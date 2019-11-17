@@ -8,17 +8,19 @@ namespace operands {
 
     template <typename data_t>
     class operand {
-        data_t *val;
+        data_t val;
     public:
         operand();
         operand(data_t);
-        operand(data_t *);
 
-        data_t *get() const;
-        std::size_t size() const;
+        void set(data_t);
+        data_t get() const;
 
-        friend std::ostream &operator<< (std::ostream &os, const operand &);
-        friend std::istream &operator>> (std::istream &is, operand &);
+        template <typename type>
+        friend std::ostream &operator<< (std::ostream &os, const operand <data_t> &);
+
+        template <typename type>
+        friend std::istream &operator>> (std::istream &is, operand <data_t> &);
     };
 
     typedef operand <def_t> num_t;

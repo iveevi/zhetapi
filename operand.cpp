@@ -1,38 +1,35 @@
+#ifndef OPERAND_CPP
+#define OPERAND_CPP
+
 namespace operands {
     template <typename data_t>
     operand <data_t> ::operand ()
     {
-        val = nullptr;
+        val = data_t();
     }
 
     template <typename data_t>
     operand <data_t> ::operand(data_t val)
     {
-        this->val = &val;
+        set(val);
     }
 
     template <typename data_t>
-    operand <data_t> ::operand(data_t *pval)
+    void operand <data_t> ::set(data_t nval)
     {
-        this->val = pval;
+        val = nval;
     }
 
     template <typename data_t>
-    data_t *operand <data_t> ::get() const
+    data_t operand <data_t> ::get() const
     {
         return val;
     }
 
     template <typename data_t>
-    std::size_t operand <data_t> ::size() const
-    {
-        return sizeof(val);
-    }
-
-    template <typename data_t>
     std::ostream &operator<< (std::ostream &os, const operand <data_t> &right)
     {
-        os << *(right->val);
+        os << right.get();
         return os;
     }
 
@@ -41,7 +38,9 @@ namespace operands {
     {
         data_t temp;
         is >> temp;
-        right->val = &temp;
+        right.set(temp);
         return is;
     }
 }
+
+#endif
