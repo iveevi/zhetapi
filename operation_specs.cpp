@@ -3,28 +3,28 @@
 
 namespace operations {
     template <typename oper_t>
-    operation <oper_t> add = operation <oper_t>
-    ([](oper_t &a, oper_t &b) {
-        return oper_t(a.get() + b.get());
-    });
+    operation <oper_t> add_op = operation <oper_t>
+    ([](const std::vector <oper_t> &inputs) {
+        return oper_t(inputs[0].get() + inputs[1].get());
+    }, 2);
 
     template <typename oper_t>
-    operation <oper_t> sub = operation <oper_t>
-    ([](oper_t &a, oper_t &b) {
-        return oper_t(a.get() - b.get());
-    });
+    operation <oper_t> sub_op = operation <oper_t>
+    ([](const std::vector <oper_t> &inputs) {
+        return oper_t(inputs[0].get() - inputs[1].get());
+    }, 2);
 
     template <typename oper_t>
-    operation <oper_t> mult = operation <oper_t>
-    ([](oper_t &a, oper_t &b) {
-        return oper_t(a.get() * b.get());
-    });
+    operation <oper_t> mult_op = operation <oper_t>
+    ([](const std::vector <oper_t> &inputs) {
+        return oper_t(inputs[0].get() * inputs[1].get());
+    }, 2);
 
     template <typename oper_t>
-    operation <oper_t> div = operation <oper_t>
-    ([](oper_t &a, oper_t &b) {
-        return oper_t(a.get() / b.get());
-    });
+    operation <oper_t> div_op = operation <oper_t>
+    ([](const std::vector <oper_t> &inputs) {
+        return oper_t(inputs[0].get() / inputs[1].get());
+    }, 2);
 }
 
 #endif

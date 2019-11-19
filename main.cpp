@@ -17,6 +17,7 @@ int main()
     int oper;
     num_t first = num_t();
     num_t second = num_t();
+    vector <num_t> operands;
 
     opn_t *select;
 
@@ -29,25 +30,28 @@ int main()
 
         switch(oper) {
         case 0:
-            select = &(add <num_t>);
+            select = &(add_op <num_t>);
             break;
         case 1:
-            select = &(sub <num_t>);
+            select = &(sub_op <num_t>);
             break;
         case 2:
-            select = &(mult <num_t>);
+            select = &(mult_op <num_t>);
             break;
         case 3:
-            select = &(div <num_t>);
+            select = &(div_op <num_t>);
             break;
         default:
             select = nullptr;
             break;
         }
 
+        operands.push_back(first);
+        operands.push_back(second);
         if (select != nullptr)
-            cout << select->compute(first, second) << endl;
+            cout << select->compute(operands) << endl;
         else
             cout << "Valid option was not selected" << endl;
+        operands.clear();
     }
 }

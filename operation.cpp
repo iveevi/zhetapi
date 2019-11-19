@@ -6,15 +6,17 @@ namespace operations {
     }
 
     template <class oper_t>
-    operation <oper_t> ::operation(function func)
+    operation <oper_t> ::operation(function nfunc, int nopers)
     {
-        this->func = func;
+        func = nfunc;
+        opers = nopers;
     }
 
     template <class oper_t>
-    void operation <oper_t> ::set(function doer)
+    void operation <oper_t> ::set(function nfunc, int nopers)
     {
-        this->func = doer;
+        func = nfunc;
+        opers = nopers;
     }
 
     template <class oper_t>
@@ -24,8 +26,46 @@ namespace operations {
     }
 
     template <class oper_t>
-    oper_t operation <oper_t> ::compute(oper_t &a, oper_t &b) const
+    typename operation <oper_t>::function operation <oper_t> ::operator~ () const
     {
-        return func(a, b);
+        return func;
     }
+
+    template <class oper_t>
+    oper_t operation <oper_t> ::compute(const std::vector <oper_t> &inputs) const
+        noexcept(false)
+    {
+        if (inputs.size() != opers)
+            throw argset_exception(inputs.size());
+        return (*func)(inputs);
+    }
+
+    template <class oper_t>
+    oper_t operation <oper_t> ::operator() (const std::vector <oper_t> &inputs) const
+        noexcept(false)
+    {
+        if (inputs.size() != opers)
+            throw argset_exception(inputs.size());
+        return (*func)(inputs);
+    }
+    
+    // Exception (Base Exception Class) Implementation
+    template <class oper_t>
+    typename operation <oper_t> ::exception()
+    {
+
+    }
+
+    /*template <class oper_t>
+    typename operation <data_t> ::argset_exception() {}
+
+    template <class oper_t>
+    typename operation <data_t> ::argset_exception(int actual)
+    {
+        msg = operation <data_t> ::name + ": expected ";
+        msg += operation <data_t> ::opers + " operands but received ";
+        msg += actual + "instead";
+    }
+
+    template <class oper_t> ::argset_exception()*/
 }

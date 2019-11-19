@@ -3,15 +3,12 @@
 
 namespace operands {
     template <typename data_t>
-    operand <data_t> ::operand ()
-    {
-        val = data_t();
-    }
+    operand <data_t> ::operand () : val(data_t()) {}
 
     template <typename data_t>
-    operand <data_t> ::operand(data_t val)
+    operand <data_t> ::operand(data_t nval)
     {
-        set(val);
+        set(nval);
     }
 
     template <typename data_t>
@@ -21,7 +18,31 @@ namespace operands {
     }
 
     template <typename data_t>
-    data_t operand <data_t> ::get() const
+    void operand <data_t> ::operator[] (data_t nval)
+    {
+        val = nval;
+    }
+    
+    template <typename data_t>
+    data_t &operand <data_t> ::get()
+    {
+        return val;
+    }
+
+    template <typename data_t>
+    const data_t &operand <data_t> ::get() const
+    {
+        return val;
+    }
+
+    template <typename data_t>
+    data_t &operand <data_t> ::operator~ ()
+    {
+        return val;
+    }
+
+    template <typename data_t>
+    const data_t &operand <data_t> ::operator~ () const
     {
         return val;
     }
