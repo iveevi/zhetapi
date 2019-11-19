@@ -51,10 +51,13 @@ namespace operations {
     
     // Exception (Base Exception Class) Implementation
     template <class oper_t>
-    typename operation <oper_t> ::exception()
-    {
+    typename operation <oper_t> ::exception::exception() : msg("") {}
 
-    }
+    template <class oper_t>
+    typename operation <oper_t> ::exception::exception(std::string str) : msg(str) {}
+
+    template <class ope_t>
+    typename operation <oper_t> ::exception::set(std::string str) : {msg = str;} 
 
     /*template <class oper_t>
     typename operation <data_t> ::argset_exception() {}
