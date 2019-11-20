@@ -57,7 +57,23 @@ namespace operations {
     typename operation <oper_t> ::exception::exception(std::string str) : msg(str) {}
 
     template <class ope_t>
-    typename operation <oper_t> ::exception::set(std::string str) : {msg = str;} 
+    typename operation <oper_t> ::exception::set(std::string str) : {msg = str;}
+
+    // Argset Exception (Derived Class From Exception) Implementation
+    template <class oper_t>
+    typename operation <oper_t> ::argset_exception::argset_exception()
+        : operation <oper_t> ::exception() {}
+
+    template <class oper_t>
+    typename operation <oper_t> ::argset_exception::argset_exception(int actual)
+    {
+        msg = name + ": Expected " + toString(opers);
+        msg += " operands, received " + actual + " instead.";
+    }
+
+    template <class oper_t>
+    typename operation <oper_t> ::argset_exception::argset_exception(std::string str)
+        : operation <oper_t> ::exception(str) {}
 
     /*template <class oper_t>
     typename operation <data_t> ::argset_exception() {}

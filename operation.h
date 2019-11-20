@@ -41,9 +41,9 @@ namespace operations {
 
         // Member Functions
         operation();
-        operation(function, int);
+        operation(std::string, function, int);
 
-        void set(function, int);
+        void set(std::string, function, int);
 
         function get() const;
         function operator~ () const;
