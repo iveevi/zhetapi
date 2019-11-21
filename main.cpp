@@ -48,10 +48,21 @@ int main()
 
         operands.push_back(first);
         operands.push_back(second);
-        if (select != nullptr)
-            cout << select->compute(operands) << endl;
-        else
+
+        if (select == nullptr) {
             cout << "Valid option was not selected" << endl;
+            continue;
+        }
+        
+        operands.push_back(123);
+
+        try {
+            cout << (*select)(operands) << endl;
+        } catch (operation <num_t> ::argset_exception err) {
+            cout << err.msg << endl;
+        }
+
         operands.clear();
+        cout.flush();
     }
 }

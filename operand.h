@@ -4,10 +4,15 @@
 #include <iostream>
 
 namespace operands {
+    // Setting up the default type of operands
     typedef double def_t;
 
+    // Dummy class for convenience;
+    class token {};
+
+    // Operand class declaration
     template <typename data_t>
-    class operand {
+    class operand : public token {
         data_t val;
     public:
         operand();

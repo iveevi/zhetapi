@@ -2,6 +2,7 @@
 #define OPERATION_H
 
 #include <vector>
+#include <string>
 
 #include "operand.h"
 
@@ -9,7 +10,7 @@ namespace operations {
     using namespace operands;
     
     template <class oper_t>
-    class operation {
+    class operation : public token {
     public:
         // Typedefs
         typedef oper_t (*function)(const std::vector <oper_t> &);
@@ -28,11 +29,11 @@ namespace operations {
         class argset_exception : public exception {
         public:
             argset_exception();
-            argset_exception(int);
+            argset_exception(int, const operation <oper_t> &);
             argset_exception(std::string);
             argset_exception(std::string, int, int);
 
-            void set(int);
+            void set(int, const operation <oper_t> &);
             void set(std::string);
             void set(std::string, int, int);
         };
@@ -41,9 +42,9 @@ namespace operations {
 
         // Member Functions
         operation();
-        operation(std::string, function, int);
+        operation(std::string, function, int, const std::vector <std::string> &);
 
-        void set(std::string, function, int);
+        void set(std::string, function, int, const std::vector <std::string> &);
 
         function get() const;
         function operator~ () const;
@@ -51,9 +52,11 @@ namespace operations {
         oper_t compute(const std::vector <oper_t> &) const noexcept(false);
         oper_t operator() (const std::vector <oper_t> &) const noexcept(false);  
     private:
+        // Real Members
         function func;
         std::string name;
         std::size_t opers;
+        std::vector <std::string> symbols;
     };
 
     typedef operation <num_t> opn_t;
