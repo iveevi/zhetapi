@@ -2,15 +2,13 @@
 #include <iostream>
 
 // Custom headers
-#include "operand.h"
-#include "operation.h"
+#include "types.h"
 
 // Reused constants
 #define ITEMS 5
 
 using namespace std;
-using namespace operands;
-using namespace operations;
+using namespace types;
 
 int main()
 {
@@ -54,8 +52,6 @@ int main()
             continue;
         }
         
-        operands.push_back(123);
-
         try {
             cout << (*select)(operands) << endl;
         } catch (operation <num_t> ::argset_exception err) {
