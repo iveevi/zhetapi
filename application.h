@@ -1,31 +1,37 @@
 #ifndef APPLICATION_H
 #define APPLICATION_H
 
-/* Change to a templated application */
+#include "operand.h"
+#include "operation.h"
+#include "operation_specs.h"
+
 namespace application {
-    operation <num_t> operation_defs[];
-    const int OPERATIONS;
+	/* Class that contains
+	 * the common utilities
+	 * for an expression and
+	 * the application in general
+	 *
+	 * Supports:
+	 *  - reading tokens (operands and 
+	 *  operations) from strings
+	 */
+	template <class oper_t>
+	class modules {
+	public:
+		const int OPERATIONS = 4;
+		const operation <oper_t> op_defs[] = {
+			add_op <oper_t>,
+			sub_op <oper_t>,
+			mult_op <oper_t>,
+			div_op <oper_t>
+		};
 
-    // Number of operations
-    OPERATIONS = 4;
+		token *next_token(std::string);
+		vector <token *> read(std::string);
 
-    // List of the default operations
-    application::operation_defs = {
-        add_op <num_t>,
-        sub_op <num_t>,
-        mult_op <num_t>,
-        div_op <num_t>
-    };
-
-    class expression {
-        
-    };
-
-    class application {
-    public:        
-        // Run Function For Applcation
-        void run();
-    };
+		std::istream &operator>> (std::ostream &, token *);
+		std::istream &operator>> (std::ostream &, vector <token *> &);
+	};
 }
 
 #endif
