@@ -43,10 +43,7 @@ namespace types {
 	// Beginning of the operation class
 	template <class oper_t>
 	class operation : public token {
-	public:
-		// Typedefs
-		typedef oper_t (*function)(const std::vector <oper_t> &);
-
+	protected:
 		// Exception Classes
 		class exception {
 		public:
@@ -71,7 +68,10 @@ namespace types {
 		};
 
 		class computation_exception : public exception {};
-
+	public:
+		// Typedefs
+		typedef oper_t (*function)(const std::vector <oper_t> &);
+		
 		// Member Functions
 		operation();
 		operation(std::string, function, int, const std::vector <std::string> &);
@@ -79,7 +79,7 @@ namespace types {
 		void set(std::string, function, int, const std::vector <std::string> &);
 
 		function get() const;
-		function operator~ () const;
+		function operator~() const;
 
 		oper_t compute(const std::vector <oper_t> &) const noexcept(false);
 		oper_t operator() (const std::vector <oper_t> &) const noexcept(false);  
@@ -96,11 +96,12 @@ namespace types {
 	// Beginning of the variable class
 	template <typename data_t>
 	class variable : public token {
-		data_t val;
 		std::string name;
+		data_t val;
+		bool param;
 	public:
 		variable();
-		variable(data_t, std::string);
+		variable(std::string str, bool par, data_t data = data_t());
 
 		void set(data_t);
 		void set(std::string);
@@ -116,11 +117,32 @@ namespace types {
 
 	// Beginning of the function class
 	template <class oper_t>
-	class function : public token {
+	class function : public operation {
 	public:
-		typedef (function *)
-	private:
+		typedef oper_t (*function)(const std::vector <varible> &);
 
+		function();
+		function(std::string, function, opers);
+
+		/* Use these functions to
+		 * save space in the function
+		 * stack class - instead
+		 * of creating new objects
+		 * and using space, modify
+		 * old ones (if the program
+		 * is sure they wont be used
+		 * again)
+		 */
+		void set(std::string);
+		void set(function, opers);
+		void set(std::string, function, opers);
+
+		function get() const;
+		function operator~() const;
+	private:
+		function func;
+		std::string name;
+		std::size_t opers;
 	};
 
 	typedef function <num_t> func_t;
