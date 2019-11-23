@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace types {
-	// Setting up the default type of operands
+	// Default numerical value
 	typedef double def_t;
 
 	// Dummy class for convenience;
@@ -39,8 +39,8 @@ namespace types {
 	};
 
 	typedef operand <def_t> num_t;
-
-    // Beginning of the operation class
+	
+	// Beginning of the operation class
 	template <class oper_t>
 	class operation : public token {
 	public:
@@ -93,50 +93,62 @@ namespace types {
 
 	typedef operation <num_t> opn_t;
 
-    // Beginning of the variable class
-    template <typename data_t>
-    class variable : public token {
-        data_t val;
-        std::string name;
-    public:
-        variable();
-        variable(data_t, std::string);
+	// Beginning of the variable class
+	template <typename data_t>
+	class variable : public token {
+		data_t val;
+		std::string name;
+	public:
+		variable();
+		variable(data_t, std::string);
 
-        void set(data_t);
-        void set(std::string);
-        void set(data_t, std::string);
+		void set(data_t);
+		void set(std::string);
+		void set(data_t, std::string);
 
-        void operator[] (data_t);
+		void operator[] (data_t);
 
-        std::pair <data_t, std::string> &get() const;
+		std::pair <data_t, std::string> &get() const;
+		std::pair <data_t, std::string> &operator~() const;
+	};
 
-        std::pair <data_t, std::string> &operator~() const;
-    };
+	typedef variable <def_t> var_t;
 
-    // Default Operations
-    template <typename oper_t>
-    operation <oper_t> add_op = operation <oper_t>
-    ("add_op",[](const std::vector <oper_t> &inputs) {
-        return oper_t(inputs[0].get() + inputs[1].get());
-    }, 2, {"+", "plus", "add"});
+	// Beginning of the function class
+	template <class oper_t>
+	class function : public token {
+	public:
+		typedef (function *)
+	private:
 
-    template <typename oper_t>
-    operation <oper_t> sub_op = operation <oper_t>
-    ("sub_op", [](const std::vector <oper_t> &inputs) {
-        return oper_t(inputs[0].get() - inputs[1].get());
-    }, 2, {"-", "minus", "subtract"});
+	};
 
-    template <typename oper_t>
-    operation <oper_t> mult_op = operation <oper_t>
-    ("mult_op", [](const std::vector <oper_t> &inputs) {
-        return oper_t(inputs[0].get() * inputs[1].get());
-    }, 2, {"*", "mult", "times"});
+	typedef function <num_t> func_t;
 
-    template <typename oper_t>
-    operation <oper_t> div_op = operation <oper_t>
-    ("div_op", [](const std::vector <oper_t> &inputs) {
-        return oper_t(inputs[0].get() / inputs[1].get());
-    }, 2, {"/", "divided by"});
+	// Default Operations
+	template <typename oper_t>
+	operation <oper_t> add_op = operation <oper_t>
+	("add_op",[](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() + inputs[1].get());
+	}, 2, {"+", "plus", "add"});
+
+	template <typename oper_t>
+	operation <oper_t> sub_op = operation <oper_t>
+	("sub_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() - inputs[1].get());
+	}, 2, {"-", "minus", "subtract"});
+
+	template <typename oper_t>
+	operation <oper_t> mult_op = operation <oper_t>
+	("mult_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() * inputs[1].get());
+	}, 2, {"*", "mult", "times"});
+
+	template <typename oper_t>
+	operation <oper_t> div_op = operation <oper_t>
+	("div_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() / inputs[1].get());
+	}, 2, {"/", "divided by"});
 }
 
 #include "types.cpp"
