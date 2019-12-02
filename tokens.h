@@ -42,13 +42,13 @@ namespace tokens {
 	public:
 		/* Constructors:
 		 * operand() - sets the private member variable
-		 *   val to the default value of data_t
+		 *   [val] to the default value of data_t
 		 * operand(data_t) - sets the private member variable
-		 *   to whatever value is passed */
+		 *   [val] to whatever value is passed */
 		operand();
 		operand(data_t);
 
-		/* Regular Member Functions:
+		/* Virtualized Member Functions:
 		 * void [set](data_t) - sets the private member variable
 		 *   to whatever value is passed
 		 * void operator[](data_t) - sets the private member
@@ -61,28 +61,28 @@ namespace tokens {
 		 *   member variable
 		 * const data_t &operator*() - returns a constant (unchangable)
 		 *   reference to the private member variable */
-		void set(data_t);
-		void operator[](data_t);
+		virtual void set(data_t);
+		virtual void operator[](data_t);
 		
-		data_t &get();
-		const data_t &get() const;
+		virtual data_t &get();
+		virtual const data_t &get() const;
 
-		data_t &operator*();
-		const data_t &operator*() const;
+		virtual data_t &operator*();
+		virtual const data_t &operator*() const;
 
 		/* Friends:
-		 * std::ostream &operator<< (std::ostream &, const operand
+		 * std::ostream &operator<<(std::ostream &, const operand
 		 *   <data_t> &) - outputs the value of val onto the stream
 		 *   pointed to by the passed ostream object
-		 * std::istream &operator>> (std::istream &, operand &) - reads
+		 * std::istream &operator>>(std::istream &, operand &) - reads
 		 *   input from the stream passed in and sets the value
 		 *   of the val in the passed operand object to the read data_t
 		 *   value */
 		template <typename type>
-		friend std::ostream &operator<< (std::ostream &os, const operand <data_t> &);
+		friend std::ostream &operator<<(std::ostream &os, const operand <data_t> &);
 
 		template <typename type>
-		friend std::istream &operator>> (std::istream &is, operand <data_t> &);
+		friend std::istream &operator>>(std::istream &is, operand <data_t> &);
 	};
 
 	/* Default operand specification
@@ -104,7 +104,7 @@ namespace tokens {
 		set(nval);
 	}
 
-	/* Regular member functions:
+	/* Virtualized member functions:
 	 * setters, getter and operators */
 	template <typename data_t>
 	void operand <data_t> ::set(data_t nval)
@@ -159,49 +159,144 @@ namespace tokens {
 		return is;
 	}
 
-	// Beginning of the operation class
+	/* Operation Class:
+	 *
+	 * Represents an operation in mathematics
+	 * that bases computations on the oper_t
+	 * operand class, which can check whether
+	 * the operand class supports the computations
+	 * and makes sure that the class passed in
+	 * is an operand class or its derived class */
 	template <class oper_t>
 	class operation : public token {
-	protected:
-		// Exception Classes
+	public:
+		/* Exception Class:
+		 *
+		 * Represents the generic error that
+		 * is thrown whenever an error occurs
+		 * when trying to compute with the
+		 * operands */
 		class exception {
-		public:
+		protected:
+			/* std::string [msg] - what the
+			 * error is about */
 			std::string msg;
-
+		public:
+			/* Constructors:
+			 * exception() - default constructor
+			 *   that sets the private member [msg]
+			 *   to an empty string
+			 * exception(std::string) - sets the
+			 *   private member variable [msg] to
+			 *   whatever string is passed */
 			exception();
 			exception(std::string);
 
+			/* Virtualized Member Functions:
+			 * void [set](std::string) - sets the
+			 *   private member variable [msg] to
+			 *   whatever string is passed
+			 * std::string [what]() - returns a constant
+			 *   (unchangable) reference to the contents
+			 *   of the private member varaible [msg] */
 			virtual void set(std::string);
+			virtual const std::string &what();
 		};
 
+		/* Argset_Exception Class:
+		 *
+		 * An error class derived from
+		 * operation::exception that represents
+		 * an error resulting from receiving an
+		 * inappropriate number of operands
+		 * in the compute method */
 		class argset_exception : public exception {
 		public:
+			/* Constructors:
+			 * argset_exception() - default constuctor
+			 *   that sets the private member variable
+			 *   [msg] to an empty string 
+			 * argset_exception(std::string) - constructor
+			 *   that sets the private member variabele [msg]
+			 *   to whatever string is passed 
+			 * argset_exception(std::string, int,
+			 *   int) - constructor that creates a message
+			 *   using the name of the operation, number of
+			 *   operands required and the number of operands
+			 *   received
+			 * argset_exception(int, const operation
+			 *   <oper_t> &) - constructor that creates
+			 *   the message using the number of operands
+			 *   (passed) and the operation it is called
+			 *   from (passed) */
 			argset_exception();
-			argset_exception(int, const operation <oper_t> &);
 			argset_exception(std::string);
 			argset_exception(std::string, int, int);
+			argset_exception(int, const operation <oper_t> &);
 
-			void set(int, const operation <oper_t> &);
-			void set(std::string);
-			void set(std::string, int, int);
+			/* Virtualized Member Functions:
+			 * void [set](std::string, int, int) - setter
+			 *   method that does the same thing as
+			 *   the corresponding constructor
+			 * void [set](int, const operation <oper_t> &) - setter
+			 *   method that does the same thing as
+			 *   the corresponding constructor */
+			virtual void set(std::string, int, int);
+			virtual void set(int, const operation <oper_t> &);
 		};
 
+		/* Computation_Exception Class:
+		 *
+		 * Represents an error derived from trying
+		 * to compute something using the operand
+		 * class */
 		class computation_exception : public exception {};
-	public:
-		// Typedefs
+		
+		/* Typedef oper_t (*[function])(const std::vector
+		 * <oper_t> &) - a type alias for conveneince for
+		 * the type of function used for computation */
 		typedef oper_t (*function)(const std::vector <oper_t> &);
 
-		// Member Functions
+		/* Constructors:
+		 * operation() - sets the private member function
+		 *   [func] to a null pointer, [opers] to -1,
+		 *   [symbols] and [name] to null pointer as well
+		 * operation(std::string, function, int, const
+		 *   std::vector> &) - sets the private member variables
+		 *   to the corresponding parameters passed */
 		operation();
 		operation(std::string, function, int, const std::vector <std::string> &);
 
-		void set(std::string, function, int, const std::vector <std::string> &);
+		/* Virtualized Member Functions:
+		 * void [set](std::string, function, int, const std::vector
+		 *   <std::string> &) - sets the private member variables to
+		 *   the corresponding parameters passed
+		 * void [function][get] const - returns a pointer to the
+		 *   computer function used by the object
+		 * void [function]operator*() const - returns a poinbter to
+		 *   the computer function used by the object
+		 * void oper_t [compute](const std::vector <oper_t> &) - returns
+		 *   the result of the operation given a list of operands, and
+		 *   throws [argset_exception] if there are not exactly [opers]
+		 *   operands
+		 * void oper_t operator()(const std::vector <oper_t> &) - does
+		 *   the same thing as compute but is supported by the function
+		 *   operator */
+		virtual void set(std::string, function, int, const std::vector <std::string> &);
 
-		function get() const;
-		function operator~() const;
+		virtual function get() const;
+		virtual function operator*() const;
 
-		oper_t compute(const std::vector <oper_t> &) const noexcept(false);
-		oper_t operator() (const std::vector <oper_t> &) const noexcept(false);  
+		virtual oper_t compute(const std::vector <oper_t> &) const noexcept(false);
+		virtual oper_t operator()(const std::vector <oper_t> &) const noexcept(false);  
+		
+		/* Friend Functions:
+		 * std::ostream &operator<<(std::ostream */
+		template <class oper_t>
+		friend std::ostream &operator<<(std::ostream &, const operation <oper_t> &);
+
+		template <class oper_t>
+		friend std::istream &operator>>(Std::istream &, operation <oper_t> &);
 	private:
 		// Real Members
 		function func;
@@ -349,6 +444,9 @@ namespace tokens {
 		 * (dummy) or to hold information */
 		bool param;
 	public:
+		/* Constructors:
+		 * variable() - creates a new variable object
+		 *   that is by default */
 		variable();
 		variable(std::string str, bool par, data_t data = data_t());
 
