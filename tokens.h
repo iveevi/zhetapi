@@ -291,23 +291,37 @@ namespace tokens {
 		virtual oper_t operator()(const std::vector <oper_t> &) const noexcept(false);  
 		
 		/* Friend Functions:
-		 * std::ostream &operator<<(std::ostream */
+		 * std::ostream &operator<<(std::ostream &, const operation
+		 *   <oper_t> &) - outputs information about the passed operation
+		 *   object into the stream pointed to by the passed ostream */
 		template <class oper_t>
 		friend std::ostream &operator<<(std::ostream &, const operation <oper_t> &);
-
-		template <class oper_t>
-		friend std::istream &operator>>(Std::istream &, operation <oper_t> &);
 	private:
-		// Real Members
+		/* [functio][func] - the function used by the operation */
 		function func;
+
+		/* std::string [name] - the name of the operation */
 		std::string name;
+
+		/* std::size_t [opers] - the number of operands expected
+		 * by the operation's function */
 		std::size_t opers;
+
+		/* std::vector <std::string> [symbols] - the list of
+		 * symbols of the operation that are used in parsing */
 		std::vector <std::string> symbols;
 	};
 
+	/* Default operation specification using
+	 * the default operand type/class */
 	typedef operation <num_t> opn_t;
 
-	// Operation Member Functions
+	/* Operand Class Member Functions
+	 *
+	 * See declaration to see a
+	 * description of each function
+	 *
+	 * Constructors: */
 	template <class oper_t>
 	operation <oper_t> ::operation()
 	{
@@ -334,6 +348,7 @@ namespace tokens {
 		symbols = nsymbols;
 	}
 
+	/* Virtualized Member Functions: */
 	template <class oper_t>
 	typename operation <oper_t>::function operation <oper_t> ::get() const
 	{
@@ -341,7 +356,7 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	typename operation <oper_t>::function operation <oper_t> ::operator~ () const
+	typename operation <oper_t>::function operation <oper_t> ::operator*() const
 	{
 		return func;
 	}
@@ -356,7 +371,7 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	oper_t operation <oper_t> ::operator() (const std::vector <oper_t> &inputs) const
+	oper_t operation <oper_t> ::operator()(const std::vector <oper_t> &inputs) const
 		noexcept(false)
 	{
 		if (inputs.size() != opers)
@@ -364,7 +379,11 @@ namespace tokens {
 		return (*func)(inputs);
 	}
 
-	// Exception (Base Exception Class) Implementation
+	/* Friend Functions: ostream utilities */
+	template <class oper_t>
+	std::ostream &operator>>(
+
+	/* Exception Class - Constructors: */
 	template <class oper_t>
 	operation <oper_t> ::exception::exception() : msg("") {}
 
