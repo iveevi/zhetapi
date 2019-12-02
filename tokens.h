@@ -4,46 +4,80 @@
 #include <iostream>
 #include <string>
 #include <utility>
-#include <vector>
 
-namespace types {
+namespace tokens {
 	/* Default data/info type to
 	 * use for calculations */
 	typedef double def_t;
 
 	/* Token Class:
 	 *
-	 * Acts as */
+	 * Acts as a dummy class for
+	 * use of generic pointer in
+	 * other modules */
 	class token {
 	public:
+		/* Enumerations:
+		 * [type] - new data type to allow function
+		 * caller inspection */
 		enum type {NONE, OPERAND, OPERATION,
 			VARIABLE, FUNCTION, MODULE};
+
+		/* Virtuals:
+		 * [type] [caller]() - insepctor function passed
+		 * on to all derived classes */
 		virtual type caller() = 0;
 	};
 
 	/* Operand Class:
 	 * 
-	 * Represents */
+	 * Represents an operand in mathematics
+	 * by using data_t as the numerical data
+	 * type or value */
 	template <typename data_t>
 	class operand : public token {
-		/* The only member of operand
+		/* data_t [val] - the only member of operand
 		 * which represents its value */
 		data_t val;
 	public:
-		/* Constructor: Sets val to
-		 * default value of data_t */
+		/* Constructors:
+		 * operand() - sets the private member variable
+		 *   val to the default value of data_t
+		 * operand(data_t) - sets the private member variable
+		 *   to whatever value is passed */
 		operand();
 		operand(data_t);
 
+		/* Regular Member Functions:
+		 * void [set](data_t) - sets the private member variable
+		 *   to whatever value is passed
+		 * void operator[](data_t) - sets the private member
+		 *   variable to whatever value is passed
+		 * data_t &[get]() - returns a reference to the private
+		 *   member variable
+		 * const data_t &[get]() - returns a constant (unchangable)
+		 *   reference to the prviate member variable
+		 * data_t &operator*() - returns a reference to the private
+		 *   member variable
+		 * const data_t &operator*() - returns a constant (unchangable)
+		 *   reference to the private member variable */
 		void set(data_t);
-		void operator[] (data_t);
-
+		void operator[](data_t);
+		
 		data_t &get();
 		const data_t &get() const;
 
-		data_t &operator~ ();
-		const data_t &operator~ () const;
+		data_t &operator*();
+		const data_t &operator*() const;
 
+		/* Friends:
+		 * std::ostream &operator<< (std::ostream &, const operand
+		 *   <data_t> &) - outputs the value of val onto the stream
+		 *   pointed to by the passed ostream object
+		 * std::istream &operator>> (std::istream &, operand &) - reads
+		 *   input from the stream passed in and sets the value
+		 *   of the val in the passed operand object to the read data_t
+		 *   value */
 		template <typename type>
 		friend std::ostream &operator<< (std::ostream &os, const operand <data_t> &);
 
@@ -57,8 +91,10 @@ namespace types {
 
 	/* Operand Class Member Functions
 	 * 
-	 * See class declaration to see a description
-	 * of each function */
+	 * See class declaration to see a
+	 * description of each function
+	 *
+	 * Constructors: */
 	template <typename data_t>
 	operand <data_t> ::operand () : val(data_t()) {}
 
@@ -68,6 +104,8 @@ namespace types {
 		set(nval);
 	}
 
+	/* Regular member functions:
+	 * setters, getter and operators */
 	template <typename data_t>
 	void operand <data_t> ::set(data_t nval)
 	{
@@ -75,7 +113,7 @@ namespace types {
 	}
 
 	template <typename data_t>
-	void operand <data_t> ::operator[] (data_t nval)
+	void operand <data_t> ::operator[](data_t nval)
 	{
 		val = nval;
 	}
@@ -93,17 +131,18 @@ namespace types {
 	}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::operator~ ()
+	data_t &operand <data_t> ::operator*()
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::operator~ () const
+	const data_t &operand <data_t> ::operator*() const
 	{
 		return val;
 	}
 
+	/* Friend functions: istream and ostream utilities */
 	template <typename data_t>
 	std::ostream &operator<< (std::ostream &os, const operand <data_t> &right)
 	{
@@ -284,11 +323,30 @@ namespace types {
 		exception::msg += " operands, received " + to_string(actual) + "instead.";
 	}
 
-	// Beginning of the variable class
+	/* Variable Class:
+	 *
+	 * Represents a variable in mathematics
+	 * which can be used as a dummy variable
+	 * for custom functions and has the safe
+	 * ability to read and write the value
+	 * is stores */
 	template <typename data_t>
 	class variable : public token {
+		/* std::string [name] - the name of the
+		 * variable that will be taken into account
+		 * when creating custom functions and using
+		 * them later on */
 		std::string name;
+
+		/* data_t [val] - the value stored by the
+		 * object which serves the same purpose as
+		 * the val member in the operand class */
 		data_t val;
+
+		/* bool [param] - a boolean variable that
+		 * represents whether or not the current
+		 * variable object is being used a parameter
+		 * (dummy) or to hold information */
 		bool param;
 	public:
 		variable();
@@ -338,30 +396,52 @@ namespace types {
 
 	typedef function <num_t> func_t;	
 
-	// Default Operations
-	template <typename oper_t>
-	operation <oper_t> add_op = operation <oper_t>
-	("add_op",[](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() + inputs[1].get());
-	}, 2, {"+", "plus", "add"});
+	// Beginning of the module class
+	template <class oper_t>
+	class module : public operation {
+	private:
+		/* The following are the initializations
+		 * of the lambda member functions */
+		operation <oper_t> add_op = operation <oper_t>
+		("add_op",[](const std::vector <oper_t> &inputs) {
+			return oper_t(inputs[0].get() + inputs[1].get());
+		}, 2, {"+", "plus", "add"});
 
-	template <typename oper_t>
-	operation <oper_t> sub_op = operation <oper_t>
-	("sub_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() - inputs[1].get());
-	}, 2, {"-", "minus", "subtract"});
+		operation <oper_t> sub_op = operation <oper_t>
+		("sub_op", [](const std::vector <oper_t> &inputs) {
+			return oper_t(inputs[0].get() - inputs[1].get());
+		}, 2, {"-", "minus", "subtract"});
 
-	template <typename oper_t>
-	operation <oper_t> mult_op = operation <oper_t>
-	("mult_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() * inputs[1].get());
-	}, 2, {"*", "mult", "times"});
+		operation <oper_t> mult_op = operation <oper_t>
+		("mult_op", [](const std::vector <oper_t> &inputs) {
+			return oper_t(inputs[0].get() * inputs[1].get());
+		}, 2, {"*", "mult", "times"});
+		
+		operation <oper_t> div_op = operation <oper_t>
+		("div_op", [](const std::vector <oper_t> &inputs) {
+			return oper_t(inputs[0].get() / inputs[1].get());
+		}, 2, {"/", "divided by"});
+	public:
+		/* The following are static member functions that
+		 * give purpose to the tokens
+		 *
+		 * const token &get_next( std::string, std::size_t):
+		 *   returns the next valid token in the passed
+		 *   string from the specified index, or throws an
+		 *   error if no token was detected
+		 */
+		static const token &get_next(std::string, std::size_t) noexcept(false);
+		static vector <token *> *get_tokens(std::string);
+		
+		/* The following is the array containing
+		 * all the default operations */
+		static const int NOPERS = 0x4;
+		static const operation <oper_t> opers {
+		   add_op, sub_op, mult_op, div_op,
+		};
+	};
 
-	template <typename oper_t>
-	operation <oper_t> div_op = operation <oper_t>
-	("div_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() / inputs[1].get());
-	}, 2, {"/", "divided by"});
+	typedef module <num_t> module_t;
 }
 
 #include "types.cpp"
