@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/venki/calculator/src/main.cpp
+iostream
+-
+tokens.h
+/home/venki/calculator/src/tokens.h
+
+/home/venki/calculator/src/tokens.h
+iostream
+-
+string
+-
+utility
+-
+vector
+-
+types.cpp
+/home/venki/calculator/src/types.cpp
+
