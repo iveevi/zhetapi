@@ -1,0 +1,13 @@
+Things That Need to be Done:
+ - add big 3 to each class
+   and operators for comparison
+   and equality (no need for math operators)
+ - expand the exception tree for
+   each class, make exception handling
+   more advanced
+ - add exception handling in operation
+   class to check if passed data type is
+   an operand, if not then throw an
+   illegal type error
+ - add te big 5 once having understood
+   move semantics and r-value references

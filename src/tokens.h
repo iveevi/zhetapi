@@ -29,6 +29,60 @@ namespace tokens {
 		 * on to all derived classes */
 		virtual type caller() = 0;
 	};
+	
+	/* Exception Class:
+	 *
+	 * Represents the generic error that
+	 * is thrown whenever an error occurs
+	 * when trying to compute with the
+	 * operands */
+	class exception {
+	protected:
+		/* std::string [msg] - what the
+		 * error is about */
+		std::string msg;
+	public:
+		/* Constructors:
+		 * exception() - default constructor
+		 *   that sets the private member [msg]
+		 *   to an empty string
+		 * exception(std::string) - sets the
+		 *   private member variable [msg] to
+		 *   whatever string is passed */
+		exception();
+		exception(std::string);
+
+		/* Virtualized Member Functions:
+		 * void [set](std::string) - sets the
+		 *   private member variable [msg] to
+		 *   whatever string is passed
+		 * std::string [what]() - returns a constant
+		 *   (unchangable) reference to the contents
+		 *   of the private member varaible [msg] */
+		virtual void set(std::string);
+		
+		virtual const std::string &what();
+	};
+
+	/* Exception Class Member Functions
+	 *
+	 * See class declaration for a
+	 * description of each function
+	 *
+	 * Constructors: */
+	template <class oper_t>
+	operation <oper_t> ::exception::exception() : msg("") {}
+
+	template <class oper_t>
+	operation <oper_t> ::exception::exception(std::string str) : msg(str) {}
+
+	/* Virtualized member functions:
+	 * setter and getters */
+	template <class oper_t>
+	void operation <oper_t> ::exception::set(std::string str) {msg = str;}
+
+	template <class oper_t>
+	std::string operation <oper_t> ::exception::what() {return msg;}
 
 	/* Operand Class:
 	 * 
@@ -48,6 +102,7 @@ namespace tokens {
 		 *   [val] to whatever value is passed */
 		operand();
 		operand(data_t);
+		operand(const operand &);
 
 		/* Virtualized Member Functions:
 		 * void [set](data_t) - sets the private member variable
@@ -71,6 +126,8 @@ namespace tokens {
 		virtual data_t &operator*();
 		virtual const data_t &operator*() const;
 
+		virtual operand &operator=(const operand &);
+
 		/* Friends:
 		 * std::ostream &operator<<(std::ostream &, const operand
 		 *   <data_t> &) - outputs the value of val onto the stream
@@ -86,6 +143,25 @@ namespace tokens {
 		template <typename type>
 		friend std::istream &operator>>(std::istream &is, operand
 		        <data_t> &);
+
+		/* Comparison Operators: */
+		template <typename type>
+		friend bool &operator==(const operand &, const operand &);
+		
+		template <typename type>
+		friend bool &operator!=(const operand &, const operand &);
+		
+		template <typename type>
+		friend bool &operator>(const operand &, const operand &);
+		
+		template <typename type>
+		friend bool &operator<(const operand &, const operand &);
+		
+		template <typename type>
+		friend bool &operator=>(const operand &, const operand &);
+		
+		template <typename type>
+		friend bool &operator=<(const operand &, const operand &);
 	};
 
 	/* Default operand specification
@@ -102,47 +178,36 @@ namespace tokens {
 	operand <data_t> ::operand () : val(data_t()) {}
 
 	template <typename data_t>
-	operand <data_t> ::operand(data_t nval)
-	{
-		set(nval);
-	}
-
+	operand <data_t> ::operand(data_t nval) {val = nval;}
+	
+	template <typename data_t>
+	operand <data_t> ::operand(const operand &other) {val = other.val;}
+	
 	/* Virtualized member functions:
 	 * setters, getter and operators */
 	template <typename data_t>
-	void operand <data_t> ::set(data_t nval)
-	{
-		val = nval;
-	}
+	void operand <data_t> ::set(data_t nval) {val = nval;}
 
 	template <typename data_t>
-	void operand <data_t> ::operator[](data_t nval)
-	{
-		val = nval;
-	}
+	void operand <data_t> ::operator[](data_t nval) {val = nval;}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::get()
-	{
-		return val;
-	}
+	data_t &operand <data_t> ::get() {return val;}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::get() const
-	{
-		return val;
-	}
+	const data_t &operand <data_t> ::get() const {return val;}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::operator*()
-	{
-		return val;
-	}
+	data_t &operand <data_t> ::operator*() {return val;}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::operator*() const
+	const data_t &operand <data_t> ::operator*() const {return val;}
+	
+	template <typename data_t>
+	const data_t &operand <data_t> ::operator=(const operand &other) const
 	{
-		return val;
+		val = other.val;
+		return *this;
 	}
 
 	/* Friend functions: istream and ostream utilities */
@@ -163,6 +228,13 @@ namespace tokens {
 		return is;
 	}
 
+	/* Cmoparison functions: */
+	template <typename data_t>
+
+	/* Token class derived functions: */
+	template <typename data_t>
+	token::type operand <data_t> ::caller() {return OPERAND;}
+
 	/* Operation Class:
 	 *
 	 * Represents an operation in mathematics
@@ -174,39 +246,6 @@ namespace tokens {
 	template <class oper_t>
 	class operation : public token {
 	public:
-		/* Exception Class:
-		 *
-		 * Represents the generic error that
-		 * is thrown whenever an error occurs
-		 * when trying to compute with the
-		 * operands */
-		class exception {
-		protected:
-			/* std::string [msg] - what the
-			 * error is about */
-			std::string msg;
-		public:
-			/* Constructors:
-			 * exception() - default constructor
-			 *   that sets the private member [msg]
-			 *   to an empty string
-			 * exception(std::string) - sets the
-			 *   private member variable [msg] to
-			 *   whatever string is passed */
-			exception();
-			exception(std::string);
-
-			/* Virtualized Member Functions:
-			 * void [set](std::string) - sets the
-			 *   private member variable [msg] to
-			 *   whatever string is passed
-			 * std::string [what]() - returns a constant
-			 *   (unchangable) reference to the contents
-			 *   of the private member varaible [msg] */
-			virtual void set(std::string);
-			virtual const std::string &what();
-		};
-
 		/* Argset_Exception Class:
 		 *
 		 * An error class derived from
@@ -326,17 +365,14 @@ namespace tokens {
 	 * the default operand type/class */
 	typedef operation <num_t> opn_t;
 
-	/* Operand Class Member Functions
+	/* Operation Class Member Functions
 	 *
 	 * See declaration to see a
 	 * description of each function
 	 *
 	 * Constructors: */
 	template <class oper_t>
-	operation <oper_t> ::operation()
-	{
-		func = nullptr;
-	}
+	operation <oper_t> ::operation() {func = nullptr;}
 
 	template <class oper_t>
 	operation <oper_t> ::operation(std::string str, function nfunc,
@@ -360,20 +396,16 @@ namespace tokens {
 
 	/* Virtualized Member Functions: */
 	template <class oper_t>
-	typename operation <oper_t>::function operation <oper_t> ::get() const
-	{
-		return func;
-	}
+	typename operation <oper_t>::function operation <oper_t> ::get()
+		const {return func;}
 
 	template <class oper_t>
-	typename operation <oper_t>::function operation <oper_t> ::operator*() const
-	{
-		return func;
-	}
+	typename operation <oper_t>::function operation <oper_t> ::operator*()
+		const {return func;}
 
 	template <class oper_t>
-	oper_t operation <oper_t> ::compute(const std::vector <oper_t> &inputs) const
-		noexcept(false)
+	oper_t operation <oper_t> ::compute(const std::vector <oper_t> &inputs)
+		const noexcept(false)
 	{
 		if (inputs.size() != opers)
 			throw argset_exception(inputs.size(), *this);
@@ -381,8 +413,8 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	oper_t operation <oper_t> ::operator()(const std::vector
-	        <oper_t> &inputs) const noexcept(false)
+	oper_t operation <oper_t> ::operator()(const std::vector <oper_t> &inputs)
+		const noexcept(false)
 	{
 		if (inputs.size() != opers)
 			throw argset_exception(inputs.size(), *this);
@@ -394,20 +426,21 @@ namespace tokens {
 	std::ostream &operator<<(std::ostream &os, const operation <oper_t>
 	        &opn)
 	{
-
+		os << opn.name << " - " << opn.opers << " operands, ";
+		os << opn.symbols;
+		return os;
 	}
 
-	/* Exception Class - Constructors: */
+	/* Token class derived functions: */
 	template <class oper_t>
-	operation <oper_t> ::exception::exception() : msg("") {}
+	token::type operation <oper_t> ::caller() {return OPERATION;}
 
-	template <class oper_t>
-	operation <oper_t> ::exception::exception(std::string str) : msg(str) {}
-
-	template <class oper_t>
-	void operation <oper_t> ::exception::set(std::string str) {msg = str;}
-
-	// Argset Exception (Derived Class From Exception) Implementation
+	/* Argset Exception Class Member Functions
+	 *
+	 * See class declaration for a description
+	 * of each member function
+	 *
+	 * Constructors */
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception()
 		: operation <oper_t> ::exception() {}
@@ -432,6 +465,8 @@ namespace tokens {
 		exception::msg += " operands, received " + to_string(actual) + "instead.";
 	}
 
+	/* Virtualized member functions:
+	 * setters only - getters are inherited */
 	template <class oper_t>
 	void operation <oper_t> ::argset_exception::set(int actual, const operation <oper_t> &obj)
 	{
@@ -477,23 +512,129 @@ namespace tokens {
 		 * (dummy) or to hold information */
 		bool param;
 	public:
+		class bypass_attempt_exception : exception {};
+
 		/* Constructors:
 		 * variable() - creates a new variable object
-		 *   that is by default */
+		 *   that is by default a dummy parameter
+		 * variable(std::string, boolean, data_t) - creates
+		 *   a new variable object with corresponding
+		 *   members with respect to the passed parameters,
+		 *   private member variable [val] is defaulted
+		 *   to the defalt value of data_t */
 		variable();
 		variable(std::string str, bool par, data_t data = data_t());
 
-		void set(data_t);
-		void set(std::string);
-		void set(data_t, std::string);
+		/* Virtualized Member Functions:
+		 * void [set](bool) - changes whether or not the
+		 *   current variable object acts as a dummy
+		 *   or as a value
+		 * void [set](data_t) - sets the private member
+		 *   variable [val] to the value that is passed
+		 * void [set](std::string) - sets the private
+		 *   member variable [name] to the string
+		 *   that is passed
+		 * void [set](data_t, std::string) - sets
+		 *   the name, [name], and value, [val], of
+		 *   the current variable object
+		 * void operator[](bool) - does the same thing
+		 *   as void [set](bool)
+		 * void operator[](data_t) - does the same thing
+		 *   as void [set](data_t)
+		 * void operator[](std::string) - does the same
+		 *   thing as void [set](std::string)
+		 * void operator[](data_t, std::string) - does the
+		 *   same thing as void [set](data_t, std::string)
+		 * data_t &[get]() - returns a reference to the
+		 *   value of the object or throws a bypass attempt
+		 *   exception
+		 * const data_t &[get]() const - returns a constant
+		 *   (unchangable) reference to the value of the
+		 *   object or throws a bypass attempt exception
+		 * const std::string &[get]() const - returns the name
+		 *   of the current variable object
+		 * const std::pair <data_t, std::string> &[get]()
+		 *   const - returns a tuple of the value and name of
+		 *   the current variable object, or throws a bypass
+		 *   attempt exception if the object is a dummy
+		 * data_t &operator() - does the same thing as
+		 *   data_t &[get]()
+		 * const data_t &operator() const- does the same
+		 *   thing as const data_t &[get](); 
+		 * const std::string &operator() const - does the
+		 *   same thing as const std::string &[get]()
+		 * const std::pair <data_t, std::string> &operator()
+		 *   const - does the same thing as const std::pair
+		 *   <data_t, std::string> &[get]() const */
+		virtual void set(bool);
+		virtual void set(data_t);
+		virtual void set(std::string);
+		virtual void set(data_t, std::string);
+		
+		virtual void operator[](bool);
+		virtual void operator[](data_t);
+		virtual void operator[](std::string);
+		virtual void operator[](data_t, std::string);
 
-		void operator[] (data_t);
+		virtual data_t &get() noexcept(false);
+		virtual const data_t &get() const noexcept(false);
+		virtual const std::string &get() const noexcept(false);
+		virtual const std::pair <data_t, std::string>
+			&get() const noexcept(false);
 
-		std::pair <data_t, std::string> &get() const;
-		std::pair <data_t, std::string> &operator~() const;
+		virtual data_t &operator*() noexcept(false);
+		virtual const data_t &operator*() const noexcept(false);
+		virtual const std::string &operator*() const noexcept(false);
+		virtual const std::pair <data_t, std::string>
+			&operator*() const noexcept(false);
+		
+		/* Friends:
+		 * std::ostream &operator<<(std::ostream &, const variable
+		 *   <data_t> &) - outputs the name of the passed variable
+		 *   object, its value, and whether or not it is a dummy
+		 * std::istream &operator>>(std::istream &, variale &) - reads
+		 *   information from the passed istream object, and modifies
+		 *   the passed variable object appropriately */
+		template <typename type>
+		friend std::ostream &operator<<(std::ostream &os, const
+		        variable <data_t> &);
+
+		template <typename type>
+		friend std::istream &operator>>(std::istream &is, variable
+		        <data_t> &);
 	};
 
+	/* Default variable specification using
+	 * the default numerical type/info structure */
 	typedef variable <def_t> var_t;
+
+	/* Variable Class Member Functions
+	 *
+	 * See class declaration for a
+	 * description of each function
+	 *
+	 * Constructors: */
+	template <typename data_t>
+	variable <data_t> ::variable() : val(data_t()), name("x"),
+		param(false) {}
+
+	template <typename data_t>
+	variable <data_t> ::variable(std::string str, bool bl, data_t vl)
+		: val(vl), name(str), param(bl) {}
+
+	/* Virtualized member functions:
+	 * setters, getters and operators */
+	template <typename data_t>
+	void variable <data_t> ::set(bool bl) {param = bl;}
+
+	template <typename data_t>
+	void variable <data_t> ::set(data_t vl) {val = vl;}
+	
+	template <typename data_t>
+	void variable <data_t> ::set(bool bl) {param = bl;}
+
+	template <typename data_t>
+	void variable <data_t> ::set(bool bl) {param = bl;}
 
 	// Beginning of the function class
 	template <class oper_t>
