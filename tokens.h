@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace tokens {
 	/* Default data/info type to
@@ -79,10 +80,12 @@ namespace tokens {
 		 *   of the val in the passed operand object to the read data_t
 		 *   value */
 		template <typename type>
-		friend std::ostream &operator<<(std::ostream &os, const operand <data_t> &);
+		friend std::ostream &operator<<(std::ostream &os, const
+		        operand <data_t> &);
 
 		template <typename type>
-		friend std::istream &operator>>(std::istream &is, operand <data_t> &);
+		friend std::istream &operator>>(std::istream &is, operand
+		        <data_t> &);
 	};
 
 	/* Default operand specification
@@ -144,7 +147,8 @@ namespace tokens {
 
 	/* Friend functions: istream and ostream utilities */
 	template <typename data_t>
-	std::ostream &operator<< (std::ostream &os, const operand <data_t> &right)
+	std::ostream &operator<< (std::ostream &os, const operand <data_t>
+	        &right)
 	{
 		os << right.get();
 		return os;
@@ -265,7 +269,8 @@ namespace tokens {
 		 *   std::vector> &) - sets the private member variables
 		 *   to the corresponding parameters passed */
 		operation();
-		operation(std::string, function, int, const std::vector <std::string> &);
+		operation(std::string, function, int, const std::vector
+		        <std::string> &);
 
 		/* Virtualized Member Functions:
 		 * void [set](std::string, function, int, const std::vector
@@ -282,20 +287,25 @@ namespace tokens {
 		 * void oper_t operator()(const std::vector <oper_t> &) - does
 		 *   the same thing as compute but is supported by the function
 		 *   operator */
-		virtual void set(std::string, function, int, const std::vector <std::string> &);
+		virtual void set(std::string, function, int, const
+			std::vector <std::string> &);
 
 		virtual function get() const;
 		virtual function operator*() const;
 
-		virtual oper_t compute(const std::vector <oper_t> &) const noexcept(false);
-		virtual oper_t operator()(const std::vector <oper_t> &) const noexcept(false);  
+		virtual oper_t compute(const std::vector <oper_t> &) const
+			noexcept(false);
+		virtual oper_t operator()(const std::vector <oper_t> &) const
+			noexcept(false);
 		
 		/* Friend Functions:
 		 * std::ostream &operator<<(std::ostream &, const operation
-		 *   <oper_t> &) - outputs information about the passed operation
+		 *   <oper_t> &) - outputs information about the passed
+		 *   operation
 		 *   object into the stream pointed to by the passed ostream */
 		template <class oper_t>
-		friend std::ostream &operator<<(std::ostream &, const operation <oper_t> &);
+		friend std::ostream &operator<<(std::ostream &, const operation
+		        <oper_t> &);
 	private:
 		/* [functio][func] - the function used by the operation */
 		function func;
@@ -329,8 +339,8 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	operation <oper_t> ::operation(std::string str, function nfunc, int nopers,
-		const std::vector <std::string> &nsymbols)
+	operation <oper_t> ::operation(std::string str, function nfunc,
+		int nopers, const std::vector <std::string> &nsymbols)
 	{
 		name = str;
 		func = nfunc;
@@ -339,8 +349,8 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	void operation <oper_t> ::set(std::string str, function nfunc, int nopers,
-		const std::vector <std::string> &nsymbols)
+	void operation <oper_t> ::set(std::string str, function nfunc,
+		int nopers, const std::vector <std::string> &nsymbols)
 	{
 		name = str;
 		func = nfunc;
@@ -371,8 +381,8 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	oper_t operation <oper_t> ::operator()(const std::vector <oper_t> &inputs) const
-		noexcept(false)
+	oper_t operation <oper_t> ::operator()(const std::vector
+	        <oper_t> &inputs) const noexcept(false)
 	{
 		if (inputs.size() != opers)
 			throw argset_exception(inputs.size(), *this);
@@ -381,7 +391,11 @@ namespace tokens {
 
 	/* Friend Functions: ostream utilities */
 	template <class oper_t>
-	std::ostream &operator>>(
+	std::ostream &operator<<(std::ostream &os, const operation <oper_t>
+	        &opn)
+	{
+
+	}
 
 	/* Exception Class - Constructors: */
 	template <class oper_t>
