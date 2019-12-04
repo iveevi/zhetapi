@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/venki/CLionProjects/calculator/src/main.cpp
+iostream
+-
+tokens.h
+C:/Users/venki/CLionProjects/calculator/src/tokens.h
+
+C:/Users/venki/CLionProjects/calculator/src/tokens.h
+iostream
+-
+string
+-
+utility
+-
+vector
+-
+types.cpp
+C:/Users/venki/CLionProjects/calculator/src/types.cpp
+
