@@ -1,1 +1,0 @@
-/usr/bin/c++     CMakeFiles/calculator.dir/src/main.cpp.o  -o calculator 

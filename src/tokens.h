@@ -24,11 +24,16 @@ namespace tokens {
 		enum type {NONE, OPERAND, OPERATION,
 			VARIABLE, FUNCTION, MODULE};
 
-		/* Virtuals:
-		 * [type] [caller]() - insepctor function passed
+		/* Virtual:
+		 * [type] [caller]() - inspector function passed
 		 * on to all derived classes */
-		virtual type caller() = 0;
+		virtual type caller();
 	};
+
+	token::type token::caller()
+	{
+		return NONE;
+	}
 	
 	/* Exception Class:
 	 *
@@ -50,15 +55,15 @@ namespace tokens {
 		 *   private member variable [msg] to
 		 *   whatever string is passed */
 		exception();
-		exception(std::string);
+		explicit exception(std::string);
 
 		/* Virtualized Member Functions:
 		 * void [set](std::string) - sets the
 		 *   private member variable [msg] to
 		 *   whatever string is passed
 		 * std::string [what]() - returns a constant
-		 *   (unchangable) reference to the contents
-		 *   of the private member varaible [msg] */
+		 *   (unchangeable) reference to the contents
+		 *   of the private member variable [msg] */
 		virtual void set(std::string);
 		
 		virtual const std::string &what();
@@ -70,19 +75,20 @@ namespace tokens {
 	 * description of each function
 	 *
 	 * Constructors: */
-	template <class oper_t>
-	operation <oper_t> ::exception::exception() : msg("") {}
-
-	template <class oper_t>
-	operation <oper_t> ::exception::exception(std::string str) : msg(str) {}
+	exception::exception() : msg("") {}
+	exception::exception(std::string str) : msg(std::move(str)) {}
 
 	/* Virtualized member functions:
 	 * setter and getters */
-	template <class oper_t>
-	void operation <oper_t> ::exception::set(std::string str) {msg = str;}
+	void exception::set(std::string str)
+	{
+		msg = std::move(str);
+	}
 
-	template <class oper_t>
-	std::string operation <oper_t> ::exception::what() {return msg;}
+	const std::string &exception::what()
+	{
+		return msg;
+	}
 
 	/* Operand Class:
 	 * 
@@ -101,7 +107,7 @@ namespace tokens {
 		 * operand(data_t) - sets the private member variable
 		 *   [val] to whatever value is passed */
 		operand();
-		operand(data_t);
+		explicit operand(data_t);
 		operand(const operand &);
 
 		/* Virtualized Member Functions:
@@ -111,11 +117,11 @@ namespace tokens {
 		 *   variable to whatever value is passed
 		 * data_t &[get]() - returns a reference to the private
 		 *   member variable
-		 * const data_t &[get]() - returns a constant (unchangable)
-		 *   reference to the prviate member variable
+		 * const data_t &[get]() - returns a constant (unchangeable)
+		 *   reference to the private member variable
 		 * data_t &operator*() - returns a reference to the private
 		 *   member variable
-		 * const data_t &operator*() - returns a constant (unchangable)
+		 * const data_t &operator*() - returns a constant (unchangeable)
 		 *   reference to the private member variable */
 		virtual void set(data_t);
 		virtual void operator[](data_t);
@@ -126,7 +132,8 @@ namespace tokens {
 		virtual data_t &operator*();
 		virtual const data_t &operator*() const;
 
-		virtual operand &operator=(const operand &);
+		operand &operator=(const operand &);
+		type caller() override;
 
 		/* Friends:
 		 * std::ostream &operator<<(std::ostream &, const operand
@@ -158,10 +165,10 @@ namespace tokens {
 		friend bool &operator<(const operand &, const operand &);
 		
 		template <typename type>
-		friend bool &operator=>(const operand &, const operand &);
+		friend bool &operator>=(const operand &, const operand &);
 		
 		template <typename type>
-		friend bool &operator=<(const operand &, const operand &);
+		friend bool &operator<=(const operand &, const operand &);
 	};
 
 	/* Default operand specification
@@ -178,33 +185,51 @@ namespace tokens {
 	operand <data_t> ::operand () : val(data_t()) {}
 
 	template <typename data_t>
-	operand <data_t> ::operand(data_t nval) {val = nval;}
+	operand <data_t> ::operand(data_t data) : val(data) {}
 	
 	template <typename data_t>
-	operand <data_t> ::operand(const operand &other) {val = other.val;}
+	operand <data_t> ::operand(const operand &other) : val(other.val) {}
 	
 	/* Virtualized member functions:
 	 * setters, getter and operators */
 	template <typename data_t>
-	void operand <data_t> ::set(data_t nval) {val = nval;}
+	void operand <data_t> ::set(data_t data)
+	{
+		val = data;
+	}
 
 	template <typename data_t>
-	void operand <data_t> ::operator[](data_t nval) {val = nval;}
+	void operand <data_t> ::operator[](data_t data)
+	{
+		val = data;
+	}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::get() {return val;}
+	data_t &operand <data_t> ::get()
+	{
+		return val;
+	}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::get() const {return val;}
+	const data_t &operand <data_t> ::get() const
+	{
+		return val;
+	}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::operator*() {return val;}
+	data_t &operand <data_t> ::operator*()
+	{
+		return val;
+	}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::operator*() const {return val;}
+	const data_t &operand <data_t> ::operator*() const
+	{
+		return val;
+	}
 	
 	template <typename data_t>
-	const data_t &operand <data_t> ::operator=(const operand &other) const
+	operand <data_t> &operand <data_t> ::operator=(const operand &other)
 	{
 		val = other.val;
 		return *this;
@@ -228,8 +253,48 @@ namespace tokens {
 		return is;
 	}
 
-	/* Cmoparison functions: */
+	/* Comparison functions: */
 	template <typename data_t>
+	bool operator==(const operand <data_t> &right, const operand
+	        <data_t> &left)
+	{
+		return right.val == left.val;
+	}
+
+	template <typename data_t>
+	bool operator!=(const operand <data_t> &right, const operand
+	        <data_t> &left)
+	{
+		return right != left;
+	}
+
+	template <typename data_t>
+	bool operator>(const operand <data_t> &right, const operand <data_t>
+	        &left)
+	{
+		return right.val > left.val;
+	}
+
+	template <typename data_t>
+	bool operator<(const operand <data_t> &right, const operand <data_t>
+	&left)
+	{
+		return right.val < left.val;
+	}
+
+	template <typename data_t>
+	bool operator>=(const operand <data_t> &right, const operand <data_t>
+	&left)
+	{
+		return right.val >= left.val;
+
+	}
+	template <typename data_t>
+	bool operator<=(const operand <data_t> &right, const operand <data_t>
+	&left)
+	{
+		return right.val <= left.val;
+	}
 
 	/* Token class derived functions: */
 	template <typename data_t>
@@ -256,11 +321,11 @@ namespace tokens {
 		class argset_exception : public exception {
 		public:
 			/* Constructors:
-			 * argset_exception() - default constuctor
+			 * argset_exception() - default constructor
 			 *   that sets the private member variable
 			 *   [msg] to an empty string 
 			 * argset_exception(std::string) - constructor
-			 *   that sets the private member variabele [msg]
+			 *   that sets the private member variable [msg]
 			 *   to whatever string is passed 
 			 * argset_exception(std::string, int,
 			 *   int) - constructor that creates a message
@@ -273,7 +338,7 @@ namespace tokens {
 			 *   (passed) and the operation it is called
 			 *   from (passed) */
 			argset_exception();
-			argset_exception(std::string);
+			explicit argset_exception(std::string);
 			argset_exception(std::string, int, int);
 			argset_exception(int, const operation <oper_t> &);
 
@@ -294,9 +359,16 @@ namespace tokens {
 		 * to compute something using the operand
 		 * class */
 		class computation_exception : public exception {};
+
+		/* Illegal_Type_Exception Class:
+		 *
+		 * Represents an error derived from trying
+		 * to create an operation object by passing
+		 * a non-operand class as a parameter */
+		class illegal_type_exception : public exception {};
 		
 		/* Typedef oper_t (*[function])(const std::vector
-		 * <oper_t> &) - a type alias for conveneince for
+		 * <oper_t> &) - a type alias for convenience for
 		 * the type of function used for computation */
 		typedef oper_t (*function)(const std::vector <oper_t> &);
 
@@ -307,9 +379,11 @@ namespace tokens {
 		 * operation(std::string, function, int, const
 		 *   std::vector> &) - sets the private member variables
 		 *   to the corresponding parameters passed */
-		operation();
+		operation() noexcept(false);
+		operation(const operation &) noexcept(false);
 		operation(std::string, function, int, const std::vector
-		        <std::string> &);
+		        <std::string> &) noexcept(false);
+		~operation() noexcept(false);
 
 		/* Virtualized Member Functions:
 		 * void [set](std::string, function, int, const std::vector
@@ -317,7 +391,7 @@ namespace tokens {
 		 *   the corresponding parameters passed
 		 * void [function][get] const - returns a pointer to the
 		 *   computer function used by the object
-		 * void [function]operator*() const - returns a poinbter to
+		 * void [function]operator*() const - returns a pointer to
 		 *   the computer function used by the object
 		 * void oper_t [compute](const std::vector <oper_t> &) - returns
 		 *   the result of the operation given a list of operands, and
@@ -326,8 +400,10 @@ namespace tokens {
 		 * void oper_t operator()(const std::vector <oper_t> &) - does
 		 *   the same thing as compute but is supported by the function
 		 *   operator */
-		virtual void set(std::string, function, int, const
-			std::vector <std::string> &);
+		virtual void set(std::string, function, int, const std::vector
+		        <std::string> &);
+		virtual void operator()(std::string, function, int, const std::vector
+			<std::string> &);
 
 		virtual function get() const;
 		virtual function operator*() const;
@@ -336,6 +412,11 @@ namespace tokens {
 			noexcept(false);
 		virtual oper_t operator()(const std::vector <oper_t> &) const
 			noexcept(false);
+
+		operation &operator=(const operation &);
+		type caller() override;
+
+		static
 		
 		/* Friend Functions:
 		 * std::ostream &operator<<(std::ostream &, const operation
@@ -345,8 +426,33 @@ namespace tokens {
 		template <class oper_t>
 		friend std::ostream &operator<<(std::ostream &, const operation
 		        <oper_t> &);
+
+		/* Comparison Functions:
+		 *
+		 * The following comparison operators
+		 * execute by comparing the number of
+		 * operations (first), and then the
+		 * name, list of symbols and finally
+		 * the address of their function */
+		template <typename type>
+		friend bool operator==(const operation &, const operation &);
+
+		template <typename type>
+		friend bool operator!=(const operation &, const operation &);
+
+		template <typename type>
+		friend bool operator>(const operation &, const operation &);
+
+		template <typename type>
+		friend bool operator<(const operation &, const operation &);
+
+		template <typename type>
+		friend bool operator>=(const operation &, const operation &);
+
+		template <typename type>
+		friend bool operator<=(const operation &, const operation &);
 	private:
-		/* [functio][func] - the function used by the operation */
+		/* [function][func] - the function used by the operation */
 		function func;
 
 		/* std::string [name] - the name of the operation */
@@ -372,18 +478,28 @@ namespace tokens {
 	 *
 	 * Constructors: */
 	template <class oper_t>
-	operation <oper_t> ::operation() {func = nullptr;}
+	operation <oper_t> ::operation() : name(""), opers(0), symbols(0),
+		func(nullptr)
+	{
+		if (!std::is_same(operand, oper_t))
+			throw new illegal_type_exception("Expected a"
+				    "templated operand class");
+	}
+
+	template <class oper_t>
+	operation <oper_t> ::operation(const operation &other) : name(other.name),
+		opers(other.opers), symbols(other.symbols), func(other.func)
+	{
+		if (!std::is_same(operand, oper_t))
+	}
 
 	template <class oper_t>
 	operation <oper_t> ::operation(std::string str, function nfunc,
-		int nopers, const std::vector <std::string> &nsymbols)
-	{
-		name = str;
-		func = nfunc;
-		opers = nopers;
-		symbols = nsymbols;
-	}
+		int nopers, const std::vector <std::string> &nsymbols) : name(str),
+		opers(nopers), symbols(nsymbols), func(nullptr) {}
 
+	/* Virtualized Member Functions:
+	 * setters, getters, and operators */
 	template <class oper_t>
 	void operation <oper_t> ::set(std::string str, function nfunc,
 		int nopers, const std::vector <std::string> &nsymbols)
@@ -394,7 +510,13 @@ namespace tokens {
 		symbols = nsymbols;
 	}
 
-	/* Virtualized Member Functions: */
+	template <class oper_t>
+	void operation <oper_t> ::operator()(std::string str, function nfunc,
+		int nopers, const std::vector <std::string> &nsymbols)
+	{
+
+	}
+
 	template <class oper_t>
 	typename operation <oper_t>::function operation <oper_t> ::get()
 		const {return func;}
@@ -715,8 +837,6 @@ namespace tokens {
 
 	typedef module <num_t> module_t;
 }
-
-#include "types.cpp"
 
 #endif
 
