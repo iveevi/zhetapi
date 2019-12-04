@@ -298,7 +298,10 @@ namespace tokens {
 
 	/* Token class derived functions: */
 	template <typename data_t>
-	token::type operand <data_t> ::caller() {return OPERAND;}
+	token::type operand <data_t> ::caller()
+	{
+		return OPERAND;
+	}
 
 	/* Operation Class:
 	 *
@@ -383,7 +386,7 @@ namespace tokens {
 		operation(const operation &) noexcept(false);
 		operation(std::string, function, int, const std::vector
 		        <std::string> &) noexcept(false);
-		~operation() noexcept(false);
+		~operation();
 
 		/* Virtualized Member Functions:
 		 * void [set](std::string, function, int, const std::vector
@@ -415,8 +418,6 @@ namespace tokens {
 
 		operation &operator=(const operation &);
 		type caller() override;
-
-		static
 		
 		/* Friend Functions:
 		 * std::ostream &operator<<(std::ostream &, const operation
@@ -481,28 +482,47 @@ namespace tokens {
 	operation <oper_t> ::operation() : name(""), opers(0), symbols(0),
 		func(nullptr)
 	{
-		if (!std::is_same(operand, oper_t))
+		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
 				    "templated operand class");
+		}
 	}
 
 	template <class oper_t>
 	operation <oper_t> ::operation(const operation &other) : name(other.name),
 		opers(other.opers), symbols(other.symbols), func(other.func)
 	{
-		if (!std::is_same(operand, oper_t))
+		if (!std::is_same(operand, oper_t)) {
+			throw new illegal_type_exception("Expected a"
+				    "templated operand class");
+		}
 	}
 
 	template <class oper_t>
 	operation <oper_t> ::operation(std::string str, function nfunc,
-		int nopers, const std::vector <std::string> &nsymbols) : name(str),
-		opers(nopers), symbols(nsymbols), func(nullptr) {}
+		int nopers, const std::vector <std::string> &nsymbols) :
+		name(str), opers(nopers), symbols(nsymbols), func(nullptr)
+	{
+		if (!std::is_same(operand, oper_t)) {
+			throw new illegal_type_exception("Expected a"
+				    "templated operand class");
+		}
+	}
+
+	template <class oper_t>
+	operation <oper_t> ::~operation()
+	{
+		// Put the operation to a stack
+		// so that future uses can be reused
+		// instead remade
+		delete func;
+	}
 
 	/* Virtualized Member Functions:
 	 * setters, getters, and operators */
 	template <class oper_t>
 	void operation <oper_t> ::set(std::string str, function nfunc,
-		int nopers, const std::vector <std::string> &nsymbols)
+			int nopers, const std::vector <std::string> &nsymbols)
 	{
 		name = str;
 		func = nfunc;
@@ -512,22 +532,31 @@ namespace tokens {
 
 	template <class oper_t>
 	void operation <oper_t> ::operator()(std::string str, function nfunc,
-		int nopers, const std::vector <std::string> &nsymbols)
+			int nopers, const std::vector <std::string> &nsymbols)
 	{
-
+		name = str;
+		func = nfunc;
+		opers = nopers;
+		symbols = nsymbols;
 	}
 
 	template <class oper_t>
 	typename operation <oper_t>::function operation <oper_t> ::get()
-		const {return func;}
+			const
+	{
+		return func;
+	}
 
 	template <class oper_t>
 	typename operation <oper_t>::function operation <oper_t> ::operator*()
-		const {return func;}
+			const
+	{
+		return func;
+	}
 
 	template <class oper_t>
 	oper_t operation <oper_t> ::compute(const std::vector <oper_t> &inputs)
-		const noexcept(false)
+			const
 	{
 		if (inputs.size() != opers)
 			throw argset_exception(inputs.size(), *this);
@@ -536,7 +565,7 @@ namespace tokens {
 
 	template <class oper_t>
 	oper_t operation <oper_t> ::operator()(const std::vector <oper_t> &inputs)
-		const noexcept(false)
+			const
 	{
 		if (inputs.size() != opers)
 			throw argset_exception(inputs.size(), *this);
@@ -546,16 +575,95 @@ namespace tokens {
 	/* Friend Functions: ostream utilities */
 	template <class oper_t>
 	std::ostream &operator<<(std::ostream &os, const operation <oper_t>
-	        &opn)
+			&opn)
 	{
 		os << opn.name << " - " << opn.opers << " operands, ";
 		os << opn.symbols;
 		return os;
 	}
 
+	/* Comparison functions: order described in
+	 * class declaration */
+	template <class oper_t>
+	bool operator==(const operation <oper_t> &right, const operation <oper_t>
+			&left)
+	{
+		if (right.opers != left.opers)
+			return false;
+		if (right.name != left.name)
+			return false;
+		if (right.symbols != left.symbols)
+			return false;
+		if (right.func != left.func)
+			return false;
+		return true;
+	}
+	
+	template <class oper_t>
+	bool operator!=(const operation <oper_t> &right, const operation <oper_t>
+			&left)
+	{
+		if (right.opers != left.opers)
+			return true;
+		if (right.name != left.name)
+			return true;
+		if (right.symbols != left.symbols)
+			return true;
+		if (right.func != left.func)
+			return true;
+		return false;
+	}
+	
+	template <class oper_t>
+	bool operator>(const operation <oper_t> &right, const operation <oper_t>
+			&left)
+	{
+		if (right.opers > left.opers)
+			return true;
+		if (right.name > left.name)
+			return true;
+		if (right.symbols > left.symbols)
+			return true;
+		if (right.func > left.func)
+			return true;
+		return false;
+	}
+	
+	template <class oper_t>
+	bool operator<(const operation <oper_t> &right, const operation <oper_t>
+			&left)
+	{
+		if (right.opers < left.opers)
+			return true;
+		if (right.name < left.name)
+			return true;
+		if (right.symbols < left.symbols)
+			return true;
+		if (right.func < left.func)
+			return true;
+		return false;
+	}
+
+	template <class oper_t>
+	bool operator>=(const operation <oper_t> &right, const operation &<oper_t>
+			&left)
+	{
+		return (right > left) || (right == leff);
+	}
+	
+	template <class oper_t>
+	bool operator<=(const operation <oper_t> &right, const operation &<oper_t>
+			&left)
+	{
+		return (right < left) || (right == leff);
+	}
+
 	/* Token class derived functions: */
 	template <class oper_t>
-	token::type operation <oper_t> ::caller() {return OPERATION;}
+	token::type operation <oper_t> ::caller()
+	{
+		return OPERATION;
+	}
 
 	/* Argset Exception Class Member Functions
 	 *
@@ -568,23 +676,27 @@ namespace tokens {
 		: operation <oper_t> ::exception() {}
 
 	template <class oper_t>
-	operation <oper_t> ::argset_exception::argset_exception(int actual, const operation <oper_t> &obj)
+	operation <oper_t> ::argset_exception::argset_exception(int actual,
+			const operation <oper_t> &obj)
 	{
 		using std::to_string;
 		exception::msg = obj.name + ": Expected " + to_string(obj.opers);
-		exception::msg += " operands, received " + to_string(actual) + " instead.";
+		exception::msg += " operands, received " + to_string(actual);
+		exception::msg += " instead.";
 	}
 
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception(std::string str)
-		: operation <oper_t> ::exception(str) {}
+			: operation <oper_t> ::exception(str) {}
 
 	template <class oper_t>
-	operation <oper_t> ::argset_exception::argset_exception(std::string str, int expected, int actual)
+	operation <oper_t> ::argset_exception::argset_exception(std::string str,
+			int expected, int actual)
 	{
 		using std::to_string;
 		exception::msg = str + ": Expected " + to_string(expected);
-		exception::msg += " operands, received " + to_string(actual) + "instead.";
+		exception::msg += " operands, received " + to_string(actual);
+		exception::msg += "instead.";
 	}
 
 	/* Virtualized member functions:
@@ -747,16 +859,32 @@ namespace tokens {
 	/* Virtualized member functions:
 	 * setters, getters and operators */
 	template <typename data_t>
-	void variable <data_t> ::set(bool bl) {param = bl;}
+	void variable <data_t> ::set(bool bl)
+	{
+		param = bl;
+	}
 
 	template <typename data_t>
-	void variable <data_t> ::set(data_t vl) {val = vl;}
+	void variable <data_t> ::set(data_t vl)
+	{
+		val = vl;
+	}
 	
 	template <typename data_t>
-	void variable <data_t> ::set(bool bl) {param = bl;}
+	void variable <data_t> ::set(std::string str)
+	{
+		name = str;
+	}
 
 	template <typename data_t>
-	void variable <data_t> ::set(bool bl) {param = bl;}
+	void variable <data_t> ::set(data_t val, std::string str)
+	{
+		val = vl;
+		name = str;
+	}
+
+	template <typename data_t>
+	void va
 
 	// Beginning of the function class
 	template <class oper_t>
