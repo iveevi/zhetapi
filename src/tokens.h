@@ -235,7 +235,8 @@ namespace tokens {
 		return *this;
 	}
 
-	/* Friend functions: istream and ostream utilities */
+	/* Friend functions: istream and
+	 * ostream utilities */
 	template <typename data_t>
 	std::ostream &operator<< (std::ostream &os, const operand <data_t>
 	        &right)
@@ -436,22 +437,28 @@ namespace tokens {
 		 * name, list of symbols and finally
 		 * the address of their function */
 		template <typename type>
-		friend bool operator==(const operation &, const operation &);
+		friend bool operator==(const operation <type> &, const operation
+			<type> &);
 
 		template <typename type>
-		friend bool operator!=(const operation &, const operation &);
+		friend bool operator!=(const operation <type> &, const operation
+			<type> &);
 
 		template <typename type>
-		friend bool operator>(const operation &, const operation &);
+		friend bool operator>(const operation <type> &, const operation
+			<type> &);
 
 		template <typename type>
-		friend bool operator<(const operation &, const operation &);
+		friend bool operator<(const operation <type> &, const operation
+			<type> &);
 
 		template <typename type>
-		friend bool operator>=(const operation &, const operation &);
+		friend bool operator>=(const operation <type> &, const operation
+			<type> &);
 
 		template <typename type>
-		friend bool operator<=(const operation &, const operation &);
+		friend bool operator<=(const operation <type> &, const operation
+			<type> &);
 	private:
 		/* [function][func] - the function used by the operation */
 		function func;
@@ -484,7 +491,7 @@ namespace tokens {
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
-				    "templated operand class");
+				    "template operand class");
 		}
 	}
 
@@ -494,18 +501,18 @@ namespace tokens {
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
-				    "templated operand class");
+				    "template operand class");
 		}
 	}
 
 	template <class oper_t>
 	operation <oper_t> ::operation(std::string str, function nfunc,
 		int nopers, const std::vector <std::string> &nsymbols) :
-		name(str), opers(nopers), symbols(nsymbols), func(nullptr)
+		name(str), opers(nopers), symbols(nsymbols), func(nfunc)
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
-				    "templated operand class");
+				    "template operand class");
 		}
 	}
 
@@ -572,6 +579,16 @@ namespace tokens {
 		return (*func)(inputs);
 	}
 
+	template <class oper_t>
+	operation <oper_t> &operation <oper_t> ::operator=(const operation <oper_t>
+	                &other)
+	{
+		name = other.name;
+		opers = other.opers;
+		symbols = other.symbols;
+		func = std::move(other.func);
+	}
+
 	/* Friend Functions: ostream utilities */
 	template <class oper_t>
 	std::ostream &operator<<(std::ostream &os, const operation <oper_t>
@@ -594,9 +611,7 @@ namespace tokens {
 			return false;
 		if (right.symbols != left.symbols)
 			return false;
-		if (right.func != left.func)
-			return false;
-		return true;
+		return right.func == left.func;
 	}
 	
 	template <class oper_t>
@@ -609,9 +624,7 @@ namespace tokens {
 			return true;
 		if (right.symbols != left.symbols)
 			return true;
-		if (right.func != left.func)
-			return true;
-		return false;
+		return right.func != left.func;
 	}
 	
 	template <class oper_t>
@@ -624,9 +637,7 @@ namespace tokens {
 			return true;
 		if (right.symbols > left.symbols)
 			return true;
-		if (right.func > left.func)
-			return true;
-		return false;
+		return right.func > left.func;
 	}
 	
 	template <class oper_t>
@@ -639,20 +650,18 @@ namespace tokens {
 			return true;
 		if (right.symbols < left.symbols)
 			return true;
-		if (right.func < left.func)
-			return true;
-		return false;
+		return right.func < left.func;
 	}
 
 	template <class oper_t>
-	bool operator>=(const operation <oper_t> &right, const operation &<oper_t>
+	bool operator>=(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
 		return (right > left) || (right == leff);
 	}
 	
 	template <class oper_t>
-	bool operator<=(const operation <oper_t> &right, const operation &<oper_t>
+	bool operator<=(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
 		return (right < left) || (right == leff);
@@ -746,7 +755,22 @@ namespace tokens {
 		 * (dummy) or to hold information */
 		bool param;
 	public:
-		class bypass_attempt_exception : exception {};
+		/*
+		 * Bypass_Attempt_Exception Class:
+		 *
+		 * Represents the error thrown whenever
+		 * the value of the variable object is
+		 * attempted to be accessed while it is
+		 * supposed to be a parameter
+		 */
+		class bypass_attempt_exception : public exception {
+		};
+
+		/* Dummy parameters for operators () and *
+		 * one for dummy int and one for dummy
+		 * std::string */
+		#define DINT 0x0
+		#define DSTRING ""
 
 		/* Constructors:
 		 * variable() - creates a new variable object
@@ -755,9 +779,9 @@ namespace tokens {
 		 *   a new variable object with corresponding
 		 *   members with respect to the passed parameters,
 		 *   private member variable [val] is defaulted
-		 *   to the defalt value of data_t */
+		 *   to the default value of data_t */
 		variable();
-		variable(std::string str, bool par, data_t data = data_t());
+		variable(std::string str, bool bl, data_t vl = data_t());
 
 		/* Virtualized Member Functions:
 		 * void [set](bool) - changes whether or not the
@@ -783,7 +807,7 @@ namespace tokens {
 		 *   value of the object or throws a bypass attempt
 		 *   exception
 		 * const data_t &[get]() const - returns a constant
-		 *   (unchangable) reference to the value of the
+		 *   (unchangeable) reference to the value of the
 		 *   object or throws a bypass attempt exception
 		 * const std::string &[get]() const - returns the name
 		 *   of the current variable object
@@ -806,27 +830,26 @@ namespace tokens {
 		virtual void set(data_t, std::string);
 		
 		virtual void operator[](bool);
-		virtual void operator[](data_t);
+		virtual void operator[](data_t) noexcept(false);
 		virtual void operator[](std::string);
-		virtual void operator[](data_t, std::string);
 
 		virtual data_t &get() noexcept(false);
 		virtual const data_t &get() const noexcept(false);
-		virtual const std::string &get() const noexcept(false);
+		virtual const std::string &get(int) const;
 		virtual const std::pair <data_t, std::string>
-			&get() const noexcept(false);
+			&get(std::string) const noexcept(false);
 
 		virtual data_t &operator*() noexcept(false);
 		virtual const data_t &operator*() const noexcept(false);
-		virtual const std::string &operator*() const noexcept(false);
+		virtual const std::string &operator*(int) const noexcept(false);
 		virtual const std::pair <data_t, std::string>
-			&operator*() const noexcept(false);
+			&operator*(std::string) const noexcept(false);
 		
 		/* Friends:
 		 * std::ostream &operator<<(std::ostream &, const variable
 		 *   <data_t> &) - outputs the name of the passed variable
 		 *   object, its value, and whether or not it is a dummy
-		 * std::istream &operator>>(std::istream &, variale &) - reads
+		 * std::istream &operator>>(std::istream &, variable &) - reads
 		 *   information from the passed istream object, and modifies
 		 *   the passed variable object appropriately */
 		template <typename type>
@@ -836,6 +859,37 @@ namespace tokens {
 		template <typename type>
 		friend std::istream &operator>>(std::istream &is, variable
 		        <data_t> &);
+
+		/* Comparison Functions:
+		 *
+		 * The following comparison operators
+		 * execute by comparing the values of
+		 * the variables, and throw a bypass
+		 * attempt error if any of the variables
+		 * are parameters */
+		template <typename data_t>
+		friend bool operator==(const variable <data_t> &, const
+			variable <data_t> &);
+
+		template <typename data_t>
+		friend bool operator!=(const variable <data_t> &, const
+		variable <data_t> &);
+
+		template <typename data_t>
+		friend bool operator>(const variable <data_t> &, const
+		variable <data_t> &);
+
+		template <typename data_t>
+		friend bool operator<(const variable <data_t> &, const
+		variable <data_t> &);
+
+		template <typename data_t>
+		friend bool operator>=(const variable <data_t> &, const
+		variable <data_t> &);
+
+		template <typename data_t>
+		friend bool operator<=(const variable <data_t> &, const
+		variable <data_t> &);
 	};
 
 	/* Default variable specification using
@@ -884,29 +938,116 @@ namespace tokens {
 	}
 
 	template <typename data_t>
-	void va
+	void variable <data_t> ::operator[](bool bl)
+	{
+		param = vl;
+	}
 
-	// Beginning of the function class
+	template <typename data_t>
+	void variable <data_t> ::operator[](data_t vl)
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		val = vl;
+	}
+
+	template <typename data_t>
+	data_t &variable <data_t> ::get()
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return val;
+	}
+
+	template <typename data_t>
+	const data_t &variable <data_t> ::get() const
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return val;
+	}
+
+	template <typename data_t>
+	const std::string &variable <data_t> ::get(int dm) const
+	{
+		return name;
+	}
+
+	template <typename data_t>
+	const std::pair <data_t, std::string> &variable <data_t> ::get
+			(std::string dstr) const
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return par(val, name);
+	}
+
+	template <typename data_t>
+	void variable <data_t> ::operator[](std::string str)
+	{
+		name = str;
+	}
+
+	template <typename data_t>
+	const data_t &variable <data_t> ::operator*() const
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return val;
+	}
+
+	template <typename data_t>
+	const std::string &variable <data_t> ::operator*(int dm) const
+	{
+		return name;
+	}
+
+	template <typename data_t>
+	data_t &variable <data_t> ::operator*()
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return pair(val, name);
+	}
+
+	template <typename data_t>
+	const std::pair <data_t, std::string> &variable <data_t> ::operator*
+	                (std::string dstr) const
+	{
+		if (param)
+			throw bypass_attempt_exception;
+		return val;
+
+
+	/* Friend functions: ostream and
+	 * istream utilities */
+	template <typename data_t>
+	std::ostream &operator<<(std::ostream &os, const variable <data_t> &var)
+	{
+		os << "[" << var.name 
+	}
+
+	/* Beginning of the function class - first complete
+	 * toke_tree and ftoken_tree classes
 	template <class oper_t>
-	class function : public operation {
+	class function : public token {
 	public:
-		typedef oper_t (*function)(const std::vector <varible> &);
+		typedef oper_t (*ftype)(const std::vector <varible> &);
 
 		function();
-		function(std::string, function, opers);
+		function(std::string, ftype, opers);
 
-		/* Use these functions to
+		/Use these functions to
 		* save space in the function
 		* stack class - instead
 		* of creating new objects
 		* and using space, modify
 		* old ones (if the program
 		* is sure they wont be used
-		* again)
-		*/
+		* again) *
 		void set(std::string);
 		void set(function, opers);
-		void set(std::string, function, opers);
+		void set(std::string, ftype, opers);
 
 		function get() const;
 		function operator~() const;
@@ -914,13 +1055,13 @@ namespace tokens {
 		function func;
 		std::string name;
 		std::size_t opers;
-	};
+	};*/
 
 	typedef function <num_t> func_t;	
 
 	// Beginning of the module class
 	template <class oper_t>
-	class module : public operation {
+	class module : public token {
 	private:
 		/* The following are the initializations
 		 * of the lambda member functions */
