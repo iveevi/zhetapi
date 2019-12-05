@@ -376,17 +376,29 @@ namespace tokens {
 		 * the type of function used for computation */
 		typedef oper_t (*function)(const std::vector <oper_t> &);
 
+		/* Enum orders - the type parameters
+		 * for pemdas values of operations
+		 * NA_L0 - for empty operations
+		 * SA_L1 - for addition/subtraction
+		 * MDM_L2 - for multiplication/division,
+		 *   and modulus
+		 * FUNC_LMAX - for function std operations
+		 *   such as sin, cos, log, etc. */
+		enum orders = {NA_L0, SA_L1, MDM_L2, FUNC_LMAX};
+
 		/* Constructors:
 		 * operation() - sets the private member function
 		 *   [func] to a null pointer, [opers] to -1,
 		 *   [symbols] and [name] to null pointer as well
 		 * operation(std::string, function, int, const
-		 *   std::vector> &) - sets the private member variables
-		 *   to the corresponding parameters passed */
+		 *   std::vector> &, order) - sets the private
+		 *   member variables to the corresponding parameters
+		 *   passed as parameters */
 		operation() noexcept(false);
 		operation(const operation &) noexcept(false);
 		operation(std::string, function, int, const std::vector
-		        <std::string> &) noexcept(false);
+		        <std::string> &, order, const std::vector <std::string> &)
+			noexcept(false);
 		~operation();
 
 		/* Virtualized Member Functions:
@@ -405,9 +417,9 @@ namespace tokens {
 		 *   the same thing as compute but is supported by the function
 		 *   operator */
 		virtual void set(std::string, function, int, const std::vector
-		        <std::string> &);
+		        <std::string> &, order, const std::vector <std::string> &);
 		virtual void operator()(std::string, function, int, const std::vector
-			<std::string> &);
+			<std::string> &, order, const std::vector <std::string> &);
 
 		virtual function get() const;
 		virtual function operator*() const;
@@ -417,7 +429,11 @@ namespace tokens {
 		virtual oper_t operator()(const std::vector <oper_t> &) const
 			noexcept(false);
 
+		virtual bool matches(std::string) const;
+		virtual bool operator[](std::string) const;
+
 		operation &operator=(const operation &);
+		
 		type caller() override;
 		
 		/* Friend Functions:
@@ -432,35 +448,34 @@ namespace tokens {
 		/* Comparison Functions:
 		 *
 		 * The following comparison operators
-		 * execute by comparing the number of
-		 * operations (first), and then the
-		 * name, list of symbols and finally
-		 * the address of their function */
-		template <typename type>
-		friend bool operator==(const operation <type> &, const operation
-			<type> &);
-
-		template <typename type>
-		friend bool operator!=(const operation <type> &, const operation
-			<type> &);
-
-		template <typename type>
-		friend bool operator>(const operation <type> &, const operation
-			<type> &);
-
-		template <typename type>
-		friend bool operator<(const operation <type> &, const operation
-			<type> &);
-
-		template <typename type>
-		friend bool operator>=(const operation <type> &, const operation
-			<type> &);
-
-		template <typename type>
-		friend bool operator<=(const operation <type> &, const operation
-			<type> &);
+		 * execute by comparing the pemdas values
+		 * except in == and != (comparison of all
+		 * members is done) */
+		template <class oper_t>
+		friend bool operator==(const operation <oper_t> &, const operation
+			<oper_t> &);
+		
+		template <class oper_t>
+		friend bool operator!=(const operation <oper_t> &, const operation
+			<oper_t> &);
+		
+		template <class oper_t>
+		friend bool operator>(const operation <oper_t> &, const operation
+			<oper_t> &);
+		
+		template <class oper_t>
+		friend bool operator<(const operation <oper_t> &, const operation
+			<oper_t> &);
+		
+		template <class oper_t>
+		friend bool operator>=(const operation <oper_t> &, const operation
+			<oper_t> &);
+		
+		template <class oper_t>
+		friend bool operator<=(const operation <oper_t> &, const operation
+			<oper_t> &);
 	private:
-		/* [function][func] - the function used by the operation */
+		/* [function] [func] - the function used by the operation */
 		function func;
 
 		/* std::string [name] - the name of the operation */
@@ -473,6 +488,20 @@ namespace tokens {
 		/* std::vector <std::string> [symbols] - the list of
 		 * symbols of the operation that are used in parsing */
 		std::vector <std::string> symbols;
+
+		/* [order] [pemdas] - the operations pemdas value, see
+		 * public declaration for a description of all the types
+		 * of pemdas orders/values */
+		order pemdas;
+
+		/* std::vector <std::string> [formats] - the list of string
+		 * formats of the operation in the user input that are
+		 * or can be valid */
+		std::vector <std::string> formats;
+
+		/* bool [is_same](std::string, std::string) - checks if two
+		 * strings are the same with the addition of wildcards */
+		bool is_same(std::string, std::string);
 	};
 
 	/* Default operation specification using
@@ -487,7 +516,7 @@ namespace tokens {
 	 * Constructors: */
 	template <class oper_t>
 	operation <oper_t> ::operation() : name(""), opers(0), symbols(0),
-		func(nullptr)
+		func(nullptr), pemdas(NA_L1), formats(0)
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
@@ -497,7 +526,8 @@ namespace tokens {
 
 	template <class oper_t>
 	operation <oper_t> ::operation(const operation &other) : name(other.name),
-		opers(other.opers), symbols(other.symbols), func(other.func)
+		opers(other.opers), symbols(other.symbols), func(other.func),
+		pemdas(other.pemdas), formats(other.formats)
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
@@ -507,8 +537,9 @@ namespace tokens {
 
 	template <class oper_t>
 	operation <oper_t> ::operation(std::string str, function nfunc,
-		int nopers, const std::vector <std::string> &nsymbols) :
-		name(str), opers(nopers), symbols(nsymbols), func(nfunc)
+		int nopers, const std::vector <std::string> &nsymbols, order pm,
+		const std::vector <std::string> &nformats) : name(str), opers(nopers),
+		symbols(nsymbols), func(nfunc), pemdas(pm), formats(nformats)
 	{
 		if (!std::is_same(operand, oper_t)) {
 			throw new illegal_type_exception("Expected a"
@@ -525,26 +556,42 @@ namespace tokens {
 		delete func;
 	}
 
+	/* Private member functions:
+	 * helper functions that are put
+	 * outside the scope of the general
+	 * program */
+	template <class oper_t>
+	bool operation <oper_t> ::is_same(std::string, std::string)
+	{
+		std::cout << "Unimplemeted XP" << std::endl;
+	}
+
 	/* Virtualized Member Functions:
 	 * setters, getters, and operators */
 	template <class oper_t>
 	void operation <oper_t> ::set(std::string str, function nfunc,
-			int nopers, const std::vector <std::string> &nsymbols)
+			int nopers, const std::vector <std::string> &nsymbols,
+			order pm, const std::vector <std::string> &nformat)
 	{
 		name = str;
 		func = nfunc;
 		opers = nopers;
 		symbols = nsymbols;
+		pemdas = pm;
+		formats = nformats;
 	}
 
 	template <class oper_t>
 	void operation <oper_t> ::operator()(std::string str, function nfunc,
-			int nopers, const std::vector <std::string> &nsymbols)
+			int nopers, const std::vector <std::string> &nsymbols,
+			order pm, const std::vector <std::string> &nformat)
 	{
 		name = str;
 		func = nfunc;
 		opers = nopers;
 		symbols = nsymbols;
+		pemdas = pm;
+		formats = nformats;
 	}
 
 	template <class oper_t>
@@ -583,10 +630,23 @@ namespace tokens {
 	operation <oper_t> &operation <oper_t> ::operator=(const operation <oper_t>
 	                &other)
 	{
-		name = other.name;
+		name = other.name;-
 		opers = other.opers;
 		symbols = other.symbols;
 		func = std::move(other.func);
+	}
+
+	template <class oper_t>
+	operation <oper_t> &operation <oper_t> ::matches(std::string) const
+	{
+		std::cout << "Unimplemented" << std::endl;
+	}
+
+
+	template <class oper_t>
+	operation <oper_t> &operation <oper_t> ::operator[](std::string) const
+	{
+		std::cout << "Unimplemented" << std::endl;
 	}
 
 	/* Friend Functions: ostream utilities */
@@ -605,6 +665,8 @@ namespace tokens {
 	bool operator==(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
+		if (right.pemdas != left.pemdas)
+			return false;
 		if (right.opers != left.opers)
 			return false;
 		if (right.name != left.name)
@@ -618,6 +680,8 @@ namespace tokens {
 	bool operator!=(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
+		if (right.pemdas != left.pemdas)
+			return true;
 		if (right.opers != left.opers)
 			return true;
 		if (right.name != left.name)
@@ -631,40 +695,28 @@ namespace tokens {
 	bool operator>(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
-		if (right.opers > left.opers)
-			return true;
-		if (right.name > left.name)
-			return true;
-		if (right.symbols > left.symbols)
-			return true;
-		return right.func > left.func;
+		return right.pemdas > left.pemdas;
 	}
 	
 	template <class oper_t>
 	bool operator<(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
-		if (right.opers < left.opers)
-			return true;
-		if (right.name < left.name)
-			return true;
-		if (right.symbols < left.symbols)
-			return true;
-		return right.func < left.func;
+		return right.pemdas < left.pemdas;
 	}
 
 	template <class oper_t>
 	bool operator>=(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
-		return (right > left) || (right == leff);
+		return (right > left) || (right == left);
 	}
 	
 	template <class oper_t>
 	bool operator<=(const operation <oper_t> &right, const operation <oper_t>
 			&left)
 	{
-		return (right < left) || (right == leff);
+		return (right < left) || (right == left);
 	}
 
 	/* Token class derived functions: */
@@ -869,27 +921,27 @@ namespace tokens {
 		 * are parameters */
 		template <typename data_t>
 		friend bool operator==(const variable <data_t> &, const
-			variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 
 		template <typename data_t>
 		friend bool operator!=(const variable <data_t> &, const
-		variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 
 		template <typename data_t>
 		friend bool operator>(const variable <data_t> &, const
-		variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 
 		template <typename data_t>
 		friend bool operator<(const variable <data_t> &, const
-		variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 
 		template <typename data_t>
 		friend bool operator>=(const variable <data_t> &, const
-		variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 
 		template <typename data_t>
 		friend bool operator<=(const variable <data_t> &, const
-		variable <data_t> &);
+			variable <data_t> &) noexcept(false);
 	};
 
 	/* Default variable specification using
@@ -1024,7 +1076,77 @@ namespace tokens {
 	template <typename data_t>
 	std::ostream &operator<<(std::ostream &os, const variable <data_t> &var)
 	{
-		os << "[" << var.name 
+		os << "[" << var.name << "] - ";
+
+		if (var.param)
+			os << " NULL (PARAMETER)";
+		else
+			os << var.val;
+
+		return os;
+	}
+
+	template <typename data_t>
+	std::istream &operator>>(std::istream &is, variable <data_t> &var)
+	{
+		// Implement in the general scope
+		// Later, after trees
+		return is;
+	}
+
+	/* Comparison functions: execute comparison
+	 * functions by comparing values, and throws
+	 * a bypass error if one argument is a parameter */
+	template <typename data_t>
+	bool operator==(const variable &right, const variable &left)
+	{
+		// Later, add constructor for
+		// Bypass exception that takes in
+		// The name of the violated variable
+		
+		if (right.param || left.param) // Distinguish later
+			throw variable::bypass_attempt_exception;
+		return right.val == left.val;
+	}
+
+	template <typename data_t>
+	bool operator!=(const variable &right, const variable &left)
+	{
+		if (right.param || left.param)
+			throw variable::bypass_attempt_exception;
+		return right.val != left.val;
+	}
+
+	template <typename data_t>
+	bool operator>(const variable &right, const variable &left)
+	{
+		if (right.param || left.param)
+			throw variable::bypass_attempt_exception;
+		return right.val > left.val;
+	}
+
+	template <typename data_t>
+	bool operator<(const variable &right, const variable &left)
+	{
+		if (right.param || left.param)
+			throw variable::bypass_attempt_exception;
+		return right.val < left.val;
+	}
+
+	template <typename data_t>
+	bool operator>=(const variable &right, const variable &left)
+	{
+		if (right.param || left.param)
+			throw variable::bypass_attempt_exception;
+		return right.val >= left.val;
+	}
+	
+	template <typename data_t>
+	bool operator<=(const variable &right, const variable &left)
+	{
+		if (right.param || left.param)
+			throw variable::bypass_attempt_exception;
+		return right.val =< left.val;
 	}
 
 	/* Beginning of the function class - first complete
@@ -1055,7 +1177,7 @@ namespace tokens {
 		function func;
 		std::string name;
 		std::size_t opers;
-	};*/
+	}; */
 
 	typedef function <num_t> func_t;	
 
@@ -1094,11 +1216,13 @@ namespace tokens {
 		 *   error if no token was detected
 		 */
 		static const token &get_next(std::string, std::size_t) noexcept(false);
+		
 		static vector <token *> *get_tokens(std::string);
 		
 		/* The following is the array containing
 		 * all the default operations */
 		static const int NOPERS = 0x4;
+		
 		static const operation <oper_t> opers {
 		   add_op, sub_op, mult_op, div_op,
 		};
@@ -1108,4 +1232,3 @@ namespace tokens {
 }
 
 #endif
-
