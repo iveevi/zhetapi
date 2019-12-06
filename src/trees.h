@@ -9,15 +9,14 @@ namespace trees {
 	// Beginning of tree class
 	class tree {
 	public:
-		enum type {
-			TREE, TTREE, VTREE,
-			FTREE, ETREE
-		};
+		enum type {TREE, TTREE, VTREE,
+			FTREE, ETREE};
 
 		virtual type caller();
 	};
 
-	tree::type tree::caller() {
+	tree::type tree::caller()
+	{
 		return TREE;
 	}
 
@@ -33,12 +32,11 @@ namespace trees {
 		std::size_t get_index(data_t *);
 
 		list *operator()(data_t *);
-
 		list *operator[](std::size_t);
 	};
 
 	template <typename data_t>
-	std::size_t list<data_t>::get_index(data_t *nd) {
+	std::size_t list <data_t> ::get_index(data_t *nd) {
 		list *cpy = this;
 		int index = 0;
 
@@ -53,7 +51,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	list<data_t> *list<data_t>::operator()(data_t *nd) {
+	list <data_t> *list <data_t> ::operator()(data_t *nd) {
 		list *cpy = this;
 
 		while (cpy != nullptr) {
@@ -66,7 +64,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	list<data_t> *list<data_t>::operator[](std::size_t i) {
+	list <data_t> *list <data_t> ::operator[](std::size_t i) {
 		list *cpy = *this;
 		int index = i;
 
@@ -82,7 +80,11 @@ namespace trees {
 
 	// Beginning of node class
 	template <typename data_t>
-	struct node {};
+	struct node {
+		data_t *dptr;
+		node *parent;
+		list <node> *leaves;
+	};
 
 	// Beginning of token_tree class
 	template <typename data_t>
@@ -118,15 +120,13 @@ namespace trees {
 		void print() const;
 		void print(node *) const;
 	private:
-
-		struct node {
-			struct node *parent;
-			struct token *tptr;
-			struct list *leaves;
+		union vals {
+			oper oper_d;
+			opn opn_d;
 		};
 
-		node *root;
-		node *cursor;
+		node <vals> *root;
+		node <vals> *cursor;
 	}
 
 	// token_tree implementation

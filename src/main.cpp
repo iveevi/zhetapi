@@ -12,7 +12,7 @@ using namespace trees;
 
 int main()
 {
-	token_tree tr = token_tree();
+	token_tree <double> tr = token_tree();
 
 	tr.add_branch(new operand <int> (45));
 	tr.add_branch(new operand <int> (67));
