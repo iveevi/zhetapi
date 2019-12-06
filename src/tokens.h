@@ -429,8 +429,8 @@ namespace tokens {
 		virtual oper_t operator()(const std::vector <oper_t> &) const
 			noexcept(false);
 
-		virtual bool matches(std::string) const;
-		virtual bool operator[](std::string) const;
+		virtual bool matches(const std::string &) const;
+		virtual bool operator[](const std::string &) const;
 
 		operation &operator=(const operation &);
 		
@@ -501,7 +501,7 @@ namespace tokens {
 
 		/* bool [is_same](std::string, std::string) - checks if two
 		 * strings are the same with the addition of wildcards */
-		bool is_same(std::string, std::string);
+		bool is_same(const std::string &, const std::string &);
 	};
 
 	/* Default operation specification using
@@ -561,9 +561,11 @@ namespace tokens {
 	 * outside the scope of the general
 	 * program */
 	template <class oper_t>
-	bool operation <oper_t> ::is_same(std::string, std::string)
+	bool operation <oper_t> ::is_same(const std::string &left, const
+			std::string &right)
 	{
 		std::cout << "Unimplemeted XP" << std::endl;
+		return false;
 	}
 
 	/* Virtualized Member Functions:
@@ -637,16 +639,18 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	bool operation <oper_t> ::matches(std::string) const
+	bool operation <oper_t> ::matches(const std::string &str) const
 	{
 		std::cout << "Unimplemented" << std::endl;
+		return false;
 	}
 
 
 	template <class oper_t>
-	bool operation <oper_t> ::operator[](std::string) const
+	bool operation <oper_t> ::operator[](const std::string &str) const
 	{
 		std::cout << "Unimplemented" << std::endl;
+		return false;
 	}
 
 	/* Friend Functions: ostream utilities */
@@ -1103,7 +1107,7 @@ namespace tokens {
 		// The name of the violated variable
 		
 		if (right.param || left.param) // Distinguish later
-			throw variable <d::bypass_attempt_exception("needs change");
+			throw variable <data_t> ::bypass_attempt_exception("needs change");
 		return right.val == left.val;
 	}
 
@@ -1111,7 +1115,7 @@ namespace tokens {
 	bool operator!=(const variable <data_t> &right, const variable <data_t> &left)
 	{
 		if (right.param || left.param)
-			throw variable::bypass_attempt_exception;
+			throw variable <data_t> ::bypass_attempt_exception;
 		return right.val != left.val;
 	}
 
@@ -1119,7 +1123,7 @@ namespace tokens {
 	bool operator>(const variable <data_t> &right, const variable <data_t> &left)
 	{
 		if (right.param || left.param)
-			throw variable::bypass_attempt_exception;
+			throw variable <data_t> ::bypass_attempt_exception;
 		return right.val > left.val;
 	}
 
@@ -1127,7 +1131,7 @@ namespace tokens {
 	bool operator<(const variable <data_t> &right, const variable <data_t> &left)
 	{
 		if (right.param || left.param)
-			throw variable::bypass_attempt_exception;
+			throw variable <data_t> ::bypass_attempt_exception;
 		return right.val < left.val;
 	}
 
@@ -1135,7 +1139,7 @@ namespace tokens {
 	bool operator>=(const variable <data_t> &right, const variable <data_t> &left)
 	{
 		if (right.param || left.param)
-			throw variable::bypass_attempt_exception;
+			throw variable <data_t> ::bypass_attempt_exception;
 		return right.val >= left.val;
 	}
 	
@@ -1143,8 +1147,8 @@ namespace tokens {
 	bool operator<=(const variable <data_t> &right, const variable <data_t> &left)
 	{
 		if (right.param || left.param)
-			throw variable::bypass_attempt_exception;
-		return right.val =< left.val;
+			throw variable <data_t> ::bypass_attempt_exception;
+		return right.val <= left.val;
 	}
 
 	/* Beginning of the function class - first complete
@@ -1185,22 +1189,22 @@ namespace tokens {
 	private:
 		/* The following are the initializations
 		 * of the lambda member functions */
-		operation <oper_t> add_op = operation <oper_t>
+		static operation <oper_t> add_op = operation <oper_t>
 		("add_op",[](const std::vector <oper_t> &inputs) {
 			return oper_t(inputs[0].get() + inputs[1].get());
 		}, 2, {"+", "plus", "add"});
 
-		operation <oper_t> sub_op = operation <oper_t>
+		static operation <oper_t> sub_op = operation <oper_t>
 		("sub_op", [](const std::vector <oper_t> &inputs) {
 			return oper_t(inputs[0].get() - inputs[1].get());
 		}, 2, {"-", "minus", "subtract"});
 
-		operation <oper_t> mult_op = operation <oper_t>
+		static operation <oper_t> mult_op = operation <oper_t>
 		("mult_op", [](const std::vector <oper_t> &inputs) {
 			return oper_t(inputs[0].get() * inputs[1].get());
 		}, 2, {"*", "mult", "times"});
 		
-		operation <oper_t> div_op = operation <oper_t>
+		static operation <oper_t> div_op = operation <oper_t>
 		("div_op", [](const std::vector <oper_t> &inputs) {
 			return oper_t(inputs[0].get() / inputs[1].get());
 		}, 2, {"/", "divided by"});
@@ -1215,13 +1219,13 @@ namespace tokens {
 		 */
 		static const token &get_next(std::string, std::size_t) noexcept(false);
 		
-		static vector <token *> *get_tokens(std::string);
+		static std::vector <token *> *get_tokens(std::string);
 		
 		/* The following is the array containing
 		 * all the default operations */
 		static const int NOPERS = 0x4;
 		
-		static const operation <oper_t> opers {
+		static const operation <oper_t> opers[] {
 		   add_op, sub_op, mult_op, div_op,
 		};
 	};

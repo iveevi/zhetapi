@@ -2,7 +2,7 @@
 #define TYPES_H
 
 namespace types {
-	enum sets = {};
+	enum sets {};
 
 	struct natural {
 		unsigned int val;
