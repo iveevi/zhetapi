@@ -3,4 +3,5 @@
 
 CMakeFiles\calculator.dir\src\main.cpp.obj: ..\src\main.cpp
 CMakeFiles\calculator.dir\src\main.cpp.obj: ..\src\tokens.h
+CMakeFiles\calculator.dir\src\main.cpp.obj: ..\src\trees.h
 

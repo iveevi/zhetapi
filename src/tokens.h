@@ -384,7 +384,7 @@ namespace tokens {
 		 *   and modulus
 		 * FUNC_LMAX - for function std operations
 		 *   such as sin, cos, log, etc. */
-		enum orders = {NA_L0, SA_L1, MDM_L2, FUNC_LMAX};
+		enum order {NA_L0, SA_L1, MDM_L2, FUNC_LMAX};
 
 		/* Constructors:
 		 * operation() - sets the private member function
@@ -637,14 +637,14 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	operation <oper_t> &operation <oper_t> ::matches(std::string) const
+	bool operation <oper_t> ::matches(std::string) const
 	{
 		std::cout << "Unimplemented" << std::endl;
 	}
 
 
 	template <class oper_t>
-	operation <oper_t> &operation <oper_t> ::operator[](std::string) const
+	bool operation <oper_t> ::operator[](std::string) const
 	{
 		std::cout << "Unimplemented" << std::endl;
 	}
@@ -763,7 +763,8 @@ namespace tokens {
 	/* Virtualized member functions:
 	 * setters only - getters are inherited */
 	template <class oper_t>
-	void operation <oper_t> ::argset_exception::set(int actual, const operation <oper_t> &obj)
+	void operation <oper_t> ::argset_exception::set(int actual, const
+	                operation <oper_t> &obj)
 	{
 		using std::to_string;
 		exception::msg = obj.name + ": Expected " + to_string(obj.opers);
@@ -771,10 +772,8 @@ namespace tokens {
 	}
 
 	template <class oper_t>
-	void operation <oper_t> ::argset_exception::set(std::string str) {exception::msg = str;}
-
-	template <class oper_t>
-	void operation <oper_t> ::argset_exception::set(std::string str, int expected, int actual)
+	void operation <oper_t> ::argset_exception::set(std::string str,
+			int expected, int actual)
 	{
 		using std::to_string;
 		exception::msg = str + ": Expected " + to_string(expected);
@@ -815,8 +814,7 @@ namespace tokens {
 		 * attempted to be accessed while it is
 		 * supposed to be a parameter
 		 */
-		class bypass_attempt_exception : public exception {
-		};
+		class bypass_attempt_exception : public exception {};
 
 		/* Dummy parameters for operators () and *
 		 * one for dummy int and one for dummy

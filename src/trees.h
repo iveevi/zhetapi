@@ -1,72 +1,44 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include <type_traits>
+
 #include "tokens.h"
 
 namespace trees {
 	// Beginning of tree class
 	class tree {
 	public:
-		enum type {TREE, TTREE, VTREE,
-			FTREE, ETREE};
+		enum type {
+			TREE, TTREE, VTREE,
+			FTREE, ETREE
+		};
+
 		virtual type caller();
 	};
 
-	tree::type tree:caller()
-	{
+	tree::type tree::caller() {
 		return TREE;
 	}
 
-	// Beginning of token_tree class
-	class token_tree {
-		struct list {
-			node *curr;
-			list *next;
+	// Beginning of the helper classes
+	// such as node and list
 
-			std::size_t get_index(node *);
+	// Beginning of list class
+	template <typename data_t>
+	struct list {
+		data_t *curr;
+		list *next;
 
-			list *operator()(node *);
-			list *operator[](std::size_t);
-		};
+		std::size_t get_index(data_t *);
 
-		struct node {
-			node *parent;
-			token *tptr;
-			list *leaves;
-		};
+		list *operator()(data_t *);
 
-		node *root;
-		node *current;
-	public:
-		token_tree();
-		token_tree(token *);
-		token_tree(const token &);
-		
-		// token_tree(std::string);
-		// implement later
-		
-		// token_tree(const token_tree &);
-		// implement later
-		
-		void reset_cursor();
-		
-		void add_branch(token *);
-		void add_branch(const token &);
+		list *operator[](std::size_t);
+	};
 
-		void move_left();
-		void move_right();
-		void move_up();
-		void move_down(std::size_t);
-
-		node *current();
-		
-		void print() const;	
-		void print(node *) const;
-	}
-
-	// list implementation
-	std::size_t token_tree::list::get_index(node *nd)
-	{
+	template <typename data_t>
+	std::size_t list<data_t>::get_index(data_t *nd) {
 		list *cpy = this;
 		int index = 0;
 
@@ -74,14 +46,14 @@ namespace trees {
 			if (*(cpy->curr->tptr) == *(nd->tptr))
 				return index;
 			cpy = cpy->next;
-			index++;
+			index ++;
 		}
 
-		return -1;
+		return - 1;
 	}
 
-	list *token_tree::list::operator()(node *nd)
-	{
+	template <typename data_t>
+	list<data_t> *list<data_t>::operator()(data_t *nd) {
 		list *cpy = this;
 
 		while (cpy != nullptr) {
@@ -93,18 +65,68 @@ namespace trees {
 		return nullptr;
 	}
 
-	list *token_tree::list::operator[](std::size_t i)
-	{
-		list *cpy = this;
+	template <typename data_t>
+	list<data_t> *list<data_t>::operator[](std::size_t i) {
+		list *cpy = *this;
 		int index = i;
 
 		while (index >= 0) {
 			if (cpy == nullptr)
 				return nullptr;
 			cpy = cpy->next;
+			index --;
 		}
 
 		return cpy;
+	}
+
+	// Beginning of node class
+	template <typename data_t>
+	struct node {};
+
+	// Beginning of token_tree class
+	template <typename data_t>
+	class token_tree {
+	public:
+		// Typedefs
+		typedef operand <data_t> oper;
+		typedef operation <oper> opn;
+
+		// Constructors
+		token_tree();
+		token_tree(token *);
+		token_tree(const token &);
+
+		// token_tree(std::string);
+		// implement later
+
+		// token_tree(const token_tree &);
+		// implement later
+
+		void reset_cursor();
+
+		void add_branch(token *);
+		void add_branch(const token &);
+
+		void move_left();
+		void move_right();
+		void move_up();
+		void move_down(std::size_t);
+
+		node *current();
+
+		void print() const;
+		void print(node *) const;
+	private:
+
+		struct node {
+			struct node *parent;
+			struct token *tptr;
+			struct list *leaves;
+		};
+
+		node *root;
+		node *cursor;
 	}
 
 	// token_tree implementation
@@ -130,7 +152,7 @@ namespace trees {
 		root = new node;
 		
 		root->parent = nullptr;
-		root->tptr = &tok;
+		root->tptr = remove_const;
 		root->leaves = nullptr;
 
 		cursor = root;
