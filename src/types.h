@@ -32,7 +32,7 @@ namespace types {
 		union {
 			natural n;
 			integer z;
-			raiotnal q;
+			rational q;
 			real r;
 			complex c;
 		};

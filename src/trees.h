@@ -121,7 +121,7 @@ namespace trees {
 		node <token *> *current();
 
 		void print() const;
-		void print(node <token *> *) const;
+		void print(node <token *> *, int, int) const;
 	private:
 		node <token *> *root;
 		node <token *> *cursor;
@@ -171,7 +171,7 @@ namespace trees {
 	void token_tree <data_t> ::add_branch(token *tptr)
 	{
 		node <token *> *new_node = new node <token *>;
-		new_node->dptr = new vals(tptr);
+		new_node->dptr = tptr;
 		new_node->leaves = nullptr;
 
 		list <node <token *>> *cleaves = cursor->leaves;
@@ -215,7 +215,7 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
-		cursor = ((cursor->parent)[index - 1])->curr;
+		cursor = ((cursor->parent->leaves)[index - 1]).curr;
 	}
 	
 	template <typename data_t>
@@ -229,7 +229,7 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
-		cursor = (*(cursor->parent->leaves))[index + 1]->curr;
+		cursor = ((cursor->parent->leaves))[index + 1].curr;
 	}
 	
 	template <typename data_t>
@@ -278,9 +278,23 @@ namespace trees {
 			counter--;
 		}
 
-		std::cout << "#" << num << *(nd->dptr) << std::endl;
+		std::cout << "#" << num << " - ";
+		
+		switch (nd->dptr->caller()) {
+		case token::OPERAND:
+			std::cout << (operand <data_t>)(*(nd->dptr));
+			break;
+		case token::OPERATION:
+			std::cout << (operation <operand <data_t>>)(*(nd->dptr));
+			break;
+		default:	
+			std::cout << "Invalid dptr kind";
+			break;
+		}
 
-		list <node <token *>> *rleaves = rcpy->leaves;
+		std::cout << std::endl;
+
+		list <node <token *>> *rleaves = nd->leaves;
 
 		counter = 0;
 		while (rleaves != nullptr) {

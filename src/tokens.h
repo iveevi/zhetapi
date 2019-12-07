@@ -738,7 +738,7 @@ namespace tokens {
 	 * Constructors */
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception()
-		: operation <oper_t> ::exception() {}
+		: exception() {}
 
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception(int actual,
@@ -752,7 +752,7 @@ namespace tokens {
 
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception(std::string str)
-			: operation <oper_t> ::exception(str) {}
+			: exception(str) {}
 
 	template <class oper_t>
 	operation <oper_t> ::argset_exception::argset_exception(std::string str,
