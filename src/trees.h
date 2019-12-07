@@ -44,7 +44,7 @@ namespace trees {
 		int index = 0;
 
 		while (cpy != nullptr) {
-			if (*(cpy->curr->tptr) == *(nd->tptr))
+			if (*(cpy->curr->dptr) == *(nd->dptr))
 				return index;
 			cpy = cpy->next;
 			index ++;
@@ -68,7 +68,7 @@ namespace trees {
 
 	template <typename data_t>
 	list <data_t> *list <data_t> ::operator[](std::size_t i) {
-		list *cpy = *this;
+		list *cpy = this;
 		int index = i;
 
 		while (index >= 0) {
@@ -84,7 +84,7 @@ namespace trees {
 	// Beginning of node class
 	template <typename data_t>
 	struct node {
-		data_t *dptr;
+		data_t dptr;
 		node *parent;
 		list <node> *leaves;
 	};
@@ -96,21 +96,6 @@ namespace trees {
 		// Typedefs
 		typedef operand <data_t> oper;
 		typedef operation <oper> opn;
-
-		// Crate a hybrid data type
-		// of oper and opn
-		struct vals {
-			union data {
-				oper oper_d;
-				opn opn_d;
-			} embed;
-
-			enum type {NA, OPER, OPN};
-			type t;
-
-			vals();
-			vals(token *);
-		};
 
 		// Constructors
 		token_tree();
@@ -133,37 +118,14 @@ namespace trees {
 		void move_up();
 		void move_down(std::size_t);
 
-		node <vals> *current();
+		node <token *> *current();
 
 		void print() const;
-		void print(node <vals> *) const;
+		void print(node <token *> *) const;
 	private:
-		node <vals> *root;
-		node <vals> *cursor;
+		node <token *> *root;
+		node <token *> *cursor;
 	};
-
-	// vals implementation
-	template <typename data_t>
-	token_tree <data_t> ::vals ::vals() : t(NA) {}
-
-	template <typename data_t>
-	token_tree <data_t> ::vals ::vals(token *tptr)
-	{
-		switch(tptr->caller()) {
-		case token::OPERAND:
-			embed->oper_d = *tptr;
-			t = OPER;
-			break;
-		case token::OPERATION:
-			embed->opn_d = *tptr;
-			t = OPN;
-			break;
-		default:
-			// Throw error here
-			t = NA;
-			break;
-		}
-	}
 
 	// token_tree implementation
 	template <typename data_t>
@@ -176,10 +138,10 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree(token *tptr)
 	{
-		root = new node <vals>;
+		root = new node <token *>;
 
 		root->parent = nullptr;
-		root->tptr = tptr;
+		root->dptr = tptr;
 		root->leaves = nullptr;
 
 		cursor = root;
@@ -188,12 +150,12 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree(const token &tok)
 	{
-		root = new node <vals>;
+		root = new node <token *>;
 		
 		root->parent = nullptr;
 		// Make sopy constructor for
 		// all tokens
-		root->tptr = new token(tok);
+		root->dptr = new token(tok);
 		root->leaves = nullptr;
 
 		cursor = root;
@@ -208,11 +170,11 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(token *tptr)
 	{
-		node <vals> *new_node = new node <vals>;
+		node <token *> *new_node = new node <token *>;
 		new_node->dptr = new vals(tptr);
 		new_node->leaves = nullptr;
 
-		list <node <vals>> *cleaves = cursor->leaves;
+		list <node <token *>> *cleaves = cursor->leaves;
 
 		if (cursor == nullptr) { // Throw a null_cursor_exception later
 			std::cout << "Cursor is null, reset and come back?";
@@ -220,14 +182,14 @@ namespace trees {
 		}
 
 		if (cleaves == nullptr) {
-			cleaves = new list <node <vals>>;
+			cleaves = new list <node <token *>>;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
 			new_node->parent = cursor;
 		} else {
 			while (cleaves->next != nullptr)
 				cleaves = cleaves->next;
-			cleaves->next = new list <node <vals>>;
+			cleaves->next = new list <node <token *>>;
 			cleaves = cleaves->next;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
@@ -252,8 +214,8 @@ namespace trees {
 			return;
 		}
 
-		index = (cursor->parent)->get_index(cursor);
-		cursor = (cursor->parent)[index - 1];
+		index = (cursor->parent->leaves)->get_index(cursor);
+		cursor = ((cursor->parent)[index - 1])->curr;
 	}
 	
 	template <typename data_t>
@@ -266,8 +228,8 @@ namespace trees {
 			return;
 		}
 
-		index = (cursor->parent)->get_index(cursor);
-		cursor = (cursor->parent)[index + 1];
+		index = (cursor->parent->leaves)->get_index(cursor);
+		cursor = (*(cursor->parent->leaves))[index + 1]->curr;
 	}
 	
 	template <typename data_t>
@@ -293,8 +255,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	node <typename token_tree <data_t> ::vals> *token_tree <data_t>
-			::current()
+	node <token *> *token_tree <data_t> ::current()
 	{
 		return cursor;
 	}
@@ -302,24 +263,28 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::print() const
 	{
-		print(root);
+		print(root, 1, 0);
 	}
 
 	template <typename data_t>
-	void token_tree <data_t> ::print(node <vals> *nd) const
+	void token_tree <data_t> ::print(node <token *> *nd, int num, int lev) const
 	{
-		node <data_t> *rcpy = nd;
-
-		if (rcpy == nullptr)
+		if (nd == nullptr)
 			return;
 
-		std::cout << *(rcpy->tptr) << " ";
-		list <node <data_t>> *rleaves = rcpy->leaves;
+		int counter = lev;
+		while (counter > 0) {
+			std::cout << "\t";
+			counter--;
+		}
 
-		int counter = 0;
+		std::cout << "#" << num << *(nd->dptr) << std::endl;
+
+		list <node <token *>> *rleaves = rcpy->leaves;
+
+		counter = 0;
 		while (rleaves != nullptr) {
-			std::cout << "\t#" << counter;
-			print(rleaves->curr);
+			print(rleaves->curr, counter + 1, lev + 1);
 			counter++;
 		}
 	}
