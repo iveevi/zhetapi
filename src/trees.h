@@ -9,6 +9,56 @@ namespace trees {
 	// Using declarations
 	using namespace tokens;
 
+	// Beginning of wrapper class
+	class wrapper {
+		token *tok;
+	public:
+		wrapper();
+		wrapper(token);
+		wrapper(const token &);
+		~wrapper();
+
+		token *get() const;
+
+		// throws error if not the
+		// same token
+		bool operator==(token) const;
+	};
+
+	wrapper::wrapper() : tok(nullptr) {}
+
+	wrapper::wrapper(token t) : tok(&t) {}
+
+	wrapper::wrapper(const token &) : tok(&t) {}
+
+	wrapper::~wrapper()
+	{
+		delete tok;
+	}
+
+	token *wrapper::get() const
+	{
+		return tok;
+	}
+
+	bool wrapper::operator==(token t) const
+	{
+		// Throw error here later
+		if (tok->caller() != t.caller())
+			return false;
+		
+		switch (tok->caller()) {
+		case OPERAND:
+			return (operand)
+		case OPERATION:
+		default:
+			// Thrown error
+			break;
+		}
+
+		return false;
+	}
+
 	// Beginning of tree class
 	class tree {
 	public:
@@ -37,7 +87,7 @@ namespace trees {
 		list *operator()(data_t *);
 		list *operator[](std::size_t);
 	};
-
+	
 	template <typename data_t>
 	std::size_t list <data_t> ::get_index(data_t *nd) {
 		list *cpy = this;
