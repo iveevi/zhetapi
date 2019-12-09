@@ -1,6 +1,7 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <bits/c++config.h>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -144,11 +145,11 @@ namespace tokens {
 		 *   of the val in the passed operand object to the read data_t
 		 *   value */
 		template <typename type>
-		friend std::ostream &operator<<(std::ostream &os, const
+		friend std::ostream &operator<<(std::ostream &, const
 		        operand <data_t> &);
 
 		template <typename type>
-		friend std::istream &operator>>(std::istream &is, operand
+		friend std::istream &operator>>(std::istream &, operand
 		        <data_t> &);
 
 		/* Comparison Operators: */
@@ -259,7 +260,7 @@ namespace tokens {
 	bool operator==(const operand <data_t> &right, const operand
 	        <data_t> &left)
 	{
-		return right.val == left.val;
+		return *right == *left;
 	}
 
 	template <typename data_t>
@@ -553,7 +554,7 @@ namespace tokens {
 		// Put the operation to a stack
 		// so that future uses can be reused
 		// instead remade
-		delete func;
+		// delete func; <- illegal
 	}
 
 	/* Private member functions:
@@ -659,7 +660,8 @@ namespace tokens {
 			&opn)
 	{
 		os << opn.name << " - " << opn.opers << " operands, ";
-		os << opn.symbols;
+		for (std::string str : opn.symbols)
+                        os << str << " ";
 		return os;
 	}
 

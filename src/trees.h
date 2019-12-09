@@ -4,6 +4,7 @@
 #include <type_traits>
 
 #include "tokens.h"
+#include "debug.h"
 
 namespace trees {
 	// Using declarations
@@ -25,6 +26,8 @@ namespace trees {
 		bool operator==(operand <data_t>);
 		bool operator==(operation <operand <data_t>>);
 
+                bool operator==(const ttwrapper <data_t> &);
+
 		token::type t;
 	};
 
@@ -33,7 +36,7 @@ namespace trees {
 	{
 		oper_t = nullptr;
 		opn_t = nullptr;
-		type = token::NONE;
+		t = token::NONE;
 	}
 
 	template <typename data_t>
@@ -79,7 +82,20 @@ namespace trees {
 		// Throw error
 		if (t != token::OPERATION)
 			return false;
-		return *opn_t = opn;
+		return *opn_t == opn;
+	}
+
+        template <typename data_t>
+	bool ttwrapper <data_t> ::operator==(const ttwrapper <data_t> &ttw)
+	{
+		switch (ttw.t) {
+                case token::OPERAND:
+                        return *this == *(ttw.oper_t);
+                case token::OPERATION:
+                        return *this == *(ttw.opn_t);
+                }
+
+                return false;
 	}
 
 	// Beginning of tree class
@@ -238,10 +254,15 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
 	{
+                extern int stage;
+                stage = 
+
 		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper
 		        <data_t> *>;
 		new_node->dptr = tptr;
 		new_node->leaves = nullptr;
+
+                stage = 0x10;
 
 		list <node <ttwrapper <data_t> *>> *cleaves = cursor->leaves;
 
@@ -350,12 +371,12 @@ namespace trees {
 
 		std::cout << "#" << num << " - ";
 		
-		switch (nd->dptr->caller()) {
+		switch (nd->dptr->t) {
 		case token::OPERAND:
-			std::cout << nd->dptr->*get_oper();
+			std::cout << *(nd->dptr->get_oper());
 			break;
 		case token::OPERATION:
-			std::cout << nd->dptr->*get_opn();
+			std::cout << *(nd->dptr->get_opn());
 			break;
 		default:	
 			std::cout << "Invalid dptr kind";
@@ -364,7 +385,7 @@ namespace trees {
 
 		std::cout << std::endl;
 
-		list <node <token *>> *rleaves = nd->leaves;
+		list <node <ttwrapper <data_t> *>> *rleaves = nd->leaves;
 
 		counter = 0;
 		while (rleaves != nullptr) {
