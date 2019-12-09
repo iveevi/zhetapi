@@ -9,54 +9,23 @@ namespace trees {
 	// Using declarations
 	using namespace tokens;
 
-	// Beginning of wrapper class
+	// Beginning of ttwrapper class
+	template <typename data_t>
 	class wrapper {
-		token *tok;
+		operand <data_t> *oper_t;
+		operation <operand <data>> *opn_t;
 	public:
 		wrapper();
 		wrapper(token);
-		wrapper(const token &);
-		~wrapper();
 
-		token *get() const;
+		bool operator==(token);
 
-		// throws error if not the
-		// same token
-		bool operator==(token) const;
+		token::type t;
 	};
 
-	wrapper::wrapper() : tok(nullptr) {}
-
-	wrapper::wrapper(token t) : tok(&t) {}
-
-	wrapper::wrapper(const token &) : tok(&t) {}
-
-	wrapper::~wrapper()
+	wrapper::wrapper()
 	{
-		delete tok;
-	}
-
-	token *wrapper::get() const
-	{
-		return tok;
-	}
-
-	bool wrapper::operator==(token t) const
-	{
-		// Throw error here later
-		if (tok->caller() != t.caller())
-			return false;
-		
-		switch (tok->caller()) {
-		case OPERAND:
-			return (operand)
-		case OPERATION:
-		default:
-			// Thrown error
-			break;
-		}
-
-		return false;
+		type = token::NONE;
 	}
 
 	// Beginning of tree class
