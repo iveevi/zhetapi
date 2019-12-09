@@ -11,21 +11,75 @@ namespace trees {
 
 	// Beginning of ttwrapper class
 	template <typename data_t>
-	class wrapper {
+	class ttwrapper {
 		operand <data_t> *oper_t;
-		operation <operand <data>> *opn_t;
+		operation <operand <data_t>> *opn_t;
 	public:
-		wrapper();
-		wrapper(token);
+		ttwrapper();
+		explicit ttwrapper(operand <data_t>);
+		explicit ttwrapper(operation <operand <data_t>>);
 
-		bool operator==(token);
+		operand <data_t> *get_oper() const;
+		operation <operand <data_t>> *get_opn() const;
+
+		bool operator==(operand <data_t>);
+		bool operator==(operation <operand <data_t>>);
 
 		token::type t;
 	};
 
-	wrapper::wrapper()
+	template <typename data_t>
+	ttwrapper <data_t> ::ttwrapper()
 	{
+		oper_t = nullptr;
+		opn_t = nullptr;
 		type = token::NONE;
+	}
+
+	template <typename data_t>
+	ttwrapper <data_t> ::ttwrapper(operand <data_t> oper)
+	{
+		oper_t = &oper;
+		opn_t = nullptr;
+		t = token::OPERAND;
+	}
+
+	template <typename data_t>
+	ttwrapper <data_t> ::ttwrapper(operation <operand <data_t>> opn)
+	{
+		opn_t = &opn;
+		oper_t = nullptr;
+		t = token::OPERATION;
+	}
+
+	template <typename data_t>
+	operand <data_t> *ttwrapper <data_t> ::get_oper() const
+	{
+		return oper_t;
+	}
+
+	template <typename data_t>
+	operation <operand <data_t>> *ttwrapper <data_t> ::get_opn() const
+	{
+		return opn_t;
+	}
+
+	template <typename data_t>
+	bool ttwrapper <data_t> ::operator==(operand <data_t> oper)
+	{
+		// Throw error
+		if (t != token::OPERAND)
+			return false;
+		return *oper_t == oper;
+	}
+
+	template <typename data_t>
+	bool ttwrapper <data_t> ::operator==(operation <operand <data_t>> opn)
+	{
+		// Throw error
+		if (t != token::OPERATION)
+			return false;
+		return *opn_t = opn;
 	}
 
 	// Beginning of tree class
@@ -111,15 +165,13 @@ namespace trees {
 	// Beginning of token_tree class
 	template <typename data_t>
 	class token_tree {
+		node <ttwrapper <data_t> *> *root;
+		node <ttwrapper <data_t> *> *cursor;
 	public:
-		// Typedefs
-		typedef operand <data_t> oper;
-		typedef operation <oper> opn;
-
 		// Constructors
 		token_tree();
-		token_tree(token *);
-		token_tree(const token &);
+		explicit token_tree(ttwrapper <data_t> *);
+		explicit token_tree(const ttwrapper <data_t> &);
 
 		// token_tree(std::string);
 		// implement later
@@ -129,21 +181,18 @@ namespace trees {
 
 		void reset_cursor();
 
-		void add_branch(token *);
-		void add_branch(const token &);
+		void add_branch(ttwrapper <data_t> *);
+		void add_branch(const ttwrapper <data_t> &);
 
 		void move_left();
 		void move_right();
 		void move_up();
 		void move_down(std::size_t);
 
-		node <token *> *current();
+		node <ttwrapper <data_t> *> *current();
 
 		void print() const;
-		void print(node <token *> *, int, int) const;
-	private:
-		node <token *> *root;
-		node <token *> *cursor;
+		void print(node <ttwrapper <data_t> *> *, int, int) const;
 	};
 
 	// token_tree implementation
@@ -155,9 +204,9 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	token_tree <data_t> ::token_tree(token *tptr)
+	token_tree <data_t> ::token_tree(ttwrapper <data_t> *tptr)
 	{
-		root = new node <token *>;
+		root = new node <ttwrapper <data_t> *>;
 
 		root->parent = nullptr;
 		root->dptr = tptr;
@@ -167,12 +216,12 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	token_tree <data_t> ::token_tree(const token &tok)
+	token_tree <data_t> ::token_tree(const ttwrapper <data_t> &tok)
 	{
 		root = new node <token *>;
 		
 		root->parent = nullptr;
-		// Make sopy constructor for
+		// Make copy constructor for
 		// all tokens
 		root->dptr = new token(tok);
 		root->leaves = nullptr;
@@ -187,13 +236,14 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	void token_tree <data_t> ::add_branch(token *tptr)
+	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
 	{
-		node <token *> *new_node = new node <token *>;
+		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper
+		        <data_t> *>;
 		new_node->dptr = tptr;
 		new_node->leaves = nullptr;
 
-		list <node <token *>> *cleaves = cursor->leaves;
+		list <node <ttwrapper <data_t> *>> *cleaves = cursor->leaves;
 
 		if (cursor == nullptr) { // Throw a null_cursor_exception later
 			std::cout << "Cursor is null, reset and come back?";
@@ -201,14 +251,14 @@ namespace trees {
 		}
 
 		if (cleaves == nullptr) {
-			cleaves = new list <node <token *>>;
+			cleaves = new list <node <ttwrapper <data_t> *>>;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
 			new_node->parent = cursor;
 		} else {
 			while (cleaves->next != nullptr)
 				cleaves = cleaves->next;
-			cleaves->next = new list <node <token *>>;
+			cleaves->next = new list <node <ttwrapper <data_t> *>>;
 			cleaves = cleaves->next;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
@@ -217,7 +267,7 @@ namespace trees {
 	}
 	
 	template <typename data_t>
-	void token_tree <data_t> ::add_branch(const token &tok)
+	void token_tree <data_t> ::add_branch(const ttwrapper <data_t> &tok)
 	{
 		token *tptr = new token(tok);
 		add_branch(tptr);
@@ -274,7 +324,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	node <token *> *token_tree <data_t> ::current()
+	node <ttwrapper <data_t> *> *token_tree <data_t> ::current()
 	{
 		return cursor;
 	}
@@ -286,7 +336,8 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	void token_tree <data_t> ::print(node <token *> *nd, int num, int lev) const
+	void token_tree <data_t> ::print(node <ttwrapper <data_t> *> *nd,
+			int num, int lev) const
 	{
 		if (nd == nullptr)
 			return;
@@ -301,10 +352,10 @@ namespace trees {
 		
 		switch (nd->dptr->caller()) {
 		case token::OPERAND:
-			std::cout << (operand <data_t>)(*(nd->dptr));
+			std::cout << nd->dptr->*get_oper();
 			break;
 		case token::OPERATION:
-			std::cout << (operation <operand <data_t>>)(*(nd->dptr));
+			std::cout << nd->dptr->*get_opn();
 			break;
 		default:	
 			std::cout << "Invalid dptr kind";
