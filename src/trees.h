@@ -1,6 +1,7 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include <bits/c++config.h>
 #include <type_traits>
 
 #include "tokens.h"
@@ -163,20 +164,33 @@ namespace trees {
 		std::size_t get_index(data_t *) const;
 
 		list *operator()(data_t *);
+
+                list *get(std::size_t);
 		list *operator[](std::size_t);
 	};
 
         template <typename data_t>
         std::size_t list <data_t> ::size() const
         {
-                
-                while
+                auto *cpy = this;
+                std::size_t counter = 0;
+
+                while (cpy != nullptr) {
+                        std::cout << "#" << counter + 1 << " @";
+                        std::cout << cpy << std::endl;
+                        cpy = cpy->next;
+                        std::cout << "[" << counter << "] @";
+                        std::cout << (this)[counter] << std::endl;
+                        counter++;
+                }
+
+                return counter;
         }
 	
 	template <typename data_t>
 	std::size_t list <data_t> ::get_index(data_t *nd) const
         {
-		list *cpy = this;
+		auto *cpy = this;
 		int index = 0;
 
 		while (cpy != nullptr) {
@@ -191,7 +205,7 @@ namespace trees {
 
 	template <typename data_t>
 	list <data_t> *list <data_t> ::operator()(data_t *nd) {
-		list *cpy = this;
+		list <data_t> *cpy = this;
 
 		while (cpy != nullptr) {
 			if (*(cpy->curr->tptr) == *(nd->tptr))
@@ -202,9 +216,12 @@ namespace trees {
 		return nullptr;
 	}
 
+        tempplate <typname data_t>
+        
+
 	template <typename data_t>
 	list <data_t> *list <data_t> ::operator[](std::size_t i) {
-		list *cpy = this;
+		list <data_t> *cpy = this;
 		int index = i;
 
 		while (index >= 0) {
@@ -402,6 +419,7 @@ namespace trees {
 
 		index = (cursor->parent->leaves)->get_index(cursor);
                 std::cout << "index: " << index << std::endl;
+                IC(cursor->parent->leaves->size());
 		cursor = ((cursor->parent->leaves))[index + 1].curr;
 	}
 	
