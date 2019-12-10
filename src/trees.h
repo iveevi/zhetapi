@@ -17,8 +17,9 @@ namespace trees {
 		operation <operand <data_t>> *opn_t;
 	public:
 		ttwrapper();
-		explicit ttwrapper(operand <data_t>);
-		explicit ttwrapper(operation <operand <data_t>>);
+		ttwrapper(operand <data_t>);
+		ttwrapper(operation <operand <data_t>>);
+                ttwrapper(const ttwrapper <data_t> &);
 
 		operand <data_t> *get_oper() const;
 		operation <operand <data_t>> *get_opn() const;
@@ -45,21 +46,34 @@ namespace trees {
 	template <typename data_t>
 	ttwrapper <data_t> ::ttwrapper(operand <data_t> oper)
 	{
-		std::cout << "operand received" << std::endl;
 		oper_t = &oper;
 		opn_t = nullptr;
 		t = token::OPERAND;
-		std::cout << "constructed wrapper for operand" << std::endl;
 	}
 
 	template <typename data_t>
 	ttwrapper <data_t> ::ttwrapper(operation <operand <data_t>> opn)
 	{
-		std::cout << "operation received" << std::endl;
 		opn_t = &opn;
 		oper_t = nullptr;
 		t = token::OPERATION;
 	}
+
+        template <typename data_t>
+        ttwrapper <data_t> ::ttwrapper(const ttwrapper <data_t> &ttw)
+        {
+                t = ttw.t;
+                switch (t) {
+                case token::OPERAND:
+                        oper_t = new operand <data_t> (*ttw.oper_t);
+                        opn_t = nullptr;
+                        break;
+                case token::OPERATION:
+                        opn_t = new operation <operand <data_t>> (*ttw.opn_t);
+                        oper_t = nullptr;
+                        break;
+                }
+        }
 
 	template <typename data_t>
 	operand <data_t> *ttwrapper <data_t> ::get_oper() const
@@ -105,7 +119,22 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	std::ostream &
+	std::ostream &operator<<(std::ostream &os, const ttwrapper <data_t> &ttw)
+        {
+                switch (ttw.t) {
+                case token::OPERAND:
+                        os << *(ttw.oper_t);
+                        break;
+                case token::OPERATION:
+                        os << *(ttw.opn_t);
+                        break;
+                default:
+                        os << "Undefined Wrapper Object";
+                        break;
+                }
+
+                return os;
+        }
 
 	// Beginning of tree class
 	class tree {
@@ -130,14 +159,23 @@ namespace trees {
 		data_t *curr;
 		list *next;
 
-		std::size_t get_index(data_t *);
+                std::size_t size() const;
+		std::size_t get_index(data_t *) const;
 
 		list *operator()(data_t *);
 		list *operator[](std::size_t);
 	};
+
+        template <typename data_t>
+        std::size_t list <data_t> ::size() const
+        {
+                
+                while
+        }
 	
 	template <typename data_t>
-	std::size_t list <data_t> ::get_index(data_t *nd) {
+	std::size_t list <data_t> ::get_index(data_t *nd) const
+        {
 		list *cpy = this;
 		int index = 0;
 
@@ -227,7 +265,6 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree()
 	{
-		std::cout << "setting pointers" << std::endl;
 		root = nullptr;
 		cursor = nullptr;
 	}
@@ -247,7 +284,7 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree(const ttwrapper <data_t> &tok)
 	{
-		root = new node <token *>;
+		root = new node <ttwrapper <data_t> *>;
 		
 		root->parent = nullptr;
 		// Make copy constructor for
@@ -270,24 +307,16 @@ namespace trees {
 		node <ttwrapper <data_t> *> *nd = cursor;
 
 		if (ttwptr == nullptr) {
-			std::cout << "nulltpr passed" << std::endl;
+			//std::cout << "nulltpr passed" << std::endl;
 			return;
 		}
 
-		std::cout << "entering a branch" << std::endl;
-
 		if (nd == nullptr) {
-			std::cout << "cursor is nullptr" << std::endl;
-		} else  {
-			std::cout << "cursor is invalid" << std::endl;
-		}
-
-		if (nd == nullptr) {
-			std::cout << "cursor is null, needs to be allocated" << std::endl;
 			cursor = new node <ttwrapper <data_t> *>;
-			cursor->dptr = ttwptr;
+			cursor->dptr = new ttwrapper <data_t> (*ttwptr);
 			cursor->parent = nullptr;
 			cursor->leaves = nullptr;
+                        root = cursor;
 		} else {
 			cursor->dptr = ttwptr;
 			cursor->parent = nd->parent;
@@ -299,18 +328,15 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::set_cursor(const ttwrapper <data_t> &ttw)
 	{
-		std::cout << "passing into other" << std::endl;
 		set_cursor(&ttw);
 	}
 
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
 	{
-		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper
-		        <data_t> *>;
-		new_node->dptr = tptr;
+		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper <data_t> *>;
+		new_node->dptr = new ttwrapper <data_t> (*tptr);
 		new_node->leaves = nullptr;
-
 		
 		if (cursor == nullptr) { // Throw a null_cursor_exception later
 			std::cout << "Cursor is null, reset and come back?";
@@ -324,7 +350,8 @@ namespace trees {
 			cleaves = new list <node <ttwrapper <data_t> *>>;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
-			new_node->parent = cursor;
+			cleaves->curr->parent = cursor;
+                        cursor->leaves = cleaves;
 		} else {
 			while (cleaves->next != nullptr)
 				cleaves = cleaves->next;
@@ -339,7 +366,7 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(const ttwrapper <data_t> &tok)
 	{
-		token *tptr = new token(tok);
+		token *tptr = new ttwrapper <data_t> (tok);
 		add_branch(tptr);
 	}
 
@@ -349,7 +376,7 @@ namespace trees {
 		int index;
 
 		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			std::cout << "No nodes beside cursor" << std::endl;
+			//std::cout << "No nodes beside cursor" << std::endl;
 			return;
 		}
 
@@ -360,6 +387,7 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::move_right()
 	{
+                std::cout << "in move right function " << std::endl;
 		int index;
 
 		if (cursor == nullptr) {
@@ -373,6 +401,7 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
+                std::cout << "index: " << index << std::endl;
 		cursor = ((cursor->parent->leaves))[index + 1].curr;
 	}
 	
@@ -380,11 +409,11 @@ namespace trees {
 	void token_tree <data_t> ::move_up()
 	{
 		if (cursor == nullptr) {
-			std::cout << "cursor is null, exiting from move up" << std::endl;
+			//std::cout << "cursor is null, exiting from move up" << std::endl;
 			return;
 		}
 		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			std::cout << "Cursor has no parent" << std::endl;
+			//std::cout << "Cursor has no parent" << std::endl;
 			return;
 		}
 
@@ -400,7 +429,7 @@ namespace trees {
 		}
 
 		if (cursor->leaves == nullptr) { // Thrown null_leaves_exception
-			std::cout << "Cursor has no leaves" << std::endl;
+			//std::cout << "Cursor has no leaves" << std::endl;
 			return;
 		}
 
@@ -416,15 +445,25 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::print() const
 	{
+                std::cout << std::endl << "-------------" << std::endl;
+                std::cout << "PRINTING TREE" << std::endl;
 		print(root, 1, 0);
+                std::cout << std::endl << "ADDRESSES" << std::endl;
+                if (cursor != nullptr)
+                        IC(cursor->dptr);
+                if (root != nullptr)
+                        IC(root->dptr);
+                std::cout << "-------------" << std::endl;
 	}
 
 	template <typename data_t>
 	void token_tree <data_t> ::print(node <ttwrapper <data_t> *> *nd,
 			int num, int lev) const
 	{
-		if (nd == nullptr)
-			return;
+                //std::cout << "Inside the print function, num = " << num;
+                //std::cout << " and lev = " << lev << std::endl;
+		if (nd == nullptr) 
+                	return;
 
 		int counter = lev;
 		while (counter > 0) {
@@ -432,27 +471,14 @@ namespace trees {
 			counter--;
 		}
 
-		std::cout << "#" << num << " - ";
-		
-		switch (nd->dptr->t) {
-		case token::OPERAND:
-			std::cout << *(nd->dptr->get_oper());
-			break;
-		case token::OPERATION:
-			std::cout << *(nd->dptr->get_opn());
-			break;
-		default:	
-			std::cout << "Invalid dptr kind";
-			break;
-		}
-
-		std::cout << std::endl;
+		std::cout << "#" << num << " - " << *(nd->dptr) << std::endl;
 
 		list <node <ttwrapper <data_t> *>> *rleaves = nd->leaves;
 
 		counter = 0;
 		while (rleaves != nullptr) {
 			print(rleaves->curr, counter + 1, lev + 1);
+                        rleaves = rleaves->next;
 			counter++;
 		}
 	}
