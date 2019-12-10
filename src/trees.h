@@ -197,6 +197,9 @@ namespace trees {
 
 		void reset_cursor();
 
+		void set_cursor(ttwrapper <data_t> *);
+		void set_cursor(const ttwrapper <data_t> &);
+
 		void add_branch(ttwrapper <data_t> *);
 		void add_branch(const ttwrapper <data_t> &);
 
@@ -252,24 +255,47 @@ namespace trees {
 	}
 
 	template <typename data_t>
+	void token_tree <data_t> ::set_cursor(ttwrapper <data_t> *ttwptr)
+	{
+		std::cout << "fdfdf";
+		node <ttwrapper <data_t> *> *nd = cursor;
+
+		if (nd == nullptr) {
+			std::cout << "here";
+			cursor->dptr = ttwptr;
+			cursor->parent = nullptr;
+			cursor->leaves = nullptr;
+		} else {
+			std::cout << "sfdfsfd";
+			cursor->dptr = ttwptr;
+			cursor->parent = nd->parent;
+			cursor->leaves = nd->leaves;
+			delete nd;
+		}
+	}
+
+	template <typename data_t>
+	void token_tree <data_t> ::set_cursor(const ttwrapper <data_t> &ttw)
+	{
+		set_cursor(&ttw);
+	}
+
+	template <typename data_t>
 	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
 	{
-                extern int stage;
-                stage = 
-
 		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper
 		        <data_t> *>;
 		new_node->dptr = tptr;
 		new_node->leaves = nullptr;
 
-                stage = 0x10;
-
-		list <node <ttwrapper <data_t> *>> *cleaves = cursor->leaves;
-
+		
 		if (cursor == nullptr) { // Throw a null_cursor_exception later
 			std::cout << "Cursor is null, reset and come back?";
 			std::cout << std::endl;
+			return;
 		}
+
+		list <node <ttwrapper <data_t> *>> *cleaves = cursor->leaves;
 
 		if (cleaves == nullptr) {
 			cleaves = new list <node <ttwrapper <data_t> *>>;
