@@ -28,6 +28,9 @@ namespace trees {
 
                 bool operator==(const ttwrapper <data_t> &);
 
+		template <typename T>
+		friend std::ostream &operator<<(std::ostream &, const ttwrapper <T> &);
+
 		token::type t;
 	};
 
@@ -42,14 +45,17 @@ namespace trees {
 	template <typename data_t>
 	ttwrapper <data_t> ::ttwrapper(operand <data_t> oper)
 	{
+		std::cout << "operand received" << std::endl;
 		oper_t = &oper;
 		opn_t = nullptr;
 		t = token::OPERAND;
+		std::cout << "constructed wrapper for operand" << std::endl;
 	}
 
 	template <typename data_t>
 	ttwrapper <data_t> ::ttwrapper(operation <operand <data_t>> opn)
 	{
+		std::cout << "operation received" << std::endl;
 		opn_t = &opn;
 		oper_t = nullptr;
 		t = token::OPERATION;
@@ -97,6 +103,9 @@ namespace trees {
 
                 return false;
 	}
+
+	template <typename data_t>
+	std::ostream &
 
 	// Beginning of tree class
 	class tree {
@@ -218,6 +227,7 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree()
 	{
+		std::cout << "setting pointers" << std::endl;
 		root = nullptr;
 		cursor = nullptr;
 	}
@@ -257,16 +267,28 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::set_cursor(ttwrapper <data_t> *ttwptr)
 	{
-		std::cout << "fdfdf";
 		node <ttwrapper <data_t> *> *nd = cursor;
 
+		if (ttwptr == nullptr) {
+			std::cout << "nulltpr passed" << std::endl;
+			return;
+		}
+
+		std::cout << "entering a branch" << std::endl;
+
 		if (nd == nullptr) {
-			std::cout << "here";
+			std::cout << "cursor is nullptr" << std::endl;
+		} else  {
+			std::cout << "cursor is invalid" << std::endl;
+		}
+
+		if (nd == nullptr) {
+			std::cout << "cursor is null, needs to be allocated" << std::endl;
+			cursor = new node <ttwrapper <data_t> *>;
 			cursor->dptr = ttwptr;
 			cursor->parent = nullptr;
 			cursor->leaves = nullptr;
 		} else {
-			std::cout << "sfdfsfd";
 			cursor->dptr = ttwptr;
 			cursor->parent = nd->parent;
 			cursor->leaves = nd->leaves;
@@ -277,6 +299,7 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::set_cursor(const ttwrapper <data_t> &ttw)
 	{
+		std::cout << "passing into other" << std::endl;
 		set_cursor(&ttw);
 	}
 
@@ -339,6 +362,11 @@ namespace trees {
 	{
 		int index;
 
+		if (cursor == nullptr) {
+			std::cout << "cursor is null, exiting from move right" << std::endl;
+			return;
+		}
+
 		if (cursor->parent == nullptr) { // Thrown null_parent_exception
 			std::cout << "No nodes beside cursor" << std::endl;
 			return;
@@ -351,6 +379,10 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::move_up()
 	{
+		if (cursor == nullptr) {
+			std::cout << "cursor is null, exiting from move up" << std::endl;
+			return;
+		}
 		if (cursor->parent == nullptr) { // Thrown null_parent_exception
 			std::cout << "Cursor has no parent" << std::endl;
 			return;
@@ -362,6 +394,11 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::move_down(std::size_t i)
 	{
+		if (cursor == nullptr) {
+			std::cout << "cursor is null, exiting" << std::endl;
+			return;
+		}
+
 		if (cursor->leaves == nullptr) { // Thrown null_leaves_exception
 			std::cout << "Cursor has no leaves" << std::endl;
 			return;

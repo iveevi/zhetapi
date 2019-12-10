@@ -189,7 +189,9 @@ namespace tokens {
 	operand <data_t> ::operand(data_t data) : val(data) {}
 	
 	template <typename data_t>
-	operand <data_t> ::operand(const operand &other) : val(other.val) {}
+	operand <data_t> ::operand(const operand &other) : val(other.val) {
+		std::cout << "creating operand" << std::endl;
+	}
 	
 	/* Virtualized member functions:
 	 * setters, getter and operators */
