@@ -375,7 +375,7 @@ namespace tokens {
 		/* Typedef oper_t (*[function])(const std::vector
 		 * <oper_t> &) - a type alias for convenience for
 		 * the type of function used for computation */
-		typedef oper_t (*function)(const std::vector <oper_t> &);
+		typedef oper_t &(*function)(const std::vector <oper_t> &);
 
 		/* Enum orders - the type parameters
 		 * for pemdas values of operations
@@ -1191,25 +1191,17 @@ namespace tokens {
 	private:
 		/* The following are the initializations
 		 * of the lambda member functions */
-		static operation <oper_t> add_op = operation <oper_t>
-		("add_op",[](const std::vector <oper_t> &inputs) {
-			return oper_t(inputs[0].get() + inputs[1].get());
-		}, 2, {"+", "plus", "add"});
+		static operation <oper_t> add_op;
+		static operation <oper_t> sub_op;
+		static operation <oper_t> mult_op;
+		static operation <oper_t> div_op;
 
-		static operation <oper_t> sub_op = operation <oper_t>
-		("sub_op", [](const std::vector <oper_t> &inputs) {
-			return oper_t(inputs[0].get() - inputs[1].get());
-		}, 2, {"-", "minus", "subtract"});
-
-		static operation <oper_t> mult_op = operation <oper_t>
-		("mult_op", [](const std::vector <oper_t> &inputs) {
-			return oper_t(inputs[0].get() * inputs[1].get());
-		}, 2, {"*", "mult", "times"});
-		
-		static operation <oper_t> div_op = operation <oper_t>
-		("div_op", [](const std::vector <oper_t> &inputs) {
-			return oper_t(inputs[0].get() / inputs[1].get());
-		}, 2, {"/", "divided by"});
+		/* The following are the functions
+		 * correspodning to each of the operations */
+		static oper_t &add_f(const std::vector <oper_t> &);
+		static oper_t &sub_f(const oper_t &);
+		static oper_t &mult_f(const oper_t &);
+		static oper_t &div_f(const oper_t &);
 	public:
 		/* The following are static member functions that
 		 * give purpose to the tokens
@@ -1224,14 +1216,51 @@ namespace tokens {
 		static std::vector <token *> *get_tokens(std::string);
 		
 		/* The following is the array containing
-		 * all the default operations */
+		 * all the default operations, and constants
+		 * that represents certain things */
 		static const int NOPERS = 0x4;
+		static const int ADDOP = 0x0;
 		
-		static const operation <oper_t> opers[] {
-		   add_op, sub_op, mult_op, div_op,
-		};
+		static operation <oper_t> opers[];
 	};
 
+	/* Corresponding functios */
+	template <typename oper_t>
+	oper_t &module <oper_t> ::add_f(const std::vector <oper_t> &inputs)
+	{
+		oper_t new_oper_t = oper_t(inputs[0].get() + inputs[1].get());
+		return new_oper_t;
+	}
+
+	// Module's default operations
+	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::add_op = operation <oper_t>
+	(std::string {"add_op"}, module <oper_t> ::add_f, 2, std::vector <std::string> {"+", "plus", "add"}, operation <oper_t>::SA_L1,
+	std::vector <std::string> {"+"});
+
+	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::sub_op = operation <oper_t>
+	("sub_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() - inputs[1].get());
+	}, 2, {"-", "minus", "subtract"});
+
+	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::mult_op = operation <oper_t>
+	("mult_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() * inputs[1].get());
+	}, 2, {"*", "mult", "times"});
+
+	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::div_op = operation <oper_t>
+	("div_op", [](const std::vector <oper_t> &inputs) {
+		return oper_t(inputs[0].get() / inputs[1].get());
+	}, 2, {"/", "divided by"});
+
+	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::opers[] = {
+		add_op, sub_op, mult_op, div_op,
+	};
+	
 	typedef module <num_t> module_t;
 }
 

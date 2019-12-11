@@ -160,8 +160,8 @@ namespace trees {
 		data_t *curr;
 		list *next;
 
-                std::size_t size() const;
-		std::size_t get_index(data_t *) const;
+                std::size_t size();
+		std::size_t get_index(data_t *);
 
 		list *operator()(data_t *);
 
@@ -170,17 +170,19 @@ namespace trees {
 	};
 
         template <typename data_t>
-        std::size_t list <data_t> ::size() const
+        std::size_t list <data_t> ::size()
         {
                 auto *cpy = this;
                 std::size_t counter = 0;
 
                 while (cpy != nullptr) {
-                        std::cout << "#" << counter + 1 << " @";
-                        std::cout << cpy << std::endl;
-                        cpy = cpy->next;
-                        std::cout << "[" << counter << "] @";
-                        std::cout << (this)[counter] << std::endl;
+                        //std::cout << "#" << counter + 1 << " @";
+                        //std::cout << cpy << std::endl;
+                        //std::cout << "[" << counter << "] @";
+                        //std::cout << this->get(counter) << " - [";
+			//std::cout << cpy << "]" << " which contains @";
+			//std::cout << cpy->curr << std::endl;
+			cpy = cpy->next;
                         counter++;
                 }
 
@@ -188,7 +190,7 @@ namespace trees {
         }
 	
 	template <typename data_t>
-	std::size_t list <data_t> ::get_index(data_t *nd) const
+	std::size_t list <data_t> ::get_index(data_t *nd)
         {
 		auto *cpy = this;
 		int index = 0;
@@ -204,7 +206,8 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	list <data_t> *list <data_t> ::operator()(data_t *nd) {
+	list <data_t> *list <data_t> ::operator()(data_t *nd)
+	{
 		list <data_t> *cpy = this;
 
 		while (cpy != nullptr) {
@@ -216,11 +219,25 @@ namespace trees {
 		return nullptr;
 	}
 
-        tempplate <typname data_t>
-        
+        template <typename data_t>
+        list <data_t> *list <data_t> ::get(std::size_t i)
+	{
+		auto *cpy = this;
+		int index = i;
+
+		while (index > 0) {
+			if (cpy == nullptr)
+				return nullptr;
+			cpy = cpy->next;
+			index --;
+		}
+
+		return cpy;
+	}
 
 	template <typename data_t>
-	list <data_t> *list <data_t> ::operator[](std::size_t i) {
+	list <data_t> *list <data_t> ::operator[](std::size_t i)
+	{
 		list <data_t> *cpy = this;
 		int index = i;
 
@@ -398,13 +415,13 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
-		cursor = ((cursor->parent->leaves)[index - 1]).curr;
+		cursor = (cursor->parent->leaves)->get()->curr;
 	}
 	
 	template <typename data_t>
 	void token_tree <data_t> ::move_right()
 	{
-                std::cout << "in move right function " << std::endl;
+                //std::cout << "in move right function " << std::endl;
 		int index;
 
 		if (cursor == nullptr) {
@@ -418,20 +435,22 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
-                std::cout << "index: " << index << std::endl;
-                IC(cursor->parent->leaves->size());
-		cursor = ((cursor->parent->leaves))[index + 1].curr;
+                //std::cout << "index: " << index << std::endl;
+                //IC(cursor->parent->leaves->size());
+		cursor = (cursor->parent->leaves)->get(index + 1)->curr;
+		//std::cout << "cursor now @" << cursor << std::endl;
 	}
 	
 	template <typename data_t>
 	void token_tree <data_t> ::move_up()
 	{
 		if (cursor == nullptr) {
-			//std::cout << "cursor is null, exiting from move up" << std::endl;
+			std::cout << "cursor is null, exiting from move up" << std::endl;
 			return;
 		}
+
 		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			//std::cout << "Cursor has no parent" << std::endl;
+			std::cout << "Cursor has no parent" << std::endl;
 			return;
 		}
 
@@ -447,7 +466,7 @@ namespace trees {
 		}
 
 		if (cursor->leaves == nullptr) { // Thrown null_leaves_exception
-			//std::cout << "Cursor has no leaves" << std::endl;
+			std::cout << "Cursor has no leaves" << std::endl;
 			return;
 		}
 
@@ -463,15 +482,17 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::print() const
 	{
-                std::cout << std::endl << "-------------" << std::endl;
+                //std::cout << std::endl << "-------------" << std::endl;
                 std::cout << "PRINTING TREE" << std::endl;
 		print(root, 1, 0);
-                std::cout << std::endl << "ADDRESSES" << std::endl;
-                if (cursor != nullptr)
-                        IC(cursor->dptr);
-                if (root != nullptr)
-                        IC(root->dptr);
-                std::cout << "-------------" << std::endl;
+                //std::cout << std::endl << "ADDRESSES" << std::endl;
+		//std::cout << "root @" << root << std::endl;
+		//std::cout << "cursor @" << cursor << std::endl;
+                //if (cursor != nullptr)
+                //        IC(cursor->dptr);
+                //if (root != nullptr)
+                //        IC(root->dptr);
+                //std::cout << "-------------" << std::endl;
 	}
 
 	template <typename data_t>
@@ -490,6 +511,7 @@ namespace trees {
 		}
 
 		std::cout << "#" << num << " - " << *(nd->dptr) << std::endl;
+		//std::cout << " @" << nd << std::endl;
 
 		list <node <ttwrapper <data_t> *>> *rleaves = nd->leaves;
 
