@@ -291,6 +291,8 @@ namespace trees {
 
 		node <ttwrapper <data_t> *> *current();
 
+                node <ttwrapper <data_t> *> *value();
+
 		void print() const;
 		void print(node <ttwrapper <data_t> *> *, int, int) const;
 	};
@@ -415,7 +417,7 @@ namespace trees {
 		}
 
 		index = (cursor->parent->leaves)->get_index(cursor);
-		cursor = (cursor->parent->leaves)->get()->curr;
+		cursor = (cursor->parent->leaves)->get(index - 1)->curr;
 	}
 	
 	template <typename data_t>
@@ -470,7 +472,7 @@ namespace trees {
 			return;
 		}
 
-		cursor = (cursor->leaves)[i].curr;
+		cursor = (cursor->leaves)->get(i)->curr;
 	}
 
 	template <typename data_t>
@@ -478,6 +480,56 @@ namespace trees {
 	{
 		return cursor;
 	}
+
+        template <typename data_t>
+        node <ttwrapper <data_t> *> *token_tree <data_t> ::value()
+        {
+                // Return operand wrapper if operand,
+                // returns operand wrapper value if
+                // operation
+                return value(root);
+        }
+
+        template <typename data_t>
+        node <ttwrapper <data_t> *> *token_tree <data_t> ::value(node <ttwrapper
+                        <data_t> *> *nd)
+        {
+                std::vector <operand <data_t>> vals;
+                node <ttwrapper <data_t> *> *output;
+                int index;
+                // Return operand wrapper if operand,
+                // returns operand wrapper value if
+                // operation
+                switch (nd->dptr->t) {
+                case token::OPERAND:
+                        return nd;
+                case token::OPERATION:
+                        // Gather all the operands
+                        // or values (in general) into
+                        // a vector
+                        for (index = 0; index < nd->leaves->size(); index++) {
+                                // Should throw error if leaf isnt an
+                                // operation or an operand
+                                switch (nd->leaves->get(index)->curr->dptr->t) {
+                                case token::OPERAND:
+                                       vals.push_back(*(nd->leaves->get(index)->curr->dptr->get_oper()));
+                                       break;
+                                case token::OPERATION:
+                                        // Return value if leaf is an operation
+                                        // is always an operand
+                                        vals.push_back();
+                                        break;
+                                }
+                        }
+                        output = new node <ttwrapper <data_t> *>;
+                        output->dptr = new ttwrapper <data_t> (nd->dptr->opn_t->compute(vals));
+                        output->leaves = nullptr;
+                        output->parent = nullptr;
+                        return output;
+                }
+
+                return nullptr;
+        }
 
 	template <typename data_t>
 	void token_tree <data_t> ::print() const

@@ -375,7 +375,7 @@ namespace tokens {
 		/* Typedef oper_t (*[function])(const std::vector
 		 * <oper_t> &) - a type alias for convenience for
 		 * the type of function used for computation */
-		typedef oper_t &(*function)(const std::vector <oper_t> &);
+		typedef oper_t (*function)(const std::vector <oper_t> &);
 
 		/* Enum orders - the type parameters
 		 * for pemdas values of operations
@@ -1198,10 +1198,10 @@ namespace tokens {
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
-		static oper_t &add_f(const std::vector <oper_t> &);
-		static oper_t &sub_f(const oper_t &);
-		static oper_t &mult_f(const oper_t &);
-		static oper_t &div_f(const oper_t &);
+		static oper_t add_f(const std::vector <oper_t> &);
+		static oper_t sub_f(const std::vector <oper_t> &);
+		static oper_t mult_f(const std::vector <oper_t> &);
+		static oper_t div_f(const std::vector <oper_t> &);
 	public:
 		/* The following are static member functions that
 		 * give purpose to the tokens
@@ -1220,41 +1220,66 @@ namespace tokens {
 		 * that represents certain things */
 		static const int NOPERS = 0x4;
 		static const int ADDOP = 0x0;
+                static const int SUBOP = 0x1;
+                static const int MULTOP = 0x2;
+                static const int DIVOP = 0x3;
 		
 		static operation <oper_t> opers[];
 	};
 
 	/* Corresponding functios */
 	template <typename oper_t>
-	oper_t &module <oper_t> ::add_f(const std::vector <oper_t> &inputs)
+	oper_t module <oper_t> ::add_f(const std::vector <oper_t> &inputs)
 	{
 		oper_t new_oper_t = oper_t(inputs[0].get() + inputs[1].get());
+		return new_oper_t;
+	}
+
+        template <typename oper_t>
+	oper_t module <oper_t> ::sub_f(const std::vector <oper_t> &inputs)
+	{
+		oper_t new_oper_t = oper_t(inputs[0].get() - inputs[1].get());
+		return new_oper_t;
+	}
+
+        template <typename oper_t>
+	oper_t module <oper_t> ::mult_f(const std::vector <oper_t> &inputs)
+	{
+		oper_t new_oper_t = oper_t(inputs[0].get() * inputs[1].get());
+		return new_oper_t;
+	}
+
+        template <typename oper_t>
+	oper_t module <oper_t> ::div_f(const std::vector <oper_t> &inputs)
+	{
+		oper_t new_oper_t = oper_t(inputs[0].get() / inputs[1].get());
 		return new_oper_t;
 	}
 
 	// Module's default operations
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::add_op = operation <oper_t>
-	(std::string {"add_op"}, module <oper_t> ::add_f, 2, std::vector <std::string> {"+", "plus", "add"}, operation <oper_t>::SA_L1,
-	std::vector <std::string> {"+"});
+	(std::string {"add_op"}, module <oper_t> ::add_f, 2, std::vector
+        <std::string> {"+", "plus", "add"}, operation <oper_t>::SA_L1,
+	std::vector <std::string> {"8+8"});
 
-	template <typename oper_t>
+        template <typename oper_t>
 	operation <oper_t> module <oper_t> ::sub_op = operation <oper_t>
-	("sub_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() - inputs[1].get());
-	}, 2, {"-", "minus", "subtract"});
+	(std::string {"sub_op"}, module <oper_t> ::sub_f, 2, std::vector
+        <std::string> {"-", "minus"}, operation <oper_t>::SA_L1,
+	std::vector <std::string> {"8-8"});
 
-	template <typename oper_t>
+        template <typename oper_t>
 	operation <oper_t> module <oper_t> ::mult_op = operation <oper_t>
-	("mult_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() * inputs[1].get());
-	}, 2, {"*", "mult", "times"});
+	(std::string {"mult_op"}, module <oper_t> ::mult_f, 2, std::vector
+        <std::string> {"*", "times", "by"}, operation <oper_t>::MDM_L2,
+	std::vector <std::string> {"8*8"});
 
-	template <typename oper_t>
+        template <typename oper_t>
 	operation <oper_t> module <oper_t> ::div_op = operation <oper_t>
-	("div_op", [](const std::vector <oper_t> &inputs) {
-		return oper_t(inputs[0].get() / inputs[1].get());
-	}, 2, {"/", "divided by"});
+	(std::string {"div_op"}, module <oper_t> ::add_f, 2, std::vector
+        <std::string> {"/", "divided by"}, operation <oper_t>::MDM_L2,
+	std::vector <std::string> {"8/8"});
 
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::opers[] = {
