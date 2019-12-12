@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include <bits/c++config.h>
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -658,7 +659,11 @@ namespace tokens {
 	template <class oper_t>
 	bool operation <oper_t> ::matches(const std::string &str) const
 	{
-		std::cout << "Unimplemented" << std::endl;
+		for (std::string s : symbols) {
+                        if (s == str)
+                                return true;
+                }
+
 		return false;
 	}
 
@@ -666,7 +671,11 @@ namespace tokens {
 	template <class oper_t>
 	bool operation <oper_t> ::operator[](const std::string &str) const
 	{
-		std::cout << "Unimplemented" << std::endl;
+		for (std::string s : symbols) {
+                        if (s == str)
+                                return true;
+                }
+
 		return false;
 	}
 
@@ -1233,7 +1242,13 @@ namespace tokens {
 		std::size_t opers;
 	};
 
-	typedef function <num_t> func_t; */	
+	typedef function <num_t> func_t; */
+
+        // Beginning of grouping token
+        template <class oper_t>
+        class group : token {
+
+        };
 
 	// Beginning of the module class
 	template <class oper_t>
@@ -1241,6 +1256,7 @@ namespace tokens {
 	private:
 		/* The following are the initializations
 		 * of the lambda member functions */
+                static operation <oper_t> none_op;
 		static operation <oper_t> add_op;
 		static operation <oper_t> sub_op;
 		static operation <oper_t> mult_op;
@@ -1248,6 +1264,7 @@ namespace tokens {
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
+                static oper_t none_f(const std::vector <oper_t> &);
 		static oper_t add_f(const std::vector <oper_t> &);
 		static oper_t sub_f(const std::vector <oper_t> &);
 		static oper_t mult_f(const std::vector <oper_t> &);
@@ -1259,9 +1276,14 @@ namespace tokens {
 		 * const token &get_next( std::string, std::size_t):
 		 *   returns the next valid token in the passed
 		 *   string from the specified index, or throws an
-		 *   error if no token was detected
+		 *   error if no token was detected and modifies the
+                 *   passed index value appropriately
 		 */
-		static token *get_next(std::string, std::size_t) noexcept(false);
+		static token *get_next(std::string, std::size_t &) noexcept(false);
+
+                // Returns the index of the operation who's format
+                // matches the format this passed, and none_op if none
+                static std::size_t get_matching(std::string);
 		
 		//static std::vector <token *> *get_tokens(std::string);
 
@@ -1278,11 +1300,18 @@ namespace tokens {
                 static const int SUBOP = 0x1;
                 static const int MULTOP = 0x2;
                 static const int DIVOP = 0x3;
+                static const int NONOP = -0x1;
 		
 		static operation <oper_t> opers[];
 	};
 
 	/* Corresponding functios */
+        template <typename oper_t>
+	oper_t module <oper_t> ::none_f(const std::vector <oper_t> &inputs)
+	{
+		return oper_t();
+	}
+
 	template <typename oper_t>
 	oper_t module <oper_t> ::add_f(const std::vector <oper_t> &inputs)
 	{
@@ -1312,6 +1341,11 @@ namespace tokens {
 	}
 
 	// Module's default operations
+        template <typename oper_t>
+	operation <oper_t> module <oper_t> ::none_op = operation <oper_t>
+	(std::string {"none_op"}, module <oper_t> ::none_f, 2, std::vector
+        <std::string> {}, operation <oper_t>::NA_L0, std::vector <std::string> {""});
+
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::add_op = operation <oper_t>
 	(std::string {"add_op"}, module <oper_t> ::add_f, 2, std::vector
@@ -1338,14 +1372,61 @@ namespace tokens {
 
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::opers[] = {
-		add_op, sub_op, mult_op, div_op,
+		add_op, sub_op, mult_op, div_op
 	};
 	
 	typedef module <num_t> module_t;
 
         // Module's parsing functions
         template <typename oper_t>
-        token *get_next()
+        token *module <oper_t> ::get_next(std::string input, std::size_t &index)
+        {
+                // Add parenthesis (groups)
+                // after basic operand parsing
+                // is working
+                std::size_t i;
+                char c;
+
+                // Accumulated string
+                std::string cumul;
+
+                std::istringstream ss(input);
+                std::size_t opn_index;
+                oper_t oper;
+
+                ss.seekg(index);
+
+                for (i = index; i < input.length(); i++) {
+                        c = input[i];
+
+                        if (std::isdigit(c)) {
+                                ss >> oper;
+                                index = ss.tellg();
+                                return new oper_t(oper);
+                        }
+
+                        // c is an operation
+                        // or a grouping term
+                        cumul += c;
+                        
+                        opn_index = get_matching(cumul);
+                        if (opn_index != NONOP)
+                                return &opers[opn_index];
+                }
+
+                return nullptr;
+        }
+
+        template <typename oper_t>
+        std::size_t module <oper_t> ::get_matching(std::string str)
+        {
+                for (int i = 0; i < NOPERS; i++) {
+                        if (opers[i].matches(str))
+                                return i;
+                }
+
+                return NONOP;
+        }
 
         // Derived member functions
         template <typename oper_t>

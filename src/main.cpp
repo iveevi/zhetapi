@@ -38,7 +38,25 @@ int main()
 	tr.print();
         IC(tr.value()->dptr);
 
-        cout << endl << "Testing module parsing functions:" << endl;
+        cout << endl << "Testing module parsing functions:";
+        string str;
+        size_t index = 0;
+
+        cout << endl << "Enter a string to be parsed: ";
+        cin >> str;
+
+        cout << endl << "Enter index of search start: ";
+        cin >> index;
+        
+        token *tptr = module_t::get_next(str, index);
+
+        cout << endl << "Next token of " << str << " from ";
+        cout << index << " is ";
+        if (tptr == nullptr)
+                cout << " nullptr" << endl;
+        else
+                cout << module_t::get_next(str, index)->str() << endl;
+        cout << "Index is now " << index << endl;
 
         cout << endl << "Testing string parsed tree:" << endl;
 }

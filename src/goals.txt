@@ -11,3 +11,8 @@ Things That Need to be Done:
    illegal type error
  - add te big 5 once having understood
    move semantics and r-value references
+
+Things That Should Be Kept in Mind:
+ - try not to make copies of operations,
+   they should be passed by refernce, even
+   with functions taking pointer arguments
