@@ -489,6 +489,8 @@ namespace trees {
                 std::vector <operand <data_t>> vals;
                 node <ttwrapper <data_t> *> *output;
                 int index;
+
+                output = new node <ttwrapper <data_t> *>;
                 // Return operand wrapper if operand,
                 // returns operand wrapper value if
                 // operation
@@ -513,8 +515,12 @@ namespace trees {
                                         break;
                                 }
                         }
-                        output = new node <ttwrapper <data_t> *>;
-                        output->dptr = new ttwrapper <data_t> (nd->dptr->opn_t->compute(vals));
+
+                        for (operand <data_t> oper : vals)
+                                std::cout << "\t\tvals - " << oper << std::endl;
+                        std::cout << "value - " << nd->dptr->get_opn()->compute(vals) << std::endl;
+                        std::cout << "passed";
+                        output->dptr = new ttwrapper <data_t> (nd->dptr->get_opn()->compute(vals));
                         output->leaves = nullptr;
                         output->parent = nullptr;
                         return output;

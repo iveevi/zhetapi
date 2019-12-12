@@ -25,7 +25,7 @@ int main()
 	token_tree <double> tr = token_tree <double> ();
         
         tr.set_cursor(new ttwrapper <double> (module <operand <double>>
-        ::opers[module <operand <double>> ::ADDOP]));
+        ::opers[module <operand <double>> ::MULTOP]));
  
         tr.add_branch(new ttwrapper <double> (operand <double> (45)));
 	tr.add_branch(new ttwrapper <double> (operand <double> (345)));
