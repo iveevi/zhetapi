@@ -481,18 +481,10 @@ namespace trees {
 		return cursor;
 	}
 
-        template <typename data_t>
-        node <ttwrapper <data_t> *> *token_tree <data_t> ::value()
-        {
-                // Return operand wrapper if operand,
-                // returns operand wrapper value if
-                // operation
-                return value(root);
-        }
-
-        template <typename data_t>
-        node <ttwrapper <data_t> *> *token_tree <data_t> ::value(node <ttwrapper
-                        <data_t> *> *nd)
+	// Non-Member helper function
+	// for general scope things
+	template <typename data_t>
+        node <ttwrapper <data_t> *> *getval(node <ttwrapper <data_t> *> *nd)
         {
                 std::vector <operand <data_t>> vals;
                 node <ttwrapper <data_t> *> *output;
@@ -517,7 +509,7 @@ namespace trees {
                                 case token::OPERATION:
                                         // Return value if leaf is an operation
                                         // is always an operand
-                                        vals.push_back();
+                                        vals.push_back(*(getval(nd->leaves->get(index)->curr)->dptr->get_oper()));
                                         break;
                                 }
                         }
@@ -529,6 +521,15 @@ namespace trees {
                 }
 
                 return nullptr;
+        }
+
+        template <typename data_t>
+        node <ttwrapper <data_t> *> *token_tree <data_t> ::value()
+        {
+                // Return operand wrapper if operand,
+                // returns operand wrapper value if
+                // operation
+                return getval(root);
         }
 
 	template <typename data_t>
