@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <sstream>
 
 namespace tokens {
 	/* Default data/info type to
@@ -29,6 +30,11 @@ namespace tokens {
 		 * [type] [caller]() - inspector function passed
 		 * on to all derived classes */
 		virtual type caller();
+
+                /* Virtual:
+		 * string [str]() - returns the string
+		 * representation of the token */
+		virtual std::string str() const = 0;
 	};
 
 	token::type token::caller()
@@ -133,8 +139,11 @@ namespace tokens {
 		virtual data_t &operator*();
 		virtual const data_t &operator*() const;
 
+                // Add descriptors later
 		operand &operator=(const operand &);
+
 		type caller() override;
+                std::string str() const override; 
 
 		/* Friends:
 		 * std::ostream &operator<<(std::ostream &, const operand
@@ -305,6 +314,12 @@ namespace tokens {
 		return OPERAND;
 	}
 
+        template <typename data_t>
+        std::string operand <data_t> ::str() const
+        {
+                return std::to_string(val);
+        }
+
 	/* Operation Class:
 	 *
 	 * Represents an operation in mathematics
@@ -436,6 +451,7 @@ namespace tokens {
 		operation &operator=(const operation &);
 		
 		type caller() override;
+                std::string str() const override;
 		
 		/* Friend Functions:
 		 * std::ostream &operator<<(std::ostream &, const operation
@@ -732,6 +748,16 @@ namespace tokens {
 		return OPERATION;
 	}
 
+        template <class oper_t>
+        std::string operation <oper_t> ::str() const
+        {
+                std::ostringstream scin;
+                scin << name << " - " << opers << " operands, ";
+		for (std::string str : symbols)
+                        scin << str << " ";
+		return scin.str();
+        }
+
 	/* Argset Exception Class Member Functions
 	 *
 	 * See class declaration for a description
@@ -900,6 +926,9 @@ namespace tokens {
 		virtual const std::string &operator*(int) const noexcept(false);
 		virtual const std::pair <data_t, std::string>
 			&operator*(std::string) const noexcept(false);
+
+                type caller() override;
+                std::string str() const override;
 		
 		/* Friends:
 		 * std::ostream &operator<<(std::ostream &, const variable
@@ -1153,6 +1182,27 @@ namespace tokens {
 		return right.val <= left.val;
 	}
 
+        /* Derived member functions */
+	template <typename data_t>
+        token::type variable <data_t> ::caller()
+	{
+		return VARIABLE;
+	}
+
+        template <typename data_t>
+        std::string variable <data_t> ::str() const
+        {
+                std::ostringstream scin;
+
+                scin << "[" << name << "] - ";
+		if (param)
+			scin << " NULL (PARAMETER)";
+		else
+			scin << val;
+
+		return scin.str();
+        } 
+
 	/* Beginning of the function class - first complete
 	 * toke_tree and ftoken_tree classes
 	template <class oper_t>
@@ -1211,9 +1261,14 @@ namespace tokens {
 		 *   string from the specified index, or throws an
 		 *   error if no token was detected
 		 */
-		static const token &get_next(std::string, std::size_t) noexcept(false);
+		static token *get_next(std::string, std::size_t) noexcept(false);
 		
-		static std::vector <token *> *get_tokens(std::string);
+		//static std::vector <token *> *get_tokens(std::string);
+
+                // Always check to make sure
+                // oper_t is an operand
+                type caller() override;
+                std::string str() const override;
 		
 		/* The following is the array containing
 		 * all the default operations, and constants
@@ -1287,6 +1342,25 @@ namespace tokens {
 	};
 	
 	typedef module <num_t> module_t;
+
+        // Module's parsing functions
+        template <typename oper_t>
+        token *get_next()
+
+        // Derived member functions
+        template <typename oper_t>
+        token::type module <oper_t> ::caller()
+        {
+                return MODULE;
+        }
+
+        template <typename oper_t>
+        std::string module <oper_t> ::str() const
+        {
+                // Add some more description
+                // to the returned string
+                return "module";
+        }
 }
 
 #endif

@@ -254,23 +254,53 @@ namespace trees {
 	// Beginning of node class
 	template <typename data_t>
 	struct node {
-		data_t dptr;
+		data_t *dptr;
 		node *parent;
 		list <node> *leaves;
+
+                node();
+                node(data_t);
+                node(data_t *);
 	};
+
+        template <typename data_t>
+        node <data_t> ::node()
+        {
+                dptr = nullptr;
+                parent = nullptr;
+                leaves = nullptr;
+        }
+
+        template <typename data_t>
+        node <data_t> ::node(data_t data)
+        {
+                dptr = new data_t(data);
+                parent = nullptr;
+                leaves = nullptr;      
+        }
+
+        // Use this constructor to explicitly
+        // use the same address as passed
+        template <typename data_t>
+        node <data_t> ::node (data_t *data)
+        {
+                dptr = data;
+                parent = nullptr;
+                leaves = nullptr;
+        }
 
 	// Beginning of token_tree class
 	template <typename data_t>
 	class token_tree {
-		node <ttwrapper <data_t> *> *root;
-		node <ttwrapper <data_t> *> *cursor;
+		node <ttwrapper <data_t>> *root;
+		node <ttwrapper <data_t>> *cursor;
 	public:
 		// Constructors
 		token_tree();
 		explicit token_tree(ttwrapper <data_t> *);
 		explicit token_tree(const ttwrapper <data_t> &);
 
-		// token_tree(std::string);
+		token_tree(std::string);
 		// implement later
 
 		// token_tree(const token_tree &);
@@ -289,12 +319,12 @@ namespace trees {
 		void move_up();
 		void move_down(std::size_t);
 
-		node <ttwrapper <data_t> *> *current();
+		node <ttwrapper <data_t>> *current();
 
-                node <ttwrapper <data_t> *> *value();
+                node <ttwrapper <data_t>> *value();
 
 		void print() const;
-		void print(node <ttwrapper <data_t> *> *, int, int) const;
+		void print(node <ttwrapper <data_t>> *, int, int) const;
 	};
 
 	// token_tree implementation
@@ -340,7 +370,7 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::set_cursor(ttwrapper <data_t> *ttwptr)
 	{
-		node <ttwrapper <data_t> *> *nd = cursor;
+		node <ttwrapper <data_t>> *nd = cursor;
 
 		if (ttwptr == nullptr) {
 			//std::cout << "nulltpr passed" << std::endl;
@@ -348,7 +378,7 @@ namespace trees {
 		}
 
 		if (nd == nullptr) {
-			cursor = new node <ttwrapper <data_t> *>;
+			cursor = new node <ttwrapper <data_t>>;
 			cursor->dptr = new ttwrapper <data_t> (*ttwptr);
 			cursor->parent = nullptr;
 			cursor->leaves = nullptr;
@@ -364,13 +394,13 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::set_cursor(const ttwrapper <data_t> &ttw)
 	{
-		set_cursor(&ttw);
+		set_cursor(new ttwrapper <data_t> (ttw));
 	}
 
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
 	{
-		node <ttwrapper <data_t> *> *new_node = new node <ttwrapper <data_t> *>;
+		node <ttwrapper <data_t>> *new_node = new node <ttwrapper <data_t>>;
 		new_node->dptr = new ttwrapper <data_t> (*tptr);
 		new_node->leaves = nullptr;
 		
@@ -380,10 +410,10 @@ namespace trees {
 			return;
 		}
 
-		list <node <ttwrapper <data_t> *>> *cleaves = cursor->leaves;
+		list <node <ttwrapper <data_t>>> *cleaves = cursor->leaves;
 
 		if (cleaves == nullptr) {
-			cleaves = new list <node <ttwrapper <data_t> *>>;
+			cleaves = new list <node <ttwrapper <data_t>>>;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
 			cleaves->curr->parent = cursor;
@@ -391,7 +421,7 @@ namespace trees {
 		} else {
 			while (cleaves->next != nullptr)
 				cleaves = cleaves->next;
-			cleaves->next = new list <node <ttwrapper <data_t> *>>;
+			cleaves->next = new list <node <ttwrapper <data_t>>>;
 			cleaves = cleaves->next;
 			cleaves->curr = new_node;
 			cleaves->next = nullptr;
@@ -402,7 +432,7 @@ namespace trees {
 	template <typename data_t>
 	void token_tree <data_t> ::add_branch(const ttwrapper <data_t> &tok)
 	{
-		token *tptr = new ttwrapper <data_t> (tok);
+		ttwrapper <data_t> *tptr = new ttwrapper <data_t> (tok);
 		add_branch(tptr);
 	}
 
@@ -476,7 +506,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	node <ttwrapper <data_t> *> *token_tree <data_t> ::current()
+	node <ttwrapper <data_t>> *token_tree <data_t> ::current()
 	{
 		return cursor;
 	}
@@ -484,13 +514,13 @@ namespace trees {
 	// Non-Member helper function
 	// for general scope things
 	template <typename data_t>
-        node <ttwrapper <data_t> *> *getval(node <ttwrapper <data_t> *> *nd)
+        node <ttwrapper <data_t>> *getval(node <ttwrapper <data_t>> *nd)
         {
                 std::vector <operand <data_t>> vals;
-                node <ttwrapper <data_t> *> *output;
+                node <ttwrapper <data_t>> *output;
                 int index;
 
-                output = new node <ttwrapper <data_t> *>;
+                output = new node <ttwrapper <data_t>>;
                 // Return operand wrapper if operand,
                 // returns operand wrapper value if
                 // operation
@@ -516,21 +546,15 @@ namespace trees {
                                 }
                         }
 
-                        for (operand <data_t> oper : vals)
-                                std::cout << "\t\tvals - " << oper << std::endl;
-                        std::cout << "value - " << nd->dptr->get_opn()->compute(vals) << std::endl;
-                        std::cout << "passed";
-                        output->dptr = new ttwrapper <data_t> (nd->dptr->get_opn()->compute(vals));
-                        output->leaves = nullptr;
-                        output->parent = nullptr;
-                        return output;
+                        return new node <ttwrapper <data_t>> (ttwrapper <data_t>
+                                (nd->dptr->get_opn()->compute(vals)));
                 }
 
                 return nullptr;
         }
 
         template <typename data_t>
-        node <ttwrapper <data_t> *> *token_tree <data_t> ::value()
+        node <ttwrapper <data_t>> *token_tree <data_t> ::value()
         {
                 // Return operand wrapper if operand,
                 // returns operand wrapper value if
@@ -555,7 +579,7 @@ namespace trees {
 	}
 
 	template <typename data_t>
-	void token_tree <data_t> ::print(node <ttwrapper <data_t> *> *nd,
+	void token_tree <data_t> ::print(node <ttwrapper <data_t>> *nd,
 			int num, int lev) const
 	{
                 //std::cout << "Inside the print function, num = " << num;
@@ -572,7 +596,7 @@ namespace trees {
 		std::cout << "#" << num << " - " << *(nd->dptr) << std::endl;
 		//std::cout << " @" << nd << std::endl;
 
-		list <node <ttwrapper <data_t> *>> *rleaves = nd->leaves;
+		list <node <ttwrapper <data_t>>> *rleaves = nd->leaves;
 
 		counter = 0;
 		while (rleaves != nullptr) {
