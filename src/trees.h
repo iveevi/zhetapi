@@ -299,8 +299,9 @@ namespace trees {
 		token_tree();
 		explicit token_tree(ttwrapper <data_t> *);
 		explicit token_tree(const ttwrapper <data_t> &);
+                explicit token_tree(const std::vector <data_t> &);
 
-		token_tree(std::string);
+		// token_tree(std::string);
 		// implement later
 
 		// token_tree(const token_tree &);
@@ -360,6 +361,16 @@ namespace trees {
 
 		cursor = root;
 	}
+
+        template <typename data_t>
+        token_tree <data_t> ::token_tree(const std::vector <token *> &toks)
+        {
+                token *tptr = &module <data_t> ::opers[module <data_t> ::NONOP];
+
+                for (token *t : toks) {
+                        if (t->caller() == token::OPERATION && t->)
+                }
+        }
 
 	template <typename data_t>
 	void token_tree <data_t> ::reset_cursor()

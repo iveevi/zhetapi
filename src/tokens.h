@@ -3,6 +3,7 @@
 
 #include <bits/c++config.h>
 #include <cctype>
+#include <cstdint>
 #include <iostream>
 #include <string>
 #include <utility>
@@ -35,13 +36,18 @@ namespace tokens {
                 /* Virtual:
 		 * string [str]() - returns the string
 		 * representation of the token */
-		virtual std::string str() const = 0;
+		virtual std::string str() const;
 	};
 
 	token::type token::caller()
 	{
 		return NONE;
 	}
+
+        std::string token::str() const
+        {
+                return "NA";
+        }
 	
 	/* Exception Class:
 	 *
@@ -401,7 +407,7 @@ namespace tokens {
 		 *   and modulus
 		 * FUNC_LMAX - for function std operations
 		 *   such as sin, cos, log, etc. */
-		enum order {NA_L0, SA_L1, MDM_L2, FUNC_LMAX};
+		enum order {SA_L1, MDM_L2, FUNC_LMAX, NA_L0};
 
 		/* Constructors:
 		 * operation() - sets the private member function
@@ -1414,7 +1420,7 @@ namespace tokens {
                         
                         opn_index = get_matching(cumul);
                         if (opn_index != NONOP)
-                                return {&opers[opn_index], i};
+                                return {&opers[opn_index], i + 1};
                 }
 
                 return {nullptr, -1};
@@ -1427,11 +1433,16 @@ namespace tokens {
 		std::vector <token *> tokens;
 		std::size_t index = 0;
 
-		const int ses_len = 5;
+		int ses_len = 5;
 
-		while (ses_len-- > 0) {
-			(opair = get_next(input, index)).second != -1
-			std::cout << "in loop..." << std::endl;
+		while (true) {
+			opair = get_next(input, index);
+
+                        if (opair.second == UINT64_MAX) {
+                                tokens.push_back(opair.first);
+                                break;
+                        }
+
 			tokens.push_back(opair.first);
 			index = opair.second;
 		}

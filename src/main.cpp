@@ -40,24 +40,9 @@ int main()
 
         cout << endl << "Testing module parsing functions:";
         string str;
-        size_t index = 0;
 
         cout << endl << "Enter a string to be parsed: ";
         cin >> str;
-
-        cout << endl << "Enter index of search start: ";
-        cin >> index;
-        
-        pair <token *, size_t> opair = module_t::get_next(str, index);
-        token *tptr = opair.first;
-
-        cout << endl << "Next token of " << str << " from ";
-        cout << index << " is ";
-        if (tptr == nullptr)
-                cout << " nullptr" << endl;
-        else
-                cout << tptr->str() << endl;
-        cout << "Next index is now " << opair.second << endl;
 
         cout << endl << "All tokens in string:" << endl;
         vector <token *> toks = module_t::get_tokens(str);
@@ -66,4 +51,9 @@ int main()
                 cout << "\t" << t->str() << endl;
 
         cout << endl << "Testing string parsed tree:" << endl;
+
+        tr = token_tree <double> (toks);
+
+        tr.print();
+        IC(tr.value()->dptr);
 }
