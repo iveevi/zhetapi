@@ -299,7 +299,7 @@ namespace trees {
 		token_tree();
 		explicit token_tree(ttwrapper <data_t> *);
 		explicit token_tree(const ttwrapper <data_t> &);
-                explicit token_tree(const std::vector <data_t> &);
+                explicit token_tree(const std::vector <token *> &);
 
 		// token_tree(std::string);
 		// implement later
@@ -314,6 +314,7 @@ namespace trees {
 
 		void add_branch(ttwrapper <data_t> *);
 		void add_branch(const ttwrapper <data_t> &);
+                void add_branch(const token_tree <data_t> &);
 
 		void move_left();
 		void move_right();
@@ -366,10 +367,32 @@ namespace trees {
         token_tree <data_t> ::token_tree(const std::vector <token *> &toks)
         {
                 token *tptr = &module <data_t> ::opers[module <data_t> ::NONOP];
+                token *t;
+                std::size_t i;
 
-                for (token *t : toks) {
-                        if (t->caller() == token::OPERATION && t->)
+                for (i = 0; i < toks.size(); i++) {
+                        t = toks[i];
+                        // search for the last operation
+                        // with smallest pemdas value
+                        if (t->caller() == token::OPERATION &&
+                                (operation <data_t> (t))->get_order() <= 
+                                (operation <data_t> (tptr))->get_order())
+                                tptr = t;
                 }
+
+                // partition the vector into
+                // both sides of the operation
+                std::vector <token *> subf(toks.begin(), toks.begin() + i - 1);
+                std::vector <token *> subs(toks.begin() + (i + 1), toks.end());
+
+                /*std::cout << "First one:"
+                for (token *t : subf)
+                        cout << "\t" << t->str() << endl;
+
+                for (token *t : subs)
+                        cout << "\t" << t->str() << endl;*/
+
+                set_cursor(new ttwrapper <data_t> (operation <data_t> (tptr)));
         }
 
 	template <typename data_t>
@@ -446,6 +469,12 @@ namespace trees {
 		ttwrapper <data_t> *tptr = new ttwrapper <data_t> (tok);
 		add_branch(tptr);
 	}
+
+        template <typename data_t>
+        void token_tree <data_t> ::add_branch(const token_tree <data_t> &ttree)
+        {
+                
+        }
 
 	template <typename data_t>
 	void token_tree <data_t> ::move_left()
@@ -547,12 +576,14 @@ namespace trees {
                                 // operation or an operand
                                 switch (nd->leaves->get(index)->curr->dptr->t) {
                                 case token::OPERAND:
-                                       vals.push_back(*(nd->leaves->get(index)->curr->dptr->get_oper()));
-                                       break;
+                                        vals.push_back(*(nd->leaves->get(index)
+                                                ->curr->dptr->get_oper()));
+                                        break;
                                 case token::OPERATION:
                                         // Return value if leaf is an operation
                                         // is always an operand
-                                        vals.push_back(*(getval(nd->leaves->get(index)->curr)->dptr->get_oper()));
+                                        vals.push_back(*(getval(nd->leaves->
+                                                get(index)->curr)->dptr->get_oper()));
                                         break;
                                 }
                         }

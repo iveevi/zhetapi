@@ -1,7 +1,6 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <bits/c++config.h>
 #include <cctype>
 #include <cstdint>
 #include <iostream>
@@ -454,6 +453,8 @@ namespace tokens {
 
 		virtual bool matches(const std::string &) const;
 		virtual bool operator[](const std::string &) const;
+                
+                virtual order get_order() const;
 
 		operation &operator=(const operation &);
 		
@@ -651,6 +652,13 @@ namespace tokens {
 			throw argset_exception(inputs.size(), *this);
 		return (*func)(inputs);
 	}
+
+        template <class oper_t>
+        typename operation <oper_t> ::order operation <oper_t> ::get_order()
+                        const
+        {
+                return pemdas;
+        }
 
 	template <class oper_t>
 	operation <oper_t> &operation <oper_t> ::operator=(const operation <oper_t>
