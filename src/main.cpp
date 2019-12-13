@@ -48,15 +48,22 @@ int main()
         cout << endl << "Enter index of search start: ";
         cin >> index;
         
-        token *tptr = module_t::get_next(str, index);
+        pair <token *, size_t> opair = module_t::get_next(str, index);
+        token *tptr = opair.first;
 
         cout << endl << "Next token of " << str << " from ";
         cout << index << " is ";
         if (tptr == nullptr)
                 cout << " nullptr" << endl;
         else
-                cout << module_t::get_next(str, index)->str() << endl;
-        cout << "Index is now " << index << endl;
+                cout << tptr->str() << endl;
+        cout << "Next index is now " << opair.second << endl;
+
+        cout << endl << "All tokens in string:" << endl;
+        vector <token *> toks = module_t::get_tokens(str);
+
+        for (token *t : toks)
+                cout << "\t" << t->str() << endl;
 
         cout << endl << "Testing string parsed tree:" << endl;
 }

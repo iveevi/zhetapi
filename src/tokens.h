@@ -1279,7 +1279,9 @@ namespace tokens {
 		 *   error if no token was detected and modifies the
                  *   passed index value appropriately
 		 */
-		static token *get_next(std::string, std::size_t &) noexcept(false);
+		static std::pair <token *, std::size_t> get_next(std::string,
+			std::size_t) noexcept(false);
+		static std::vector <token *> get_tokens(std::string);
 
                 // Returns the index of the operation who's format
                 // matches the format this passed, and none_op if none
@@ -1379,7 +1381,8 @@ namespace tokens {
 
         // Module's parsing functions
         template <typename oper_t>
-        token *module <oper_t> ::get_next(std::string input, std::size_t &index)
+        std::pair <token *, std::size_t> module <oper_t> ::get_next(std::string
+			input, std::size_t index)
         {
                 // Add parenthesis (groups)
                 // after basic operand parsing
@@ -1401,8 +1404,8 @@ namespace tokens {
 
                         if (std::isdigit(c)) {
                                 ss >> oper;
-                                index = ss.tellg();
-                                return new oper_t(oper);
+                                i = ss.tellg();
+                                return {new oper_t(oper), i};
                         }
 
                         // c is an operation
@@ -1411,11 +1414,30 @@ namespace tokens {
                         
                         opn_index = get_matching(cumul);
                         if (opn_index != NONOP)
-                                return &opers[opn_index];
+                                return {&opers[opn_index], i};
                 }
 
-                return nullptr;
+                return {nullptr, -1};
         }
+
+	template <typename oper_t>
+	std::vector <token *> module <oper_t> ::get_tokens(std::string input)
+	{
+		std::pair <token *, std::size_t> opair;
+		std::vector <token *> tokens;
+		std::size_t index = 0;
+
+		const int ses_len = 5;
+
+		while (ses_len-- > 0) {
+			(opair = get_next(input, index)).second != -1
+			std::cout << "in loop..." << std::endl;
+			tokens.push_back(opair.first);
+			index = opair.second;
+		}
+
+		return tokens;
+	}
 
         template <typename oper_t>
         std::size_t module <oper_t> ::get_matching(std::string str)
