@@ -19,7 +19,9 @@ namespace trees {
 	public:
 		ttwrapper();
 		ttwrapper(operand <data_t>);
+                ttwrapper(operand <data_t> *);
 		ttwrapper(operation <operand <data_t>>);
+                ttwrapper(operation <operand <data_t>> *);
                 ttwrapper(const ttwrapper <data_t> &);
 
 		operand <data_t> *get_oper() const;
@@ -52,10 +54,26 @@ namespace trees {
 		t = token::OPERAND;
 	}
 
+        template <typename data_t>
+	ttwrapper <data_t> ::ttwrapper(operand <data_t> *oper)
+	{
+		oper_t = oper;
+		opn_t = nullptr;
+		t = token::OPERAND;
+	}
+
 	template <typename data_t>
 	ttwrapper <data_t> ::ttwrapper(operation <operand <data_t>> opn)
 	{
 		opn_t = &opn;
+		oper_t = nullptr;
+		t = token::OPERATION;
+	}
+
+        template <typename data_t>
+	ttwrapper <data_t> ::ttwrapper(operation <operand <data_t>> *opn)
+	{
+		opn_t = opn;
 		oper_t = nullptr;
 		t = token::OPERATION;
 	}
@@ -299,7 +317,10 @@ namespace trees {
 		token_tree();
 		explicit token_tree(ttwrapper <data_t> *);
 		explicit token_tree(const ttwrapper <data_t> &);
-                explicit token_tree(const std::vector <token *> &);
+                explicit token_tree(std::vector <token *> &);
+
+                node <ttwrapper <data_t>> *build(std::vector
+                        <token *> &);
 
 		// token_tree(std::string);
 		// implement later
@@ -364,11 +385,46 @@ namespace trees {
 	}
 
         template <typename data_t>
-        token_tree <data_t> ::token_tree(const std::vector <token *> &toks)
+        token_tree <data_t> ::token_tree(std::vector <token *> &toks)
         {
-                token *tptr = &module <data_t> ::opers[module <data_t> ::NONOP];
-                token *t;
+                root = build(toks);
+                cursor = root;
+        }
+
+        template <typename data_t>
+        node <ttwrapper <data_t>> *token_tree <data_t> ::build(std::vector
+                <token *> &toks)
+        {
+                list <node <ttwrapper <data_t>>> *leaves;
+                node <ttwrapper <data_t>> *out, *oa, *ob;
+                std::vector <token *> a, b;
+                ttwrapper <data_t> *ttptr;
+                token *tptr;
+                token *t, norm;
                 std::size_t i;
+
+                if (toks.size() == 0)
+                        return nullptr;
+
+                if (toks.size() == 1) {
+                        switch(toks[0]->caller()) {
+                        case token::OPERAND:
+                                ttptr = new ttwrapper <data_t> ((operand <data_t> *) (toks[0]));
+                                break;
+                        case token::OPERATION:
+                                ttptr = new ttwrapper <data_t> ((operation <operand
+                                        <data_t>> *) (toks[0]));
+                                break;
+                        default:
+                                ttptr = nullptr;
+                                break;
+                        }
+
+                        out = new node <ttwrapper <data_t>> (ttptr);
+                        return out;
+                }
+
+                tptr = &module <data_t> ::opers[module <data_t> ::NONOP];
 
                 for (i = 0; i < toks.size(); i++) {
                         t = toks[i];
@@ -380,19 +436,21 @@ namespace trees {
                                 tptr = t;
                 }
 
-                // partition the vector into
-                // both sides of the operation
-                std::vector <token *> subf(toks.begin(), toks.begin() + i - 1);
-                std::vector <token *> subs(toks.begin() + (i + 1), toks.end());
+                a = std::vector <token *> (toks.begin(), toks.begin() + i - 1);
+                b = std::vector <token *> (toks.begin() + (i + 1), toks.end());
+                ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
 
-                /*std::cout << "First one:"
-                for (token *t : subf)
-                        cout << "\t" << t->str() << endl;
+                out = new node <ttwrapper <data_t>> (ttptr);
+                oa = build(a);
+                ob = build(b);
 
-                for (token *t : subs)
-                        cout << "\t" << t->str() << endl;*/
+                leaves = out->leaves;
+                leaves->curr = oa;
+                leaves->next = new list <node <ttwrapper <data_t>>>;
+                leaves->next->curr = ob;
+                leaves->next->next = nullptr;
 
-                set_cursor(new ttwrapper <data_t> (operation <data_t> (tptr)));
+                return out;
         }
 
 	template <typename data_t>
