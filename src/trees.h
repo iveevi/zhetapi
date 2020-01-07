@@ -399,13 +399,14 @@ namespace trees {
                 node <ttwrapper <data_t>> *out, *oa, *ob;
                 std::vector <token *> a, b;
                 ttwrapper <data_t> *ttptr;
-                token *tptr;
-                token *t, norm;
+                token *tptr, *t, norm;
                 std::size_t i;
-
+                
+                stdpr("Before if statements");
                 if (toks.size() == 0)
                         return nullptr;
 
+                stdpr("After test for empty set");
                 if (toks.size() == 1) {
                         switch(toks[0]->caller()) {
                         case token::OPERAND:
@@ -424,20 +425,58 @@ namespace trees {
                         return out;
                 }
 
-                tptr = &module <data_t> ::opers[module <data_t> ::NONOP];
+                stdpr("Setting tptr to nopers");
+                tptr = &module <operand <data_t>> ::opers[module <operand <data_t>> ::NOPERS];
 
-                for (i = 0; i < toks.size(); i++) {
+                stdpr("Finding splitting operation");
+                for (int i = 0; i < toks.size(); i++) {
                         t = toks[i];
                         // search for the last operation
                         // with smallest pemdas value
                         if (t->caller() == token::OPERATION &&
-                                (operation <data_t> (t))->get_order() <= 
-                                (operation <data_t> (tptr))->get_order())
+                                ((operation <operand <data_t>> *) (t))->get_order() <= 
+                                ((operation <operand <data_t>> *) (tptr))->get_order())
                                 tptr = t;
                 }
 
+                std::cout << "Splitting operation:\n\t" << *((operation <operand <data_t>> *) (tptr)) << std::endl;
+
+                stdpr("Splitting arrays");
+                stdpr(i);
                 a = std::vector <token *> (toks.begin(), toks.begin() + i - 1);
                 b = std::vector <token *> (toks.begin() + (i + 1), toks.end());
+
+                std::cout << "Sub-vector A" << std::endl;
+                for (token *t : a) {
+                        switch (t->caller()) {
+                        case token::OPERAND:
+                                std::cout << *((operand <data_t> *) t) <<std::endl;
+                                break;
+                        case token::OPERATION:
+                                std::cout << *((operation <operand <data_t>> *) t) <<std::endl;
+                                break;
+                        default:
+                                std::cout << "Illegal operation" << std::endl;
+                                break;
+                        }
+                }
+
+                std::cout << std::endl << "Sub-vector A" << std::endl;
+                for (token *t : a) {
+                        switch (t->caller()) {
+                        case token::OPERAND:
+                                std::cout << *((operand <data_t> *) t) <<std::endl;
+                                break;
+                        case token::OPERATION:
+                                std::cout << *((operation <operand <data_t>> *) t) <<std::endl;
+                                break;
+                        default:
+                                std::cout << "Illegal operation" << std::endl;
+                                break;
+                        }
+                }
+
+                stdpr("Done splitting arrays");
                 ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
 
                 out = new node <ttwrapper <data_t>> (ttptr);

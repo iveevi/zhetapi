@@ -1,6 +1,7 @@
 // C++ standard libraries
 #include <chrono>
 #include <iostream>
+#include <string>
 #include <thread>
 
 // Custom made libraries
@@ -37,15 +38,13 @@ int main()
 
 	tr.print();
         IC(tr.value()->dptr);
-
-        cout << endl << "Testing module parsing functions:";
+        
+        vector <token *> toks;
         string str;
 
-        cout << endl << "Enter a string to be parsed: ";
-        cin >> str;
-
         cout << endl << "All tokens in string:" << endl;
-        vector <token *> toks = module_t::get_tokens(str);
+        str = "123 + 456 - 234/8 + 9* 2";
+        toks = module_t::get_tokens(str);
 
         for (token *t : toks)
                 cout << "\t" << t->str() << endl;

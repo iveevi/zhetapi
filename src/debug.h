@@ -3,6 +3,8 @@
 
 #include "icecream.hpp"
 
+#define stdpr(msg) std::cout << "Debug Print: " << msg << std::endl;
+
 int stage;
 bool print;
 

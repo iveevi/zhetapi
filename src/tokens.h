@@ -9,6 +9,8 @@
 #include <vector>
 #include <sstream>
 
+#include "debug.h"
+
 namespace tokens {
 	/* Default data/info type to
 	 * use for calculations */
@@ -1382,13 +1384,13 @@ namespace tokens {
 
         template <typename oper_t>
 	operation <oper_t> module <oper_t> ::div_op = operation <oper_t>
-	(std::string {"div_op"}, module <oper_t> ::add_f, 2, std::vector
+	(std::string {"div_op"}, module <oper_t> ::div_f, 2, std::vector
         <std::string> {"/", "divided by"}, operation <oper_t>::MDM_L2,
 	std::vector <std::string> {"8/8"});
 
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::opers[] = {
-		add_op, sub_op, mult_op, div_op
+		add_op, sub_op, mult_op, div_op, none_op
 	};
 	
 	typedef module <num_t> module_t;
@@ -1424,7 +1426,8 @@ namespace tokens {
 
                         // c is an operation
                         // or a grouping term
-                        cumul += c;
+                        if (!std::isspace(c))
+                                cumul += c;
                         
                         opn_index = get_matching(cumul);
                         if (opn_index != NONOP)
@@ -1440,7 +1443,6 @@ namespace tokens {
 		std::pair <token *, std::size_t> opair;
 		std::vector <token *> tokens;
 		std::size_t index = 0;
-
 		int ses_len = 5;
 
 		while (true) {
