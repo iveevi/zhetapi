@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <sstream>
+#include <cmath>
 
 #include "debug.h"
 
@@ -408,7 +409,7 @@ namespace tokens {
 		 *   and modulus
 		 * FUNC_LMAX - for function std operations
 		 *   such as sin, cos, log, etc. */
-		enum order {SA_L1, MDM_L2, FUNC_LMAX, NA_L0};
+		enum order {SA_L1, MDM_L2, EXP_L3, FUNC_LMAX, NA_L0};
 
 		/* Constructors:
 		 * operation() - sets the private member function
@@ -1277,6 +1278,7 @@ namespace tokens {
 		static operation <oper_t> sub_op;
 		static operation <oper_t> mult_op;
 		static operation <oper_t> div_op;
+                static operation <oper_t> exp_op;
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
@@ -1285,6 +1287,7 @@ namespace tokens {
 		static oper_t sub_f(const std::vector <oper_t> &);
 		static oper_t mult_f(const std::vector <oper_t> &);
 		static oper_t div_f(const std::vector <oper_t> &);
+                static oper_t exp_f(const std::vector <oper_t> &);
 	public:
 		/* The following are static member functions that
 		 * give purpose to the tokens
@@ -1313,12 +1316,13 @@ namespace tokens {
 		/* The following is the array containing
 		 * all the default operations, and constants
 		 * that represents certain things */
-		static const int NOPERS = 0x4;
+                static const int NONOP = -0x1;
 		static const int ADDOP = 0x0;
                 static const int SUBOP = 0x1;
                 static const int MULTOP = 0x2;
                 static const int DIVOP = 0x3;
-                static const int NONOP = -0x1;
+                static const int EXPOP = 0x4;
+                static const int NOPERS = 0x5;
 		
 		static operation <oper_t> opers[];
 	};
@@ -1358,6 +1362,13 @@ namespace tokens {
 		return new_oper_t;
 	}
 
+         template <typename oper_t>
+	oper_t module <oper_t> ::exp_f(const std::vector <oper_t> &inputs)
+	{
+		oper_t new_oper_t = oper_t(std::pow(inputs[0].get(), inputs[1].get()));
+		return new_oper_t;
+	}
+
 	// Module's default operations
         template <typename oper_t>
 	operation <oper_t> module <oper_t> ::none_op = operation <oper_t>
@@ -1388,9 +1399,16 @@ namespace tokens {
         <std::string> {"/", "divided by"}, operation <oper_t>::MDM_L2,
 	std::vector <std::string> {"8/8"});
 
+        template <typename oper_t>
+	operation <oper_t> module <oper_t> ::exp_op = operation <oper_t>
+	(std::string {"exp_op"}, module <oper_t> ::exp_f, 2, std::vector
+        <std::string> {"/", "divided by"}, operation <oper_t>::EXP_L3,
+	std::vector <std::string> {"8^8"});
+
 	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::opers[] = {
-		add_op, sub_op, mult_op, div_op, none_op
+		add_op, sub_op, mult_op,
+                div_op, exp_op, none_op
 	};
 	
 	typedef module <num_t> module_t;
