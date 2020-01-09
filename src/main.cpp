@@ -4,11 +4,8 @@
 #include <string>
 #include <thread>
 
-// Custom made libraries
-#include "trees.h"
-#include "tokens.h"
-
-#include "debug.h"
+// Custom libraries import
+#include "all.h"
 
 // Including namespaces
 using namespace std;
