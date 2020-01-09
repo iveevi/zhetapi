@@ -1402,7 +1402,7 @@ namespace tokens {
         template <typename oper_t>
 	operation <oper_t> module <oper_t> ::exp_op = operation <oper_t>
 	(std::string {"exp_op"}, module <oper_t> ::exp_f, 2, std::vector
-        <std::string> {"/", "divided by"}, operation <oper_t>::EXP_L3,
+        <std::string> {"^", "to", "to the power of"}, operation <oper_t>::EXP_L3,
 	std::vector <std::string> {"8^8"});
 
 	template <typename oper_t>

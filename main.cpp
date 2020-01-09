@@ -35,6 +35,6 @@ int main()
                 tr = token_tree <double> (input);
 
                 tr.print();
-                IC(tr.value()->dptr);
+                dp_ptr(tr.value()->dptr);
         }
 }
