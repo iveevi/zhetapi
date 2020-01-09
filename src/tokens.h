@@ -1279,6 +1279,7 @@ namespace tokens {
 		static operation <oper_t> mult_op;
 		static operation <oper_t> div_op;
                 static operation <oper_t> exp_op;
+		static operation <oper_t> mod_op;
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
@@ -1288,6 +1289,7 @@ namespace tokens {
 		static oper_t mult_f(const std::vector <oper_t> &);
 		static oper_t div_f(const std::vector <oper_t> &);
                 static oper_t exp_f(const std::vector <oper_t> &);
+		static oper_t mod_f(const std::vector <oper_t> &);
 	public:
 		/* The following are static member functions that
 		 * give purpose to the tokens
@@ -1322,7 +1324,8 @@ namespace tokens {
                 static const int MULTOP = 0x2;
                 static const int DIVOP = 0x3;
                 static const int EXPOP = 0x4;
-                static const int NOPERS = 0x5;
+		static const int MODOP = 0x5;
+                static const int NOPERS = 0x6;
 		
 		static operation <oper_t> opers[];
 	};
@@ -1362,10 +1365,18 @@ namespace tokens {
 		return new_oper_t;
 	}
 
-         template <typename oper_t>
+        template <typename oper_t>
 	oper_t module <oper_t> ::exp_f(const std::vector <oper_t> &inputs)
 	{
 		oper_t new_oper_t = oper_t(std::pow(inputs[0].get(), inputs[1].get()));
+		return new_oper_t;
+	}
+
+	template <typename oper_t>
+	oper_t module <oper_t> ::mod_f(const std::vector <oper_t> &inputs)
+	{
+		// Need to convert to integer later
+		oper_t new_oper_t = oper_t(inputs[0].get() % inputs[1].get());
 		return new_oper_t;
 	}
 
@@ -1406,9 +1417,16 @@ namespace tokens {
 	std::vector <std::string> {"8^8"});
 
 	template <typename oper_t>
+	operation <oper_t> module <oper_t> ::mod_op = operation <oper_t>
+	(std::string {"mod_op"}, module <oper_t> ::exp_f, 2, std::vector
+        <std::string> {"%", "mod"}, operation <oper_t>::MDM_L2,
+	std::vector <std::string> {"8%8"});
+
+	template <typename oper_t>
 	operation <oper_t> module <oper_t> ::opers[] = {
 		add_op, sub_op, mult_op,
-                div_op, exp_op, none_op
+                div_op, exp_op, mod_op,
+		none_op
 	};
 	
 	typedef module <num_t> module_t;
