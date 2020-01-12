@@ -9,10 +9,15 @@
 #include "tokens/variable.h"
 
 // All tree class includes
+#include "trees/list.h"
+#include "trees/node.h"
+#include "trees/token_tree.h"
+#include "trees/tree.h"
+#include "trees/ttwrapper.h"
 
 // Conditional debug header
 #ifdef DEBUG
 
-#include "debug.h"
+#include "misc/debug.h"
 
 #endif

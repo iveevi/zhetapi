@@ -10,7 +10,7 @@
 #include <sstream>
 #include <cmath>
 
-#include "debug.h"
+#include "../misc/debug.h"
 // #include "trees.h"
 
 namespace tokens {
