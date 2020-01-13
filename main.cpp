@@ -1,37 +1,32 @@
-// C++ standard libraries
-#include <chrono>
+// C++ Standard Libraries
 #include <iostream>
 #include <string>
 #include <thread>
 
-// Custom libraries import
+// Custom Built Libraries
 #include "all.h"
 
-// Including namespaces
+// Include Directives
 using namespace std;
 using namespace tokens;
 using namespace trees;
 
-// Delay time
-#define DELAY 1
-#define DELAY_P 100
+// Benchmarking Tools
+#define INPUT "123 - 456"
 
-extern int stage;
+clock_t start, end;
 
 int main()
 {
-        token_tree <double> tr;
-        string input;
-
-        while (true) {
-                cout << "Enter Input: ";
-                getline(cin, input);
-
-                if (input.empty())
-                        break;
-                tr = token_tree <double> (input);
-
-                tr.print();
-                dp_ptr(tr.value()->dptr);
-        }
+	start = clock();
+        
+	token_tree <double> tr(INPUT);
+	tr.print();
+	dp_ptr(tr.value()->dptr);
+	
+	end = clock();
+	
+	cout << "\nAlgorithm Elapsed Time: " 
+		<< (double) (start - end) / (double) CLOCKS_PER_SEC 
+		<< " seconds." << endl;
 }
