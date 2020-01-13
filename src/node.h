@@ -1,6 +1,9 @@
 #ifndef NODE_H
 #define NODE_H
 
+// Custom Built Libraries
+#include "list.h"
+
 namespace trees {
 	// Beginning of node class
 	template <typename data_t>

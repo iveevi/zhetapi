@@ -1,7 +1,9 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+// Custom Built Libraries
 #include "token.h"
+#include "token_tree.h"
 
 namespace tokens {
 	/* Beginning of grouping token */

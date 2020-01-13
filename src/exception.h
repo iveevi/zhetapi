@@ -1,6 +1,10 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
+// C++ Standard Libraries
+#include <string>
+
+// Custom Built Libraries
 #include "token.h"
 
 namespace tokens {

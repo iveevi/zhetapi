@@ -1,6 +1,9 @@
 #ifndef LIST_H
 #define LIST_H
 
+// Custom Built Libraries
+#include <cstdlib>
+
 namespace trees {
 	// Beginning of list class
 	template <typename data_t>

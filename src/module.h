@@ -1,8 +1,15 @@
 #ifndef MODULE_H
 #define MODULE_H
 
+// C++ Standard Libraries
+#include <vector>
+#include <sstream>
+#include <cmath>
+
 // Custom Built Libraries
 #include "token.h"
+#include "operand.h"
+#include "operation.h"
 
 namespace tokens {
 	// Beginning of the module class

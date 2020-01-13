@@ -1,6 +1,16 @@
 #ifndef TTWRAPPER_H
 #define TTWRAPPER_H
 
+// C++ Standard Libraries
+#include <iostream>
+
+// Custom Built Libraries
+#include "operand.h"
+#include "operation.h"
+
+// Remove include directive later
+using namespace tokens;
+
 namespace trees {
 	// Beginning of ttwrapper class
 	template <typename data_t>

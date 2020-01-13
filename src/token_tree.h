@@ -1,8 +1,14 @@
 #ifndef TOKEN_TREE_H
 #define TOKEN_TREE_H
 
+// C++ Standard Libraries
+#include <vector>
+
 // Custom Built Libraries
-#include "trees.h"
+#include "tree.h"
+#include "node.h"
+#include "module.h"
+#include "ttwrapper.h"
 
 namespace trees {
 	// Beginning of token_tree class

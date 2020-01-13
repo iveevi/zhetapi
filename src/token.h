@@ -1,6 +1,9 @@
 #ifndef TOKEN_H
 #define TOKEN_H
 
+// C++ Standard Libraries
+#include <string>
+
 namespace tokens {
 	/* Default data/info type to
 	 * use for calculations */

@@ -3,6 +3,7 @@
 
 // Custom Built Libraries
 #include "token.h"
+#include "exception.h"
 
 namespace tokens {
 	/* Operation Class:

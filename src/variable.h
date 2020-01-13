@@ -1,7 +1,14 @@
 #ifndef VARIALBE_H
 #define VARIALBE_H
 
+// C++ Standard Libraries
+#include <string>
+#include <iostream>
+#include <sstream>
+
+// Custom Built Libraries
 #include "token.h"
+#include "exception.h"
 
 namespace tokens {
 	/* Variable Class:
