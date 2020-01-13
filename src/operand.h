@@ -1,3 +1,7 @@
+#ifndef OPERAND_H
+#define OPERAND_H
+
+// Custom Built Libraries
 #include "token.h"
 
 namespace tokens {
@@ -224,3 +228,5 @@ namespace tokens {
                 return std::to_string(val);
         }
 }
+
+#endif

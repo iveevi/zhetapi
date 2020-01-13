@@ -1,3 +1,7 @@
+#ifndef MODULE_H
+#define MODULE_H
+
+// Custom Built Libraries
 #include "token.h"
 
 namespace tokens {
@@ -256,3 +260,5 @@ namespace tokens {
                 return "module";
         }
 }
+
+#endif

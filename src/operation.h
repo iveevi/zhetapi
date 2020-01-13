@@ -1,3 +1,7 @@
+#ifndef OPERATION_H
+#define OPERATION_H
+
+// Custom Built Libraries
 #include "token.h"
 
 namespace tokens {
@@ -510,3 +514,5 @@ namespace tokens {
 		exception::msg += " operands, received " + to_string(actual) + "instead.";
 	}
 }
+
+#endif

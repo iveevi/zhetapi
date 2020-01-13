@@ -1,3 +1,6 @@
+#ifndef GROUP_H
+#define GROUP_H
+
 #include "token.h"
 
 namespace tokens {
@@ -19,3 +22,5 @@ namespace tokens {
 		type caller() override;
         };
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef NODE_H
+#define NODE_H
+
 namespace trees {
 	// Beginning of node class
 	template <typename data_t>
@@ -37,3 +40,5 @@ namespace trees {
                 leaves = nullptr;
         }
 }
+
+#endif

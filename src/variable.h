@@ -1,3 +1,6 @@
+#ifndef VARIALBE_H
+#define VARIALBE_H
+
 #include "token.h"
 
 namespace tokens {
@@ -392,3 +395,6 @@ namespace tokens {
 		return scin.str();
         } 
 }
+
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef FUNCTION_H
+#define FUNCTION_H
+
 #include "token.h"
 
 namespace tokens {
@@ -33,3 +36,5 @@ namespace tokens {
 
 	typedef function <num_t> func_t; */
 }
+
+#endif

@@ -1,3 +1,7 @@
+#ifndef TOKEN_TREE_H
+#define TOKEN_TREE_H
+
+// Custom Built Libraries
 #include "trees.h"
 
 namespace trees {
@@ -407,3 +411,5 @@ namespace trees {
 		}
 	}
 }
+
+#endif

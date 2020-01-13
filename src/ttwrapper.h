@@ -1,3 +1,6 @@
+#ifndef TTWRAPPER_H
+#define TTWRAPPER_H
+
 namespace trees {
 	// Beginning of ttwrapper class
 	template <typename data_t>
@@ -143,3 +146,5 @@ namespace trees {
                 return os;
         }
 }
+
+#endif

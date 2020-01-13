@@ -1,3 +1,6 @@
+#ifndef EXCEPTION_H
+#define EXCEPTION_H
+
 #include "token.h"
 
 namespace tokens {
@@ -56,3 +59,5 @@ namespace tokens {
 		return msg;
 	}
 }
+
+#endif

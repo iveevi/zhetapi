@@ -1,3 +1,6 @@
+#ifndef LIST_H
+#define LIST_H
+
 namespace trees {
 	// Beginning of list class
 	template <typename data_t>
@@ -96,3 +99,5 @@ namespace trees {
 		return cpy;
 	}
 }
+
+#endif

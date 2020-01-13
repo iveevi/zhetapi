@@ -1,17 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
-
-#include <cctype>
-#include <cstdint>
-#include <iostream>
-#include <string>
-#include <utility>
-#include <vector>
-#include <sstream>
-#include <cmath>
-
-#include "../misc/debug.h"
-// #include "trees.h"
+#ifndef TOKEN_H
+#define TOKEN_H
 
 namespace tokens {
 	/* Default data/info type to
