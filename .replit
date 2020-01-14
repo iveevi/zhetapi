@@ -1,0 +1,2 @@
+language = "cpp"
+run = "make \n echo '\n----RUNNING PROGRAM----\n' \n ./zhetapi"

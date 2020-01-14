@@ -49,7 +49,7 @@ namespace tokens {
 	template <typename data_t>
 	group <data_t> ::group(std::string exp)
 	{
-		gtree = new token_tree(exp);
+		gtree = new token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
@@ -65,14 +65,14 @@ namespace tokens {
 	template <typename data_t>
 	void group <data_t> ::set(std::string exp)
 	{
-		gtree = new token_tree(exp);
+		gtree = new token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
 	template <typename data_t>
 	void group <data_t> ::operator[](std::string exp)
 	{
-		gtree = new token_tree(exp);
+		gtree = new token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
