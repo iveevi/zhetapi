@@ -50,7 +50,7 @@ namespace tokens {
                 // Add descriptors later
 		operand &operator=(const operand &);
 
-		type caller() override;
+		type caller() const override;
                 std::string str() const override; 
 
 		/* Friends:
@@ -217,7 +217,7 @@ namespace tokens {
 
 	/* Token class derived functions: */
 	template <typename data_t>
-	token::type operand <data_t> ::caller()
+	token::type operand <data_t> ::caller() const
 	{
 		return OPERAND;
 	}

@@ -20,20 +20,22 @@ namespace tokens {
 		 * [type] - new data type to allow function
 		 * caller inspection */
 		enum type {NONE, OPERAND, OPERATION,
-			VARIABLE, FUNCTION, MODULE};
+			VARIABLE, FUNCTION, MODULE, GROUP};
 
 		/* Virtual:
 		 * [type] [caller]() - inspector function passed
 		 * on to all derived classes */
-		virtual type caller(); //const;
+		virtual type caller() const;
 
                 /* Virtual:
 		 * string [str]() - returns the string
 		 * representation of the token */
 		virtual std::string str() const;
 	};
-
-	token::type token::caller()
+	
+	/* Virtualized member functions:
+	 * caller and str methods */
+	token::type token::caller() const
 	{
 		return NONE;
 	}

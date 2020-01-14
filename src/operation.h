@@ -138,7 +138,7 @@ namespace tokens {
 
 		operation &operator=(const operation &);
 		
-		type caller() override;
+		type caller() const override;
                 std::string str() const override;
 		
 		/* Friend Functions:
@@ -446,7 +446,7 @@ namespace tokens {
 
 	/* Token class derived functions: */
 	template <class oper_t>
-	token::type operation <oper_t> ::caller()
+	token::type operation <oper_t> ::caller() const
 	{
 		return OPERATION;
 	}

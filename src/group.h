@@ -31,12 +31,11 @@ namespace tokens {
 
 		// Get value
 		virtual data_t get() const;
-		virtual const data_t &get() const;
+		virtual const data_t &get_cr() const;
 
-		virtual data_t operator*() const;
-		virtual const data_t &get() const;
+		virtual const data_t &operator*() const;
 
-		virtual type caller() override;
+		virtual type caller() const override;
 		virtual std::string str() const override;
         };
 
@@ -49,7 +48,7 @@ namespace tokens {
 	template <typename data_t>
 	group <data_t> ::group(std::string exp)
 	{
-		gtree = new token_tree <data_t> (exp);
+		gtree = new trees::token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
@@ -65,39 +64,49 @@ namespace tokens {
 	template <typename data_t>
 	void group <data_t> ::set(std::string exp)
 	{
-		gtree = new token_tree <data_t> (exp);
+		gtree = new trees::token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
 	template <typename data_t>
 	void group <data_t> ::operator[](std::string exp)
 	{
-		gtree = new token_tree <data_t> (exp);
+		gtree = new trees::token_tree <data_t> (exp);
 		val = gtree->value()->dptr();
 	}
 
 	template <typename data_t>
-	data_t group <data_t> ::get()
+	data_t group <data_t> ::get() const
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	const data_t &group <data_t> ::get()
+	const data_t &group <data_t> ::get_cr() const
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	data_t group <data_t> ::operator*()
+	const data_t &group <data_t> ::operator*() const
 	{
 		return val;
 	}
 
+	// functions inherited
 	template <typename data_t>
-	const data_t &group <data_t> ::operator*()
+	token::type group <data_t> ::caller() const
 	{
-		return val;
+		return GROUP;
+	}
+
+	template <typename data_t>
+	std::string group <data_t> ::str() const
+	{
+		// Overload the token_tree
+		// ostream operator and add
+		// a string method to it
+		return "Add later";
 	}
 }
 

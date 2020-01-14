@@ -126,7 +126,7 @@ namespace tokens {
 		virtual const std::pair <data_t, std::string>
 			&operator*(std::string) const noexcept(false);
 
-                type caller() override;
+                type caller() const override;
                 std::string str() const override;
 		
 		/* Friends:
@@ -383,7 +383,7 @@ namespace tokens {
 
         /* Derived member functions */
 	template <typename data_t>
-        token::type variable <data_t> ::caller()
+        token::type variable <data_t> ::caller() const
 	{
 		return VARIABLE;
 	}

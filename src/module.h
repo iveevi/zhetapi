@@ -2,11 +2,14 @@
 #define MODULE_H
 
 // C++ Standard Libraries
+#include <iostream>
+#include <string>
 #include <vector>
 #include <sstream>
 #include <cmath>
 
 // Custom Built Libraries
+#include "debug.h"
 #include "token.h"
 #include "operand.h"
 #include "operation.h"
@@ -57,7 +60,7 @@ namespace tokens {
 
                 // Always check to make sure
                 // oper_t is an operand
-                type caller() override;
+                type caller() const override;
                 std::string str() const override;
 		
 		/* The following is the array containing
@@ -238,6 +241,21 @@ namespace tokens {
 			index = opair.second;
 		}
 
+		stl_reveal(std::cout, tokens, [](token *t) -> std::string
+		{
+			/*switch (t->caller()) {
+			case token::OPERAND:
+			case token::OPERATION:
+			case token::GROUP:
+				// return (group <oper_t> *(t))
+				// Turn module onto a class
+				// templated on data not operand
+				return t->str();
+			}*/
+
+			return "-NA-";
+		});
+
 		return tokens;
 	}
 
@@ -254,7 +272,7 @@ namespace tokens {
 
         // Derived member functions
         template <typename oper_t>
-        token::type module <oper_t> ::caller()
+        token::type module <oper_t> ::caller() const
         {
                 return MODULE;
         }

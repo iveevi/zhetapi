@@ -1,7 +1,7 @@
 // All token class includes
 #include "src/exception.h"
 #include "src/function.h"
-#include "src/group.h"
+// #include "src/group.h"
 #include "src/module.h"
 #include "src/operand.h"
 #include "src/operation.h"
