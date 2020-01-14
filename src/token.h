@@ -25,7 +25,7 @@ namespace tokens {
 		/* Virtual:
 		 * [type] [caller]() - inspector function passed
 		 * on to all derived classes */
-		virtual type caller();
+		virtual type caller() const;
 
                 /* Virtual:
 		 * string [str]() - returns the string
