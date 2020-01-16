@@ -98,7 +98,7 @@ namespace trees {
         template <typename data_t>
         token_tree <data_t> ::token_tree(std::string input)
         {
-                std::vector <token *> toks = module <operand <data_t>>
+                std::vector <token *> toks = module <data_t>
                         ::get_tokens(input);
                 *this = token_tree(toks);
         }
@@ -135,7 +135,7 @@ namespace trees {
                         return out;
                 }
 
-                tptr = &module <operand <data_t>> ::opers[module <operand <data_t>> ::NOPERS];
+                tptr = &module <data_t> ::opers[module <data_t> ::NOPERS];
 
                 save = 0;
                 for (int i = 0; i < toks.size(); i++) {

@@ -7,10 +7,18 @@
 #include <vector>
 #include <sstream>
 
+// Custom Built Libraries
+#include "token.h"
+
 /* Functions to print the
  * C++ STLs for debugging:
  * 
  * fff */
+std::string ptok(tokens::token *t)
+{
+	return t->str();
+}
+
 template <class item>
 std::string def_str(item i)
 {
@@ -20,16 +28,17 @@ std::string def_str(item i)
 	return oss.str();
 }
 
-template <class item>
-void stl_reveal(std::ostream &os, const std::vector <item> &vec,
-	std::function <std::string (item)> str = def_str <item>)
+template <class item, class container>
+void stl_reveal(std::ostream &os, const container &con,
+	std::string (*str)(item))
 {
 	os << "Vector Statistics: " << std::endl;
-	os << "\tSize:" << vec.size() << std::endl;
+	os << "\tSize:" << con.size() << std::endl;
 	os << "Printing Vector:" << std::endl;
 
-	for (item i : vec)
+	for (item i : con)
 		os << "\t" << str(i) << std::endl;
+	os << std::endl;
 }
 
 /* Include alternate definitions

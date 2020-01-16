@@ -1,6 +1,9 @@
 #ifndef OPERATION_H
 #define OPERATION_H
 
+// C++ Standard Libraries
+#include <vector>
+
 // Custom Built Libraries
 #include "token.h"
 #include "exception.h"

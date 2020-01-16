@@ -16,7 +16,7 @@ namespace tokens {
 
 		// Store the value of tree to
 		// retain quick calling
-		data_t val;
+		operand <data_t> *val;
 	public:
 		/* string constructor
 		(inside parenthesis) */
@@ -30,10 +30,8 @@ namespace tokens {
 		virtual void operator[](std::string);
 
 		// Get value
-		virtual data_t get() const;
-		virtual const data_t &get_cr() const;
-
-		virtual const data_t &operator*() const;
+		virtual operand <data_t> *get() const;
+		virtual operand <data_t> *operator*() const;
 
 		virtual type caller() const override;
 		virtual std::string str() const override;
@@ -49,7 +47,7 @@ namespace tokens {
 	group <data_t> ::group(std::string exp)
 	{
 		gtree = new trees::token_tree <data_t> (exp);
-		val = gtree->value()->dptr();
+		val = gtree->value()->dptr()->get_opn_t();
 	}
 
 	template <typename data_t>
@@ -65,30 +63,24 @@ namespace tokens {
 	void group <data_t> ::set(std::string exp)
 	{
 		gtree = new trees::token_tree <data_t> (exp);
-		val = gtree->value()->dptr();
+		val = gtree->value()->dptr()->get_opn_t();
 	}
 
 	template <typename data_t>
 	void group <data_t> ::operator[](std::string exp)
 	{
 		gtree = new trees::token_tree <data_t> (exp);
-		val = gtree->value()->dptr();
+		val = gtree->value()->dptr()->get_opn_t();
 	}
 
 	template <typename data_t>
-	data_t group <data_t> ::get() const
+	operand <data_t> *group <data_t> ::get() const
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	const data_t &group <data_t> ::get_cr() const
-	{
-		return val;
-	}
-
-	template <typename data_t>
-	const data_t &group <data_t> ::operator*() const
+	operand <data_t> *group <data_t> ::operator*() const
 	{
 		return val;
 	}

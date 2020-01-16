@@ -16,7 +16,7 @@ using namespace trees;
 using namespace chrono;
 
 // Benchmarking Tools
-#define INPUT "0.123 to the power of 18.5645 - (456 * 2 ^ 32 / 89)"
+#define INPUT "0.123 to 18.5645 - (456 * 2 ^ 32 / 89)"
 
 high_resolution_clock::time_point start_t, end_t;
 duration <double, micro> time_span;
