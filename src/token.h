@@ -20,7 +20,8 @@ namespace tokens {
 		 * [type] - new data type to allow function
 		 * caller inspection */
 		enum type {NONE, OPERAND, OPERATION,
-			VARIABLE, FUNCTION, MODULE, GROUP};
+			VARIABLE, FUNCTION, PARSER, DEFAULTS,
+			GROUP};
 
 		/* Virtual:
 		 * [type] [caller]() - inspector function passed
