@@ -7,8 +7,14 @@
 // Custom Built Libraries
 #include "tree.h"
 #include "node.h"
-#include "module.h"
+#include "defaults.h"
 #include "ttwrapper.h"
+#include "defaults.h"
+
+namespace tokens {
+	template <typename data_t>
+	class parser;
+}
 
 namespace trees {
 	// Beginning of token_tree class
@@ -58,6 +64,7 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree()
 	{
+		std::cout << "[DEFAULT CONSTRUCTOR]" << std::endl;
 		root = nullptr;
 		cursor = nullptr;
 	}
@@ -91,16 +98,23 @@ namespace trees {
         template <typename data_t>
         token_tree <data_t> ::token_tree(std::vector <token *> &toks)
         {
+		std::cout << "[VECTOR CONSTRUCTOR]" << std::endl;
                 root = build(toks, 0);
                 cursor = root;
+		print();
+		std::cout << "Finished Construction" << std::endl;
         }
 
         template <typename data_t>
         token_tree <data_t> ::token_tree(std::string input)
         {
-                std::vector <token *> toks = module <data_t>
+		std::cout << "[STRING CONSTRUCTOR]" << std::endl;
+                std::vector <token *> toks = parser <data_t>
                         ::get_tokens(input);
                 *this = token_tree(toks);
+		// std::cout << "---PRINTING---" << std::endl;
+		print();
+		// std::cout << "Finished String Construction" << std::endl;
         }
 
         template <typename data_t>
@@ -135,7 +149,7 @@ namespace trees {
                         return out;
                 }
 
-                tptr = &module <data_t> ::opers[module <data_t> ::NOPERS];
+                tptr = &defaults <data_t> ::opers[defaults <data_t> ::NOPERS];
 
                 save = 0;
                 for (int i = 0; i < toks.size(); i++) {
