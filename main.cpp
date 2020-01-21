@@ -71,7 +71,8 @@ int main()
 	cout << "\tToken: " << sizeof(token) << " bytes" << endl;
 	cout << "\tOperand: " << sizeof(operand <double>) << " bytes" << endl;
 	cout << "\tOperation: " << sizeof(operation <operand <double>>) << " bytes" << endl;
-	cout << "\tModule: " << sizeof(module <operand <double>>) << " bytes" << endl;
+	cout << "\tParser: " << sizeof(parser <double>) << " bytes" << endl;
+	cout << "\tDefaults: " << sizeof(defaults <double>) << " bytes" << endl;
 	cout << "\tVariable: " << sizeof(variable <double>) << " bytes" << endl;
 	cout << "\tToken_tree: " << sizeof(token_tree <double>) << " bytes" << endl;
 	cout << "\tTtwrapper: " << sizeof(ttwrapper <double>) << " bytes" << endl;
