@@ -14,13 +14,8 @@
  * C++ STLs for debugging:
  * 
  * fff */
-std::string ptok(tokens::token *t)
-{
-	return t->str();
-}
-
-template <class item>
-std::string def_str(item i)
+template <class T>
+std::string to_str(T i)
 {
 	std::ostringstream oss;
 	oss << i;
@@ -28,15 +23,16 @@ std::string def_str(item i)
 	return oss.str();
 }
 
-template <class item, class container>
-void stl_reveal(std::ostream &os, const container &con,
-	std::string (*str)(item))
+template <class T, class V, class P>
+void stl_reveal(const V &con,
+	P str = to_str, std::ostream
+	&os = std::cout)
 {
 	os << "Vector Statistics: " << std::endl;
 	os << "\tSize:" << con.size() << std::endl;
 	os << "Printing Vector:" << std::endl;
-
-	for (item i : con)
+	
+	for (T i : con)
 		os << "\t" << str(i) << std::endl;
 	os << std::endl;
 }
