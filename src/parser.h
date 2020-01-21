@@ -1,5 +1,5 @@
-#ifndef MODULE_H
-#define MODULE_H
+#ifndef PARSER_H
+#define PARSER_H
 
 // C++ Standard Libraries
 #include <iostream>
@@ -13,12 +13,13 @@
 #include "token.h"
 #include "operand.h"
 #include "operation.h"
-#include "group.h"
+#include "defaults.h"
+#include "token_tree.h"
 
 namespace tokens {
-	// Beginning of the module class
+	// Beginning of the parser class
 	template <class data_t>
-	class parses : public token {
+	class parser : public token {
 		/* The following are states of parsing
 		 * the expressions, etc. Immediate resolution
 		 * is carried out */
@@ -49,9 +50,9 @@ namespace tokens {
 
 	
 
-        // Module's parsing functions
+        // Parser's parsing functions
         template <typename data_t>
-        std::pair <token *, std::size_t> module <data_t> ::get_next(std::string
+        std::pair <token *, std::size_t> parser <data_t> ::get_next(std::string
 			input, std::size_t index)
         {
 		// Current state of parsing
@@ -69,7 +70,10 @@ namespace tokens {
 
                 std::istringstream ss(input);
                 std::size_t opn_index;
+
                 operand <data_t> oper;
+		
+		trees::token_tree <data_t> tr;
 
                 ss.seekg(index);
 
@@ -88,10 +92,13 @@ namespace tokens {
 			}
 
 			if (state == PAREN) {
+				// Ignore the parenthesis
+				ss.seekg(i + 1);
 				while (ss >> c) {
 					if (c == ')') {
-						return {(new group <data_t> (paren))->get(),
-							ss.tellg()};
+						std::cout << "paren: " << paren << std::endl;
+						tr = trees::token_tree <data_t> (paren);
+						return {tr.value()->dptr->get_oper(), ss.tellg()};
 					}
 					paren += c;
 				}
@@ -109,15 +116,15 @@ namespace tokens {
                                 cumul += c;
                         
                         opn_index = get_matching(cumul);
-                        if (opn_index != NONOP)
-                                return {&opers[opn_index], i + 1};
+                        if (opn_index != defaults <data_t> ::NONOP)
+                                return {&defaults <data_t> ::opers[opn_index], i + 1};
                 }
 
                 return {nullptr, -1};
         }
 
 	template <typename data_t>
-	std::vector <token *> module <data_t> ::get_tokens(std::string input)
+	std::vector <token *> parser <data_t> ::get_tokens(std::string input)
 	{
 		std::pair <token *, std::size_t> opair;
 		std::vector <token *> tokens;
@@ -136,35 +143,37 @@ namespace tokens {
 			index = opair.second;
 		}
 
-		stl_reveal(std::cout, tokens, ptok);
+		// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
+
+		std::cout << "Returning" << std::endl;
 
 		return tokens;
 	}
 
         template <typename data_t>
-        std::size_t module <data_t> ::get_matching(std::string str)
+        std::size_t parser <data_t> ::get_matching(std::string str)
         {
-                for (int i = 0; i < NOPERS; i++) {
-                        if (opers[i].matches(str))
+                for (int i = 0; i < defaults <data_t> ::NOPERS; i++) {
+                        if (defaults <data_t> ::opers[i].matches(str))
                                 return i;
                 }
 
-                return NONOP;
+                return defaults <data_t> ::NONOP;
         }
 
         // Derived member functions
         template <typename data_t>
-        token::type module <data_t> ::caller() const
+        token::type parser <data_t> ::caller() const
         {
-                return MODULE;
+                return PARSER;
         }
 
         template <typename data_t>
-        std::string module <data_t> ::str() const
+        std::string parser <data_t> ::str() const
         {
                 // Add some more description
                 // to the returned string
-                return "module";
+                return "parser";
         }
 }
 
