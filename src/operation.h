@@ -3,10 +3,13 @@
 
 // C++ Standard Libraries
 #include <vector>
+#include <iostream>
+#include <sstream>
 
 // Custom Built Libraries
 #include "token.h"
 #include "exception.h"
+#include "operand.h"
 
 namespace tokens {
 	/* Operation Class:
