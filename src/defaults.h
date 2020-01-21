@@ -2,6 +2,7 @@
 #define DEFAULTS_H
 
 // C++ Standard Libraries
+#include <cmath>
 
 // Cusotm Built Libraries
 #include "token.h"
@@ -50,6 +51,19 @@ namespace tokens {
 		
 		static operation <operand <data_t>> opers[];
 	};
+
+	// Virtualized functions
+	template <typename data_t>
+	token::type defaults <data_t> ::caller() const
+	{
+		return PARSER;
+	}
+
+	template <typename data_t>
+	std::string defaults <data_t> ::str() const
+	{
+		return "defaults";
+	}
 
 	/* Corresponding functios */
         template <typename data_t>
