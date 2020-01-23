@@ -18,9 +18,23 @@ using namespace chrono;
 // Benchmarking Tools
 #define INPUT "0.123 to 18.5645 - (456 * 2 ^ 32 / 89)"
 
+// Default # of tests to 10
+#ifndef TESTS
+
+#define TESTS 1000
+
+#endif
+
+#define LINE 30
+
+struct bench {
+	duration <double, micro> time;
+	double mem;
+	double rss;
+	double vm;
+};
+
 high_resolution_clock::time_point start_t, end_t;
-duration <double, micro> time_span;
-double vm, rss;
 
 void mem_usage(double &vm_t, double &rss_t)
 {
@@ -46,26 +60,59 @@ void mem_usage(double &vm_t, double &rss_t)
 	rss_t = rss * sysconf(_SC_PAGE_SIZE) / 1024;
 }
 
-int main()
+// Benchmark function
+bench bench_mark()
 {
 	cout << "Beginning Benchmark Test:" << endl << endl;
 	cout << "Input: " << INPUT << endl << endl;
+
 	start_t = high_resolution_clock::now();
+	bench out;
 
 	token_tree <double> tr(INPUT);
+
+	cout << "--------------------------------------------------" << endl;
 	tr.print();
 	dp_ptr(tr.value()->dptr);
+	out.mem += sizeof(tr);
 	
-	mem_usage(vm, rss);
+	mem_usage(out.vm, out.rss);
 	end_t = high_resolution_clock::now();
-	time_span = duration_cast <duration <double, micro>> (end_t - start_t);
+	out.time = duration_cast <duration <double, micro>> (end_t - start_t);
 
-	cout << endl << "Program (process) statistics:" << endl;
-	cout << "\tProcess elapsed " << time_span.count()
-		<< " microseconds." << endl;
-	cout << "\tToken_tree tr consumed " << sizeof(tr) << " bytes" << endl;
-	cout << "\tVirtual Memory: " << vm << " kilobytes" << endl;
-	cout << "\tResident set size: " << rss << " kilobytes" << endl << endl;
+	return out;
+}
+
+int main()
+{
+	// Perform mutliple benchmarks
+	bench total {duration <double, micro> (), 0, 0};
+	bench mark;
+
+	for (int i = 0; i < TESTS; i++) {
+		mark = bench_mark();
+
+		total.time += mark.time;
+		total.rss += mark.rss;
+		total.vm += mark.vm;
+		total.mem += mark.mem;
+	}
+
+	cout << "--------------------------------------------------" << endl;
+	total.time /= TESTS;
+	// total.rss /= TESTS;
+	// total.mem /= TESTS;
+	// total.vm /= TESTS;
+
+	cout << endl << "Average program (process) statistics: " << TESTS << " tests performed " << endl;
+	cout << "\tProcess elapsed " << total.time.count()
+		<< " microseconds on average." << endl;
+	cout << "\tToken_tree tr consumed " << total.mem << " bytes" << endl;
+	cout << "\tVirtual Memory: " << total.vm << " kilobytes" << endl;
+	cout << "\tResident set size: " << total.rss << " kilobytes" << endl;
+	cout << "\tToken_tree tr consumed " << total.mem / TESTS << " bytes on average" << endl;
+	cout << "\tVirtual Memory: " << total.vm / TESTS << " kilobytes on average" << endl;
+	cout << "\tResident set size: " << total.rss / TESTS << " kilobytes on average" << endl << endl;
 
 	cout << "Library class statistics" << endl;
 	cout << "\tToken: " << sizeof(token) << " bytes" << endl;
