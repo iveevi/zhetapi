@@ -96,7 +96,9 @@ namespace tokens {
 				ss.seekg(i + 1);
 				while (ss >> c) {
 					if (c == ')') {
-						std::cout << "paren: " << paren << std::endl;
+						// read parenthesis
+						ss >> c;
+						// std::cout << "paren: " << paren << std::endl;
 						tr = trees::token_tree <data_t> (paren);
 						return {tr.value()->dptr->get_oper(), ss.tellg()};
 					}
@@ -135,6 +137,9 @@ namespace tokens {
 			opair = get_next(input, index);
 
                         if (opair.second == UINT64_MAX) {
+				// dp_var(input);
+				// dp_var(opair.first);
+				// dp_var(opair.second);
                                 tokens.push_back(opair.first);
                                 break;
                         }
@@ -145,7 +150,7 @@ namespace tokens {
 
 		// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
 
-		std::cout << "Returning" << std::endl;
+		// std::cout << "Returning" << std::endl;
 
 		return tokens;
 	}

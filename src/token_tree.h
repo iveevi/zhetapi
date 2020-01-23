@@ -10,6 +10,7 @@
 #include "defaults.h"
 #include "ttwrapper.h"
 #include "defaults.h"
+#include "debug.h"
 
 namespace tokens {
 	template <typename data_t>
@@ -64,7 +65,7 @@ namespace trees {
 	template <typename data_t>
 	token_tree <data_t> ::token_tree()
 	{
-		std::cout << "[DEFAULT CONSTRUCTOR]" << std::endl;
+		// std::cout << "[DEFAULT CONSTRUCTOR]" << std::endl;
 		root = nullptr;
 		cursor = nullptr;
 	}
@@ -98,22 +99,22 @@ namespace trees {
         template <typename data_t>
         token_tree <data_t> ::token_tree(std::vector <token *> &toks)
         {
-		std::cout << "[VECTOR CONSTRUCTOR]" << std::endl;
+		// std::cout << "[VECTOR CONSTRUCTOR]" << std::endl;
                 root = build(toks, 0);
                 cursor = root;
-		print();
-		std::cout << "Finished Construction" << std::endl;
+		// print();
+		// std::cout << "Finished Construction" << std::endl;
         }
 
         template <typename data_t>
         token_tree <data_t> ::token_tree(std::string input)
         {
-		std::cout << "[STRING CONSTRUCTOR]" << std::endl;
+		// std::cout << "[STRING CONSTRUCTOR]" << std::endl;
                 std::vector <token *> toks = parser <data_t>
                         ::get_tokens(input);
                 *this = token_tree(toks);
 		// std::cout << "---PRINTING---" << std::endl;
-		print();
+		// print();
 		// std::cout << "Finished String Construction" << std::endl;
         }
 
@@ -151,9 +152,15 @@ namespace trees {
 
                 tptr = &defaults <data_t> ::opers[defaults <data_t> ::NOPERS];
 
+		///dp_msg("Pringint out toks vector");
+		// stl_reveal(t, toks);
+
                 save = 0;
                 for (int i = 0; i < toks.size(); i++) {
                         t = toks[i];
+			///dp_msg("t:");
+			// std::cout << t << std::endl;
+			// std::cout << t->str() << std::endl;
                         if (t->caller() == token::OPERATION &&
                                 ((operation <operand <data_t>> *) (t))->get_order() <= 
                                 ((operation <operand <data_t>> *) (tptr))->get_order())

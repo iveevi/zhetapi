@@ -23,8 +23,8 @@ std::string to_str(T i)
 	return oss.str();
 }
 
-template <class T, class V, class P>
-void stl_reveal(const V &con,
+template <class T, class V, class P = std::string (*)(T)>
+void stl_reveal(T dm, const V &con,
 	P str = to_str, std::ostream
 	&os = std::cout)
 {

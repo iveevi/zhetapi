@@ -8,5 +8,5 @@ SRC	:= main.cpp
 
 all: $(SRC)
 	@echo BUILDING...
-	@$(CC) -o $(TARGET) -DDEBUG=0 $(SRC)
+	@$(CC) -o $(TARGET) -DDEBUG=0 -g $(SRC)
 	@echo DONE
