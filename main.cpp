@@ -25,7 +25,7 @@ using namespace chrono;
 
 #endif
 
-#define LINE 30
+#define LINE 75
 
 struct bench {
 	duration <double, micro> time;
@@ -71,7 +71,7 @@ bench bench_mark()
 
 	token_tree <double> tr(INPUT);
 
-	cout << "--------------------------------------------------" << endl;
+	cout << string(LINE, '-') << endl;
 	tr.print();
 	dp_ptr(tr.value()->dptr);
 	out.mem += sizeof(tr);
@@ -98,7 +98,7 @@ int main()
 		total.mem += mark.mem;
 	}
 
-	cout << "--------------------------------------------------" << endl;
+	cout << string(LINE, '-') << endl;
 	total.time /= TESTS;
 	// total.rss /= TESTS;
 	// total.mem /= TESTS;
