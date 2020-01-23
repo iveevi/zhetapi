@@ -8,9 +8,9 @@
 
 ## Benchmarks ##
 
- * January 22nd, 2020
-   * Input: 0.123 to 18.5645 - (456 * 2 ^ 32 / 89)
-   * Value Returned: -2.20057e+10
-   * Memory Used (RAM): 1828 KB
-   * Time Taken: 469.689 microseconds
+ * January 22nd, 2020 (Single Run):
+   * Input: ```0.123 to 18.5645 - (456 * 2 ^ 32 / 89)```
+   * Value Returned: ```-2.20057e+10```
+   * Memory Used (RAM): ```1828 KB```
+   * Time Taken: ```469.689 microseconds```
  
