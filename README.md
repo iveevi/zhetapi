@@ -14,10 +14,10 @@
    * Value Returned: ```-2.20057e+10```
    * Memory Used (RAM): ```1828 kilobytes```
    * Time Taken: ```469.689 microseconds```
-   * Computer Sepcs: Inter(R) Xeon(R) CPU @ 2.20 GHz, 60 GB RAM
+   * Computer Sepcs: ```Intel(R) Xeon(R) CPU @ 2.20 GHz, 60 GB RAM```
  * Januray 23rd, 2020 (1000 Runs):
    * Input: ```0.123 to 18.5645 - (456 * 2 ^ 32 / 89)```
    * Value Returned: ```2.20057e+10```
    * Memory Used (RAM): ```4.87576e+06 kilobytes, 4875.76 kilobytes on average```
    * Time Taken: ```170.234 microseconds on average```
-   * Computer Sepcs: Inter(R) Xeon(R) CPU @ 2.20 GHz, 60 GB RAM
+   * Computer Sepcs: ```Intel(R) Xeon(R) CPU @ 2.20 GHz, 60 GB RAM```
