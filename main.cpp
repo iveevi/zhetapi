@@ -16,12 +16,12 @@ using namespace trees;
 using namespace chrono;
 
 // Benchmarking Tools
-#define INPUT "0.123 to 18.5645 - (456 * 2 ^ 32 / 89)"
+#define INPUT "sin (10 * 90 / 3^7)"
 
-// Default # of tests to 10
+// Default # of tests to 1
 #ifndef TESTS
 
-#define TESTS 1000
+#define TESTS 1
 
 #endif
 

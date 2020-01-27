@@ -22,6 +22,7 @@ namespace tokens {
 		static operation <operand <data_t>> div_op;
                 static operation <operand <data_t>> exp_op;
 		static operation <operand <data_t>> mod_op;
+		static operation <operand <data_t>> sin_op;
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
@@ -32,6 +33,7 @@ namespace tokens {
 		static operand <data_t> div_f(const std::vector <operand <data_t>> &);
                 static operand <data_t> exp_f(const std::vector <operand <data_t>> &);
 		static operand <data_t> mod_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> sin_f(const std::vector <operand <data_t>> &);
 	public:
 		/* Virtualized functions */
 		type caller() const override;
@@ -47,7 +49,8 @@ namespace tokens {
                 static const int DIVOP = 0x3;
                 static const int EXPOP = 0x4;
 		static const int MODOP = 0x5;
-                static const int NOPERS = 0x6;
+		static const int SINOP = 0x6;
+                static const int NOPERS = 0x7;
 		
 		static operation <operand <data_t>> opers[];
 	};
@@ -115,6 +118,14 @@ namespace tokens {
 		return new_oper_t;
 	}
 
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::sin_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(sin(inputs[0].get()));
+		return new_oper_t;
+	}
+
 	// Defaults's default operations
         template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::none_op = operation <operand <data_t>>
@@ -151,6 +162,7 @@ namespace tokens {
         <std::string> {"^", "to", "to the power of"}, operation <operand <data_t>>::EXP_L3,
 	std::vector <std::string> {"8^8"});
 
+	// needs to be changed
 	template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::mod_op = operation <operand <data_t>>
 	(std::string {"mod_op"}, defaults <data_t> ::exp_f, 2, std::vector
@@ -158,10 +170,16 @@ namespace tokens {
 	std::vector <std::string> {"8%8"});
 
 	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::sin_op = operation <operand <data_t>>
+	(std::string {"sin_op"}, defaults <data_t> ::sin_f, 1, std::vector
+        <std::string> {"sin"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"sin 8"});
+
+	template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::opers[] = {
 		add_op, sub_op, mult_op,
                 div_op, exp_op, mod_op,
-		none_op
+		sin_op, none_op
 	};
 	
 	typedef defaults <def_t> defaults_t;
