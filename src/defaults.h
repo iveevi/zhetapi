@@ -23,6 +23,11 @@ namespace tokens {
                 static operation <operand <data_t>> exp_op;
 		static operation <operand <data_t>> mod_op;
 		static operation <operand <data_t>> sin_op;
+		static operation <operand <data_t>> cos_op;
+		static operation <operand <data_t>> tan_op;
+		static operation <operand <data_t>> csc_op;
+		static operation <operand <data_t>> sec_op;
+		static operation <operand <data_t>> cot_op;
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
@@ -34,6 +39,11 @@ namespace tokens {
                 static operand <data_t> exp_f(const std::vector <operand <data_t>> &);
 		static operand <data_t> mod_f(const std::vector <operand <data_t>> &);
 		static operand <data_t> sin_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> cos_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> tan_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> csc_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> sec_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> cot_f(const std::vector <operand <data_t>> &);
 	public:
 		/* Virtualized functions */
 		type caller() const override;
@@ -50,7 +60,12 @@ namespace tokens {
                 static const int EXPOP = 0x4;
 		static const int MODOP = 0x5;
 		static const int SINOP = 0x6;
-                static const int NOPERS = 0x7;
+		static const int COSOP = 0x7;
+		static const int TANOP = 0x8;
+		static const int CSCOP = 0x9;
+		static const int SECOP = 0x10;
+		static const int COTOP = 0x11;
+                static const int NOPERS = 0x12;
 		
 		static operation <operand <data_t>> opers[];
 	};
@@ -126,6 +141,46 @@ namespace tokens {
 		return new_oper_t;
 	}
 
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::cos_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(cos(inputs[0].get()));
+		return new_oper_t;
+	}
+
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::tan_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(tan(inputs[0].get()));
+		return new_oper_t;
+	}
+
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::csc_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(1.0 / sin(inputs[0].get()));
+		return new_oper_t;
+	}
+
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::sec_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(1.0 / cos (inputs[0].get()));
+		return new_oper_t;
+	}
+
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::cot_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(1.0 / tan(inputs[0].get()));
+		return new_oper_t;
+	}
+
 	// Defaults's default operations
         template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::none_op = operation <operand <data_t>>
@@ -174,6 +229,36 @@ namespace tokens {
 	(std::string {"sin_op"}, defaults <data_t> ::sin_f, 1, std::vector
         <std::string> {"sin"}, operation <operand <data_t>>::FUNC_LMAX,
 	std::vector <std::string> {"sin 8"});
+
+	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::cos_op = operation <operand <data_t>>
+	(std::string {"cos_op"}, defaults <data_t> ::cos_f, 1, std::vector
+        <std::string> {"cos"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"cos 8"});
+
+	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::tan_op = operation <operand <data_t>>
+	(std::string {"tan_op"}, defaults <data_t> ::tan_f, 1, std::vector
+        <std::string> {"tan"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"tan 8"});
+
+	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::csc_op = operation <operand <data_t>>
+	(std::string {"csc_op"}, defaults <data_t> ::csc_f, 1, std::vector
+        <std::string> {"csc"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"csc 8"});
+
+	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::sec_op = operation <operand <data_t>>
+	(std::string {"sec_op"}, defaults <data_t> ::sec_f, 1, std::vector
+        <std::string> {"sec"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"sec 8"});
+
+	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::cot_op = operation <operand <data_t>>
+	(std::string {"cot_op"}, defaults <data_t> ::cot_f, 1, std::vector
+        <std::string> {"cot"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"cot 8"});
 
 	template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::opers[] = {

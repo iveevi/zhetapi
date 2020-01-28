@@ -25,6 +25,7 @@ namespace trees {
                 ttwrapper(operation <operand <data_t>> *);
                 ttwrapper(const ttwrapper <data_t> &);
 
+		token *get_token() const;
 		operand <data_t> *get_oper() const;
 		operation <operand <data_t>> *get_opn() const;
 
@@ -94,6 +95,16 @@ namespace trees {
                         break;
                 }
         }
+
+	template <typename data_t>
+	token *ttwrapper <data_t> ::get_token() const
+	{
+		// Checks operand first
+		// (if both are valid pointers)
+		if (oper_t != nullptr)
+			return nullptr;
+		return opn_t;
+	}
 
 	template <typename data_t>
 	operand <data_t> *ttwrapper <data_t> ::get_oper() const

@@ -23,7 +23,7 @@ namespace tokens {
 		/* The following are states of parsing
 		 * the expressions, etc. Immediate resolution
 		 * is carried out */
-		enum STATES {NORM, PAREN};
+		enum STATES {NORM, PAREN, OPERATION};
 	public:
 		/* The following are static member functions that
 		 * give purpose to the tokens
@@ -96,9 +96,9 @@ namespace tokens {
 				ss.seekg(i + 1);
 				while (ss >> c) {
 					if (c == ')') {
-						// read parenthesis
-						ss >> c;
+						// dp_var(ss.tellg());
 						// std::cout << "paren: " << paren << std::endl;
+						// std::cout << "tellg(): " << ss.tellg() << std::endl;
 						tr = trees::token_tree <data_t> (paren);
 						return {tr.value()->dptr->get_oper(), ss.tellg()};
 					}
@@ -107,19 +107,32 @@ namespace tokens {
 			}
 
                         if (std::isdigit(c)) {
+				// dp_var(c)
+				// dp_var(ss.tellg())
                                 ss >> oper;
                                 return {new operand <data_t> (oper),
 					ss.tellg()};
                         }
 
-                        // c is an operation
-                        // or a grouping term
-                        if (!std::isspace(c))
+			// isspace is ok because we already
+			// took care of parenthesis (add
+			// function sensetivity to parentheses)
+			if (state == OPERATION && isspace(c)) {
+				state = NORM;
+
+				dp_msg("got here")
+				opn_index = get_matching(cumul);
+				dp_msg("lost after")
+				if (opn_index != defaults <data_t> ::NONOP)
+					return {&defaults <data_t> ::opers[opn_index], i + 1};
+			}
+
+                        // c is the start of an
+			// operation or function
+                        if (!std::isspace(c)) {
+				state = OPERATION;
                                 cumul += c;
-                        
-                        opn_index = get_matching(cumul);
-                        if (opn_index != defaults <data_t> ::NONOP)
-                                return {&defaults <data_t> ::opers[opn_index], i + 1};
+			}
                 }
 
                 return {nullptr, -1};
@@ -133,8 +146,16 @@ namespace tokens {
 		std::size_t index = 0;
 		int ses_len = 5;
 
+		// std::cout << std::string(10, '*') << std::endl;
+		// for (int i = 0; i < input.length(); i++)
+		// 	std::cout << i << "\t" << input[i] << std::endl;
+		// std::cout << std::endl;
+
 		while (true) {
 			opair = get_next(input, index);
+
+			// dp_var(opair.first->str());
+			// dp_var(opair.second)
 
                         if (opair.second == UINT64_MAX) {
 				// dp_var(input);
@@ -151,6 +172,7 @@ namespace tokens {
 		// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
 
 		// std::cout << "Returning" << std::endl;
+		// std::cout << std::string(5, '*') << std::endl;
 
 		return tokens;
 	}
@@ -158,7 +180,9 @@ namespace tokens {
         template <typename data_t>
         std::size_t parser <data_t> ::get_matching(std::string str)
         {
+		dp_msg("in matching process")
                 for (int i = 0; i < defaults <data_t> ::NOPERS; i++) {
+			dp_msg("looping")
                         if (defaults <data_t> ::opers[i].matches(str))
                                 return i;
                 }

@@ -124,8 +124,7 @@ namespace trees {
         {
                 list <node <ttwrapper <data_t>>> *leaves;
                 node <ttwrapper <data_t>> *out, *oa, *ob;
-                std::vector <token *> a, b;
-                ttwrapper <data_t> *ttptr;
+                ttwrapper <data_t> *ttptr, *tmp;
                 token *tptr, *t, norm;
                 std::size_t i, save;
                 
@@ -167,20 +166,69 @@ namespace trees {
                                 tptr = t, save = i;
                 }
 
-                a = std::vector <token *> (toks.begin(), toks.begin() + save);
-                b = std::vector <token *> (toks.begin() + (save + 1), toks.end());
-                ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
+		// dp_var(save);
+		// dp_var(tptr->str());
+		// stl_reveal(t, toks, [](token *t) {return t->str();});
 
-                out = new node <ttwrapper <data_t>> (ttptr);
-                oa = build(a, level + 1);
-                ob = build(b, level + 1);
+		ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
 
-                out->leaves = new list <node <ttwrapper <data_t>>>;
-                leaves = out->leaves;
-                leaves->curr = oa;
-                leaves->next = new list <node <ttwrapper <data_t>>>;
-                leaves->next->curr = ob;
-                leaves->next->next = nullptr;
+		// Perform seperate algorithm for functions
+		if (((operation <operand <data_t>> *) (tptr))->get_order() ==
+			operation <operand <data_t>> ::FUNC_LMAX) {
+			// Since functions have highest priority
+			// the stage at which they are the leading
+			// operation (root of subtree) is when all
+			// its nodes (operands) belong to it
+			// therefore, we just need to transfer operands
+			// to the operation in order of parsing
+			
+			// (until silent multiplication such as 3sin x)
+			// only consider operands after the operation
+
+			// dp_var(toks.size());
+
+			out = new node <ttwrapper <data_t>> (ttptr);
+			out->leaves = new list <node <ttwrapper <data_t>>>;
+
+			leaves = out->leaves;
+			for (int i = save + 1; i < toks.size(); i++) {
+				// dp_msg("looping")
+				// dp_var(toks[i]->str())
+
+				if (leaves == nullptr)
+					leaves = new list <node <ttwrapper <data_t>>>;
+
+				tmp = new ttwrapper <data_t> ((operand <data_t> *) toks[i]);
+				leaves->curr = new node <ttwrapper <data_t>> (tmp);
+				leaves->next = nullptr;
+				leaves = leaves->next;
+			}
+
+			// dp_msg("DONE")
+		} else { // Operation is otherwise binary
+			std::vector <token *> a, b;
+
+			a = std::vector <token *> (toks.begin(), toks.begin() + save);
+
+			// dp_msg("a:")
+			// stl_reveal(tptr, a, [](token *t) {return t->str();});
+
+			b = std::vector <token *> (toks.begin() + (save + 1), toks.end());
+
+			// dp_msg("b:")
+			// stl_reveal(tptr, b, [](token *t) {return t->str();});
+
+			out = new node <ttwrapper <data_t>> (ttptr);
+			oa = build(a, level + 1);
+			ob = build(b, level + 1);
+
+			out->leaves = new list <node <ttwrapper <data_t>>>;
+			leaves = out->leaves;
+			leaves->curr = oa;
+			leaves->next = new list <node <ttwrapper <data_t>>>;
+			leaves->next->curr = ob;
+			leaves->next->next = nullptr;
+		}
 
                 return out;
         }
@@ -361,15 +409,21 @@ namespace trees {
                         // Gather all the operands
                         // or values (in general) into
                         // a vector
+			// dp_var(nd->dptr->get_token()->str())
+			// dp_var(nd->leaves->size())
                         for (index = 0; index < nd->leaves->size(); index++) {
                                 // Should throw error if leaf isnt an
                                 // operation or an operand
+				
+				//dp_var(nd->leaves->get(index)->curr->dptr->get_token()->str())
                                 switch (nd->leaves->get(index)->curr->dptr->t) {
                                 case token::OPERAND:
+					// dp_msg("operand")
                                         vals.push_back(*(nd->leaves->get(index)
                                                 ->curr->dptr->get_oper()));
                                         break;
                                 case token::OPERATION:
+					// dp_msg("operation")
                                         // Return value if leaf is an operation
                                         // is always an operand
                                         vals.push_back(*(getval(nd->leaves->
@@ -377,6 +431,8 @@ namespace trees {
                                         break;
                                 }
                         }
+
+			// dp_var(nd->dptr->get_opn()->compute(vals))
 
                         return new node <ttwrapper <data_t>> (ttwrapper <data_t>
                                 (nd->dptr->get_opn()->compute(vals)));

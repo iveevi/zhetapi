@@ -16,7 +16,7 @@ using namespace trees;
 using namespace chrono;
 
 // Benchmarking Tools
-#define INPUT "sin (10 * 90 / 3^7)"
+#define INPUT "sin (10 * 90 / 3^7) ^ 2 + 10 / 18 + 90"
 
 // Default # of tests to 1
 #ifndef TESTS
