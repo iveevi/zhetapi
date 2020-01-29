@@ -100,7 +100,12 @@ namespace tokens {
 						// std::cout << "paren: " << paren << std::endl;
 						// std::cout << "tellg(): " << ss.tellg() << std::endl;
 						tr = trees::token_tree <data_t> (paren);
-						return {tr.value()->dptr->get_oper(), ss.tellg()};
+
+						if (ss.tellg() >= input.length())
+							return {tr.value()->dptr->get_oper(),
+								-1};
+						return {tr.value()->dptr->get_oper(),
+							ss.tellg()};
 					}
 					paren += c;
 				}
@@ -117,22 +122,24 @@ namespace tokens {
 			// isspace is ok because we already
 			// took care of parenthesis (add
 			// function sensetivity to parentheses)
-			if (state == OPERATION && isspace(c)) {
-				state = NORM;
+			// if (state == OPERATION && isspace(c)) {
+			// 	state = NORM;
 
-				dp_msg("got here")
-				opn_index = get_matching(cumul);
-				dp_msg("lost after")
-				if (opn_index != defaults <data_t> ::NONOP)
-					return {&defaults <data_t> ::opers[opn_index], i + 1};
-			}
+				
+			// }
 
                         // c is the start of an
 			// operation or function
                         if (!std::isspace(c)) {
-				state = OPERATION;
+				//state = OPERATION;
                                 cumul += c;
 			}
+
+			// dp_msg("got here")
+			opn_index = get_matching(cumul);
+			// dp_msg("lost after")
+			if (opn_index != defaults <data_t> ::NONOP)
+				return {&defaults <data_t> ::opers[opn_index], i + 1};
                 }
 
                 return {nullptr, -1};
@@ -146,16 +153,17 @@ namespace tokens {
 		std::size_t index = 0;
 		int ses_len = 5;
 
-		// std::cout << std::string(10, '*') << std::endl;
-		// for (int i = 0; i < input.length(); i++)
-		// 	std::cout << i << "\t" << input[i] << std::endl;
-		// std::cout << std::endl;
+		std::cout << std::string(10, '*') << std::endl;
+		for (int i = 0; i < input.length(); i++)
+			std::cout << i << "\t" << input[i] << std::endl;
+		std::cout << std::endl;
+		// dp_var(input)
 
 		while (true) {
 			opair = get_next(input, index);
 
-			// dp_var(opair.first->str());
-			// dp_var(opair.second)
+			dp_var(opair.first->str());
+			dp_var(opair.second)
 
                         if (opair.second == UINT64_MAX) {
 				// dp_var(input);
@@ -172,7 +180,7 @@ namespace tokens {
 		// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
 
 		// std::cout << "Returning" << std::endl;
-		// std::cout << std::string(5, '*') << std::endl;
+		std::cout << std::string(5, '*') << std::endl;
 
 		return tokens;
 	}
@@ -180,12 +188,17 @@ namespace tokens {
         template <typename data_t>
         std::size_t parser <data_t> ::get_matching(std::string str)
         {
-		dp_msg("in matching process")
+		// dp_var(str)
+		// dp_msg("in matching process")
                 for (int i = 0; i < defaults <data_t> ::NOPERS; i++) {
-			dp_msg("looping")
+			// dp_msg("looping")
+			//dp_var(i)
+			//dp_var(defaults <data_t> ::opers[i].str())
                         if (defaults <data_t> ::opers[i].matches(str))
                                 return i;
                 }
+
+		// dp_msg("returning")
 
                 return defaults <data_t> ::NONOP;
         }

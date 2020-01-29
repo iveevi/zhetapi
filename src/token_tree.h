@@ -151,8 +151,8 @@ namespace trees {
 
                 tptr = &defaults <data_t> ::opers[defaults <data_t> ::NOPERS];
 
-		///dp_msg("Pringint out toks vector");
-		// stl_reveal(t, toks);
+		// dp_msg("Pringint out toks vector");
+		// stl_reveal(t, toks, [](token *t) {return t->str();});
 
                 save = 0;
                 for (int i = 0; i < toks.size(); i++) {

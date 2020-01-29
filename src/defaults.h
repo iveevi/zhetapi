@@ -52,20 +52,20 @@ namespace tokens {
 		/* The following is the array containing
 		 * all the default operations, and constants
 		 * that represents certain things */
-                static const int NONOP = -0x1;
-		static const int ADDOP = 0x0;
-                static const int SUBOP = 0x1;
-                static const int MULTOP = 0x2;
-                static const int DIVOP = 0x3;
-                static const int EXPOP = 0x4;
-		static const int MODOP = 0x5;
-		static const int SINOP = 0x6;
-		static const int COSOP = 0x7;
-		static const int TANOP = 0x8;
-		static const int CSCOP = 0x9;
-		static const int SECOP = 0x10;
-		static const int COTOP = 0x11;
-                static const int NOPERS = 0x12;
+                static const int NONOP = -1;
+		static const int ADDOP = 0;
+                static const int SUBOP = 1;
+                static const int MULTOP = 2;
+                static const int DIVOP = 3;
+                static const int EXPOP = 4;
+		static const int MODOP = 5;
+		static const int SINOP = 6;
+		static const int COSOP = 7;
+		static const int TANOP = 8;
+		static const int CSCOP = 9;
+		static const int SECOP = 10;
+		static const int COTOP = 11;
+                static const int NOPERS = 12;
 		
 		static operation <operand <data_t>> opers[];
 	};
@@ -264,7 +264,9 @@ namespace tokens {
 	operation <operand <data_t>> defaults <data_t> ::opers[] = {
 		add_op, sub_op, mult_op,
                 div_op, exp_op, mod_op,
-		sin_op, none_op
+		sin_op, cos_op, tan_op,
+		csc_op, sec_op, cot_op,
+		none_op
 	};
 	
 	typedef defaults <def_t> defaults_t;
