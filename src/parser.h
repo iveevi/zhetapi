@@ -86,29 +86,36 @@ namespace tokens {
 				break;
 			case ')':
 				// Throw error
-				std::cout << "Error - Missing \
-					opening parenthesis" << std::endl;
+				std::cout << "Error - Missing "
+					<< "opening parenthesis" << std::endl;
 				return {nullptr, -1};
 			}
 
 			if (state == PAREN) {
 				// Ignore the parenthesis
-				ss.seekg(i + 1);
-				while (ss >> c) {
-					if (c == ')') {
+				// ss.seekg(i + 1);
+				for (int si = i + 1; si < input.length(); si++) {
+					if (input[si] == ')') {
+						dp_var(paren);
+						dp_msg("IMPORTANT---")
+						dp_var(si)
+						dp_var(input.length());
 						// dp_var(ss.tellg());
 						// std::cout << "paren: " << paren << std::endl;
 						// std::cout << "tellg(): " << ss.tellg() << std::endl;
 						tr = trees::token_tree <data_t> (paren);
 
-						if (ss.tellg() >= input.length())
+						if (si >= input.length() - 1)
 							return {tr.value()->dptr->get_oper(),
 								-1};
 						return {tr.value()->dptr->get_oper(),
-							ss.tellg()};
+							si + 1};
 					}
-					paren += c;
+					paren += input[si];
 				}
+
+				// Add auto completion later
+				// assuming parenthesis
 			}
 
                         if (std::isdigit(c)) {

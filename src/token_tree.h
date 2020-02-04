@@ -2,6 +2,7 @@
 #define TOKEN_TREE_H
 
 // C++ Standard Libraries
+#include <string>
 #include <vector>
 
 // Custom Built Libraries
@@ -127,6 +128,8 @@ namespace trees {
                 ttwrapper <data_t> *ttptr, *tmp;
                 token *tptr, *t, norm;
                 std::size_t i, save;
+
+		dp_msg("Entering")
                 
                 if (toks.size() == 0)
                         return nullptr;
@@ -152,7 +155,13 @@ namespace trees {
                 tptr = &defaults <data_t> ::opers[defaults <data_t> ::NOPERS];
 
 		// dp_msg("Pringint out toks vector");
-		// stl_reveal(t, toks, [](token *t) {return t->str();});
+		stl_reveal(t, toks, [](token *t) {
+			if (t == nullptr)
+				return std::string("nullptr");
+			return t->str();
+		});
+
+		dp_msg("Entering save loop")
 
                 save = 0;
                 for (int i = 0; i < toks.size(); i++) {
@@ -166,8 +175,8 @@ namespace trees {
                                 tptr = t, save = i;
                 }
 
-		// dp_var(save);
-		// dp_var(tptr->str());
+		dp_var(save);
+		dp_var(tptr->str());
 		// stl_reveal(t, toks, [](token *t) {return t->str();});
 
 		ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
@@ -195,14 +204,23 @@ namespace trees {
 				// dp_msg("looping")
 				// dp_var(toks[i]->str())
 
-				if (leaves == nullptr)
-					leaves = new list <node <ttwrapper <data_t>>>;
-
 				tmp = new ttwrapper <data_t> ((operand <data_t> *) toks[i]);
 				leaves->curr = new node <ttwrapper <data_t>> (tmp);
-				leaves->next = nullptr;
-				leaves = leaves->next;
+				
+				// Allocate only if next loop
+				// will execute
+				if (i + 1 < toks.size()) {
+					leaves->next = new list <node <ttwrapper <data_t>>>;
+					leaves = leaves->next;
+				}
 			}
+
+			// conserve memory
+			// delete leaves->next;
+
+			// dp_var(out->leaves->size());
+
+			print(out, 1, 0);
 
 			// dp_msg("DONE")
 		} else { // Operation is otherwise binary
@@ -398,6 +416,8 @@ namespace trees {
                 node <ttwrapper <data_t>> *output;
                 int index;
 
+		// dp_msg("Here");
+
                 output = new node <ttwrapper <data_t>>;
                 // Return operand wrapper if operand,
                 // returns operand wrapper value if
@@ -409,8 +429,8 @@ namespace trees {
                         // Gather all the operands
                         // or values (in general) into
                         // a vector
-			// dp_var(nd->dptr->get_token()->str())
-			// dp_var(nd->leaves->size())
+			//dp_var(nd->dptr->get_token()->str())
+			//dp_var(nd->leaves->size())
                         for (index = 0; index < nd->leaves->size(); index++) {
                                 // Should throw error if leaf isnt an
                                 // operation or an operand
@@ -434,10 +454,12 @@ namespace trees {
 
 			// dp_var(nd->dptr->get_opn()->compute(vals))
 
+			//dp_msg("returning valid");
                         return new node <ttwrapper <data_t>> (ttwrapper <data_t>
                                 (nd->dptr->get_opn()->compute(vals)));
                 }
 
+		//dp_msg("returning invalid");
                 return nullptr;
         }
 

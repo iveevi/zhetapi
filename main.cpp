@@ -16,7 +16,7 @@ using namespace trees;
 using namespace chrono;
 
 // Benchmarking Tools
-#define INPUT "3 * sin (10 * 90 / 3^7) ^ 2 + 10 / 18 + 90 * cos (90 * 9)"
+#define INPUT "(log 2 8) * sin (3.1415926535 / 2) + tan(3.141526535 / 4)"
 
 // Default # of tests to 1
 #ifndef TESTS
@@ -61,7 +61,7 @@ void mem_usage(double &vm_t, double &rss_t)
 }
 
 // Benchmark function
-bench bench_mark()
+bench bench_mark(int num)
 {
 	cout << "Beginning Benchmark Test:" << endl << endl;
 	cout << "Input: " << INPUT << endl << endl;
@@ -72,6 +72,7 @@ bench bench_mark()
 	token_tree <double> tr(INPUT);
 
 	cout << string(LINE, '-') << endl;
+	cout << "TEST #" << num << " - ";
 	tr.print();
 	dp_ptr(tr.value()->dptr);
 	out.mem += sizeof(tr);
@@ -90,7 +91,7 @@ int main()
 	bench mark;
 
 	for (int i = 0; i < TESTS; i++) {
-		mark = bench_mark();
+		mark = bench_mark(i + 1);
 
 		total.time += mark.time;
 		total.rss += mark.rss;

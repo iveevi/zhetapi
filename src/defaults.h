@@ -3,6 +3,7 @@
 
 // C++ Standard Libraries
 #include <cmath>
+#include <math.h>
 
 // Cusotm Built Libraries
 #include "token.h"
@@ -28,6 +29,7 @@ namespace tokens {
 		static operation <operand <data_t>> csc_op;
 		static operation <operand <data_t>> sec_op;
 		static operation <operand <data_t>> cot_op;
+		static operation <operand <data_t>> log_op;
 
 		/* The following are the functions
 		 * correspodning to each of the operations */
@@ -44,6 +46,7 @@ namespace tokens {
 		static operand <data_t> csc_f(const std::vector <operand <data_t>> &);
 		static operand <data_t> sec_f(const std::vector <operand <data_t>> &);
 		static operand <data_t> cot_f(const std::vector <operand <data_t>> &);
+		static operand <data_t> log_f(const std::vector <operand <data_t>> &);
 	public:
 		/* Virtualized functions */
 		type caller() const override;
@@ -65,7 +68,8 @@ namespace tokens {
 		static const int CSCOP = 9;
 		static const int SECOP = 10;
 		static const int COTOP = 11;
-                static const int NOPERS = 12;
+		static const int LOGOP = 12;
+                static const int NOPERS = 13;
 		
 		static operation <operand <data_t>> opers[];
 	};
@@ -181,6 +185,15 @@ namespace tokens {
 		return new_oper_t;
 	}
 
+	template <typename data_t>
+	operand <data_t> defaults <data_t> ::log_f(const std::vector <operand <data_t>> &inputs)
+	{
+		// Need to convert to integer later
+		operand <data_t> new_oper_t = operand <data_t>(log10(inputs[1].get())
+			/ log10(inputs[0].get()));
+		return new_oper_t;
+	}
+
 	// Defaults's default operations
         template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::none_op = operation <operand <data_t>>
@@ -261,12 +274,18 @@ namespace tokens {
 	std::vector <std::string> {"cot 8"});
 
 	template <typename data_t>
+	operation <operand <data_t>> defaults <data_t> ::log_op = operation <operand <data_t>>
+	(std::string {"log_op"}, defaults <data_t> ::log_f, 2, std::vector
+        <std::string> {"log"}, operation <operand <data_t>>::FUNC_LMAX,
+	std::vector <std::string> {"cot 8"});
+
+	template <typename data_t>
 	operation <operand <data_t>> defaults <data_t> ::opers[] = {
 		add_op, sub_op, mult_op,
                 div_op, exp_op, mod_op,
 		sin_op, cos_op, tan_op,
 		csc_op, sec_op, cot_op,
-		none_op
+		log_op, none_op
 	};
 	
 	typedef defaults <def_t> defaults_t;
