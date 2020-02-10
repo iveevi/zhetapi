@@ -1,47 +1,30 @@
 #ifndef NODE_H
 #define NODE_H
 
+// C++ Standard Libraries
+#include <vector>
+
 // Custom Built Libraries
 #include "list.h"
+#include "ttwrapper.h"
 
-namespace trees {
-	// Beginning of node class
-	template <typename data_t>
-	struct node {
-		data_t *dptr;
-		node *parent;
-		list <node> *leaves;
+// remove later (usage of namespaces)
+using namespace trees;
 
-                node();
-                node(data_t);
-                node(data_t *);
-	};
+// Beginning of node class
+template <typename data_t>
+struct node {
+	ttwrapper <data_t> *val;
+	std::vector <node *> leaves;
 
-        template <typename data_t>
-        node <data_t> ::node()
-        {
-                dptr = nullptr;
-                parent = nullptr;
-                leaves = nullptr;
-        }
+	node();
+	node(data_t);
+};
 
-        template <typename data_t>
-        node <data_t> ::node(data_t data)
-        {
-                dptr = new data_t(data);
-                parent = nullptr;
-                leaves = nullptr;      
-        }
-	
-	// Use this constructor to explicitly
-        // use the same address as passed
-        template <typename data_t>
-        node <data_t> ::node (data_t *data)
-        {
-                dptr = data;
-                parent = nullptr;
-                leaves = nullptr;
-        }
-}
+template <typename data_t>
+node <data_t> ::node() {}
+
+template <typename data_t>
+node <data_t> ::node(data_t data) : val(data) {}
 
 #endif

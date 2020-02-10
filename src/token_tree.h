@@ -24,6 +24,8 @@ namespace trees {
 	class token_tree {
 		node <ttwrapper <data_t>> *root;
 		node <ttwrapper <data_t>> *cursor;
+
+		void free(node <ttwrapper <data_t>> *);
 	public:
 		// Constructors
 		token_tree();
@@ -31,6 +33,9 @@ namespace trees {
 		explicit token_tree(const ttwrapper <data_t> &);
                 explicit token_tree(std::vector <token *> &);
                 explicit token_tree(std::string);
+
+		// Destructor
+		~token_tree();
 
                 node <ttwrapper <data_t>> *build(std::vector
                         <token *> &, int);
@@ -119,6 +124,31 @@ namespace trees {
 		// std::cout << "Finished String Construction" << std::endl;
         }
 
+	template <typename data_t>
+	token_tree <data_t> ::~token_tree()
+	{
+		std::cout << "-----DESTROYING TREE-----" << std::endl;
+
+		free(root);
+	}
+
+	template <typename data_t>
+	void token_tree <data_t> ::free(node <ttwrapper <data_t>> *nd)
+	{
+		if (nd == nullptr)
+			return;
+
+		if (nd->leaves != nullptr) {
+			for (int i = nd->leaves->size() - 1; i >= 0; i--) {
+				free(nd->leaves->get(i)->curr);
+				delete nd->leaves->get(i);
+			}
+		}
+
+		delete nd;
+	}
+
+	// make private
         template <typename data_t>
         node <ttwrapper <data_t>> *token_tree <data_t> ::build(std::vector
                 <token *> &toks, int level)
@@ -205,20 +235,22 @@ namespace trees {
 				// dp_var(toks[i]->str())
 
 				tmp = new ttwrapper <data_t> ((operand <data_t> *) toks[i]);
-				leaves->curr = new node <ttwrapper <data_t>> (tmp);
+				out->leaves->curr = new node <ttwrapper <data_t>> (tmp);
 				
 				// Allocate only if next loop
 				// will execute
 				if (i + 1 < toks.size()) {
-					leaves->next = new list <node <ttwrapper <data_t>>>;
-					leaves = leaves->next;
+					out->leaves->next = new list <node <ttwrapper <data_t>>>;
+					out->leaves = out->leaves->next;
 				}
 			}
 
 			// conserve memory
 			// delete leaves->next;
+			out->leaves = leaves;
 
-			// dp_var(out->leaves->size());
+			dp_var(leaves->size());
+			dp_var(out->leaves->size());
 
 			print(out, 1, 0);
 
