@@ -73,7 +73,7 @@ namespace tokens {
 
                 operand <data_t> oper;
 		
-		trees::token_tree <data_t> tr;
+		token_tree <data_t> tr;
 
                 ss.seekg(index);
 
@@ -96,19 +96,19 @@ namespace tokens {
 				// ss.seekg(i + 1);
 				for (int si = i + 1; si < input.length(); si++) {
 					if (input[si] == ')') {
-						dp_var(paren);
+						/*dp_var(paren);
 						dp_msg("IMPORTANT---")
 						dp_var(si)
-						dp_var(input.length());
+						dp_var(input.length());*/
 						// dp_var(ss.tellg());
 						// std::cout << "paren: " << paren << std::endl;
 						// std::cout << "tellg(): " << ss.tellg() << std::endl;
-						tr = trees::token_tree <data_t> (paren);
+						tr = token_tree <data_t> (paren);
 
 						if (si >= input.length() - 1)
-							return {tr.value()->dptr->get_oper(),
+							return {new operand <data_t> (tr.value()),
 								-1};
-						return {tr.value()->dptr->get_oper(),
+						return {new operand <data_t> (tr.value()),
 							si + 1};
 					}
 					paren += input[si];
@@ -160,17 +160,17 @@ namespace tokens {
 		std::size_t index = 0;
 		int ses_len = 5;
 
-		std::cout << std::string(10, '*') << std::endl;
+		/*std::cout << std::string(10, '*') << std::endl;
 		for (int i = 0; i < input.length(); i++)
 			std::cout << i << "\t" << input[i] << std::endl;
-		std::cout << std::endl;
+		std::cout << std::endl;*/
 		// dp_var(input)
 
 		while (true) {
 			opair = get_next(input, index);
 
-			dp_var(opair.first->str());
-			dp_var(opair.second)
+			//dp_var(opair.first->str());
+			//dp_var(opair.second)
 
                         if (opair.second == UINT64_MAX) {
 				// dp_var(input);

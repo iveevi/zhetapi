@@ -73,8 +73,9 @@ bench bench_mark(int num)
 
 	cout << string(LINE, '-') << endl;
 	cout << "TEST #" << num << " - ";
+	
 	tr.print();
-	dp_ptr(tr.value()->dptr);
+	dp_var(tr.value());
 	out.mem += sizeof(tr);
 	
 	mem_usage(out.vm, out.rss);
@@ -123,7 +124,4 @@ int main()
 	cout << "\tDefaults: " << sizeof(defaults <double>) << " bytes" << endl;
 	cout << "\tVariable: " << sizeof(variable <double>) << " bytes" << endl;
 	cout << "\tToken_tree: " << sizeof(token_tree <double>) << " bytes" << endl;
-	cout << "\tTtwrapper: " << sizeof(ttwrapper <double>) << " bytes" << endl;
-	cout << "\tNode: " << sizeof(node <ttwrapper <double>>) << " bytes" << endl;
-	cout << "\tList: " << sizeof(list <node <ttwrapper <double>>>) << " bytes" << endl;
 }

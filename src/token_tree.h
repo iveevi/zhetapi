@@ -7,546 +7,341 @@
 
 // Custom Built Libraries
 #include "tree.h"
-#include "node.h"
 #include "defaults.h"
-#include "ttwrapper.h"
 #include "defaults.h"
 #include "debug.h"
+#include "token.h"
 
 namespace tokens {
-	template <typename data_t>
+	template <typename T>
 	class parser;
 }
 
-namespace trees {
-	// Beginning of token_tree class
-	template <typename data_t>
-	class token_tree {
-		node <ttwrapper <data_t>> *root;
-		node <ttwrapper <data_t>> *cursor;
+using namespace tokens;
 
-		void free(node <ttwrapper <data_t>> *);
-	public:
-		// Constructors
-		token_tree();
-		explicit token_tree(ttwrapper <data_t> *);
-		explicit token_tree(const ttwrapper <data_t> &);
-                explicit token_tree(std::vector <token *> &);
-                explicit token_tree(std::string);
-
-		// Destructor
-		~token_tree();
-
-                node <ttwrapper <data_t>> *build(std::vector
-                        <token *> &, int);
-
-		// implement later
-
-		// token_tree(const token_tree &);
-		// implement later
-
-		void reset_cursor();
-
-		void set_cursor(ttwrapper <data_t> *);
-		void set_cursor(const ttwrapper <data_t> &);
-
-		void add_branch(ttwrapper <data_t> *);
-		void add_branch(const ttwrapper <data_t> &);
-                void add_branch(const token_tree <data_t> &);
-
-		void move_left();
-		void move_right();
-		void move_up();
-		void move_down(std::size_t);
-
-		node <ttwrapper <data_t>> *current();
-
-                node <ttwrapper <data_t>> *value();
-
-		void print() const;
-		void print(node <ttwrapper <data_t>> *, int, int) const;
+// Beginning of token_tree class
+template <typename T>
+class token_tree {
+public:
+	struct node {
+		token *tok;
+		std::vector <node *> leaves;
 	};
+private:
+	node *root;
+	node *cursor;
 
-	// token_tree implementation
-	template <typename data_t>
-	token_tree <data_t> ::token_tree()
-	{
-		// std::cout << "[DEFAULT CONSTRUCTOR]" << std::endl;
-		root = nullptr;
-		cursor = nullptr;
+	void free(node *);
+public:
+	// Constructors
+	token_tree();
+	
+	/* ignore these constructors for now
+	explicit token_tree(ttwrapper <T> *);
+	explicit token_tree(const ttwrapper <T> &);
+	*/
+
+	explicit token_tree(std::vector <token *> &);
+	explicit token_tree(std::string);
+
+	// Destructor
+	~token_tree();
+
+	// make private and try to add const passing
+	node *build(std::vector <token *> &);
+
+	// implement later
+
+	// token_tree(const token_tree &);
+	// implement later
+
+	// keep this, but make getval private
+	const T &value() const;
+
+	const T &getval(node *) const;
+
+	// keep this
+	void print() const;
+
+	// make private/protected
+	void print(node *, int, int) const;
+
+	// dummy class, rename
+	class incomputable_exception {};
+};
+
+// token_tree implementation
+template <typename T>
+token_tree <T> ::token_tree()
+{
+	// std::cout << "[DEFAULT CONSTRUCTOR]" << std::endl;
+	root = nullptr;
+	cursor = nullptr;
+}
+
+/*template <typename T>
+token_tree <T> ::token_tree(ttwrapper <T> *tptr)
+{
+	root = new node <ttwrapper <T> *>;
+
+	root->parent = nullptr;
+	root->val = tptr;
+	root->leaves = nullptr;
+
+	cursor = root;
+}
+
+template <typename T>
+token_tree <T> ::token_tree(const ttwrapper <T> &tok)
+{
+	root = new node <ttwrapper <T> *>;
+	
+	root->parent = nullptr;
+	// Make copy constructor for
+	// all tokens
+	root->val = new token(tok);
+	root->leaves = nullptr;
+
+	cursor = root;
+}*/
+
+template <typename T>
+token_tree <T> ::token_tree(std::vector <token *> &toks)
+{
+	// std::cout << "[VECTOR CONSTRUCTOR]" << std::endl;
+	root = build(toks);
+	cursor = root;
+	// print();
+	// std::cout << "Finished Construction" << std::endl;
+}
+
+template <typename T>
+token_tree <T> ::token_tree(std::string input)
+{
+	// std::cout << "[STRING CONSTRUCTOR]" << std::endl;
+	std::vector <token *> toks = parser <T>
+		::get_tokens(input);
+	*this = token_tree(toks);
+	// std::cout << "---PRINTING---" << std::endl;
+	// print();
+	// std::cout << "Finished String Construction" << std::endl;
+}
+
+template <typename T>
+token_tree <T> ::~token_tree()
+{
+	//std::cout << "-----DESTROYING TREE-----" << std::endl;
+
+	// fix later free(root);
+}
+
+template <typename T>
+void token_tree <T> ::free(node *nd)
+{
+	if (nd == nullptr)
+		return;
+
+	for (auto it = nd->leaves.begin(); it != nd->leaves.end(); it++)
+		free(*it);
+
+	delete nd;
+}
+
+// make private
+template <typename T>
+typename token_tree <T> ::node *token_tree <T> ::build(std::vector <token *> &toks)
+{
+	node *out, *oa, *ob;
+	token *tptr, *t, norm, *tmp;
+	std::size_t i, save;
+
+	//dp_msg("Entering")
+	stl_reveal(t, toks, [](token *t) {
+		if (t == nullptr)
+			return std::string("nullptr");
+		return t->str();
+	});
+	
+	if (toks.size() == 0)
+		return nullptr;
+
+	if (toks.size() == 1)
+		return new node {toks[0], {}};
+
+	tptr = &defaults <T> ::opers[defaults <T> ::NOPERS];
+
+	// dp_msg("Pringint out toks vector");
+
+	//dp_msg("Entering save loop")
+
+	save = 0;
+	for (int i = 0; i < toks.size(); i++) {
+		t = toks[i];
+		///dp_msg("t:");
+		// std::cout << t << std::endl;
+		// std::cout << t->str() << std::endl;
+		if (t->caller() == token::OPERATION &&
+			((operation <operand <T>> *) (t))->get_order() <= 
+			((operation <operand <T>> *) (tptr))->get_order())
+			tptr = t, save = i;
 	}
 
-	template <typename data_t>
-	token_tree <data_t> ::token_tree(ttwrapper <data_t> *tptr)
-	{
-		root = new node <ttwrapper <data_t> *>;
+	//dp_var(save);
+	//dp_var(tptr->str());
+	// stl_reveal(t, toks, [](token *t) {return t->str();});
 
-		root->parent = nullptr;
-		root->dptr = tptr;
-		root->leaves = nullptr;
-
-		cursor = root;
-	}
-
-	template <typename data_t>
-	token_tree <data_t> ::token_tree(const ttwrapper <data_t> &tok)
-	{
-		root = new node <ttwrapper <data_t> *>;
+	// Perform seperate algorithm for functions
+	if (((operation <operand <T>> *) (tptr))->get_order() ==
+		operation <operand <T>> ::FUNC_LMAX) {
+		// Since functions have highest priority
+		// the stage at which they are the leading
+		// operation (root of subtree) is when all
+		// its nodes (operands) belong to it
+		// therefore, we just need to transfer operands
+		// to the operation in order of parsing
 		
-		root->parent = nullptr;
-		// Make copy constructor for
-		// all tokens
-		root->dptr = new token(tok);
-		root->leaves = nullptr;
+		// (until silent multiplication such as 3sin x)
+		// only consider operands after the operation
 
-		cursor = root;
-	}
+		// dp_var(toks.size());
 
-        template <typename data_t>
-        token_tree <data_t> ::token_tree(std::vector <token *> &toks)
-        {
-		// std::cout << "[VECTOR CONSTRUCTOR]" << std::endl;
-                root = build(toks, 0);
-                cursor = root;
-		// print();
-		// std::cout << "Finished Construction" << std::endl;
-        }
+		out = new node {tptr, {}};
+		for (int i = save + 1; i < toks.size(); i++) {
+			// dp_msg("looping")
+			// dp_var(toks[i]->str())
 
-        template <typename data_t>
-        token_tree <data_t> ::token_tree(std::string input)
-        {
-		// std::cout << "[STRING CONSTRUCTOR]" << std::endl;
-                std::vector <token *> toks = parser <data_t>
-                        ::get_tokens(input);
-                *this = token_tree(toks);
-		// std::cout << "---PRINTING---" << std::endl;
-		// print();
-		// std::cout << "Finished String Construction" << std::endl;
-        }
-
-	template <typename data_t>
-	token_tree <data_t> ::~token_tree()
-	{
-		std::cout << "-----DESTROYING TREE-----" << std::endl;
-
-		free(root);
-	}
-
-	template <typename data_t>
-	void token_tree <data_t> ::free(node <ttwrapper <data_t>> *nd)
-	{
-		if (nd == nullptr)
-			return;
-
-		if (nd->leaves != nullptr) {
-			for (int i = nd->leaves->size() - 1; i >= 0; i--) {
-				free(nd->leaves->get(i)->curr);
-				delete nd->leaves->get(i);
-			}
+			//tmp = new ttwrapper <T> ((operand <T> *) toks[i]);
+			out->leaves.push_back(new node {toks[i], {}});
 		}
 
-		delete nd;
+		//print(out, 1, 0);
+
+		// dp_msg("DONE")
+	} else { // Operation is otherwise binary
+		std::vector <token *> a, b;
+
+		a = std::vector <token *> (toks.begin(), toks.begin() + save);
+
+		// dp_msg("a:")
+		// stl_reveal(tptr, a, [](token *t) {return t->str();});
+
+		b = std::vector <token *> (toks.begin() + (save + 1), toks.end());
+
+		// dp_msg("b:")
+		// stl_reveal(tptr, b, [](token *t) {return t->str();});
+
+		out = new node {tptr, {}};
+		oa = build(a);
+		ob = build(b);
+
+		out->leaves.push_back(oa);
+		out->leaves.push_back(ob);
 	}
 
-	// make private
-        template <typename data_t>
-        node <ttwrapper <data_t>> *token_tree <data_t> ::build(std::vector
-                <token *> &toks, int level)
-        {
-                list <node <ttwrapper <data_t>>> *leaves;
-                node <ttwrapper <data_t>> *out, *oa, *ob;
-                ttwrapper <data_t> *ttptr, *tmp;
-                token *tptr, *t, norm;
-                std::size_t i, save;
+	return out;
+}
 
-		dp_msg("Entering")
-                
-                if (toks.size() == 0)
-                        return nullptr;
+// Non-Member helper function
+// for general scope things
+template <typename T>
+const T &token_tree <T> ::getval(node *nd) const
+{
+	std::vector <operand <T>> vals;
+	node *output;
+	int index;
 
-                if (toks.size() == 1) {
-                        switch(toks[0]->caller()) {
-                        case token::OPERAND:
-                                ttptr = new ttwrapper <data_t> ((operand <data_t> *) (toks[0]));
-                                break;
-                        case token::OPERATION:
-                                ttptr = new ttwrapper <data_t> ((operation <operand
-                                        <data_t>> *) (toks[0]));
-                                break;
-                        default:
-                                ttptr = nullptr;
-                                break;
-                        }
+	// dp_msg("Here");
 
-                        out = new node <ttwrapper <data_t>> (ttptr);
-                        return out;
-                }
-
-                tptr = &defaults <data_t> ::opers[defaults <data_t> ::NOPERS];
-
-		// dp_msg("Pringint out toks vector");
-		stl_reveal(t, toks, [](token *t) {
-			if (t == nullptr)
-				return std::string("nullptr");
-			return t->str();
-		});
-
-		dp_msg("Entering save loop")
-
-                save = 0;
-                for (int i = 0; i < toks.size(); i++) {
-                        t = toks[i];
-			///dp_msg("t:");
-			// std::cout << t << std::endl;
-			// std::cout << t->str() << std::endl;
-                        if (t->caller() == token::OPERATION &&
-                                ((operation <operand <data_t>> *) (t))->get_order() <= 
-                                ((operation <operand <data_t>> *) (tptr))->get_order())
-                                tptr = t, save = i;
-                }
-
-		dp_var(save);
-		dp_var(tptr->str());
-		// stl_reveal(t, toks, [](token *t) {return t->str();});
-
-		ttptr = new ttwrapper <data_t> ((operation <operand <data_t>> *) (tptr));
-
-		// Perform seperate algorithm for functions
-		if (((operation <operand <data_t>> *) (tptr))->get_order() ==
-			operation <operand <data_t>> ::FUNC_LMAX) {
-			// Since functions have highest priority
-			// the stage at which they are the leading
-			// operation (root of subtree) is when all
-			// its nodes (operands) belong to it
-			// therefore, we just need to transfer operands
-			// to the operation in order of parsing
+	output = new node ();
+	// Return operand wrapper if operand,
+	// returns operand wrapper value if
+	// operation
+	switch (nd->tok->caller()) {
+	case token::OPERAND:
+		// make notation more convenient
+		return (dynamic_cast <operand <T> *> (nd->tok))->get();
+	case token::OPERATION:
+		// Gather all the operands
+		// or values (in general) into
+		// a vector
+		//dp_var(nd->val->get_token()->str())
+		//dp_var(nd->leaves->size())
+		for (index = 0; index < nd->leaves.size(); index++) {
+			// Should throw error if leaf isnt an
+			// operation or an operand
 			
-			// (until silent multiplication such as 3sin x)
-			// only consider operands after the operation
-
-			// dp_var(toks.size());
-
-			out = new node <ttwrapper <data_t>> (ttptr);
-			out->leaves = new list <node <ttwrapper <data_t>>>;
-
-			leaves = out->leaves;
-			for (int i = save + 1; i < toks.size(); i++) {
-				// dp_msg("looping")
-				// dp_var(toks[i]->str())
-
-				tmp = new ttwrapper <data_t> ((operand <data_t> *) toks[i]);
-				out->leaves->curr = new node <ttwrapper <data_t>> (tmp);
-				
-				// Allocate only if next loop
-				// will execute
-				if (i + 1 < toks.size()) {
-					out->leaves->next = new list <node <ttwrapper <data_t>>>;
-					out->leaves = out->leaves->next;
-				}
+			//dp_var(nd->leaves->get(index)->curr->val->get_token()->str())
+			switch (nd->leaves[index]->tok->caller()) {
+			case token::OPERAND:
+				// dp_msg("operand")
+				vals.push_back(*(dynamic_cast <operand <T> *> (nd->leaves[index]->tok)));
+				break;
+			case token::OPERATION:
+				// dp_msg("operation")
+				// Return value if leaf is an operation
+				// is always an operand
+				vals.push_back(operand <T> (getval(nd->leaves[index])));
+				break;
 			}
-
-			// conserve memory
-			// delete leaves->next;
-			out->leaves = leaves;
-
-			dp_var(leaves->size());
-			dp_var(out->leaves->size());
-
-			print(out, 1, 0);
-
-			// dp_msg("DONE")
-		} else { // Operation is otherwise binary
-			std::vector <token *> a, b;
-
-			a = std::vector <token *> (toks.begin(), toks.begin() + save);
-
-			// dp_msg("a:")
-			// stl_reveal(tptr, a, [](token *t) {return t->str();});
-
-			b = std::vector <token *> (toks.begin() + (save + 1), toks.end());
-
-			// dp_msg("b:")
-			// stl_reveal(tptr, b, [](token *t) {return t->str();});
-
-			out = new node <ttwrapper <data_t>> (ttptr);
-			oa = build(a, level + 1);
-			ob = build(b, level + 1);
-
-			out->leaves = new list <node <ttwrapper <data_t>>>;
-			leaves = out->leaves;
-			leaves->curr = oa;
-			leaves->next = new list <node <ttwrapper <data_t>>>;
-			leaves->next->curr = ob;
-			leaves->next->next = nullptr;
 		}
 
-                return out;
-        }
+		// dp_var(nd->val->get_opn()->compute(vals))
 
-	template <typename data_t>
-	void token_tree <data_t> ::reset_cursor()
-	{
-		cursor = root;
+		//dp_msg("returning valid");
+		return (dynamic_cast <operation <operand <T>> *> (nd->tok))->compute(vals).get();
 	}
 
-	template <typename data_t>
-	void token_tree <data_t> ::set_cursor(ttwrapper <data_t> *ttwptr)
-	{
-		node <ttwrapper <data_t>> *nd = cursor;
+	//dp_msg("returning invalid");
+	// should throw instead
+	throw incomputable_exception();
+}
 
-		if (ttwptr == nullptr) {
-			//std::cout << "nulltpr passed" << std::endl;
-			return;
-		}
+template <typename T>
+const T &token_tree <T> ::value() const
+{
+	// Return operand wrapper if operand,
+	// returns operand wrapper value if
+	// operation
+	return getval(root);
+}
 
-		if (nd == nullptr) {
-			cursor = new node <ttwrapper <data_t>>;
-			cursor->dptr = new ttwrapper <data_t> (*ttwptr);
-			cursor->parent = nullptr;
-			cursor->leaves = nullptr;
-                        root = cursor;
-		} else {
-			cursor->dptr = ttwptr;
-			cursor->parent = nd->parent;
-			cursor->leaves = nd->leaves;
-			delete nd;
-		}
+template <typename T>
+void token_tree <T> ::print() const
+{
+	//std::cout << std::endl << "-------------" << std::endl;
+	std::cout << "PRINTING TREE" << std::endl;
+	print(root, 1, 0);
+	//std::cout << std::endl << "ADDRESSES" << std::endl;
+	//std::cout << "root @" << root << std::endl;
+	//std::cout << "cursor @" << cursor << std::endl;
+	//if (cursor != nullptr)
+	//        IC(cursor->val);
+	//if (root != nullptr)
+	//        IC(root->val);
+	//std::cout << "-------------" << std::endl;
+}
+
+template <typename T>
+void token_tree <T> ::print(node *nd,
+		int num, int lev) const
+{
+	//std::cout << "Inside the print function, num = " << num;
+	//std::cout << " and lev = " << lev << std::endl;
+	if (nd == nullptr) 
+		return;
+
+	int counter = lev;
+	while (counter > 0) {
+		std::cout << "\t";
+		counter--;
 	}
 
-	template <typename data_t>
-	void token_tree <data_t> ::set_cursor(const ttwrapper <data_t> &ttw)
-	{
-		set_cursor(new ttwrapper <data_t> (ttw));
-	}
+	std::cout << "#" << num << " - " << nd << std::endl;//nd->val->get_token()->str() << std::endl;
+	//std::cout << " @" << nd << std::endl;
 
-	template <typename data_t>
-	void token_tree <data_t> ::add_branch(ttwrapper <data_t> *tptr)
-	{
-		node <ttwrapper <data_t>> *new_node = new node <ttwrapper <data_t>>;
-		new_node->dptr = new ttwrapper <data_t> (*tptr);
-		new_node->leaves = nullptr;
-		
-		if (cursor == nullptr) { // Throw a null_cursor_exception later
-			std::cout << "Cursor is null, reset and come back?";
-			std::cout << std::endl;
-			return;
-		}
-
-		list <node <ttwrapper <data_t>>> *cleaves = cursor->leaves;
-
-		if (cleaves == nullptr) {
-			cleaves = new list <node <ttwrapper <data_t>>>;
-			cleaves->curr = new_node;
-			cleaves->next = nullptr;
-			cleaves->curr->parent = cursor;
-                        cursor->leaves = cleaves;
-		} else {
-			while (cleaves->next != nullptr)
-				cleaves = cleaves->next;
-			cleaves->next = new list <node <ttwrapper <data_t>>>;
-			cleaves = cleaves->next;
-			cleaves->curr = new_node;
-			cleaves->next = nullptr;
-			new_node->parent = cursor;
-		}
-	}
-	
-	template <typename data_t>
-	void token_tree <data_t> ::add_branch(const ttwrapper <data_t> &tok)
-	{
-		ttwrapper <data_t> *tptr = new ttwrapper <data_t> (tok);
-		add_branch(tptr);
-	}
-
-        template <typename data_t>
-        void token_tree <data_t> ::add_branch(const token_tree <data_t> &ttree)
-        {
-                
-        }
-
-	template <typename data_t>
-	void token_tree <data_t> ::move_left()
-	{
-		int index;
-
-		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			//std::cout << "No nodes beside cursor" << std::endl;
-			return;
-		}
-
-		index = (cursor->parent->leaves)->get_index(cursor);
-		cursor = (cursor->parent->leaves)->get(index - 1)->curr;
-	}
-	
-	template <typename data_t>
-	void token_tree <data_t> ::move_right()
-	{
-                //std::cout << "in move right function " << std::endl;
-		int index;
-
-		if (cursor == nullptr) {
-			std::cout << "cursor is null, exiting from move right" << std::endl;
-			return;
-		}
-
-		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			std::cout << "No nodes beside cursor" << std::endl;
-			return;
-		}
-
-		index = (cursor->parent->leaves)->get_index(cursor);
-                //std::cout << "index: " << index << std::endl;
-                //IC(cursor->parent->leaves->size());
-		cursor = (cursor->parent->leaves)->get(index + 1)->curr;
-		//std::cout << "cursor now @" << cursor << std::endl;
-	}
-	
-	template <typename data_t>
-	void token_tree <data_t> ::move_up()
-	{
-		if (cursor == nullptr) {
-			std::cout << "cursor is null, exiting from move up" << std::endl;
-			return;
-		}
-
-		if (cursor->parent == nullptr) { // Thrown null_parent_exception
-			std::cout << "Cursor has no parent" << std::endl;
-			return;
-		}
-
-		cursor = cursor->parent;
-	}
-
-	template <typename data_t>
-	void token_tree <data_t> ::move_down(std::size_t i)
-	{
-		if (cursor == nullptr) {
-			std::cout << "cursor is null, exiting" << std::endl;
-			return;
-		}
-
-		if (cursor->leaves == nullptr) { // Thrown null_leaves_exception
-			std::cout << "Cursor has no leaves" << std::endl;
-			return;
-		}
-
-		cursor = (cursor->leaves)->get(i)->curr;
-	}
-
-	template <typename data_t>
-	node <ttwrapper <data_t>> *token_tree <data_t> ::current()
-	{
-		return cursor;
-	}
-
-	// Non-Member helper function
-	// for general scope things
-	template <typename data_t>
-        node <ttwrapper <data_t>> *getval(node <ttwrapper <data_t>> *nd)
-        {
-                std::vector <operand <data_t>> vals;
-                node <ttwrapper <data_t>> *output;
-                int index;
-
-		// dp_msg("Here");
-
-                output = new node <ttwrapper <data_t>>;
-                // Return operand wrapper if operand,
-                // returns operand wrapper value if
-                // operation
-                switch (nd->dptr->t) {
-                case token::OPERAND:
-                        return nd;
-                case token::OPERATION:
-                        // Gather all the operands
-                        // or values (in general) into
-                        // a vector
-			//dp_var(nd->dptr->get_token()->str())
-			//dp_var(nd->leaves->size())
-                        for (index = 0; index < nd->leaves->size(); index++) {
-                                // Should throw error if leaf isnt an
-                                // operation or an operand
-				
-				//dp_var(nd->leaves->get(index)->curr->dptr->get_token()->str())
-                                switch (nd->leaves->get(index)->curr->dptr->t) {
-                                case token::OPERAND:
-					// dp_msg("operand")
-                                        vals.push_back(*(nd->leaves->get(index)
-                                                ->curr->dptr->get_oper()));
-                                        break;
-                                case token::OPERATION:
-					// dp_msg("operation")
-                                        // Return value if leaf is an operation
-                                        // is always an operand
-                                        vals.push_back(*(getval(nd->leaves->
-                                                get(index)->curr)->dptr->get_oper()));
-                                        break;
-                                }
-                        }
-
-			// dp_var(nd->dptr->get_opn()->compute(vals))
-
-			//dp_msg("returning valid");
-                        return new node <ttwrapper <data_t>> (ttwrapper <data_t>
-                                (nd->dptr->get_opn()->compute(vals)));
-                }
-
-		//dp_msg("returning invalid");
-                return nullptr;
-        }
-
-        template <typename data_t>
-        node <ttwrapper <data_t>> *token_tree <data_t> ::value()
-        {
-                // Return operand wrapper if operand,
-                // returns operand wrapper value if
-                // operation
-                return getval(root);
-        }
-
-	template <typename data_t>
-	void token_tree <data_t> ::print() const
-	{
-                //std::cout << std::endl << "-------------" << std::endl;
-                std::cout << "PRINTING TREE" << std::endl;
-		print(root, 1, 0);
-                //std::cout << std::endl << "ADDRESSES" << std::endl;
-		//std::cout << "root @" << root << std::endl;
-		//std::cout << "cursor @" << cursor << std::endl;
-                //if (cursor != nullptr)
-                //        IC(cursor->dptr);
-                //if (root != nullptr)
-                //        IC(root->dptr);
-                //std::cout << "-------------" << std::endl;
-	}
-
-	template <typename data_t>
-	void token_tree <data_t> ::print(node <ttwrapper <data_t>> *nd,
-			int num, int lev) const
-	{
-                //std::cout << "Inside the print function, num = " << num;
-                //std::cout << " and lev = " << lev << std::endl;
-		if (nd == nullptr) 
-                	return;
-
-		int counter = lev;
-		while (counter > 0) {
-			std::cout << "\t";
-			counter--;
-		}
-
-		std::cout << "#" << num << " - " << *(nd->dptr) << std::endl;
-		//std::cout << " @" << nd << std::endl;
-
-		list <node <ttwrapper <data_t>>> *rleaves = nd->leaves;
-
-		counter = 0;
-		while (rleaves != nullptr) {
-			print(rleaves->curr, counter + 1, lev + 1);
-                        rleaves = rleaves->next;
-			counter++;
-		}
-	}
+	counter = 0;
+	for (auto it = nd->leaves.begin(); it != nd->leaves.end(); it++, counter++)
+		print(*it, counter + 1, lev + 1);
 }
 
 #endif

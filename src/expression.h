@@ -8,20 +8,24 @@
 #include "operand.h"
 #include "token_tree.h"
 
-
 // remove
 using namespace tokens;
 
 template <class T>
 class expression {
+	// Change to a hash table
 	std::string m_cached;
 public:
 	expression(std::string = "");
 
-	operand <T> *evaluate(std::string = "") const;
+	// Includes caching
+	const T &evaluate(std::string = "") const;
 
 	class empty_expr {};
 	class invalid_expr {};
+
+	// Without caching
+	static const T &in_place_evaluate(std::string = "");
 };
 
 template <class T>
@@ -29,7 +33,7 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-operand <T> *expression <T> ::evaluate(std::string str)
+const T &expression <T> ::evaluate(std::string str) const
 {
 	if (str.empty() && m_cached.empty())
 		throw empty_expr();
@@ -41,7 +45,20 @@ operand <T> *expression <T> ::evaluate(std::string str)
 	token *temp = eval->value()->get();
 
 	delete eval;
-	return dynamic_cast <operand <T> *> (temp);
+	return (dynamic_cast <operand <T> *> (temp))->get();
+}
+
+template <class T>
+const T &expression <T> ::in_place_evaluate(std::string str)
+{
+	if (str.empty())
+		throw empty_expr();
+
+	token_tree <T> *eval = new token_tree <T> (str);
+	token *temp = eval->value()->get();
+
+	delete eval;
+	return (dynamic_cast <operand <T> *> (temp))->get();
 }
 
 #endif
