@@ -6,6 +6,7 @@
 
 // Custom Built Libraries
 #include "operand.h"
+#include "token_tree.h"
 
 
 // remove
@@ -17,7 +18,7 @@ class expression {
 public:
 	expression(std::string = "");
 
-	operand <T> evaluate(std::string = "") const;
+	operand <T> *evaluate(std::string = "") const;
 
 	class empty_expr {};
 	class invalid_expr {};
@@ -28,13 +29,19 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-expression <T> ::evaluate(std::string str)
+operand <T> *expression <T> ::evaluate(std::string str)
 {
-	if (str.empty())
+	if (str.empty() && m_cached.empty())
 		throw empty_expr();
-	
-	m_cached = str;
-	
+
+	if (!str.empty())
+		m_cached = str;
+
+	token_tree <T> *eval = new token_tree <T> (m_cached);
+	token *temp = eval->value()->get();
+
+	delete eval;
+	return dynamic_cast <operand <T> *> (temp);
 }
 
 #endif

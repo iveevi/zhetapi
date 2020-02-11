@@ -6,25 +6,41 @@
 
 // Custom Built Libraries
 #include "list.h"
+#include "token.h"
 #include "ttwrapper.h"
 
 // remove later (usage of namespaces)
 using namespace trees;
 
 // Beginning of node class
-template <typename data_t>
+template <class T>
 struct node {
-	ttwrapper <data_t> *val;
+	ttwrapper <T> *val;
 	std::vector <node *> leaves;
 
 	node();
-	node(data_t);
+	node(T);
+
+	token *get() const;
+	token *operator *() const;
 };
 
-template <typename data_t>
-node <data_t> ::node() {}
+template <class T>
+node <T> ::node() {}
 
-template <typename data_t>
-node <data_t> ::node(data_t data) : val(data) {}
+template <class T>
+node <T> ::node(T data) : val(data) {}
+
+template <class T>
+token *node <T> ::get() const
+{
+	return val->get_token();
+}
+
+template <class T>
+token *node <T> ::operator *() const
+{
+	return val->get_token();
+}
 
 #endif
