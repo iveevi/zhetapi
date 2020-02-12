@@ -11,8 +11,6 @@
 
 // Include Directives
 using namespace std;
-using namespace tokens;
-using namespace trees;
 using namespace chrono;
 
 // Benchmarking Tools
@@ -69,7 +67,7 @@ bench bench_mark(int num)
 	start_t = high_resolution_clock::now();
 	bench out;
 
-	token_tree <double> tr(INPUT);
+	tree <double> tr(INPUT);
 
 	cout << string(LINE, '-') << endl;
 	cout << "TEST #" << num << " - ";
@@ -123,5 +121,5 @@ int main()
 	cout << "\tParser: " << sizeof(parser <double>) << " bytes" << endl;
 	cout << "\tDefaults: " << sizeof(defaults <double>) << " bytes" << endl;
 	cout << "\tVariable: " << sizeof(variable <double>) << " bytes" << endl;
-	cout << "\tToken_tree: " << sizeof(token_tree <double>) << " bytes" << endl;
+	cout << "\tToken_tree: " << sizeof(tree <double>) << " bytes" << endl;
 }

@@ -6,10 +6,7 @@
 
 // Custom Built Libraries
 #include "operand.h"
-#include "token_tree.h"
-
-// remove
-using namespace tokens;
+#include "tree.h"
 
 template <class T>
 class expression {
@@ -41,7 +38,7 @@ const T &expression <T> ::evaluate(std::string str) const
 	if (!str.empty())
 		m_cached = str;
 
-	token_tree <T> *eval = new token_tree <T> (m_cached);
+	tree <T> *eval = new tree <T> (m_cached);
 	token *temp = eval->value()->get();
 
 	delete eval;
@@ -54,7 +51,7 @@ const T &expression <T> ::in_place_evaluate(std::string str)
 	if (str.empty())
 		throw empty_expr();
 
-	token_tree <T> *eval = new token_tree <T> (str);
+	tree <T> *eval = new tree <T> (str);
 	token *temp = eval->value()->get();
 
 	delete eval;
