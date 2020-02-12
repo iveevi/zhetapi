@@ -49,18 +49,14 @@ public:
 	bool remove(const T &);
 protected:
 	node *clone(node *) const;
-	node *find(node *, const T &) const;
 
-	bool insert(node *(&), const T &);
-	bool remove(node *(&), const T &);
+	void clear(node *(&)) const;
 
-	void clear(node *(&));
-
-	void rotate_left(node *(&));
-	void rotate_right(node *(&));
+	void rotate_left(node *(&)) const;
+	void rotate_right(node *(&)) const;
 
 	// overload this in derived classes
-	virtual void splay(node *(&), const T &);
+	virtual void splay(node *(&), const T &) const;
 private:
 	std::size_t m_size;
 	node *m_root;
@@ -87,7 +83,7 @@ splay_stack <T> ::~splay_stack()
 /* splay_tree other member
  * functions (public interface) */
 template <class T>
-const T &splay_tree <T> ::find(const T &key) const
+const T &splay_stack <T> ::find(const T &key) const
 {
 	splay(m_root, key);
 
@@ -98,21 +94,141 @@ const T &splay_tree <T> ::find(const T &key) const
 }
 
 template <class T>
-bool splay_tree <T> ::empty() const
+bool splay_stack <T> ::empty() const
 {
 	return m_size == 0;
 }
 
 template <class T>
-std::size_t splay_tree <T> ::size() const
+std::size_t splay_stack <T> ::size() const
 {
 	return m_size;
 }
 
 template <class T>
-void splay_tree <T> ::clear()
+void splay_stack <T> ::clear()
 {
 	clear(m_root);
+}
+
+template <class T>
+const splay_stack <T> &splay_stack <T> ::operator= (const splay_stack<T> &rhs)
+{
+	if (rhs != *this) {
+		clear();
+		m_root = clone(rhs.m_root);
+		m_size = rhs.m_size;
+	}
+
+	return *this;
+}
+
+template <class T>
+bool splay_stack <T> ::insert(const T &val)
+{
+	if (m_root == nullptr) {
+		m_root = new node {val, nullptr, nullptr};
+		m_size++;
+		return true;
+	}
+
+	splay(m_root, val);
+
+	node *temp = new node {val, nullptr, nullptr};
+
+	if (val < m_root->val) {
+		temp->left = m_root->left;
+		temp->right = m_root->right;
+
+		temp->right->left = nullptr;
+		m_root = temp;
+		m_size++;
+
+		return true;
+	}
+
+	if (val > m_root->val) {
+		temp->left = m_root;
+		temp->right = m_root->right;
+
+		temp->left->right = nullptr;
+		m_root = temp;
+		m_size++;
+
+		return true;
+	}
+
+	return false;
+}
+
+template <class T>
+bool splay_stack <T> ::remove(const T &val)
+{
+	if (!m_size)
+		return false;
+
+	splay(m_root, val);
+
+	if (val != m_root->val)
+		return false;
+
+	node *nroot;
+	if (m_root->left == nullptr) {
+		nroot = m_root->left;
+	} else {
+		nroot = m_root->left;
+		splay(nroot, val);
+
+		nroot->right = m_root->right;
+	}
+
+	delete m_root;
+
+	m_root = nroot;
+	m_size--;
+
+	return true;
+}
+
+/* splay_tree other member
+ * functions (protected interface) */
+template <class T>
+typename splay_stack <T> ::node *splay_stack <T>
+	::clone(node *nd) const
+{
+	node *nnode;
+
+	if (nd == nullptr)
+		return nullptr;
+
+	nnode = new node {nd->val, clone(nd->left),
+		clone(nd->right)};
+
+	return nnode;
+}
+
+template <class T>
+void splay_stack <T> ::clear(node *(&nd)) const
+{
+	
+}
+
+template <class T>
+void splay_stack <T> ::rotate_left(node *(&nd)) const
+{
+
+}
+
+template <class T>
+void splay_stack <T> ::rotate_right(node *(&nd)) const
+{
+
+}
+
+template <class T>
+void splay_stack <T> ::splay(node *(&nd), const T &val) const
+{
+
 }
 
 #endif
