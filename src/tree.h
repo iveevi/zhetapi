@@ -6,7 +6,6 @@
 #include <vector>
 
 // Custom Built Libraries
-#include "tree.h"
 #include "defaults.h"
 #include "debug.h"
 #include "token.h"
@@ -151,11 +150,11 @@ typename tree <T> ::node *tree <T> ::build(std::vector <token *> &toks)
 	std::size_t i, save;
 
 	//dp_msg("Entering")
-	stl_reveal(t, toks, [](token *t) {
+	/*stl_reveal(t, toks, [](token *t) {
 		if (t == nullptr)
 			return std::string("nullptr");
 		return t->str();
-	});
+	});*/
 	
 	if (toks.size() == 0)
 		return nullptr;

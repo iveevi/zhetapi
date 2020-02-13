@@ -188,7 +188,7 @@ std::vector <token *> parser <data_t> ::get_tokens(std::string input)
 	// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
 
 	// std::cout << "Returning" << std::endl;
-	std::cout << std::string(5, '*') << std::endl;
+	// std::cout << std::string(5, '*') << std::endl;
 
 	return tokens;
 }

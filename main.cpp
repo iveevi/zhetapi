@@ -19,7 +19,7 @@ using namespace chrono;
 // Default # of tests to 1
 #ifndef TESTS
 
-#define TESTS 1
+#define TESTS 1000000
 
 #endif
 

@@ -127,6 +127,9 @@ public:
 	virtual const std::pair <data_t, std::string>
 		&operator*(std::string) const noexcept(false);
 
+	// returns the name of the variable
+	virtual const std::string &symbol() const;
+
 	type caller() const override;
 	std::string str() const override;
 	
@@ -302,6 +305,12 @@ const std::pair <data_t, std::string> &variable <data_t> ::operator*
 	if (param)
 		throw bypass_attempt_exception();
 	return std::pair <data_t, std::string> (val, name);
+}
+
+template <typename data_t>
+const std::string &variable <data_t> ::symbol() const
+{
+	return name;
 }
 
 /* Friend functions: ostream and

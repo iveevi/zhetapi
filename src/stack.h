@@ -1,5 +1,5 @@
-#ifndef STACKS_H_
-#define STACKS_H_
+#ifndef STACK_H_
+#define STACK_H_
 
 #include <iostream>
 
@@ -36,7 +36,7 @@ public:
 	// dont use this in inherited classes,
 	// instead use specific keys to search
 	// for variables
-	const T &find(const T &) const;
+	const T &find(const T &);
 
 	bool empty() const;
 	std::size_t size() const;
@@ -47,16 +47,19 @@ public:
 
 	bool insert(const T &);
 	bool remove(const T &);
+
+	void print() const;
 protected:
-	node *clone(node *) const;
+	node *clone(node *);
 
-	void clear(node *(&)) const;
+	void clear(node *(&));
+	void print(node *, int, int) const;
 
-	void rotate_left(node *(&)) const;
-	void rotate_right(node *(&)) const;
+	void rotate_left(node *(&));
+	void rotate_right(node *(&));
 
 	// overload this in derived classes
-	virtual void splay(node *(&), const T &) const;
+	virtual void splay(node *(&), const T &);
 private:
 	std::size_t m_size;
 	node *m_root;
@@ -83,7 +86,7 @@ splay_stack <T> ::~splay_stack()
 /* splay_tree other member
  * functions (public interface) */
 template <class T>
-const T &splay_stack <T> ::find(const T &key) const
+const T &splay_stack <T> ::find(const T &key)
 {
 	splay(m_root, key);
 
@@ -138,7 +141,7 @@ bool splay_stack <T> ::insert(const T &val)
 
 	if (val < m_root->val) {
 		temp->left = m_root->left;
-		temp->right = m_root->right;
+		temp->right = m_root;
 
 		temp->right->left = nullptr;
 		m_root = temp;
@@ -172,29 +175,35 @@ bool splay_stack <T> ::remove(const T &val)
 	if (val != m_root->val)
 		return false;
 
-	node *nroot;
+	node *nnd;
 	if (m_root->left == nullptr) {
-		nroot = m_root->left;
+		nnd = m_root->left;
 	} else {
-		nroot = m_root->left;
-		splay(nroot, val);
+		nnd = m_root->left;
+		splay(nnd, val);
 
-		nroot->right = m_root->right;
+		nnd->right = m_root->right;
 	}
 
 	delete m_root;
 
-	m_root = nroot;
+	m_root = nnd;
 	m_size--;
 
 	return true;
+}
+
+template <class T>
+void splay_stack <T> ::print() const
+{
+	print(m_root, 0, 0);
 }
 
 /* splay_tree other member
  * functions (protected interface) */
 template <class T>
 typename splay_stack <T> ::node *splay_stack <T>
-	::clone(node *nd) const
+	::clone(node *nd)
 {
 	node *nnode;
 
@@ -208,27 +217,159 @@ typename splay_stack <T> ::node *splay_stack <T>
 }
 
 template <class T>
-void splay_stack <T> ::clear(node *(&nd)) const
+void splay_stack <T> ::clear(node *(&nd))
 {
+	if (nd == nullptr)
+		return;
+
+	clear(nd->left);
+	clear(nd->right);
+
+	delete nd;
 	
+	// maybe remove later
+	nd = nullptr;
+	m_size--;
 }
 
 template <class T>
-void splay_stack <T> ::rotate_left(node *(&nd)) const
+void splay_stack <T> ::print(node *nd, int lev, int dir) const
 {
+	if (nd == nullptr) return;
 
+	for (int i = 0; i < lev; i++)
+		std::cout << "\t";
+
+	switch (dir) {
+	case 0:
+		std::cout << "Level #" << lev << " -- Root: ";
+
+		if (nd == nullptr)
+			std::cout << "NULL";
+		else
+			std::cout << nd->val;
+		std::cout << std::endl;;
+		break;
+	case 1:
+		std::cout << "Level #" << lev << " -- Left: ";
+		
+		if (nd == nullptr)
+			std::cout << "NULL";
+		else
+			std::cout << nd->val;
+		std::cout << std::endl;;
+		break;
+	case -1:
+		std::cout << "Level #" << lev << " -- Right: ";
+		
+		if (nd == nullptr)
+			std::cout << "NULL";
+		else
+			std::cout << nd->val;
+		std::cout << std::endl;;
+		break;
+	}
+	
+	if (nd == nullptr)
+		return;
+
+	print(nd->left, lev + 1, 1);
+	print(nd->right, lev + 1, -1);
 }
 
 template <class T>
-void splay_stack <T> ::rotate_right(node *(&nd)) const
+void splay_stack <T> ::rotate_left(node *(&nd))
 {
+	node *rt = nd->left;
 
+	nd->left = rt->right;
+	rt->right = nd;
+	nd = rt;
 }
 
 template <class T>
-void splay_stack <T> ::splay(node *(&nd), const T &val) const
+void splay_stack <T> ::rotate_right(node *(&nd))
 {
+	node *rt = nd->right;
 
+	nd->right = rt->left;
+	rt->left = nd;
+	nd = rt;
+}
+
+template <class T>
+void splay_stack <T> ::splay(node *(&nd), const T &val)
+{
+	node *rt = nullptr;
+	node *lt = nullptr;
+	node *rtm = nullptr;
+	node *ltm = nullptr;
+	
+	while (nd != nullptr) {
+		if (val < nd->val) {
+			if (nd->left == nullptr)
+				break;
+			
+			if (val < nd->left->val) {
+				rotate_left(nd);
+
+				if (nd->left == nullptr)
+					break;
+			}
+
+			if (rt == nullptr)
+				rt = new node {T(), nullptr, nullptr};
+		
+
+			if (rtm == nullptr) {
+				rt->left = nd;
+				rtm = rt;
+			} else {
+				rtm->left = nd;
+			}
+
+			rtm = rtm->left;
+			
+			nd = rtm->left;
+			rtm->left = nullptr;
+		} else if (val > nd->val) {
+			if (nd->right == nullptr)
+				break;
+			
+			if (val > nd->right->val) {
+				rotate_right(nd);
+				if (nd->right == nullptr)
+					break;
+			}
+
+			if (lt == nullptr)
+				lt = new node {T(), nullptr, nullptr};
+
+			if (ltm == nullptr) {
+				lt->right = nd;
+				ltm = lt;
+			} else {
+				ltm->right = nd;
+			}
+
+			ltm = ltm->right;
+
+			nd = ltm->right;
+			ltm->right = nullptr;
+		} else {
+			break;
+		}
+	}
+	
+	if (lt != nullptr) {
+		ltm->right = nd->left;
+		nd->left = lt->right;
+	}
+
+	if (rt != nullptr) {
+		rtm->left = nd->right;
+		nd->right = rt->left;
+	}
 }
 
 #endif
