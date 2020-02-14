@@ -4,6 +4,7 @@
 #include "src/variable.h"
 #include "src/stack.h"
 #include "src/expression.h"
+#include "src/var_stack.h"
 
 using namespace std;
 
@@ -53,6 +54,10 @@ void test_expression()
 {
 	cout << endl << "BEGINNING EXPRESSION TEST" << endl;
 
+	cout << "Expression evaluation with format: "
+		<< expression <double> ::in_place_evaluate_formatted("12 * 13 * log 3 8")
+		<< endl;
+
 	string input;
 	while (true) {
 		cout << "Enter an expression to be evaluated: ";
@@ -63,7 +68,36 @@ void test_expression()
 	}
 }
 
+void test_var_stack()
+{
+	var_stack <double> vst;
+
+	vector <variable <double>> vals {variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0}};
+
+	for (variable <double> v : vals) {
+		cout << "\tInserting: " << v << endl;
+		vst.insert(v);
+	}
+
+	cout << "After Populating:" << endl;
+	vst.print();
+
+	cout << "Testing Find Function:" << endl;
+
+	variable <double> temp;
+	for (variable <double> v : vals) {
+		cout << endl << "Trying to find " << v << endl;
+		temp = vst.find(v.symbol());
+		
+		cout << "Returned " << temp << endl;
+		vst.print();
+	}
+}
+
 int main()
 {
-	test_expression();
+	test_var_stack();
 }

@@ -60,7 +60,7 @@ protected:
 
 	// overload this in derived classes
 	virtual void splay(node *(&), const T &);
-private:
+
 	std::size_t m_size;
 	node *m_root;
 };

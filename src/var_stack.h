@@ -8,25 +8,98 @@
 template <class T>
 class var_stack : public splay_stack <variable <T>> {
 public:
-	using nfe = typename splay_stack <variable <T>> ::not_found_exception;
+	using nfe = not_found_exception;
 	using node = typename splay_stack <variable <T>> ::node;
 
 	const variable <T> &find(const std::string &);
 protected:
 	virtual void splay(node *(&), const std::string &);
-private:
-	node *(&rptr) = this->m_root;
 };
 
 template <class T>
 const variable <T> &var_stack <T> ::find(const std::string &id)
 {
-	splay(rptr, id);
+	splay(this->m_root, id);
 
-	if (rptr->val.symbol() != id)
+	if (this->m_root->val.symbol() != id)
 		throw nfe();
 	
-	return rptr->val;
+	return this->m_root->val;
+}
+
+template <class T>
+void var_stack <T> ::splay(node *(&nd), const std::string &id)
+{
+	node *rt = nullptr;
+	node *lt = nullptr;
+	node *rtm = nullptr;
+	node *ltm = nullptr;
+	
+	while (nd != nullptr) {
+		if (id < nd->val.symbol()) {
+			if (nd->left == nullptr)
+				break;
+			
+			if (id < nd->left->val.symbol()) {
+				this->rotate_left(nd);
+
+				if (nd->left == nullptr)
+					break;
+			}
+
+			if (rt == nullptr)
+				rt = new node {variable <T> (), nullptr, nullptr};
+		
+
+			if (rtm == nullptr) {
+				rt->left = nd;
+				rtm = rt;
+			} else {
+				rtm->left = nd;
+			}
+
+			rtm = rtm->left;
+			
+			nd = rtm->left;
+			rtm->left = nullptr;
+		} else if (id > nd->val.symbol()) {
+			if (nd->right == nullptr)
+				break;
+			
+			if (id > nd->right->val.symbol()) {
+				this->rotate_right(nd);
+				if (nd->right == nullptr)
+					break;
+			}
+
+			if (lt == nullptr)
+				lt = new node {variable <T> (), nullptr, nullptr};
+
+			if (ltm == nullptr) {
+				lt->right = nd;
+				ltm = lt;
+			} else {
+				ltm->right = nd;
+			}
+
+			ltm = ltm->right;
+
+			nd = ltm->right;
+			ltm->right = nullptr;
+		} else {
+			break;
+		}
+	}
+	
+	if (lt != nullptr) {
+		ltm->right = nd->left;
+		nd->left = lt->right;
+	}
+
+	if (rt != nullptr) {
+		rtm->left = nd->right;
+		nd->right = rt->left;
+	}
 }
 
 #endif

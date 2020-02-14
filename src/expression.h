@@ -100,6 +100,9 @@ const T &expression <T> ::in_place_evaluate_formatted(const char *format, ...)
 	// Future Note:
 	// remove overhead
 	// with string class
+
+	using namespace std;
+	cout << "Buffer: " << buf << endl;
 	
 	return in_place_evaluate(std::string(buf));
 }

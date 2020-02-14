@@ -63,7 +63,8 @@ public:
 	 *   private member variable [val] is defaulted
 	 *   to the default value of data_t */
 	variable();
-	variable(std::string str, bool bl, data_t vl = data_t());
+	variable(const std::string &, const data_t & = data_t());
+	variable(std::string, bool, data_t = data_t());
 
 	/* Virtualized Member Functions:
 	 * void [set](bool) - changes whether or not the
@@ -142,11 +143,11 @@ public:
 	 *   the passed variable object appropriately */
 	template <typename type>
 	friend std::ostream &operator<<(std::ostream &os, const
-		variable <data_t> &);
+		variable <type> &);
 
 	template <typename type>
 	friend std::istream &operator>>(std::istream &is, variable
-		<data_t> &);
+		<type> &);
 
 	/* Comparison Functions:
 	 *
@@ -193,6 +194,10 @@ typedef variable <def_t> var_t;
 template <typename data_t>
 variable <data_t> ::variable() : val(data_t()), name("x"),
 	param(false) {}
+
+template <class T>
+variable <T> ::variable(const std::string &str, const T &dt)
+	: val(dt), name(str), param(false) {}
 
 template <typename data_t>
 variable <data_t> ::variable(std::string str, bool bl, data_t vl)
@@ -355,23 +360,23 @@ template <typename data_t>
 bool operator!=(const variable <data_t> &right, const variable <data_t> &left)
 {
 	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception;
+		throw variable <data_t> ::bypass_attempt_exception();
 	return right.val != left.val;
 }
 
 template <typename data_t>
 bool operator>(const variable <data_t> &right, const variable <data_t> &left)
 {
-	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception;
+	//if (right.param || left.param)
+	//	throw variable <data_t> ::bypass_attempt_exception();
 	return right.val > left.val;
 }
 
 template <typename data_t>
 bool operator<(const variable <data_t> &right, const variable <data_t> &left)
 {
-	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception;
+	//if (right.param || left.param)
+	//	throw variable <data_t> ::bypass_attempt_exception();
 	return right.val < left.val;
 }
 
@@ -379,7 +384,7 @@ template <typename data_t>
 bool operator>=(const variable <data_t> &right, const variable <data_t> &left)
 {
 	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception;
+		throw variable <data_t> ::bypass_attempt_exception();
 	return right.val >= left.val;
 }
 
