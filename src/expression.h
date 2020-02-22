@@ -35,10 +35,10 @@ public:
 	expression(std::string = "");
 
 	// Includes caching
-	const T &evaluate(std::string = "") const;
+	const T &evaluate(std::string = "", var_stack <T> = var_stack <T> ()) const;
 
 	// Without caching
-	static const T &in_place_evaluate(std::string = "");
+	static const T &in_place_evaluate(std::string = "", var_stack <T> = var_stack <T> ());
 
 	// Without caching, and with formatting
 	static const T&in_place_evaluate_formatted(const char *, ...);
@@ -57,7 +57,7 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-const T &expression <T> ::evaluate(std::string str) const
+const T &expression <T> ::evaluate(std::string str, var_stack <T> vst) const
 {
 	if (str.empty() && m_cached.empty())
 		throw invalid_expr();
@@ -65,7 +65,7 @@ const T &expression <T> ::evaluate(std::string str) const
 	if (!str.empty())
 		m_cached = str;
 
-	tree <T> *eval = new tree <T> (m_cached);
+	tree <T> *eval = new tree <T> (m_cached, vst);
 	token *temp = eval->value()->get();
 
 	delete eval;
@@ -73,12 +73,12 @@ const T &expression <T> ::evaluate(std::string str) const
 }
 
 template <class T>
-const T &expression <T> ::in_place_evaluate(std::string str)
+const T &expression <T> ::in_place_evaluate(std::string str, var_stack <T> vst)
 {
 	if (str.empty())
 		throw invalid_expr();
 
-	tree <T> eval(str);
+	tree <T> eval(str, vst);
 	return eval.value();
 }
 

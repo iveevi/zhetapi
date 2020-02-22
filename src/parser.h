@@ -15,10 +15,12 @@
 #include "operation.h"
 #include "defaults.h"
 #include "tree.h"
+#include "var_stack.h"
 
 // remove actual parser class
 
 // Beginning of the parser class
+// remove derivation to token class
 template <class data_t>
 class parser : public token {
 	/* The following are states of parsing
@@ -35,9 +37,14 @@ public:
 	 *   error if no token was detected and modifies the
 	 *   passed index value appropriately
 	 */
+
+	// keep reference to stack variable, as
+	// the stack changes fromfind queries
 	static std::pair <token *, std::size_t> get_next(std::string,
-		std::size_t) noexcept(false);
-	static std::vector <token *> get_tokens(std::string);
+		std::size_t, var_stack <data_t> &) noexcept(false);
+	
+	static std::vector <token *> get_tokens(std::string,
+			var_stack <data_t> &);
 
 	// Returns the index of the operation who's format
 	// matches the format this passed, and none_op if none
@@ -54,7 +61,7 @@ public:
 // Parser's parsing functions
 template <typename data_t>
 std::pair <token *, std::size_t> parser <data_t> ::get_next(std::string
-		input, std::size_t index)
+		input, std::size_t index, var_stack <data_t> &vst)
 {
 	// Current state of parsing
 	STATES state = NORM;
@@ -146,15 +153,31 @@ std::pair <token *, std::size_t> parser <data_t> ::get_next(std::string
 		// dp_msg("got here")
 		opn_index = get_matching(cumul);
 		// dp_msg("lost after")
-		if (opn_index != defaults <data_t> ::NONOP)
+		
+		if (opn_index != defaults <data_t> ::NONOP) {
 			return {&defaults <data_t> ::opers[opn_index], i + 1};
+		} else {
+			// If not an operation, could be variable
+			std::cout << "Trying to find: " << cumul << std::endl;
+			variable <data_t> var;
+			try {
+				var = vst.find(cumul);
+			} catch (typename var_stack <data_t> ::nfe e) {
+				// Skip return
+				continue;
+			}
+
+			return {&var, i + 1};
+		}
+
 	}
 
 	return {nullptr, -1};
 }
 
 template <typename data_t>
-std::vector <token *> parser <data_t> ::get_tokens(std::string input)
+std::vector <token *> parser <data_t> ::get_tokens(std::string input,
+		var_stack <data_t> &vst)
 {
 	std::pair <token *, std::size_t> opair;
 	std::vector <token *> tokens;
@@ -168,7 +191,7 @@ std::vector <token *> parser <data_t> ::get_tokens(std::string input)
 	// dp_var(input)
 
 	while (true) {
-		opair = get_next(input, index);
+		opair = get_next(input, index, vst);
 
 		//dp_var(opair.first->str());
 		//dp_var(opair.second)
@@ -212,12 +235,14 @@ std::size_t parser <data_t> ::get_matching(std::string str)
 }
 
 // Derived member functions
+// remove
 template <typename data_t>
 token::type parser <data_t> ::caller() const
 {
 	return PARSER;
 }
 
+// remove
 template <typename data_t>
 std::string parser <data_t> ::str() const
 {

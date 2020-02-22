@@ -9,6 +9,7 @@
 #include "defaults.h"
 #include "debug.h"
 #include "token.h"
+#include "var_stack.h"
 
 template <typename T>
 class parser;
@@ -36,7 +37,7 @@ public:
 	*/
 
 	explicit tree(std::vector <token *> &);
-	explicit tree(std::string);
+	explicit tree(std::string, var_stack <T> = var_stack <T> ());
 
 	// Destructor
 	~tree();
@@ -110,11 +111,11 @@ tree <T> ::tree(std::vector <token *> &toks)
 }
 
 template <typename T>
-tree <T> ::tree(std::string input)
+tree <T> ::tree(std::string input, var_stack <T> vst)
 {
 	// std::cout << "[STRING CONSTRUCTOR]" << std::endl;
 	std::vector <token *> toks = parser <T>
-		::get_tokens(input);
+		::get_tokens(input, vst);
 	*this = tree(toks);
 	// std::cout << "---PRINTING---" << std::endl;
 	// print();
@@ -150,11 +151,11 @@ typename tree <T> ::node *tree <T> ::build(std::vector <token *> &toks)
 	std::size_t i, save;
 
 	//dp_msg("Entering")
-	/*stl_reveal(t, toks, [](token *t) {
+	stl_reveal(t, toks, [](token *t) {
 		if (t == nullptr)
 			return std::string("nullptr");
 		return t->str();
-	});*/
+	});
 	
 	if (toks.size() == 0)
 		return nullptr;

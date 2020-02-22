@@ -97,7 +97,21 @@ void test_var_stack()
 	}
 }
 
+void test_variable_parsing()
+{
+	var_stack <double> vst;
+
+	vector <variable <double>> vals {variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0}};
+
+	string input = "6 * x + 5";
+	cout << "Expression [" << input << "] = " << expression <double>
+		::in_place_evaluate(input, vst) << endl;
+}
+
 int main()
 {
-	test_var_stack();
+	test_variable_parsing();
 }

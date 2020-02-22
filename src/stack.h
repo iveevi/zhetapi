@@ -117,7 +117,7 @@ void splay_stack <T> ::clear()
 template <class T>
 const splay_stack <T> &splay_stack <T> ::operator= (const splay_stack<T> &rhs)
 {
-	if (rhs != *this) {
+	if (this != &rhs) {
 		clear();
 		m_root = clone(rhs.m_root);
 		m_size = rhs.m_size;

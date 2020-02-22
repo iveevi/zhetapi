@@ -27,6 +27,10 @@ const variable <T> &var_stack <T> ::find(const std::string &id)
 	return this->m_root->val;
 }
 
+// Note: Varialbe comparison has been
+// moved to name comparison instead
+// of value comparison
+
 template <class T>
 void var_stack <T> ::splay(node *(&nd), const std::string &id)
 {

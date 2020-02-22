@@ -353,7 +353,7 @@ bool operator==(const variable <data_t> &right, const variable <data_t> &left)
 	
 	if (right.param || left.param) // Distinguish later
 		throw variable <data_t> ::bypass_attempt_exception("needs change");
-	return right.val == left.val;
+	return right.name == left.name;
 }
 
 template <typename data_t>
@@ -361,7 +361,7 @@ bool operator!=(const variable <data_t> &right, const variable <data_t> &left)
 {
 	if (right.param || left.param)
 		throw variable <data_t> ::bypass_attempt_exception();
-	return right.val != left.val;
+	return right.name != left.name;
 }
 
 template <typename data_t>
@@ -369,7 +369,7 @@ bool operator>(const variable <data_t> &right, const variable <data_t> &left)
 {
 	//if (right.param || left.param)
 	//	throw variable <data_t> ::bypass_attempt_exception();
-	return right.val > left.val;
+	return right.name > left.name;
 }
 
 template <typename data_t>
@@ -377,7 +377,7 @@ bool operator<(const variable <data_t> &right, const variable <data_t> &left)
 {
 	//if (right.param || left.param)
 	//	throw variable <data_t> ::bypass_attempt_exception();
-	return right.val < left.val;
+	return right.name < left.name;
 }
 
 template <typename data_t>
@@ -385,7 +385,7 @@ bool operator>=(const variable <data_t> &right, const variable <data_t> &left)
 {
 	if (right.param || left.param)
 		throw variable <data_t> ::bypass_attempt_exception();
-	return right.val >= left.val;
+	return right.name >= left.name;
 }
 
 template <typename data_t>
@@ -393,7 +393,7 @@ bool operator<=(const variable <data_t> &right, const variable <data_t> &left)
 {
 	if (right.param || left.param)
 		throw variable <data_t> ::bypass_attempt_exception;
-	return right.val <= left.val;
+	return right.name <= left.name;
 }
 
 /* Derived member functions */
