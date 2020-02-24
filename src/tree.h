@@ -116,6 +116,15 @@ tree <T> ::tree(std::string input, var_stack <T> vst)
 	// std::cout << "[STRING CONSTRUCTOR]" << std::endl;
 	std::vector <token *> toks = parser <T>
 		::get_tokens(input, vst);
+	/* token *t;
+	std::cout << "[ABOUT TO CONSTRUCTOR]" << std::endl;
+	stl_reveal(t, toks, [](token *t) {
+	if (t == nullptr)
+		return std::string("nullptr");
+	return t->str();
+	});
+
+	dp_msg("BUILDING"); */
 	*this = tree(toks);
 	// std::cout << "---PRINTING---" << std::endl;
 	// print();
@@ -151,11 +160,11 @@ typename tree <T> ::node *tree <T> ::build(std::vector <token *> &toks)
 	std::size_t i, save;
 
 	//dp_msg("Entering")
-	stl_reveal(t, toks, [](token *t) {
+	/* stl_reveal(t, toks, [](token *t) {
 		if (t == nullptr)
 			return std::string("nullptr");
 		return t->str();
-	});
+	}); */
 	
 	if (toks.size() == 0)
 		return nullptr;
@@ -165,7 +174,7 @@ typename tree <T> ::node *tree <T> ::build(std::vector <token *> &toks)
 
 	tptr = &defaults <T> ::opers[defaults <T> ::NOPERS];
 
-	// dp_msg("Pringint out toks vector");
+	// dp_msg("Printing out toks vector");
 
 	//dp_msg("Entering save loop")
 

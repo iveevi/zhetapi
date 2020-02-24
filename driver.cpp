@@ -5,6 +5,7 @@
 #include "src/stack.h"
 #include "src/expression.h"
 #include "src/var_stack.h"
+#include "src/application.h"
 
 using namespace std;
 
@@ -105,13 +106,53 @@ void test_variable_parsing()
 		variable <double> {"ran", true, 123},
 		variable <double> {"y", 13423.423},
 		variable <double> {"this", true, 12.0}};
+	
+	for (variable <double> v : vals) {
+		// cout << "Inserting: " << v << endl;
+		vst.insert(v);
+	}
+
+	cout << endl;
 
 	string input = "6 * x + 5";
 	cout << "Expression [" << input << "] = " << expression <double>
 		::in_place_evaluate(input, vst) << endl;
+	
+	while (true) {
+		cout << "Enter an expression to be evaluated: ";
+		getline(cin, input);
+
+		cout << "\t" << expression <double>
+			::in_place_evaluate(input, vst) << endl;
+	}
+}
+
+void test_application()
+{
+	application <double> app;
+	var_stack <double> vst;
+
+	vector <variable <double>> vals {variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0}};
+	
+	for (variable <double> v : vals) {
+		// cout << "Inserting: " << v << endl;
+		vst.insert(v);
+	}
+
+	string input;
+	while (true) {
+		cout << "Enter an expression to be evaluated: ";
+		getline(cin, input);
+
+		app = application <double> (input);
+		app(vst);
+	}
 }
 
 int main()
 {
-	test_variable_parsing();
+	test_application();
 }

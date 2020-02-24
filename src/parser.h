@@ -156,18 +156,22 @@ std::pair <token *, std::size_t> parser <data_t> ::get_next(std::string
 		
 		if (opn_index != defaults <data_t> ::NONOP) {
 			return {&defaults <data_t> ::opers[opn_index], i + 1};
-		} else {
+		} else if (!cumul.empty()) {
 			// If not an operation, could be variable
-			std::cout << "Trying to find: " << cumul << std::endl;
+			// std::cout << "Trying to find: " << cumul << std::endl;
 			variable <data_t> var;
 			try {
 				var = vst.find(cumul);
 			} catch (typename var_stack <data_t> ::nfe e) {
 				// Skip return
+				// dp_msg("Her");
 				continue;
 			}
 
-			return {&var, i + 1};
+			// return value of var
+			if (i >= input.length() - 1)
+				return {new operand <data_t> (var.get()), -1};
+			return {new operand <data_t> (var.get()), i + 1};
 		}
 
 	}
@@ -183,6 +187,8 @@ std::vector <token *> parser <data_t> ::get_tokens(std::string input,
 	std::vector <token *> tokens;
 	std::size_t index = 0;
 	int ses_len = 5;
+	
+	token *t;
 
 	/*std::cout << std::string(10, '*') << std::endl;
 	for (int i = 0; i < input.length(); i++)
@@ -193,8 +199,8 @@ std::vector <token *> parser <data_t> ::get_tokens(std::string input,
 	while (true) {
 		opair = get_next(input, index, vst);
 
-		//dp_var(opair.first->str());
-		//dp_var(opair.second)
+		// dp_var(opair.first->str());
+		// dp_var(opair.second)
 
 		if (opair.second == UINT64_MAX) {
 			// dp_var(input);
@@ -208,9 +214,13 @@ std::vector <token *> parser <data_t> ::get_tokens(std::string input,
 		index = opair.second;
 	}
 
-	// stl_reveal <token *> (tokens, [](token *t) {return t->str();});
+	/* stl_reveal(t, tokens, [](token *t) {
+		if (t == nullptr)
+			return std::string("nullptr");
+		return t->str();
+	});
 
-	// std::cout << "Returning" << std::endl;
+	std::cout << "Returning" << std::endl; */
 	// std::cout << std::string(5, '*') << std::endl;
 
 	return tokens;

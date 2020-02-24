@@ -35,7 +35,7 @@ public:
 	expression(std::string = "");
 
 	// Includes caching
-	const T &evaluate(std::string = "", var_stack <T> = var_stack <T> ()) const;
+	const T &evaluate(std::string = "", var_stack <T> = var_stack <T> ());
 
 	// Without caching
 	static const T &in_place_evaluate(std::string = "", var_stack <T> = var_stack <T> ());
@@ -57,7 +57,7 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-const T &expression <T> ::evaluate(std::string str, var_stack <T> vst) const
+const T &expression <T> ::evaluate(std::string str, var_stack <T> vst)
 {
 	if (str.empty() && m_cached.empty())
 		throw invalid_expr();
