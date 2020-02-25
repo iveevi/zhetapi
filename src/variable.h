@@ -64,6 +64,8 @@ public:
 	 *   to the default value of data_t */
 	variable();
 	variable(const std::string &, const data_t & = data_t());
+
+	// change to const refs
 	variable(std::string, bool, data_t = data_t());
 
 	/* Virtualized Member Functions:

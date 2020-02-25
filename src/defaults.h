@@ -69,6 +69,7 @@ public:
 	static const int COTOP = 11;
 	static const int LOGOP = 12;
 	static const int NOPERS = 13;
+	static const int m_size = 13;
 	
 	static operation <operand <data_t>> opers[];
 };

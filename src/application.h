@@ -13,6 +13,7 @@ using namespace std;
 #include "expression.h"
 #include "var_stack.h"
 #include "formatter.h"
+#include "assignment.h"
 
 /**
  * @brief need another parameter for formatter
@@ -55,7 +56,7 @@ void application <T> ::operator()(var_stack<T> &vst) const
 {
 	switch (m_kind) {
 	case ASSIGNMENT:
-		cout << "Adding feature" << endl;
+		assignment <T> ::resolve(m_input, vst);
 		break;
 	case EXPRESSION:
 		cout << "\t" << expression <T> ::in_place_evaluate(m_input, vst) << endl;

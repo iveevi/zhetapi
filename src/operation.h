@@ -395,7 +395,8 @@ template <class oper_t>
 bool operator==(const operation <oper_t> &right, const operation <oper_t>
 		&left)
 {
-	if (right.pemdas != left.pemdas)
+	return right.name == left.name;
+	/*if (right.pemdas != left.pemdas)
 		return false;
 	if (right.opers != left.opers)
 		return false;
@@ -403,7 +404,7 @@ bool operator==(const operation <oper_t> &right, const operation <oper_t>
 		return false;
 	if (right.symbols != left.symbols)
 		return false;
-	return right.func == left.func;
+	return right.func == left.func;*/
 }
 
 template <class oper_t>

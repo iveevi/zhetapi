@@ -14,7 +14,7 @@
 template <typename T>
 class parser;
 
-// Beginning of tree class
+// Beginning of tree class - move parser utilities here
 template <typename T>
 class tree {
 public:

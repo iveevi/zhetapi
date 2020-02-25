@@ -11,10 +11,22 @@ public:
 	using nfe = not_found_exception;
 	using node = typename splay_stack <variable <T>> ::node;
 
+	variable <T> &get(const std::string &);
 	const variable <T> &find(const std::string &);
 protected:
 	virtual void splay(node *(&), const std::string &);
 };
+
+template <class T>
+variable <T> &var_stack <T> ::get(const std::string &id)
+{
+	splay(this->m_root, id);
+
+	if (this->m_root->val.symbol() != id)
+		throw nfe();
+	
+	return this->m_root->val;
+}
 
 template <class T>
 const variable <T> &var_stack <T> ::find(const std::string &id)
