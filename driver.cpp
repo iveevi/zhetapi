@@ -155,7 +155,7 @@ void test_application()
 
 void test_function()
 {
-	functor <double> f("f(x, y, z) = x^2 - y^2 + 3z");
+	functor <double> f("f(x, y, z) = x^2 - y^2 + 3*z");
 }
 
 int main()

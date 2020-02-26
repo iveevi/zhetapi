@@ -4,6 +4,7 @@
 // C++ Standard Libraries
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <unordered_map>
 
 // Custom Built Libraries
@@ -149,12 +150,24 @@ template <class T>
 typename functor <T> ::node *functor <T> ::build
 	(const std::vector <token *> &toks)
 {
+	token *t;
+	
+	stl_reveal(t, toks, [](token *t) {
+	if (t == nullptr)
+		return std::string("nullptr");
+	return t->str();
+	});
 
+	return nullptr;
 }
 
 template <class T>
 const std::vector <token *> functor <T> ::symbols(const std::string &str)
 {
+	for (int i = 0; i < str.length(); i++)
+		std::cout << i << "\t" << str[i] << std::endl;
+	std::cout << std::endl;
+
 	std::pair <token *, size_t> pr;
 	std::vector <token *> toks;
 	size_t index = 0;
@@ -176,8 +189,11 @@ template <class T>
 const std::pair <token *, size_t> &functor <T> ::next
 	(const std::string &str, const size_t &index)
 {
-	using defaults <T> ::opers;
-	using defaults <T> ::m_size;
+	auto opers = defaults <T> ::opers;
+	size_t m_size = defaults <T> ::m_size;
+
+	std::pair <token *, size_t> *pr = new
+		std::pair <token *, size_t> {nullptr, -1};
 
 	std::istringstream ss(str);
 	std::string paren;
@@ -187,6 +203,7 @@ const std::pair <token *, size_t> &functor <T> ::next
 	T val;
 
 	for (i = index; i < str.length(); i++) {
+		dp_var(str[i]);
 		/* handle parenthesis later
 		if (str[i] == '(') {
 			for (size_t j = i + 1; j < str.length(); j++) {
@@ -200,17 +217,32 @@ const std::pair <token *, size_t> &functor <T> ::next
 
 		if (isdigit(str[i])) {
 			ss >> val;
-			return {new operand <T> (val), ss.tellg()};
+
+			pr->first = new operand <T> (val);
+			pr->second = ss.tellg();
+
+			return *pr;
 		}
 
 		if (!isspace(str[i]))
 			accum += str[i];
 
-		auto itr = find(opers, opers + m_size,
+		dp_var(accum);
+
+		auto itr = find_if(opers, opers + m_size,
 			[&](const operation <operand <T>> &opn) {
 				return opn.matches(accum);
 			});
+		
+		if (itr != nullptr) {
+			pr->first = itr;
+			pr->second = i + 1;
+
+			return *pr;
+		}
 	}
+
+	return *pr;
 }
 
 // 'Debugging' functors
