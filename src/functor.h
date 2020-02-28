@@ -54,14 +54,14 @@ public:
 		const std::vector <std::string> &,
 		const std::string &);
 
-	const T &operator()(const std::vector <T> &) const;
-	const T &operator()(...) const;
+	const T &operator()(const std::vector <T> &);
+	const T &operator()(...);
 
 	void print() const;
 protected:
 	void print(node *, int, int) const;
 
-	node *copy(const node *);
+	node *copy(const node *) const;
 	node *build(const std::string &);
 	node *build(const std::vector <token *> &);
 
@@ -147,16 +147,19 @@ functor <T> ::functor(const std::string &in)
 }
 
 template <class T>
-typename functor <T> ::node *copy(const node *tree)
+typename functor <T> ::node *functor <T> ::copy
+	(const node *tree) const
 {
 	node *cpy;
 
 	if (tree == nullptr)
-		return tree;
+		return nullptr;
 	
 	cpy = new node{tree->tok, {}};
 	for (node *nd : tree->leaves)
 		cpy->leaves.push_back(copy(nd));
+
+	return cpy;
 }
 
 template <class T>
@@ -233,13 +236,13 @@ const T &functor <T> ::value(const node *tree) const
 	
 	switch (tree->tok->caller()) {
 	case token::OPERAND:
-		return (dynamic_cast <operand> (tree->tok))->get();
+		return (dynamic_cast <operand *> (tree->tok))->get();
 	case token::OPERATION:
 		for (auto it = tree->leaves.begin();
 			it != tree->leaves.end(); it++) {
-			switch (it->tok->caller) {
+			switch ((*it)->tok->caller()) {
 			case token::OPERAND:
-				vals.push_back(*(dynamic_cast <operand *>(it->tok)));
+				vals.push_back(*(dynamic_cast <operand *> ((*it)->tok)));
 				break;
 			case token::OPERATION:
 				vals.push_back(operand (value(*it)));
@@ -248,7 +251,7 @@ const T &functor <T> ::value(const node *tree) const
 			}
 
 			return (dynamic_cast <operation *> (tree->tok))
-				->compute(vals)->get();
+				->compute(vals).get();
 		}
 	}
 
@@ -383,22 +386,33 @@ void functor <T> ::print(node *nd, int num,
 }
 
 template <class T>
-const T &functor <T> ::operator()(const std::vector <T> &vals) const
+const T &functor <T> ::operator()(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
 	
+	dp_msg("-------------------------------");
+	print(m_root, 0, 0);
+
 	node *cpy = copy(m_root);
+
+	dp_msg("-------------------------------");
+	print(cpy, 0, 0);
+
 	for (size_t i = 0; i < m_params.size(); i++) {
 		for (auto &p : m_vmap[m_params[i].symbol()]) {
-			std::vector <token *> lvs = p->leaves;
-			p = new node{vals[0], lvs};
+			std::vector <node *> lvs = p->leaves;
+			p = new node{new operand <T> {vals[0]}, lvs};
+			dp_var(p->tok->get());
 		}
 	}
 
+	dp_msg("-------------------------------");
+	print(m_root, 0, 0);
+
 	// Get value, restore tree
 	// and return value
-	T *val = T(value(m_root));
+	T *val = new T(value(m_root));
 	m_root = cpy;
 	return *val;
 }
