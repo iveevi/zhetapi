@@ -77,6 +77,9 @@ protected:
 
 	const T &value(const node *) const;
 
+	template <class ... V>
+	void arguments(std::vector <T> &, T, V ...) const;
+
 	static const std::vector <token *> symbols
 		(const std::string &, const std::vector
 		<variable <T>> &);
@@ -443,20 +446,19 @@ template <class T>
 template <class ... V>
 const T &functor <T> ::operator()(V ... args)
 {
-	va_list args;
-
-	va_start(args, arg);
 	std::vector <T> vals;
-
-	vals.push_back(arg);
-	for (int i = 0; i < m_params.size() - 1; i++) {
-		vals.push_back(va_arg(args, T));
-	}
-
-	for (T val : vals)
-		dp_var(val);
+	arguments(vals, args...);
 
 	return (*this)(vals);
+}
+
+template <class T>
+template <class ... V>
+void functor <T> ::arguments(std::vector <T> &vals,
+	T first, V ... args) const
+{
+	vals.push_back(first);
+	arguments(vals, args...);
 }
 
 #endif
