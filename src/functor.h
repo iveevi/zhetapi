@@ -2,6 +2,7 @@
 #define FUNCTOR_H_
 
 // C++ Standard Libraries
+#include <cstdarg>
 #include <string>
 #include <vector>
 #include <algorithm>
@@ -24,6 +25,7 @@
 template <class T>
 class functor {
 public:
+	/* change naming */
 	struct node {
 		token *tok;
 		std::vector <node *> leaves;
@@ -49,19 +51,27 @@ protected:
 	std::unordered_map <std::string,
 		std::vector <node *>> m_vmap;
 public:
+	// if there are no arguments, degrade to
+	// lambda (formal token_tree)
 	functor(const std::string &);
 	functor(const std::string &,
 		const std::vector <std::string> &,
 		const std::string &);
 
 	const T &operator()(const std::vector <T> &);
-	const T &operator()(...);
+
+	template <class ... V>
+	const T &operator()(V ...);
 
 	void print() const;
 protected:
 	void print(node *, int, int) const;
 
+	void refresh();
+	void refresh(node *);
+
 	node *copy(const node *) const;
+
 	node *build(const std::string &);
 	node *build(const std::vector <token *> &);
 
@@ -144,6 +154,28 @@ functor <T> ::functor(const std::string &in)
 		m_params.push_back(variable <T> (str, true));
 	
 	m_root = build(expr);
+}
+
+template <class T>
+void functor <T> ::refresh()
+{
+	m_vmap.clear();
+	refresh(m_root);
+}
+
+template <class T>
+void functor <T> ::refresh(node *tree)
+{
+	if (tree == nullptr)
+		return;
+
+	if (tree->tok->caller() == token::VARIABLE) {
+		m_vmap[dynamic_cast <variable <T> *>
+			(tree->tok)->symbol()].push_back(tree);
+	}
+	
+	for (node *nd : tree->leaves)
+		refresh(nd);
 }
 
 template <class T>
@@ -246,13 +278,15 @@ const T &functor <T> ::value(const node *tree) const
 				break;
 			case token::OPERATION:
 				vals.push_back(operand (value(*it)));
+				break;
 			default:
 				throw incomputable_tree();
+				break;
 			}
-
-			return (dynamic_cast <operation *> (tree->tok))
-				->compute(vals).get();
 		}
+		
+		return (dynamic_cast <operation *> (tree->tok))
+			->compute(vals).get();
 	}
 
 	throw incomputable_tree();
@@ -361,7 +395,6 @@ const std::pair <token *, size_t> &functor <T> ::next
 template <class T>
 void functor <T> ::print() const
 {
-	std::cout << "PRINTING TREE" << std::endl;
 	print(m_root, 1, 0);
 }
 
@@ -378,7 +411,7 @@ void functor <T> ::print(node *nd, int num,
 		counter--;
 	}
 
-	std::cout << "#" << num << " - " << nd->tok->str() << std::endl;
+	std::cout << "#" << num << " - " << nd->tok->str() << " @ " << nd << std::endl;
 
 	counter = 0;
 	for (auto it = nd->leaves.begin(); it != nd->leaves.end(); it++, counter++)
@@ -390,31 +423,40 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
-	
-	dp_msg("-------------------------------");
-	print(m_root, 0, 0);
 
 	node *cpy = copy(m_root);
-
-	dp_msg("-------------------------------");
-	print(cpy, 0, 0);
-
 	for (size_t i = 0; i < m_params.size(); i++) {
-		for (auto &p : m_vmap[m_params[i].symbol()]) {
-			std::vector <node *> lvs = p->leaves;
-			p = new node{new operand <T> {vals[0]}, lvs};
-			dp_var(p->tok->get());
-		}
+		for (auto &p : m_vmap[m_params[i].symbol()])
+			p->tok = new operand <T> {vals[i]};
 	}
-
-	dp_msg("-------------------------------");
-	print(m_root, 0, 0);
 
 	// Get value, restore tree
 	// and return value
 	T *val = new T(value(m_root));
 	m_root = cpy;
+	refresh();
+
 	return *val;
+}
+
+template <class T>
+template <class ... V>
+const T &functor <T> ::operator()(V ... args)
+{
+	va_list args;
+
+	va_start(args, arg);
+	std::vector <T> vals;
+
+	vals.push_back(arg);
+	for (int i = 0; i < m_params.size() - 1; i++) {
+		vals.push_back(va_arg(args, T));
+	}
+
+	for (T val : vals)
+		dp_var(val);
+
+	return (*this)(vals);
 }
 
 #endif
