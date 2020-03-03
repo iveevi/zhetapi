@@ -274,7 +274,7 @@ const std::pair <data_t, std::string> &variable <data_t> ::get
 {
 	if (param)
 		throw bypass_attempt_exception();
-	return std::pair <data_t, std::string> (val, name);
+	return *(new std::pair <data_t, std::string> (val, name));
 }
 
 template <typename data_t>
@@ -311,7 +311,7 @@ const std::pair <data_t, std::string> &variable <data_t> ::operator*
 {
 	if (param)
 		throw bypass_attempt_exception();
-	return std::pair <data_t, std::string> (val, name);
+	return *(new std::pair <data_t, std::string> (val, name));
 }
 
 template <typename data_t>

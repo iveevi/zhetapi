@@ -34,7 +34,7 @@ class expression {
 public:
 	expression(std::string = "");
 
-	// Includes caching
+	// Includes caching, change to references
 	const T &evaluate(std::string = "", var_stack <T> = var_stack <T> ());
 
 	// Without caching

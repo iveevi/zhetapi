@@ -14,12 +14,15 @@
 #include "constants.h"
 #include "operand.h"
 #include "defaults.h"
+#include "var_stack.h"
 
 // remove after fixes
 #include "debug.h"
 
 /**
- * @brief later add refernces to the vst
+ * @brief later add refernces to the vst,
+ * and remove copyning refreshing process by
+ * changing only token forth and back
  * @tparam T para
  */
 template <class T>
@@ -35,21 +38,24 @@ public:
 	class syntax_error {};
 	class invalid_call {};
 	class incomputable_tree {};
+
+	
+	using map = std::unordered_map <std::string, std::vector <node *>>;
+	using param_list = std::vector <variable <T>>;
 protected:
 	/** functor symbol/name */
 	std::string m_name;
 
 	/** functors inputs/parameters,
 	used really only for checking correctness */
-	std::vector <variable <T>> m_params;
+	param_list m_params;
 
 	/** functor tree */
 	node *m_root;
 
 	
 	/** functor evaluation map : name to nodes*/
-	std::unordered_map <std::string,
-		std::vector <node *>> m_vmap;
+	map m_map;
 public:
 	// if there are no arguments, degrade to
 	// lambda (formal token_tree)
@@ -60,33 +66,49 @@ public:
 
 	const T &operator()(const std::vector <T> &);
 
-	template <class ... V>
-	const T &operator()(V ...);
-
 	void print() const;
 protected:
-	void print(node *, int, int) const;
+	static void print(node *, int, int);
 
-	void refresh();
-	void refresh(node *);
+	static node *build(const std::string &, const param_list &, map &);
+	static node *build(const std::vector <token *> &, map &);
 
-	node *copy(const node *) const;
+	static const T &value(const node *);
 
-	node *build(const std::string &);
-	node *build(const std::vector <token *> &);
-
-	const T &value(const node *) const;
-
-	template <class ... V>
-	void arguments(std::vector <T> &, T, V ...) const;
+	enum m_state {
+		state_none,
+		state_operation,
+		state_negative,
+		//state_variable,
+		//state_operand,
+		state_operand,
+	};
 
 	static const std::vector <token *> symbols
-		(const std::string &, const std::vector
-		<variable <T>> &);
+		(const std::string &, const param_list &,
+		map &, var_stack <T> &);
 
 	static const std::pair <token *, size_t>
 		&next(const std::string &, const size_t &,
-		const std::vector <variable <T>> &);
+		m_state &, const param_list &, map &,
+		var_stack <T> &);
+
+	/* groping class */
+	class group : public token {
+		node *m_root;
+	public:
+		group(node *tree) {
+			m_root = tree;
+		}
+
+		std::string str() {
+			return "grouper - ()";
+		}
+
+		type caller() {
+			return GROUP;
+		}
+	};
 	
 	/* replace with vector find
 	static size_t get_matching(std::string); */
@@ -156,57 +178,23 @@ functor <T> ::functor(const std::string &in)
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
 	
-	m_root = build(expr);
-}
+	m_root = build(expr, m_params, m_map);
 
-template <class T>
-void functor <T> ::refresh()
-{
-	m_vmap.clear();
-	refresh(m_root);
-}
-
-template <class T>
-void functor <T> ::refresh(node *tree)
-{
-	if (tree == nullptr)
-		return;
-
-	if (tree->tok->caller() == token::VARIABLE) {
-		m_vmap[dynamic_cast <variable <T> *>
-			(tree->tok)->symbol()].push_back(tree);
-	}
-	
-	for (node *nd : tree->leaves)
-		refresh(nd);
-}
-
-template <class T>
-typename functor <T> ::node *functor <T> ::copy
-	(const node *tree) const
-{
-	node *cpy;
-
-	if (tree == nullptr)
-		return nullptr;
-	
-	cpy = new node{tree->tok, {}};
-	for (node *nd : tree->leaves)
-		cpy->leaves.push_back(copy(nd));
-
-	return cpy;
+	print();
 }
 
 template <class T>
 typename functor <T> ::node *functor <T> ::build
-	(const std::string &str)
+	(const std::string &str, const param_list &m_params, map &m_map)
 {
-	return build(symbols(str, m_params));
+	// dummy
+	var_stack <T> vst = var_stack <T> ();
+	return build(symbols(str, m_params, m_map, vst), m_map);
 }
 
 template <class T>
 typename functor <T> ::node *functor <T> ::build
-	(const std::vector <token *> &toks)
+	(const std::vector <token *> &toks, map &m_map)
 {
 	typedef operation <operand <T>> operation;
 	typedef operand <T> operand;
@@ -228,7 +216,7 @@ typename functor <T> ::node *functor <T> ::build
 			<variable <T> *> (toks[0]);
 
 		if (var != nullptr)
-			m_vmap[var->symbol()].push_back(tree);
+			m_map[var->symbol()].push_back(tree);
 
 		return tree;
 	}
@@ -254,15 +242,15 @@ typename functor <T> ::node *functor <T> ::build
 		std::vector <token *> b(std::next(save), toks.end());
 
 		tree = new node{tptr, {}};
-		tree->leaves.push_back(build(a));
-		tree->leaves.push_back(build(b));
+		tree->leaves.push_back(build(a, m_map));
+		tree->leaves.push_back(build(b, m_map));
 	}
 
 	return tree;
 }
 
 template <class T>
-const T &functor <T> ::value(const node *tree) const
+const T &functor <T> ::value(const node *tree)
 {
 	typedef operation <operand <T>> operation;
 	typedef operand <T> operand;
@@ -297,22 +285,57 @@ const T &functor <T> ::value(const node *tree) const
 
 template <class T>
 const std::vector <token *> functor <T> ::symbols(const std::string &str,
-	const std::vector <variable <T>> &params)
+	const param_list &params, map &m_map, var_stack <T> &vst)
 {
 	std::pair <token *, size_t> pr;
 	std::vector <token *> toks;
 	size_t index = 0;
+
+	m_state prev;
 	
+	m_state curr = state_none;
 	while (true) {
-		pr = next(str, index, params);
+		prev = curr;
+
+		pr = next(str, index, curr, params, m_map, vst);
 
 		index = pr.second;
 
+		// change size_t to some
+		// larger data holder
 		if (index == (size_t) -1)
 			break;
 
+		
+		// Assumes that there will be
+		// another operand later in the 
+		// expression
+		if (pr.first != nullptr && pr.first == &defaults <T>
+			::opers[defaults <T> ::SUBOP] && prev == state_none) {
+			toks.push_back(new operand <T> (-1));
+			toks.push_back(&defaults <T>
+				::opers[defaults <T> ::MULTOP]);
+			continue;
+		}
+		
+		// Assuming operand * operand,
+		// where operand is either an
+		// actual operand (value), a
+		// variable, or a parenthesized
+		// sub expression
+		if (curr == state_operand) {
+			if (prev == curr) {
+				toks.push_back(&defaults <T>
+					::opers[defaults <T> ::MULTOP]);
+			}
+		}
+
 		toks.push_back(pr.first);
 	}
+
+	dp_msg("TOKENS");
+	for (token *t : toks)
+		dp_var(t->str());
 
 	return toks;
 }
@@ -320,7 +343,8 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 template <class T>
 const std::pair <token *, size_t> &functor <T> ::next
 	(const std::string &str, const size_t &index,
-	const std::vector <variable <T>> &params)
+	m_state &state, const param_list &m_params, map &m_map,
+	var_stack <T> &vst)
 {
 	auto null = defaults <T> ::opers[defaults <T> ::NOPERS];
 	auto opers = defaults <T> ::opers;
@@ -339,22 +363,31 @@ const std::pair <token *, size_t> &functor <T> ::next
 
 	ss.seekg(index);
 	for (i = index; i < str.length(); i++) {
-		/* handle parenthesis later
 		if (str[i] == '(') {
 			for (size_t j = i + 1; j < str.length(); j++) {
 				if (str[j] == ')') {
+					node *ptree = build(paren, m_params, m_map);
 
+					pr->first = new group(ptree);
+					print(ptree, 0, 0);
+					pr->second = j + 1;
+					state = state_operand;
+					break;
 				}
+
+				paren += str[j];
 			}
 		} else if (str[i] == ')') {
 			throw syntax_error();
-		} */
+		}
 
 		if (isdigit(str[i])) {
 			ss >> val;
 
 			pr->first = new operand <T> (val);
 			pr->second = ss.tellg();
+			state = state_operand;
+
 			break;
 		}
 
@@ -365,14 +398,16 @@ const std::pair <token *, size_t> &functor <T> ::next
 			continue;
 
 		// Priority with variables over var-stack vars
-		auto var = find_if(params.begin(), params.end(),
+		auto var = find_if(m_params.begin(), m_params.end(),
 			[&](const variable <T> &v) {
 				return v.symbol() == accum;
 			});
 		
-		if (var != params.end()) {
+		if (var != m_params.end()) {
 			pr->first = new variable <T> (var->symbol(), true);
 			pr->second = i + 1;
+			state = state_operand;
+
 			break;
 		}
 
@@ -384,6 +419,8 @@ const std::pair <token *, size_t> &functor <T> ::next
 		if (itr != nullptr && *itr != null) {
 			pr->first = itr;
 			pr->second = i + 1;
+			state = state_operation;
+
 			break;
 		}
 	}
@@ -403,7 +440,7 @@ void functor <T> ::print() const
 
 template <class T>
 void functor <T> ::print(node *nd, int num,
-	int lev) const
+	int lev)
 {
 	if (nd == nullptr) 
 		return;
@@ -427,38 +464,21 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 	if (vals.size() != m_params.size())
 		throw invalid_call();
 
-	node *cpy = copy(m_root);
 	for (size_t i = 0; i < m_params.size(); i++) {
-		for (auto &p : m_vmap[m_params[i].symbol()])
+		for (auto &p : m_map[m_params[i].symbol()])
 			p->tok = new operand <T> {vals[i]};
 	}
 
 	// Get value, restore tree
 	// and return value
 	T *val = new T(value(m_root));
-	m_root = cpy;
-	refresh();
+
+	for (size_t i = 0; i < m_params.size(); i++) {
+		for (auto &p : m_map[m_params[i].symbol()])
+			p->tok = new variable <T> (m_params[i].symbol(), true);
+	}
 
 	return *val;
-}
-
-template <class T>
-template <class ... V>
-const T &functor <T> ::operator()(V ... args)
-{
-	std::vector <T> vals;
-	arguments(vals, args...);
-
-	return (*this)(vals);
-}
-
-template <class T>
-template <class ... V>
-void functor <T> ::arguments(std::vector <T> &vals,
-	T first, V ... args) const
-{
-	vals.push_back(first);
-	arguments(vals, args...);
 }
 
 #endif

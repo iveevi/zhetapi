@@ -20,7 +20,7 @@ public:
 	 * caller inspection */
 	enum type {NONE, OPERAND, OPERATION,
 		VARIABLE, FUNCTION, PARSER, DEFAULTS,
-		GROUP};
+		GROUP, LPAREN, RPAREN};
 
 	/* Virtual:
 	 * [type] [caller]() - inspector function passed
