@@ -95,17 +95,18 @@ protected:
 
 	/* groping class */
 	class group : public token {
-		node *m_root;
 	public:
+		node *m_root;
+
 		group(node *tree) {
 			m_root = tree;
 		}
 
-		std::string str() {
+		std::string str() const {
 			return "grouper - ()";
 		}
 
-		type caller() {
+		type caller() const {
 			return GROUP;
 		}
 	};
@@ -180,7 +181,7 @@ functor <T> ::functor(const std::string &in)
 	
 	m_root = build(expr, m_params, m_map);
 
-	print();
+	// print();
 }
 
 template <class T>
@@ -203,6 +204,7 @@ typename functor <T> ::node *functor <T> ::build
 	auto opers = defaults <T> ::opers;
 
 	node *tree;
+	node *temp;
 
 	operation *tptr;
 	operation *optr;
@@ -235,8 +237,17 @@ typename functor <T> ::node *functor <T> ::build
 	if (tptr->get_order() == operation::FUNC_LMAX) {
 		tree = new node {tptr, {}};
 
-		for (auto it = std::next(save); it != toks.end(); it++)
-			tree->leaves.push_back(new node {*it, {}});
+		for (auto it = std::next(save); it != toks.end(); it++) {
+			temp = new node {*it, {}};
+
+			variable <T> *var = dynamic_cast
+				<variable <T> *> (*it);
+
+			if (var != nullptr)
+				m_map[var->symbol()].push_back(temp);
+
+			tree->leaves.push_back(temp);
+		}
 	} else {
 		std::vector <token *> a(toks.begin(), save);
 		std::vector <token *> b(std::next(save), toks.end());
@@ -256,19 +267,27 @@ const T &functor <T> ::value(const node *tree)
 	typedef operand <T> operand;
 
 	std::vector <operand> vals;
+
+	// dp_var(tree->tok->str());
 	
 	switch (tree->tok->caller()) {
+	case token::GROUP:
+		return value((dynamic_cast <group *> (tree->tok))->m_root);
 	case token::OPERAND:
 		return (dynamic_cast <operand *> (tree->tok))->get();
 	case token::OPERATION:
 		for (auto it = tree->leaves.begin();
 			it != tree->leaves.end(); it++) {
+			// dp_var((*it)->tok->str());
 			switch ((*it)->tok->caller()) {
 			case token::OPERAND:
 				vals.push_back(*(dynamic_cast <operand *> ((*it)->tok)));
 				break;
 			case token::OPERATION:
 				vals.push_back(operand (value(*it)));
+				break;
+			case token::GROUP:
+				vals.push_back(operand (value((dynamic_cast <group *> ((*it)->tok))->m_root)));
 				break;
 			default:
 				throw incomputable_tree();
@@ -291,6 +310,8 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 	std::vector <token *> toks;
 	size_t index = 0;
 
+	// dp_msg("-----------------------------------------------");
+
 	m_state prev;
 	
 	m_state curr = state_none;
@@ -305,8 +326,9 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 		// larger data holder
 		if (index == (size_t) -1)
 			break;
-
 		
+		// dp_var(pr.first->str());
+
 		// Assumes that there will be
 		// another operand later in the 
 		// expression
@@ -333,9 +355,9 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 		toks.push_back(pr.first);
 	}
 
-	dp_msg("TOKENS");
+	/* dp_msg("TOKENS");
 	for (token *t : toks)
-		dp_var(t->str());
+		dp_var(t->str()); */
 
 	return toks;
 }
@@ -369,10 +391,11 @@ const std::pair <token *, size_t> &functor <T> ::next
 					node *ptree = build(paren, m_params, m_map);
 
 					pr->first = new group(ptree);
-					print(ptree, 0, 0);
+					// print(ptree, 0, 0);
 					pr->second = j + 1;
 					state = state_operand;
-					break;
+
+					return *pr;
 				}
 
 				paren += str[j];

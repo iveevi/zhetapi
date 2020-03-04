@@ -155,7 +155,7 @@ void test_application()
 
 void test_function()
 {
-	functor <double> f("f(x, y, z) = 3x(-5x^2 - y^2 + 3z)");
+	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z)");
 	dp_var(f({2, 3, 4}));
 	dp_var(f({2, 3, 4}));
 }
