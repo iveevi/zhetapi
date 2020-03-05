@@ -65,6 +65,7 @@ public:
 		const std::string &);
 
 	const T &operator()(const std::vector <T> &);
+	const T &operator()(T, ...);
 
 	void print() const;
 protected:
@@ -502,6 +503,28 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 	}
 
 	return *val;
+}
+
+template <class T>
+const T &functor <T> ::operator()(T first, ...)
+{
+	std::vector <T> vals;
+	va_list args;
+	
+	vals.push_back(first);
+
+	va_start(args, first);
+	T v;
+	for (size_t i = 0; i < m_params.size() - 1; i++) {
+		vals.push_back(v = va_arg(args, double));
+		dp_var(v);
+	}
+
+	dp_msg("VALS");
+	for (T val : vals)
+		dp_var(val);
+
+	return T();
 }
 
 #endif
