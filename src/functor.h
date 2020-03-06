@@ -65,7 +65,7 @@ public:
 		const std::string &);
 
 	const T &operator()(const std::vector <T> &);
-	const T &operator()(T, ...);
+	const T &operator()(int, ...);
 
 	void print() const;
 protected:
@@ -506,25 +506,26 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 }
 
 template <class T>
-const T &functor <T> ::operator()(T first, ...)
+const T &functor <T> ::operator()(int first, ...)
 {
-	std::vector <T> vals;
+	std::vector <double> vals;
+
 	va_list args;
-	
-	vals.push_back(first);
+	int list;
 
 	va_start(args, first);
-	T v;
-	for (size_t i = 0; i < m_params.size() - 1; i++) {
-		vals.push_back(v = va_arg(args, double));
-		dp_var(v);
+	vals.push_back((double)first);
+
+	dp_var(first);
+	for (size_t i = 1; i < m_params.size(); i++) {
+		list = va_arg(args, int);
+		vals.push_back((double)list);
+		dp_var(list);
 	}
 
-	dp_msg("VALS");
-	for (T val : vals)
-		dp_var(val);
+	va_end(args);
 
-	return T();
+	return (*this)(vals);
 }
 
 #endif
