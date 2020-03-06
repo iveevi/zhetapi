@@ -64,8 +64,12 @@ public:
 		const std::vector <std::string> &,
 		const std::string &);
 
+	const std::string &symbol() const;
+
 	const T &operator()(const std::vector <T> &);
-	const T &operator()(int, ...);
+
+	template <class ... U>
+	const T &operator()(U ...);
 
 	void print() const;
 protected:
@@ -75,6 +79,11 @@ protected:
 	static node *build(const std::vector <token *> &, map &);
 
 	static const T &value(const node *);
+
+	template <class ... U>
+	static void gather(std::vector <T> &, T, U...);
+
+	static void gather(std::vector <T> &, T);
 
 	enum m_state {
 		state_none,
@@ -183,6 +192,12 @@ functor <T> ::functor(const std::string &in)
 	m_root = build(expr, m_params, m_map);
 
 	// print();
+}
+
+template <class T>
+const std::string &functor <T> ::symbol() const
+{
+	return m_name;
 }
 
 template <class T>
@@ -506,26 +521,28 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 }
 
 template <class T>
-const T &functor <T> ::operator()(int first, ...)
+template <class ... U>
+const T &functor <T> ::operator()(U ... args)
 {
-	std::vector <double> vals;
-
-	va_list args;
-	int list;
-
-	va_start(args, first);
-	vals.push_back((double)first);
-
-	dp_var(first);
-	for (size_t i = 1; i < m_params.size(); i++) {
-		list = va_arg(args, int);
-		vals.push_back((double)list);
-		dp_var(list);
-	}
-
-	va_end(args);
-
+	std::vector <T> vals;
+	gather(vals, args...);
 	return (*this)(vals);
+}
+
+template <class T>
+template <class ... U>
+void functor <T> ::gather(std::vector <T> &vals,
+	T first, U ... args)
+{
+	vals.push_back(first);
+	gather(vals, args...);
+}
+
+template <class T>
+void functor <T> ::gather(std::vector <T> &vals,
+	T first)
+{
+	vals.push_back(first);
 }
 
 #endif

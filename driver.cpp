@@ -5,6 +5,7 @@
 #include "src/stack.h"
 #include "src/expression.h"
 #include "src/var_stack.h"
+#include "src/func_stack.h"
 #include "src/application.h"
 #include "src/functor.h"
 
@@ -157,10 +158,37 @@ void test_function()
 {
 	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z)");
 	cout << "\t" << f({2, 3, 4}) << endl;
-	dp_var(f(2, 3, 4));
+	cout << "\t" << f(2, 3, 4) << endl;
+}
+
+void test_func_stack()
+{
+	func_stack <double> fst;
+
+	vector <std::string> funcs {"f(x) = x^4 + 6",
+		"h(x) = 232x^7 - 90", "g(x, y) = x^2 + y^2"};
+
+	for (std::string str : funcs) {
+		cout << "\tInserting: " << str << endl;
+		fst.insert(functor <double> (str));
+	}
+
+	cout << "After Populating:" << endl;
+	fst.print();
+
+	cout << "Testing Find Function:" << endl;
+
+	functor <double> temp("");
+	for (std::string str : funcs) {
+		cout << endl << "Trying to find " << str << endl;
+		temp = fst.find(str.substr());
+		
+		//cout << "Returned " << temp << endl;
+		//vst.print();
+	}
 }
 
 int main()
 {
-	test_function();
+	test_func_stack();
 }
