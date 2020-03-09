@@ -72,6 +72,9 @@ public:
 	const T &operator()(U ...);
 
 	void print() const;
+
+	template <class U>
+	friend const std::string &output(const functor <U> &);
 protected:
 	static void print(node *, int, int);
 
@@ -450,7 +453,7 @@ const std::pair <token *, size_t> &functor <T> ::next
 			break;
 		}
 
-		auto itr = find_if(opers, opers + m_size,
+		auto itr = std::find_if(opers, opers + m_size,
 			[&](const operation <operand <T>> &opn) {
 				return opn.matches(accum);
 			});
@@ -543,6 +546,58 @@ void functor <T> ::gather(std::vector <T> &vals,
 	T first)
 {
 	vals.push_back(first);
+}
+
+// output functions
+template <class T>
+void process_operation(const typename functor <T> ::node *tree)
+{
+	size_t index;
+	for (size_t i = 0; i < defaults <T> ::opers::m_size; i++) {
+		if (defaults <T> ::opers[i].matches(*(dynamic_cast <operation <operand <T>> *> (tree->tok)))) {
+			index = i;
+			break;
+		}
+	}
+
+	dp_var(defaults <T> ::opers[index]);
+
+
+	switch (index) {
+
+	}
+}
+
+template <class T>
+void process(const typename functor <T> ::node *tree, std::string &str)
+{
+	switch (tree->tok->caller()) {
+	case token::OPERATION:
+		process_operation <T> (tree);
+		break;
+	case token::FUNCTION:
+		str += "function";
+		break;
+	case token::OPERAND:
+		str += "operand";
+		break;
+	case token::GROUP:
+		str += "(group)";
+		break;
+	default:
+		break;
+	}
+}
+
+template <class T>
+const std::string &output(const functor <T> &func)
+{
+	std::string out;
+
+	process <T> (const_cast <const typename functor <T> ::node *> (func.m_root), out);
+
+	std::string *nout = new std::string(out);
+	return *nout;
 }
 
 #endif

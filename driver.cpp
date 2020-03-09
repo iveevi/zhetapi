@@ -5,8 +5,8 @@
 #include "src/stack.h"
 #include "src/expression.h"
 #include "src/var_stack.h"
-#include "src/func_stack.h"
-#include "src/application.h"
+// #include "src/func_stack.h"
+// #include "src/application.h"
 #include "src/functor.h"
 
 using namespace std;
@@ -129,7 +129,7 @@ void test_variable_parsing()
 	}
 }
 
-void test_application()
+/* void test_application()
 {
 	application <double> app;
 	var_stack <double> vst;
@@ -152,16 +152,17 @@ void test_application()
 		app = application <double> (input);
 		app(vst);
 	}
-}
+} */
 
 void test_function()
 {
 	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z)");
 	cout << "\t" << f({2, 3, 4}) << endl;
 	cout << "\t" << f(2, 3, 4) << endl;
+	cout << output(f) << endl;
 }
 
-void test_func_stack()
+/* void test_func_stack()
 {
 	func_stack <double> fst;
 
@@ -186,9 +187,9 @@ void test_func_stack()
 		//cout << "Returned " << temp << endl;
 		//vst.print();
 	}
-}
+} */
 
 int main()
 {
-	test_func_stack();
+	test_function();
 }
