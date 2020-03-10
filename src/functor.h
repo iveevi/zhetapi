@@ -106,7 +106,8 @@ protected:
 		m_state &, const param_list &, map &,
 		var_stack <T> &);
 
-	/* groping class */
+public:
+	/* grouping class */
 	class group : public token {
 	public:
 		node *m_root;
@@ -569,20 +570,24 @@ void process_operation(const typename functor <T> ::node *tree)
 }
 
 template <class T>
-void process(const typename functor <T> ::node *tree, std::string &str)
+void process(const typename functor <T> ::node *tree, std::string &str, size_t index)
 {
 	switch (tree->tok->caller()) {
 	case token::OPERATION:
-		process_operation <T> (tree);
+		//process_operation <T> (tree);
+		str.insert(index, " operation ");
+		process <T> (tree->leaves[0], str, index);
+		process <T> (tree->leaves[1], str, index + 9);
 		break;
 	case token::FUNCTION:
-		str += "function";
+		// str.insert(index, "operation");
 		break;
 	case token::OPERAND:
-		str += "operand";
+		str.insert(index, " operand ");
 		break;
 	case token::GROUP:
-		str += "(group)";
+		str.insert(index, " () ");
+		process <T> ((dynamic_cast <typename functor <T> ::group *> (tree->tok))->m_root, str, index + 2);
 		break;
 	default:
 		break;
@@ -594,7 +599,7 @@ const std::string &output(const functor <T> &func)
 {
 	std::string out;
 
-	process <T> (const_cast <const typename functor <T> ::node *> (func.m_root), out);
+	process <T> (const_cast <const typename functor <T> ::node *> (func.m_root), out, 0);
 
 	std::string *nout = new std::string(out);
 	return *nout;
