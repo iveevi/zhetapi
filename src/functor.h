@@ -551,42 +551,78 @@ void functor <T> ::gather(std::vector <T> &vals,
 
 // output functions
 template <class T>
-void process_operation(const typename functor <T> ::node *tree)
+void process(const typename functor<T>::node *,
+	std::string &, size_t);
+
+template <class T>
+void process_operation(const typename functor <T> ::node *tree, std::string &str, size_t index)
 {
-	size_t index;
-	for (size_t i = 0; i < defaults <T> ::opers::m_size; i++) {
-		if (defaults <T> ::opers[i].matches(*(dynamic_cast <operation <operand <T>> *> (tree->tok)))) {
-			index = i;
+	size_t ind;
+	for (size_t i = 0; i < defaults <T> ::m_size; i++) {
+		if (defaults <T> ::opers[i].matches((dynamic_cast <operation <operand <T>> *> (tree->tok))->symbol())) {
+			ind = i;
 			break;
 		}
 	}
 
-	dp_var(defaults <T> ::opers[index]);
+	// dp_var(defaults <T> ::opers[index]);
 
 
-	switch (index) {
-
+	// use macros insteead of hardcode and use if ranges
+	switch (ind) {
+	case 1: case 2: case 3:
+	case 4: case 5:
+		str.insert(index, " " + defaults <T> ::opers[ind].symbol() + " ");
+		process <T> (tree->leaves[0], str, index);
+		/*dp_msg("SPLIT--------------------");
+		dp_var(tree->tok->str());
+		dp_msg("--------------------SPLIT");*/
+		process <T> (tree->leaves[1], str, index + 9);
+		break;
+	case 6: case 7: case 8: case 9:
+	case 10: case 11: case 12:
+		str.insert(index, " " + defaults <T> ::opers[ind].symbol() + " ");
+		process <T> (tree->leaves[0], str, index + 9);
+		break;
 	}
 }
 
 template <class T>
 void process(const typename functor <T> ::node *tree, std::string &str, size_t index)
 {
+	typename functor <T> ::group *g;
+
+	// dp_var(tree->tok->str());
+	dp_var(str);
+
 	switch (tree->tok->caller()) {
 	case token::OPERATION:
-		//process_operation <T> (tree);
-		str.insert(index, " operation ");
+		process_operation <T> (tree, str, index);
+		/*str.insert(index, " operation ");
 		process <T> (tree->leaves[0], str, index);
-		process <T> (tree->leaves[1], str, index + 9);
+		dp_msg("SPLIT--------------------");
+		dp_var(tree->tok->str());
+		dp_msg("--------------------SPLIT");
+		process <T> (tree->leaves[1], str, index + 9);*/
 		break;
 	case token::FUNCTION:
 		// str.insert(index, "operation");
 		break;
 	case token::OPERAND:
-		str.insert(index, " operand ");
+		// str.insert(index, " " + (dynamic_cast <operation <operand <T>> *> (tree->tok))->symbol() + " ");
+		break;
+	case token::VARIABLE:
+		str.insert(index, " variable ");
 		break;
 	case token::GROUP:
 		str.insert(index, " () ");
+		g = dynamic_cast <typename functor <T> ::group *> (tree->tok);
+		/*if (g != nullptr) {
+			dp_msg("is a group");
+			dp_var(g->m_root->tok->str());
+		} else {
+			dp_msg("not a group");
+		}*/
 		process <T> ((dynamic_cast <typename functor <T> ::group *> (tree->tok))->m_root, str, index + 2);
 		break;
 	default:

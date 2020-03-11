@@ -145,6 +145,11 @@ public:
 	
 	type caller() const override;
 	std::string str() const override;
+
+	const std::string &symbol() const
+	{
+		return symbols[0];
+	}
 	
 	/* Friend Functions:
 	 * std::ostream &operator<<(std::ostream &, const operation
