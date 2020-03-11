@@ -25,7 +25,7 @@
  * changing only token forth and back
  * @tparam T para
  */
-template <class T>
+template <class T> // inherit from token
 class functor {
 public:
 	/* change naming */
@@ -75,8 +75,13 @@ public:
 
 	template <class U>
 	friend const std::string &output(const functor <U> &);
-protected:
+
+	template <class U>
+	size_t process(const typename functor <U> ::node *,
+		std::string &, size_t);
+//protected:
 	static void print(node *, int, int);
+protected:
 
 	static node *build(const std::string &, const param_list &, map &);
 	static node *build(const std::vector <token *> &, map &);
@@ -229,6 +234,10 @@ typename functor <T> ::node *functor <T> ::build
 	operation *tptr;
 	operation *optr;
 
+	dp_msg("-------------------");
+	for (token *t : toks)
+		dp_var(t->str());
+
 	switch (toks.size()) {
 	case 0:
 		return nullptr;
@@ -342,12 +351,10 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 
 		index = pr.second;
 
-		// change size_t to some
-		// larger data holder
-		if (index == (size_t) -1)
+		if (pr.first == nullptr)
 			break;
-		
-		// dp_var(pr.first->str());
+
+		dp_var(pr.first->str());
 
 		// Assumes that there will be
 		// another operand later in the 
@@ -373,6 +380,11 @@ const std::vector <token *> functor <T> ::symbols(const std::string &str,
 		}
 
 		toks.push_back(pr.first);
+
+		// change size_t to some
+		// larger data holder
+		if (index == (size_t) -1)
+			break;
 	}
 
 	/* dp_msg("TOKENS");
@@ -551,13 +563,16 @@ void functor <T> ::gather(std::vector <T> &vals,
 
 // output functions
 template <class T>
-void process(const typename functor<T>::node *,
+size_t process(const typename functor<T>::node *,
 	std::string &, size_t);
 
 template <class T>
-void process_operation(const typename functor <T> ::node *tree, std::string &str, size_t index)
+size_t process_operation(const typename functor <T> ::node *tree, std::string &str, size_t index)
 {
-	size_t ind;
+	dp_msg("entering...");
+	std::string app;
+
+	size_t ind = 0;
 	for (size_t i = 0; i < defaults <T> ::m_size; i++) {
 		if (defaults <T> ::opers[i].matches((dynamic_cast <operation <operand <T>> *> (tree->tok))->symbol())) {
 			ind = i;
@@ -565,75 +580,95 @@ void process_operation(const typename functor <T> ::node *tree, std::string &str
 		}
 	}
 
-	// dp_var(defaults <T> ::opers[index]);
+	app = " " + defaults <T> ::opers[ind].symbol() + " ";
 
+	dp_var(app);
+	dp_var(ind);
+
+	size_t offset;
 
 	// use macros insteead of hardcode and use if ranges
 	switch (ind) {
-	case 1: case 2: case 3:
-	case 4: case 5:
-		str.insert(index, " " + defaults <T> ::opers[ind].symbol() + " ");
-		process <T> (tree->leaves[0], str, index);
+	case 0: case 1: case 2:
+	case 3: case 4: case 5:
+		dp_msg("over here!");
+		str.insert(index, app);//" " + defaults <T> ::opers[ind].symbol() + " ");
+		offset = process <T> (tree->leaves[0], str, index);
+		dp_msg("------------SPLIT---------------");
 		/*dp_msg("SPLIT--------------------");
 		dp_var(tree->tok->str());
 		dp_msg("--------------------SPLIT");*/
-		process <T> (tree->leaves[1], str, index + 9);
-		break;
+		offset += process <T> (tree->leaves[1], str, index + offset + app.length());
+		return index + offset + app.length();
 	case 6: case 7: case 8: case 9:
 	case 10: case 11: case 12:
-		str.insert(index, " " + defaults <T> ::opers[ind].symbol() + " ");
-		process <T> (tree->leaves[0], str, index + 9);
-		break;
+		str.insert(index, app);//" " + defaults <T> ::opers[ind].symbol() + " ");
+		return process <T> (tree->leaves[0], str, index + app.length()) + index + app.length();
 	}
+
+	return 0;
 }
 
 template <class T>
-void process(const typename functor <T> ::node *tree, std::string &str, size_t index)
+size_t process(const typename functor <T> ::node *tree, std::string &str, size_t index) //return soffest
 {
-	typename functor <T> ::group *g;
+	typename functor <T> ::group *gr;
 
-	// dp_var(tree->tok->str());
+	std::string app;
+	size_t offset;
+
+	dp_var(tree->tok->str());
+	dp_var(index);
 	dp_var(str);
 
 	switch (tree->tok->caller()) {
 	case token::OPERATION:
-		process_operation <T> (tree, str, index);
+		dp_msg("over here! one");
+		return process_operation <T> (tree, str, index);
 		/*str.insert(index, " operation ");
 		process <T> (tree->leaves[0], str, index);
 		dp_msg("SPLIT--------------------");
 		dp_var(tree->tok->str());
 		dp_msg("--------------------SPLIT");
 		process <T> (tree->leaves[1], str, index + 9);*/
-		break;
+		// return ;
 	case token::FUNCTION:
-		// str.insert(index, "operation");
+		app = "function";
+		str.insert(index, app);
 		break;
 	case token::OPERAND:
-		// str.insert(index, " " + (dynamic_cast <operation <operand <T>> *> (tree->tok))->symbol() + " ");
+		//str.insert(index, " " + std::string((dynamic_cast <operand <T> *> (tree->tok))->symbol()) + " ");
+		app = (dynamic_cast <operand <T> *> (tree->tok))->symbol();
+		str.insert(index, app);
 		break;
 	case token::VARIABLE:
-		str.insert(index, " variable ");
+		app = " variable ";
+		str.insert(index, app);
 		break;
 	case token::GROUP:
-		str.insert(index, " () ");
-		g = dynamic_cast <typename functor <T> ::group *> (tree->tok);
-		/*if (g != nullptr) {
+		app = "()";
+		gr = dynamic_cast <typename functor <T> ::group *> (tree->tok);
+		/*if (gr != nullptr) {
 			dp_msg("is a group");
-			dp_var(g->m_root->tok->str());
+			dp_var(gr->m_root->tok->str());
 		} else {
 			dp_msg("not a group");
 		}*/
-		process <T> ((dynamic_cast <typename functor <T> ::group *> (tree->tok))->m_root, str, index + 2);
-		break;
-	default:
+		functor <T> ::print(gr->m_root, 0, 0);
+		process <T> (gr->m_root, app, 1);
+		str.insert(index, app);
 		break;
 	}
+
+	return app.length();
 }
 
 template <class T>
 const std::string &output(const functor <T> &func)
 {
 	std::string out;
+
+	func.print();
 
 	process <T> (const_cast <const typename functor <T> ::node *> (func.m_root), out, 0);
 

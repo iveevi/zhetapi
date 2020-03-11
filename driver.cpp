@@ -157,6 +157,7 @@ void test_variable_parsing()
 void test_function()
 {
 	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z)");
+	// f.print();
 	cout << "\t" << f({2, 3, 4}) << endl;
 	cout << "\t" << f(2, 3, 4) << endl;
 	cout << output(f) << endl;

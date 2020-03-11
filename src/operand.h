@@ -46,6 +46,11 @@ public:
 	virtual data_t &operator*();
 	virtual const data_t &operator*() const;
 
+	const std::string &symbol() const {
+		std::string *nout = new std::string(str());
+		return *nout;
+	}
+
 	// Add descriptors later
 	operand &operator=(const operand &);
 
