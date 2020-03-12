@@ -9,7 +9,7 @@ template <class T>
 class func_stack : public splay_stack <functor <T>> {
 public:
 	using nfe = not_found_exception;
-	using node = typename splay_stack <variable <T>> ::node;
+	using node = typename splay_stack <functor <T>> ::node;
 
 	functor <T> &get(const std::string &);
 	const functor <T> &find(const std::string &);
@@ -64,7 +64,7 @@ void func_stack <T> ::splay(node *(&nd), const std::string &id)
 			}
 
 			if (rt == nullptr)
-				rt = new node {variable <T> (), nullptr, nullptr};
+				rt = new node {functor <T> (), nullptr, nullptr};
 		
 
 			if (rtm == nullptr) {
@@ -89,7 +89,7 @@ void func_stack <T> ::splay(node *(&nd), const std::string &id)
 			}
 
 			if (lt == nullptr)
-				lt = new node {variable <T> (), nullptr, nullptr};
+				lt = new node {functor <T> (), nullptr, nullptr};
 
 			if (ltm == nullptr) {
 				lt->right = nd;

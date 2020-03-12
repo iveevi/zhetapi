@@ -1,3 +1,4 @@
+#include <ctime>
 #include <iostream>
 #include <vector>
 
@@ -5,7 +6,7 @@
 #include "src/stack.h"
 #include "src/expression.h"
 #include "src/var_stack.h"
-// #include "src/func_stack.h"
+#include "src/func_stack.h"
 // #include "src/application.h"
 #include "src/functor.h"
 
@@ -73,6 +74,8 @@ void test_expression()
 
 void test_var_stack()
 {
+	cout << endl << "BEGINNING VAR_STACK TEST" << endl;
+
 	var_stack <double> vst;
 
 	vector <variable <double>> vals {variable <double> {"x", 12.0},
@@ -102,6 +105,8 @@ void test_var_stack()
 
 void test_variable_parsing()
 {
+	cout << endl << "BEGINNING VARIABLE PARSING TEST" << endl;
+
 	var_stack <double> vst;
 
 	vector <variable <double>> vals {variable <double> {"x", 12.0},
@@ -131,6 +136,7 @@ void test_variable_parsing()
 
 /* void test_application()
 {
+	cout << endl << "BEGINNING APPLICATION TEST" << endl;
 	application <double> app;
 	var_stack <double> vst;
 
@@ -156,15 +162,30 @@ void test_variable_parsing()
 
 void test_function()
 {
-	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z)");
-	// f.print();
-	cout << "\t" << f({2, 3, 4}) << endl;
-	cout << "\t" << f(2, 3, 4) << endl;
-	cout << output(f) << endl;
+	cout << endl << "BEGINNING FUNCTION TEST" << endl;
+
+	clock_t start, end;
+
+	start = clock();
+	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z");
+	end = clock();
+
+	functor <double> h("h(x) = x^3");
+
+	cout << f({2, 3, 4}) << endl;
+	cout << f(2, 3, 4) << endl;
+
+	cout << endl << "f(x, y, z): " << output(f) << endl;
+	cout << "dh(x)/dx : " << output(h.differentiate("x")) << endl;
+
+	cout << endl << "Construction: " << (end - start) /
+		(double) CLOCKS_PER_SEC << " seconds " << endl;
 }
 
-/* void test_func_stack()
+void test_func_stack()
 {
+	cout << endl << "BEGINNING FUNC_STACK TEST" << endl;
+
 	func_stack <double> fst;
 
 	vector <std::string> funcs {"f(x) = x^4 + 6",
@@ -180,17 +201,20 @@ void test_function()
 
 	cout << "Testing Find Function:" << endl;
 
+	vector <std::string> fnames {"f", "g", "h"};
+
 	functor <double> temp("");
-	for (std::string str : funcs) {
+	for (std::string str : fnames) {
 		cout << endl << "Trying to find " << str << endl;
 		temp = fst.find(str.substr());
 		
-		//cout << "Returned " << temp << endl;
-		//vst.print();
+		cout << "Returned " << temp << endl;
+		fst.print();
 	}
-} */
+}
 
 int main()
 {
 	test_function();
+	// test_func_stack();
 }
