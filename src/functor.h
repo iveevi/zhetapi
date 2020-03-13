@@ -127,6 +127,7 @@ protected:
 	static void label_operation(node *);
 	static void label(node *, const std::string &);
 
+	static void compress_operation(node *);
 	static void compress(node *);
 
 	static node *differentiate(node *, const std::string &);
@@ -665,11 +666,15 @@ const functor <T> &functor <T> ::differentiate
 	node *diffed = copy(m_root);
 
 	label(diffed, var);
-	print(diffed, 1, 0);
 
 	diffed = differentiate(diffed, var);
 
+	label(diffed, var);
+	compress(diffed);
+
+	std::cout << std::string(50, '-') << std::endl;
 	print(diffed, 1, 0);
+	std::cout << std::string(50, '-') << std::endl;
 
 	out->m_root = diffed;
 	out->m_name = m_name + "'";
@@ -687,6 +692,12 @@ void functor <T> ::label_operation(node *tree)
 			((dynamic_cast <operation <operand <T>> *>
 			(tree->tok))->symbol()))
 			break;
+	}
+
+	if (i >= defaults <T> ::ADDOP && i <= defaults <T> ::MODOP
+		&& tree->leaves[0]->type == tree->leaves[1]->type == m_constant) {
+		tree->type = m_constant;
+		return;
 	}
 
 	switch (i) {
@@ -749,9 +760,17 @@ void functor <T> ::label(node *tree, const std::string &var)
 }
 
 template <class T>
-void functor <T> ::compress(node *tree)
+void functor <T> ::compress_operation(node *tree)
 {
 
+}
+
+template <class T>
+void functor <T> ::compress(node *tree)
+{
+	switch (tree->tok->caller()) {
+		
+	}
 }
 
 template <class T>
@@ -760,6 +779,10 @@ typename functor <T> ::node *functor <T> ::differentiate
 {
 	node *left;
 	node *right;
+
+	node *lcpy;
+	node *rcpy;
+
 	T val;
 
 	switch (tree->type) {
@@ -767,9 +790,10 @@ typename functor <T> ::node *functor <T> ::differentiate
 		val = (dynamic_cast <operand <T> *> 
 			(tree->leaves[1]->tok))->get();
 
-		tree->leaves[1]->tok = tree->tok;
-		tree->leaves[1]->leaves.push_back(new node {tree->leaves[0]->tok, m_variable, {}});
-		tree->leaves[1]->leaves.push_back(new node {new operand <T> (val - 1), m_constant, {}});
+		tree->leaves[1] = new node {&defaults <T> ::opers[defaults <T> ::EXPOP], m_none,
+			{new node {tree->leaves[0]->tok, m_variable, {}},
+			new node {new operand <T> (val - 1), m_constant, {}}}
+		};
 
 		tree->tok = &defaults <T> ::opers[defaults <T> ::MULTOP];
 		tree->leaves[0]->tok = new operand <T> (val);
@@ -783,17 +807,20 @@ typename functor <T> ::node *functor <T> ::differentiate
 		left = new node {&defaults <T> ::opers[defaults <T> ::MULTOP], m_none, {}};
 		right = new node {&defaults <T> ::opers[defaults <T> ::MULTOP], m_none, {}};
 
+		lcpy = copy(tree->leaves[0]);
+		rcpy = copy(tree->leaves[1]);
+
 		left->leaves.push_back(differentiate(tree->leaves[0], var));
 		left->leaves.push_back(tree->leaves[1]);
 
-		right->leaves.push_back(tree->leaves[0]);
-		right->leaves.push_back(differentiate(tree->leaves[1], var));
+		right->leaves.push_back(lcpy);
+		right->leaves.push_back(differentiate(rcpy, var));
 
 		tree->leaves[0] = left;
 		tree->leaves[1] = right;
 		break;
 	case m_variable:
-		tree->tok = new operand <T> (1);
+		// tree->tok = new operand <T> (1);
 		break;
 	case m_constant:
 		tree->tok = new operand <T> (0);
