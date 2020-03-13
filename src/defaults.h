@@ -55,12 +55,16 @@ public:
 	 * all the default operations, and constants
 	 * that represents certain things */
 	static const int NONOP = -1;
+
+	// Binary Operations
 	static const int ADDOP = 0;
 	static const int SUBOP = 1;
 	static const int MULTOP = 2;
 	static const int DIVOP = 3;
 	static const int EXPOP = 4;
 	static const int MODOP = 5;
+
+	// Unary Operations
 	static const int SINOP = 6;
 	static const int COSOP = 7;
 	static const int TANOP = 8;
@@ -68,6 +72,7 @@ public:
 	static const int SECOP = 10;
 	static const int COTOP = 11;
 	static const int LOGOP = 12;
+	
 	static const int NOPERS = 13;
 	
 	static const size_t m_size = 13;

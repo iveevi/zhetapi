@@ -170,13 +170,14 @@ void test_function()
 	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z");
 	end = clock();
 
-	functor <double> h("h(x) = x^3");
+	// functor <double> h("h(x, y) = x^3 + y");
+	functor <double> h("h(x) = x^3 + 2x^2");
 
 	cout << f({2, 3, 4}) << endl;
 	cout << f(2, 3, 4) << endl;
 
 	cout << endl << "f(x, y, z): " << output(f) << endl;
-	cout << "dh(x)/dx : " << output(h.differentiate("x")) << endl;
+	cout << "dh(x)/dx :\n" << output(h.differentiate("x")) << endl;
 
 	cout << endl << "Construction: " << (end - start) /
 		(double) CLOCKS_PER_SEC << " seconds " << endl;

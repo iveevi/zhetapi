@@ -31,7 +31,12 @@ class functor : token {
 public:
 	/* change naming */
 	enum m_label {
+		m_none,
+		m_separable,
+		m_multiplied,
+		m_divided,
 		m_constant,
+		m_variable,
 		m_polynomial,
 		m_power,
 		m_exponential,
@@ -119,7 +124,11 @@ protected:
 	static node *build(const std::string &, const param_list &, map &);
 	static node *build(const std::vector <token *> &, map &);
 
+	static void label_operation(node *);
 	static void label(node *, const std::string &);
+
+	static void compress(node *);
+
 	static node *differentiate(node *, const std::string &);
 
 	static bool valid(const node *);
@@ -172,7 +181,12 @@ public:
 // static out of line definitions
 template <class T>
 std::string functor <T> ::m_label_str[] = {
+	"none",
+	"separable",
+	"multiplied",
+	"divided",
 	"constant",
+	"variable",
 	"polynomic",
 	"power",
 	"exponential",
@@ -640,6 +654,8 @@ void functor <T> ::gather(std::vector <T> &vals,
 	vals.push_back(first);
 }
 
+// Beginning of differentiation work
+
 template <class T>
 const functor <T> &functor <T> ::differentiate
 	(const std::string &var) const
@@ -649,9 +665,11 @@ const functor <T> &functor <T> ::differentiate
 	node *diffed = copy(m_root);
 
 	label(diffed, var);
-	print(diffed, 0, 0);
+	print(diffed, 1, 0);
 
 	diffed = differentiate(diffed, var);
+
+	print(diffed, 1, 0);
 
 	out->m_root = diffed;
 	out->m_name = m_name + "'";
@@ -661,23 +679,129 @@ const functor <T> &functor <T> ::differentiate
 }
 
 template <class T>
-void functor <T> ::label(node *tree, const std::string &var)
+void functor <T> ::label_operation(node *tree)
 {
-	for (node *nd : tree->leaves)
-		label(nd);
+	size_t i;
+	for (i = 0; i < defaults <T> ::m_size; i++) {
+		if (defaults <T> ::opers[i].matches
+			((dynamic_cast <operation <operand <T>> *>
+			(tree->tok))->symbol()))
+			break;
+	}
 
-	switch (tree->tok->caller()) {
-	case token::VARIABLE:
+	switch (i) {
+	case defaults <T> ::EXPOP:
+		if (tree->leaves[0]->type == m_variable) {
+			if (tree->leaves[1]->type == m_constant)
+				tree->type = m_power;
+			else
+				// new type
+				break;
+		} else if (tree->leaves[0]->type == m_constant) {
+			if (tree->leaves[1]->type == m_constant)
+				tree->type = m_constant;
+			else if (tree->leaves[1]->type == m_variable)
+				tree->type = m_exponential;
+			else
+				// something else
+				break;
+		}
+
 		break;
-	case token::OPERAND:
+	case defaults <T> ::ADDOP: case defaults <T> ::SUBOP:
+		tree->type = m_separable;
+		break;
+	case defaults <T> ::MULTOP:
+		tree->type = m_multiplied;
+		break;
+	case defaults <T> ::DIVOP:
+		tree->type = m_divided;
+		break;
+	default:
 		break;
 	}
+}
+
+template <class T>
+void functor <T> ::label(node *tree, const std::string &var)
+{
+	if (tree == nullptr)
+		return;
+
+	for (node *nd : tree->leaves)
+		label(nd, var);
+
+	switch (tree->tok->caller()) {
+	case token::OPERATION:
+		label_operation(tree);
+		break;
+	case token::VARIABLE:
+		if ((dynamic_cast <variable <T> *>
+			(tree->tok))->symbol() == var)
+			tree->type = m_variable;
+		else
+			tree->type = m_constant;
+		break;
+	case token::OPERAND:
+		tree->type = m_constant;
+		break;
+	}
+}
+
+template <class T>
+void functor <T> ::compress(node *tree)
+{
+
 }
 
 template <class T>
 typename functor <T> ::node *functor <T> ::differentiate
 	(node *tree, const std::string &var)
 {
+	node *left;
+	node *right;
+	T val;
+
+	switch (tree->type) {
+	case m_power:
+		val = (dynamic_cast <operand <T> *> 
+			(tree->leaves[1]->tok))->get();
+
+		tree->leaves[1]->tok = tree->tok;
+		tree->leaves[1]->leaves.push_back(new node {tree->leaves[0]->tok, m_variable, {}});
+		tree->leaves[1]->leaves.push_back(new node {new operand <T> (val - 1), m_constant, {}});
+
+		tree->tok = &defaults <T> ::opers[defaults <T> ::MULTOP];
+		tree->leaves[0]->tok = new operand <T> (val);
+	case m_separable:
+		differentiate(tree->leaves[0], var);
+		differentiate(tree->leaves[1], var);
+		break;
+	case m_multiplied:
+		tree->tok = &defaults <T> ::opers[defaults <T> ::ADDOP];
+
+		left = new node {&defaults <T> ::opers[defaults <T> ::MULTOP], m_none, {}};
+		right = new node {&defaults <T> ::opers[defaults <T> ::MULTOP], m_none, {}};
+
+		left->leaves.push_back(differentiate(tree->leaves[0], var));
+		left->leaves.push_back(tree->leaves[1]);
+
+		right->leaves.push_back(tree->leaves[0]);
+		right->leaves.push_back(differentiate(tree->leaves[1], var));
+
+		tree->leaves[0] = left;
+		tree->leaves[1] = right;
+		break;
+	case m_variable:
+		tree->tok = new operand <T> (1);
+		break;
+	case m_constant:
+		tree->tok = new operand <T> (0);
+		break;
+	default:
+		break;
+	}
+
 	return tree;
 }
 
@@ -758,6 +882,9 @@ size_t process(const typename functor <T> ::node *tree, std::string &str, size_t
 	std::string app;
 	size_t offset;
 
+	if (tree == nullptr)
+		return 0;
+
 	switch (tree->tok->caller()) {
 	case token::OPERATION:
 		return process_operation <T> (tree, str, index);
@@ -792,7 +919,17 @@ const std::string &output(const functor <T> &func)
 
 	process <T> (const_cast <const typename functor <T> ::node *> (func.m_root), out, 0);
 
-	std::string *nout = new std::string(out);
+	std::string *nout = new std::string();
+
+	*nout += func.m_name + "(";
+	for (size_t i = 0; i < func.m_params.size(); i++) {
+		*nout += func.m_params[i].symbol();
+
+		if (i < func.m_params.size() - 1)
+			*nout += ", ";
+	}
+	*nout += ") = " + out;
+
 	return *nout;
 }
 
