@@ -6,6 +6,7 @@
 #include <cstdarg>
 #include <string>
 #include <vector>
+#include <queue>
 #include <algorithm>
 #include <unordered_map>
 
@@ -41,6 +42,7 @@ public:
 		m_power,
 		m_exponential,
 		m_constant_logarithmic,
+		m_operation_constant,
 		m_logarithmic,
 		m_trigonometric
 	};
@@ -51,13 +53,15 @@ public:
 		token *tok;
 		m_label type;
 		std::vector <node *> leaves;
+
+		node(token *t, m_label l, std::vector <node *> lv)
+			: tok(t), type(l), leaves(lv) {}
 	};
 
 	class invalid_definition {};
 	class syntax_error {};
 	class invalid_call {};
 	class incomputable_tree {};
-
 	
 	using map = std::unordered_map <std::string, std::vector <node *>>;
 	using param_list = std::vector <variable <T>>;
@@ -73,8 +77,12 @@ protected:
 	node *m_root;
 
 	
-	/** functor evaluation map : name to nodes*/
+	/** functor evaluation map : name to nodes */
 	map m_map;
+
+	/** functor external evaulation map : for
+	 * variables that are not part of m_params */
+	map m_emap;
 public:
 	// if there are no arguments, degrade to
 	// lambda (formal token_tree)
@@ -90,11 +98,13 @@ public:
 	template <class ... U>
 	const T &operator()(U ...);
 
-	const functor &differentiate(const std::string &) const;
+	const functor &differentiate(const std::string &);
 
 	// The following are helper functions,
 	// whether it be output or comparison
 	// operators
+	
+	void compress();
 
 	void print() const;
 
@@ -117,18 +127,21 @@ public:
 	template <class U>
 	friend bool operator<(const functor <U> &,
 		const functor <U> &);
-protected:
+	
+	// restore to private
 	static void print(node *, int, int);
 
+protected:
 	static node *copy(const node *);
 	static node *build(const std::string &, const param_list &, map &);
 	static node *build(const std::vector <token *> &, map &);
 
-	static void label_operation(node *);
-	static void label(node *, const std::string &);
+	void label_operation(node *);
+	void label(node *, const std::vector <std::string> &);
+	void label();
 
-	static void compress_operation(node *);
-	static void compress(node *);
+	void compress_operation(node *);
+	void compress(node *(&));
 
 	static node *differentiate(node *, const std::string &);
 
@@ -139,6 +152,10 @@ protected:
 	static void gather(std::vector <T> &, T, U...);
 
 	static void gather(std::vector <T> &, T);
+
+	// for construction from another tree
+	void rebuild();
+	void rebuild(node *);
 
 	enum m_state {
 		state_none,
@@ -177,7 +194,12 @@ public:
 	
 	/* replace with vector find
 	static size_t get_matching(std::string); */
+
+	friend int yyparse(node *(&), param_list, map &);
 };
+
+#include "fparser.h"
+#include "lex.yy.c"
 
 // static out of line definitions
 template <class T>
@@ -192,6 +214,7 @@ std::string functor <T> ::m_label_str[] = {
 	"power",
 	"exponential",
 	"constant logarithmic",
+	"operation constant",
 	"logarithmic",
 	"trigonometric"
 };
@@ -266,7 +289,16 @@ functor <T> ::functor(const std::string &in)
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
 	
-	m_root = build(expr, m_params, m_map);
+	// m_root = build(expr, m_params, m_map);
+	char *cpy = new char[expr.length() + 1];
+	int i;
+	for (i = 0; i < expr.length(); i++)
+		cpy[i] = expr[i];
+	cpy[i] = '\n';
+
+	yy_scan_string(cpy);
+	yyparse(m_root, m_params, m_map);
+	compress();
 
 	if (!valid)
 		throw invalid_definition();
@@ -286,7 +318,7 @@ typename functor <T> ::node *functor <T> ::copy(const node *tree)
 	if (tree == nullptr)
 		return nullptr;
 
-	cpy = new node {tree->tok, {}};
+	cpy = new node {tree->tok, tree->type, {}};
 	for (node *nd : tree->leaves)
 		cpy->leaves.push_back(copy(nd));
 	
@@ -655,32 +687,36 @@ void functor <T> ::gather(std::vector <T> &vals,
 	vals.push_back(first);
 }
 
-// Beginning of differentiation work
+template <class T>
+void functor <T> ::rebuild()
+{
+	m_map.clear();
+	label();
+	rebuild(m_root);
+}
 
 template <class T>
-const functor <T> &functor <T> ::differentiate
-	(const std::string &var) const
+void functor <T> ::rebuild(node *tree)
 {
-	functor *out = new functor <T> ();
+	if (tree == nullptr)
+		return;
 
-	node *diffed = copy(m_root);
+	if (tree->type == m_variable) {
+		m_map[(dynamic_cast <variable <T> *>
+			(tree->tok))->symbol()].push_back(tree);
+	}
 
-	label(diffed, var);
+	for (node *nd : tree->leaves)
+		rebuild(nd);
+}
 
-	diffed = differentiate(diffed, var);
-
-	label(diffed, var);
-	compress(diffed);
-
-	std::cout << std::string(50, '-') << std::endl;
-	print(diffed, 1, 0);
-	std::cout << std::string(50, '-') << std::endl;
-
-	out->m_root = diffed;
-	out->m_name = m_name + "'";
-	out->m_params = m_params;
-
-	return *out;
+template <class T>
+void functor <T> ::label()
+{
+	std::vector <std::string> names;
+	for (variable <T> v : m_params)
+		names.push_back(v.symbol());
+	label(m_root, names);
 }
 
 template <class T>
@@ -694,8 +730,21 @@ void functor <T> ::label_operation(node *tree)
 			break;
 	}
 
+	bool constant = true;
+	for (node *nd : tree->leaves) {
+		if (nd->type != m_constant && nd->type != m_operation_constant) {
+			constant = false;
+			break;
+		}
+	}
+
+	if (constant) {
+		tree->type = m_operation_constant;
+		return;
+	}
+
 	if (i >= defaults <T> ::ADDOP && i <= defaults <T> ::MODOP
-		&& tree->leaves[0]->type == tree->leaves[1]->type == m_constant) {
+			&& tree->leaves[0]->type == tree->leaves[1]->type == m_constant) {
 		tree->type = m_constant;
 		return;
 	}
@@ -734,21 +783,23 @@ void functor <T> ::label_operation(node *tree)
 }
 
 template <class T>
-void functor <T> ::label(node *tree, const std::string &var)
+void functor <T> ::label(node *tree, const std::vector <std::string> &vars)
 {
+	string v;
 	if (tree == nullptr)
 		return;
 
 	for (node *nd : tree->leaves)
-		label(nd, var);
+		label(nd, vars);
 
 	switch (tree->tok->caller()) {
 	case token::OPERATION:
 		label_operation(tree);
 		break;
 	case token::VARIABLE:
-		if ((dynamic_cast <variable <T> *>
-			(tree->tok))->symbol() == var)
+		v = (dynamic_cast <variable <T> *>
+			(tree->tok))->symbol();
+		if (find(vars.begin(), vars.end(), v) != vars.end())
 			tree->type = m_variable;
 		else
 			tree->type = m_constant;
@@ -759,18 +810,37 @@ void functor <T> ::label(node *tree, const std::string &var)
 	}
 }
 
-template <class T>
-void functor <T> ::compress_operation(node *tree)
-{
-
-}
+// Beginning of differentiation work
 
 template <class T>
-void functor <T> ::compress(node *tree)
+const functor <T> &functor <T> ::differentiate
+	(const std::string &var)
 {
-	switch (tree->tok->caller()) {
-		
-	}
+	functor *out = new functor <T> ();
+
+	node *diffed = copy(m_root);
+
+	label(diffed, {var});
+
+	diffed = differentiate(diffed, var);
+
+	label(diffed, {var});
+	compress(diffed);
+	std::cout << std::string(50, '-') << std::endl;
+	printf("Original:\n");
+	print();
+	std::cout << std::string(50, '-') << std::endl;
+
+	std::cout << std::string(50, '-') << std::endl;
+	printf("Differentiated:\n");
+	print(diffed, 1, 0);
+	std::cout << std::string(50, '-') << std::endl;
+
+	out->m_root = diffed;
+	out->m_name = m_name + "'";
+	out->m_params = m_params;
+
+	return *out;
 }
 
 template <class T>
@@ -797,6 +867,7 @@ typename functor <T> ::node *functor <T> ::differentiate
 
 		tree->tok = &defaults <T> ::opers[defaults <T> ::MULTOP];
 		tree->leaves[0]->tok = new operand <T> (val);
+		break;
 	case m_separable:
 		differentiate(tree->leaves[0], var);
 		differentiate(tree->leaves[1], var);
@@ -830,6 +901,273 @@ typename functor <T> ::node *functor <T> ::differentiate
 	}
 
 	return tree;
+}
+
+template <class T>
+void functor <T> ::compress()
+{
+	label();
+	compress(m_root);
+	rebuild();
+}
+
+template <class T>
+void functor <T> ::compress_operation(node *tree)
+{
+}
+
+template <class T>
+void functor <T> ::compress(node *(&tree))
+{
+	std::vector <node *> misc;
+	std::vector <operand <T>> vals;
+
+	std::string name;
+	
+	std::queue <node *> que;
+	std::unordered_map <std::string, int> chart;
+	operand <T> *constant = new operand <T> (1);
+	bool var = false;
+	node *temp;
+	
+	/* FIX: treat operation constants seperaely,
+	 * outisde of the switch statement; if the
+	 * current node is not such (an operation constant),
+	 * then compress its children and progress with
+	 * checking its specifics
+	 * 
+	 * REASON: reduce code complexity */
+	T val;
+	switch (tree->type) {
+	case m_operation_constant:
+		tree->tok = new operand <T> (value(tree));
+		tree->type = functor <T> ::m_constant;
+		tree->leaves.clear();
+		break;
+	case m_power:
+		for (node *nd : tree->leaves)
+			compress(nd);
+
+		if (tree->leaves[1]->type == m_constant) {
+			val = (dynamic_cast <operand <T> *> (tree->leaves[1]->tok))->get();
+			if (val == 1) {
+				tree->tok = tree->leaves[0]->tok;
+				/* if (tree->leaves[1]->type = m_variable) {
+					string name = (dynamic_cast <variable <T> *>
+							(tree->leaves[1]->tok))->symbol();
+					auto itr = m_map[name].begin();
+					while (itr != m_map[name].end()) {
+						if (*itr == tree->leaves[1]) {
+							m_map[name].erase(itr);
+							break;
+						}
+						itr++;
+					}
+					m_map[name].push_back(tree);
+				} */
+				
+				tree->leaves = tree->leaves[1]->leaves;
+				tree->type = tree->leaves[1]->type;
+			} else if (val == 0) {
+				tree->tok = new operand <double> (1);
+				tree->type = m_constant;
+				tree->leaves.clear();
+			}
+		}
+
+		break;
+	// add properties of addition/subtraction: x - 0 = x
+	// and division: x / 1 = 1
+	case m_separable:
+		for (node *nd : tree->leaves)
+			compress(nd);
+
+		if (tree->leaves[0]->type == m_constant) {
+			val = (dynamic_cast <operand <T> *> (tree->leaves[0]->tok))->get();
+			if (val == 0) {
+				tree->tok = tree->leaves[1]->tok;
+				/* if (tree->leaves[1]->type = m_variable) {
+					string name = (dynamic_cast <variable <T> *>
+							(tree->leaves[1]->tok))->symbol();
+					auto itr = m_map[name].begin();
+					while (itr != m_map[name].end()) {
+						if (*itr == tree->leaves[1]) {
+							m_map[name].erase(itr);
+							break;
+						}
+						itr++;
+					}
+					m_map[name].push_back(tree);
+				} */
+				
+				tree->leaves = tree->leaves[1]->leaves;
+				tree->type = tree->leaves[1]->type;
+			}
+		} else if (tree->leaves[1]->type == m_constant) {
+			val = (dynamic_cast <operand <T> *> (tree->leaves[1]->tok))->get();
+			if (val == 0) {
+				tree->tok = tree->leaves[1]->tok;
+				
+				/* if (tree->leaves[1]->type = m_variable) {
+					string name = (dynamic_cast <variable <T> *> 
+							(tree->leaves[1]->tok))->symbol();
+
+					auto itr = m_map[name].begin();
+					while (itr != m_map[name].end()) {
+						if (*itr == tree->leaves[1]) {
+							m_map[name].erase(itr);
+							break;
+						}
+						itr++;
+					}
+					m_map[name].push_back(tree);
+				} */
+				
+				tree->leaves = tree->leaves[1]->leaves;
+				tree->type = tree->leaves[1]->type;
+			}
+		}
+
+		break;
+	case m_multiplied:
+		/* FIX: add linear space specific constant, such
+		 * as ONE and ZERO
+		 *
+		 * REASON: allows the client/user to create
+		 * different kinds of linear spaces, specifying
+		 * what the value of the identity or reflexive
+		 * values are */
+		cout << "ORIGINAL TREE" << endl;
+		print(tree, 1, 0);
+		for (node *nd : tree->leaves)
+			compress(nd);
+		cout << "TREE AFTER COMPRESSION OF CHILDREN" << endl;
+		print(tree, 1, 0);
+
+		que.push(tree);
+
+		node *current;
+		while (!que.empty()) {
+			current = que.front();
+			que.pop();
+
+			if (current->type == m_multiplied) {
+				que.push(current->leaves[0]);
+				que.push(current->leaves[1]);
+			} else if (current->type == m_constant) {
+				vals.clear();
+				vals.push_back(*(dynamic_cast <operand <T> *> (constant)));
+				vals.push_back(*(dynamic_cast <operand <T> *> (current->tok)));
+				constant = new operand <T> (defaults <T> ::mult_op.compute(vals));
+			} else if (current->type == m_variable) {
+				name = (dynamic_cast <variable <T> *> (current->tok))->symbol();
+				if (chart.find(name) == chart.end())
+					chart[name] = 0;
+				chart[name]++;
+			} else {
+				misc.push_back(tree);
+			}
+		}
+
+		// cout << "tree @ " << tree << endl;
+		// cout << "\tconstant = " << constant->get() << endl;
+		for (node *nd : misc) {
+			switch (nd->type) {
+			case m_variable: case m_power:
+			case m_polynomial: 
+				var |= true;
+				break;
+			default:
+				break;
+			}
+		}
+		
+		tree = new node {new operand <T> (1), m_constant, {}};
+
+		for (auto itr : chart) {
+			if (itr.second == 1) {
+				temp = new node {new variable <T> {itr.first, true}, m_variable, {}};
+			} else {
+				temp = new node {&defaults <T> ::exp_op, m_power, {
+					new node {new variable <T> {itr.first, true}, m_variable, {}},
+					new node {new operand <T> {itr.second}, m_constant, {}}
+				}};
+			}
+			tree = new node {&defaults <T> ::mult_op, m_multiplied, {temp, tree}};
+		}
+
+		for (auto nd : misc)
+			tree = new node {&defaults <T> ::mult_op, m_multiplied, {nd, tree}};
+
+		if (constant->get() != 1)
+			tree = new node {&defaults <T> ::mult_op, m_multiplied, {new node {constant, m_constant, {}}, tree}};
+		if (constant->get() == 0)
+			tree = new node {new operand <T> (0), m_constant, {}};
+
+		if (tree->type == m_multiplied) {
+			if (tree->leaves[0]->type == m_constant) {
+				val = (dynamic_cast <operand <T> *> (tree->leaves[0]->tok))->get();
+				if (val == 1) {
+					tree->tok = tree->leaves[1]->tok;
+					/* if (tree->leaves[1]->type = m_variable) {
+						string name = (dynamic_cast <variable <T> *>
+								(tree->leaves[1]->tok))->symbol();
+						auto itr = m_map[name].begin();
+						while (itr != m_map[name].end()) {
+							if (*itr == tree->leaves[1]) {
+								m_map[name].erase(itr);
+								break;
+							}
+							itr++;
+						}
+						m_map[name].push_back(tree);
+					} */
+					
+					tree->leaves = tree->leaves[1]->leaves;
+					tree->type = tree->leaves[1]->type;
+				} else if (val == 0) {
+					tree->tok = new operand <double> (0);
+					tree->type = m_constant;
+					tree->leaves.clear();
+				}
+			} else if (tree->leaves[1]->type == m_constant) {
+				val = (dynamic_cast <operand <T> *> (tree->leaves[1]->tok))->get();
+				if (val == 1) {
+					tree->tok = tree->leaves[1]->tok;
+					
+					/* if (tree->leaves[1]->type = m_variable) {
+						string name = (dynamic_cast <variable <T> *> 
+								(tree->leaves[1]->tok))->symbol();
+
+						auto itr = m_map[name].begin();
+						while (itr != m_map[name].end()) {
+							if (*itr == tree->leaves[1]) {
+								m_map[name].erase(itr);
+								break;
+							}
+							itr++;
+						}
+						m_map[name].push_back(tree);
+					} */
+					
+					tree->leaves = tree->leaves[1]->leaves;
+					tree->type = tree->leaves[1]->type;
+				} else if (val == 0) {
+					tree->tok = new operand <double> (0);
+					tree->type = m_constant;
+					tree->leaves.clear();
+				}
+			}
+		}
+		cout << "TREE AFTER COMPRESSION" << endl;
+		print(tree, 1, 0);
+
+		break;
+	default:
+		for (node *nd : tree->leaves)
+			compress(nd);
+		break;
+	}
 }
 
 // 'Debugging' functors

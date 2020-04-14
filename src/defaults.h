@@ -12,7 +12,7 @@
 
 template <typename data_t>
 class defaults : public token {
-		private:
+public:
 	/* The following are the initializations
 	 * of the operations themselves */
 	static operation <operand <data_t>> none_op;
@@ -29,7 +29,7 @@ class defaults : public token {
 	static operation <operand <data_t>> sec_op;
 	static operation <operand <data_t>> cot_op;
 	static operation <operand <data_t>> log_op;
-
+	
 	/* The following are the functions
 	 * correspodning to each of the operations */
 	static operand <data_t> none_f(const std::vector <operand <data_t>> &);

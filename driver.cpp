@@ -4,9 +4,9 @@
 
 #include "src/variable.h"
 #include "src/stack.h"
-#include "src/expression.h"
+// #include "src/expression.h"
 #include "src/var_stack.h"
-#include "src/func_stack.h"
+ #include "src/func_stack.h"
 // #include "src/application.h"
 #include "src/functor.h"
 
@@ -54,12 +54,12 @@ void test_stack()
 	}
 }
 
-void test_expression()
+/* void test_expression()
 {
 	cout << endl << "BEGINNING EXPRESSION TEST" << endl;
 
 	cout << "Expression evaluation with format: "
-		<< expression <double> ::in_place_evaluate_formatted("12 * 13 * log 3 8")
+		<< expression <double> ::in_place_evaluate_formatted("12 * 13")
 		<< endl;
 
 	string input;
@@ -112,7 +112,10 @@ void test_variable_parsing()
 	vector <variable <double>> vals {variable <double> {"x", 12.0},
 		variable <double> {"ran", true, 123},
 		variable <double> {"y", 13423.423},
-		variable <double> {"this", true, 12.0}};
+		variable <double> {"this", true, 12.0},
+		variable <double> {"pi", acos(-1)},
+		variable <double> {"e", exp(1)}
+	};
 	
 	for (variable <double> v : vals) {
 		// cout << "Inserting: " << v << endl;
@@ -134,7 +137,7 @@ void test_variable_parsing()
 	}
 }
 
-/* void test_application()
+* void test_application()
 {
 	cout << endl << "BEGINNING APPLICATION TEST" << endl;
 	application <double> app;
@@ -166,17 +169,32 @@ void test_function()
 
 	clock_t start, end;
 
+	string str = "f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z";
+	// string str = "f(x, y, z) = 3x + yz";
+	// string str = "f(x) = 3x";
+
+	cout << endl << "Function to be parsed: " << str << endl << endl;
+
 	start = clock();
-	functor <double> f("f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z");
+	functor <double> f(str);
 	end = clock();
 
-	// functor <double> h("h(x, y) = x^3 + y");
-	functor <double> h("h(x) = x^3 + 2x^2");
+	f.print();
 
+	// f.compress();
+
+	cout << string(100, '-') << endl;
+	f.print();
+
+	// functor <double> h("h(x, y) = x^3 + y");
 	cout << f({2, 3, 4}) << endl;
 	cout << f(2, 3, 4) << endl;
 
 	cout << endl << "f(x, y, z): " << output(f) << endl;
+
+	cout << "CONSTRUCTING H(X)" << endl;
+	functor <double> h("h(x) = 4 * 2x^3");
+	cout << endl << "h(x): " << output(h) << endl;
 	cout << "dh(x)/dx :\n" << output(h.differentiate("x")) << endl;
 
 	cout << endl << "Construction: " << (end - start) /
@@ -218,4 +236,6 @@ int main()
 {
 	test_function();
 	// test_func_stack();
+	// test_expression();
+	// test_variable_parsing();
 }

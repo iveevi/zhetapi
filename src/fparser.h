@@ -62,7 +62,7 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "parser.y" /* yacc.c:339  */
+#line 1 "fparser.y" /* yacc.c:339  */
 
 	#include <iostream>
 	#include <cctype>
@@ -74,7 +74,10 @@
 	#include "operation.h"
 	#include "defaults.h"
   	#include "operand.h"
-	
+
+	#include "functor.h"
+	// #include "func_stack.h"
+
 	#include "var_stack.h"
 	#include "variable.h"
 
@@ -82,10 +85,9 @@
   	
 	using namespace std;
 
-  	template <class T>
-	void yyerror (operand <T> *, var_stack <T>, const char *error);
+	void yyerror(functor <double> ::node *(&), functor <double> ::param_list, functor <double> ::map, const char *);
 
-#line 89 "parser.h" /* yacc.c:339  */
+#line 91 "fparser.h" /* yacc.c:339  */
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -149,21 +151,21 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 50 "parser.y" /* yacc.c:355  */
+#line 54 "fparser.y" /* yacc.c:355  */
 
-	operand <double>		*expr;
-	operand <double>		*coll;
-	operand <double>		*term;
-	operand <double>		*felm;
-	operand <double>		*dopn;
-	operand <double>		*dpnt;
-	operand <double>		*prth;
-	operand <double>		*sclr;
+	functor <double> ::node		*expr;
+	functor <double> ::node		*coll;
+	functor <double> ::node		*term;
+	functor <double> ::node		*felm;
+	functor <double> ::node		*dopn;
+	functor <double> ::node		*dpnt;
+	functor <double> ::node		*prth;
+	functor <double> ::node		*sclr;
 
 	const char			*ident;
 	double       			value;
 
-#line 167 "parser.h" /* yacc.c:355  */
+#line 169 "fparser.h" /* yacc.c:355  */
 };
 
 typedef union YYSTYPE YYSTYPE;
@@ -174,13 +176,13 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE yylval;
 
-int yyparse (operand <double> *value, var_stack <double> vst);
+int yyparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap);
 
 
 
 /* Copy the second part of user declarations.  */
 
-#line 184 "parser.h" /* yacc.c:358  */
+#line 186 "fparser.h" /* yacc.c:358  */
 
 #ifdef short
 # undef short
@@ -480,10 +482,10 @@ static const yytype_uint8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,    96,    96,   102,   111,   120,   129,   138,   147,   156,
-     162,   171,   175,   181,   189,   194,   204,   214,   224,   233,
-     240,   247,   254,   261,   268,   276,   284,   288,   292,   297,
-     312,   318
+       0,   100,   100,   111,   125,   139,   153,   167,   181,   196,
+     202,   216,   220,   227,   236,   242,   258,   275,   297,   318,
+     330,   342,   354,   366,   378,   391,   406,   410,   414,   419,
+     490,   498
 };
 #endif
 
@@ -648,7 +650,7 @@ do                                                              \
     }                                                           \
   else                                                          \
     {                                                           \
-      yyerror (value, vst, YY_("syntax error: cannot back up")); \
+      yyerror (root, list, vmap, YY_("syntax error: cannot back up")); \
       YYERROR;                                                  \
     }                                                           \
 while (0)
@@ -685,7 +687,7 @@ do {                                                                      \
     {                                                                     \
       YYFPRINTF (stderr, "%s ", Title);                                   \
       yy_symbol_print (stderr,                                            \
-                  Type, Value, value, vst); \
+                  Type, Value, root, list, vmap); \
       YYFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
@@ -696,12 +698,13 @@ do {                                                                      \
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, operand <double> *value, var_stack <double> vst)
+yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
   FILE *yyo = yyoutput;
   YYUSE (yyo);
-  YYUSE (value);
-  YYUSE (vst);
+  YYUSE (root);
+  YYUSE (list);
+  YYUSE (vmap);
   if (!yyvaluep)
     return;
 # ifdef YYPRINT
@@ -717,12 +720,12 @@ yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvalue
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, operand <double> *value, var_stack <double> vst)
+yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
   YYFPRINTF (yyoutput, "%s %s (",
              yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, value, vst);
+  yy_symbol_value_print (yyoutput, yytype, yyvaluep, root, list, vmap);
   YYFPRINTF (yyoutput, ")");
 }
 
@@ -755,7 +758,7 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, operand <double> *value, var_stack <double> vst)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
   unsigned long int yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
@@ -769,7 +772,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, operand <doubl
       yy_symbol_print (stderr,
                        yystos[yyssp[yyi + 1 - yynrhs]],
                        &(yyvsp[(yyi + 1) - (yynrhs)])
-                                              , value, vst);
+                                              , root, list, vmap);
       YYFPRINTF (stderr, "\n");
     }
 }
@@ -777,7 +780,7 @@ yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, operand <doubl
 # define YY_REDUCE_PRINT(Rule)          \
 do {                                    \
   if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, Rule, value, vst); \
+    yy_reduce_print (yyssp, yyvsp, Rule, root, list, vmap); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
@@ -1035,11 +1038,12 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, operand <double> *value, var_stack <double> vst)
+yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
   YYUSE (yyvaluep);
-  YYUSE (value);
-  YYUSE (vst);
+  YYUSE (root);
+  YYUSE (list);
+  YYUSE (vmap);
   if (!yymsg)
     yymsg = "Deleting";
   YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
@@ -1066,7 +1070,7 @@ int yynerrs;
 `----------*/
 
 int
-yyparse (operand <double> *value, var_stack <double> vst)
+yyparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
     int yystate;
     /* Number of tokens to shift before error messages enabled.  */
@@ -1301,346 +1305,522 @@ yyreduce:
   switch (yyn)
     {
         case 2:
-#line 96 "parser.y" /* yacc.c:1646  */
+#line 100 "fparser.y" /* yacc.c:1646  */
     {
-     		value->set((yyvsp[-1].expr)->get());
+     		// value->set($1->get());
+		//printf("end of input, root is %s\n", $1->tok->str().c_str());
+		root = (yyvsp[-1].expr);
+		// root = new functor <double> ::node {new operand <double> (10), functor <double> ::m_none, vector <functor <double> ::node *> ()};
+		// functor <double> ::print($1, 1, 0);
+		// functor <double> ::print(root, 1, 0);
 		return 0;
 }
-#line 1310 "parser.h" /* yacc.c:1646  */
+#line 1319 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 102 "parser.y" /* yacc.c:1646  */
+#line 111 "fparser.y" /* yacc.c:1646  */
     { // Exponentiation
-   		printf("expression exponentiation\n");
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+   		//printf("expression exponentiation\n");
+		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::exp_op(vals));
+		$$ = new operand <double> (defaults <double> ::exp_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::exp_op, functor <double> ::m_none, leaves};
 }
-#line 1323 "parser.h" /* yacc.c:1646  */
+#line 1337 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 111 "parser.y" /* yacc.c:1646  */
+#line 125 "fparser.y" /* yacc.c:1646  */
     { // Multiplication
-   		printf("expression multiplication\n");
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+   		//printf("expression multiplication\n");
+		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::mult_op(vals));
+		$$ = new operand <double> (defaults <double> ::mult_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none, leaves};
 }
-#line 1336 "parser.h" /* yacc.c:1646  */
+#line 1355 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 120 "parser.y" /* yacc.c:1646  */
+#line 139 "fparser.y" /* yacc.c:1646  */
     { // Division
-   		printf("expression divition\n");
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+   		//printf("expression divition\n");
+		/* tor <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::div_op(vals));
+		$$ = new operand <double> (defaults <double> ::div_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::div_op, functor <double> ::m_none, leaves};
 }
-#line 1349 "parser.h" /* yacc.c:1646  */
+#line 1373 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 129 "parser.y" /* yacc.c:1646  */
+#line 153 "fparser.y" /* yacc.c:1646  */
     { // Addition
-   		printf("expression addition\n");
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+   		//printf("expression addition\n");
+		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::add_op(vals));
+		$$ = new operand <double> (defaults <double> ::add_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::add_op, functor <double> ::m_none, leaves};
 }
-#line 1362 "parser.h" /* yacc.c:1646  */
+#line 1391 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 138 "parser.y" /* yacc.c:1646  */
+#line 167 "fparser.y" /* yacc.c:1646  */
     { // Subtraction
-   		printf("expression substraction\n");
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+   		//printf("expression substraction\n");
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::sub_op(vals));
+		$$ = new operand <double> (defaults <double> ::sub_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
 }
-#line 1375 "parser.h" /* yacc.c:1646  */
+#line 1409 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 147 "parser.y" /* yacc.c:1646  */
+#line 181 "fparser.y" /* yacc.c:1646  */
     {
-   		printf("expression negative collective\n");
-   		vector <operand <double>> vals;
+   		//printf("expression negative collective\n");
+   		/* vector <operand <double>> vals;
 		vals.push_back(operand <double> (-1));
-		vals.push_back(*(yyvsp[0].coll));
+		vals.push_back(*$2);
 
-		(yyval.expr) = new operand <double> (defaults <double> ::mult_op(vals));
+		$$ = new operand <double> (defaults <double> ::mult_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back(new functor <double> ::node (new operand <double> (-1), functor <double> ::m_none,
+			vector <functor <double> ::node *> ()));
+		leaves.push_back((yyvsp[0].coll));
+
+		(yyval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
 }
-#line 1388 "parser.h" /* yacc.c:1646  */
+#line 1428 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 156 "parser.y" /* yacc.c:1646  */
+#line 196 "fparser.y" /* yacc.c:1646  */
     {
-   		printf("expression collective\n");
+   		//printf("expression collective\n");
    		(yyval.expr) = (yyvsp[0].coll);
 }
-#line 1397 "parser.h" /* yacc.c:1646  */
+#line 1437 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 162 "parser.y" /* yacc.c:1646  */
+#line 202 "fparser.y" /* yacc.c:1646  */
     { // Implicit Multiplication: term and non-arithmetic operation
-    		printf("collective, term (%s) implicitly multiplicied with non-arithmetic operation (%s)\n", (yyvsp[-1].term)->str().c_str(), (yyvsp[0].felm)->str().c_str());
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-1].term));
-		vals.push_back(*(yyvsp[0].felm));
+    		//printf("collective, term (%s) implicitly multiplicied with non-arithmetic operation (%s)\n", $1->tok->str().c_str(), $2->tok->str().c_str());
+		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$2);
 
-		(yyval.coll) = new operand <double> (defaults <double> ::mult_op(vals));
+		$$ = new operand <double> (defaults <double> ::mult_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-1].term));
+		leaves.push_back((yyvsp[0].felm));
+
+		(yyval.coll) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
 }
-#line 1410 "parser.h" /* yacc.c:1646  */
+#line 1455 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 171 "parser.y" /* yacc.c:1646  */
+#line 216 "fparser.y" /* yacc.c:1646  */
     {
     		(yyval.coll) = (yyvsp[0].felm);
 }
-#line 1418 "parser.h" /* yacc.c:1646  */
+#line 1463 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 175 "parser.y" /* yacc.c:1646  */
+#line 220 "fparser.y" /* yacc.c:1646  */
     {
-    		printf("collective as a regular term (%s)\n", (yyvsp[0].term)->str().c_str());
+
+    		// printf("collective as a regular term (%s)\n", $1->str().c_str());
     		(yyval.coll) = (yyvsp[0].term);
 }
-#line 1427 "parser.h" /* yacc.c:1646  */
+#line 1473 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 181 "parser.y" /* yacc.c:1646  */
+#line 227 "fparser.y" /* yacc.c:1646  */
     { // Implicit Multiplication: two or more terms
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-1].term));
-		vals.push_back(*(yyvsp[0].term));
+    		//printf("term with two terms, %s and %s\n", $1->tok->str().c_str(), $2->tok->str().c_str());
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-1].term));
+		leaves.push_back((yyvsp[0].term));
 
-		(yyval.term) = new operand <double> (defaults <double> ::mult_op(vals));
+		(yyval.term) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
 }
-#line 1439 "parser.h" /* yacc.c:1646  */
+#line 1486 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 189 "parser.y" /* yacc.c:1646  */
+#line 236 "fparser.y" /* yacc.c:1646  */
     { // Direct Operand
+    		//printf("term with direct operand %s\n", $1->tok->str().c_str());
     		(yyval.term) = (yyvsp[0].dopn);
 }
-#line 1447 "parser.h" /* yacc.c:1646  */
+#line 1495 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 194 "parser.y" /* yacc.c:1646  */
+#line 242 "fparser.y" /* yacc.c:1646  */
     {
-    		printf("non-arithmetic regular logarithm: log_{%s} (%s)\n", (yyvsp[-2].expr)->str().c_str(), (yyvsp[0].expr)->str().c_str());
-   		vector <operand <double>> vals;
+    		// printf("non-arithmetic regular logarithm: log_{%s} (%s)\n", $4->str().c_str(), $6->str().c_str());
+   		/* vector <operand <double>> vals;
 		
-		vals.push_back(*(yyvsp[-2].expr));
-		vals.push_back(*(yyvsp[0].expr));
+		vals.push_back(*$4);
+		vals.push_back(*$6);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::log_op(vals));
+		$$ = new operand <double> (defaults <double> ::log_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].expr));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1461 "parser.h" /* yacc.c:1646  */
+#line 1515 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 204 "parser.y" /* yacc.c:1646  */
+#line 258 "fparser.y" /* yacc.c:1646  */
     { // Binary log
-    		printf("non-arithmetic binary logarithm of %s\n", (yyvsp[0].expr)->str().c_str());
-   		vector <operand <double>> vals;
+    		//printf("non-arithmetic binary logarithm of %s\n", $2->str().c_str());
+   		/* vector <operand <double>> vals;
 		
 		vals.push_back(operand <double> (2));
-		vals.push_back(*(yyvsp[0].expr));
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::log_op(vals));
+		$$ = new operand <double> (defaults <double> ::log_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back(new functor <double> ::node (new operand <double> (2), functor <double> ::m_none,
+			vector <functor <double> ::node *> ()));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1475 "parser.h" /* yacc.c:1646  */
+#line 1536 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 214 "parser.y" /* yacc.c:1646  */
+#line 275 "fparser.y" /* yacc.c:1646  */
     { // Natural log
-    		printf("non-arithmetic natural logarithm of %s\n", (yyvsp[0].expr)->str().c_str());
-   		vector <operand <double>> vals;
+    		//printf("non-arithmetic natural logarithm of %s\n", $2->tok->str().c_str());
+   		/* vector <operand <double>> vals;
 		
 		vals.push_back(operand <double> (exp(1.0)));
-		vals.push_back(*(yyvsp[0].expr));
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::log_op(vals));
+		$$ = new operand <double> (defaults <double> ::log_op(vals));
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back($2);
+
+		$$ = new functor <double> ::node {&defaults <double> ::sin_op,
+			m_none, leaves}; */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back(new functor <double> ::node (new operand <double> (exp(1)), functor <double> ::m_none,
+			vector <functor <double> ::node *> ()));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1489 "parser.h" /* yacc.c:1646  */
+#line 1562 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 224 "parser.y" /* yacc.c:1646  */
+#line 297 "fparser.y" /* yacc.c:1646  */
     { // Log base 10
-   		vector <operand <double>> vals;
+   		/* vector <operand <double>> vals;
 		
 		vals.push_back(operand <double> (10));
-		vals.push_back(*(yyvsp[0].expr));
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::log_op(vals));
+		$$ = new operand <double> (defaults <double> ::log_op(vals));
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back($2);
+
+		$$ = new functor <double> ::node {&defaults <double> ::sin_op,
+			functor <double> ::m_none, leaves}; */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back(new functor <double> ::node (new operand <double> (10), functor <double> ::m_none,
+			vector <functor <double> ::node *> ()));
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1502 "parser.h" /* yacc.c:1646  */
+#line 1587 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 233 "parser.y" /* yacc.c:1646  */
+#line 318 "fparser.y" /* yacc.c:1646  */
     { // Cot
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::cot_op(vals));
+		$$ = new operand <double> (defaults <double> ::cot_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::cot_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1513 "parser.h" /* yacc.c:1646  */
+#line 1603 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 240 "parser.y" /* yacc.c:1646  */
+#line 330 "fparser.y" /* yacc.c:1646  */
     { // Sec
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::sec_op(vals));
+		$$ = new operand <double> (defaults <double> ::sec_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::sec_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1524 "parser.h" /* yacc.c:1646  */
+#line 1619 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 247 "parser.y" /* yacc.c:1646  */
+#line 342 "fparser.y" /* yacc.c:1646  */
     { // Csc
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::csc_op(vals));
+		$$ = new operand <double> (defaults <double> ::csc_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::csc_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1535 "parser.h" /* yacc.c:1646  */
+#line 1635 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 254 "parser.y" /* yacc.c:1646  */
+#line 354 "fparser.y" /* yacc.c:1646  */
     { // Tan
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::tan_op(vals));
+		$$ = new operand <double> (defaults <double> ::tan_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::tan_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1546 "parser.h" /* yacc.c:1646  */
+#line 1651 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 261 "parser.y" /* yacc.c:1646  */
+#line 366 "fparser.y" /* yacc.c:1646  */
     { // Cos
-   		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+   		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::cos_op(vals));
+		$$ = new operand <double> (defaults <double> ::cos_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::cos_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1557 "parser.h" /* yacc.c:1646  */
+#line 1667 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 268 "parser.y" /* yacc.c:1646  */
+#line 378 "fparser.y" /* yacc.c:1646  */
     { // Sin
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[0].expr));
+		/* vector <operand <double>> vals;
+		vals.push_back(*$2);
 
-		(yyval.felm) = new operand <double> (defaults <double> ::sin_op(vals));
+		$$ = new operand <double> (defaults <double> ::sin_op(vals)); */
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[0].expr));
+
+		(yyval.felm) = new functor <double> ::node {&defaults <double> ::sin_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1568 "parser.h" /* yacc.c:1646  */
+#line 1683 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 276 "parser.y" /* yacc.c:1646  */
+#line 391 "fparser.y" /* yacc.c:1646  */
     {
-		vector <operand <double>> vals;
-		vals.push_back(*(yyvsp[-2].dopn));
-		vals.push_back(*(yyvsp[0].dopn));
+		/* vector <operand <double>> vals;
+		vals.push_back(*$1);
+		vals.push_back(*$3);
 
-		(yyval.dopn) = new operand <double> (defaults <double> ::exp_op(vals));
+		$$ = new operand <double> (defaults <double> ::exp_op(vals)); */
+		
+		vector <functor <double> ::node *> leaves;
+		leaves.push_back((yyvsp[-2].dopn));
+		leaves.push_back((yyvsp[0].dopn));
+
+		(yyval.dopn) = new functor <double> ::node {&defaults <double> ::exp_op,
+			functor <double> ::m_none, leaves};
 }
-#line 1580 "parser.h" /* yacc.c:1646  */
+#line 1702 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 284 "parser.y" /* yacc.c:1646  */
+#line 406 "fparser.y" /* yacc.c:1646  */
     {
     		(yyval.dopn) = (yyvsp[0].dpnt);
 }
-#line 1588 "parser.h" /* yacc.c:1646  */
+#line 1710 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 288 "parser.y" /* yacc.c:1646  */
+#line 410 "fparser.y" /* yacc.c:1646  */
     {
     		(yyval.dopn) = (yyvsp[0].sclr);
 }
-#line 1596 "parser.h" /* yacc.c:1646  */
+#line 1718 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 292 "parser.y" /* yacc.c:1646  */
+#line 414 "fparser.y" /* yacc.c:1646  */
     {
     		(yyval.dopn) = (yyvsp[0].prth);
 }
-#line 1604 "parser.h" /* yacc.c:1646  */
+#line 1726 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 297 "parser.y" /* yacc.c:1646  */
+#line 419 "fparser.y" /* yacc.c:1646  */
     { // Variable
-    		printf("dependant, variable %s\n", (yyvsp[0].ident));
-		variable <double> var;
+    		//printf("dependant, variable %s\n", $1);
 		string str = (yyvsp[0].ident);
 		
-		try {
+		/* try {
 			var = vst.find(str);
 		} catch (...) {
 			yyerror(value, vst, "no variable in scope");
+		} */
+
+		/* bool param = false;
+		for (auto v : list) {
+			if (v.symbol() == str) {
+				param = true;
+				break;
+			}
 		}
 
-		(yyval.dpnt) = new operand <double> (var.get());
+		if (!param)
+			yyerror(root, list, vmap, "no variable in function scope"); */
+
+		// variable <double> *var = new variable <double> {str, true};
+		functor <double> ::node *save;
+		functor <double> ::node *temp;
+		functor <double> ::node *in;
+		// variable <double> var;
+
+		(yyval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op,
+			functor <double> ::m_variable, vector <functor <double> ::node *>
+			{new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}},
+			new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}}}};
+		temp = (yyval.dpnt);
+
+		int num = 0;
+
+		string acc;
+		for (int i = 0; i < str.length(); i++) {
+			acc += str[i];
+
+			auto var = find_if(list.begin(), list.end(),
+				[&](const variable <double> &vr) {
+					return vr.symbol() == acc;
+				}
+			);
+
+			if (var != list.end()) {
+				/* in = new functor <double> ::node {&(*var), functor <double> ::m_none, {}};
+				temp->leaves[1] = new functor <double> ::node {&defaults <double> ::mult_op,
+					functor <double> ::m_none, vector <functor <double> ::node *> {in,
+					new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}}}};
+				temp = temp->leaves[1]; */
+				(yyval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none,
+					{(yyval.dpnt), new functor <double> ::node {new variable <double> {var->symbol(), true}, functor <double> ::m_none, {}}}};
+				vmap[var->symbol()].push_back((yyval.dpnt)->leaves[1]);
+				// temp = $$;
+				acc.clear();
+				num++;
+			}
+		}
+
+		// printf("done\n");
+		//$$ = new functor <double> ::node {new variable <double> {"x", true}, functor <double> ::m_none, {}};
+		//functor <double> ::print($$, 1, 0);
+
+		if (!num)
+			throw functor <double> ::invalid_definition();
+
+		// operand <double> val = new operand <double> (var.get());
 }
-#line 1622 "parser.h" /* yacc.c:1646  */
+#line 1800 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 312 "parser.y" /* yacc.c:1646  */
+#line 490 "fparser.y" /* yacc.c:1646  */
     { // Number
-		(yyval.sclr) = new operand <double> ((yyvsp[0].value));
-    		printf("scalar, %s\n", (yyval.sclr)->str().c_str());
+		operand <double> *val = new operand <double> ((yyvsp[0].value));
+		(yyval.sclr) = new functor <double> ::node {val, functor <double> ::m_constant,
+			vector <functor <double> ::node *> ()};
+    		//printf("scalar, %s\n", $$->tok->str().c_str());
 }
-#line 1631 "parser.h" /* yacc.c:1646  */
+#line 1811 "fparser.h" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 318 "parser.y" /* yacc.c:1646  */
+#line 498 "fparser.y" /* yacc.c:1646  */
     { // Parenthesis
-    		printf("parenthesis, %s\n", (yyvsp[-1].expr)->str().c_str());
+    		//printf("parenthesis, %s\n", $2->tok->str().c_str());
    		(yyval.prth) = (yyvsp[-1].expr);
 }
-#line 1640 "parser.h" /* yacc.c:1646  */
+#line 1820 "fparser.h" /* yacc.c:1646  */
     break;
 
 
-#line 1644 "parser.h" /* yacc.c:1646  */
+#line 1824 "fparser.h" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1690,7 +1870,7 @@ yyerrlab:
     {
       ++yynerrs;
 #if ! YYERROR_VERBOSE
-      yyerror (value, vst, YY_("syntax error"));
+      yyerror (root, list, vmap, YY_("syntax error"));
 #else
 # define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
                                         yyssp, yytoken)
@@ -1717,7 +1897,7 @@ yyerrlab:
                 yymsgp = yymsg;
               }
           }
-        yyerror (value, vst, yymsgp);
+        yyerror (root, list, vmap, yymsgp);
         if (yysyntax_error_status == 2)
           goto yyexhaustedlab;
       }
@@ -1741,7 +1921,7 @@ yyerrlab:
       else
         {
           yydestruct ("Error: discarding",
-                      yytoken, &yylval, value, vst);
+                      yytoken, &yylval, root, list, vmap);
           yychar = YYEMPTY;
         }
     }
@@ -1797,7 +1977,7 @@ yyerrlab1:
 
 
       yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp, value, vst);
+                  yystos[yystate], yyvsp, root, list, vmap);
       YYPOPSTACK (1);
       yystate = *yyssp;
       YY_STACK_PRINT (yyss, yyssp);
@@ -1834,7 +2014,7 @@ yyabortlab:
 | yyexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
 yyexhaustedlab:
-  yyerror (value, vst, YY_("memory exhausted"));
+  yyerror (root, list, vmap, YY_("memory exhausted"));
   yyresult = 2;
   /* Fall through.  */
 #endif
@@ -1846,7 +2026,7 @@ yyreturn:
          user semantic actions for why this is necessary.  */
       yytoken = YYTRANSLATE (yychar);
       yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval, value, vst);
+                  yytoken, &yylval, root, list, vmap);
     }
   /* Do not reclaim the symbols of the rule whose action triggered
      this YYABORT or YYACCEPT.  */
@@ -1855,7 +2035,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp, value, vst);
+                  yystos[*yyssp], yyvsp, root, list, vmap);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -1868,11 +2048,10 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 323 "parser.y" /* yacc.c:1906  */
+#line 503 "fparser.y" /* yacc.c:1906  */
 
 
-template <class T>
-void yyerror (operand <T> *optr, var_stack <T> vst, const char *error)
+void yyerror(functor <double> ::node *(&nd), functor <double> ::param_list l, functor <double> ::map m, const char *error)
 {
 	cout << error << endl;
 }

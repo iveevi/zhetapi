@@ -140,6 +140,7 @@ public:
 	virtual bool operator[](const std::string &) const;
 	
 	virtual order get_order() const;
+	virtual size_t get_opers() const {return opers;}
 
 	operation &operator=(const operation &);
 	
