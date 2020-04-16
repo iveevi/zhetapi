@@ -40,6 +40,7 @@ public:
 		m_variable,
 		m_polynomial,
 		m_power,
+		m_power_uncertain,
 		m_exponential,
 		m_constant_logarithmic,
 		m_operation_constant,
@@ -56,6 +57,12 @@ public:
 
 		node(token *t, m_label l, std::vector <node *> lv)
 			: tok(t), type(l), leaves(lv) {}
+
+		void set(token *t, m_label l, std::vector <node *> lv) {
+			tok = t;
+			type = l;
+			leaves = lv;
+		}
 	};
 
 	class invalid_definition {};
@@ -198,8 +205,14 @@ public:
 	friend int yyparse(node *(&), param_list, map &);
 };
 
-#include "fparser.h"
-#include "lex.yy.c"
+//#include "fparser.h"
+//#include "lexer.h"
+//#include "lex.yy.c"
+//#include "function_parser.h"
+
+#include "common.h"
+#include "function_parser.h"
+#include "function_lexer.h"
 
 // static out of line definitions
 template <class T>
@@ -212,6 +225,7 @@ std::string functor <T> ::m_label_str[] = {
 	"variable",
 	"polynomic",
 	"power",
+	"power uncertain",
 	"exponential",
 	"constant logarithmic",
 	"operation constant",
@@ -272,6 +286,7 @@ functor <T> ::functor(const std::string &in)
 	name = name.substr(0, start);
 
 	std::string var;
+
 	for (int i = 0; i < vars.length(); i++) {
 		if (vars[i] == ',' && !var.empty()) {
 			params.push_back(var);
@@ -296,8 +311,8 @@ functor <T> ::functor(const std::string &in)
 		cpy[i] = expr[i];
 	cpy[i] = '\n';
 
-	yy_scan_string(cpy);
-	yyparse(m_root, m_params, m_map);
+	f_scan_string(cpy);
+	fparse(m_root, m_params, m_map);
 	compress();
 
 	if (!valid)
@@ -750,6 +765,11 @@ void functor <T> ::label_operation(node *tree)
 	}
 
 	switch (i) {
+	case defaults <T> ::SINOP: case defaults <T> ::COSOP:
+	case defaults <T> ::CSCOP: case defaults <T> ::SECOP:
+	case defaults <T> ::TANOP: case defaults <T> ::COTOP:
+		tree->type = m_trigonometric;
+		break;
 	case defaults <T> ::EXPOP:
 		if (tree->leaves[0]->type == m_variable) {
 			if (tree->leaves[1]->type == m_constant)
@@ -856,6 +876,17 @@ typename functor <T> ::node *functor <T> ::differentiate
 	T val;
 
 	switch (tree->type) {
+	case m_trigonometric:
+		if (tree->tok == &defaults <T> ::sin_op) {
+			tree->tok = &defaults <T> ::cos_op;
+		} else if (tree->tok == &defaults <T> ::cos_op) {
+			tree = new node {&defaults <T> ::mult_op, m_trigonometric, {
+				new node {new operand <T> (-1), m_constant, {}},
+				tree
+			}};
+		}
+
+		break;
 	case m_power:
 		val = (dynamic_cast <operand <T> *> 
 			(tree->leaves[1]->tok))->get();
@@ -925,10 +956,11 @@ void functor <T> ::compress(node *(&tree))
 	std::string name;
 	
 	std::queue <node *> que;
-	std::unordered_map <std::string, int> chart;
+	std::unordered_map <std::string, double> chart;
 	operand <T> *constant = new operand <T> (1);
 	bool var = false;
 	node *temp;
+	node *t;
 	
 	/* FIX: treat operation constants seperaely,
 	 * outisde of the switch statement; if the
@@ -1037,12 +1069,11 @@ void functor <T> ::compress(node *(&tree))
 		 * different kinds of linear spaces, specifying
 		 * what the value of the identity or reflexive
 		 * values are */
-		cout << "ORIGINAL TREE" << endl;
+
+		/* cout << "ORIGINAL TREE:" << endl;
+		cout << std::string(100, '-') << endl;
 		print(tree, 1, 0);
-		for (node *nd : tree->leaves)
-			compress(nd);
-		cout << "TREE AFTER COMPRESSION OF CHILDREN" << endl;
-		print(tree, 1, 0);
+		cout << std::string(100, '-') << endl; */
 
 		que.push(tree);
 
@@ -1059,108 +1090,76 @@ void functor <T> ::compress(node *(&tree))
 				vals.push_back(*(dynamic_cast <operand <T> *> (constant)));
 				vals.push_back(*(dynamic_cast <operand <T> *> (current->tok)));
 				constant = new operand <T> (defaults <T> ::mult_op.compute(vals));
+			} else if (current->type == m_operation_constant) {
+				vals.clear();
+				vals.push_back(operand <T> (value(current)));
+				vals.push_back(*(dynamic_cast <operand <T> *> (constant)));
+				constant = new operand <T> (defaults <T> ::mult_op.compute(vals));
 			} else if (current->type == m_variable) {
 				name = (dynamic_cast <variable <T> *> (current->tok))->symbol();
 				if (chart.find(name) == chart.end())
 					chart[name] = 0;
 				chart[name]++;
 			} else {
-				misc.push_back(tree);
+				misc.push_back(current);
 			}
 		}
 
-		// cout << "tree @ " << tree << endl;
-		// cout << "\tconstant = " << constant->get() << endl;
-		for (node *nd : misc) {
-			switch (nd->type) {
-			case m_variable: case m_power:
-			case m_polynomial: 
-				var |= true;
-				break;
-			default:
-				break;
-			}
+		/* cout << endl << "CONSTANT:" << endl;
+		cout << "\t" << constant->get() << " @ " << constant << endl;
+
+		cout << endl << "VARIABLES:" << endl;
+		for (auto itr : chart)
+			cout << "\tVAR:\t" << itr.first << ", POW:\t" << itr.second << endl;
+
+		cout << endl << "MISC:" << endl; 
+		for (auto nd : misc) {
+			cout << std::string(100, '-') << endl;
+			compress(nd);
+			print(nd, 1, 0);
 		}
 		
-		tree = new node {new operand <T> (1), m_constant, {}};
+		cout << std::string(100, '-') << endl; */
+		
+		for (auto nd : misc)
+			compress(nd);
+
+		tree->tok = nullptr;
+		if (constant->get() == 0) {
+			tree->set(new operand <T> (0), m_constant, {});
+			return;
+		}
+
+		if (constant->get() != 1)
+			tree->set(constant, m_constant, {});
 
 		for (auto itr : chart) {
+			if (tree->tok)
+				temp = copy(tree);
+
 			if (itr.second == 1) {
-				temp = new node {new variable <T> {itr.first, true}, m_variable, {}};
+				t = new node {new variable <T> {itr.first, true}, m_variable, {}};
 			} else {
-				temp = new node {&defaults <T> ::exp_op, m_power, {
+				t = new node {&defaults <T> ::exp_op, m_power, {
 					new node {new variable <T> {itr.first, true}, m_variable, {}},
 					new node {new operand <T> {itr.second}, m_constant, {}}
 				}};
 			}
-			tree = new node {&defaults <T> ::mult_op, m_multiplied, {temp, tree}};
+
+			if (tree->tok)
+				tree->set(&defaults <T> ::mult_op, m_multiplied, {temp, t});
+			else
+				tree->set(t->tok, t->type, t->leaves);
 		}
 
-		for (auto nd : misc)
-			tree = new node {&defaults <T> ::mult_op, m_multiplied, {nd, tree}};
-
-		if (constant->get() != 1)
-			tree = new node {&defaults <T> ::mult_op, m_multiplied, {new node {constant, m_constant, {}}, tree}};
-		if (constant->get() == 0)
-			tree = new node {new operand <T> (0), m_constant, {}};
-
-		if (tree->type == m_multiplied) {
-			if (tree->leaves[0]->type == m_constant) {
-				val = (dynamic_cast <operand <T> *> (tree->leaves[0]->tok))->get();
-				if (val == 1) {
-					tree->tok = tree->leaves[1]->tok;
-					/* if (tree->leaves[1]->type = m_variable) {
-						string name = (dynamic_cast <variable <T> *>
-								(tree->leaves[1]->tok))->symbol();
-						auto itr = m_map[name].begin();
-						while (itr != m_map[name].end()) {
-							if (*itr == tree->leaves[1]) {
-								m_map[name].erase(itr);
-								break;
-							}
-							itr++;
-						}
-						m_map[name].push_back(tree);
-					} */
-					
-					tree->leaves = tree->leaves[1]->leaves;
-					tree->type = tree->leaves[1]->type;
-				} else if (val == 0) {
-					tree->tok = new operand <double> (0);
-					tree->type = m_constant;
-					tree->leaves.clear();
-				}
-			} else if (tree->leaves[1]->type == m_constant) {
-				val = (dynamic_cast <operand <T> *> (tree->leaves[1]->tok))->get();
-				if (val == 1) {
-					tree->tok = tree->leaves[1]->tok;
-					
-					/* if (tree->leaves[1]->type = m_variable) {
-						string name = (dynamic_cast <variable <T> *> 
-								(tree->leaves[1]->tok))->symbol();
-
-						auto itr = m_map[name].begin();
-						while (itr != m_map[name].end()) {
-							if (*itr == tree->leaves[1]) {
-								m_map[name].erase(itr);
-								break;
-							}
-							itr++;
-						}
-						m_map[name].push_back(tree);
-					} */
-					
-					tree->leaves = tree->leaves[1]->leaves;
-					tree->type = tree->leaves[1]->type;
-				} else if (val == 0) {
-					tree->tok = new operand <double> (0);
-					tree->type = m_constant;
-					tree->leaves.clear();
-				}
+		for (auto itr : misc) {
+			if (tree->tok) {
+				temp = copy(tree);
+				tree->set(&defaults <T> ::mult_op, m_multiplied, {temp, itr});
+			} else {
+				tree->set(itr->tok, itr->type, itr->leaves);
 			}
 		}
-		cout << "TREE AFTER COMPRESSION" << endl;
-		print(tree, 1, 0);
 
 		break;
 	default:
@@ -1266,12 +1265,12 @@ size_t process(const typename functor <T> ::node *tree, std::string &str, size_t
 		app = (dynamic_cast <variable <T> *> (tree->tok))->symbol();
 		str.insert(index, app);
 		break;
-	case token::GROUP:
+	/* case token::GROUP:
 		app = "()";
 		gr = dynamic_cast <typename functor <T> ::group *> (tree->tok);
 		process <T> (gr->m_root, app, 1);
 		str.insert(index, app);
-		break;
+		break; */
 	}
 
 	return app.length();

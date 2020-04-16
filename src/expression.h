@@ -15,10 +15,12 @@
 #include "var_stack.h"
 #include "defaults.h"
 #include "operand.h"
-#include "parser.h"
-#include "lex.yy.c"
 #include "stack.h"
 #include "debug.h"
+
+#include "common.h"
+#include "expression_parser.h"
+#include "expression_lexer.h"
 
 // Future Note:
 // Add parsing method
@@ -75,9 +77,9 @@ const T &expression <T> ::evaluate(std::string str, var_stack <T> vst)
 		m_cached = str;
 
 	//set_input(str.c_str());
-	yy_scan_string(str.c_str());
+	e_scan_string(str.c_str());
 	operand <T> *out = new operand <T> ();
-	yyparse(out);
+	eparse(out);
 	return out->get();
 }
 
@@ -102,10 +104,10 @@ const T &expression <T> ::in_place_evaluate(std::string str, var_stack <T> vst)
 	/* s = cpy;
 	while (s)
 		cout << *s << " @ " << (int)*s++ << endl; */
-	yy_scan_string(cpy);
+	e_scan_string(cpy);
 	operand <T> *out = new operand <T> ();
 	
-	yyparse(out, vst);
+	eparse(out, vst);
 	return out->get();
 }
 

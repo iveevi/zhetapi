@@ -11,7 +11,7 @@
   	#include "operand.h"
 
 	#include "functor.h"
-	// #include "func_stack.h"
+	#include "func_stack.h"
 
 	#include "var_stack.h"
 	#include "variable.h"
@@ -23,33 +23,34 @@
 	void yyerror(functor <double> ::node *(&), functor <double> ::param_list, functor <double> ::map, const char *);
 %}
 
-// %define api.prefix {f}
+%define api.prefix {f}
+
 %define parse.error verbose
 
 %parse-param	{functor <double> ::node *(&root)}
 %parse-param	{functor <double> ::param_list list}
 %parse-param	{functor <double> ::map &vmap}
 
-%token IDENT
-%token NUMBER
+%token F_IDENT
+%token F_NUMBER
 
-%token PLUS
-%token MINUS
-%token MULT
-%token DIV
+%token F_PLUS
+%token F_MINUS
+%token F_MULT
+%token F_DIV
 
-%token SIN COS TAN
-%token CSC SEC COT
-%token LOG LN LG
+%token F_SIN	F_COS	F_TAN
+%token F_CSC	F_SEC	F_COT
+%token F_LOG	F_LN	F_LG
 
-%token SUPERSCRIPT
-%token SUBSCRIPT
+%token F_SUPERSCRIPT
+%token F_SUBSCRIPT
 
-%token LPAREN RPAREN
-%token LBRACE RBRACE
-%token LBRACKET RBRACKET
+%token F_LPAREN		F_RPAREN
+%token F_LBRACE 	F_RBRACE
+%token F_LBRACKET	F_RBRACKET
 
-%token END
+%token F_END
 
 %union {
 	functor <double> ::node		*expr;
@@ -66,8 +67,8 @@
 }
 
 /* Types for the terminal symbols */
-%type	<value>	NUMBER
-%type	<ident>	IDENT
+%type	<value>	F_NUMBER
+%type	<ident>	F_IDENT
 
 /* Types for non-terminal symbols */
 %type	<expr>	expr
@@ -80,24 +81,24 @@
 %type	<sclr>	sclr
 
 /* Precedence information to resolve ambiguity */
-%left PLUS MINUS
-%left MULT DIV
+%left	F_PLUS	F_MINUS
+%left	F_MULT	F_DIV
 
-%precedence LBRACKET RBRACKET
-%precedence LBRACE RBRACE
-%precedence LPAREN RPAREN
+%precedence	F_LBRACKET	F_RBRACKET
+%precedence	F_LBRACE	F_RBRACE
+%precedence	F_LPAREN	F_RPAREN
 
-%precedence SUPERSCRIPT
-%precedence SIN COS TAN
-%precedence CSC SEC COT
-%precedence LOG LN LG
+%precedence	F_SUPERSCRIPT
+%precedence	F_SIN	F_COS	F_TAN
+%precedence	F_CSC	F_SEC 	F_COT
+%precedence	F_LOG	F_LN	F_LG
 
 %%
 
 /* make computations based to template type later */
 
 /* Input: general user input */
-input:	expr END {
+input:	expr F_END {
      		// value->set($1->get());
 		//printf("end of input, root is %s\n", $1->tok->str().c_str());
 		root = $1;
@@ -108,7 +109,7 @@ input:	expr END {
 };
 
 /* Expression: general exprression */
-expr:  	expr SUPERSCRIPT expr { // Exponentiation
+expr:  	expr F_SUPERSCRIPT expr { // Exponentiation
    		//printf("expression exponentiation\n");
 		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
@@ -120,9 +121,9 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($3);
 
 		$$ = new functor <double> ::node {&defaults <double> ::exp_op, functor <double> ::m_none, leaves};
-} %prec SUPERSCRIPT
+} %prec F_SUPERSCRIPT
 
-   |	expr MULT expr { // Multiplication
+   |	expr F_MULT expr { // Multiplication
    		//printf("expression multiplication\n");
 		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
@@ -134,9 +135,9 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($3);
 
 		$$ = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none, leaves};
-} %prec MULT
+} %prec F_MULT
 
-   |	expr DIV expr { // Division
+   |	expr F_DIV expr { // Division
    		//printf("expression divition\n");
 		/* tor <operand <double>> vals;
 		vals.push_back(*$1);
@@ -148,9 +149,9 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($3);
 
 		$$ = new functor <double> ::node {&defaults <double> ::div_op, functor <double> ::m_none, leaves};
-} %prec DIV
+} %prec F_DIV
 
-   |	expr PLUS expr { // Addition
+   |	expr F_PLUS expr { // Addition
    		//printf("expression addition\n");
 		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
@@ -162,9 +163,9 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($3);
 
 		$$ = new functor <double> ::node {&defaults <double> ::add_op, functor <double> ::m_none, leaves};
-} %prec PLUS
+} %prec F_PLUS
 
-   |	expr MINUS expr { // Subtraction
+   |	expr F_MINUS expr { // Subtraction
    		//printf("expression substraction\n");
    		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
@@ -176,9 +177,9 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($3);
 
 		$$ = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
-} %prec MINUS
+} %prec F_MINUS
 
-   | 	MINUS coll {
+   | 	F_MINUS coll {
    		//printf("expression negative collective\n");
    		/* vector <operand <double>> vals;
 		vals.push_back(operand <double> (-1));
@@ -191,12 +192,12 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		leaves.push_back($2);
 
 		$$ = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
-} %prec MINUS
+} %prec F_MINUS
 
    |	coll {
    		//printf("expression collective\n");
    		$$ = $1;
-} %prec LOG;
+} %prec F_LOG;
 
 /* Collective: terms and miscellanics */
 coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
@@ -211,17 +212,17 @@ coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
 		leaves.push_back($2);
 
 		$$ = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
-} %prec LOG
+} %prec F_LOG
 
     |	felm {
     		$$ = $1;
-} %prec LOG
+} %prec F_LOG
 
     |	term {
 
     		// printf("collective as a regular term (%s)\n", $1->str().c_str());
     		$$ = $1;
-} %prec MULT;
+} %prec F_MULT;
 
 /* Term: algebraic term */
 term:	term term { // Implicit Multiplication: two or more terms
@@ -231,7 +232,7 @@ term:	term term { // Implicit Multiplication: two or more terms
 		leaves.push_back($2);
 
 		$$ = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
-} %prec MULT
+} %prec F_MULT
     		
     |	dopn { // Direct Operand
     		//printf("term with direct operand %s\n", $1->tok->str().c_str());
@@ -239,7 +240,7 @@ term:	term term { // Implicit Multiplication: two or more terms
 };
 
 /* Functional Elementary Operations: non-arithmetic operations */
-felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
+felm:	F_LOG F_SUBSCRIPT F_LBRACE expr F_RBRACE expr {
     		// printf("non-arithmetic regular logarithm: log_{%s} (%s)\n", $4->str().c_str(), $6->str().c_str());
    		/* vector <operand <double>> vals;
 		
@@ -253,9 +254,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
-} %prec LOG
+} %prec F_LOG
 
-   |	LG expr { // Binary log
+   |	F_LG expr { // Binary log
     		//printf("non-arithmetic binary logarithm of %s\n", $2->str().c_str());
    		/* vector <operand <double>> vals;
 		
@@ -270,9 +271,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
-} %prec LG
+} %prec F_LG
 
-   |	LN expr { // Natural log
+   |	F_LN expr { // Natural log
     		//printf("non-arithmetic natural logarithm of %s\n", $2->tok->str().c_str());
    		/* vector <operand <double>> vals;
 		
@@ -292,9 +293,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
-} %prec LN
+} %prec F_LN
 
-   |	LOG expr { // Log base 10
+   |	F_LOG expr { // Log base 10
    		/* vector <operand <double>> vals;
 		
 		vals.push_back(operand <double> (10));
@@ -313,9 +314,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
-} %prec LOG
+} %prec F_LOG
 
-   |	COT expr { // Cot
+   |	F_COT expr { // Cot
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -325,9 +326,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::cot_op,
 			functor <double> ::m_none, leaves};
-} %prec CSC
+} %prec F_CSC
 
-   |	SEC expr { // Sec
+   |	F_SEC expr { // Sec
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -337,9 +338,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::sec_op,
 			functor <double> ::m_none, leaves};
-} %prec CSC
+} %prec F_CSC
 
-   |	CSC expr { // Csc
+   |	F_CSC expr { // Csc
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -349,9 +350,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::csc_op,
 			functor <double> ::m_none, leaves};
-} %prec CSC
+} %prec F_CSC
 
-   |	TAN expr { // Tan
+   |	F_TAN expr { // Tan
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -361,9 +362,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::tan_op,
 			functor <double> ::m_none, leaves};
-} %prec TAN
+} %prec F_TAN
 
-   |	COS expr { // Cos
+   |	F_COS expr { // Cos
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -373,9 +374,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::cos_op,
 			functor <double> ::m_none, leaves};
-} %prec COS
+} %prec F_COS
 
-   |	SIN expr { // Sin
+   |	F_SIN expr { // Sin
 		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
@@ -385,10 +386,10 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
 		$$ = new functor <double> ::node {&defaults <double> ::sin_op,
 			functor <double> ::m_none, leaves};
-} %prec SIN;
+} %prec F_SIN;
 
 /* Direct Operand: dependant, scalar or parenthesized expression */
-dopn: 	dopn SUPERSCRIPT dopn {
+dopn: 	dopn F_SUPERSCRIPT dopn {
 		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
@@ -401,7 +402,7 @@ dopn: 	dopn SUPERSCRIPT dopn {
 
 		$$ = new functor <double> ::node {&defaults <double> ::exp_op,
 			functor <double> ::m_none, leaves};
-} %prec SUPERSCRIPT
+} %prec F_SUPERSCRIPT
 
     |	dpnt {
     		$$ = $1;
@@ -416,7 +417,7 @@ dopn: 	dopn SUPERSCRIPT dopn {
 };
 
 /* Dependant: variable, function */
-dpnt:	IDENT { // Variable
+dpnt:	F_IDENT { // Variable
     		//printf("dependant, variable %s\n", $1);
 		string str = $1;
 		
@@ -487,7 +488,7 @@ dpnt:	IDENT { // Variable
 };
 
 /* Scalar: pure numerical values */
-sclr:	NUMBER { // Number
+sclr:	F_NUMBER { // Number
 		operand <double> *val = new operand <double> ($1);
 		$$ = new functor <double> ::node {val, functor <double> ::m_constant,
 			vector <functor <double> ::node *> ()};
@@ -495,10 +496,10 @@ sclr:	NUMBER { // Number
 };
 
 /* Parenthesis: parenthesized expressions */
-prth:	LPAREN expr RPAREN { // Parenthesis
+prth:	F_LPAREN expr F_RPAREN { // Parenthesis
     		//printf("parenthesis, %s\n", $2->tok->str().c_str());
    		$$ = $2;
-} %prec LPAREN;
+} %prec F_LPAREN;
    
 %%
 

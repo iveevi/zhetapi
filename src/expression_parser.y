@@ -21,31 +21,33 @@
 	void yyerror (operand <T> *, var_stack <T>, const char *error);
 %}
 
+%define api.prefix {e}
+
 %define parse.error verbose
 
 %parse-param {operand <double> *value}
 %parse-param {var_stack <double> vst}
 
-%token IDENT
-%token NUMBER
+%token E_IDENT
+%token E_NUMBER
 
-%token PLUS
-%token MINUS
-%token MULT
-%token DIV
+%token E_PLUS
+%token E_MINUS
+%token E_MULT
+%token E_DIV
 
-%token SIN COS TAN
-%token CSC SEC COT
-%token LOG LN LG
+%token E_SIN E_COS E_TAN
+%token E_CSC E_SEC E_COT
+%token E_LOG E_LN E_LG
 
-%token SUPERSCRIPT
-%token SUBSCRIPT
+%token E_SUPERSCRIPT
+%token E_SUBSCRIPT
 
-%token LPAREN RPAREN
-%token LBRACE RBRACE
-%token LBRACKET RBRACKET
+%token E_LPAREN E_RPAREN
+%token E_LBRACE E_RBRACE
+%token E_LBRACKET E_RBRACKET
 
-%token END
+%token E_END
 
 %union {
 	operand <double>		*expr;
@@ -62,8 +64,8 @@
 }
 
 /* Types for the terminal symbols */
-%type	<value>	NUMBER
-%type	<ident>	IDENT
+%type	<value>	E_NUMBER
+%type	<ident>	E_IDENT
 
 /* Types for non-terminal symbols */
 %type	<expr>	expr
@@ -76,46 +78,46 @@
 %type	<sclr>	sclr
 
 /* Precedence information to resolve ambiguity */
-%left PLUS MINUS
-%left MULT DIV
+%left E_PLUS E_MINUS
+%left E_MULT DIV
 
-%precedence LBRACKET RBRACKET
-%precedence LBRACE RBRACE
-%precedence LPAREN RPAREN
+%precedence E_LBRACKET E_RBRACKET
+%precedence E_LBRACE E_RBRACE
+%precedence E_LPAREN E_RPAREN
 
-%precedence SUPERSCRIPT
-%precedence SIN COS TAN
-%precedence CSC SEC COT
-%precedence LOG LN LG
+%precedence E_SUPERSCRIPT
+%precedence E_SIN E_COS TAN
+%precedence E_CSC E_SEC E_COT
+%precedence E_LOG E_LN E_LG
 
 %%
 
 /* make computations based to template type later */
 
 /* Input: general user input */
-input:	expr END {
+input:	expr E_END {
      		value->set($1->get());
 		return 0;
 };
 
 /* Expression: general exprression */
-expr:  	expr SUPERSCRIPT expr { // Exponentiation
+expr:  	expr E_SUPERSCRIPT expr { // Exponentiation
    		printf("expression exponentiation\n");
 		vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
 
 		$$ = new operand <double> (defaults <double> ::exp_op(vals));
-} %prec SUPERSCRIPT
+} %prec E_SUPERSCRIPT
 
-   |	expr MULT expr { // Multiplication
+   |	expr E_MULT expr { // Multiplication
    		printf("expression multiplication\n");
 		vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals));
-} %prec MULT
+} %prec E_MULT
 
    |	expr DIV expr { // Division
    		printf("expression divition\n");
@@ -126,37 +128,37 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 		$$ = new operand <double> (defaults <double> ::div_op(vals));
 } %prec DIV
 
-   |	expr PLUS expr { // Addition
+   |	expr E_PLUS expr { // Addition
    		printf("expression addition\n");
 		vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
 
 		$$ = new operand <double> (defaults <double> ::add_op(vals));
-} %prec PLUS
+} %prec E_PLUS
 
-   |	expr MINUS expr { // Subtraction
+   |	expr E_MINUS expr { // Subtraction
    		printf("expression substraction\n");
    		vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
 
 		$$ = new operand <double> (defaults <double> ::sub_op(vals));
-} %prec MINUS
+} %prec E_MINUS
 
-   | 	MINUS coll {
+   | 	E_MINUS coll {
    		printf("expression negative collective\n");
    		vector <operand <double>> vals;
 		vals.push_back(operand <double> (-1));
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals));
-} %prec MINUS
+} %prec E_MINUS
 
    |	coll {
    		printf("expression collective\n");
    		$$ = $1;
-} %prec LOG;
+} %prec E_LOG;
 
 /* Collective: terms and miscellanics */
 coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
@@ -166,16 +168,16 @@ coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals));
-} %prec LOG
+} %prec E_LOG
 
     |	felm {
     		$$ = $1;
-} %prec LOG
+} %prec E_LOG
 
     |	term {
     		printf("collective as a regular term (%s)\n", $1->str().c_str());
     		$$ = $1;
-} %prec MULT;
+} %prec E_MULT;
 
 /* Term: algebraic term */
 term:	term term { // Implicit Multiplication: two or more terms
@@ -184,14 +186,14 @@ term:	term term { // Implicit Multiplication: two or more terms
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals));
-} %prec MULT
+} %prec E_MULT
     		
     |	dopn { // Direct Operand
     		$$ = $1;
 };
 
 /* Functional Elementary Operations: non-arithmetic operations */
-felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
+felm:	E_LOG E_SUBSCRIPT E_LBRACE expr E_RBRACE expr {
     		printf("non-arithmetic regular logarithm: log_{%s} (%s)\n", $4->str().c_str(), $6->str().c_str());
    		vector <operand <double>> vals;
 		
@@ -199,9 +201,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 		vals.push_back(*$6);
 
 		$$ = new operand <double> (defaults <double> ::log_op(vals));
-} %prec LOG
+} %prec E_LOG
 
-   |	LG expr { // Binary log
+   |	E_LG expr { // Binary log
     		printf("non-arithmetic binary logarithm of %s\n", $2->str().c_str());
    		vector <operand <double>> vals;
 		
@@ -209,9 +211,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::log_op(vals));
-} %prec LG
+} %prec E_LG
 
-   |	LN expr { // Natural log
+   |	E_LN expr { // Natural log
     		printf("non-arithmetic natural logarithm of %s\n", $2->str().c_str());
    		vector <operand <double>> vals;
 		
@@ -219,67 +221,67 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::log_op(vals));
-} %prec LN
+} %prec E_LN
 
-   |	LOG expr { // Log base 10
+   |	E_LOG expr { // Log base 10
    		vector <operand <double>> vals;
 		
 		vals.push_back(operand <double> (10));
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::log_op(vals));
-} %prec LOG
+} %prec E_LOG
 
-   |	COT expr { // Cot
+   |	E_COT expr { // Cot
    		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::cot_op(vals));
-} %prec CSC
+} %prec E_CSC
 
-   |	SEC expr { // Sec
+   |	E_SEC expr { // Sec
    		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::sec_op(vals));
-} %prec CSC
+} %prec E_CSC
 
-   |	CSC expr { // Csc
+   |	E_CSC expr { // Csc
    		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::csc_op(vals));
-} %prec CSC
+} %prec E_CSC
 
-   |	TAN expr { // Tan
+   |	E_TAN expr { // Tan
    		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::tan_op(vals));
 } %prec TAN
 
-   |	COS expr { // Cos
+   |	E_COS expr { // Cos
    		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::cos_op(vals));
-} %prec COS
+} %prec E_COS
 
-   |	SIN expr { // Sin
+   |	E_SIN expr { // Sin
 		vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::sin_op(vals));
-} %prec SIN;
+} %prec E_SIN;
 
 /* Direct Operand: dependant, scalar or parenthesized expression */
-dopn: 	dopn SUPERSCRIPT dopn {
+dopn: 	dopn E_SUPERSCRIPT dopn {
 		vector <operand <double>> vals;
 		vals.push_back(*$1);
 		vals.push_back(*$3);
 
 		$$ = new operand <double> (defaults <double> ::exp_op(vals));
-} %prec SUPERSCRIPT
+} %prec E_SUPERSCRIPT
 
     |	dpnt {
     		$$ = $1;
@@ -294,7 +296,7 @@ dopn: 	dopn SUPERSCRIPT dopn {
 };
 
 /* Dependant: variable, function */
-dpnt:	IDENT { // Variable
+dpnt:	E_IDENT { // Variable
     		printf("dependant, variable %s\n", $1);
 		variable <double> var;
 		string str = $1;
@@ -309,16 +311,16 @@ dpnt:	IDENT { // Variable
 };
 
 /* Scalar: pure numerical values */
-sclr:	NUMBER { // Number
+sclr:	E_NUMBER { // Number
 		$$ = new operand <double> ($1);
     		printf("scalar, %s\n", $$->str().c_str());
 };
 
 /* Parenthesis: parenthesized expressions */
-prth:	LPAREN expr RPAREN { // Parenthesis
+prth:	E_LPAREN expr E_RPAREN { // Parenthesis
     		printf("parenthesis, %s\n", $2->str().c_str());
    		$$ = $2;
-} %prec LPAREN;
+} %prec E_LPAREN;
    
 %%
 

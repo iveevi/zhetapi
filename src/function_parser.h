@@ -33,7 +33,7 @@
 /* C LALR(1) parser skeleton written by Richard Stallman, by
    simplifying the original so-called "semantic" parser.  */
 
-/* All symbols defined below should begin with yy or YY, to avoid
+/* All symbols defined below should begin with f or F, to avoid
    infringing on user name space.  This should be done even for local
    variables, as they might otherwise be expanded by user macros.
    There are some unavoidable exceptions within include files to
@@ -41,28 +41,39 @@
    USER NAME SPACE" below.  */
 
 /* Identify Bison output.  */
-#define YYBISON 1
+#define FBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.0.4"
+#define FBISON_VERSION "3.0.4"
 
 /* Skeleton name.  */
-#define YYSKELETON_NAME "yacc.c"
+#define FSKELETON_NAME "yacc.c"
 
 /* Pure parsers.  */
-#define YYPURE 0
+#define FPURE 0
 
 /* Push parsers.  */
-#define YYPUSH 0
+#define FPUSH 0
 
 /* Pull parsers.  */
-#define YYPULL 1
+#define FPULL 1
 
+/* Substitute the type names.
+#define F	F
+#define f	f
+#define FSTYPE         FSTYPE
+* Substitute the variable and function names.  *
+* #define fparse         fparse
+#define flex           flex
+#define ferror         ferror
+#define fdebug         fdebug
+#define fnerrs         fnerrs
 
-
+#define flval          flval
+#define fchar          fchar */
 
 /* Copy the first part of user declarations.  */
-#line 1 "fparser.y" /* yacc.c:339  */
+#line 1 "function_parser.y" /* yacc.c:339  */
 
 	#include <iostream>
 	#include <cctype>
@@ -76,82 +87,90 @@
   	#include "operand.h"
 
 	#include "functor.h"
-	// #include "func_stack.h"
+	#include "func_stack.h"
 
 	#include "var_stack.h"
 	#include "variable.h"
 
-	extern "C" int yylex();
+	extern "C" int flex();
   	
 	using namespace std;
 
-	void yyerror(functor <double> ::node *(&), functor <double> ::param_list, functor <double> ::map, const char *);
+	void ferror(functor <double> ::node *(&), functor <double> ::param_list, functor <double> ::map, const char *);
 
-#line 91 "fparser.h" /* yacc.c:339  */
+#line 100 "function_parser.h" /* yacc.c:339  */
 
-# ifndef YY_NULLPTR
+# ifndef F_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
-#   define YY_NULLPTR nullptr
+#   define F_NULLPTR nullptr
 #  else
-#   define YY_NULLPTR 0
+#   define F_NULLPTR 0
 #  endif
 # endif
 
 /* Enabling verbose error messages.  */
-#ifdef YYERROR_VERBOSE
-# undef YYERROR_VERBOSE
-# define YYERROR_VERBOSE 1
+#ifdef FERROR_VERBOSE
+# undef FERROR_VERBOSE
+# define FERROR_VERBOSE 1
 #else
-# define YYERROR_VERBOSE 1
+# define FERROR_VERBOSE 1
 #endif
 
 
 /* Debug traces.  */
-#ifndef YYDEBUG
-# define YYDEBUG 0
-#endif
-#if YYDEBUG
-extern int yydebug;
+#ifndef FDEBUG
+# if defined FDEBUG
+#if FDEBUG
+#   define FDEBUG 1
+#  else
+#   define FDEBUG 0
+#  endif
+# else /* ! defined FDEBUG */
+#  define FDEBUG 0
+# endif /* ! defined FDEBUG */
+#endif  /* ! defined FDEBUG */
+#if FDEBUG
+extern int fdebug;
 #endif
 
 /* Token type.  */
-#ifndef YYTOKENTYPE
-# define YYTOKENTYPE
-  enum yytokentype
+#ifndef FTOKENTYPE
+# define FTOKENTYPE
+  enum ftokentype
   {
-    IDENT = 258,
-    NUMBER = 259,
-    PLUS = 260,
-    MINUS = 261,
-    MULT = 262,
-    DIV = 263,
-    SIN = 264,
-    COS = 265,
-    TAN = 266,
-    CSC = 267,
-    SEC = 268,
-    COT = 269,
-    LOG = 270,
-    LN = 271,
-    LG = 272,
-    SUPERSCRIPT = 273,
-    SUBSCRIPT = 274,
-    LPAREN = 275,
-    RPAREN = 276,
-    LBRACE = 277,
-    RBRACE = 278,
-    LBRACKET = 279,
-    RBRACKET = 280,
-    END = 281
+    F_IDENT = 258,
+    F_NUMBER = 259,
+    F_PLUS = 260,
+    F_MINUS = 261,
+    F_MULT = 262,
+    F_DIV = 263,
+    F_SIN = 264,
+    F_COS = 265,
+    F_TAN = 266,
+    F_CSC = 267,
+    F_SEC = 268,
+    F_COT = 269,
+    F_LOG = 270,
+    F_LN = 271,
+    F_LG = 272,
+    F_SUPERSCRIPT = 273,
+    F_SUBSCRIPT = 274,
+    F_LPAREN = 275,
+    F_RPAREN = 276,
+    F_LBRACE = 277,
+    F_RBRACE = 278,
+    F_LBRACKET = 279,
+    F_RBRACKET = 280,
+    F_END = 281
   };
 #endif
 
 /* Value type.  */
-#if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+#if ! defined FSTYPE && ! defined FSTYPE_IS_DECLARED
 
-union YYSTYPE
+union FSTYPE
 {
-#line 54 "fparser.y" /* yacc.c:355  */
+#line 55 "function_parser.y" /* yacc.c:355  */
 
 	functor <double> ::node		*expr;
 	functor <double> ::node		*coll;
@@ -165,96 +184,96 @@ union YYSTYPE
 	const char			*ident;
 	double       			value;
 
-#line 169 "fparser.h" /* yacc.c:355  */
+#line 186 "function_parser.h" /* yacc.c:355  */
 };
 
-typedef union YYSTYPE YYSTYPE;
-# define YYSTYPE_IS_TRIVIAL 1
-# define YYSTYPE_IS_DECLARED 1
+typedef union FSTYPE FSTYPE;
+# define FSTYPE_IS_TRIVIAL 1
+# define FSTYPE_IS_DECLARED 1
 #endif
 
 
-extern YYSTYPE yylval;
+extern FSTYPE flval;
 
-int yyparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap);
+int fparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap);
 
 
 
 /* Copy the second part of user declarations.  */
 
-#line 186 "fparser.h" /* yacc.c:358  */
+#line 203 "function_parser.h" /* yacc.c:358  */
 
 #ifdef short
 # undef short
 #endif
 
-#ifdef YYTYPE_UINT8
-typedef YYTYPE_UINT8 yytype_uint8;
+#ifdef FTYPE_UINT8
+typedef FTYPE_UINT8 ftype_uint8;
 #else
-typedef unsigned char yytype_uint8;
+typedef unsigned char ftype_uint8;
 #endif
 
-#ifdef YYTYPE_INT8
-typedef YYTYPE_INT8 yytype_int8;
+#ifdef FTYPE_INT8
+typedef FTYPE_INT8 ftype_int8;
 #else
-typedef signed char yytype_int8;
+typedef signed char ftype_int8;
 #endif
 
-#ifdef YYTYPE_UINT16
-typedef YYTYPE_UINT16 yytype_uint16;
+#ifdef FTYPE_UINT16
+typedef FTYPE_UINT16 ftype_uint16;
 #else
-typedef unsigned short int yytype_uint16;
+typedef unsigned short int ftype_uint16;
 #endif
 
-#ifdef YYTYPE_INT16
-typedef YYTYPE_INT16 yytype_int16;
+#ifdef FTYPE_INT16
+typedef FTYPE_INT16 ftype_int16;
 #else
-typedef short int yytype_int16;
+typedef short int ftype_int16;
 #endif
 
-#ifndef YYSIZE_T
+#ifndef FSIZE_T
 # ifdef __SIZE_TYPE__
-#  define YYSIZE_T __SIZE_TYPE__
+#  define FSIZE_T __SIZE_TYPE__
 # elif defined size_t
-#  define YYSIZE_T size_t
-# elif ! defined YYSIZE_T
+#  define FSIZE_T size_t
+# elif ! defined FSIZE_T
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYSIZE_T size_t
+#  define FSIZE_T size_t
 # else
-#  define YYSIZE_T unsigned int
+#  define FSIZE_T unsigned int
 # endif
 #endif
 
-#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
+#define FSIZE_MAXIMUM ((FSIZE_T) -1)
 
-#ifndef YY_
-# if defined YYENABLE_NLS && YYENABLE_NLS
+#ifndef F_
+# if defined FENABLE_NLS && FENABLE_NLS
 #  if ENABLE_NLS
 #   include <libintl.h> /* INFRINGES ON USER NAME SPACE */
-#   define YY_(Msgid) dgettext ("bison-runtime", Msgid)
+#   define F_(Msgid) dgettext ("bison-runtime", Msgid)
 #  endif
 # endif
-# ifndef YY_
-#  define YY_(Msgid) Msgid
+# ifndef F_
+#  define F_(Msgid) Msgid
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE
+#ifndef F_ATTRIBUTE
 # if (defined __GNUC__                                               \
       && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
      || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
-#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
+#  define F_ATTRIBUTE(Spec) __attribute__(Spec)
 # else
-#  define YY_ATTRIBUTE(Spec) /* empty */
+#  define F_ATTRIBUTE(Spec) /* empty */
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+#ifndef F_ATTRIBUTE_PURE
+# define F_ATTRIBUTE_PURE   F_ATTRIBUTE ((__pure__))
 #endif
 
-#ifndef YY_ATTRIBUTE_UNUSED
-# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
+#ifndef F_ATTRIBUTE_UNUSED
+# define F_ATTRIBUTE_UNUSED F_ATTRIBUTE ((__unused__))
 #endif
 
 #if !defined _Noreturn \
@@ -262,54 +281,54 @@ typedef short int yytype_int16;
 # if defined _MSC_VER && 1200 <= _MSC_VER
 #  define _Noreturn __declspec (noreturn)
 # else
-#  define _Noreturn YY_ATTRIBUTE ((__noreturn__))
+#  define _Noreturn F_ATTRIBUTE ((__noreturn__))
 # endif
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
 #if ! defined lint || defined __GNUC__
-# define YYUSE(E) ((void) (E))
+# define FUSE(E) ((void) (E))
 #else
-# define YYUSE(E) /* empty */
+# define FUSE(E) /* empty */
 #endif
 
 #if defined __GNUC__ && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
-/* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+/* Suppress an incorrect diagnostic about flval being uninitialized.  */
+# define F_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
     _Pragma ("GCC diagnostic push") \
     _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
+# define F_IGNORE_MAYBE_UNINITIALIZED_END \
     _Pragma ("GCC diagnostic pop")
 #else
-# define YY_INITIAL_VALUE(Value) Value
+# define F_INITIAL_VALUE(Value) Value
 #endif
-#ifndef YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END
+#ifndef F_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define F_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+# define F_IGNORE_MAYBE_UNINITIALIZED_END
 #endif
-#ifndef YY_INITIAL_VALUE
-# define YY_INITIAL_VALUE(Value) /* Nothing. */
+#ifndef F_INITIAL_VALUE
+# define F_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
 
-#if ! defined yyoverflow || YYERROR_VERBOSE
+#if ! defined foverflow || FERROR_VERBOSE
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
-# ifdef YYSTACK_USE_ALLOCA
-#  if YYSTACK_USE_ALLOCA
+# ifdef FSTACK_USE_ALLOCA
+#  if FSTACK_USE_ALLOCA
 #   ifdef __GNUC__
-#    define YYSTACK_ALLOC __builtin_alloca
+#    define FSTACK_ALLOC __builtin_alloca
 #   elif defined __BUILTIN_VA_ARG_INCR
 #    include <alloca.h> /* INFRINGES ON USER NAME SPACE */
 #   elif defined _AIX
-#    define YYSTACK_ALLOC __alloca
+#    define FSTACK_ALLOC __alloca
 #   elif defined _MSC_VER
 #    include <malloc.h> /* INFRINGES ON USER NAME SPACE */
 #    define alloca _alloca
 #   else
-#    define YYSTACK_ALLOC alloca
+#    define FSTACK_ALLOC alloca
 #    if ! defined _ALLOCA_H && ! defined EXIT_SUCCESS
 #     include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
       /* Use EXIT_SUCCESS as a witness for stdlib.h.  */
@@ -321,131 +340,131 @@ typedef short int yytype_int16;
 #  endif
 # endif
 
-# ifdef YYSTACK_ALLOC
+# ifdef FSTACK_ALLOC
    /* Pacify GCC's 'empty if-body' warning.  */
-#  define YYSTACK_FREE(Ptr) do { /* empty */; } while (0)
-#  ifndef YYSTACK_ALLOC_MAXIMUM
+#  define FSTACK_FREE(Ptr) do { /* empty */; } while (0)
+#  ifndef FSTACK_ALLOC_MAXIMUM
     /* The OS might guarantee only one guard page at the bottom of the stack,
        and a page size can be as small as 4096 bytes.  So we cannot safely
        invoke alloca (N) if N exceeds 4096.  Use a slightly smaller number
        to allow for a few compiler-allocated temporary stack slots.  */
-#   define YYSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
+#   define FSTACK_ALLOC_MAXIMUM 4032 /* reasonable circa 2006 */
 #  endif
 # else
-#  define YYSTACK_ALLOC YYMALLOC
-#  define YYSTACK_FREE YYFREE
-#  ifndef YYSTACK_ALLOC_MAXIMUM
-#   define YYSTACK_ALLOC_MAXIMUM YYSIZE_MAXIMUM
+#  define FSTACK_ALLOC FMALLOC
+#  define FSTACK_FREE FFREE
+#  ifndef FSTACK_ALLOC_MAXIMUM
+#   define FSTACK_ALLOC_MAXIMUM FSIZE_MAXIMUM
 #  endif
 #  if (defined __cplusplus && ! defined EXIT_SUCCESS \
-       && ! ((defined YYMALLOC || defined malloc) \
-             && (defined YYFREE || defined free)))
+       && ! ((defined FMALLOC || defined malloc) \
+             && (defined FFREE || defined free)))
 #   include <stdlib.h> /* INFRINGES ON USER NAME SPACE */
 #   ifndef EXIT_SUCCESS
 #    define EXIT_SUCCESS 0
 #   endif
 #  endif
-#  ifndef YYMALLOC
-#   define YYMALLOC malloc
+#  ifndef FMALLOC
+#   define FMALLOC malloc
 #   if ! defined malloc && ! defined EXIT_SUCCESS
-void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
+void *malloc (FSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
-#  ifndef YYFREE
-#   define YYFREE free
+#  ifndef FFREE
+#   define FFREE free
 #   if ! defined free && ! defined EXIT_SUCCESS
 void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* ! defined yyoverflow || YYERROR_VERBOSE */
+#endif /* ! defined foverflow || FERROR_VERBOSE */
 
 
-#if (! defined yyoverflow \
+#if (! defined foverflow \
      && (! defined __cplusplus \
-         || (defined YYSTYPE_IS_TRIVIAL && YYSTYPE_IS_TRIVIAL)))
+         || (defined FSTYPE_IS_TRIVIAL && FSTYPE_IS_TRIVIAL)))
 
 /* A type that is properly aligned for any stack member.  */
-union yyalloc
+union falloc
 {
-  yytype_int16 yyss_alloc;
-  YYSTYPE yyvs_alloc;
+  ftype_int16 fss_alloc;
+  FSTYPE fvs_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
+# define FSTACK_GAP_MAXIMUM (sizeof (union falloc) - 1)
 
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
-# define YYSTACK_BYTES(N) \
-     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
-      + YYSTACK_GAP_MAXIMUM)
+# define FSTACK_BYTES(N) \
+     ((N) * (sizeof (ftype_int16) + sizeof (FSTYPE)) \
+      + FSTACK_GAP_MAXIMUM)
 
-# define YYCOPY_NEEDED 1
+# define FCOPY_NEEDED 1
 
 /* Relocate STACK from its old location to the new one.  The
-   local variables YYSIZE and YYSTACKSIZE give the old and new number of
-   elements in the stack, and YYPTR gives the new location of the
-   stack.  Advance YYPTR to a properly aligned location for the next
+   local variables FSIZE and FSTACKSIZE give the old and new number of
+   elements in the stack, and FPTR gives the new location of the
+   stack.  Advance FPTR to a properly aligned location for the next
    stack.  */
-# define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
+# define FSTACK_RELOCATE(Stack_alloc, Stack)                           \
     do                                                                  \
       {                                                                 \
-        YYSIZE_T yynewbytes;                                            \
-        YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
-        Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / sizeof (*yyptr);                          \
+        FSIZE_T fnewbytes;                                            \
+        FCOPY (&fptr->Stack_alloc, Stack, fsize);                    \
+        Stack = &fptr->Stack_alloc;                                    \
+        fnewbytes = fstacksize * sizeof (*Stack) + FSTACK_GAP_MAXIMUM; \
+        fptr += fnewbytes / sizeof (*fptr);                          \
       }                                                                 \
     while (0)
 
 #endif
 
-#if defined YYCOPY_NEEDED && YYCOPY_NEEDED
+#if defined FCOPY_NEEDED && FCOPY_NEEDED
 /* Copy COUNT objects from SRC to DST.  The source and destination do
    not overlap.  */
-# ifndef YYCOPY
+# ifndef FCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
-#   define YYCOPY(Dst, Src, Count) \
+#   define FCOPY(Dst, Src, Count) \
       __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
 #  else
-#   define YYCOPY(Dst, Src, Count)              \
+#   define FCOPY(Dst, Src, Count)              \
       do                                        \
         {                                       \
-          YYSIZE_T yyi;                         \
-          for (yyi = 0; yyi < (Count); yyi++)   \
-            (Dst)[yyi] = (Src)[yyi];            \
+          FSIZE_T fi;                         \
+          for (fi = 0; fi < (Count); fi++)   \
+            (Dst)[fi] = (Src)[fi];            \
         }                                       \
       while (0)
 #  endif
 # endif
-#endif /* !YYCOPY_NEEDED */
+#endif /* !FCOPY_NEEDED */
 
-/* YYFINAL -- State number of the termination state.  */
-#define YYFINAL  35
-/* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   112
+/* FFINAL -- State number of the termination state.  */
+#define FFINAL  35
+/* FLAST -- Last index in FTABLE.  */
+#define FLAST   112
 
-/* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  27
-/* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  10
-/* YYNRULES -- Number of rules.  */
-#define YYNRULES  31
-/* YYNSTATES -- Number of states.  */
-#define YYNSTATES  56
+/* FNTOKENS -- Number of terminals.  */
+#define FNTOKENS  27
+/* FNNTS -- Number of nonterminals.  */
+#define FNNTS  10
+/* FNRULES -- Number of rules.  */
+#define FNRULES  31
+/* FNSTATES -- Number of states.  */
+#define FNSTATES  56
 
-/* YYTRANSLATE[YYX] -- Symbol number corresponding to YYX as returned
-   by yylex, with out-of-bounds checking.  */
-#define YYUNDEFTOK  2
-#define YYMAXUTOK   281
+/* FTRANSLATE[FX] -- Symbol number corresponding to FX as returned
+   by flex, with out-of-bounds checking.  */
+#define FUNDEFTOK  2
+#define FMAXUTOK   281
 
-#define YYTRANSLATE(YYX)                                                \
-  ((unsigned int) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+#define FTRANSLATE(FX)                                                \
+  ((unsigned int) (FX) <= FMAXUTOK ? ftranslate[FX] : FUNDEFTOK)
 
-/* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
-   as returned by yylex, without out-of-bounds checking.  */
-static const yytype_uint8 yytranslate[] =
+/* FTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
+   as returned by flex, without out-of-bounds checking.  */
+static const ftype_uint8 ftranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -478,34 +497,35 @@ static const yytype_uint8 yytranslate[] =
       25,    26
 };
 
-#if YYDEBUG
-  /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint16 yyrline[] =
+#if FDEBUG
+  /* FRLINE[FN] -- Source line where rule number FN was defined.  */
+static const ftype_uint16 frline[] =
 {
-       0,   100,   100,   111,   125,   139,   153,   167,   181,   196,
-     202,   216,   220,   227,   236,   242,   258,   275,   297,   318,
-     330,   342,   354,   366,   378,   391,   406,   410,   414,   419,
-     490,   498
+       0,   101,   101,   112,   126,   140,   154,   168,   182,   197,
+     203,   217,   221,   228,   237,   243,   259,   276,   298,   319,
+     331,   343,   355,   367,   379,   392,   407,   411,   415,   420,
+     491,   499
 };
 #endif
 
-#if YYDEBUG || YYERROR_VERBOSE || 1
-/* YYTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
-   First, the terminals, then, starting at YYNTOKENS, nonterminals.  */
-static const char *const yytname[] =
+#if FDEBUG || FERROR_VERBOSE || 1
+/* FTNAME[SYMBOL-NUM] -- String name of the symbol SYMBOL-NUM.
+   First, the terminals, then, starting at FNTOKENS, nonterminals.  */
+static const char *const ftname[] =
 {
-  "$end", "error", "$undefined", "IDENT", "NUMBER", "PLUS", "MINUS",
-  "MULT", "DIV", "SIN", "COS", "TAN", "CSC", "SEC", "COT", "LOG", "LN",
-  "LG", "SUPERSCRIPT", "SUBSCRIPT", "LPAREN", "RPAREN", "LBRACE", "RBRACE",
-  "LBRACKET", "RBRACKET", "END", "$accept", "input", "expr", "coll",
-  "term", "felm", "dopn", "dpnt", "sclr", "prth", YY_NULLPTR
+  "$end", "error", "$undefined", "F_IDENT", "F_NUMBER", "F_PLUS",
+  "F_MINUS", "F_MULT", "F_DIV", "F_SIN", "F_COS", "F_TAN", "F_CSC",
+  "F_SEC", "F_COT", "F_LOG", "F_LN", "F_LG", "F_SUPERSCRIPT",
+  "F_SUBSCRIPT", "F_LPAREN", "F_RPAREN", "F_LBRACE", "F_RBRACE",
+  "F_LBRACKET", "F_RBRACKET", "F_END", "$accept", "input", "expr", "coll",
+  "term", "felm", "dopn", "dpnt", "sclr", "prth", F_NULLPTR
 };
 #endif
 
-# ifdef YYPRINT
-/* YYTOKNUM[NUM] -- (External) token number corresponding to the
+# ifdef FPRINT
+/* FTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_uint16 yytoknum[] =
+static const ftype_uint16 ftoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -513,19 +533,19 @@ static const yytype_uint16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF -20
+#define FPACT_NINF -20
 
-#define yypact_value_is_default(Yystate) \
+#define fpact_value_is_default(Yystate) \
   (!!((Yystate) == (-20)))
 
-#define YYTABLE_NINF -1
+#define FTABLE_NINF -1
 
-#define yytable_value_is_error(Yytable_value) \
+#define ftable_value_is_error(Yytable_value) \
   0
 
-  /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
+  /* FPACT[STATE-NUM] -- Index in FTABLE of the portion describing
      STATE-NUM.  */
-static const yytype_int8 yypact[] =
+static const ftype_int8 fpact[] =
 {
       60,   -20,   -20,    75,    60,    60,    60,    60,    60,    60,
       42,    60,    60,    60,    22,    12,   -20,    75,   -20,     3,
@@ -535,10 +555,10 @@ static const yytype_int8 yypact[] =
        6,     6,     3,     8,    60,   -20
 };
 
-  /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
-     Performed when YYTABLE does not specify something else to do.  Zero
+  /* FDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
+     Performed when FTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const yytype_uint8 yydefact[] =
+static const ftype_uint8 fdefact[] =
 {
        0,    29,    30,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     9,    12,    11,    14,
@@ -548,22 +568,22 @@ static const yytype_uint8 yydefact[] =
        5,     3,    25,     0,     0,    15
 };
 
-  /* YYPGOTO[NTERM-NUM].  */
-static const yytype_int8 yypgoto[] =
+  /* FPGOTO[NTERM-NUM].  */
+static const ftype_int8 fpgoto[] =
 {
      -20,   -20,    -4,    37,    -5,    25,   -19,   -20,   -20,   -20
 };
 
-  /* YYDEFGOTO[NTERM-NUM].  */
-static const yytype_int8 yydefgoto[] =
+  /* FDEFGOTO[NTERM-NUM].  */
+static const ftype_int8 fdefgoto[] =
 {
       -1,    14,    15,    16,    17,    18,    19,    20,    21,    22
 };
 
-  /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
+  /* FTABLE[FPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
-     number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_uint8 yytable[] =
+     number is the opposite.  If FTABLE_NINF, syntax error.  */
+static const ftype_uint8 ftable[] =
 {
       24,    25,    26,    27,    28,    29,    31,    32,    33,    34,
        1,     2,    42,    36,    37,    38,    39,    36,    37,    38,
@@ -579,7 +599,7 @@ static const yytype_uint8 yytable[] =
        0,     0,    46
 };
 
-static const yytype_int8 yycheck[] =
+static const ftype_int8 fcheck[] =
 {
        4,     5,     6,     7,     8,     9,    10,    11,    12,    13,
        3,     4,    17,     5,     6,     7,     8,     5,     6,     7,
@@ -595,9 +615,9 @@ static const yytype_int8 yycheck[] =
       -1,    -1,    21
 };
 
-  /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
+  /* FSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
-static const yytype_uint8 yystos[] =
+static const ftype_uint8 fstos[] =
 {
        0,     3,     4,     6,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    20,    28,    29,    30,    31,    32,    33,
@@ -607,8 +627,8 @@ static const yytype_uint8 yystos[] =
       29,    29,    33,    29,    23,    29
 };
 
-  /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_uint8 yyr1[] =
+  /* FR1[FN] -- Symbol number of symbol that rule FN derives.  */
+static const ftype_uint8 fr1[] =
 {
        0,    27,    28,    29,    29,    29,    29,    29,    29,    29,
       30,    30,    30,    31,    31,    32,    32,    32,    32,    32,
@@ -616,8 +636,8 @@ static const yytype_uint8 yyr1[] =
       35,    36
 };
 
-  /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_uint8 yyr2[] =
+  /* FR2[FN] -- Number of symbols on the right hand side of rule FN.  */
+static const ftype_uint8 fr2[] =
 {
        0,     2,     2,     3,     3,     3,     3,     3,     2,     1,
        2,     1,     1,     2,     1,     6,     2,     2,     2,     2,
@@ -626,306 +646,306 @@ static const yytype_uint8 yyr2[] =
 };
 
 
-#define yyerrok         (yyerrstatus = 0)
-#define yyclearin       (yychar = YYEMPTY)
-#define YYEMPTY         (-2)
-#define YYEOF           0
+#define ferrok         (ferrstatus = 0)
+#define fclearin       (fchar = FEMPTY)
+#define FEMPTY         (-2)
+#define FEOF           0
 
-#define YYACCEPT        goto yyacceptlab
-#define YYABORT         goto yyabortlab
-#define YYERROR         goto yyerrorlab
+#define FACCEPT        goto facceptlab
+#define FABORT         goto fabortlab
+#define FERROR         goto ferrorlab
 
 
-#define YYRECOVERING()  (!!yyerrstatus)
+#define FRECOVERING()  (!!ferrstatus)
 
-#define YYBACKUP(Token, Value)                                  \
+#define FBACKUP(Token, Value)                                  \
 do                                                              \
-  if (yychar == YYEMPTY)                                        \
+  if (fchar == FEMPTY)                                        \
     {                                                           \
-      yychar = (Token);                                         \
-      yylval = (Value);                                         \
-      YYPOPSTACK (yylen);                                       \
-      yystate = *yyssp;                                         \
-      goto yybackup;                                            \
+      fchar = (Token);                                         \
+      flval = (Value);                                         \
+      FPOPSTACK (flen);                                       \
+      fstate = *fssp;                                         \
+      goto fbackup;                                            \
     }                                                           \
   else                                                          \
     {                                                           \
-      yyerror (root, list, vmap, YY_("syntax error: cannot back up")); \
-      YYERROR;                                                  \
+      ferror (root, list, vmap, F_("syntax error: cannot back up")); \
+      FERROR;                                                  \
     }                                                           \
 while (0)
 
 /* Error token number */
-#define YYTERROR        1
-#define YYERRCODE       256
+#define FTERROR        1
+#define FERRCODE       256
 
 
 
 /* Enable debugging if requested.  */
-#if YYDEBUG
+#if FDEBUG
 
-# ifndef YYFPRINTF
+# ifndef FFPRINTF
 #  include <stdio.h> /* INFRINGES ON USER NAME SPACE */
-#  define YYFPRINTF fprintf
+#  define FFPRINTF fprintf
 # endif
 
-# define YYDPRINTF(Args)                        \
+# define FDPRINTF(Args)                        \
 do {                                            \
-  if (yydebug)                                  \
-    YYFPRINTF Args;                             \
+  if (fdebug)                                  \
+    FFPRINTF Args;                             \
 } while (0)
 
 /* This macro is provided for backward compatibility. */
-#ifndef YY_LOCATION_PRINT
-# define YY_LOCATION_PRINT(File, Loc) ((void) 0)
+#ifndef F_LOCATION_PRINT
+# define F_LOCATION_PRINT(File, Loc) ((void) 0)
 #endif
 
 
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)                    \
+# define F_SYMBOL_PRINT(Title, Type, Value, Location)                    \
 do {                                                                      \
-  if (yydebug)                                                            \
+  if (fdebug)                                                            \
     {                                                                     \
-      YYFPRINTF (stderr, "%s ", Title);                                   \
-      yy_symbol_print (stderr,                                            \
+      FFPRINTF (stderr, "%s ", Title);                                   \
+      f_symbol_print (stderr,                                            \
                   Type, Value, root, list, vmap); \
-      YYFPRINTF (stderr, "\n");                                           \
+      FFPRINTF (stderr, "\n");                                           \
     }                                                                     \
 } while (0)
 
 
 /*----------------------------------------.
-| Print this symbol's value on YYOUTPUT.  |
+| Print this symbol's value on FOUTPUT.  |
 `----------------------------------------*/
 
 static void
-yy_symbol_value_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
+f_symbol_value_print (FILE *foutput, int ftype, FSTYPE const * const fvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
-  FILE *yyo = yyoutput;
-  YYUSE (yyo);
-  YYUSE (root);
-  YYUSE (list);
-  YYUSE (vmap);
-  if (!yyvaluep)
+  FILE *fo = foutput;
+  FUSE (fo);
+  FUSE (root);
+  FUSE (list);
+  FUSE (vmap);
+  if (!fvaluep)
     return;
-# ifdef YYPRINT
-  if (yytype < YYNTOKENS)
-    YYPRINT (yyoutput, yytoknum[yytype], *yyvaluep);
+# ifdef FPRINT
+  if (ftype < FNTOKENS)
+    FPRINT (foutput, ftoknum[ftype], *fvaluep);
 # endif
-  YYUSE (yytype);
+  FUSE (ftype);
 }
 
 
 /*--------------------------------.
-| Print this symbol on YYOUTPUT.  |
+| Print this symbol on FOUTPUT.  |
 `--------------------------------*/
 
 static void
-yy_symbol_print (FILE *yyoutput, int yytype, YYSTYPE const * const yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
+f_symbol_print (FILE *foutput, int ftype, FSTYPE const * const fvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
-  YYFPRINTF (yyoutput, "%s %s (",
-             yytype < YYNTOKENS ? "token" : "nterm", yytname[yytype]);
+  FFPRINTF (foutput, "%s %s (",
+             ftype < FNTOKENS ? "token" : "nterm", ftname[ftype]);
 
-  yy_symbol_value_print (yyoutput, yytype, yyvaluep, root, list, vmap);
-  YYFPRINTF (yyoutput, ")");
+  f_symbol_value_print (foutput, ftype, fvaluep, root, list, vmap);
+  FFPRINTF (foutput, ")");
 }
 
 /*------------------------------------------------------------------.
-| yy_stack_print -- Print the state stack from its BOTTOM up to its |
+| f_stack_print -- Print the state stack from its BOTTOM up to its |
 | TOP (included).                                                   |
 `------------------------------------------------------------------*/
 
 static void
-yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
+f_stack_print (ftype_int16 *fbottom, ftype_int16 *ftop)
 {
-  YYFPRINTF (stderr, "Stack now");
-  for (; yybottom <= yytop; yybottom++)
+  FFPRINTF (stderr, "Stack now");
+  for (; fbottom <= ftop; fbottom++)
     {
-      int yybot = *yybottom;
-      YYFPRINTF (stderr, " %d", yybot);
+      int fbot = *fbottom;
+      FFPRINTF (stderr, " %d", fbot);
     }
-  YYFPRINTF (stderr, "\n");
+  FFPRINTF (stderr, "\n");
 }
 
-# define YY_STACK_PRINT(Bottom, Top)                            \
+# define F_STACK_PRINT(Bottom, Top)                            \
 do {                                                            \
-  if (yydebug)                                                  \
-    yy_stack_print ((Bottom), (Top));                           \
+  if (fdebug)                                                  \
+    f_stack_print ((Bottom), (Top));                           \
 } while (0)
 
 
 /*------------------------------------------------.
-| Report that the YYRULE is going to be reduced.  |
+| Report that the FRULE is going to be reduced.  |
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
+f_reduce_print (ftype_int16 *fssp, FSTYPE *fvsp, int frule, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
-  unsigned long int yylno = yyrline[yyrule];
-  int yynrhs = yyr2[yyrule];
-  int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
-             yyrule - 1, yylno);
+  unsigned long int flno = frline[frule];
+  int fnrhs = fr2[frule];
+  int fi;
+  FFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
+             frule - 1, flno);
   /* The symbols being reduced.  */
-  for (yyi = 0; yyi < yynrhs; yyi++)
+  for (fi = 0; fi < fnrhs; fi++)
     {
-      YYFPRINTF (stderr, "   $%d = ", yyi + 1);
-      yy_symbol_print (stderr,
-                       yystos[yyssp[yyi + 1 - yynrhs]],
-                       &(yyvsp[(yyi + 1) - (yynrhs)])
+      FFPRINTF (stderr, "   $%d = ", fi + 1);
+      f_symbol_print (stderr,
+                       fstos[fssp[fi + 1 - fnrhs]],
+                       &(fvsp[(fi + 1) - (fnrhs)])
                                               , root, list, vmap);
-      YYFPRINTF (stderr, "\n");
+      FFPRINTF (stderr, "\n");
     }
 }
 
-# define YY_REDUCE_PRINT(Rule)          \
+# define F_REDUCE_PRINT(Rule)          \
 do {                                    \
-  if (yydebug)                          \
-    yy_reduce_print (yyssp, yyvsp, Rule, root, list, vmap); \
+  if (fdebug)                          \
+    f_reduce_print (fssp, fvsp, Rule, root, list, vmap); \
 } while (0)
 
 /* Nonzero means print parse trace.  It is left uninitialized so that
    multiple parsers can coexist.  */
-int yydebug;
-#else /* !YYDEBUG */
-# define YYDPRINTF(Args)
-# define YY_SYMBOL_PRINT(Title, Type, Value, Location)
-# define YY_STACK_PRINT(Bottom, Top)
-# define YY_REDUCE_PRINT(Rule)
-#endif /* !YYDEBUG */
+int fdebug;
+#else /* !FDEBUG */
+# define FDPRINTF(Args)
+# define F_SYMBOL_PRINT(Title, Type, Value, Location)
+# define F_STACK_PRINT(Bottom, Top)
+# define F_REDUCE_PRINT(Rule)
+#endif /* !FDEBUG */
 
 
-/* YYINITDEPTH -- initial size of the parser's stacks.  */
-#ifndef YYINITDEPTH
-# define YYINITDEPTH 200
+/* FINITDEPTH -- initial size of the parser's stacks.  */
+#ifndef FINITDEPTH
+# define FINITDEPTH 200
 #endif
 
-/* YYMAXDEPTH -- maximum size the stacks can grow to (effective only
+/* FMAXDEPTH -- maximum size the stacks can grow to (effective only
    if the built-in stack extension method is used).
 
    Do not make this value too large; the results are undefined if
-   YYSTACK_ALLOC_MAXIMUM < YYSTACK_BYTES (YYMAXDEPTH)
+   FSTACK_ALLOC_MAXIMUM < FSTACK_BYTES (FMAXDEPTH)
    evaluated with infinite-precision integer arithmetic.  */
 
-#ifndef YYMAXDEPTH
-# define YYMAXDEPTH 10000
+#ifndef FMAXDEPTH
+# define FMAXDEPTH 10000
 #endif
 
 
-#if YYERROR_VERBOSE
+#if FERROR_VERBOSE
 
-# ifndef yystrlen
+# ifndef fstrlen
 #  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen strlen
+#   define fstrlen strlen
 #  else
-/* Return the length of YYSTR.  */
-static YYSIZE_T
-yystrlen (const char *yystr)
+/* Return the length of FSTR.  */
+static FSIZE_T
+fstrlen (const char *fstr)
 {
-  YYSIZE_T yylen;
-  for (yylen = 0; yystr[yylen]; yylen++)
+  FSIZE_T flen;
+  for (flen = 0; fstr[flen]; flen++)
     continue;
-  return yylen;
+  return flen;
 }
 #  endif
 # endif
 
-# ifndef yystpcpy
+# ifndef fstpcpy
 #  if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
-#   define yystpcpy stpcpy
+#   define fstpcpy stpcpy
 #  else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
+/* Copy FSRC to FDEST, returning the address of the terminating '\0' in
+   FDEST.  */
 static char *
-yystpcpy (char *yydest, const char *yysrc)
+fstpcpy (char *fdest, const char *fsrc)
 {
-  char *yyd = yydest;
-  const char *yys = yysrc;
+  char *fd = fdest;
+  const char *fs = fsrc;
 
-  while ((*yyd++ = *yys++) != '\0')
+  while ((*fd++ = *fs++) != '\0')
     continue;
 
-  return yyd - 1;
+  return fd - 1;
 }
 #  endif
 # endif
 
-# ifndef yytnamerr
-/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
-   quotes and backslashes, so that it's suitable for yyerror.  The
+# ifndef ftnamerr
+/* Copy to FRES the contents of FSTR after stripping away unnecessary
+   quotes and backslashes, so that it's suitable for ferror.  The
    heuristic is that double-quoting is unnecessary unless the string
    contains an apostrophe, a comma, or backslash (other than
-   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
+   backslash-backslash).  FSTR is taken from ftname.  If FRES is
    null, do not copy; instead, return the length of what the result
    would have been.  */
-static YYSIZE_T
-yytnamerr (char *yyres, const char *yystr)
+static FSIZE_T
+ftnamerr (char *fres, const char *fstr)
 {
-  if (*yystr == '"')
+  if (*fstr == '"')
     {
-      YYSIZE_T yyn = 0;
-      char const *yyp = yystr;
+      FSIZE_T fn = 0;
+      char const *fp = fstr;
 
       for (;;)
-        switch (*++yyp)
+        switch (*++fp)
           {
           case '\'':
           case ',':
             goto do_not_strip_quotes;
 
           case '\\':
-            if (*++yyp != '\\')
+            if (*++fp != '\\')
               goto do_not_strip_quotes;
             /* Fall through.  */
           default:
-            if (yyres)
-              yyres[yyn] = *yyp;
-            yyn++;
+            if (fres)
+              fres[fn] = *fp;
+            fn++;
             break;
 
           case '"':
-            if (yyres)
-              yyres[yyn] = '\0';
-            return yyn;
+            if (fres)
+              fres[fn] = '\0';
+            return fn;
           }
     do_not_strip_quotes: ;
     }
 
-  if (! yyres)
-    return yystrlen (yystr);
+  if (! fres)
+    return fstrlen (fstr);
 
-  return yystpcpy (yyres, yystr) - yyres;
+  return fstpcpy (fres, fstr) - fres;
 }
 # endif
 
-/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
-   about the unexpected token YYTOKEN for the state stack whose top is
-   YYSSP.
+/* Copy into *FMSG, which is of size *FMSG_ALLOC, an error message
+   about the unexpected token FTOKEN for the state stack whose top is
+   FSSP.
 
-   Return 0 if *YYMSG was successfully written.  Return 1 if *YYMSG is
+   Return 0 if *FMSG was successfully written.  Return 1 if *FMSG is
    not large enough to hold the message.  In that case, also set
-   *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
+   *FMSG_ALLOC to the required number of bytes.  Return 2 if the
    required number of bytes is too large to store.  */
 static int
-yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
-                yytype_int16 *yyssp, int yytoken)
+fsyntax_error (FSIZE_T *fmsg_alloc, char **fmsg,
+                ftype_int16 *fssp, int ftoken)
 {
-  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-  YYSIZE_T yysize = yysize0;
-  enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
+  FSIZE_T fsize0 = ftnamerr (F_NULLPTR, ftname[ftoken]);
+  FSIZE_T fsize = fsize0;
+  enum { FERROR_VERBOSE_ARGS_MAXIMUM = 5 };
   /* Internationalized format string. */
-  const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat. */
-  char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
+  const char *fformat = F_NULLPTR;
+  /* Arguments of fformat. */
+  char const *farg[FERROR_VERBOSE_ARGS_MAXIMUM];
   /* Number of reported tokens (one for the "unexpected", one per
      "expected"). */
-  int yycount = 0;
+  int fcount = 0;
 
   /* There are many possibilities here to consider:
      - If this state is a consistent state with a default action, then
        the only way this function was invoked is if the default action
        is an error action.  In that case, don't check for expected
        tokens because there are none.
-     - The only way there can be no lookahead present (in yychar) is if
+     - The only way there can be no lookahead present (in fchar) is if
        this state is a consistent state with a default action.  Thus,
        detecting the absence of a lookahead is sufficient to determine
        that there is no unexpected or expected token to report.  In that
@@ -933,7 +953,7 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
      - Don't assume there isn't a lookahead just because this state is a
        consistent state with a default action.  There might have been a
        previous inconsistent state, consistent state with a non-default
-       action, or user semantic action that manipulated yychar.
+       action, or user semantic action that manipulated fchar.
      - Of course, the expected token list depends on states to have
        correct lookahead information, and it depends on the parser not
        to perform extra reductions after fetching a lookahead from the
@@ -943,71 +963,71 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
        one exception: it will still contain any token that will not be
        accepted due to an error action in a later state.
   */
-  if (yytoken != YYEMPTY)
+  if (ftoken != FEMPTY)
     {
-      int yyn = yypact[*yyssp];
-      yyarg[yycount++] = yytname[yytoken];
-      if (!yypact_value_is_default (yyn))
+      int fn = fpact[*fssp];
+      farg[fcount++] = ftname[ftoken];
+      if (!fpact_value_is_default (fn))
         {
-          /* Start YYX at -YYN if negative to avoid negative indexes in
-             YYCHECK.  In other words, skip the first -YYN actions for
+          /* Start FX at -FN if negative to avoid negative indexes in
+             FCHECK.  In other words, skip the first -FN actions for
              this state because they are default actions.  */
-          int yyxbegin = yyn < 0 ? -yyn : 0;
-          /* Stay within bounds of both yycheck and yytname.  */
-          int yychecklim = YYLAST - yyn + 1;
-          int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
-          int yyx;
+          int fxbegin = fn < 0 ? -fn : 0;
+          /* Stay within bounds of both fcheck and ftname.  */
+          int fchecklim = FLAST - fn + 1;
+          int fxend = fchecklim < FNTOKENS ? fchecklim : FNTOKENS;
+          int fx;
 
-          for (yyx = yyxbegin; yyx < yyxend; ++yyx)
-            if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR
-                && !yytable_value_is_error (yytable[yyx + yyn]))
+          for (fx = fxbegin; fx < fxend; ++fx)
+            if (fcheck[fx + fn] == fx && fx != FTERROR
+                && !ftable_value_is_error (ftable[fx + fn]))
               {
-                if (yycount == YYERROR_VERBOSE_ARGS_MAXIMUM)
+                if (fcount == FERROR_VERBOSE_ARGS_MAXIMUM)
                   {
-                    yycount = 1;
-                    yysize = yysize0;
+                    fcount = 1;
+                    fsize = fsize0;
                     break;
                   }
-                yyarg[yycount++] = yytname[yyx];
+                farg[fcount++] = ftname[fx];
                 {
-                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
-                  if (! (yysize <= yysize1
-                         && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+                  FSIZE_T fsize1 = fsize + ftnamerr (F_NULLPTR, ftname[fx]);
+                  if (! (fsize <= fsize1
+                         && fsize1 <= FSTACK_ALLOC_MAXIMUM))
                     return 2;
-                  yysize = yysize1;
+                  fsize = fsize1;
                 }
               }
         }
     }
 
-  switch (yycount)
+  switch (fcount)
     {
-# define YYCASE_(N, S)                      \
+# define FCASE_(N, S)                      \
       case N:                               \
-        yyformat = S;                       \
+        fformat = S;                       \
       break
-      YYCASE_(0, YY_("syntax error"));
-      YYCASE_(1, YY_("syntax error, unexpected %s"));
-      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
-      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
-      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
-      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
-# undef YYCASE_
+      FCASE_(0, F_("syntax error"));
+      FCASE_(1, F_("syntax error, unexpected %s"));
+      FCASE_(2, F_("syntax error, unexpected %s, expecting %s"));
+      FCASE_(3, F_("syntax error, unexpected %s, expecting %s or %s"));
+      FCASE_(4, F_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      FCASE_(5, F_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+# undef FCASE_
     }
 
   {
-    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
-    if (! (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM))
+    FSIZE_T fsize1 = fsize + fstrlen (fformat);
+    if (! (fsize <= fsize1 && fsize1 <= FSTACK_ALLOC_MAXIMUM))
       return 2;
-    yysize = yysize1;
+    fsize = fsize1;
   }
 
-  if (*yymsg_alloc < yysize)
+  if (*fmsg_alloc < fsize)
     {
-      *yymsg_alloc = 2 * yysize;
-      if (! (yysize <= *yymsg_alloc
-             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
-        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      *fmsg_alloc = 2 * fsize;
+      if (! (fsize <= *fmsg_alloc
+             && *fmsg_alloc <= FSTACK_ALLOC_MAXIMUM))
+        *fmsg_alloc = FSTACK_ALLOC_MAXIMUM;
       return 1;
     }
 
@@ -1015,311 +1035,311 @@ yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
      Don't have undefined behavior even if the translation
      produced a string with the wrong number of "%s"s.  */
   {
-    char *yyp = *yymsg;
-    int yyi = 0;
-    while ((*yyp = *yyformat) != '\0')
-      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+    char *fp = *fmsg;
+    int fi = 0;
+    while ((*fp = *fformat) != '\0')
+      if (*fp == '%' && fformat[1] == 's' && fi < fcount)
         {
-          yyp += yytnamerr (yyp, yyarg[yyi++]);
-          yyformat += 2;
+          fp += ftnamerr (fp, farg[fi++]);
+          fformat += 2;
         }
       else
         {
-          yyp++;
-          yyformat++;
+          fp++;
+          fformat++;
         }
   }
   return 0;
 }
-#endif /* YYERROR_VERBOSE */
+#endif /* FERROR_VERBOSE */
 
 /*-----------------------------------------------.
 | Release the memory associated to this symbol.  |
 `-----------------------------------------------*/
 
 static void
-yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
+fdestruct (const char *fmsg, int ftype, FSTYPE *fvaluep, functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
-  YYUSE (yyvaluep);
-  YYUSE (root);
-  YYUSE (list);
-  YYUSE (vmap);
-  if (!yymsg)
-    yymsg = "Deleting";
-  YY_SYMBOL_PRINT (yymsg, yytype, yyvaluep, yylocationp);
+  FUSE (fvaluep);
+  FUSE (root);
+  FUSE (list);
+  FUSE (vmap);
+  if (!fmsg)
+    fmsg = "Deleting";
+  F_SYMBOL_PRINT (fmsg, ftype, fvaluep, flocationp);
 
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  YYUSE (yytype);
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
+  F_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  FUSE (ftype);
+  F_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
 
 
 /* The lookahead symbol.  */
-int yychar;
+int fchar;
 
 /* The semantic value of the lookahead symbol.  */
-YYSTYPE yylval;
+FSTYPE flval;
 /* Number of syntax errors so far.  */
-int yynerrs;
+int fnerrs;
 
 
 /*----------.
-| yyparse.  |
+| fparse.  |
 `----------*/
 
 int
-yyparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
+fparse (functor <double> ::node *(&root), functor <double> ::param_list list, functor <double> ::map &vmap)
 {
-    int yystate;
+    int fstate;
     /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
+    int ferrstatus;
 
     /* The stacks and their tools:
-       'yyss': related to states.
-       'yyvs': related to semantic values.
+       'fss': related to states.
+       'fvs': related to semantic values.
 
-       Refer to the stacks through separate pointers, to allow yyoverflow
+       Refer to the stacks through separate pointers, to allow foverflow
        to reallocate them elsewhere.  */
 
     /* The state stack.  */
-    yytype_int16 yyssa[YYINITDEPTH];
-    yytype_int16 *yyss;
-    yytype_int16 *yyssp;
+    ftype_int16 fssa[FINITDEPTH];
+    ftype_int16 *fss;
+    ftype_int16 *fssp;
 
     /* The semantic value stack.  */
-    YYSTYPE yyvsa[YYINITDEPTH];
-    YYSTYPE *yyvs;
-    YYSTYPE *yyvsp;
+    FSTYPE fvsa[FINITDEPTH];
+    FSTYPE *fvs;
+    FSTYPE *fvsp;
 
-    YYSIZE_T yystacksize;
+    FSIZE_T fstacksize;
 
-  int yyn;
-  int yyresult;
+  int fn;
+  int fresult;
   /* Lookahead token as an internal (translated) token number.  */
-  int yytoken = 0;
+  int ftoken = 0;
   /* The variables used to return semantic value and location from the
      action routines.  */
-  YYSTYPE yyval;
+  FSTYPE fval;
 
-#if YYERROR_VERBOSE
+#if FERROR_VERBOSE
   /* Buffer for error messages, and its allocated size.  */
-  char yymsgbuf[128];
-  char *yymsg = yymsgbuf;
-  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
+  char fmsgbuf[128];
+  char *fmsg = fmsgbuf;
+  FSIZE_T fmsg_alloc = sizeof fmsgbuf;
 #endif
 
-#define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
+#define FPOPSTACK(N)   (fvsp -= (N), fssp -= (N))
 
   /* The number of symbols on the RHS of the reduced rule.
      Keep to zero when no symbol should be popped.  */
-  int yylen = 0;
+  int flen = 0;
 
-  yyssp = yyss = yyssa;
-  yyvsp = yyvs = yyvsa;
-  yystacksize = YYINITDEPTH;
+  fssp = fss = fssa;
+  fvsp = fvs = fvsa;
+  fstacksize = FINITDEPTH;
 
-  YYDPRINTF ((stderr, "Starting parse\n"));
+  FDPRINTF ((stderr, "Starting parse\n"));
 
-  yystate = 0;
-  yyerrstatus = 0;
-  yynerrs = 0;
-  yychar = YYEMPTY; /* Cause a token to be read.  */
-  goto yysetstate;
+  fstate = 0;
+  ferrstatus = 0;
+  fnerrs = 0;
+  fchar = FEMPTY; /* Cause a token to be read.  */
+  goto fsetstate;
 
 /*------------------------------------------------------------.
-| yynewstate -- Push a new state, which is found in yystate.  |
+| fnewstate -- Push a new state, which is found in fstate.  |
 `------------------------------------------------------------*/
- yynewstate:
+ fnewstate:
   /* In all cases, when you get here, the value and location stacks
      have just been pushed.  So pushing a state here evens the stacks.  */
-  yyssp++;
+  fssp++;
 
- yysetstate:
-  *yyssp = yystate;
+ fsetstate:
+  *fssp = fstate;
 
-  if (yyss + yystacksize - 1 <= yyssp)
+  if (fss + fstacksize - 1 <= fssp)
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYSIZE_T yysize = yyssp - yyss + 1;
+      FSIZE_T fsize = fssp - fss + 1;
 
-#ifdef yyoverflow
+#ifdef foverflow
       {
         /* Give user a chance to reallocate the stack.  Use copies of
            these so that the &'s don't force the real ones into
            memory.  */
-        YYSTYPE *yyvs1 = yyvs;
-        yytype_int16 *yyss1 = yyss;
+        FSTYPE *fvs1 = fvs;
+        ftype_int16 *fss1 = fss;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
            conditional around just the two extra args, but that might
-           be undefined if yyoverflow is a macro.  */
-        yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * sizeof (*yyssp),
-                    &yyvs1, yysize * sizeof (*yyvsp),
-                    &yystacksize);
+           be undefined if foverflow is a macro.  */
+        foverflow (F_("memory exhausted"),
+                    &fss1, fsize * sizeof (*fssp),
+                    &fvs1, fsize * sizeof (*fvsp),
+                    &fstacksize);
 
-        yyss = yyss1;
-        yyvs = yyvs1;
+        fss = fss1;
+        fvs = fvs1;
       }
-#else /* no yyoverflow */
-# ifndef YYSTACK_RELOCATE
-      goto yyexhaustedlab;
+#else /* no foverflow */
+# ifndef FSTACK_RELOCATE
+      goto fexhaustedlab;
 # else
       /* Extend the stack our own way.  */
-      if (YYMAXDEPTH <= yystacksize)
-        goto yyexhaustedlab;
-      yystacksize *= 2;
-      if (YYMAXDEPTH < yystacksize)
-        yystacksize = YYMAXDEPTH;
+      if (FMAXDEPTH <= fstacksize)
+        goto fexhaustedlab;
+      fstacksize *= 2;
+      if (FMAXDEPTH < fstacksize)
+        fstacksize = FMAXDEPTH;
 
       {
-        yytype_int16 *yyss1 = yyss;
-        union yyalloc *yyptr =
-          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
-        if (! yyptr)
-          goto yyexhaustedlab;
-        YYSTACK_RELOCATE (yyss_alloc, yyss);
-        YYSTACK_RELOCATE (yyvs_alloc, yyvs);
-#  undef YYSTACK_RELOCATE
-        if (yyss1 != yyssa)
-          YYSTACK_FREE (yyss1);
+        ftype_int16 *fss1 = fss;
+        union falloc *fptr =
+          (union falloc *) FSTACK_ALLOC (FSTACK_BYTES (fstacksize));
+        if (! fptr)
+          goto fexhaustedlab;
+        FSTACK_RELOCATE (fss_alloc, fss);
+        FSTACK_RELOCATE (fvs_alloc, fvs);
+#  undef FSTACK_RELOCATE
+        if (fss1 != fssa)
+          FSTACK_FREE (fss1);
       }
 # endif
-#endif /* no yyoverflow */
+#endif /* no foverflow */
 
-      yyssp = yyss + yysize - 1;
-      yyvsp = yyvs + yysize - 1;
+      fssp = fss + fsize - 1;
+      fvsp = fvs + fsize - 1;
 
-      YYDPRINTF ((stderr, "Stack size increased to %lu\n",
-                  (unsigned long int) yystacksize));
+      FDPRINTF ((stderr, "Stack size increased to %lu\n",
+                  (unsigned long int) fstacksize));
 
-      if (yyss + yystacksize - 1 <= yyssp)
-        YYABORT;
+      if (fss + fstacksize - 1 <= fssp)
+        FABORT;
     }
 
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
+  FDPRINTF ((stderr, "Entering state %d\n", fstate));
 
-  if (yystate == YYFINAL)
-    YYACCEPT;
+  if (fstate == FFINAL)
+    FACCEPT;
 
-  goto yybackup;
+  goto fbackup;
 
 /*-----------.
-| yybackup.  |
+| fbackup.  |
 `-----------*/
-yybackup:
+fbackup:
 
   /* Do appropriate processing given the current state.  Read a
      lookahead token if we need one and don't already have one.  */
 
   /* First try to decide what to do without reference to lookahead token.  */
-  yyn = yypact[yystate];
-  if (yypact_value_is_default (yyn))
-    goto yydefault;
+  fn = fpact[fstate];
+  if (fpact_value_is_default (fn))
+    goto fdefault;
 
   /* Not known => get a lookahead token if don't already have one.  */
 
-  /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
-  if (yychar == YYEMPTY)
+  /* FCHAR is either FEMPTY or FEOF or a valid lookahead symbol.  */
+  if (fchar == FEMPTY)
     {
-      YYDPRINTF ((stderr, "Reading a token: "));
-      yychar = yylex ();
+      FDPRINTF ((stderr, "Reading a token: "));
+      fchar = flex ();
     }
 
-  if (yychar <= YYEOF)
+  if (fchar <= FEOF)
     {
-      yychar = yytoken = YYEOF;
-      YYDPRINTF ((stderr, "Now at end of input.\n"));
+      fchar = ftoken = FEOF;
+      FDPRINTF ((stderr, "Now at end of input.\n"));
     }
   else
     {
-      yytoken = YYTRANSLATE (yychar);
-      YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
+      ftoken = FTRANSLATE (fchar);
+      F_SYMBOL_PRINT ("Next token is", ftoken, &flval, &flloc);
     }
 
-  /* If the proper action on seeing token YYTOKEN is to reduce or to
+  /* If the proper action on seeing token FTOKEN is to reduce or to
      detect an error, take that action.  */
-  yyn += yytoken;
-  if (yyn < 0 || YYLAST < yyn || yycheck[yyn] != yytoken)
-    goto yydefault;
-  yyn = yytable[yyn];
-  if (yyn <= 0)
+  fn += ftoken;
+  if (fn < 0 || FLAST < fn || fcheck[fn] != ftoken)
+    goto fdefault;
+  fn = ftable[fn];
+  if (fn <= 0)
     {
-      if (yytable_value_is_error (yyn))
-        goto yyerrlab;
-      yyn = -yyn;
-      goto yyreduce;
+      if (ftable_value_is_error (fn))
+        goto ferrlab;
+      fn = -fn;
+      goto freduce;
     }
 
   /* Count tokens shifted since error; after three, turn off error
      status.  */
-  if (yyerrstatus)
-    yyerrstatus--;
+  if (ferrstatus)
+    ferrstatus--;
 
   /* Shift the lookahead token.  */
-  YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
+  F_SYMBOL_PRINT ("Shifting", ftoken, &flval, &flloc);
 
   /* Discard the shifted token.  */
-  yychar = YYEMPTY;
+  fchar = FEMPTY;
 
-  yystate = yyn;
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  *++yyvsp = yylval;
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
+  fstate = fn;
+  F_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  *++fvsp = flval;
+  F_IGNORE_MAYBE_UNINITIALIZED_END
 
-  goto yynewstate;
+  goto fnewstate;
 
 
 /*-----------------------------------------------------------.
-| yydefault -- do the default action for the current state.  |
+| fdefault -- do the default action for the current state.  |
 `-----------------------------------------------------------*/
-yydefault:
-  yyn = yydefact[yystate];
-  if (yyn == 0)
-    goto yyerrlab;
-  goto yyreduce;
+fdefault:
+  fn = fdefact[fstate];
+  if (fn == 0)
+    goto ferrlab;
+  goto freduce;
 
 
 /*-----------------------------.
-| yyreduce -- Do a reduction.  |
+| freduce -- Do a reduction.  |
 `-----------------------------*/
-yyreduce:
-  /* yyn is the number of a rule to reduce with.  */
-  yylen = yyr2[yyn];
+freduce:
+  /* fn is the number of a rule to reduce with.  */
+  flen = fr2[fn];
 
-  /* If YYLEN is nonzero, implement the default value of the action:
+  /* If FLEN is nonzero, implement the default value of the action:
      '$$ = $1'.
 
-     Otherwise, the following line sets YYVAL to garbage.
+     Otherwise, the following line sets FVAL to garbage.
      This behavior is undocumented and Bison
-     users should not rely upon it.  Assigning to YYVAL
+     users should not rely upon it.  Assigning to FVAL
      unconditionally makes the parser a bit smaller, and it avoids a
-     GCC warning that YYVAL may be used uninitialized.  */
-  yyval = yyvsp[1-yylen];
+     GCC warning that FVAL may be used uninitialized.  */
+  fval = fvsp[1-flen];
 
 
-  YY_REDUCE_PRINT (yyn);
-  switch (yyn)
+  F_REDUCE_PRINT (fn);
+  switch (fn)
     {
         case 2:
-#line 100 "fparser.y" /* yacc.c:1646  */
+#line 101 "function_parser.y" /* yacc.c:1646  */
     {
      		// value->set($1->get());
 		//printf("end of input, root is %s\n", $1->tok->str().c_str());
-		root = (yyvsp[-1].expr);
+		root = (fvsp[-1].expr);
 		// root = new functor <double> ::node {new operand <double> (10), functor <double> ::m_none, vector <functor <double> ::node *> ()};
 		// functor <double> ::print($1, 1, 0);
 		// functor <double> ::print(root, 1, 0);
 		return 0;
 }
-#line 1319 "fparser.h" /* yacc.c:1646  */
+#line 1337 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 3:
-#line 111 "fparser.y" /* yacc.c:1646  */
+#line 112 "function_parser.y" /* yacc.c:1646  */
     { // Exponentiation
    		//printf("expression exponentiation\n");
 		/* vector <operand <double>> vals;
@@ -1328,16 +1348,16 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::exp_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::exp_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::exp_op, functor <double> ::m_none, leaves};
 }
-#line 1337 "fparser.h" /* yacc.c:1646  */
+#line 1355 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 4:
-#line 125 "fparser.y" /* yacc.c:1646  */
+#line 126 "function_parser.y" /* yacc.c:1646  */
     { // Multiplication
    		//printf("expression multiplication\n");
 		/* vector <operand <double>> vals;
@@ -1346,16 +1366,16 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none, leaves};
 }
-#line 1355 "fparser.h" /* yacc.c:1646  */
+#line 1373 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 5:
-#line 139 "fparser.y" /* yacc.c:1646  */
+#line 140 "function_parser.y" /* yacc.c:1646  */
     { // Division
    		//printf("expression divition\n");
 		/* tor <operand <double>> vals;
@@ -1364,16 +1384,16 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::div_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::div_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::div_op, functor <double> ::m_none, leaves};
 }
-#line 1373 "fparser.h" /* yacc.c:1646  */
+#line 1391 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 6:
-#line 153 "fparser.y" /* yacc.c:1646  */
+#line 154 "function_parser.y" /* yacc.c:1646  */
     { // Addition
    		//printf("expression addition\n");
 		/* vector <operand <double>> vals;
@@ -1382,16 +1402,16 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::add_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::add_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::add_op, functor <double> ::m_none, leaves};
 }
-#line 1391 "fparser.h" /* yacc.c:1646  */
+#line 1409 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 7:
-#line 167 "fparser.y" /* yacc.c:1646  */
+#line 168 "function_parser.y" /* yacc.c:1646  */
     { // Subtraction
    		//printf("expression substraction\n");
    		/* vector <operand <double>> vals;
@@ -1400,16 +1420,16 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::sub_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
 }
-#line 1409 "fparser.h" /* yacc.c:1646  */
+#line 1427 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 8:
-#line 181 "fparser.y" /* yacc.c:1646  */
+#line 182 "function_parser.y" /* yacc.c:1646  */
     {
    		//printf("expression negative collective\n");
    		/* vector <operand <double>> vals;
@@ -1420,24 +1440,24 @@ yyreduce:
 		vector <functor <double> ::node *> leaves;
 		leaves.push_back(new functor <double> ::node (new operand <double> (-1), functor <double> ::m_none,
 			vector <functor <double> ::node *> ()));
-		leaves.push_back((yyvsp[0].coll));
+		leaves.push_back((fvsp[0].coll));
 
-		(yyval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
+		(fval.expr) = new functor <double> ::node {&defaults <double> ::sub_op, functor <double> ::m_none, leaves};
 }
-#line 1428 "fparser.h" /* yacc.c:1646  */
+#line 1446 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 9:
-#line 196 "fparser.y" /* yacc.c:1646  */
+#line 197 "function_parser.y" /* yacc.c:1646  */
     {
    		//printf("expression collective\n");
-   		(yyval.expr) = (yyvsp[0].coll);
+   		(fval.expr) = (fvsp[0].coll);
 }
-#line 1437 "fparser.h" /* yacc.c:1646  */
+#line 1455 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 10:
-#line 202 "fparser.y" /* yacc.c:1646  */
+#line 203 "function_parser.y" /* yacc.c:1646  */
     { // Implicit Multiplication: term and non-arithmetic operation
     		//printf("collective, term (%s) implicitly multiplicied with non-arithmetic operation (%s)\n", $1->tok->str().c_str(), $2->tok->str().c_str());
 		/* vector <operand <double>> vals;
@@ -1446,56 +1466,56 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::mult_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-1].term));
-		leaves.push_back((yyvsp[0].felm));
+		leaves.push_back((fvsp[-1].term));
+		leaves.push_back((fvsp[0].felm));
 
-		(yyval.coll) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
+		(fval.coll) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
 }
-#line 1455 "fparser.h" /* yacc.c:1646  */
+#line 1473 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 11:
-#line 216 "fparser.y" /* yacc.c:1646  */
+#line 217 "function_parser.y" /* yacc.c:1646  */
     {
-    		(yyval.coll) = (yyvsp[0].felm);
+    		(fval.coll) = (fvsp[0].felm);
 }
-#line 1463 "fparser.h" /* yacc.c:1646  */
+#line 1481 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 12:
-#line 220 "fparser.y" /* yacc.c:1646  */
+#line 221 "function_parser.y" /* yacc.c:1646  */
     {
 
     		// printf("collective as a regular term (%s)\n", $1->str().c_str());
-    		(yyval.coll) = (yyvsp[0].term);
+    		(fval.coll) = (fvsp[0].term);
 }
-#line 1473 "fparser.h" /* yacc.c:1646  */
+#line 1491 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 13:
-#line 227 "fparser.y" /* yacc.c:1646  */
+#line 228 "function_parser.y" /* yacc.c:1646  */
     { // Implicit Multiplication: two or more terms
     		//printf("term with two terms, %s and %s\n", $1->tok->str().c_str(), $2->tok->str().c_str());
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-1].term));
-		leaves.push_back((yyvsp[0].term));
+		leaves.push_back((fvsp[-1].term));
+		leaves.push_back((fvsp[0].term));
 
-		(yyval.term) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
+		(fval.term) = new functor <double> ::node (&defaults <double> ::mult_op, functor <double> ::m_none, leaves);
 }
-#line 1486 "fparser.h" /* yacc.c:1646  */
+#line 1504 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 14:
-#line 236 "fparser.y" /* yacc.c:1646  */
+#line 237 "function_parser.y" /* yacc.c:1646  */
     { // Direct Operand
     		//printf("term with direct operand %s\n", $1->tok->str().c_str());
-    		(yyval.term) = (yyvsp[0].dopn);
+    		(fval.term) = (fvsp[0].dopn);
 }
-#line 1495 "fparser.h" /* yacc.c:1646  */
+#line 1513 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 15:
-#line 242 "fparser.y" /* yacc.c:1646  */
+#line 243 "function_parser.y" /* yacc.c:1646  */
     {
     		// printf("non-arithmetic regular logarithm: log_{%s} (%s)\n", $4->str().c_str(), $6->str().c_str());
    		/* vector <operand <double>> vals;
@@ -1505,17 +1525,17 @@ yyreduce:
 
 		$$ = new operand <double> (defaults <double> ::log_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].expr));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[-2].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1515 "fparser.h" /* yacc.c:1646  */
+#line 1533 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 16:
-#line 258 "fparser.y" /* yacc.c:1646  */
+#line 259 "function_parser.y" /* yacc.c:1646  */
     { // Binary log
     		//printf("non-arithmetic binary logarithm of %s\n", $2->str().c_str());
    		/* vector <operand <double>> vals;
@@ -1527,16 +1547,16 @@ yyreduce:
 		vector <functor <double> ::node *> leaves;
 		leaves.push_back(new functor <double> ::node (new operand <double> (2), functor <double> ::m_none,
 			vector <functor <double> ::node *> ()));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1536 "fparser.h" /* yacc.c:1646  */
+#line 1554 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 17:
-#line 275 "fparser.y" /* yacc.c:1646  */
+#line 276 "function_parser.y" /* yacc.c:1646  */
     { // Natural log
     		//printf("non-arithmetic natural logarithm of %s\n", $2->tok->str().c_str());
    		/* vector <operand <double>> vals;
@@ -1553,16 +1573,16 @@ yyreduce:
 		vector <functor <double> ::node *> leaves;
 		leaves.push_back(new functor <double> ::node (new operand <double> (exp(1)), functor <double> ::m_none,
 			vector <functor <double> ::node *> ()));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1562 "fparser.h" /* yacc.c:1646  */
+#line 1580 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 297 "fparser.y" /* yacc.c:1646  */
+#line 298 "function_parser.y" /* yacc.c:1646  */
     { // Log base 10
    		/* vector <operand <double>> vals;
 		
@@ -1578,112 +1598,112 @@ yyreduce:
 		vector <functor <double> ::node *> leaves;
 		leaves.push_back(new functor <double> ::node (new operand <double> (10), functor <double> ::m_none,
 			vector <functor <double> ::node *> ()));
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::log_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1587 "fparser.h" /* yacc.c:1646  */
+#line 1605 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 318 "fparser.y" /* yacc.c:1646  */
+#line 319 "function_parser.y" /* yacc.c:1646  */
     { // Cot
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::cot_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::cot_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::cot_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1603 "fparser.h" /* yacc.c:1646  */
+#line 1621 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 330 "fparser.y" /* yacc.c:1646  */
+#line 331 "function_parser.y" /* yacc.c:1646  */
     { // Sec
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::sec_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::sec_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::sec_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1619 "fparser.h" /* yacc.c:1646  */
+#line 1637 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 342 "fparser.y" /* yacc.c:1646  */
+#line 343 "function_parser.y" /* yacc.c:1646  */
     { // Csc
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::csc_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::csc_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::csc_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1635 "fparser.h" /* yacc.c:1646  */
+#line 1653 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 354 "fparser.y" /* yacc.c:1646  */
+#line 355 "function_parser.y" /* yacc.c:1646  */
     { // Tan
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::tan_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::tan_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::tan_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1651 "fparser.h" /* yacc.c:1646  */
+#line 1669 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 366 "fparser.y" /* yacc.c:1646  */
+#line 367 "function_parser.y" /* yacc.c:1646  */
     { // Cos
    		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::cos_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::cos_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::cos_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1667 "fparser.h" /* yacc.c:1646  */
+#line 1685 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 378 "fparser.y" /* yacc.c:1646  */
+#line 379 "function_parser.y" /* yacc.c:1646  */
     { // Sin
 		/* vector <operand <double>> vals;
 		vals.push_back(*$2);
 
 		$$ = new operand <double> (defaults <double> ::sin_op(vals)); */
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[0].expr));
+		leaves.push_back((fvsp[0].expr));
 
-		(yyval.felm) = new functor <double> ::node {&defaults <double> ::sin_op,
+		(fval.felm) = new functor <double> ::node {&defaults <double> ::sin_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1683 "fparser.h" /* yacc.c:1646  */
+#line 1701 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 391 "fparser.y" /* yacc.c:1646  */
+#line 392 "function_parser.y" /* yacc.c:1646  */
     {
 		/* vector <operand <double>> vals;
 		vals.push_back(*$1);
@@ -1692,49 +1712,49 @@ yyreduce:
 		$$ = new operand <double> (defaults <double> ::exp_op(vals)); */
 		
 		vector <functor <double> ::node *> leaves;
-		leaves.push_back((yyvsp[-2].dopn));
-		leaves.push_back((yyvsp[0].dopn));
+		leaves.push_back((fvsp[-2].dopn));
+		leaves.push_back((fvsp[0].dopn));
 
-		(yyval.dopn) = new functor <double> ::node {&defaults <double> ::exp_op,
+		(fval.dopn) = new functor <double> ::node {&defaults <double> ::exp_op,
 			functor <double> ::m_none, leaves};
 }
-#line 1702 "fparser.h" /* yacc.c:1646  */
+#line 1720 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 406 "fparser.y" /* yacc.c:1646  */
+#line 407 "function_parser.y" /* yacc.c:1646  */
     {
-    		(yyval.dopn) = (yyvsp[0].dpnt);
+    		(fval.dopn) = (fvsp[0].dpnt);
 }
-#line 1710 "fparser.h" /* yacc.c:1646  */
+#line 1728 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 27:
-#line 410 "fparser.y" /* yacc.c:1646  */
+#line 411 "function_parser.y" /* yacc.c:1646  */
     {
-    		(yyval.dopn) = (yyvsp[0].sclr);
+    		(fval.dopn) = (fvsp[0].sclr);
 }
-#line 1718 "fparser.h" /* yacc.c:1646  */
+#line 1736 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 28:
-#line 414 "fparser.y" /* yacc.c:1646  */
+#line 415 "function_parser.y" /* yacc.c:1646  */
     {
-    		(yyval.dopn) = (yyvsp[0].prth);
+    		(fval.dopn) = (fvsp[0].prth);
 }
-#line 1726 "fparser.h" /* yacc.c:1646  */
+#line 1744 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 29:
-#line 419 "fparser.y" /* yacc.c:1646  */
+#line 420 "function_parser.y" /* yacc.c:1646  */
     { // Variable
     		//printf("dependant, variable %s\n", $1);
-		string str = (yyvsp[0].ident);
+		string str = (fvsp[0].ident);
 		
 		/* try {
 			var = vst.find(str);
 		} catch (...) {
-			yyerror(value, vst, "no variable in scope");
+			ferror(value, vst, "no variable in scope");
 		} */
 
 		/* bool param = false;
@@ -1746,7 +1766,7 @@ yyreduce:
 		}
 
 		if (!param)
-			yyerror(root, list, vmap, "no variable in function scope"); */
+			ferror(root, list, vmap, "no variable in function scope"); */
 
 		// variable <double> *var = new variable <double> {str, true};
 		functor <double> ::node *save;
@@ -1754,11 +1774,11 @@ yyreduce:
 		functor <double> ::node *in;
 		// variable <double> var;
 
-		(yyval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op,
+		(fval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op,
 			functor <double> ::m_variable, vector <functor <double> ::node *>
 			{new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}},
 			new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}}}};
-		temp = (yyval.dpnt);
+		temp = (fval.dpnt);
 
 		int num = 0;
 
@@ -1778,9 +1798,9 @@ yyreduce:
 					functor <double> ::m_none, vector <functor <double> ::node *> {in,
 					new functor <double> ::node {new operand <double> (1), functor <double> ::m_none, {}}}};
 				temp = temp->leaves[1]; */
-				(yyval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none,
-					{(yyval.dpnt), new functor <double> ::node {new variable <double> {var->symbol(), true}, functor <double> ::m_none, {}}}};
-				vmap[var->symbol()].push_back((yyval.dpnt)->leaves[1]);
+				(fval.dpnt) = new functor <double> ::node {&defaults <double> ::mult_op, functor <double> ::m_none,
+					{(fval.dpnt), new functor <double> ::node {new variable <double> {var->symbol(), true}, functor <double> ::m_none, {}}}};
+				vmap[var->symbol()].push_back((fval.dpnt)->leaves[1]);
 				// temp = $$;
 				acc.clear();
 				num++;
@@ -1796,262 +1816,262 @@ yyreduce:
 
 		// operand <double> val = new operand <double> (var.get());
 }
-#line 1800 "fparser.h" /* yacc.c:1646  */
+#line 1818 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 490 "fparser.y" /* yacc.c:1646  */
+#line 491 "function_parser.y" /* yacc.c:1646  */
     { // Number
-		operand <double> *val = new operand <double> ((yyvsp[0].value));
-		(yyval.sclr) = new functor <double> ::node {val, functor <double> ::m_constant,
+		operand <double> *val = new operand <double> ((fvsp[0].value));
+		(fval.sclr) = new functor <double> ::node {val, functor <double> ::m_constant,
 			vector <functor <double> ::node *> ()};
     		//printf("scalar, %s\n", $$->tok->str().c_str());
 }
-#line 1811 "fparser.h" /* yacc.c:1646  */
+#line 1829 "function_parser.h" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 498 "fparser.y" /* yacc.c:1646  */
+#line 499 "function_parser.y" /* yacc.c:1646  */
     { // Parenthesis
     		//printf("parenthesis, %s\n", $2->tok->str().c_str());
-   		(yyval.prth) = (yyvsp[-1].expr);
+   		(fval.prth) = (fvsp[-1].expr);
 }
-#line 1820 "fparser.h" /* yacc.c:1646  */
+#line 1838 "function_parser.h" /* yacc.c:1646  */
     break;
 
 
-#line 1824 "fparser.h" /* yacc.c:1646  */
+#line 1842 "function_parser.h" /* yacc.c:1646  */
       default: break;
     }
-  /* User semantic actions sometimes alter yychar, and that requires
-     that yytoken be updated with the new translation.  We take the
-     approach of translating immediately before every use of yytoken.
+  /* User semantic actions sometimes alter fchar, and that requires
+     that ftoken be updated with the new translation.  We take the
+     approach of translating immediately before every use of ftoken.
      One alternative is translating here after every semantic action,
      but that translation would be missed if the semantic action invokes
-     YYABORT, YYACCEPT, or YYERROR immediately after altering yychar or
-     if it invokes YYBACKUP.  In the case of YYABORT or YYACCEPT, an
+     FABORT, FACCEPT, or FERROR immediately after altering fchar or
+     if it invokes FBACKUP.  In the case of FABORT or FACCEPT, an
      incorrect destructor might then be invoked immediately.  In the
-     case of YYERROR or YYBACKUP, subsequent parser actions might lead
+     case of FERROR or FBACKUP, subsequent parser actions might lead
      to an incorrect destructor call or verbose syntax error message
      before the lookahead is translated.  */
-  YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
+  F_SYMBOL_PRINT ("-> $$ =", fr1[fn], &fval, &floc);
 
-  YYPOPSTACK (yylen);
-  yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
+  FPOPSTACK (flen);
+  flen = 0;
+  F_STACK_PRINT (fss, fssp);
 
-  *++yyvsp = yyval;
+  *++fvsp = fval;
 
   /* Now 'shift' the result of the reduction.  Determine what state
      that goes to, based on the state we popped back to and the rule
      number reduced by.  */
 
-  yyn = yyr1[yyn];
+  fn = fr1[fn];
 
-  yystate = yypgoto[yyn - YYNTOKENS] + *yyssp;
-  if (0 <= yystate && yystate <= YYLAST && yycheck[yystate] == *yyssp)
-    yystate = yytable[yystate];
+  fstate = fpgoto[fn - FNTOKENS] + *fssp;
+  if (0 <= fstate && fstate <= FLAST && fcheck[fstate] == *fssp)
+    fstate = ftable[fstate];
   else
-    yystate = yydefgoto[yyn - YYNTOKENS];
+    fstate = fdefgoto[fn - FNTOKENS];
 
-  goto yynewstate;
+  goto fnewstate;
 
 
 /*--------------------------------------.
-| yyerrlab -- here on detecting error.  |
+| ferrlab -- here on detecting error.  |
 `--------------------------------------*/
-yyerrlab:
+ferrlab:
   /* Make sure we have latest lookahead translation.  See comments at
      user semantic actions for why this is necessary.  */
-  yytoken = yychar == YYEMPTY ? YYEMPTY : YYTRANSLATE (yychar);
+  ftoken = fchar == FEMPTY ? FEMPTY : FTRANSLATE (fchar);
 
   /* If not already recovering from an error, report this error.  */
-  if (!yyerrstatus)
+  if (!ferrstatus)
     {
-      ++yynerrs;
-#if ! YYERROR_VERBOSE
-      yyerror (root, list, vmap, YY_("syntax error"));
+      ++fnerrs;
+#if ! FERROR_VERBOSE
+      ferror (root, list, vmap, F_("syntax error"));
 #else
-# define YYSYNTAX_ERROR yysyntax_error (&yymsg_alloc, &yymsg, \
-                                        yyssp, yytoken)
+# define FSYNTAX_ERROR fsyntax_error (&fmsg_alloc, &fmsg, \
+                                        fssp, ftoken)
       {
-        char const *yymsgp = YY_("syntax error");
-        int yysyntax_error_status;
-        yysyntax_error_status = YYSYNTAX_ERROR;
-        if (yysyntax_error_status == 0)
-          yymsgp = yymsg;
-        else if (yysyntax_error_status == 1)
+        char const *fmsgp = F_("syntax error");
+        int fsyntax_error_status;
+        fsyntax_error_status = FSYNTAX_ERROR;
+        if (fsyntax_error_status == 0)
+          fmsgp = fmsg;
+        else if (fsyntax_error_status == 1)
           {
-            if (yymsg != yymsgbuf)
-              YYSTACK_FREE (yymsg);
-            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
-            if (!yymsg)
+            if (fmsg != fmsgbuf)
+              FSTACK_FREE (fmsg);
+            fmsg = (char *) FSTACK_ALLOC (fmsg_alloc);
+            if (!fmsg)
               {
-                yymsg = yymsgbuf;
-                yymsg_alloc = sizeof yymsgbuf;
-                yysyntax_error_status = 2;
+                fmsg = fmsgbuf;
+                fmsg_alloc = sizeof fmsgbuf;
+                fsyntax_error_status = 2;
               }
             else
               {
-                yysyntax_error_status = YYSYNTAX_ERROR;
-                yymsgp = yymsg;
+                fsyntax_error_status = FSYNTAX_ERROR;
+                fmsgp = fmsg;
               }
           }
-        yyerror (root, list, vmap, yymsgp);
-        if (yysyntax_error_status == 2)
-          goto yyexhaustedlab;
+        ferror (root, list, vmap, fmsgp);
+        if (fsyntax_error_status == 2)
+          goto fexhaustedlab;
       }
-# undef YYSYNTAX_ERROR
+# undef FSYNTAX_ERROR
 #endif
     }
 
 
 
-  if (yyerrstatus == 3)
+  if (ferrstatus == 3)
     {
       /* If just tried and failed to reuse lookahead token after an
          error, discard it.  */
 
-      if (yychar <= YYEOF)
+      if (fchar <= FEOF)
         {
           /* Return failure if at end of input.  */
-          if (yychar == YYEOF)
-            YYABORT;
+          if (fchar == FEOF)
+            FABORT;
         }
       else
         {
-          yydestruct ("Error: discarding",
-                      yytoken, &yylval, root, list, vmap);
-          yychar = YYEMPTY;
+          fdestruct ("Error: discarding",
+                      ftoken, &flval, root, list, vmap);
+          fchar = FEMPTY;
         }
     }
 
   /* Else will try to reuse lookahead token after shifting the error
      token.  */
-  goto yyerrlab1;
+  goto ferrlab1;
 
 
 /*---------------------------------------------------.
-| yyerrorlab -- error raised explicitly by YYERROR.  |
+| ferrorlab -- error raised explicitly by FERROR.  |
 `---------------------------------------------------*/
-yyerrorlab:
+ferrorlab:
 
   /* Pacify compilers like GCC when the user code never invokes
-     YYERROR and the label yyerrorlab therefore never appears in user
+     FERROR and the label ferrorlab therefore never appears in user
      code.  */
   if (/*CONSTCOND*/ 0)
-     goto yyerrorlab;
+     goto ferrorlab;
 
   /* Do not reclaim the symbols of the rule whose action triggered
-     this YYERROR.  */
-  YYPOPSTACK (yylen);
-  yylen = 0;
-  YY_STACK_PRINT (yyss, yyssp);
-  yystate = *yyssp;
-  goto yyerrlab1;
+     this FERROR.  */
+  FPOPSTACK (flen);
+  flen = 0;
+  F_STACK_PRINT (fss, fssp);
+  fstate = *fssp;
+  goto ferrlab1;
 
 
 /*-------------------------------------------------------------.
-| yyerrlab1 -- common code for both syntax error and YYERROR.  |
+| ferrlab1 -- common code for both syntax error and FERROR.  |
 `-------------------------------------------------------------*/
-yyerrlab1:
-  yyerrstatus = 3;      /* Each real token shifted decrements this.  */
+ferrlab1:
+  ferrstatus = 3;      /* Each real token shifted decrements this.  */
 
   for (;;)
     {
-      yyn = yypact[yystate];
-      if (!yypact_value_is_default (yyn))
+      fn = fpact[fstate];
+      if (!fpact_value_is_default (fn))
         {
-          yyn += YYTERROR;
-          if (0 <= yyn && yyn <= YYLAST && yycheck[yyn] == YYTERROR)
+          fn += FTERROR;
+          if (0 <= fn && fn <= FLAST && fcheck[fn] == FTERROR)
             {
-              yyn = yytable[yyn];
-              if (0 < yyn)
+              fn = ftable[fn];
+              if (0 < fn)
                 break;
             }
         }
 
       /* Pop the current state because it cannot handle the error token.  */
-      if (yyssp == yyss)
-        YYABORT;
+      if (fssp == fss)
+        FABORT;
 
 
-      yydestruct ("Error: popping",
-                  yystos[yystate], yyvsp, root, list, vmap);
-      YYPOPSTACK (1);
-      yystate = *yyssp;
-      YY_STACK_PRINT (yyss, yyssp);
+      fdestruct ("Error: popping",
+                  fstos[fstate], fvsp, root, list, vmap);
+      FPOPSTACK (1);
+      fstate = *fssp;
+      F_STACK_PRINT (fss, fssp);
     }
 
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
-  *++yyvsp = yylval;
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
+  F_IGNORE_MAYBE_UNINITIALIZED_BEGIN
+  *++fvsp = flval;
+  F_IGNORE_MAYBE_UNINITIALIZED_END
 
 
   /* Shift the error token.  */
-  YY_SYMBOL_PRINT ("Shifting", yystos[yyn], yyvsp, yylsp);
+  F_SYMBOL_PRINT ("Shifting", fstos[fn], fvsp, flsp);
 
-  yystate = yyn;
-  goto yynewstate;
+  fstate = fn;
+  goto fnewstate;
 
 
 /*-------------------------------------.
-| yyacceptlab -- YYACCEPT comes here.  |
+| facceptlab -- FACCEPT comes here.  |
 `-------------------------------------*/
-yyacceptlab:
-  yyresult = 0;
-  goto yyreturn;
+facceptlab:
+  fresult = 0;
+  goto freturn;
 
 /*-----------------------------------.
-| yyabortlab -- YYABORT comes here.  |
+| fabortlab -- FABORT comes here.  |
 `-----------------------------------*/
-yyabortlab:
-  yyresult = 1;
-  goto yyreturn;
+fabortlab:
+  fresult = 1;
+  goto freturn;
 
-#if !defined yyoverflow || YYERROR_VERBOSE
+#if !defined foverflow || FERROR_VERBOSE
 /*-------------------------------------------------.
-| yyexhaustedlab -- memory exhaustion comes here.  |
+| fexhaustedlab -- memory exhaustion comes here.  |
 `-------------------------------------------------*/
-yyexhaustedlab:
-  yyerror (root, list, vmap, YY_("memory exhausted"));
-  yyresult = 2;
+fexhaustedlab:
+  ferror (root, list, vmap, F_("memory exhausted"));
+  fresult = 2;
   /* Fall through.  */
 #endif
 
-yyreturn:
-  if (yychar != YYEMPTY)
+freturn:
+  if (fchar != FEMPTY)
     {
       /* Make sure we have latest lookahead translation.  See comments at
          user semantic actions for why this is necessary.  */
-      yytoken = YYTRANSLATE (yychar);
-      yydestruct ("Cleanup: discarding lookahead",
-                  yytoken, &yylval, root, list, vmap);
+      ftoken = FTRANSLATE (fchar);
+      fdestruct ("Cleanup: discarding lookahead",
+                  ftoken, &flval, root, list, vmap);
     }
   /* Do not reclaim the symbols of the rule whose action triggered
-     this YYABORT or YYACCEPT.  */
-  YYPOPSTACK (yylen);
-  YY_STACK_PRINT (yyss, yyssp);
-  while (yyssp != yyss)
+     this FABORT or FACCEPT.  */
+  FPOPSTACK (flen);
+  F_STACK_PRINT (fss, fssp);
+  while (fssp != fss)
     {
-      yydestruct ("Cleanup: popping",
-                  yystos[*yyssp], yyvsp, root, list, vmap);
-      YYPOPSTACK (1);
+      fdestruct ("Cleanup: popping",
+                  fstos[*fssp], fvsp, root, list, vmap);
+      FPOPSTACK (1);
     }
-#ifndef yyoverflow
-  if (yyss != yyssa)
-    YYSTACK_FREE (yyss);
+#ifndef foverflow
+  if (fss != fssa)
+    FSTACK_FREE (fss);
 #endif
-#if YYERROR_VERBOSE
-  if (yymsg != yymsgbuf)
-    YYSTACK_FREE (yymsg);
+#if FERROR_VERBOSE
+  if (fmsg != fmsgbuf)
+    FSTACK_FREE (fmsg);
 #endif
-  return yyresult;
+  return fresult;
 }
-#line 503 "fparser.y" /* yacc.c:1906  */
+#line 504 "function_parser.y" /* yacc.c:1906  */
 
 
-void yyerror(functor <double> ::node *(&nd), functor <double> ::param_list l, functor <double> ::map m, const char *error)
+void ferror(functor <double> ::node *(&nd), functor <double> ::param_list l, functor <double> ::map m, const char *error)
 {
 	cout << error << endl;
 }
