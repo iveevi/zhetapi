@@ -1,4 +1,11 @@
 a.out
+
+tests.cpp
+
 *.log
 *.swp
 *.output
+
+__pycache__
+
+build

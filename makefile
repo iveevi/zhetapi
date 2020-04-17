@@ -1,12 +1,23 @@
-  
-CC	:= g++
-CC	+= -std=c++11
+tests: build texifier
+	@echo "\n[BUILDING TESTS]\n"
+	g++ engine/tests.cpp -lfl -Og -pg -o build/tests
 
-TARGET	:= zhetapi
+texifier: build driver
+	@echo "\n[BUILDING TEXIFIER]\n"
+	touch build/texifier.in
+	touch build/texifier.out
+	flex texifier/lexer.l
+	mv lex.yy.c build/
+	bison texifier/parser.y
+	mv parser.tab.c build/
+	g++ texifier/texifier.cpp -lfl -o build/texifier -DDEBUG=0
 
-SRC	:= main.cpp
+driver: build
+	@echo "\n[BUILDING DRIVER]\n"
+	touch build/driver.in
+	touch build/driver.out
+	g++ engine/driver.cpp -lfl -o build/driver -DDEBUG=0
 
-all: $(SRC)
-	@echo BUILDING...
-	@$(CC) -o $(TARGET) -DDEBUG=0 -g $(SRC)
-	@echo DONE
+build:
+	@echo "\n[CREATING BUILD DIRECTORY]\n"
+	mkdir build

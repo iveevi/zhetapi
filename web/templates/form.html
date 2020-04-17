@@ -1,0 +1,18 @@
+<title> Zhetapi </title>
+
+<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+
+<h1 align="center">Zhetapi</h1>
+<form method="POST" align="center">
+	<input name="text">
+	<input type="submit">
+</form>
+
+{% if input %}
+<h2 align="center">Result</h2>
+
+<body align="center">
+	<div lang="latex">	{{input}}:	</div>
+	<pre lang="latex">	{{out}}		</pre>
+</body>
+{% endif %}
