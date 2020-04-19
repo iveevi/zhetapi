@@ -20,6 +20,9 @@ protected:
 template <class T>
 variable <T> &var_stack <T> ::get(const std::string &id)
 {
+	if (!this->m_root)
+		throw null_tree_exception();
+
 	splay(this->m_root, id);
 
 	if (this->m_root->val.symbol() != id)
@@ -31,6 +34,9 @@ variable <T> &var_stack <T> ::get(const std::string &id)
 template <class T>
 const variable <T> &var_stack <T> ::find(const std::string &id)
 {
+	if (!this->m_root)
+		throw null_tree_exception();
+
 	splay(this->m_root, id);
 
 	if (this->m_root->val.symbol() != id)

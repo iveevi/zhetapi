@@ -490,7 +490,7 @@ static const yytype_uint16 yyrline[] =
        0,   106,   106,   112,   116,   120,   124,   128,   132,   138,
      143,   157,   161,   168,   177,   183,   199,   216,   238,   259,
      271,   283,   295,   307,   319,   332,   347,   351,   355,   360,
-     431,   436
+     440,   445
 };
 #endif
 
@@ -1729,6 +1729,15 @@ yyreduce:
 				acc.clear();
 				num++;
 			}
+
+			variable <double> v;
+			try {
+				v = vst.find(acc);
+				(yyval.dpnt) = new node <double> {&def ::mult_op, l_none,
+					{(yyval.dpnt), new node <double> {new operand <double> {v.get()}, l_none, {}}}};
+				// vmap[var->symbol()].push_back($$->child_at(1));
+				num++;
+			} catch(...) {}
 		}
 
 		// printf("done\n");
@@ -1736,31 +1745,31 @@ yyreduce:
 		//print($$, 1, 0);
 
 		if (!num)
-			throw node <double> ::invalid_definition();
+			throw node <double> ::undefined_symbol(acc);
 
 		// opdval = new opd(var.get());
 }
-#line 1744 "parser.tab.c" /* yacc.c:1646  */
+#line 1753 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 30:
-#line 431 "parser.y" /* yacc.c:1646  */
+#line 440 "parser.y" /* yacc.c:1646  */
     { // Number
 		(yyval.sclr) = new node <double> {new opd((yyvsp[0].value)), {}};
 }
-#line 1752 "parser.tab.c" /* yacc.c:1646  */
+#line 1761 "parser.tab.c" /* yacc.c:1646  */
     break;
 
   case 31:
-#line 436 "parser.y" /* yacc.c:1646  */
+#line 445 "parser.y" /* yacc.c:1646  */
     { // Parenthesis
    		(yyval.prth) = (yyvsp[-1].expr);
 }
-#line 1760 "parser.tab.c" /* yacc.c:1646  */
+#line 1769 "parser.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1764 "parser.tab.c" /* yacc.c:1646  */
+#line 1773 "parser.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1988,11 +1997,11 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 440 "parser.y" /* yacc.c:1906  */
+#line 449 "parser.y" /* yacc.c:1906  */
 
 
 void yyerror(node <double> *(&n), params p, variables &v,
-	var_stack &vst, func_stack &fst, const char *error)
+	var_stack <double> &vst, func_stack <double> &fst, const char *error)
 {
 	std::cout << error << std::endl;
 }

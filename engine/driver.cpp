@@ -22,9 +22,9 @@ int main()
 		vst.insert(v);
 
 	string line;
-	
-	fin >> line;
 
+	getline(fin, line);
+	
 #ifdef DEBUG
 	cout << "[driver]: received \"" << line << "\"" << endl;
 #endif
@@ -33,7 +33,10 @@ int main()
 		//fout << "\\text{" << line << "}" << endl;
 		//fout << "\\[" << expression <double> ::in_place_evaluate(line) << "\\]" << endl;
 		fout << expression <double> ::in_place_evaluate(line, vst) << endl;
+	} catch(node <double> ::undefined_symbol e) {
+		fout << "\\text{Could not identify symbol or variable} $"
+			<< e.what() << "$ \\text{ [Undefined Symbol Error].}" << endl;
 	} catch (...) {
-		fout << "Could not evaluate expression" << endl;
+		fout << "\\text{Could not evaluate expression [Unkown Error].}" << endl;
 	}
 }

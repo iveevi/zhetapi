@@ -11,14 +11,14 @@
 #include <queue>
 
 // Custom Built Libraries
-#include "operation.h"
 #include "var_stack.h"
+#include "func_stack.h"
+#include "node.h"
+#include "operation.h"
 #include "defaults.h"
 #include "operand.h"
 #include "stack.h"
 #include "debug.h"
-
-#include "node.h"
 
 // Future Note:
 // Add parsing method
@@ -78,7 +78,7 @@ const T &expression <T> ::evaluate(std::string str, var_stack <T> vst)
 	//e_scan_string(str.c_str());
 	//operand <T> *out = new operand <T> ();
 	//eparse(out);
-	node *out = new node(str);
+	node <T> *out = new node <T> (str, vst);
 	return out->value();
 }
 
@@ -108,7 +108,7 @@ const T &expression <T> ::in_place_evaluate(std::string str, var_stack <T> vst)
 	
 	eparse(out, vst);
 	return out->get(); */
-	node *out = new node(str);
+	node <T> *out = new node <T> (str, vst);
 	return out->value();
 }
 

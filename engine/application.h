@@ -22,9 +22,9 @@ template <class T>
 class application {
 public:
 	enum m_type {
-		ASSIGNMENT,
-		EQUALITY,
-		EXPRESSION
+		T_ASSIGNMENT,
+		T_EQUALITY,
+		T_EXPRESSION
 	};
 
 	application(std::string = "");
@@ -43,9 +43,9 @@ application <T> ::application(std::string str) :
 	m_input(str)
 {
 	if (m_input.find('=') == std::string::npos)
-		m_kind = EXPRESSION;
+		m_kind = T_EXPRESSION;
 	else
-		m_kind = ASSIGNMENT;
+		m_kind = T_ASSIGNMENT;
 }
 
 /**
@@ -55,10 +55,10 @@ template <class T>
 void application <T> ::operator()(var_stack<T> &vst) const
 {
 	switch (m_kind) {
-	case ASSIGNMENT:
+	case T_ASSIGNMENT:
 		assignment <T> ::resolve(m_input, vst);
 		break;
-	case EXPRESSION:
+	case T_EXPRESSION:
 		cout << "\t" << expression <T> ::in_place_evaluate(m_input, vst) << endl;
 		break;
 	default:

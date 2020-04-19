@@ -1,6 +1,6 @@
 tests: build texifier
 	@echo "\n[BUILDING TESTS]\n"
-	g++ engine/tests.cpp -lfl -Og -pg -o build/tests
+	g++ engine/tests.cpp -lfl -g -o build/tests
 
 texifier: build driver
 	@echo "\n[BUILDING TEXIFIER]\n"

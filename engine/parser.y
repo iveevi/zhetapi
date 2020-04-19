@@ -415,6 +415,15 @@ dpnt:	IDENT { // Variable
 				acc.clear();
 				num++;
 			}
+
+			variable <double> v;
+			try {
+				v = vst.find(acc);
+				$$ = new node <double> {&def ::mult_op, l_none,
+					{$$, new node <double> {new operand <double> {v.get()}, l_none, {}}}};
+				// vmap[var->symbol()].push_back($$->child_at(1));
+				num++;
+			} catch(...) {}
 		}
 
 		// printf("done\n");
@@ -422,7 +431,7 @@ dpnt:	IDENT { // Variable
 		//print($$, 1, 0);
 
 		if (!num)
-			throw node <double> ::invalid_definition();
+			throw node <double> ::undefined_symbol(acc);
 
 		// opdval = new opd(var.get());
 };
@@ -440,7 +449,7 @@ prth:	LPAREN expr RPAREN { // Parenthesis
 %%
 
 void yyerror(node <double> *(&n), params p, variables &v,
-	var_stack &vst, func_stack &fst, const char *error)
+	var_stack <double> &vst, func_stack <double> &fst, const char *error)
 {
 	std::cout << error << std::endl;
 }

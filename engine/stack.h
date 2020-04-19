@@ -5,6 +5,7 @@
 
 // remove later
 class not_found_exception {};
+class null_tree_exception {};
 class empty_tree_exception {};
 
 // the stack class acts
@@ -88,6 +89,9 @@ splay_stack <T> ::~splay_stack()
 template <class T>
 const T &splay_stack <T> ::find(const T &key)
 {
+	if (!m_root)
+		throw null_tree_exception();
+
 	splay(m_root, key);
 
 	if (m_root->val != key)
