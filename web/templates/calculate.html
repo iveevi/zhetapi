@@ -1,0 +1,20 @@
+<title> Zhetapi - Calculate </title>
+
+<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+
+<h1 align="center" lang="latex">\Huge\textbf{Zhetapi}</h1>
+
+<form method="POST" align="center">
+	<input name="text">
+	<input type="submit" value="Solve">
+</form>
+
+<body align="center">
+
+{% if input %}
+	<h2 align="center" lang="latex">\huge\textbf{Result}</h2>
+	<div lang="latex"> {{input}} = \mathbf{ {{out}} } </div>
+{% endif %}
+
+	<a href="/"><input type="submit" name="session" value="Home" style="margin-top:0.5cm;"></a>
+</body>

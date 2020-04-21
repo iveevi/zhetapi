@@ -4,8 +4,8 @@
 
 using namespace std;
 
-#include "../build/parser.tab.c"
-#include "../build/lex.yy.c"
+#include "../build/texifier.tab.c"
+#include "../build/texifier.yy.c"
 
 int main()
 {
@@ -18,7 +18,7 @@ int main()
 	getline(fin, input);
 
 #ifdef DEBUG
-	cout << "[transformer]: received \"" << input << "\"" << endl;
+	cout << "[Texifier]: received \"" << input << "\"" << endl;
 #endif
 
 	char *cpy = new char[input.length() + 1];
@@ -36,7 +36,7 @@ int main()
 	fout << *output << endl;
 
 #ifdef DEBUG
-	cout << "[transformer]: returning \"" << *output << "\"" << endl;
+	cout << "[Texifier]: returning \"" << *output << "\"" << endl;
 #endif
 
 	return 0;

@@ -30,6 +30,7 @@ enum zlabel {
 	l_constant,
 	l_variable,
 	l_polynomial,
+	l_exp,
 	l_power,
 	l_power_uncertain,
 	l_exponential,
@@ -52,6 +53,7 @@ std::string strlabs[] = {
 	"constant",
 	"variable",
 	"polynomic",
+	"exponent",
 	"power",
 	"power uncertain",
 	"exponential",
@@ -103,6 +105,8 @@ private:
 	 * of operands of operations varies.
 	 */
 	std::vector <node *> leaves;
+
+	params pars;
 public:
 	/* Constructors of the
 	 * node class */
@@ -200,18 +204,18 @@ public:
 
 	zlabel kind();
 	// void relabel(label);
-
+	
 	/* Functional methods of
 	 * the node class */
 
 	bool valid() const;
 
 	const T &value() const;
-	
+
+	void label_all();
 	void label(const std::vector <std::string> &);
 
 	void compress();
-	void compress_operation();
 
 	void differentiate(const std::string &);
 
@@ -221,7 +225,6 @@ public:
 	void traverse(std::function <void (node)> );
 	
 	std::string display() const;
-	std::string display_as_trigonometric() const;
 
 	/* Functions mainly for
 	 * debugging the node class */
@@ -231,7 +234,7 @@ public:
 	 * used for debugging the
 	 * expression tree.
 	 */
-	void print(int = 1, int = 0);
+	void print(int = 1, int = 0) const;
 private:
 	/* Helper methods of the
 	 * node class, used by
@@ -252,9 +255,12 @@ private:
 	void differentiate_as_divided(const std::string &);
 	void differentiate_as_power(const std::string &);
 	void differentiate_as_trigonometric(const std::string &);
+	
+	std::string display_as_trigonometric() const;
 public:
 	/* Exception classes, which
 	 * are used in other functions */
+
 	class invalid_definition {};
 	class syntax_error {};
 	class invalid_call {};
@@ -271,20 +277,23 @@ public:
 		}
 	};
 	
-	class undefined_symbol {
-		std::string str;
+	class undefined_symbol : public node_error {
 	public:
-		node_error(std::string s)
-			: str(s) {}
-
-		const std::string &what() const {
-			return str;
-		}
+		undefined_symbol(std::string s)
+			: node_error(s) {}
 	};
 
 	//class undefined_symbol : public node_error {};
-	class fatal_error : public node_error {};
-	class unlabeled_node : public node_error {};
+	class fatal_error : public node_error {
+		fatal_error(std::string s) :
+			node_error(s) {}
+	};
+
+	class unlabeled_node : public node_error {
+	public:
+		unlabeled_node(std::string s) :
+			node_error(s) {}
+	};
 
 	/* Class aliases, to avoid
 	 * potential errors from
@@ -296,13 +305,18 @@ public:
 	using var = variable <T>;
 
 	using def = defaults <T>;
+	
+	/* Augmneted data structures,
+	 * used in comperssion methods  */
+
+	struct term_table {
+		opd *constant;
+		// std::vector
+	};
 };
 
-// remove and use
-// separate compilation
-// instead
-#include "parser.tab.c"
-#include "lex.yy.c"
+#include "../build/parser.tab.c"
+#include "../build/lex.yy.c"
 
 /* Constructors */
 template <class T>
@@ -324,18 +338,22 @@ node <T> ::node(std::string str, var_stack <T> vst,
 	yyparse(temp, pars, vars, vst, fst);
 
 	*this = temp;
+
+	this->pars = pars;
 }
 
 template <class T>
 node <T> ::node(node *other)
 {
 	*this = *(other->copy());
+	pars = other->pars;
 }
 
 template <class T>
 node <T> ::node(const node &other)
 {
 	*this = *(other.copy());
+	pars = other->pars;
 }
 
 template <class T>
@@ -463,6 +481,16 @@ const T &node <T> ::value() const
 }
 
 template <class T>
+void node <T> ::label_all()
+{
+	std::vector <std::string> names;
+	for (auto var : pars)
+		names.push_back(var.symbol());
+
+	label(names);
+}
+
+template <class T>
 void node <T> ::label(const std::vector <std::string> &vars)
 {
 	string sym;
@@ -552,61 +580,43 @@ void node <T> ::traverse(std::function <void (node)> fobj)
 }
 
 template <class T>
-std::string node <T> ::dislay() const
+std::string node <T> ::display() const
 {
 	switch (type) {
 	case l_separable:
 		if (tok == &def::add_op)
-			return display(leaves[0]) + " + " + display(leaves[1]);
+			return leaves[0]->display() + " + " + leaves[1]->display();
 
-		return display(leaves[0]) + " - " + display(leaves[1]);
+		return leaves[0]->display() + " - " + leaves[1]->display();
 	case l_multiplied: 
-		return display(leaves[0]) + " * " + display(leaves[1]);
+		return leaves[0]->display() + " * " + leaves[1]->display();
 	case l_divided:
-		return display(leaves[0]) + " / " + display(leaves[1]);
+		return leaves[0]->display() + " / " + leaves[1]->display();
 	case l_constant:
 		return tok->str();
 	case l_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	// case l_polynomial: Unnecessary label?
+	case l_exp:
+		return leaves[0]->display() + " ^ " + leaves[1]->display();
 	case l_power:
-		return display(leaves[0]) + " / " + display(leaves[1]);
-	case l_logarithmic:
+		return leaves[0]->display() + " ^ " + leaves[1]->display();
+	// remove operation constant later
+	case l_operation_constant:
+		return to_string(value());
 	case l_constant_logarithmic:
-		return "log_{" + display(leaves[0]) + "} (" + display(leaves[1]) ")";
+	case l_logarithmic:
+		return "log_{" + leaves[0]->display() + "} (" + leaves[1]->display() + ")";
 	case l_trigonometric:
 		return display_as_trigonometric();
 	default:
-		throw unlabeled_node("Unlabeled node, could not display it.");
+		return "?";
+		//throw unlabeled_node("Unlabeled node [" + strlabs[type] + "], could not display it.");
 	}
 }
-
-template <class T>
-std::string node <T> ::dislay_as_trigonometric() const
-{
-	std::string stropn;
-
-	stropn = display(leaves[0]);
-	if (tok == &def::sin_op)
-		return "sin " + stropn;
-	if (tok == &def::cos_op)
-		return "cos " + stropn;
-	if (tok == &def::tan_op)
-		return "tan " + stropn;
-	if (tok == &def::csc_op)
-		return "csc " + stropn;
-	if (tok == &def::sec_op)
-		return "sec " + stropn;
-	if (tok == &def::cot_op)
-		return "cot " + stropn;
-
-	throw node_error("Node labeled as trigonometric, \
-		but token is of an undetectable type");
-}
-
 /* Debugging Methods */
 template <class T>
-void node <T> ::print(int num, int lev)
+void node <T> ::print(int num, int lev) const
 {
 	int counter = lev;
 	while (counter > 0) {
@@ -686,6 +696,8 @@ void node <T> ::label_as_operation()
 			else
 				// something else
 				break;
+		} else {
+			type = l_exp;
 		}
 
 		break;
@@ -711,7 +723,7 @@ void node <T> ::compress_as_separable()
 
 	for (node *nd : leaves)
 		nd->compress();
-
+	
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 		if (val == 0)
@@ -898,6 +910,7 @@ void node <T> ::differentiate_as_power(const std::string &var)
 
 	val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 
+	tok = &def::mult_op;
 
 	delete leaves[1];
 	leaves[1] = new node(&def::exp_op, {
@@ -931,6 +944,29 @@ void node <T> ::differentiate_as_trigonometric(const std::string &var)
 	default:
 		return;
 	}
+}
+
+template <class T>
+std::string node <T> ::display_as_trigonometric() const
+{
+	std::string stropn;
+
+	stropn = leaves[0]->display();
+	if (tok == &def::sin_op)
+		return "sin " + stropn;
+	if (tok == &def::cos_op)
+		return "cos " + stropn;
+	if (tok == &def::tan_op)
+		return "tan " + stropn;
+	if (tok == &def::csc_op)
+		return "csc " + stropn;
+	if (tok == &def::sec_op)
+		return "sec " + stropn;
+	if (tok == &def::cot_op)
+		return "cot " + stropn;
+
+	throw node_error("Node labeled as trigonometric, \
+		but token is of an undetectable type");
 }
 
 #endif

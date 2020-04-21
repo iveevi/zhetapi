@@ -3,13 +3,13 @@
 	#include <vector>
 	#include <string>
 	
-	#include "func_stack.h"
-	#include "var_stack.h"
+	#include "../engine/func_stack.h"
+	#include "../engine/var_stack.h"
 
-	#include "variable.h"
-	#include "operation.h"
-	#include "defaults.h"
-  	#include "operand.h"
+	#include "../engine/variable.h"
+	#include "../engine/operation.h"
+	#include "../engine/defaults.h"
+  	#include "../engine/operand.h"
 	// #include "node.h"
 
 	extern "C" int yylex();

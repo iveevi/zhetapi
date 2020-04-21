@@ -62,6 +62,8 @@ public:
 		const std::vector <std::string> &,
 		const std::string &);
 
+	functor(const std::string &, params, node <T> *);
+
 	const std::string &symbol() const;
 
 	const T &operator()(const std::vector <T> &);
@@ -95,6 +97,8 @@ protected:
 	static void gather(std::vector <T> &, T);
 
 	void build();
+
+	void compress();
 };
 
 template <class T>
@@ -155,13 +159,22 @@ functor <T> ::functor(const std::string &in)
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
 
-	// pass necessary info (params, map)
-	// once everything else is fixed and
-	// dependable
 	var_stack <T> vst = var_stack <T> ();
 	func_stack <T> fst = func_stack <T> ();
 	m_root = new node <T> (expr, vst, fst, m_params, m_map);
-	build();
+	
+	compress();
+}
+
+template <class T>
+functor <T> ::functor(const std::string &str, params pars,
+	node <T> *tree)
+{
+	m_name = str;
+	m_params = pars;
+	m_root = tree;
+	
+	compress();
 }
 
 template <class T>
@@ -180,8 +193,6 @@ const T &functor <T> ::operator()(const std::vector <T> &vals)
 		for (auto &p : m_map[m_params[i].symbol()])
 			p->retokenize(new operand <T> {vals[i]});
 	}
-
-	print();
 
 	// Get value, restore tree
 	// and return value
@@ -223,12 +234,8 @@ void functor <T> ::gather(std::vector <T> &vals,
 template <class T>
 void functor <T> ::build()
 {
-	std::vector <std::string> names;
-	for (auto var : m_params)
-		names.push_back(var.symbol());
-
 	m_map.clear();
-	m_root->label(names);
+	m_root->label_all();
 
 	std::queue <node <T> *> que;
 	std::string name;
@@ -250,34 +257,25 @@ void functor <T> ::build()
 	}
 }
 
+template <class T>
+void functor <T> ::compress()
+{
+	m_root->label_all();
+	m_root->compress();
+	build();
+}
+
 // Beginning of differentiation work
 template <class T>
 const functor <T> &functor <T> ::differentiate
 	(const std::string &var)
 {
-	functor *out = new functor <T> ();
-
 	node <T> *diffed = new node <T> (m_root);
 
 	diffed->label({var});
-
 	diffed->differentiate(var);
-	diffed->compress();
 
-	std::cout << std::string(50, '-') << std::endl;
-	printf("Original:\n");
-	print();
-	std::cout << std::string(50, '-') << std::endl;
-
-	std::cout << std::string(50, '-') << std::endl;
-	printf("Differentiated:\n");
-	diffed->print(1, 0);
-	std::cout << std::string(50, '-') << std::endl;
-
-	out->m_root = diffed;
-	out->m_name = m_name + "'";
-	out->m_params = m_params;
-
+	functor *out = new functor(m_name + "'", m_params, diffed);
 	return *out;
 }
 
@@ -290,13 +288,24 @@ void functor <T> ::print() const
 template <class T>
 std::string functor <T> ::display() const
 {
-	return m_root->display();
+	std::string out;
+
+	out += m_name + "("; // if it doesnt have a name, generate a random one (deg_#)
+	for (size_t i = 0; i < m_params.size(); i++) {
+		out += m_params[i].symbol();
+
+		if (i < m_params.size() - 1)
+			out += ", ";
+	}
+
+	out += ") = " + m_root->display();
+	return out;
 }
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const functor <T> &func)
 {
-	os << func.diplay();
+	os << func.display();
 	return os;
 }
 

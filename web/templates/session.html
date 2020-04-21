@@ -1,0 +1,48 @@
+<title> Zhetapi - Session </title>
+
+<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+
+<h1 align="center" lang="latex">\Huge\textbf{Zhetapi}</h1>
+
+<form method="POST" align="center">
+	<input name="text">
+	<input type="submit" value="Enter">
+</form>
+
+<script type=text/javascript>
+        $(function() {
+          $('a#test').bind('click', function() {
+            $.getJSON('/clear',
+                function(data) {
+              //do nothing
+            });
+            return false;
+          });
+        });
+</script>
+
+<style>
+
+.box {
+	border-style: solid;
+	margin: 20px;
+	padding: 20px;
+}
+
+</style>
+
+<body align="center">
+
+{% if logs %}
+	<h2 align="center" lang="latex">\huge\textbf{History}</h2>
+
+	<ul>
+		{% for item in logs %}
+		<p lang="latex" class=box> {{ item }} </p>
+		{% endfor %}
+	</ul>
+{% endif %}
+
+	<a href="/"><input type="submit" name="session" value="Home" style="margin-top:0.5cm;"></a>
+	<a href=# id=test><button class='btn btn-default'>Test</button></a>
+</body>

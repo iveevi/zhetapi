@@ -4,18 +4,21 @@ tests: build texifier
 
 texifier: build driver
 	@echo "\n[BUILDING TEXIFIER]\n"
+	
 	touch build/texifier.in
 	touch build/texifier.out
-	flex texifier/lexer.l
-	mv lex.yy.c build/
-	bison texifier/parser.y
-	mv parser.tab.c build/
+	
+	flex -o build/texifier.yy.c texifier/texifier.l
+	bison -o build/texifier.tab.c texifier/texifier.y
+	
 	g++ texifier/texifier.cpp -lfl -o build/texifier -DDEBUG=0
 
 driver: build
 	@echo "\n[BUILDING DRIVER]\n"
 	touch build/driver.in
 	touch build/driver.out
+	flex -o build/lex.yy.c engine/lexer.l
+	bison -o build/parser.tab.c engine/parser.y
 	g++ engine/driver.cpp -lfl -o build/driver -DDEBUG=0
 
 build:
