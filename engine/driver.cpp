@@ -26,7 +26,6 @@ void notify(int i)
 	signal(SIGHUP, notify);
 	printf("[Driver]: Received SIGHUP signal, proceeding with appropriate action...\n");
 	strip();
-	goto loop;
 }
 
 void strip()
@@ -105,6 +104,5 @@ int main(int argc, char *argv[])
 		fout << "\\text{Could not evaluate expression [Unkown Error].}" << endl;
 	} */
 
-loop:
 	while (true);
 }

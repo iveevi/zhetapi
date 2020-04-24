@@ -2,8 +2,9 @@ import subprocess
 import os
 import signal
 import time
+import struct
 
-import sample
+from subprocess import *
 
 counter = 1
 
@@ -14,14 +15,32 @@ print("[App]: Building executables...")
 os.system("./run")
 
 print("[App]: Launching driver...")
-# driver = subprocess.Popen("./../build/driver", shell = False)
+driver = subprocess.Popen("./../build/driver")
+# driver = Popen("./a.out")
 
-sin = open("../build/pid", "w")
-sin.write(str(os.getpid()))
-sin.close()
+while not os.path.exists("../build/driver.in"):
+    pass
+
+while not os.path.exists("../build/driver.out"):
+    pass
+
+fin = open("../build/driver.in", "r")
+fout = open("../build/driver.out", "wb")
+
+"""while not os.path.exists("input"):
+    pass
+
+while not os.path.exists("output"):
+    pass
+
+fin = open("output", "r")
+fout = open("input", "wb")"""
+
+print("[App]: Opened pipes...")
 
 # Regular text to LaTeX converter
 def convert(input):
+    print("[App]: In converter")
     sin = open("../build/texifier.in", "w")
     sin.write(input)
     sin.close()
@@ -34,37 +53,29 @@ def convert(input):
 
     return text
 
-done = False
-def switch(a, b):
-    print("[App]: Received signal...")
-    done = True
-
 # Helper method to call driver
 def compute(input):
     global counter
+    
+    print("[App]: In computer")
 
-    sin = open("../build/driver.in", "a")
-    sin.write("#" + str(counter) + "\t" + input + "\n")
-    sin.close()
+    # print("[App]: Waiting to open pipes...\n")
+
+    print("[App]: Packaging " + input)
+
+    in_bytes = struct.pack("<I", len(input))
+    in_bytes += bytes(input, 'utf-8')
+
+    print("[App]: Sending " + str(bytearray(in_bytes)))
+
+    fout.write(bytearray(in_bytes))
+    fout.flush()
+
+    out = fin.readline()
+
+    print("[App]: Receiving " + out)
 
     counter += 1
-
-    done = False
-
-    # driver.send_signal(signal.SIGHUP)
-    """ print("[App]: Sent signal, waiting for response...")
-
-    signal.signal(signal.SIGINT, switch)
-    while not done:
-        pass """
-
-    # sample.get()
-
-    # print("[App]: Got signal, proceeding...")
-
-    sout = open("../build/driver.out", "r")
-    out = sout.read()
-    sout.close()
     
     return out
 
@@ -73,7 +84,6 @@ from flask import request
 from flask import render_template
 
 app = Flask(__name__)
-signal.signal(signal.SIGINT, switch)
 
 @app.route('/')
 def home():
@@ -105,4 +115,9 @@ def session_post():
     logs.insert(0, text + " = \\textbf{" + out + "}");
     return render_template('session.html', logs = logs)
 
-# driver.send_signal(signal.SIGKILL)
+print("[App]: After the program...\n")
+# fout.write(bytearray(0))
+# fout.close()
+# fin.close()
+
+# driver.wait()

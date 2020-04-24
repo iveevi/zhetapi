@@ -255,7 +255,8 @@ private:
 	void differentiate_as_divided(const std::string &);
 	void differentiate_as_power(const std::string &);
 	void differentiate_as_trigonometric(const std::string &);
-	
+
+	std::string display_as_operand() const;
 	std::string display_as_trigonometric() const;
 public:
 	/* Exception classes, which
@@ -589,18 +590,18 @@ std::string node <T> ::display() const
 
 		return leaves[0]->display() + " - " + leaves[1]->display();
 	case l_multiplied: 
-		return leaves[0]->display() + " * " + leaves[1]->display();
+		return leaves[0]->display_as_operand() + " * " + leaves[1]->display_as_operand();
 	case l_divided:
-		return leaves[0]->display() + " / " + leaves[1]->display();
+		return leaves[0]->display_as_operand() + " / " + leaves[1]->display_as_operand();
 	case l_constant:
 		return tok->str();
 	case l_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
-		return leaves[0]->display() + " ^ " + leaves[1]->display();
+		return leaves[0]->display_as_operand() + " ^ " + leaves[1]->display_as_operand();
 	case l_power:
-		return leaves[0]->display() + " ^ " + leaves[1]->display();
+		return leaves[0]->display_as_operand() + " ^ " + leaves[1]->display_as_operand();
 	// remove operation constant later
 	case l_operation_constant:
 		return to_string(value());
@@ -944,6 +945,17 @@ void node <T> ::differentiate_as_trigonometric(const std::string &var)
 	default:
 		return;
 	}
+}
+
+template <class T>
+std::string node <T> ::display_as_operand() const
+{
+	std::string out = display();
+
+	if (type == l_separable)
+		out = "(" + out + ")";
+
+	return out;
 }
 
 template <class T>
