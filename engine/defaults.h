@@ -47,7 +47,7 @@ public:
 	static operand <data_t> cot_f(const std::vector <operand <data_t>> &);
 	static operand <data_t> log_f(const std::vector <operand <data_t>> &);
 public:
-	/* Virtualized functions */
+/* Virtualized functions */
 	type caller() const override;
 	std::string str() const override;
 
