@@ -5,38 +5,47 @@ import time
 import struct
 
 from subprocess import *
+from flask import Flask
+from flask import request
+from flask import render_template
 
-counter = 1
+BUILD_DIR = "/home/ram/zhetapi/build/"
+PIPE_DIR = "/home/ram/null/"
 
-print("[App]: Reseting shared files...")
-os.system("rm -rf ../build")
-
-print("[App]: Building executables...")
-os.system("./run")
-
-print("[App]: Launching driver...")
-driver = subprocess.Popen("./../build/driver")
-# driver = Popen("./a.out")
-
-while not os.path.exists("../build/driver.in"):
-    pass
-
-while not os.path.exists("../build/driver.out"):
-    pass
-
-fin = open("../build/driver.in", "r")
-fout = open("../build/driver.out", "wb")
-
-"""while not os.path.exists("input"):
-    pass
-
-while not os.path.exists("output"):
-    pass
-
-fin = open("output", "r")
-fout = open("input", "wb")"""
+print("started....");
+fout = open(PIPE_DIR + "web2drv", "wb")
 
 print("[App]: Opened pipes...")
+
+def compute(input):
+    print("[App]: In computer")
+    print("[App]: Packaging " + input)
+
+    in_bytes = struct.pack("<I", len(input))
+    in_bytes += bytes(input, 'utf-8')
+
+    print("[App]: Sending " + str(bytearray(in_bytes)))
+    print("length is " + str(len(input)))
+
+    fout.write(bytearray(in_bytes))
+    fout.flush()
+
+    print("opening fin");
+    fin = open(PIPE_DIR + "drv2web", "r")
+    # print("fin opened")
+    # x = struct.unpack("<I", fin.read())[0]
+    # print("drv acked " + str(x) + " bytes")
+    x = fin.readline()
+    print("got: " + x)
+    fin.close()
+
+    return x
+
+compute("23 / 54")
+compute("e^2")
+# compute("")
+
+# fout.close()
 
 # Regular text to LaTeX converter
 def convert(input):
@@ -52,32 +61,6 @@ def convert(input):
     sout.close()
 
     return text
-
-# Helper method to call driver
-def compute(input):
-    global counter
-    
-    print("[App]: In computer")
-
-    # print("[App]: Waiting to open pipes...\n")
-
-    print("[App]: Packaging " + input)
-
-    in_bytes = struct.pack("<I", len(input))
-    in_bytes += bytes(input, 'utf-8')
-
-    print("[App]: Sending " + str(bytearray(in_bytes)))
-
-    fout.write(bytearray(in_bytes))
-    fout.flush()
-
-    out = fin.readline()
-
-    print("[App]: Receiving " + out)
-
-    counter += 1
-    
-    return out
 
 from flask import Flask
 from flask import request
@@ -115,9 +98,4 @@ def session_post():
     logs.insert(0, text + " = \\textbf{" + out + "}");
     return render_template('session.html', logs = logs)
 
-print("[App]: After the program...\n")
-# fout.write(bytearray(0))
-# fout.close()
-# fin.close()
-
-# driver.wait()
+driver.wait()

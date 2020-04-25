@@ -67,7 +67,6 @@ std::string strlabs[] = {
  * @brief Singular node class,
  * used in expression trees.
  */
-
 template <class T>
 class node {
 public:
@@ -800,11 +799,9 @@ void node <T> ::compress_as_multiplied()
 
 	/* cout << endl << "CONSTANT:" << endl;
 	cout << "\t" << constant->get() << " @ " << constant << endl;
-
 	cout << endl << "VARIABLES:" << endl;
 	for (auto itr : chart)
 		cout << "\tVAR:\t" << itr.first << ", POW:\t" << itr.second << endl;
-
 	cout << endl << "MISC:" << endl; 
 	for (auto nd : misc) {
 		cout << std::string(100, '-') << endl;
