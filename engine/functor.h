@@ -64,6 +64,10 @@ public:
 
 	functor(const std::string &, params, node <T> *);
 
+	size_t variales() const {
+		return m_params.size();
+	}
+
 	const std::string &symbol() const;
 
 	const T &operator()(const std::vector <T> &);
@@ -71,7 +75,7 @@ public:
 	template <class ... U>
 	const T &operator()(U ...);
 
-	const functor &differentiate(const std::string &);
+	const functor &differentiate(const std::string &) const;
 
 	std::string display() const;
 
@@ -173,7 +177,7 @@ functor <T> ::functor(const std::string &str, params pars,
 	m_name = str;
 	m_params = pars;
 	m_root = tree;
-	
+
 	compress();
 }
 
@@ -268,14 +272,16 @@ void functor <T> ::compress()
 // Beginning of differentiation work
 template <class T>
 const functor <T> &functor <T> ::differentiate
-	(const std::string &var)
+	(const std::string &var) const
 {
 	node <T> *diffed = new node <T> (m_root);
 
 	diffed->label({var});
-	diffed->differentiate(var);
 
-	functor *out = new functor(m_name + "'", m_params, diffed);
+	diffed->differentiate(var);
+	
+	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
+
 	return *out;
 }
 

@@ -14,8 +14,8 @@
 #include "var_stack.h"
 
 #define MAX_COUNT	4096
-#define FIFO_R_FILE	"/home/ram/null/web2drv"
-#define FIFO_W_FILE	"/home/ram/null/drv2web"
+#define FIFO_R_FILE	"/home/ram/zhetapi/build/web2drv"
+#define FIFO_W_FILE	"/home/ram/zhetapi/build/drv2web"
 
 using namespace std;
 
@@ -33,9 +33,7 @@ static void parent(void)
 	int fin;
 	int n;
 
-	printf("trying to open fifo...\n");
 	fin = open(FIFO_R_FILE, O_RDONLY);
-	printf("fifo opened\n");
 
 	assert(fin > 0);
 
@@ -43,24 +41,18 @@ static void parent(void)
 	string stripped;
 
 	do {
-		printf("[Driver]: Waiting...\n");
-
 		n = read(fin, &count, 4);
-		printf("[Driver]: n [%d]\n", n);
+		
 		assert(n == 4);
 		assert(count < MAX_COUNT);
 
 		n = read(fin, data, count);
 		assert(n == count);
 		data[count] = 0;
-		printf("data: <%s>\n", data);
 
-		printf("trying to open fout\n");
 		fout = open(FIFO_W_FILE, O_WRONLY);
-		printf("fout opened\n");
 		assert(fout > 0);
-		//out = "<" + string((char *) data) + ">";
-		// assert(n == 4);
+		
 		stripped = (char *) data;
 
 		printf("calculating...\n");
@@ -74,15 +66,9 @@ static void parent(void)
 			out = "\\text{Could not evaluate expression [Unkown Error].}";
 		}
 
-		printf("out of try block\n");
-		
 		n = write(fout, out.c_str(), out.length());
 
-		printf("done wiritng\n");
-		
-		// write(fout, out.c_str(), out.length() + 1);
 		close(fout);
-		printf("fout closed\n");
 	} while (count > 0);
 
 	close(fin);
@@ -101,10 +87,7 @@ int main(int argc, char *argv[])
 	mknod(FIFO_R_FILE, S_IFIFO | 0666, 0);
 	mknod(FIFO_W_FILE, S_IFIFO | 0666, 0);
 
-	printf("starting parent....\n");
 	parent();
-
-	printf("Exiting...\n");
 
 	assert(!remove(FIFO_R_FILE));
 	assert(!remove(FIFO_W_FILE));

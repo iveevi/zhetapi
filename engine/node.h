@@ -315,8 +315,8 @@ public:
 	};
 };
 
-#include "../build/parser.tab.c"
-#include "../build/lex.yy.c"
+// #include "../build/parser.tab.c"
+// #include "../build/lex.yy.c"
 
 /* Constructors */
 template <class T>
@@ -331,11 +331,14 @@ node <T> ::node(std::string str, var_stack <T> vst,
 		stripped[i] = str[i];
 	stripped[i] = '\n';
 
-	yy_scan_string(stripped);
+	//yy_scan_string(stripped);
 
 	node <T> *temp;
 
-	yyparse(temp, pars, vars, vst, fst);
+	//yyparse(temp);
+
+	// cout << "[STRING TREE]" << endl;
+	// temp->print();
 
 	*this = temp;
 
@@ -493,7 +496,7 @@ void node <T> ::label_all()
 template <class T>
 void node <T> ::label(const std::vector <std::string> &vars)
 {
-	string sym;
+	std::string sym;
 
 	for (auto nd : leaves)
 		nd->label(vars);
@@ -562,8 +565,11 @@ void node <T> ::differentiate(const std::string &var)
 	case l_variable:
 		tok = new opd(1);
 		break;
+	case l_operation_constant:
 	case l_constant:
 		tok = new opd(0);
+		leaves.clear();
+		type = l_constant;
 		break;
 	default:
 		break;
@@ -603,7 +609,7 @@ std::string node <T> ::display() const
 		return leaves[0]->display_as_operand() + " ^ " + leaves[1]->display_as_operand();
 	// remove operation constant later
 	case l_operation_constant:
-		return to_string(value());
+		return std::to_string(value());
 	case l_constant_logarithmic:
 	case l_logarithmic:
 		return "log_{" + leaves[0]->display() + "} (" + leaves[1]->display() + ")";

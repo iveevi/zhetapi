@@ -11,8 +11,7 @@
 %%
 
 -?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) {
-		istringstream iss(yytext);
-		iss >> yylval.value;
+		yylval.value = yytext;
 		return NUMBER;
 }
 

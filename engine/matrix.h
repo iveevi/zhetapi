@@ -71,6 +71,9 @@ public:
 	template <class U>
 	friend const matrix <U> &operator*(const matrix <U> &, const matrix <U> &);
 
+	/* template <class U>
+	friend const U &operator*(const matrix <U> &, const matrix <U> &); */
+
 	template <class U>
 	friend const matrix <U> &operator*(const matrix <U> &, const U &);
 	
@@ -82,6 +85,9 @@ public:
 	
 	template <class U>
 	friend const matrix <U> &operator/(const U &, const matrix <U> &);
+
+	template <class U>
+	friend std::ostream &operator<<(std::ostream &, const matrix <U> &);
 private:
 	T determinant(const matrix &) const;
 };
@@ -324,24 +330,22 @@ const matrix <T> &matrix <T> ::transpose() const
 template <class T>
 std::string matrix <T> ::display() const
 {
-	std::string out;
-
-	std::string row;
+	std::ostringstream oss;
 	for (int i = 0; i < rows; i++) {
-		row = '|';
-		
+		oss << '|';
+
 		for (int j = 0; j < cols; j++) {
-			row += to_string(m_array[i][j]);
+			oss << m_array[i][j];
 			if (j != cols - 1)
-				row += "\t";
+				oss << "\t";
 		}
 
-		row += '|';
+		oss << '|';
 
-		out += row + "\n";
+		oss << "\n";
 	}
 
-	return out;
+	return oss.str();
 }
 
 template <class T>
@@ -386,6 +390,14 @@ const matrix <T> &operator*(const matrix <T> &a, const matrix <T> &b)
 	return *out;
 }
 
+/* template <class T>
+const T &matrix <T> ::operator*(const matrix <T> &a, const matrix <T> &b)
+{
+	assert(a.cols == b.rows && a.rows == b.cols == 1);
+
+	return (a * b)[0][0];
+} */
+
 template <class T>
 const matrix <T> &operator*(const matrix <T> &a, const T &scalar)
 {
@@ -414,6 +426,13 @@ template <class T>
 const matrix <T> &operator/(const T &scalar, const matrix <T> &a)
 {
 	return a / scalar;
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const matrix <T> &a)
+{
+	os << a.display();
+	return os;
 }
 
 // Private helper methods

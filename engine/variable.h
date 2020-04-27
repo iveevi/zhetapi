@@ -133,6 +133,10 @@ public:
 	// returns the name of the variable
 	virtual const std::string &symbol() const;
 
+	virtual data_t ttype() const {
+		return data_t();
+	}
+
 	type caller() const override;
 	std::string str() const override;
 	
