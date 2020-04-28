@@ -11,34 +11,33 @@
  */
 template <class T>
 struct config {
-public:
 	using opd = operand <T>;
 	using opn = operation <operand <T>>;
 
-	opn add;
-	opn sub;
-	opn mult;
-	opn div;
-	opn exp;
-	opn mod;
+	static opn add;
+	static opn sub;
+	static opn mult;
+	static opn div;
+	static opn exp;
+	static opn mod;
 
-	opn sin;
-	opn cos;
-	opn tan;
-	opn csc;
-	opn sec;
-	opn cot;
+	static opn sin;
+	static opn cos;
+	static opn tan;
+	static opn csc;
+	static opn sec;
+	static opn cot;
 
-	opn log;
+	static opn log;
 
 	/* Real/complex space
 	 * constants */
-	T zero;
-	T one;
-	T neg;
+	static T zero;
+	static T one;
+	static T neg;
 
 	// Add formatter later
-	T read(const std::string &);
+	static T read(const std::string &);
 };
 
 #endif
