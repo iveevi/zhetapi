@@ -9,10 +9,7 @@
 #include <queue>
 
 /* Engine Headers */
-#include "token.h"
-#include "operand.h"
-#include "operation.h"
-#include "variable.h"
+#include "stree.h"
 
 template <class T>
 class func_stack;
@@ -242,7 +239,14 @@ private:
 	 * class */
 
 	node *copy() const;
-	
+
+	node *convert(stree *, var_stack <T>, func_stack <T>,
+			params, variables) const;
+	node *convert_operation(stree *, var_stack <T>,
+			func_stack <T>, params, variables) const;
+	node *convert_variable_cluster(stree *, var_stack <T>,
+			func_stack <T>, params, variables) const;
+
 	void label_as_operation();
 
 	void compress_as_separable();
@@ -315,33 +319,12 @@ public:
 	};
 };
 
-// #include "../build/parser.tab.c"
-// #include "../build/lex.yy.c"
-
 /* Constructors */
 template <class T>
 node <T> ::node(std::string str, var_stack <T> vst,
 		func_stack <T> fst, params pars, variables vars)
 {
-	char *stripped;
-	int i;
-	
-	stripped = new char[str.length() + 1];
-	for (i = 0; i < str.length(); i++)
-		stripped[i] = str[i];
-	stripped[i] = '\n';
-
-	//yy_scan_string(stripped);
-
-	node <T> *temp;
-
-	//yyparse(temp);
-
-	// cout << "[STRING TREE]" << endl;
-	// temp->print();
-
-	*this = temp;
-
+	*this = convert(new stree(str), vst, fst, pars, vars);
 	this->pars = pars;
 }
 
@@ -652,6 +635,130 @@ node <T> *node <T> ::copy() const
 		cpy->leaves.push_back(nd->copy());
 	
 	return cpy;
+}
+
+template <class T>
+node <T> *node <T> ::convert(stree *st, var_stack <T> vst, func_stack <T> fst,
+		params pars, variables vars) const
+{
+	node *out;
+
+	T val;
+
+	switch (st->kind()) {
+	case l_operation:
+		out = convert_operation(st, vst, fst, pars, vars);
+		break;
+	case l_variable_cluster:
+		out = convert_variable_cluster(st, vst, fst, pars, vars);
+		break;
+	case l_number:
+		istringstream iss(st->str());
+
+		iss >> val;
+
+		out = new node {new opd(val), l_constant, {}};
+		break;
+	}
+
+	return out;
+}
+
+template <class T>
+node <T> *node <T> ::convert_operation(stree *st, var_stack <T> vst,
+		func_stack <T> fst, params pars, variables vars) const
+{
+	node *out = new node {&def::none_op, {}};
+
+	if (st->str() == "+") {
+		out->tok = &def::add_op;
+	} else if (st->str() == "-") {
+		out->tok = &def::sub_op;
+	} else if (st->str() == "*") {
+		out->tok = &def::mult_op;
+	} else if (st->str() == "/") {
+		out->tok = &def::div_op;
+	} else if (st->str() == "^") {
+		out->tok = &def::exp_op;
+	} else if (st->str() == "sin") {
+		out->tok = &def::sin_op;
+	} else if (st->str() == "cos") {
+		out->tok = &def::cos_op;
+	} else if (st->str() == "tan") {
+		out->tok = &def::tan_op;
+	} else if (st->str() == "csc") {
+		out->tok = &def::csc_op;
+	} else if (st->str() == "sec") {
+		out->tok = &def::sec_op;
+	} else if (st->str() == "cot") {
+		out->tok = &def::cot_op;
+	} else if (st->str() == "log") {
+		out->tok = &def::log_op;
+	}
+
+	for (stree *s : st->children())
+		out->leaves.push_back(convert(s, vst, fst, pars, vars));
+
+	return out;
+}
+
+template <class T>
+node <T> *node <T> ::convert_variable_cluster(stree *st, var_stack <T> vst,
+		func_stack <T> fst, params pars, variables vars) const
+{
+	node *out;
+
+	node *save;
+	node *temp;
+	node *in;
+
+	out = new node {&def ::mult_op, {
+		new node {new opd(1), l_none, {}},
+		new node {new opd(1), l_none, {}}
+	}};
+
+	temp = out;
+
+	int num = 0;
+
+	std::string str = st->str();
+	std::string acc;
+
+	var vr;
+
+	for (int i = 0; i < str.length(); i++) {
+		acc += str[i];
+
+		auto vitr = find_if(pars.begin(), pars.end(),
+			[&](const var &v) {
+				return v.symbol() == acc;
+			}
+		);
+
+		if (vitr != pars.end()) {
+			out = new node {&def ::mult_op, l_none, {
+				out,
+				new node {new var {vitr->symbol(), true}, {}}
+			}};
+
+			acc.clear();
+			num++;
+		}
+
+		try {
+			vr = vst.find(acc);
+			out = new node {&def ::mult_op, l_none, {
+				out,
+				new node {new opd {vr.get()}, {}}
+			}};
+			num++;
+		} catch(...) {}
+	}
+
+	if (!num)
+		throw undefined_symbol(acc);
+
+	return out;
 }
 
 template <class T>

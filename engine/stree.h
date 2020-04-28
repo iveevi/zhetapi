@@ -21,7 +21,7 @@ enum st_label {
  */
 std::string st_str_labs[] = {
 	"number",
-	"operation"
+	"operation",
 	"variable cluster",
 };
 
@@ -47,9 +47,13 @@ public:
 
 	stree(const std::string &);
 
+	const st_label &kind() const;
+	const std::string &str() const;
+	const std::vector <stree *> &children() const;
+	
 	void set(stree *);
 
-	void print(int, int) const;
+	void print(int = 1, int = 0) const;
 };
 
 #include "../build/parser.tab.c"
@@ -79,9 +83,27 @@ stree::stree(const std::string &str)
 	// and inputted
 	yyparse(out);
 
+	cout << "STREE: " << endl;
+	out->print();
+
 	set(out);
 
 	delete out;
+}
+
+const st_label &stree::kind() const
+{
+	return type;
+}
+
+const std::string &stree::str() const
+{
+	return rep;
+}
+
+const std::vector <stree *> &stree::children() const
+{
+	return leaves;
 }
 
 void stree::set(stree *other)
