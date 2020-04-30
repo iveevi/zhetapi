@@ -83,9 +83,6 @@ stree::stree(const std::string &str)
 	// and inputted
 	yyparse(out);
 
-	cout << "STREE: " << endl;
-	out->print();
-
 	set(out);
 
 	delete out;

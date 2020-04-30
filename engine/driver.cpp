@@ -10,8 +10,10 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
 #include "expression.h"
-#include "var_stack.h"
+#include "table.h"
+#include "variable.h"
 
 #define MAX_COUNT	4096
 #define FIFO_R_FILE	"/home/ram/zhetapi/build/web2drv"
@@ -22,7 +24,7 @@ using namespace std;
 /* Structures with state of application */
 vector <string> history;
 
-var_stack <double> vst;
+table <double> tbl;
 
 static void parent(void)
 {
@@ -58,7 +60,7 @@ static void parent(void)
 		printf("calculating...\n");
 
 		try {
-			out = to_string(expression <double> ::in_place_evaluate(stripped, vst));
+			out = to_string(expression <double> ::in_place_evaluate(stripped, tbl));
 		} catch(node <double> ::undefined_symbol e) {
 			out = "\\text{Could not identify symbol or variable} $" +
 				e.what() + "$ \\text{ [Undefined Symbol Error].}";
@@ -76,13 +78,13 @@ static void parent(void)
 
 int main(int argc, char *argv[])
 {
-	vector <variable <double>> vals {
+	vector <variable <double>> vars {
 		variable <double> {"pi", acos(-1)},
 		variable <double> {"e", exp(1)}
 	};
 	
-	for (variable <double> v : vals)
-		vst.insert(v);
+	for (variable <double> vr : vars)
+		tbl.insert_var(vr);
 	
 	mknod(FIFO_R_FILE, S_IFIFO | 0666, 0);
 	mknod(FIFO_W_FILE, S_IFIFO | 0666, 0);

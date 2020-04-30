@@ -11,21 +11,23 @@
 #include <queue>
 
 // Custom Built Libraries
-#include "var_stack.h"
-#include "func_stack.h"
 #include "node.h"
-#include "operation.h"
-#include "defaults.h"
-#include "operand.h"
-#include "stack.h"
-#include "debug.h"
 
-// Future Note:
-// Add parsing method
-// for const char *
-// parameters (overhead
-// reduction from string
-// class is possible)
+/* FUTURE: Remove anything related
+ * to caching in this (expression)
+ * class.
+ *
+ * REASON: Caching, if it is to be
+ * implemented, will be done at a
+ * higher level, such as assignment
+ * or application, rather than
+ * expression.
+ *
+ * CONSEQUENCE: The expression class
+ * should be left with only static methods,
+ * and these methods should be placed outside
+ * this class; destory the expression class,
+ * place them in a namespace if necessary. */
 
 template <class T>
 class expression {
@@ -43,10 +45,10 @@ public:
 	expression(std::string = "");
 
 	// Includes caching, change to references
-	const T &evaluate(std::string = "", var_stack <T> = var_stack <T> ());
+	const T &evaluate(std::string = "", table <T> = table <T> ());
 
 	// Without caching
-	static const T &in_place_evaluate(std::string = "", var_stack <T> = var_stack <T> ());
+	static const T &in_place_evaluate(std::string = "", table <T> = table <T> ());
 
 	// Without caching, and with formatting
 	static const T&in_place_evaluate_formatted(const char *, ...);
@@ -66,7 +68,7 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-const T &expression <T> ::evaluate(std::string str, var_stack <T> vst)
+const T &expression <T> ::evaluate(std::string str, table <T> tbl)
 {
 	if (str.empty() && m_cached.empty())
 		throw invalid_expr();
@@ -74,41 +76,17 @@ const T &expression <T> ::evaluate(std::string str, var_stack <T> vst)
 	if (!str.empty())
 		m_cached = str;
 
-	//set_input(str.c_str());
-	//e_scan_string(str.c_str());
-	//operand <T> *out = new operand <T> ();
-	//eparse(out);
-	node <T> *out = new node <T> (str, vst);
+	node <T> *out = new node <T> (str, tbl);
 	return out->value();
 }
 
 template <class T>
-const T &expression <T> ::in_place_evaluate(std::string str, var_stack <T> vst)
+const T &expression <T> ::in_place_evaluate(std::string str, table <T> tbl)
 {
 	if (str.empty())
 		throw invalid_expr();
 
-	// return value(symbols(str, vst));
-	// set_input(str.c_str());
-	//cout << "dumping contents of str:" << endl;
-	//const char *s = str.c_str();
-	//while (s)
-	//	cout << *s << " @ " << (int)*s++ << endl;
-	/* char *cpy = new char[str.length() + 1];
-	int i;
-	for (i = 0; i < str.length(); i++)
-		cpy[i] = str[i];
-	cpy[i] = '\n';
-
-	* s = cpy;
-	while (s)
-		cout << *s << " @ " << (int)*s++ << endl; *
-	e_scan_string(cpy);
-	operand <T> *out = new operand <T> ();
-	
-	eparse(out, vst);
-	return out->get(); */
-	node <T> *out = new node <T> (str, vst);
+	node <T> *out = new node <T> (str, tbl);
 	return out->value();
 }
 

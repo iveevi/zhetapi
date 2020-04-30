@@ -2,39 +2,43 @@
 #define NODE_H_
 
 /* C++ Standard Libraries */
-#include <unordered_map>
 #include <functional>
-#include <vector>
-#include <string>
 #include <queue>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 /* Engine Headers */
+#include "variable.h"
+#include "operation.h"
+#include "operand.h"
+#include "defaults.h"
 #include "stree.h"
 
 template <class T>
-class func_stack;
+class table;
 
 /**
  * @brief The enumeration
  * label is used to label nodes
  * of an expression tree.
  */
-enum zlabel {
+enum nd_label {
 	l_none,
+	l_power,
+	l_divided,
+	l_variable,
+	l_constant,
+	l_exp,
+	l_polynomial,
 	l_separable,
 	l_multiplied,
-	l_divided,
-	l_constant,
-	l_variable,
-	l_polynomial,
-	l_exp,
-	l_power,
-	l_power_uncertain,
 	l_exponential,
-	l_constant_logarithmic,
-	l_operation_constant,
 	l_logarithmic,
-	l_trigonometric
+	l_trigonometric,
+	l_power_uncertain,
+	l_operation_constant,
+	l_constant_logarithmic
 };
 
 /**
@@ -44,20 +48,20 @@ enum zlabel {
  */
 std::string strlabs[] = {
 	"none",
+	"power",
+	"divided",
+	"variable",
+	"constant",
+	"exponent",
+	"polynomic",
 	"separable",
 	"multiplied",
-	"divided",
-	"constant",
-	"variable",
-	"polynomic",
-	"exponent",
-	"power",
-	"power uncertain",
 	"exponential",
-	"constant logarithmic",
-	"operation constant",
 	"logarithmic",
-	"trigonometric"
+	"trigonometric",
+	"power uncertain",
+	"operation constant",
+	"constant logarithmic"
 };
 
 /**
@@ -71,9 +75,6 @@ public:
 	 * defined earlier to be
 	 * used later */
 	
-	using variables = std::unordered_map <std::string,
-	      std::vector <node <double> *>>;
-
 	using params = std::vector <variable <double>>;
 private:
 	/* Member instances of
@@ -92,7 +93,7 @@ private:
 	 * more complex functions such
 	 * as compression and differentiation
 	 */
-	zlabel type;
+	nd_label type;
 
 	/**
 	 * @brief Children of this node
@@ -102,6 +103,11 @@ private:
 	 */
 	std::vector <node *> leaves;
 
+	/**
+	 * @brief List of variable names
+	 * that are the names of paramters
+	 * (of a function).
+	 */
 	params pars;
 public:
 	/* Constructors of the
@@ -114,9 +120,8 @@ public:
 	 *
 	 * REQUIRES UPDATE ^^
 	 */
-	node(std::string, var_stack <T> = var_stack <T> (),
-		func_stack <T> = func_stack <T> (),
-		params = params(), variables = variables());
+	node(std::string, table <T> = table <T> (),
+			params = params());
 
 	/**
 	 * @brief Node copy constructor
@@ -141,7 +146,7 @@ public:
 	 * @brief Node constructor, for
 	 * all its members.
 	 */
-	node(token *t, zlabel l, std::vector <node *> lv);
+	node(token *t, nd_label l, std::vector <node *> lv);
 
 	/* Modifiers and getter methods
 	 * of the node class */
@@ -172,7 +177,7 @@ public:
 	 * and similar methods in the functor
 	 * class.
 	 */
-	void set(token *, zlabel, std::vector <node *>);
+	void set(token *, nd_label, std::vector <node *>);
 
 	/**
 	 * @brief Getter method for
@@ -198,7 +203,7 @@ public:
 
 	std::vector <node *> children();
 
-	zlabel kind();
+	nd_label kind();
 	// void relabel(label);
 	
 	/* Functional methods of
@@ -240,12 +245,9 @@ private:
 
 	node *copy() const;
 
-	node *convert(stree *, var_stack <T>, func_stack <T>,
-			params, variables) const;
-	node *convert_operation(stree *, var_stack <T>,
-			func_stack <T>, params, variables) const;
-	node *convert_variable_cluster(stree *, var_stack <T>,
-			func_stack <T>, params, variables) const;
+	node *convert(stree *, table <T> = table <T> ()) const;
+	node *convert_operation(stree *, table <T> = table <T> ()) const;
+	node *convert_variable_cluster(stree *, table <T> = table <T> ()) const;
 
 	void label_as_operation();
 
@@ -321,11 +323,10 @@ public:
 
 /* Constructors */
 template <class T>
-node <T> ::node(std::string str, var_stack <T> vst,
-		func_stack <T> fst, params pars, variables vars)
+node <T> ::node(std::string str, table <T> tbl, params params)
+	: pars(params)
 {
-	*this = convert(new stree(str), vst, fst, pars, vars);
-	this->pars = pars;
+	*this = convert(new stree(str), tbl);
 }
 
 template <class T>
@@ -350,7 +351,7 @@ node <T> ::node(token *t, std::vector <node <T> *> lv)
 }
 
 template <class T>
-node <T> ::node(token *t, zlabel l, std::vector <node <T> *> lv)
+node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv)
 	: tok(t), type(l), leaves(lv) {}
 
 /* Setters and Getters */
@@ -370,7 +371,7 @@ void node <T> ::set(token *t, std::vector <node <T> *> lv)
 }
 
 template <class T>
-void node <T> ::set(token *t, zlabel l, std::vector <node <T> *> lv)
+void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv)
 {
 	tok = t;
 	type = l;
@@ -402,7 +403,7 @@ std::vector <node <T> *> node <T> ::children()
 }
 
 template <class T>
-zlabel node <T> ::kind()
+nd_label node <T> ::kind()
 {
 	return type;
 }
@@ -490,6 +491,7 @@ void node <T> ::label(const std::vector <std::string> &vars)
 		break;
 	case token::VARIABLE:
 		sym = (dynamic_cast <var *> (tok))->symbol();
+
 		if (find(vars.begin(), vars.end(), sym) != vars.end())
 			type = l_variable;
 		else
@@ -638,8 +640,7 @@ node <T> *node <T> ::copy() const
 }
 
 template <class T>
-node <T> *node <T> ::convert(stree *st, var_stack <T> vst, func_stack <T> fst,
-		params pars, variables vars) const
+node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 {
 	node *out;
 
@@ -647,10 +648,10 @@ node <T> *node <T> ::convert(stree *st, var_stack <T> vst, func_stack <T> fst,
 
 	switch (st->kind()) {
 	case l_operation:
-		out = convert_operation(st, vst, fst, pars, vars);
+		out = convert_operation(st, tbl);
 		break;
 	case l_variable_cluster:
-		out = convert_variable_cluster(st, vst, fst, pars, vars);
+		out = convert_variable_cluster(st, tbl);
 		break;
 	case l_number:
 		istringstream iss(st->str());
@@ -661,12 +662,14 @@ node <T> *node <T> ::convert(stree *st, var_stack <T> vst, func_stack <T> fst,
 		break;
 	}
 
+	if (out)
+		out->pars = pars;
+
 	return out;
 }
 
 template <class T>
-node <T> *node <T> ::convert_operation(stree *st, var_stack <T> vst,
-		func_stack <T> fst, params pars, variables vars) const
+node <T> *node <T> ::convert_operation(stree *st, table <T> tbl) const
 {
 	node *out = new node {&def::none_op, {}};
 
@@ -697,14 +700,13 @@ node <T> *node <T> ::convert_operation(stree *st, var_stack <T> vst,
 	}
 
 	for (stree *s : st->children())
-		out->leaves.push_back(convert(s, vst, fst, pars, vars));
+		out->leaves.push_back(convert(s, tbl));
 
 	return out;
 }
 
 template <class T>
-node <T> *node <T> ::convert_variable_cluster(stree *st, var_stack <T> vst,
-		func_stack <T> fst, params pars, variables vars) const
+node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 {
 	node *out;
 
@@ -746,7 +748,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, var_stack <T> vst,
 		}
 
 		try {
-			vr = vst.find(acc);
+			vr = tbl.find_var(acc);
 			out = new node {&def ::mult_op, l_none, {
 				out,
 				new node {new opd {vr.get()}, {}}
@@ -899,7 +901,7 @@ void node <T> ::compress_as_multiplied()
 			break;
 		case l_constant:
 			vals = {
-				*(dynamic_cast <opd *> (constant)),
+				*constant,
 				*(dynamic_cast <opd *> (current->tok))
 			};
 			constant = new opd(def::mult_op.compute(vals));

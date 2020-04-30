@@ -16,8 +16,7 @@
 #include "constants.h"
 #include "operand.h"
 #include "defaults.h"
-#include "var_stack.h"
-
+#include "table.h"
 #include "node.h"
 
 /**
@@ -36,6 +35,7 @@ public:
 	
 	using variables = std::unordered_map <std::string,
 	      std::vector <node <double> *>>;
+
 	using params = std::vector <variable <double>>;
 protected:
 	/** functor symbol/name */
@@ -162,10 +162,8 @@ functor <T> ::functor(const std::string &in)
 
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
-
-	var_stack <T> vst = var_stack <T> ();
-	func_stack <T> fst = func_stack <T> ();
-	m_root = new node <T> (expr, vst, fst, m_params, m_map);
+	
+	m_root = new node <T> (expr, table <T> (), m_params);
 	
 	compress();
 }

@@ -3,14 +3,6 @@
 	#include <vector>
 	#include <string>
 	
-	#include "../engine/func_stack.h"
-	#include "../engine/var_stack.h"
-
-	#include "../engine/variable.h"
-	#include "../engine/operation.h"
-	#include "../engine/defaults.h"
-  	#include "../engine/operand.h"
-
 	extern "C" int yylex();
   	
 	void yyerror(stree *(&), const char *);

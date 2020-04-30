@@ -1,6 +1,7 @@
 #ifndef TABLE_H_
 #define TABLE_H_
 
+#include "node.h"
 #include "functor.h"
 #include "variable.h"
 
@@ -92,7 +93,8 @@ table <T> ::table() : vtree(nullptr), ftree(nullptr),
 	vtree_size(0), ftree_size(0) {}
 
 template <class T>
-table <T> ::table(const table &other)
+table <T> ::table(const table &other) : vtree(nullptr),
+	ftree(nullptr), vtree_size(0), ftree_size(0)
 {
 	*this = other;
 }
@@ -100,7 +102,7 @@ table <T> ::table(const table &other)
 template <class T>
 const table <T> &table <T> ::operator=(const table &other)
 {
-	if (this != other) {
+	if (this != &other) {
 		clear();
 		vtree = clone_var(other.vtree);
 		ftree = clone_ftr(other.ftree);
@@ -325,13 +327,15 @@ void table <T> ::clear()
 template <class T>
 void table <T> ::clear_var_tree()
 {
-	clear_var_tree(vtree);
+	if (vtree != nullptr)
+		clear_var_tree(vtree);
 }
 
 template <class T>
 void table <T> ::clear_ftr_tree()
 {
-	clear_ftr_tree(ftree);
+	if (ftree != nullptr)
+		clear_ftr_tree(ftree);
 }
 
 template <class T>
@@ -366,8 +370,8 @@ typename table <T> ::__var_node *table <T> ::clone_var(__var_node *vnd)
 	if (vnd == nullptr)
 		return nullptr;
 
-	nnode = new __var_node {vnd->val, clone(vnd->left),
-		clone(vnd->right)};
+	nnode = new __var_node {vnd->val, clone_var(vnd->left),
+		clone_var(vnd->right)};
 
 	return nnode;
 }
@@ -380,8 +384,8 @@ typename table <T> ::__ftr_node *table <T> ::clone_ftr(__ftr_node *fnd)
 	if (fnd == nullptr)
 		return nullptr;
 
-	nnode = new __ftr_node {fnd->val, clone(fnd->left),
-		clone(fnd->right)};
+	nnode = new __ftr_node {fnd->val, clone_ftr(fnd->left),
+		clone_ftr(fnd->right)};
 
 	return nnode;
 }
