@@ -15,7 +15,6 @@
 #include "variable.h"
 #include "constants.h"
 #include "operand.h"
-#include "defaults.h"
 #include "table.h"
 #include "node.h"
 
@@ -26,7 +25,7 @@
  * @tparam T para
  */
 template <class T>
-class functor : token {
+class functor : public token {
 public:
 	class invalid_definition {};
 	class syntax_error {};
@@ -34,9 +33,9 @@ public:
 	class incomputable_tree {};
 	
 	using variables = std::unordered_map <std::string,
-	      std::vector <node <double> *>>;
+	      std::vector <node <T> *>>;
 
-	using params = std::vector <variable <double>>;
+	using params = std::vector <variable <T>>;
 protected:
 	/** functor symbol/name */
 	std::string m_name;
@@ -164,7 +163,7 @@ functor <T> ::functor(const std::string &in)
 		m_params.push_back(variable <T> (str, true));
 	
 	m_root = new node <T> (expr, table <T> (), m_params);
-	
+
 	compress();
 }
 

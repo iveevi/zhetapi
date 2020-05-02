@@ -1,0 +1,686 @@
+#include <cmath>
+#include <ctime>
+#include <iostream>
+#include <vector>
+
+#include <gmpxx.h>
+
+#include "config.h"
+#include "expression.h"
+#include "matrix.h"
+#include "stree.h"
+#include "table.h"
+#include "variable.h"
+
+using namespace std;
+
+void test_variable()
+{
+	cout << endl << "BEGINNING VARIABLE TEST" << endl;
+
+	variable <double> x("x", false, 12);
+
+	cout << "Initial Value of Varaible: " << *x << endl;
+
+	x[323.0];
+
+	cout << "Value is Now: " << *x << endl;
+}
+
+void test_expression()
+{
+	cout << endl << "BEGINNING EXPRESSION TEST" << endl;
+
+	table <double> tbl;
+
+	vector <variable <double>> vals {
+		variable <double> {"pi", acos(-1)},
+		variable <double> {"e", exp(1)}
+	};
+	
+	for (variable <double> v : vals)
+		tbl.insert_var(v);
+
+	cout << "Expression evaluation with format: "
+		<< expression <double> ::in_place_evaluate_formatted("3e^3 * sin(cos(pi/2))")
+		<< endl;
+
+	string input;
+	while (true) {
+		cout << "Enter an expression to be evaluated: ";
+		getline(cin, input);
+
+		cout << "\t" << expression <double>
+			::in_place_evaluate(input) << endl;
+	}
+}
+void test_variable_parsing()
+{
+	cout << endl << "BEGINNING VARIABLE PARSING TEST" << endl;
+
+	table <double> tbl;
+
+	vector <variable <double>> vals {variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0},
+		variable <double> {"pi", acos(-1)},
+		variable <double> {"e", exp(1)}
+	};
+	
+	for (variable <double> v : vals) {
+		// cout << "Inserting: " << v << endl;
+		tbl.insert_var(v);
+	}
+
+	cout << endl;
+
+	string input = "3e^3 * sin(cos(pi/2))";
+	cout << "Expression [" << input << "] = " << expression <double>
+		::in_place_evaluate(input, tbl) << endl;
+	
+	while (true) {
+		cout << "Enter an expression to be evaluated: ";
+		getline(cin, input);
+
+		cout << "\t" << expression <double>
+			::in_place_evaluate(input, tbl) << endl;
+	}
+}
+
+/* void test_application()
+{
+	cout << endl << "BEGINNING APPLICATION TEST" << endl;
+	application <double> app;
+	var_stack <double> vst;
+
+	vector <variable <double>> vals {variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0}};
+	
+	for (variable <double> v : vals) {
+		// cout << "Inserting: " << v << endl;
+		vst.insert(v);
+	}
+
+	string input;
+	while (true) {
+		cout << "Enter an expression to be evaluated: ";
+		getline(cin, input);
+
+		app = application <double> (input);
+		app(vst);
+	}
+} */
+
+void test_function()
+{
+	cout << endl << "BEGINNING FUNCTION TEST" << endl;
+
+	clock_t start, end;
+
+	string str = "f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z";
+	// string str = "f(x, y, z) = 3x + yz";
+	// string str = "f(x, y, z) = 0 + 3x + 0";
+
+	cout << endl << "Function to be parsed: " << str << endl << endl;
+
+	start = clock();
+	functor <double> f(str);
+	end = clock();
+
+	cout << string(100, '-') << endl;
+	f.print();
+	cout << string(100, '-') << endl;
+
+	cout << "f(2, 3, 4) = " << f(2, 3, 4) << endl;
+
+	cout << endl << f.display() << endl;
+
+	functor <double> h("h(x) = 4 * 2x^3");
+
+	cout << endl << h.display() << endl;
+	
+	cout << string(100, '-') << endl;
+	h.print();
+	cout << string(100, '-') << endl;
+
+	functor <double> dh_dx = h.differentiate("x");
+
+	cout << dh_dx.display() << endl;
+	
+	cout << string(100, '-') << endl;
+	dh_dx.print();
+	cout << string(100, '-') << endl;
+
+	cout << "h'(4) = " << dh_dx(4) << endl;
+
+	cout << endl << "Construction: " << (end - start) /
+		(double) CLOCKS_PER_SEC << " seconds " << endl;
+}
+
+void test_matrix()
+{
+	cout << endl << "BEGINNING MATRIX TEST" << endl;
+
+	/* double **mat = new double *[2];
+	mat[0] = {1, 2};
+	mat[1] = {0, 1}; */
+
+	matrix <double> m(2, 2, 8);
+
+	cout << endl << "m:" << endl << std::string(30, '=')
+		<< endl << m.display() << endl;
+	
+	m.set(0, 1, 5);
+
+	cout << endl << "m.get(0, 1) = " << m.get(0, 1) << endl;
+
+	cout << endl << "m:" << endl << std::string(30, '=')
+		<< endl << m.display() << endl;
+	
+	matrix <double> a({{1, 2}, {0, 4}, {5, 6}});
+
+	cout << endl << "a:" << endl << std::string(30, '=')
+		<< endl << a.display() << endl;
+	
+	a[0][1] = 7;
+
+	cout << endl << "a[0][1] = " << a[0][1] << endl;
+
+	cout << endl << "a:" << endl << std::string(30, '=')
+		<< endl << a.display() << endl;
+
+	matrix <double> b(4, 6, [](size_t i, size_t j) {return i * j;});
+	
+	cout << endl << "b:" << endl << std::string(30, '=')
+		<< endl << b.display() << endl;
+	
+	matrix <double> c(3, 3, [](size_t i, size_t j) {return (double) i / (j + 1);});
+	matrix <double> d(3, 3, [](size_t i, size_t j) {return (double) i * j;});
+
+	cout << endl << "Testing addition and subtraction constructors..." << endl;
+
+	cout << endl << "c:" << endl << std::string(30, '=')
+		<< endl << c.display() << endl;
+	
+	cout << endl << "d:" << endl << std::string(30, '=')
+		<< endl << d.display() << endl;
+
+	matrix <double> e(3, 3, [&](size_t i, size_t j) {return c[i][j] + d[i][j];});
+	matrix <double> f(3, 3, [&](size_t i, size_t j) {return c[i][j] - d[i][j];});
+	
+	cout << endl << "e:" << endl << std::string(30, '=')
+		<< endl << e.display() << endl;
+	
+	cout << endl << "f:" << endl << std::string(30, '=')
+		<< endl << f.display() << endl;
+	
+	matrix <double> g(3, 3, [](size_t i, size_t j) {return pow(i, j);});
+	matrix <double> h(3, 3, [](size_t i, size_t j) {return pow(i, 1.0/(j + 1));});
+
+	cout << endl << "Testing addition and subtraction with operators..." << endl;
+
+	cout << endl << "g:" << endl << std::string(30, '=')
+		<< endl << g.display() << endl;
+	
+	cout << endl << "h:" << endl << std::string(30, '=')
+		<< endl << h.display() << endl;
+
+	matrix <double> i = g + h;
+	matrix <double> j = g - h;
+	
+	cout << endl << "i:" << endl << std::string(30, '=')
+		<< endl << i.display() << endl;
+	
+	cout << endl << "j:" << endl << std::string(30, '=')
+		<< endl << j.display() << endl;
+	
+	matrix <double> A({{1, 0.5}, {6.6, 1}});
+	matrix <double> B({{1, 4}, {0, 3}});
+
+	cout << endl << "Testing multiplication with operator..." << endl;
+	
+	cout << endl << "A:" << endl << std::string(30, '=')
+		<< endl << A.display() << endl;
+	
+	cout << endl << "B:" << endl << std::string(30, '=')
+		<< endl << B.display() << endl;
+
+	matrix <double> C = A * B;
+	
+	cout << endl << "C:" << endl << std::string(30, '=')
+		<< endl << C.display() << endl;
+
+	cout << endl << "Testing slice feature..." << endl;
+
+	matrix <double> T({
+			{1, 2, 3, 4},
+			{4, 5, 6, 1},
+			{4, 3, 1, 3},
+			{4, 2, 1, 2},
+			{0, 1, 8, 3}
+	});
+	
+	cout << endl << "T:" << endl << std::string(30, '=')
+		<< endl << T.display() << endl;
+
+	matrix <double> S = T.slice({1, 0}, {3, 0});
+
+	cout << endl << "S:" << endl << std::string(30, '=')
+		<< endl << S.display() << endl;
+
+	cout << endl << "Testing determinant calculation..." << endl;
+
+	matrix <double> Q({
+			{1, 2, 7},
+			{4, 5, 8},
+			{6, 7, 9}
+	});
+
+	cout << endl << "Q:" << endl << std::string(30, '=')
+		<< endl << Q.display() << endl;
+
+	cout << endl << "Q.determinant() [" << Q.determinant() << "]" << endl;
+	
+	cout << endl << "Testing matrix transposition..." << endl;
+
+	A = std::vector <std::vector <double>> {
+		{1, 2},
+		{3, 4},
+		{5, 6}
+	};
+	
+	cout << endl << "A:" << endl << std::string(30, '=')
+		<< endl << A.display() << endl;
+
+	T = A.transpose();
+
+	cout << endl << "T:" << endl << std::string(30, '=')
+		<< endl << T.display() << endl;
+	
+	cout << endl << "Testing minors and cofactors..." << endl;
+
+	A = std::vector <std::vector <double>> {
+		{1, 4, 7},
+		{3, 0, 5},
+		{-1, 9, 11}
+	};
+
+	cout << endl << "A:" << endl << std::string(30, '=')
+		<< endl << A.display() << endl;
+
+	cout << endl << "M(1, 2) [" << A.minor(1, 2) << "]" << endl;
+	cout << endl << "C(1, 2) [" << A.cofactor(1, 2) << "]" << endl;
+
+	
+	cout << endl << "Testing cofactor matrix and adjugate matrix features..." << endl;
+
+	A = std::vector <std::vector <double>> {
+		{-3, 2, -5},
+		{-1, 0, -2},
+		{3, -4, 1}
+	};
+
+	cout << endl << "A:" << endl << std::string(30, '=')
+		<< endl << A.display() << endl;
+
+	C = A.cofactor();
+	
+	cout << endl << "C:" << endl << std::string(30, '=')
+		<< endl << C.display() << endl;
+	
+	matrix <double> Adj = A.adjugate();
+	
+	cout << endl << "Adj:" << endl << std::string(30, '=')
+		<< endl << Adj.display() << endl;
+	
+	cout << endl << "Testing inverse matrix..." << endl;
+
+	A = std::vector <std::vector <double>> {
+		{-3, 2, -5},
+		{-1, 0, -2},
+		{3, -4, 1}
+	};
+
+	cout << endl << "A:" << endl << std::string(30, '=')
+		<< endl << A.display() << endl;
+
+	matrix <double> Inv = A.inverse();
+	
+	cout << endl << "Inv:" << endl << std::string(30, '=')
+		<< endl << Inv.display() << endl;
+}
+
+void test_root_finding()
+{
+	cout << endl << "BEGINNING ROOT FINDING TEST" << endl;
+
+	string str = "f(x) = (x^2 - 3)(x - 4)(x + 5)";
+	
+	cout << endl << "Function: " << str << endl;
+
+	functor <double> f(str);
+
+	vector <double> visited;
+
+	double epsilon = 1e-9;
+
+	double x_next;
+	double x_prev;
+	double x_0;
+
+	x_0 = -1;
+
+	cout << endl << "Running tests with epsilon as " << epsilon << endl;
+
+	cout << endl << "Initial guess: " << x_0 << endl;
+
+	functor <double> df_dx = f.differentiate("x");
+
+	cout << endl << "Derivative: " << df_dx.display() << endl;
+
+	double delta = 0.15;
+	double factor = 1;
+
+	int iters = 10;
+	int rounds = 10;
+
+	cout << endl << "Running for " << iters
+		<< " iterations [Newton-Raphson]" << endl;
+
+	x_prev = x_0;
+	for (int i = 1; i <= iters; i++) {
+		x_next = x_prev - f(x_prev)/df_dx(x_prev);
+		x_prev = x_next;
+
+		cout << "\tIteration #" << i << ": x_next [" << x_next << "]" << endl;
+	}
+	
+	cout << endl << "Running for " << iters
+		<< " iterations [Modified Newton-Raphson]" << endl;
+
+	x_prev = x_0;
+	for (int i = 1; i <= iters; i++) {
+		x_next = x_prev - f(x_prev)/df_dx(x_0);
+		x_prev = x_next;
+
+		cout << "\tIteration #" << i << ": x_next [" << x_next << "]" << endl;
+	}
+	
+	auto check = [&](double in) {
+		for (double val : visited) {
+			if (fabs(in - val) <= epsilon)
+				return true;
+		}
+
+		return false;
+	};
+
+
+	cout << endl << "Running for " << rounds << " rounds on "
+		<< iters << " iterations each and " << delta << " as delta"
+		<< " [Newton-Raphson]" << endl;
+	
+	for (int i = 1; i <= rounds; i++) {
+		cout << "\tRound #" << i << endl;
+
+		x_prev = x_0;
+
+		for (int j = 1; j <= iters; j++) {
+			// cout << "\t\tIteration #" << j << ": x_prev [" << x_prev << "]" << endl;
+			
+			if (find(visited.begin(), visited.end(), x_prev) != visited.end()) {
+				cout << "\t\tROUND FAILURE, hit [" << x_prev << "] again" << endl;
+				break;
+			}
+			
+			visited.push_back(x_prev);
+
+			x_next = x_prev - f(x_prev)/df_dx(x_prev);
+			x_prev = x_next;
+		
+			cout << "\t\tIteration #" << i << ": x_next [" << x_next << "]" << endl;
+
+			/* cout << "\t\t\tVisited:" << endl;
+			for (double val : visited)
+				cout << "\t\t\t\t" << val << endl; */
+		}
+		
+		x_0 += (delta * factor);
+
+		cout << "\t\t\tShifting initial guess [x_0] to " << x_0 << endl;
+
+		delta *= -1;
+		factor++;
+	}
+}
+
+void test_multivariable_root_finding()
+{
+	cout << endl << "BEGINNING MULTIVARIABLE ROOT FINDING TEST" << endl;
+	string str = "h(x, y) = x^2 + 2y - 5";
+
+	cout << endl << "Function: " << str << endl;
+
+	functor <double> h(str);
+
+	pair <double, double> h_0 = {-1, 5};
+	
+	cout << endl << "Initial guess: (" << h_0.first << ", " << h_0.second << ")" << endl;
+
+	vector <string> vars = {"x", "y"};
+
+	cout << endl << h << endl;
+
+	matrix <functor <double>> gradient(2, 1, [&](size_t i, size_t j) {
+		return h.differentiate(vars[i]);
+	});
+
+	cout << endl << gradient << endl;
+	
+	matrix <functor <double>> hessian(2, 2, [&](size_t i, size_t j) {
+		return h.differentiate(vars[i]).differentiate(vars[j]);
+	});
+
+	cout << endl << hessian << endl;
+}
+
+void test_gmp()
+{
+	cout << endl << "BEGINNING GMP LIBRARY TEST" << endl;
+
+	mpz_class a, b, c;
+
+	a = "402398470187412908740294780214732984701298471032984701234873289";
+	b = "-543554947962576597265298562765483756";
+
+	c = a * b;
+
+	cout << endl << "c: " << c << endl;
+	cout << "Absolute value: " << abs(c) << endl;
+
+	string input;
+
+	// cout << endl << "Enter any number: ";
+	// cin >> input;
+
+	mpz_class x;
+
+	// gmp_sscanf(input.c_str(), "%Zd", &x);
+
+	// cout << endl << "x: " << x << endl;
+
+	mpf_class f("432.42342342342342342342343442", 100);
+	mpf_class h("5478943.2345890434324242342432", 100);
+
+	cout << "f: " << f << endl;
+	cout << "h: " << h << endl;
+
+	int n = 100;
+	gmp_printf("fixed point mpf %.*Ff with %d digits\n", n, h, n);
+	
+	mpf_class d = f / h;
+	gmp_printf("fixed point mpf %.*Ff with %d digits\n", n, d, n);
+
+	mpf_class l = trunc(d);
+	gmp_printf("fixed point mpf %.*Ff with %d digits\n", n, l, n);
+
+	mpf_class g("545689890890.000000000000000", 100);
+	gmp_printf("fixed point mpf %.*Ff with %d digits\n", n, g, n);
+
+	if (cmp(g, trunc(g)) == 0)
+		cout << "g is an integer" << endl;
+}
+
+void test_node()
+{
+	cout << endl << "BEGINNING STREE AND NODE TEST" << endl;
+	// node <double> nd = ("4 + 654 - 231");
+	stree st("45 + 65");
+
+	st.print(1, 0);
+
+	node <double> nd("43 + 65645");
+
+	nd.print();
+}
+
+void test_table()
+{
+	cout << endl << "BEGINNING OF TABLE TEST" << endl;
+
+	table <double> tbl;
+	
+	vector <variable <double>> vals {
+		variable <double> {"x", 12.0},
+		variable <double> {"ran", true, 123},
+		variable <double> {"y", 13423.423},
+		variable <double> {"this", true, 12.0}
+	};
+
+	cout << endl << "Inserting variables...\n" << endl;
+	for (variable <double> v : vals) {
+		cout << "\tInserting: " << v << endl;
+		tbl.insert_var(v);
+	}
+
+	cout << "After Populating:" << endl;
+	tbl.print_var();
+
+	cout << "Testing Find Variable:" << endl;
+
+	variable <double> temp;
+	for (variable <double> v : vals) {
+		cout << endl << "Trying to find " << v << endl;
+		temp = tbl.find_var(v.symbol());
+		
+		cout << "Returned " << temp << endl;
+		tbl.print();
+	}
+	
+	vector <std::string> funcs {
+		"f(x) = x^4 + 6",
+		"h(x) = 232x^7 - 90",
+		"g(x, y) = x^2 + y^2"
+	};
+
+	for (std::string str : funcs) {
+		cout << "\tInserting: " << str << endl;
+		tbl.insert_ftr(functor <double> (str));
+	}
+
+	cout << "After Populating:" << endl;
+	tbl.print_ftr();
+
+	cout << "Testing Find Function:" << endl;
+
+	vector <std::string> fnames {
+		"f",
+		"g",
+		"h"
+	};
+
+	functor <double> tmp("");
+	for (std::string str : fnames) {
+		cout << endl << "Trying to find " << str << endl;
+		tmp = tbl.find_ftr(str.substr());
+		
+		cout << "Returned " << tmp << endl;
+		tbl.print_ftr();
+	}
+
+	tbl.print();
+}
+
+void test_config()
+{
+	cout << endl << "BEGINNING CONFIG TEST" << endl;
+	
+	vector <opcode> codes {
+		op_add,
+		op_sub,
+		op_mul,
+		op_div,
+		op_exp,
+		op_sin,
+		op_cos,
+		op_tan,
+		op_csc,
+		op_sec,
+		op_cot,
+		op_log
+	};
+
+	config <double> cfg;
+
+	cout << "size of cfg: " << sizeof(cfg) << endl;
+
+	token *t;
+	for (opcode i : codes) {
+		t = cfg.alloc_opn(i);
+		cout << "TOKEN: " << endl;
+		cout << "\t" << t->str() << endl;
+	}
+
+	node <double> *nd;
+	for (opcode i : codes) {
+		nd = new node <double> {cfg.alloc_opn(i), {}, &cfg};
+		cout << "NODE: " << endl;
+		// cout << "\t" << t->str() << endl;
+		nd->print();
+	}
+
+	cout << "============[POST]============" << endl;
+	nd = new node <double> {cfg.alloc_opn("sin"), {}, &cfg};
+	cout << "NODE: " << endl;
+	nd->print();
+}
+
+vector <std::function <void ()>> tests = {
+	test_variable,
+	test_expression,
+	test_variable_parsing,
+	test_function,
+	test_matrix,
+	test_root_finding,
+	test_multivariable_root_finding,
+	test_node,
+	test_gmp,
+	test_table,
+	test_config
+};
+
+int main()
+{
+	for (auto t : tests) {
+		try {
+			t();
+		} catch (node <double> ::undefined_symbol e) {
+			cout << e.what() << endl;
+		} catch (...) {
+			cout << "Caught Unkown Error" << endl;
+		}
+	}
+}

@@ -1,5 +1,5 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef TOKEN_H_
+#define TOKEN_H_
 
 // C++ Standard Libraries
 #include <string>

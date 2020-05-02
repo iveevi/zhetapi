@@ -66,7 +66,7 @@ stree::stree(const std::string &str, st_label lab,
 stree::stree(const std::string &str)
 {
 	char *stripped;
-	int i;
+	size_t i;
 	
 	stripped = new char[str.length() + 1];
 	for (i = 0; i < str.length(); i++)

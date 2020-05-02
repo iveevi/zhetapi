@@ -1,7 +1,45 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+// C++ Standard Libraries
+#include <cmath>
+#include <functional>
+#include <map>
 #include <string>
+
+// Engine Headers
+#include "operand.h"
+#include "operation.h"
+#include "variable.h"
+// #include "functor.h"
+
+enum opcode {
+	op_nao,
+	op_add,
+	op_sub,
+	op_mul,
+	op_div,
+	op_exp,
+	op_sin,
+	op_cos,
+	op_tan,
+	op_csc,
+	op_sec,
+	op_cot,
+	op_log
+};
+
+enum tcode {
+	t_nat,
+	t_opd,
+	t_opn,
+	t_var,
+	t_ftr
+};
+
+// Forward Declarations
+template <class T>
+class functor;
 
 /**
  * @brief A class used as a method
@@ -10,34 +48,183 @@
  * constants.
  */
 template <class T>
-struct config {
+class config {
+public:
 	using opd = operand <T>;
-	using opn = operation <operand <T>>;
+	using opn = operation <T>;
+	using var = variable <T>;
+	using ftr = functor <T>;
 
-	static opn add;
-	static opn sub;
-	static opn mult;
-	static opn div;
-	static opn exp;
-	static opn mod;
+	struct specs {
+		std::string in;
+		std::string out;
+		std::size_t ops;
+		std::function <T (const std::vector <token *> &)> opn;
 
-	static opn sin;
-	static opn cos;
-	static opn tan;
-	static opn csc;
-	static opn sec;
-	static opn cot;
+		opcode ocode;
+	};
+	
+	T negative;
+	T zero;
+	T one;
+private:
+	std::map <int, specs> tbl;
+public:
+	config();
+	config(const std::vector <specs> &, const T &,
+			const T &, const T &);
 
-	static opn log;
+	opcode code(const std::string &) const;
 
-	/* Real/complex space
-	 * constants */
-	static T zero;
-	static T one;
-	static T neg;
+	opn *alloc_opn(opcode) const;
+	opn *alloc_opn(const std::string &) const;
+	
+	static tcode code(token *);
 
-	// Add formatter later
 	static T read(const std::string &);
 };
+
+using namespace std;
+
+template <class T>
+config <T> ::config() : config({
+		{"+", "$1 + $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return (dynamic_cast <opd *> (ins[0]))->get()
+				+ (dynamic_cast <opd *> (ins[1]))->get();
+		}, op_add},
+		{"-", "$1 - $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return (dynamic_cast <opd *> (ins[0]))->get()
+				- (dynamic_cast <opd *> (ins[1]))->get();
+		}, op_sub},
+		{"*", "$1 * $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return (dynamic_cast <opd *> (ins[0]))->get()
+				* (dynamic_cast <opd *> (ins[1]))->get();
+		}, op_mul},
+		{"/", "$1 / $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return (dynamic_cast <opd *> (ins[0]))->get()
+				/ (dynamic_cast <opd *> (ins[1]))->get();
+		}, op_div},
+		{"^", "$1 ^ $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return pow((dynamic_cast <opd *> (ins[0]))->get(),
+				(dynamic_cast <opd *> (ins[1]))->get());
+		}, op_exp},
+		{"sin", "sin $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return sin((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_sin},
+		{"cos", "cos $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return cos((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_cos},
+		{"tan", "tan $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return tan((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_tan},
+		{"csc", "csc $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return 1 / sin((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_csc},
+		{"sec", "sec $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return 1 / cos((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_sec},
+		{"cot", "cot $1", 1, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+			return 1/ tan((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_cot},
+		{"log", "log_$1 $2", 2, [](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
+				throw typename opn::token_mismatch();
+			return log((dynamic_cast <opd *> (ins[1]))->get())
+				/ log((dynamic_cast <opd *> (ins[0]))->get());
+		}, op_log}}, -1, 0, 1) {}
+
+template <class T>
+config <T> ::config(const std::vector <specs> &st, const T &n,
+		const T &z, const T &o) : negative(n),
+		zero(z), one(o)	
+{
+	std::size_t counter = 0;
+	for (const auto &spec : st)
+		tbl[counter++] = spec;
+}
+
+template <class T>
+opcode config <T> ::code(const std::string &str) const
+{
+	auto itr = std::find_if(tbl.begin(), tbl.end(),
+		[&](const std::pair <int, specs> &pr) {
+			return pr.second.in == str;
+		}
+	);
+
+	if (itr == tbl.end())
+		return op_nao;
+	return itr->second.ocode;
+}
+
+template <class T>
+typename config <T> ::opn *config <T> ::alloc_opn(opcode ocode) const
+{
+	auto itr = std::find_if(tbl.begin(), tbl.end(),
+		[&](const std::pair <int, specs> &pr) {
+			return pr.second.ocode == ocode;
+		}
+	);
+
+	if (itr == tbl.end())
+		return nullptr;
+
+	specs sp = itr->second;
+
+	return new opn(sp.in, sp.out, sp.ops, sp.opn);
+}
+
+template <class T>
+typename config <T> ::opn *config <T> ::alloc_opn(const std::string &str) const
+{
+	auto itr = std::find_if(tbl.begin(), tbl.end(),
+		[&](const std::pair <int, specs> &pr) {
+			return pr.second.in == str;
+		}
+	);
+
+	if (itr == tbl.end())
+		return nullptr;
+
+	specs sp = itr->second;
+
+	return new opn(sp.in, sp.out, sp.ops, sp.opn);
+}
+
+template <class T>
+tcode config <T> ::code(token *t)
+{
+	if (dynamic_cast <opd *> (t))
+		return t_opd;
+	if (dynamic_cast <opn *> (t))
+		return t_opn;
+	if (dynamic_cast <var *> (t))
+		return t_var;
+	if (dynamic_cast <ftr *> (t))
+		return t_ftr;
+	return t_nat;
+}
 
 #endif

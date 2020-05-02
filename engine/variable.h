@@ -1,5 +1,5 @@
-#ifndef VARIALBE_H
-#define VARIALBE_H
+#ifndef VARIALBE_H_
+#define VARIALBE_H_
 
 // C++ Standard Libraries
 #include <string>

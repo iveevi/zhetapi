@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <cmath>
 #include <fcntl.h>
 #include <fstream>
 #include <iostream>

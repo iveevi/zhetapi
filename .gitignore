@@ -1,7 +1,5 @@
 a.out
 
-tests.cpp
-
 *.log
 *.swp
 *.output

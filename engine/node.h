@@ -10,13 +10,14 @@
 
 /* Engine Headers */
 #include "variable.h"
-#include "operation.h"
-#include "operand.h"
-#include "defaults.h"
+#include "config.h"
 #include "stree.h"
 
 template <class T>
 class table;
+
+template <class T>
+class functor;
 
 /**
  * @brief The enumeration
@@ -76,6 +77,16 @@ public:
 	 * used later */
 	
 	using params = std::vector <variable <double>>;
+
+	/* Class aliases, to avoid
+	 * potential errors from
+	 * using the wrong token type */
+
+	using opn = operation <T>;
+	using opd = operand <T>;
+	using var = variable <T>;
+	using ftr = functor <T>;
+	using cfg = config <T>;
 private:
 	/* Member instances of
 	 * the node class */
@@ -109,6 +120,8 @@ private:
 	 * (of a function).
 	 */
 	params pars;
+
+	cfg *cfg_ptr;
 public:
 	/* Constructors of the
 	 * node class */
@@ -121,7 +134,7 @@ public:
 	 * REQUIRES UPDATE ^^
 	 */
 	node(std::string, table <T> = table <T> (),
-			params = params());
+			params = params(), cfg * = new cfg());
 
 	/**
 	 * @brief Node copy constructor
@@ -140,13 +153,13 @@ public:
 	 * more complex functions, where
 	 * labeling is a post action.
 	 */
-	node(token *t, std::vector <node *> lv);
+	node(token *t, std::vector <node *> lv, cfg *);
 
 	/**
 	 * @brief Node constructor, for
 	 * all its members.
 	 */
-	node(token *t, nd_label l, std::vector <node *> lv);
+	node(token *t, nd_label l, std::vector <node *> lv, cfg *);
 
 	/* Modifiers and getter methods
 	 * of the node class */
@@ -168,7 +181,7 @@ public:
 	 * complex functions where labeling
 	 * is pushed to the very end of the process.
 	 */
-	void set(token *, std::vector <node *>);
+	void set(token *, std::vector <node *>, cfg *);
 
 	/**
 	 * @brief Setter method to change
@@ -177,7 +190,7 @@ public:
 	 * and similar methods in the functor
 	 * class.
 	 */
-	void set(token *, nd_label, std::vector <node *>);
+	void set(token *, nd_label, std::vector <node *>, cfg *);
 
 	/**
 	 * @brief Getter method for
@@ -236,12 +249,16 @@ public:
 	 * expression tree.
 	 */
 	void print(int = 1, int = 0) const;
+
+	void address_print(int = 1, int = 0) const;
 private:
 	/* Helper methods of the
 	 * node class, used by
 	 * other methods in the
 	 * public interface of this
 	 * class */
+	opn *get(opcode) const;
+	opn *get(const std::string &) const;
 
 	node *copy() const;
 
@@ -301,17 +318,6 @@ public:
 			node_error(s) {}
 	};
 
-	/* Class aliases, to avoid
-	 * potential errors from
-	 * using the wrong token type */
-
-	using opn = operation <operand <T>>;
-	using opd = operand <T>;
-
-	using var = variable <T>;
-
-	using def = defaults <T>;
-	
 	/* Augmneted data structures,
 	 * used in comperssion methods  */
 
@@ -323,10 +329,12 @@ public:
 
 /* Constructors */
 template <class T>
-node <T> ::node(std::string str, table <T> tbl, params params)
-	: pars(params)
+node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
+	: pars(params), cfg_ptr(cptr)
 {
-	*this = convert(new stree(str), tbl);
+	stree *st = new stree(str);
+	node *out = convert(st, tbl);
+	*this = out;
 }
 
 template <class T>
@@ -334,6 +342,7 @@ node <T> ::node(node *other)
 {
 	*this = *(other->copy());
 	pars = other->pars;
+	cfg_ptr = other->cfg_ptr;
 }
 
 template <class T>
@@ -341,18 +350,21 @@ node <T> ::node(const node &other)
 {
 	*this = *(other.copy());
 	pars = other->pars;
+	cfg_ptr = other->cfg_ptr;
 }
 
 template <class T>
-node <T> ::node(token *t, std::vector <node <T> *> lv)
+node <T> ::node(token *t, std::vector <node <T> *> lv, cfg *cptr)
 {
 	tok = t;
 	leaves = lv;
+	cfg_ptr = cptr;
+	type = l_none;
 }
 
 template <class T>
-node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv)
-	: tok(t), type(l), leaves(lv) {}
+node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
+	: tok(t), type(l), leaves(lv), cfg_ptr(cptr) {}
 
 /* Setters and Getters */
 template <class T>
@@ -361,21 +373,25 @@ void node <T> ::set(node *nd)
 	tok = nd->tok;
 	type = nd->type;
 	leaves = nd->leaves;
+	cfg_ptr = nd->cfg_ptr;
 }
 
 template <class T>
-void node <T> ::set(token *t, std::vector <node <T> *> lv)
+void node <T> ::set(token *t, std::vector <node <T> *> lv, cfg *cptr)
 {
 	tok = t;
 	leaves = lv;
+	cfg_ptr = cptr;
+	type = l_none;
 }
 
 template <class T>
-void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv)
+void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
 {
 	tok = t;
 	type = l;
 	leaves = lv;
+	cfg_ptr = cptr;
 }
 
 template <class T>
@@ -443,7 +459,7 @@ bool node <T> ::valid() const
 template <class T>
 const T &node <T> ::value() const
 {
-	std::vector <opd> vals;
+	std::vector <token *> vals;
 	
 	switch (tok->caller()) {
 	case token::OPERAND:
@@ -453,15 +469,14 @@ const T &node <T> ::value() const
 			switch(itr->tok->caller()) {
 			case token::OPERAND:
 			case token::OPERATION:
-				vals.push_back(opd(itr->value()));
+				vals.push_back(new opd(itr->value()));
 				break;
 			default:
 				throw incomputable_tree();
 			}
 		}
 		
-		return (dynamic_cast <opn *> (tok))
-			->compute(vals).get();
+		return (new opd((*(dynamic_cast <opn *> (tok)))(vals)))->get();
 	}
 
 	throw incomputable_tree();
@@ -484,6 +499,7 @@ void node <T> ::label(const std::vector <std::string> &vars)
 
 	for (auto nd : leaves)
 		nd->label(vars);
+
 
 	switch (tok->caller()) {
 	case token::OPERATION:
@@ -575,7 +591,7 @@ std::string node <T> ::display() const
 {
 	switch (type) {
 	case l_separable:
-		if (tok == &def::add_op)
+		if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
 			return leaves[0]->display() + " + " + leaves[1]->display();
 
 		return leaves[0]->display() + " - " + leaves[1]->display();
@@ -616,7 +632,7 @@ void node <T> ::print(int num, int lev) const
 	}
 
 	std::cout << "#" << num << " - [" << strlabs[type] << "] "
-		<< tok->str() << " @ " << this << std::endl;
+		<< tok->str() << " @ " << this << endl;
 
 	counter = 0;
 	for (node *itr : leaves) {
@@ -626,13 +642,45 @@ void node <T> ::print(int num, int lev) const
 	}
 }
 
+template <class T>
+void node <T> ::address_print(int num, int lev) const
+{
+	int counter = lev;
+	while (counter > 0) {
+		std::cout << "\t";
+		counter--;
+	}
+
+	std::cout << "#" << num << " - [" << strlabs[type] << "] "
+		<< " @ " << this << std::endl;
+
+	counter = 0;
+	for (node *itr : leaves) {
+		if (itr == nullptr)
+			continue;
+		itr->address_print(++counter, lev + 1);
+	}
+}
+
 /* Helper Methods */
+template <class T>
+typename node <T> ::opn *node <T> ::get(opcode ocode) const
+{
+	return cfg_ptr->alloc_opn(ocode);
+}
+
+template <class T>
+typename node <T> ::opn *node <T> ::get(const std::string &str) const
+{
+	return cfg_ptr->alloc_opn(str);
+}
+
 template <class T>
 node <T> *node <T> ::copy() const
 {
 	node *cpy;
 
-	cpy = new node(tok, type, {});
+	cpy = new node(tok, type, {}, cfg_ptr);
 	for (node *nd : leaves)
 		cpy->leaves.push_back(nd->copy());
 	
@@ -658,7 +706,7 @@ node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 
 		iss >> val;
 
-		out = new node {new opd(val), l_constant, {}};
+		out = new node {new opd(val), l_constant, {}, cfg_ptr};
 		break;
 	}
 
@@ -671,34 +719,8 @@ node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 template <class T>
 node <T> *node <T> ::convert_operation(stree *st, table <T> tbl) const
 {
-	node *out = new node {&def::none_op, {}};
-
-	if (st->str() == "+") {
-		out->tok = &def::add_op;
-	} else if (st->str() == "-") {
-		out->tok = &def::sub_op;
-	} else if (st->str() == "*") {
-		out->tok = &def::mult_op;
-	} else if (st->str() == "/") {
-		out->tok = &def::div_op;
-	} else if (st->str() == "^") {
-		out->tok = &def::exp_op;
-	} else if (st->str() == "sin") {
-		out->tok = &def::sin_op;
-	} else if (st->str() == "cos") {
-		out->tok = &def::cos_op;
-	} else if (st->str() == "tan") {
-		out->tok = &def::tan_op;
-	} else if (st->str() == "csc") {
-		out->tok = &def::csc_op;
-	} else if (st->str() == "sec") {
-		out->tok = &def::sec_op;
-	} else if (st->str() == "cot") {
-		out->tok = &def::cot_op;
-	} else if (st->str() == "log") {
-		out->tok = &def::log_op;
-	}
-
+	node *out = new node {get(st->str()), {}, cfg_ptr};
+	
 	for (stree *s : st->children())
 		out->leaves.push_back(convert(s, tbl));
 
@@ -713,11 +735,11 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	node *save;
 	node *temp;
 	node *in;
-
-	out = new node {&def ::mult_op, {
-		new node {new opd(1), l_none, {}},
-		new node {new opd(1), l_none, {}}
-	}};
+	
+	out = new node {get(op_mul), {
+		new node {new opd(1), l_none, {}, cfg_ptr},
+		new node {new opd(1), l_none, {}, cfg_ptr}
+	}, cfg_ptr};
 
 	temp = out;
 
@@ -738,10 +760,10 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 		);
 
 		if (vitr != pars.end()) {
-			out = new node {&def ::mult_op, l_none, {
+			out = new node {get(op_mul), l_none, {
 				out,
-				new node {new var {vitr->symbol(), true}, {}}
-			}};
+				new node {new var {vitr->symbol(), true}, {}, cfg_ptr}
+			}, cfg_ptr};
 
 			acc.clear();
 			num++;
@@ -749,10 +771,10 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 
 		try {
 			vr = tbl.find_var(acc);
-			out = new node {&def ::mult_op, l_none, {
+			out = new node {get(op_mul), {
 				out,
-				new node {new opd {vr.get()}, {}}
-			}};
+				new node {new opd {vr.get()}, {}, cfg_ptr}
+			}, cfg_ptr};
 			num++;
 		} catch(...) {}
 	}
@@ -766,13 +788,6 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 template <class T>
 void node <T> ::label_as_operation()
 {
-	size_t i;
-	for (i = 0; i < def::m_size; i++) {
-		if (def::opers[i].matches((dynamic_cast
-				<opn *> (tok))->symbol()))
-			break;
-	}
-
 	bool constant = true;
 	for (node *nd : leaves) {
 		if (nd->type != l_constant &&
@@ -781,27 +796,29 @@ void node <T> ::label_as_operation()
 			break;
 		}
 	}
-
+	
 	if (constant) {
 		type = l_operation_constant;
 		return;
 	}
 
-	switch (i) {
-	case def::SINOP:
-	case def::COSOP:
-	case def::CSCOP:
-	case def::SECOP:
-	case def::TANOP:
-	case def::COTOP:
-		type = l_trigonometric;
+	opn *optr = dynamic_cast <opn *> (tok);
+	switch (cfg_ptr->code(optr->fmt())) {
+	case op_add:
+	case op_sub:
+		type = l_separable;
 		break;
-	case def::EXPOP:
+	case op_mul:
+		type = l_multiplied;
+		break;
+	case op_div:
+		type = l_divided;
+		break;
+	case op_exp:
 		if (leaves[0]->type == l_variable) {
 			if (leaves[1]->type == l_constant)
 				type = l_power;
 			else
-				// new type
 				break;
 		} else if (leaves[0]->type == l_constant) {
 			if (leaves[1]->type == l_constant)
@@ -809,23 +826,21 @@ void node <T> ::label_as_operation()
 			else if (leaves[1]->type == l_variable)
 				type = l_exponential;
 			else
-				// something else
 				break;
 		} else {
 			type = l_exp;
 		}
 
 		break;
-	case def::ADDOP:
-	case def::SUBOP:
-		type = l_separable;
+	case op_sin:
+	case op_cos:
+	case op_tan:
+	case op_csc:
+	case op_sec:
+	case op_cot:
+		type = l_trigonometric;
 		break;
-	case def::MULTOP:
-		type = l_multiplied;
-		break;
-	case def::DIVOP:
-		type = l_divided;
-		break;
+	case op_log:
 	default:
 		break;
 	}
@@ -869,7 +884,9 @@ void node <T> ::compress_as_multiplied()
 	std::queue <node *> que;
 	std::string name;
 	
-	std::vector <opd> vals;
+	std::vector <token *> vals;
+
+	opn *optr = get(op_mul);
 
 	opd *constant = new opd(1);
 	node *temp, *t;
@@ -894,17 +911,17 @@ void node <T> ::compress_as_multiplied()
 			break;
 		case l_operation_constant:
 			vals = {
-				opd(current->value()),
-				*(dynamic_cast <opd *> (constant))
+				new opd(current->value()),
+				constant
 			};
-			constant = new opd(def::mult_op.compute(vals));
+			constant = new opd((*optr)(vals));
 			break;
 		case l_constant:
 			vals = {
-				*constant,
-				*(dynamic_cast <opd *> (current->tok))
+				constant,
+				current->tok
 			};
-			constant = new opd(def::mult_op.compute(vals));
+			constant = new opd((*optr)(vals));
 			break;
 		default:
 			misc.push_back(current);
@@ -912,57 +929,44 @@ void node <T> ::compress_as_multiplied()
 		}
 	}
 
-	/* cout << endl << "CONSTANT:" << endl;
-	cout << "\t" << constant->get() << " @ " << constant << endl;
-	cout << endl << "VARIABLES:" << endl;
-	for (auto itr : chart)
-		cout << "\tVAR:\t" << itr.first << ", POW:\t" << itr.second << endl;
-	cout << endl << "MISC:" << endl; 
-	for (auto nd : misc) {
-		cout << std::string(100, '-') << endl;
-		compress(nd);
-		print(nd, 1, 0);
-	}
-	
-	cout << std::string(100, '-') << endl; */
-	
 	for (auto nd : misc)
 		nd->compress();
 
 	tok = nullptr;
 	if (constant->get() == 0) {
-		set(new opd(0), {});
+		set(new opd(0), {}, cfg_ptr);
 		return;
 	}
 
 	if (constant->get() != 1)
-		set(constant, {});
+		set(constant, {}, cfg_ptr);
 
 	for (auto itr : chart) {
 		if (tok)
 			temp = copy();
 
 		if (itr.second == 1) {
-			t = new node(new var(itr.first, true), {});
+			t = new node(new var(itr.first, true), {}, cfg_ptr);
 		} else {
-			t = new node(&def::exp_op, {
-				new node(new var(itr.first, true), {}),
-				new node(new opd(itr.second), {})
-			});
+			t = new node(get(op_exp), {
+				new node(new var(itr.first, true), {}, cfg_ptr),
+				new node(new opd(itr.second), {}, cfg_ptr)
+			}, cfg_ptr);
 		}
 
-		if (tok)
-			set(&def::mult_op, {temp, t});
-		else
+		if (tok) {
+			set(cfg_ptr->alloc_opn(op_mul), {temp, t}, cfg_ptr);
+		} else {
 			set(t);
+		}
 	}
 
 	for (auto itr : misc) {
-		if (tok) {
+		if (tok) {	
 			temp = copy();
-			set(&def::mult_op, {temp, itr});
+			set(cfg_ptr->alloc_opn(op_mul), {temp, itr}, cfg_ptr);
 		} else {
-			set(itr->tok, itr->leaves);
+			set(itr->tok, itr->leaves, cfg_ptr);
 		}
 	}
 }
@@ -986,7 +990,7 @@ void node <T> ::compress_as_power()
 		if (val == 1)
 			set(leaves[0]);
 		else if (val == 0)
-			set(new opd(1), {});
+			set(new opd(1), {}, cfg_ptr);
 	}
 }
 
@@ -996,7 +1000,7 @@ void node <T> ::differentiate_as_multiplied(const std::string &var)
 	node *lcpy;
 	node *rcpy;
 
-	tok = &def::add_op;
+	tok = get(op_add);
 
 	lcpy = leaves[0]->copy();
 	lcpy->differentiate(var);
@@ -1005,8 +1009,8 @@ void node <T> ::differentiate_as_multiplied(const std::string &var)
 	rcpy->differentiate(var);
 	
 	leaves = {
-		new node(&def::mult_op, {leaves[1], lcpy}),
-		new node(&def::mult_op, {leaves[0], rcpy})
+		new node(get(op_mul), {leaves[1], lcpy}, cfg_ptr),
+		new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
 	};
 }
 
@@ -1023,13 +1027,13 @@ void node <T> ::differentiate_as_power(const std::string &var)
 
 	val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 
-	tok = &def::mult_op;
+	tok = get(op_mul);
 
 	delete leaves[1];
-	leaves[1] = new node(&def::exp_op, {
-			new node(leaves[0]->tok, {}),
-			new node(new opd(val - 1), {})
-	});
+	leaves[1] = new node(get(op_exp), {
+			new node(leaves[0]->tok, {}, cfg_ptr),
+			new node(new opd(val - 1), {}, cfg_ptr)
+	}, cfg_ptr);
 	
 	leaves[0]->tok = new opd(val);
 }
@@ -1037,25 +1041,18 @@ void node <T> ::differentiate_as_power(const std::string &var)
 template <class T>
 void node <T> ::differentiate_as_trigonometric(const std::string &var)
 {
-	size_t i;
-	for (i = 0; i < def::m_size; i++) {
-		if (def::opers[i].matches((dynamic_cast
-				<opn *> (tok))->symbol()))
-			break;
-	}
-
-	switch (i) {
-	case def::SINOP:
-		tok = &def::cos_op;
+	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
+	case op_sin:
+		tok = get(op_cos);
 		break;
-	case def::COSOP:
-		set(&def::mult_op, {
-			new node(new opd(-1), {}),
+	case op_cos:
+		set(get(op_mul), {
+			new node(new opd(-1), {}, cfg_ptr),
 			copy()
-		});
+		}, cfg_ptr);
 		break;
 	default:
-		return;
+		break;
 	}
 }
 
@@ -1076,18 +1073,20 @@ std::string node <T> ::display_as_trigonometric() const
 	std::string stropn;
 
 	stropn = leaves[0]->display();
-	if (tok == &def::sin_op)
+	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
+	case op_sin:
 		return "sin " + stropn;
-	if (tok == &def::cos_op)
+	case op_cos:
 		return "cos " + stropn;
-	if (tok == &def::tan_op)
+	case op_tan:
 		return "tan " + stropn;
-	if (tok == &def::csc_op)
+	case op_csc:
 		return "csc " + stropn;
-	if (tok == &def::sec_op)
+	case op_sec:
 		return "sec " + stropn;
-	if (tok == &def::cot_op)
+	case op_cot:
 		return "cot " + stropn;
+	}
 
 	throw node_error("Node labeled as trigonometric, \
 		but token is of an undetectable type");

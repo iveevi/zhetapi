@@ -1,0 +1,64 @@
+Updated classes that are unlikely to see changes soon:
+	- table : Still needs documentation.
+	- stree : Still needs documentation.
+	- config : Still needs documentation
+
+Classes that are expecting new features:
+	- node
+	- matrix
+	- operation : In built formatter features
+
+Updated classes which are expecting further significant changes:
+	- expression : This class will most likely
+	be removed and be replaced by a module,
+	as it only contains static methods; caching
+	can be done at a higher as mentioned in the notes
+	of the file.
+	- defaults : This class will also most likely
+	be removed due to the fact that it will be replaced
+	by config and its default constructor.
+	- formatter : As the operation class will have
+	its own method for doing what the formatter does,
+	this class will no longer be of use as itself.
+
+Classes that are somewhat redundant:
+	- application
+	- assignment
+	- common
+	- constants
+	- debug
+	- exception
+
+Classes that need to be updated:
+	- operand
+	- variable
+
+Class that need to be cleaned up:
+	- functor : This class also need to be derived
+	from token.
+
+Classes that need to be added to completed:
+	- config : Add a feature/method that checks a
+	token pointer to see if it is any of the tokens
+	(operand, operation, variable and functor), and
+	returns the appropriate code for some other
+	functions to translate it into the appropriate token.
+	This will, in turn, make the token type enumeration
+	redundant.
+	- utility
+
+Non-header files:
+	- driver.cpp : The driving program for
+	the website, where computation is received
+	and sent back to the frontend.
+	- tests.cpp : Contains recent (and old) tests
+	which are used to tests and compare the accuracy
+	of the classes and implementation.
+	- graph.cpp : A utility for graphing certain functions,
+	using opengl, gl, and glut.
+
+	- parser.y : Bison file which aids the process
+	of the translating user input into an expression
+	tree.
+	- lexer.l : Flex file which also aids in the process
+	of translating user input into an expression tree.

@@ -1,5 +1,5 @@
-#ifndef OPERAND_H
-#define OPERAND_H
+#ifndef OPERAND_H_
+#define OPERAND_H_
 
 // Custom Built Libraries
 #include "token.h"

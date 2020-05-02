@@ -1,8 +1,12 @@
-tests: build texifier
+graph: tests
+	@echo "\n[BUILDING GRAPHER]\n"
+	nvcc engine/graph.cpp -g -lfl -lGL -lglut -o build/graph
+
+tests: texifier
 	@echo "\n[BUILDING TESTS]\n"
 	g++ engine/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
-texifier: build driver
+texifier: driver
 	@echo "\n[BUILDING TEXIFIER]\n"
 	
 	touch build/texifier.in

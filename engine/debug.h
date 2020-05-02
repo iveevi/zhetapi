@@ -1,5 +1,5 @@
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef DEBUG_H_
+#define DEBUG_H_
 
 // C++ Standard Libraries
 #include <iostream>

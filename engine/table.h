@@ -6,6 +6,12 @@
 #include "variable.h"
 
 template <class T>
+class functor;
+
+template <class T>
+class variable;
+
+template <class T>
 class table {
 public:
 	using var = variable <T>;
