@@ -13,7 +13,6 @@
 /* Engine Headers */
 #include "token.h"
 #include "variable.h"
-#include "constants.h"
 #include "operand.h"
 #include "table.h"
 #include "node.h"
@@ -125,7 +124,7 @@ functor <T> ::functor(const std::string &in)
 		}
 	}
 
-	if (count != ASSIGNMENT)
+	if (count != 1)
 		throw invalid_definition();
 
 	name = in.substr(0, index);

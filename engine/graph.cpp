@@ -2,13 +2,7 @@
 
 #include "functor.h"
 
-/* template <typename data_t>
-operation <operand <data_t>> defaults <data_t> ::mult_op = operation <operand <data_t>>
-(std::string {"mult_op"}, defaults <data_t> ::mult_f, 2, std::vector
-<std::string> {"*", "times", "by"}, operation <operand <data_t>>::MDM_L2,
-std::vector <std::string> {"8*8"}); */
-
-functor <double> f("f(x) = 2.171828^(x^2 - x)");
+functor <double> f("f(x) = sin x");
 
 /* Sample func itself */
 float func(float x)

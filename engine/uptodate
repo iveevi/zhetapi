@@ -22,12 +22,6 @@ Updated classes which are expecting further significant changes:
 	this class will no longer be of use as itself.
 
 Classes that are somewhat redundant:
-	- application
-	- assignment
-	- common
-	- constants
-	- debug
-	- exception
 
 Classes that need to be updated:
 	- operand

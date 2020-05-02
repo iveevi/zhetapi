@@ -8,7 +8,6 @@
 
 // Custom Built Libraries
 #include "token.h"
-#include "exception.h"
 
 /* Variable Class:
  *
