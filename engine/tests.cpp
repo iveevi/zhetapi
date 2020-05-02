@@ -88,32 +88,6 @@ void test_variable_parsing()
 	}
 }
 
-/* void test_application()
-{
-	cout << endl << "BEGINNING APPLICATION TEST" << endl;
-	application <double> app;
-	var_stack <double> vst;
-
-	vector <variable <double>> vals {variable <double> {"x", 12.0},
-		variable <double> {"ran", true, 123},
-		variable <double> {"y", 13423.423},
-		variable <double> {"this", true, 12.0}};
-	
-	for (variable <double> v : vals) {
-		// cout << "Inserting: " << v << endl;
-		vst.insert(v);
-	}
-
-	string input;
-	while (true) {
-		cout << "Enter an expression to be evaluated: ";
-		getline(cin, input);
-
-		app = application <double> (input);
-		app(vst);
-	}
-} */
-
 void test_function()
 {
 	cout << endl << "BEGINNING FUNCTION TEST" << endl;
