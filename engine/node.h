@@ -2,6 +2,7 @@
 #define NODE_H_
 
 /* C++ Standard Libraries */
+#include <cmath>
 #include <functional>
 #include <queue>
 #include <string>
@@ -272,10 +273,12 @@ private:
 	void compress_as_multiplied();
 	void compress_as_divided();
 	void compress_as_power();
+	void compress_as_exponential();
 
 	void differentiate_as_multiplied(const std::string &);
 	void differentiate_as_divided(const std::string &);
 	void differentiate_as_power(const std::string &);
+	void differentiate_as_exponential(const std::string &);
 	void differentiate_as_trigonometric(const std::string &);
 
 	std::string display_as_operand(nd_label) const;
@@ -464,17 +467,13 @@ const T &node <T> ::value() const
 	switch (tok->caller()) {
 	case token::OPERAND:
 		return (dynamic_cast <opd *> (tok))->get();
+	case token::VARIABLE:
+		if (!(dynamic_cast <var *> (tok))->is_param()) 
+			return (dynamic_cast <var *> (tok))->get();
+		throw incomputable_tree();
 	case token::OPERATION:
-		for (auto itr : leaves) {
-			switch(itr->tok->caller()) {
-			case token::OPERAND:
-			case token::OPERATION:
-				vals.push_back(new opd(itr->value()));
-				break;
-			default:
-				throw incomputable_tree();
-			}
-		}
+		for (auto itr : leaves)
+			vals.push_back(new opd(itr->value()));
 		
 		return (new opd((*(dynamic_cast <opn *> (tok)))(vals)))->get();
 	}
@@ -538,6 +537,9 @@ void node <T> ::compress()
 	case l_multiplied:
 		compress_as_multiplied();
 		break;
+	case l_divided:
+		compress_as_divided();
+		break;
 	default:
 		for (node *nd : leaves)
 			nd->compress();
@@ -554,6 +556,9 @@ void node <T> ::differentiate(const std::string &var)
 		break;
 	case l_power:
 		differentiate_as_power(var);
+		break;
+	case l_exponential:
+		differentiate_as_exponential(var);
 		break;
 	case l_multiplied:
 		differentiate_as_multiplied(var);
@@ -604,8 +609,8 @@ std::string node <T> ::display() const
 		return (dynamic_cast <var *> (tok))->symbol();
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
-		return leaves[0]->display_as_operand(type) + " ^ " + leaves[1]->display_as_operand(type);
 	case l_power:
+	case l_exponential:
 		return leaves[0]->display_as_operand(type) + " ^ " + leaves[1]->display_as_operand(type);
 	// remove operation constant later
 	case l_operation_constant:
@@ -772,8 +777,10 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			vr = tbl.find_var(acc);
 			out = new node {get(op_mul), {
 				out,
-				new node {new opd {vr.get()}, {}, cfg_ptr}
+				new node {new var(vr), {}, cfg_ptr}
 			}, cfg_ptr};
+
+			acc.clear();
 			num++;
 		} catch(...) {}
 	}
@@ -787,34 +794,16 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 template <class T>
 void node <T> ::label_as_operation()
 {
-
-	if (type == l_operation_constant) {
-		cout << "CATCHING RAT" << endl;
-		print();
-	}
-
 	bool constant = true;
 	for (node *nd : leaves) {
-		cout << "LEAF:" << endl;
-		nd->print();
 		if (nd->type != l_constant &&
 				nd->type != l_operation_constant) {
-			cout << "\tNOT A CONST-LIKE TERM" << endl;
 			constant = false;
 			break;
-		}
-
-		if (nd->type == l_constant) {
-			cout << "\tCONSTANT" << endl;
-		}
-
-		if (nd->type == l_variable) {
-			cout << "\tIS VARIABLE" << endl;
 		}
 	}
 	
 	if (constant) {
-		cout << "OPERATION CONST CONFIRMED:" << endl;
 		type = l_operation_constant;
 		return;
 	}
@@ -850,7 +839,12 @@ void node <T> ::label_as_operation()
 
 		// If it not an operation constant,
 		// it is a power node
-		type = l_power;
+		if (leaves[0]->type == l_constant
+				|| leaves[0]->type == l_operation_constant)
+			type = l_exponential;
+		else if (leaves[1]->type == l_constant
+				|| leaves[1]->type == l_operation_constant)
+			type = l_power;
 		break;
 	case op_sin:
 	case op_cos:
@@ -994,7 +988,34 @@ void node <T> ::compress_as_multiplied()
 template <class T>
 void node <T> ::compress_as_divided()
 {
+	T val;
+	
+	for (node *nd : leaves)
+		nd->compress();
 
+	if (leaves[0]->type == l_constant) {
+		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
+
+		if (val == 1) {
+			delete tok;
+			tok = get(op_exp);
+
+			leaves[0] = leaves[1]->copy();
+
+			delete leaves[1];
+			leaves[1] = new node(new opd(-1), {}, cfg_ptr);
+		} else if (val == 0) {
+			set(new opd(0), {}, cfg_ptr);
+		}
+	} else if (leaves[1]->type == l_constant) {
+		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
+
+		if (val == cfg_ptr->one) {
+			set(leaves[0]);
+		}
+		/* else if (val == 0) <- throw zero division exception
+			set(new opd(1), {}, cfg_ptr); */
+	}
 }
 
 template <class T>
@@ -1002,15 +1023,54 @@ void node <T> ::compress_as_power()
 {
 	T val;
 
+	node *lr;
+	node *cpy;
+	if (leaves[0]->type == l_multiplied) {
+		cpy = copy();
+
+		lr = leaves[0]->leaves[1];
+
+		cpy->leaves[0] = lr;
+		leaves[0]->leaves[1] = cpy;
+		leaves[1] = leaves[0]->leaves[1];
+		leaves[0] = leaves[0]->leaves[0];
+		tok = get(op_mul);
+
+		leaves[0]->compress();
+		leaves[1]->compress();
+		
+		for (node *nd : leaves)
+			nd->compress();
+		
+		return;
+	}
+
 	for (node *nd : leaves)
 		nd->compress();
-
+	
 	if (leaves[1]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 		if (val == 1)
 			set(leaves[0]);
 		else if (val == 0)
 			set(new opd(1), {}, cfg_ptr);
+	}
+}
+
+template <class T>
+void node <T> ::compress_as_exponential()
+{
+	T val;
+
+	for (node *nd : leaves)
+		nd->compress();
+
+	if (leaves[0]->type == l_constant) {
+		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
+		if (val == 1)
+			set(new opd(1), {}, cfg_ptr);
+		else if (val == 0)
+			set(new opd(0), {}, cfg_ptr);
 	}
 }
 
@@ -1065,6 +1125,48 @@ void node <T> ::differentiate_as_power(const std::string &var)
 }
 
 template <class T>
+void node <T> ::differentiate_as_exponential(const std::string &var)
+{
+	T val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
+
+	val = log(val);
+
+	node *r = leaves[1]->copy();
+	
+	node *rd = r->copy();
+
+	/* cout << "RIGHT [PRE]" << endl;
+	rd->print(); */
+
+	rd->differentiate({var});
+
+	/* cout << "RIGHT [POST]" << endl;
+	rd->print(); */
+
+	node *lf = new node(get(op_mul), {
+			rd,
+			new node(new opd(val), {}, cfg_ptr),
+	}, cfg_ptr);
+
+	node *rf = new node(get(op_exp), {
+			new node(new opd(exp(1)), {}, cfg_ptr),
+			new node(get(op_mul), {
+					r,
+					new node(new opd(val), {}, cfg_ptr)
+			}, cfg_ptr),
+	}, cfg_ptr);
+
+	delete tok;
+	tok = get(op_mul);
+
+	delete leaves[0];
+	leaves[0] = lf;
+
+	delete leaves[1];
+	leaves[1] = rf;
+}
+
+template <class T>
 void node <T> ::differentiate_as_trigonometric(const std::string &var)
 {
 	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
@@ -1088,9 +1190,11 @@ std::string node <T> ::display_as_operand(nd_label required) const
 	std::string out = display();
 
 	switch (required) {
+	case l_exp:
 	case l_power:
-		if (type == l_multiplied
-				|| type == l_divided)
+	case l_exponential:
+		if (type != l_constant
+			&& type != l_variable)
 			out = "(" + out + ")";
 		break;
 	case l_multiplied:

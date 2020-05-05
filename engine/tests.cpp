@@ -114,7 +114,14 @@ void test_function()
 
 	cout << endl << f.display() << endl;
 
-	functor <double> h("h(x) = (3x^2)^3");
+	table <double> tbl {
+		variable <double> {"e", exp(1)},
+		variable <double> {"pi", acos(-1)},
+		variable <double> {"phi", (1 + sqrt(5))/2},
+		functor <double> {"g(x) = x^3"}
+	};
+
+	functor <double> h("h(x) = 1/(1 + e^(-x))", tbl);
 
 	cout << endl << h.display() << endl;
 	
@@ -729,8 +736,9 @@ void test_ml()
 	
 	cout << endl << "BEGINNING ML TEST" << endl;
 
-	cout << endl << "dc/dw_one = " << cost_one << endl;
-	cout << "dc/dw_two = " << cost_two << endl;
+	cout << endl << cost << endl;
+	cout << cost_one << endl;
+	cout << cost_two << endl;
 
 	int iters = 10;
 
@@ -756,7 +764,7 @@ void test_ml()
 }
 
 vector <std::function <void ()>> tests = {
-	test_ml
+	test_function
 };
 
 int main()

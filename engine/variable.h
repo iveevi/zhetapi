@@ -67,6 +67,8 @@ public:
 	// change to const refs
 	variable(std::string, bool, data_t = data_t());
 
+	variable(const variable &);
+
 	/* Virtualized Member Functions:
 	 * void [set](bool) - changes whether or not the
 	 *   current variable object acts as a dummy
@@ -128,6 +130,8 @@ public:
 	virtual const std::string &operator*(int) const noexcept(false);
 	virtual const std::pair <data_t, std::string>
 		&operator*(std::string) const noexcept(false);
+
+	bool is_param() const {return param;}
 
 	// returns the name of the variable
 	virtual const std::string &symbol() const;
@@ -207,6 +211,10 @@ variable <T> ::variable(const std::string &str, const T &dt)
 template <typename data_t>
 variable <data_t> ::variable(std::string str, bool bl, data_t vl)
 	: val(vl), name(str), param(bl) {}
+
+template <class T>
+variable <T> ::variable(const variable &other) : name(other.name),
+	val(other.val), param(other.param) {}
 
 /* Virtualized member functions:
  * setters, getters and operators */

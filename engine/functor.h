@@ -92,9 +92,12 @@ public:
 	template <class U>
 	friend bool operator<(const functor <U> &,
 		const functor <U> &);
+
+	type caller() const;
+	std::string str() const;
 protected:
 	template <class ... U>
-	static void gather(std::vector <T> &, T, U...);
+	static void gather(std::vector <T> &, T, U ...);
 
 	static void gather(std::vector <T> &, T);
 
@@ -260,14 +263,8 @@ void functor <T> ::build()
 template <class T>
 void functor <T> ::compress()
 {
-	cout << "MROOT (" << m_name << ") [PRE LABEL]:" << endl;
-	m_root->print();
 	m_root->label_all();
-	cout << "MROOT (" << m_name << ") [POST LABEL]:" << endl;
-	m_root->print();
 	m_root->compress();
-	cout << "MROOT (" << m_name << ") [POST COMPRESSION]:" << endl;
-	m_root->print();
 	build();
 }
 
@@ -279,12 +276,8 @@ const functor <T> &functor <T> ::differentiate
 	node <T> *diffed = new node <T> (m_root);
 
 	diffed->label({var});
-	cout << "DIFFED [LABELED]: [" << m_name << "][" << var << "]" << endl;
-	diffed->print();
 
 	diffed->differentiate(var);
-	cout << "DIFFED [POST]: [" << m_name << "][" << var << "]" << endl;
-	diffed->print();
 	
 	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
 
@@ -332,6 +325,18 @@ template <class T>
 bool operator<(const functor <T> &lhs, const functor <T> &rhs)
 {
 	return lhs.m_name < rhs.m_name;
+}
+
+template <class T>
+token::type functor <T> ::caller() const
+{
+	return FUNCTOR;
+}
+
+template <class T>
+std::string functor <T> ::str() const
+{
+	return display();
 }
 
 #endif

@@ -18,9 +18,13 @@ public:
 	/* Enumerations:
 	 * [type] - new data type to allow function
 	 * caller inspection */
-	enum type {NONE, OPERAND, OPERATION,
-		VARIABLE, FUNCTION, PARSER, DEFAULTS,
-		GROUP, LPAREN, RPAREN};
+	enum type {
+		BASE,
+		OPERAND,
+		OPERATION,
+		VARIABLE,
+		FUNCTOR
+	};
 
 	/* Virtual:
 	 * [type] [caller]() - inspector function passed
@@ -37,7 +41,7 @@ public:
  * caller and str methods */
 token::type token::caller() const
 {
-	return NONE;
+	return BASE;
 }
 
 std::string token::str() const

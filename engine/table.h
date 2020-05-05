@@ -38,6 +38,12 @@ public:
 	table();
 	table(const table &);
 
+	table(const std::vector <var> &, const std::vector <ftr> &);
+	table(const std::pair <std::vector <var>, std::vector <ftr>> &);
+
+	template <class ... U>
+	table(U ...);
+
 	const table &operator=(const table &);
 
 	~table();
@@ -67,6 +73,20 @@ public:
 	void print_var() const;
 	void print_ftr() const;
 private:
+	void gather(std::pair <std::vector <var>, std::vector <ftr>> &,
+			var) const;
+	
+	template <class ... U>
+	void gather(std::pair <std::vector <var>, std::vector <ftr>> &,
+			var, U ...) const;
+	
+	void gather(std::pair <std::vector <var>, std::vector <ftr>> &,
+			ftr) const;
+	
+	template <class ... U>
+	void gather(std::pair <std::vector <var>, std::vector <ftr>> &,
+			ftr, U ...) const;
+
 	__var_node *clone_var(__var_node *);
 	__ftr_node *clone_ftr(__ftr_node *);
 
@@ -103,6 +123,33 @@ table <T> ::table(const table &other) : vtree(nullptr),
 	ftree(nullptr), vtree_size(0), ftree_size(0)
 {
 	*this = other;
+}
+
+template <class T>
+table <T> ::table(const std::vector <var> &vs, const std::vector <ftr> &fs)
+	: table()
+{
+	for (auto vr : vs)
+		insert_var(vr);
+	for (auto ft : fs)
+		insert_ftr(ft);
+}
+
+template <class T>
+table <T> ::table(const std::pair <std::vector <var>, std::vector <ftr>> &pr)
+	: table(pr.first, pr.second) {}
+
+template <class T>
+template <class ... U>
+table <T> ::table(U ... args) : table()
+{
+	std::pair <std::vector <var>, std::vector <ftr>> pr;
+	gather(pr, args...);
+
+	for (auto vr : pr.first)
+		insert_var(vr);
+	for (auto ft : pr.second)
+		insert_ftr(ft);
 }
 
 template <class T>
@@ -368,6 +415,38 @@ void table <T> ::print_ftr() const
 
 /* Protected methods (helpers methods);
  * splay, rotate left/right, clone, ect. */
+template <class T>
+void table <T> ::gather(std::pair <std::vector <var>, std::vector <ftr>> &pr,
+		var vs) const
+{
+	pr.first.push_back(vs);
+}
+
+template <class T>
+template <class ... U>
+void table <T> ::gather(std::pair <std::vector <var>, std::vector <ftr>> &pr,
+		var vs, U ... args) const
+{
+	pr.first.push_back(vs);
+	gather(pr, args...);
+}
+
+template <class T>
+void table <T> ::gather(std::pair <std::vector <var>, std::vector <ftr>> &pr,
+		ftr ft) const
+{
+	pr.second.push_back(ft);
+}
+
+template <class T>
+template <class ... U>
+void table <T> ::gather(std::pair <std::vector <var>, std::vector <ftr>> &pr,
+		ftr ft, U ... args) const
+{
+	pr.second.push_back(ft);
+	gather(pr, args...);
+}
+
 template <class T>
 typename table <T> ::__var_node *table <T> ::clone_var(__var_node *vnd)
 {

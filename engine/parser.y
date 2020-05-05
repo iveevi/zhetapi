@@ -106,7 +106,7 @@ expr:  	expr SUPERSCRIPT expr { // Exponentiation
 } %prec MINUS
 
    | 	MINUS coll {
-		$$ = new stree("-", l_operation, {
+		$$ = new stree("*", l_operation, {
 			new stree ("-1", l_number, {}), $2
 		});
 } %prec MINUS
