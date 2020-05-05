@@ -20,17 +20,23 @@
  */
 template <class T>
 class matrix {
+protected:
 	T **m_array;
 
 	size_t rows;
 	size_t cols;
 public:
+	matrix();
+	matrix(const matrix <T> &);
+
 	matrix(T **);
+	matrix(const std::vector <T> &);
 	matrix(const std::vector <std::vector <T>> &);
 
 	matrix(size_t, size_t, T = T());
 	matrix(size_t, size_t, T, T **);
 
+	matrix(size_t, size_t, std::function <T (size_t)>);
 	matrix(size_t, size_t, std::function <T (size_t, size_t)>);
 
 	~matrix();
@@ -88,9 +94,26 @@ public:
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const matrix <U> &);
-private:
+protected:
 	T determinant(const matrix &) const;
 };
+
+template <class T>
+matrix <T> ::matrix() : rows(0), cols(0), m_array(nullptr) {}
+
+template <class T>
+matrix <T> ::matrix(const matrix <T> &other) : rows(other.rows),
+		cols(other.cols)
+{
+	m_array = new T *[rows];
+
+	for (int i = 0; i < rows; i++) {
+		m_array[i] = new T[cols];
+
+		for (int j = 0; j < cols; j++)
+			m_array[i][j] = other[i][j];
+	}
+}
 
 template <class T>
 matrix <T> ::matrix(T **ref)
@@ -111,6 +134,23 @@ matrix <T> ::matrix(T **ref)
 		for (int j = 0; j < cols; j++)
 			m_array[i][j] = ref[i][j];
 	}
+}
+
+template <class T>
+matrix <T> ::matrix(const std::vector <T> &ref)
+{
+	rows = ref.size();
+
+	assert(rows > 0);
+
+	cols = 1;
+
+	assert(cols > 0);
+	
+	m_array = new T *[rows];
+
+	for (int i = 0; i < rows; i++)
+		m_array[i] = new T {ref[i]};
 }
 
 template <class T>
@@ -155,6 +195,23 @@ matrix <T> ::matrix(size_t rs, size_t cs, T val)
 template <class T>
 matrix <T> ::matrix(size_t rows, size_t cols, T val, T **ref)
 {
+}
+
+template <class T>
+matrix <T> ::matrix(size_t rs, size_t cs,
+		std::function <T (size_t)> gen)
+{
+	rows = rs;
+	cols = cs;
+
+	m_array = new T *[rows];
+
+	for (int i = 0; i < rows; i++) {
+		m_array[i] = new T[cols];
+		
+		for (int j = 0; j < cols; j++)
+			m_array[i][j] = gen(i);
+	}
 }
 
 template <class T>
@@ -394,7 +451,6 @@ const matrix <T> &operator*(const matrix <T> &a, const matrix <T> &b)
 const T &matrix <T> ::operator*(const matrix <T> &a, const matrix <T> &b)
 {
 	assert(a.cols == b.rows && a.rows == b.cols == 1);
-
 	return (a * b)[0][0];
 } */
 
@@ -404,6 +460,8 @@ const matrix <T> &operator*(const matrix <T> &a, const T &scalar)
 	matrix <T> *out = new matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
 		return a[i][j] * scalar;
 	});
+
+	return *out;
 }
 
 template <class T>

@@ -55,7 +55,7 @@ protected:
 public:
 	// if there are no arguments, degrade to
 	// lambda (formal token_tree)
-	functor(const std::string & = "");
+	functor(const std::string & = "", table <T> = table <T> ());
 	functor(const std::string &,
 		const std::vector <std::string> &,
 		const std::string &);
@@ -104,7 +104,7 @@ protected:
 };
 
 template <class T>
-functor <T> ::functor(const std::string &in)
+functor <T> ::functor(const std::string &in, table <T> tbl)
 {
 	std::vector <std::string> params;
 	std::string name;
@@ -161,7 +161,7 @@ functor <T> ::functor(const std::string &in)
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
 	
-	m_root = new node <T> (expr, table <T> (), m_params);
+	m_root = new node <T> (expr, tbl, m_params);
 
 	compress();
 }
@@ -260,8 +260,14 @@ void functor <T> ::build()
 template <class T>
 void functor <T> ::compress()
 {
+	cout << "MROOT (" << m_name << ") [PRE LABEL]:" << endl;
+	m_root->print();
 	m_root->label_all();
+	cout << "MROOT (" << m_name << ") [POST LABEL]:" << endl;
+	m_root->print();
 	m_root->compress();
+	cout << "MROOT (" << m_name << ") [POST COMPRESSION]:" << endl;
+	m_root->print();
 	build();
 }
 
@@ -273,8 +279,12 @@ const functor <T> &functor <T> ::differentiate
 	node <T> *diffed = new node <T> (m_root);
 
 	diffed->label({var});
+	cout << "DIFFED [LABELED]: [" << m_name << "][" << var << "]" << endl;
+	diffed->print();
 
 	diffed->differentiate(var);
+	cout << "DIFFED [POST]: [" << m_name << "][" << var << "]" << endl;
+	diffed->print();
 	
 	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
 

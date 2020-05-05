@@ -11,6 +11,8 @@
 #include "stree.h"
 #include "table.h"
 #include "variable.h"
+#include "element.h"
+#include "utility.h"
 
 using namespace std;
 
@@ -112,7 +114,7 @@ void test_function()
 
 	cout << endl << f.display() << endl;
 
-	functor <double> h("h(x) = 4 * 2x^3");
+	functor <double> h("h(x) = (3x^2)^3");
 
 	cout << endl << h.display() << endl;
 	
@@ -632,18 +634,129 @@ void test_config()
 	nd->print();
 }
 
+void test_gram_shmidt()
+{
+	cout << "BEGINNING GRAM-SHMIDT TEST" << endl;
+
+	using ld = vector <double>;
+	
+	vector <element <double>> span {
+		ld {1, 1, 1},
+		ld {1, 0, 1},
+		ld {3, 2, 3}
+	};
+
+	cout << endl << "Constructing an orthogonal basis for"
+		<< " the linear space spanned by the following vectors." << endl;
+
+	for (auto m : span)
+		cout << m << endl;
+
+	/* auto cross = [](const matrix <double> &a, const matrix <double> &b) {
+		double acc = 0;
+		for (size_t i = 0; i < a.get_cols(); i++)
+			acc += a[0][i] * b[0][i];
+		return acc;
+	}; */
+
+	/* matrix <double> nmat;
+	for (size_t i = 1; i < span.size(); i++) {
+		nmat = span[i];
+		for (size_t j = 0; j < i; j++)
+			nmat = nmat - (cross(span[i], basis[j]) / cross(basis[j], basis[j])) * basis[j];
+		basis.push_back(nmat);
+	} */
+
+	/* element <double> nelem;
+	for (size_t i = 1; i < span.size(); i++) {
+		nelem = span[i];
+
+		for (size_t j = 0; j < i; j++)
+			nelem = nelem - (inner(span[i], basis[j]) / inner(basis[j], basis[j])) * basis[j];
+		basis.push_back(nelem);
+	} */
+	
+	vector <element <double>> basis;
+
+	basis = utility::gram_shmidt(span);
+
+	cout << endl << "Resulting orthogonal basis:" << endl;
+
+	for (auto m : basis)
+		cout << m << endl;
+
+	span = {
+		ld {0, 2, 1, 0},
+		ld {1, -1, 0, 0},
+		ld {1, 2, 0, -1},
+		ld {1, 0, 0, 1}
+	};
+
+	// basis = {span[0].normalize()};
+
+	cout << endl << "Constructing an orthonormal basis for"
+		<< " the linear space spanned by the following vectors." << endl;
+	
+	/* for (size_t i = 1; i < span.size(); i++) {
+		nelem = span[i];
+
+		for (size_t j = 0; j < i; j++)
+			nelem = nelem - (inner(span[i], basis[j]) / inner(basis[j], basis[j])) * basis[j];
+
+		basis.push_back(nelem.normalize());
+	} */
+	
+	basis = utility::gram_shmidt(span);
+
+	cout << endl << "Resulting orthonormal basis:" << endl;
+
+	for (auto m : basis)
+		cout << m << endl;
+}
+
+void test_ml()
+{
+	table <double> tbl;
+
+	tbl.insert_var(variable <double> ("e", exp(1)));
+
+	functor <double> steer("steer(sone, stwo, wone, wtwo) = sone * wone + stwo * wtwo");
+	functor <double> cost("cost(real, sone, stwo, wone, wtwo) = (real - (sone * wone + stwo * wtwo))^2");
+	functor <double> sigma("sigma(x, alpha, minr, maxr) = (maxr - minr)/(1 + e^(-x/alpha)) - (maxr - minr)/2", tbl);
+
+	functor <double> cost_one = cost.differentiate("wone");
+	functor <double> cost_two = cost.differentiate("wtwo");
+	
+	cout << endl << "BEGINNING ML TEST" << endl;
+
+	cout << endl << "dc/dw_one = " << cost_one << endl;
+	cout << "dc/dw_two = " << cost_two << endl;
+
+	int iters = 10;
+
+	cout << endl << "Performing " << iters << " iterations..." << endl;
+
+	double r;
+	double l;
+	double s;
+	while (iters--) {
+		r = 10.0 * rand() / RAND_MAX;
+		l = 10.0 * rand() / RAND_MAX;
+
+		cout << "r: " << r << endl;
+		cout << "l: " << l << endl;
+
+		cout << "\tsteer: " << (s = steer(r, l, 5, 6)) << endl;
+		cout << "\tsigma: " << (s = sigma(s, 400, -30, 30)) << endl;
+		cout << "\tcost[L]: " << cost(-30, s, 400, -30, 30) << endl;
+		// cout << "\t\tcost[L]: " << cost_one(-30, s, 400, -30, 30) << endl;
+		cout << "\tcost[R]: " << cost(30, s, 400, -30, 30) << endl;
+		// cout << "\t\tcost[R]: " << cost_two(-30, s, 400, -30, 30) << endl;
+	}
+}
+
 vector <std::function <void ()>> tests = {
-	test_variable,
-	test_expression,
-	test_variable_parsing,
-	test_function,
-	test_matrix,
-	test_root_finding,
-	test_multivariable_root_finding,
-	test_node,
-	test_gmp,
-	test_table,
-	test_config
+	test_ml
 };
 
 int main()
@@ -653,8 +766,8 @@ int main()
 			t();
 		} catch (node <double> ::undefined_symbol e) {
 			cout << e.what() << endl;
-		} catch (...) {
+		} /* catch (...) {
 			cout << "Caught Unkown Error" << endl;
-		}
+		} */
 	}
 }

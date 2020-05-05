@@ -278,7 +278,7 @@ private:
 	void differentiate_as_power(const std::string &);
 	void differentiate_as_trigonometric(const std::string &);
 
-	std::string display_as_operand() const;
+	std::string display_as_operand(nd_label) const;
 	std::string display_as_trigonometric() const;
 public:
 	/* Exception classes, which
@@ -500,7 +500,6 @@ void node <T> ::label(const std::vector <std::string> &vars)
 	for (auto nd : leaves)
 		nd->label(vars);
 
-
 	switch (tok->caller()) {
 	case token::OPERATION:
 		label_as_operation();
@@ -596,18 +595,18 @@ std::string node <T> ::display() const
 
 		return leaves[0]->display() + " - " + leaves[1]->display();
 	case l_multiplied: 
-		return leaves[0]->display_as_operand() + " * " + leaves[1]->display_as_operand();
+		return leaves[0]->display_as_operand(type) + " * " + leaves[1]->display_as_operand(type);
 	case l_divided:
-		return leaves[0]->display_as_operand() + " / " + leaves[1]->display_as_operand();
+		return leaves[0]->display_as_operand(type) + " / " + leaves[1]->display_as_operand(type);
 	case l_constant:
 		return tok->str();
 	case l_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
-		return leaves[0]->display_as_operand() + " ^ " + leaves[1]->display_as_operand();
+		return leaves[0]->display_as_operand(type) + " ^ " + leaves[1]->display_as_operand(type);
 	case l_power:
-		return leaves[0]->display_as_operand() + " ^ " + leaves[1]->display_as_operand();
+		return leaves[0]->display_as_operand(type) + " ^ " + leaves[1]->display_as_operand(type);
 	// remove operation constant later
 	case l_operation_constant:
 		return std::to_string(value());
@@ -788,16 +787,34 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 template <class T>
 void node <T> ::label_as_operation()
 {
+
+	if (type == l_operation_constant) {
+		cout << "CATCHING RAT" << endl;
+		print();
+	}
+
 	bool constant = true;
 	for (node *nd : leaves) {
+		cout << "LEAF:" << endl;
+		nd->print();
 		if (nd->type != l_constant &&
-				type != l_operation_constant) {
+				nd->type != l_operation_constant) {
+			cout << "\tNOT A CONST-LIKE TERM" << endl;
 			constant = false;
 			break;
+		}
+
+		if (nd->type == l_constant) {
+			cout << "\tCONSTANT" << endl;
+		}
+
+		if (nd->type == l_variable) {
+			cout << "\tIS VARIABLE" << endl;
 		}
 	}
 	
 	if (constant) {
+		cout << "OPERATION CONST CONFIRMED:" << endl;
 		type = l_operation_constant;
 		return;
 	}
@@ -815,7 +832,7 @@ void node <T> ::label_as_operation()
 		type = l_divided;
 		break;
 	case op_exp:
-		if (leaves[0]->type == l_variable) {
+		/* if (leaves[0]->type == l_variable) {
 			if (leaves[1]->type == l_constant)
 				type = l_power;
 			else
@@ -829,8 +846,11 @@ void node <T> ::label_as_operation()
 				break;
 		} else {
 			type = l_exp;
-		}
+		} */
 
+		// If it not an operation constant,
+		// it is a power node
+		type = l_power;
 		break;
 	case op_sin:
 	case op_cos:
@@ -853,7 +873,7 @@ void node <T> ::compress_as_separable()
 
 	for (node *nd : leaves)
 		nd->compress();
-	
+
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 		if (val == 0)
@@ -934,12 +954,12 @@ void node <T> ::compress_as_multiplied()
 
 	tok = nullptr;
 	if (constant->get() == 0) {
-		set(new opd(0), {}, cfg_ptr);
+		set(new opd(0), l_constant, {}, cfg_ptr);
 		return;
 	}
 
 	if (constant->get() != 1)
-		set(constant, {}, cfg_ptr);
+		set(constant, l_constant, {}, cfg_ptr);
 
 	for (auto itr : chart) {
 		if (tok)
@@ -1023,19 +1043,25 @@ void node <T> ::differentiate_as_divided(const std::string &var)
 template <class T>
 void node <T> ::differentiate_as_power(const std::string &var)
 {
-	T val;
+	T val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 
-	val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
+	node *done = leaves[0]->copy();
+	done->differentiate({var});
 
+	// delete tok;
 	tok = get(op_mul);
 
-	delete leaves[1];
+	// delete leaves[1];
 	leaves[1] = new node(get(op_exp), {
-			new node(leaves[0]->tok, {}, cfg_ptr),
+			leaves[0],
 			new node(new opd(val - 1), {}, cfg_ptr)
 	}, cfg_ptr);
-	
-	leaves[0]->tok = new opd(val);
+
+	// delete leaves[0];
+	leaves[0] = new node(get(op_mul), {
+			new node(new opd(val), {}, cfg_ptr),
+			done
+	}, cfg_ptr);
 }
 
 template <class T>
@@ -1057,12 +1083,24 @@ void node <T> ::differentiate_as_trigonometric(const std::string &var)
 }
 
 template <class T>
-std::string node <T> ::display_as_operand() const
+std::string node <T> ::display_as_operand(nd_label required) const
 {
 	std::string out = display();
 
-	if (type == l_separable)
-		out = "(" + out + ")";
+	switch (required) {
+	case l_power:
+		if (type == l_multiplied
+				|| type == l_divided)
+			out = "(" + out + ")";
+		break;
+	case l_multiplied:
+	case l_divided:
+		if (type == l_separable)
+			out = "(" + out + ")";
+		break;
+	default:
+		break;
+	}
 
 	return out;
 }
