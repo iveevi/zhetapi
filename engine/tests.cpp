@@ -118,15 +118,17 @@ void test_function()
 		variable <double> {"e", exp(1)},
 		variable <double> {"pi", acos(-1)},
 		variable <double> {"phi", (1 + sqrt(5))/2},
-		functor <double> {"g(x) = x^3"}
+		functor <double> {"g(x, y) = x^3 + y"}
 	};
 
-	functor <double> h("h(x) = 1/(1 + e^(-x))", tbl);
+	functor <double> h("h(x) = x * g(4, 4)", tbl);
 
 	cout << endl << h.display() << endl;
 	
 	cout << string(100, '-') << endl;
 	h.print();
+	cout << string(100, '-') << endl;
+	cout << "h(4) = " << h(4) << endl;
 	cout << string(100, '-') << endl;
 
 	functor <double> dh_dx = h.differentiate("x");
@@ -773,9 +775,10 @@ int main()
 		try {
 			t();
 		} catch (node <double> ::undefined_symbol e) {
-			cout << e.what() << endl;
-		} /* catch (...) {
+			cout << "ERROR:\t" << e.what() << endl;
+		} catch (...) {
 			cout << "Caught Unkown Error" << endl;
-		} */
+			throw;
+		}
 	}
 }

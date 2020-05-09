@@ -12,6 +12,7 @@ enum st_label {
 	l_number,
 	l_operation,
 	l_variable_cluster,
+	l_functor
 };
 
 /**
@@ -52,6 +53,7 @@ public:
 	const std::vector <stree *> &children() const;
 	
 	void set(stree *);
+	void set_children(const std::vector <stree *> &);
 
 	void print(int = 1, int = 0) const;
 };
@@ -108,6 +110,11 @@ void stree::set(stree *other)
 	rep = other->rep;
 	type = other->type;
 	leaves = other->leaves;
+}
+
+void stree::set_children(const std::vector <stree *> &other)
+{
+	leaves = other;
 }
 
 void stree::print(int num, int lev) const

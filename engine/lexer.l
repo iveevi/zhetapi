@@ -44,7 +44,9 @@
 "["		{return LBRACKET;}
 "]"		{return RBRACKET;}
 
-[A-Z,a-z]+ {
+","		{return SEPARATOR;}
+
+[A-Za-z]+ {
 		yylval.ident = yytext;
 		return IDENT;
 }

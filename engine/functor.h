@@ -62,13 +62,15 @@ public:
 
 	functor(const std::string &, params, node <T> *);
 
+	functor(const functor &);
+
 	size_t variales() const {
 		return m_params.size();
 	}
 
 	const std::string &symbol() const;
 
-	const T &operator()(const std::vector <T> &);
+	const T &compute(const std::vector <T> &);
 
 	template <class ... U>
 	const T &operator()(U ...);
@@ -181,13 +183,20 @@ functor <T> ::functor(const std::string &str, params pars,
 }
 
 template <class T>
+functor <T> ::functor(const functor &other) : m_name(other.m_name),
+	m_params(other.m_params), m_root(other.m_root)
+{
+	compress();
+}
+
+template <class T>
 const std::string &functor <T> ::symbol() const
 {
 	return m_name;
 }
 
 template <class T>
-const T &functor <T> ::operator()(const std::vector <T> &vals)
+const T &functor <T> ::compute(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
@@ -215,7 +224,7 @@ const T &functor <T> ::operator()(U ... args)
 {
 	std::vector <T> vals;
 	gather(vals, args...);
-	return (*this)(vals);
+	return compute(vals);
 }
 
 template <class T>

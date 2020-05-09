@@ -12,39 +12,43 @@
 
 %parse-param	{stree *(&root)}
 
-%token IDENT
-%token NUMBER
+%token	IDENT
+%token	NUMBER
 
-%token PLUS
-%token MINUS
-%token MULT
-%token DIV
+%token	PLUS
+%token	MINUS
+%token	MULT
+%token	DIV
 
-%token SIN	COS	TAN
-%token CSC	SEC	COT
-%token LOG	LN	LG
+%token	SIN	COS	TAN
+%token	CSC	SEC	COT
+%token	LOG	LN	LG
 
-%token SUPERSCRIPT
-%token SUBSCRIPT
+%token	SUPERSCRIPT
+%token	SUBSCRIPT
 
-%token LPAREN		RPAREN
-%token LBRACE 	RBRACE
-%token LBRACKET	RBRACKET
+%token	LPAREN		RPAREN
+%token	LBRACE		RBRACE
+%token	LBRACKET	RBRACKET
 
-%token END
+%token	END
+%token	SEPARATOR
 
 %union {
-	stree		*expr;
-	stree		*coll;
-	stree		*term;
-	stree		*felm;
-	stree		*dopn;
-	stree		*dpnt;
-	stree		*prth;
-	stree		*sclr;
+	stree			*expr;
+	stree			*coll;
+	stree			*term;
+	stree			*felm;
+	stree			*dopn;
+	stree			*dpnt;
+	stree			*prth;
+	stree			*sclr;
+	stree			*func;
+	
+	std::vector <stree *>	*pack;
 
-	const char	*ident;
-	const char	*value;
+	const char		*ident;
+	const char		*value;
 }
 
 /* Types for the terminal symbols */
@@ -60,6 +64,8 @@
 %type	<dpnt>	dpnt
 %type	<prth>	prth
 %type	<sclr>	sclr
+%type	<pack>	pack
+%type	<func>	func
 
 /* Precedence information to resolve ambiguity */
 %left	PLUS	MINUS
@@ -73,6 +79,7 @@
 %precedence	SIN	COS	TAN
 %precedence	CSC	SEC 	COT
 %precedence	LOG	LN	LG
+%precedence	SEPARATOR
 
 %%
 
@@ -132,10 +139,14 @@ coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
 term:	term term { // Implicit Multiplication: two or more terms
 		$$ = new stree ("*", l_operation, {$1, $2});
 } %prec MULT
+
+    |	func { // Function call
+    		$$ = $1;
+} %prec LOG
     		
     |	dopn { // Direct Operand
     		$$ = $1;
-};
+} %prec LOG;
 
 /* Functional Elementary Operations: non-arithmetic operations */
 felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
@@ -200,6 +211,23 @@ dopn: 	dopn SUPERSCRIPT dopn {
     |	prth {
     		$$ = $1;
 };
+
+func:	dpnt LPAREN pack RPAREN {
+    		$$ = $1;
+
+		$$->set_children(*($3));
+};
+
+pack:	%empty
+    |	expr {
+    		$$ = new std::vector <stree *> {$1};
+} %prec LOG
+
+    |	pack SEPARATOR expr {
+    		$$ = $1;
+
+		$$->push_back($3);
+} %prec SEPARATOR
 
 /* Dependant: variable, function */
 dpnt:	IDENT { // Variable

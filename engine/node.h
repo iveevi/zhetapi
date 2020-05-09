@@ -31,6 +31,7 @@ enum nd_label {
 	l_divided,
 	l_variable,
 	l_constant,
+	l_function,
 	l_exp,
 	l_polynomial,
 	l_separable,
@@ -39,6 +40,7 @@ enum nd_label {
 	l_logarithmic,
 	l_trigonometric,
 	l_power_uncertain,
+	l_function_constant,
 	l_operation_constant,
 	l_constant_logarithmic
 };
@@ -54,6 +56,7 @@ std::string strlabs[] = {
 	"divided",
 	"variable",
 	"constant",
+	"function",
 	"exponent",
 	"polynomic",
 	"separable",
@@ -62,6 +65,7 @@ std::string strlabs[] = {
 	"logarithmic",
 	"trigonometric",
 	"power uncertain",
+	"function constant",
 	"operation constant",
 	"constant logarithmic"
 };
@@ -262,6 +266,7 @@ private:
 	opn *get(const std::string &) const;
 
 	node *copy() const;
+	token *copy(token *) const;
 
 	node *convert(stree *, table <T> = table <T> ()) const;
 	node *convert_operation(stree *, table <T> = table <T> ()) const;
@@ -336,6 +341,10 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
 	stree *st = new stree(str);
+
+	cout << "STREE:" << endl;
+	st->print();
+
 	node *out = convert(st, tbl);
 	*this = out;
 }
@@ -463,19 +472,27 @@ template <class T>
 const T &node <T> ::value() const
 {
 	std::vector <token *> vals;
+	std::vector <T> hard;
 	
 	switch (tok->caller()) {
 	case token::OPERAND:
 		return (dynamic_cast <opd *> (tok))->get();
-	case token::VARIABLE:
-		if (!(dynamic_cast <var *> (tok))->is_param()) 
-			return (dynamic_cast <var *> (tok))->get();
-		throw incomputable_tree();
 	case token::OPERATION:
 		for (auto itr : leaves)
 			vals.push_back(new opd(itr->value()));
 		
 		return (new opd((*(dynamic_cast <opn *> (tok)))(vals)))->get();
+	case token::VARIABLE:
+		if (!(dynamic_cast <var *> (tok))->is_param()) 
+			return (dynamic_cast <var *> (tok))->get();
+		throw incomputable_tree();
+	case token::FUNCTOR:
+		for (auto itr : leaves)
+			hard.push_back(itr->value());
+		
+		// change later to allow functions to accept
+		// different types of tokens for computation
+		return (dynamic_cast <ftr *> (tok))->compute(hard);
 	}
 
 	throw incomputable_tree();
@@ -495,6 +512,8 @@ template <class T>
 void node <T> ::label(const std::vector <std::string> &vars)
 {
 	std::string sym;
+	
+	bool constant = true;
 
 	for (auto nd : leaves)
 		nd->label(vars);
@@ -502,6 +521,21 @@ void node <T> ::label(const std::vector <std::string> &vars)
 	switch (tok->caller()) {
 	case token::OPERATION:
 		label_as_operation();
+		break;
+	case token::FUNCTOR:
+		type = l_function;
+		
+		for (node *nd : leaves) {
+			if (nd->type != l_constant &&
+					nd->type != l_operation_constant) {
+				constant = false;
+				break;
+			}
+		}
+		
+		if (constant)
+			type = l_function_constant;
+
 		break;
 	case token::VARIABLE:
 		sym = (dynamic_cast <var *> (tok))->symbol();
@@ -520,7 +554,8 @@ void node <T> ::label(const std::vector <std::string> &vars)
 template <class T>
 void node <T> ::compress()
 {
-	if (type == l_operation_constant) {
+	if (type == l_operation_constant
+			|| type == l_function_constant) {
 		tok = new opd(value());
 		type = l_constant;
 		leaves.clear();
@@ -562,6 +597,9 @@ void node <T> ::differentiate(const std::string &var)
 		break;
 	case l_multiplied:
 		differentiate_as_multiplied(var);
+		break;
+	case l_divided:
+		differentiate_as_divided(var);
 		break;
 	case l_separable:
 		leaves[0]->differentiate(var);
@@ -684,11 +722,28 @@ node <T> *node <T> ::copy() const
 {
 	node *cpy;
 
-	cpy = new node(tok, type, {}, cfg_ptr);
+	cpy = new node(copy(tok), type, {}, cfg_ptr);
 	for (node *nd : leaves)
 		cpy->leaves.push_back(nd->copy());
 	
 	return cpy;
+}
+
+template <class T>
+token *node <T> ::copy(token *t) const
+{
+	switch (t->caller()) {
+	case token::OPERAND:
+		return new opd((dynamic_cast <opd *> (t))->get());
+	case token::OPERATION:
+		return get((dynamic_cast <opn *> (t))->fmt());
+	case token::VARIABLE:
+		return new var(*(dynamic_cast <var *> (t)));
+	case token::FUNCTOR:
+		return new ftr(*(dynamic_cast <ftr *> (t)));
+	}
+
+	return nullptr;
 }
 
 template <class T>
@@ -753,6 +808,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	std::string acc;
 
 	var vr;
+	ftr fr;
 
 	for (int i = 0; i < str.length(); i++) {
 		acc += str[i];
@@ -783,7 +839,26 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			acc.clear();
 			num++;
 		} catch(...) {}
+		
+		try {
+			fr = tbl.find_ftr(acc);
+			out = new node {get(op_mul), {
+				out,
+				new node {new ftr(fr), {}, cfg_ptr}
+			}, cfg_ptr};
+
+			for (stree *s : st->children()) {
+				cout << "Looped - acc = " << acc << endl;
+				out->leaves[1]->leaves.push_back(convert(s));
+			}
+
+			acc.clear();
+			num++;
+		} catch(...) {}
 	}
+
+	cout << "Num: " << num << endl;
+	st->print();
 
 	if (!num)
 		throw undefined_symbol(acc);
@@ -1089,7 +1164,7 @@ void node <T> ::differentiate_as_multiplied(const std::string &var)
 	rcpy->differentiate(var);
 	
 	leaves = {
-		new node(get(op_mul), {leaves[1], lcpy}, cfg_ptr),
+		new node(get(op_mul), {lcpy, leaves[1]}, cfg_ptr),
 		new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
 	};
 }
@@ -1097,7 +1172,25 @@ void node <T> ::differentiate_as_multiplied(const std::string &var)
 template <class T>
 void node <T> ::differentiate_as_divided(const std::string &var)
 {
+	node *denom = leaves[1]->copy();
+	node *lcpy = leaves[0]->copy();
+	node *rcpy = leaves[1]->copy();
 
+	lcpy->differentiate({var});
+	rcpy->differentiate({var});
+	
+	tok = get(op_div);
+	leaves = {
+		new node(get(op_sub), {
+			new node(get(op_mul), {lcpy, leaves[1]}, cfg_ptr),
+			new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
+		}, cfg_ptr),
+
+		new node(get(op_exp), {
+				denom,
+				new node(new opd(2), {}, cfg_ptr)
+		}, cfg_ptr),
+	};
 }
 
 template <class T>
@@ -1107,7 +1200,7 @@ void node <T> ::differentiate_as_power(const std::string &var)
 
 	node *done = leaves[0]->copy();
 	done->differentiate({var});
-
+	
 	// delete tok;
 	tok = get(op_mul);
 
@@ -1116,7 +1209,7 @@ void node <T> ::differentiate_as_power(const std::string &var)
 			leaves[0],
 			new node(new opd(val - 1), {}, cfg_ptr)
 	}, cfg_ptr);
-
+	
 	// delete leaves[0];
 	leaves[0] = new node(get(op_mul), {
 			new node(new opd(val), {}, cfg_ptr),
@@ -1134,14 +1227,7 @@ void node <T> ::differentiate_as_exponential(const std::string &var)
 	node *r = leaves[1]->copy();
 	
 	node *rd = r->copy();
-
-	/* cout << "RIGHT [PRE]" << endl;
-	rd->print(); */
-
 	rd->differentiate({var});
-
-	/* cout << "RIGHT [POST]" << endl;
-	rd->print(); */
 
 	node *lf = new node(get(op_mul), {
 			rd,
