@@ -75,6 +75,22 @@ public:
 	template <class ... U>
 	const T &operator()(U ...);
 
+	template <class U>
+	friend const functor <U> &operator+(const functor <U> &,
+			const functor <U> &);
+
+	template <class U>
+	friend const functor <U> &operator-(const functor <U> &,
+			const functor <U> &);
+
+	template <class U>
+	friend const functor <U> &operator*(const functor <U> &,
+			const functor <U> &);
+
+	template <class U>
+	friend const functor <U> &operator/(const functor <U> &,
+			const functor <U> &);
+
 	const functor &differentiate(const std::string &) const;
 
 	std::string display() const;
@@ -225,6 +241,121 @@ const T &functor <T> ::operator()(U ... args)
 	std::vector <T> vals;
 	gather(vals, args...);
 	return compute(vals);
+}
+
+template <class T>
+const functor <T> &operator+(const functor <T> &a, const functor <T> &b)
+{
+	functor <T> *out = new functor <T> ();
+
+	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
+
+	typename functor <T> ::params as = a.m_params;
+	typename functor <T> ::params bs = b.m_params;
+
+	out->m_params = typename functor <T> ::params(as.size() + bs.size());
+
+	std::sort(as.begin(), as.end());
+	std::sort(bs.begin(), bs.end());
+
+	auto it = std::set_union(as.begin(), as.end(), bs.begin(), bs.end(),
+			out->m_params.begin());
+
+	out->m_params.resize(it - out->m_params.begin());
+
+	/* [FIX]: Add merging the parameters
+	 * in the arithmetic operators of the
+	 * node class; do not do it manually.
+	 *
+	 * [REASON]: Easily error prone for
+	 * other kinds of operations. */
+
+	out->m_root = new node <T> (*a.m_root + *b.m_root);
+
+	out->m_root->set(out->m_params);
+
+	return *out;
+}
+
+template <class T>
+const functor <T> &operator-(const functor <T> &a, const functor <T> &b)
+{
+	functor <T> *out = new functor <T> ();
+
+	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
+
+	typename functor <T> ::params as = a.m_params;
+	typename functor <T> ::params bs = b.m_params;
+
+	out->m_params = typename functor <T> ::params(as.size() + bs.size());
+
+	std::sort(as.begin(), as.end());
+	std::sort(bs.begin(), bs.end());
+
+	auto it = std::set_union(as.begin(), as.end(), bs.begin(), bs.end(),
+			out->m_params.begin());
+
+	out->m_params.resize(it - out->m_params.begin());
+
+	out->m_root = new node <T> (*a.m_root - *b.m_root);
+
+	out->m_root->set(out->m_params);
+
+	return *out;
+}
+
+template <class T>
+const functor <T> &operator*(const functor <T> &a, const functor <T> &b)
+{
+	functor <T> *out = new functor <T> ();
+
+	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
+
+	typename functor <T> ::params as = a.m_params;
+	typename functor <T> ::params bs = b.m_params;
+
+	out->m_params = typename functor <T> ::params(as.size() + bs.size());
+
+	std::sort(as.begin(), as.end());
+	std::sort(bs.begin(), bs.end());
+
+	auto it = std::set_union(as.begin(), as.end(), bs.begin(), bs.end(),
+			out->m_params.begin());
+
+	out->m_params.resize(it - out->m_params.begin());
+
+	out->m_root = new node <T> (*a.m_root * *b.m_root);
+
+	out->m_root->set(out->m_params);
+
+	return *out;
+}
+
+template <class T>
+const functor <T> &operator/(const functor <T> &a, const functor <T> &b)
+{
+	functor <T> *out = new functor <T> ();
+
+	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
+
+	typename functor <T> ::params as = a.m_params;
+	typename functor <T> ::params bs = b.m_params;
+
+	out->m_params = typename functor <T> ::params(as.size() + bs.size());
+
+	std::sort(as.begin(), as.end());
+	std::sort(bs.begin(), bs.end());
+
+	auto it = std::set_union(as.begin(), as.end(), bs.begin(), bs.end(),
+			out->m_params.begin());
+
+	out->m_params.resize(it - out->m_params.begin());
+
+	out->m_root = new node <T> (*a.m_root / *b.m_root);
+
+	out->m_root->set(out->m_params);
+
+	return *out;
 }
 
 template <class T>

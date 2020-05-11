@@ -106,6 +106,9 @@ void test_function()
 	functor <double> f(str);
 	end = clock();
 
+	cout << endl << "Construction: " << (end - start) /
+		(double) CLOCKS_PER_SEC << " seconds " << endl;
+
 	cout << string(100, '-') << endl;
 	f.print();
 	cout << string(100, '-') << endl;
@@ -118,10 +121,11 @@ void test_function()
 		variable <double> {"e", exp(1)},
 		variable <double> {"pi", acos(-1)},
 		variable <double> {"phi", (1 + sqrt(5))/2},
-		functor <double> {"g(x, y) = x^3 + y"}
+		functor <double> {"g(x) = x^3"}
 	};
 
-	functor <double> h("h(x) = x * g(4, 4)", tbl);
+	functor <double> h("h(x) = x * g(x)", tbl);
+	functor <double> g("m(x) = sin x", tbl);
 
 	cout << endl << h.display() << endl;
 	
@@ -141,8 +145,15 @@ void test_function()
 
 	cout << "h'(4) = " << dh_dx(4) << endl;
 
-	cout << endl << "Construction: " << (end - start) /
-		(double) CLOCKS_PER_SEC << " seconds " << endl;
+	functor <double> a = h + g;
+	functor <double> b = h - g;
+	functor <double> c = h * g;
+	functor <double> d = h / g;
+
+	cout << endl << a.display() << endl;
+	cout << b.display() << endl;
+	cout << c.display() << endl;
+	cout << d.display() << endl;
 }
 
 void test_matrix()
@@ -776,9 +787,6 @@ int main()
 			t();
 		} catch (node <double> ::undefined_symbol e) {
 			cout << "ERROR:\t" << e.what() << endl;
-		} catch (...) {
-			cout << "Caught Unkown Error" << endl;
-			throw;
 		}
 	}
 }

@@ -159,12 +159,25 @@ public:
 	 * labeling is a post action.
 	 */
 	node(token *t, std::vector <node *> lv, cfg *);
-
+	
 	/**
 	 * @brief Node constructor, for
 	 * all its members.
 	 */
 	node(token *t, nd_label l, std::vector <node *> lv, cfg *);
+
+	/* Operators of the node class */
+	template <class U>
+	friend const node <U> &operator+(const node <U> &, const node <U> &);
+
+	template <class U>
+	friend const node <U> &operator-(const node <U> &, const node <U> &);
+	
+	template <class U>
+	friend const node <U> &operator*(const node <U> &, const node <U> &);
+	
+	template <class U>
+	friend const node <U> &operator/(const node <U> &, const node <U> &);
 
 	/* Modifiers and getter methods
 	 * of the node class */
@@ -177,6 +190,8 @@ public:
 	 * address.
 	 */
 	void set(node *);
+
+	void set(params);
 
 	/**
 	 * @brief Setter method to transfer
@@ -288,6 +303,7 @@ private:
 
 	std::string display_as_operand(nd_label) const;
 	std::string display_as_trigonometric() const;
+	std::string display_as_function() const;
 public:
 	/* Exception classes, which
 	 * are used in other functions */
@@ -361,8 +377,8 @@ template <class T>
 node <T> ::node(const node &other)
 {
 	*this = *(other.copy());
-	pars = other->pars;
-	cfg_ptr = other->cfg_ptr;
+	pars = other.pars;
+	cfg_ptr = other.cfg_ptr;
 }
 
 template <class T>
@@ -378,6 +394,55 @@ template <class T>
 node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
 	: tok(t), type(l), leaves(lv), cfg_ptr(cptr) {}
 
+/* Operators
+ *
+ * [NOTE]: Assumes
+ * both operands have
+ * the same cfg_ptr. */
+template <class T>
+const node <T> &operator+(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_add), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
+template <class T>
+const node <T> &operator-(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_sub), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
+template <class T>
+const node <T> &operator*(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_mul), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
+template <class T>
+const node <T> &operator/(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_div), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
 /* Setters and Getters */
 template <class T>
 void node <T> ::set(node *nd)
@@ -386,6 +451,12 @@ void node <T> ::set(node *nd)
 	type = nd->type;
 	leaves = nd->leaves;
 	cfg_ptr = nd->cfg_ptr;
+}
+
+template <class T>
+void node <T> ::set(params p)
+{
+	pars = p;
 }
 
 template <class T>
@@ -544,6 +615,7 @@ void node <T> ::label(const std::vector <std::string> &vars)
 			type = l_variable;
 		else
 			type = l_constant;
+
 		break;
 	case token::OPERAND:
 		type = l_constant;
@@ -645,6 +717,8 @@ std::string node <T> ::display() const
 		return tok->str();
 	case l_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
+	case l_function:
+		return display_as_function();
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
 	case l_power:
@@ -1318,6 +1392,25 @@ std::string node <T> ::display_as_trigonometric() const
 
 	throw node_error("Node labeled as trigonometric, \
 		but token is of an undetectable type");
+}
+
+template <class T>
+std::string node <T> ::display_as_function() const
+{
+	std::string out = (dynamic_cast <ftr *> (tok))->symbol();
+
+	out += "(";
+
+	for (size_t i = 0; i < leaves.size(); i++) {
+		out += leaves[i]->display();
+
+		if (i < leaves.size() - 1)
+			out += ", ";
+	}
+
+	out += ")";
+
+	return out;
 }
 
 #endif
