@@ -1,7 +1,7 @@
 #ifndef FUNCTOR_H_
 #define FUNCTOR_H_
 
-/* C++ Standard Libraries */
+// C++ Standard Libraries
 #include <ostream>
 #include <cstdarg>
 #include <string>
@@ -10,19 +10,13 @@
 #include <algorithm>
 #include <unordered_map>
 
-/* Engine Headers */
+// Engine Headers
 #include "token.h"
 #include "variable.h"
 #include "operand.h"
 #include "table.h"
 #include "node.h"
 
-/**
- * @brief later add refernces to the vst,
- * and remove copyning refreshing process by
- * changing only token forth and back
- * @tparam T para
- */
 template <class T>
 class functor : public token {
 public:
@@ -36,42 +30,47 @@ public:
 
 	using params = std::vector <variable <T>>;
 protected:
-	/** functor symbol/name */
 	std::string m_name;
-
-	/** functors inputs/parameters,
-	used really only for checking correctness */
+	
 	params m_params;
 
-	/** functor tree */
 	node <T> *m_root;
 	
-	/** functor evaluation map : name to nodes */
 	variables m_map;
-
-	/** functor external evaulation map : for
-	 * variables that are not part of m_params *
-	map m_emap; */
 public:
-	// if there are no arguments, degrade to
-	// lambda (formal token_tree)
 	functor(const std::string & = "", table <T> = table <T> ());
-	functor(const std::string &,
-		const std::vector <std::string> &,
+	functor(const std::string &, const std::vector <std::string> &,
 		const std::string &);
 
 	functor(const std::string &, params, node <T> *);
 
 	functor(const functor &);
 
-	size_t variales() const {
+	/* Functional methods
+	 * of the functor class */
+	const T &compute(const std::vector <T> &);
+
+	const functor &differentiate(const std::string &) const;
+
+	std::string display() const;
+
+	size_t variables() const {
 		return m_params.size();
 	}
 
 	const std::string &symbol() const;
 
-	const T &compute(const std::vector <T> &);
+	/* Virtual functions inehrited
+	 * from the token class. */
+	std::string str() const;
 
+	type caller() const;
+
+	/* Debugging functions */
+	void print() const;
+
+	/* Operators for the
+	 * functor class */
 	template <class ... U>
 	const T &operator()(U ...);
 
@@ -91,18 +90,10 @@ public:
 	friend const functor <U> &operator/(const functor <U> &,
 			const functor <U> &);
 
-	const functor &differentiate(const std::string &) const;
-
-	std::string display() const;
-
-	// debugging
-	void print() const;
-
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &,
 		const functor <U> &);
 
-	// Boolean operators
 	template <class U>
 	friend bool operator>(const functor <U> &,
 		const functor <U> &);
@@ -110,18 +101,14 @@ public:
 	template <class U>
 	friend bool operator<(const functor <U> &,
 		const functor <U> &);
-
-	type caller() const;
-	std::string str() const;
 protected:
 	template <class ... U>
 	static void gather(std::vector <T> &, T, U ...);
 
 	static void gather(std::vector <T> &, T);
 
-	void build();
-
 	void compress();
+	void build();
 };
 
 template <class T>
