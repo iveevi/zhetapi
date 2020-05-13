@@ -1,8 +1,18 @@
 <title> Zhetapi - Session </title>
 
-<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+<script>
+	MathJax = {
+	  tex: {
+		inlineMath: [['$', '$'], ['\\(', '\\)']]
+	  }
+	};
+</script>
 
-<h1 align="center" lang="latex">\Huge\textbf{Zhetapi}</h1>
+<script id="MathJax-script" async
+	  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<h1 align="center">$\Large\mathbf{Zhetapi}$</h1>
 
 <form method="POST" align="center">
 	<input name="text">
@@ -10,7 +20,7 @@
 </form>
 
 <script type=text/javascript>
-        $(function() {
+        (function() {
           $('a#test').bind('click', function() {
             $.getJSON('/clear',
                 function(data) {
@@ -21,24 +31,13 @@
         });
 </script>
 
-<style>
-
-.box {
-	border-style: solid;
-	margin: 20px;
-	padding: 20px;
-}
-
-</style>
-
 <body align="center">
-
 {% if logs %}
-	<h2 align="center" lang="latex">\huge\textbf{History}</h2>
+	<h2 align="center" lang="latex">$\large\mathbf{History}$</h2>
 
 	<ul>
 		{% for item in logs %}
-		<p lang="latex" class=box> {{ item }} </p>
+		<p> ${{item}}$ </p>
 		{% endfor %}
 	</ul>
 {% endif %}

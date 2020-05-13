@@ -1,8 +1,18 @@
 <title> Zhetapi - Calculate </title>
 
-<script type="text/javascript" src="http://latex.codecogs.com/latexit.js"></script>
+<script>
+	MathJax = {
+	  tex: {
+		inlineMath: [['$', '$'], ['\\(', '\\)']]
+	  }
+	};
+</script>
 
-<h1 align="center" lang="latex">\Huge\textbf{Zhetapi}</h1>
+<script id="MathJax-script" async
+	  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
+</script>
+
+<h1 align="center" lang="latex">$\Large\mathbf{Zhetapi}$</h1>
 
 <form method="POST" align="center">
 	<input name="text">
@@ -12,8 +22,8 @@
 <body align="center">
 
 {% if input %}
-	<h2 align="center" lang="latex">\huge\textbf{Result}</h2>
-	<div lang="latex"> {{input}} = \mathbf{ {{out}} } </div>
+	<h2 align="center">$\large\mathbf{Result}$</h2>
+	<div> ${{input}} = \mathbf{ {{out}} }$ </div>
 {% endif %}
 
 	<a href="/"><input type="submit" name="session" value="Home" style="margin-top:0.5cm;"></a>
