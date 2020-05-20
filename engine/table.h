@@ -48,14 +48,20 @@ public:
 
 	~table();
 
+	var &get_var(const std::string &);
 	const var &find_var(const std::string &);
+	
+	ftr &get_ftr(const std::string &);
 	const ftr &find_ftr(const std::string &);
 
 	bool insert_var(const var &);
 	bool insert_ftr(const ftr &);
 
 	bool remove_var(const var &);
+	bool remove_var(const std::string &);
+
 	bool remove_ftr(const ftr &);
+	bool remove_ftr(const std::string &);
 
 	bool empty() const;
 	bool empty_var() const;
@@ -173,6 +179,20 @@ table <T> ::~table()
 /* Public interface of table;
  * find methods, clear, print, etc. */
 template <class T>
+typename table <T> ::var &table <T> ::get_var(const std::string &key)
+{
+	if (!vtree)
+		throw null_tree();
+
+	splay_var(vtree, key);
+
+	if (vtree->val.symbol() != key)
+		throw null_entry();
+
+	return vtree->val;
+}
+
+template <class T>
 const typename table <T> ::var &table <T> ::find_var(const std::string &key)
 {
 	if (!vtree)
@@ -184,6 +204,20 @@ const typename table <T> ::var &table <T> ::find_var(const std::string &key)
 		throw null_entry();
 
 	return vtree->val;
+}
+
+template <class T>
+typename table <T> ::ftr &table <T> ::get_ftr(const std::string &key)
+{
+	if (!ftree)
+		throw null_tree();
+
+	splay_ftr(ftree, key);
+
+	if (ftree->val.symbol() != key)
+		throw null_entry();
+
+	return ftree->val;
 }
 
 template <class T>
@@ -254,7 +288,36 @@ bool table <T> ::remove_var(const var &x)
 		nnd = vtree->left;
 	} else {
 		nnd = vtree->left;
-		splay(nnd, x);
+		splay_var(nnd, x.symbol());
+
+		nnd->right = vtree->right;
+	}
+
+	delete vtree;
+
+	vtree = nnd;
+	vtree_size--;
+
+	return true;
+}
+
+template <class T>
+bool table <T> ::remove_var(const std::string &str)
+{
+	if (!vtree_size)
+		return false;
+
+	splay_var(vtree, str);
+
+	if (str != vtree->val.symbol())
+		return false;
+
+	__var_node *nnd;
+	if (vtree->left == nullptr) {
+		nnd = vtree->left;
+	} else {
+		nnd = vtree->left;
+		splay_var(nnd, str);
 
 		nnd->right = vtree->right;
 	}
@@ -313,7 +376,7 @@ bool table <T> ::remove_ftr(const ftr &x)
 
 	splay_ftr(ftree, x.symbol());
 
-	if (x != ftree->val)
+	if (x.symbol() != ftree->val.symbol())
 		return false;
 
 	__ftr_node *nnd;
@@ -321,7 +384,36 @@ bool table <T> ::remove_ftr(const ftr &x)
 		nnd = ftree->left;
 	} else {
 		nnd = ftree->left;
-		splay(nnd, x);
+		splay_ftr(nnd, x.symbol());
+
+		nnd->right = ftree->right;
+	}
+
+	delete ftree;
+
+	ftree = nnd;
+	ftree_size--;
+
+	return true;
+}
+
+template <class T>
+bool table <T> ::remove_ftr(const std::string &str)
+{
+	if (!ftree_size)
+		return false;
+
+	splay_ftr(ftree, str);
+
+	if (str != ftree->val.symbol())
+		return false;
+
+	__ftr_node *nnd;
+	if (ftree->left == nullptr) {
+		nnd = ftree->left;
+	} else {
+		nnd = ftree->left;
+		splay_ftr(nnd, str);
 
 		nnd->right = ftree->right;
 	}

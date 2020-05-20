@@ -16,6 +16,7 @@
 
 <body>
 	<div vertical layout align="center">
+		
 		<div>
 			<a href="/calculate">
 				<input type="submit" name="calculate" value="Calculate">
@@ -27,73 +28,6 @@
 				<input type="submit" name="session" value="Run Session">
 			</a>
 		</div>
-
-		<p>GRAPH</p>
-
-		<canvas id="graph" width=400 height=400></canvas>
-
-		<script type="text/javascript" language="javascript">
-			var canvas = document.getElementById("graph");
-
-			var context = canvas.getContext("2d");
-
-			function border(){
-				context.moveTo(0, 0);
-				context.lineTo(0, 400);
-				context.lineTo(400, 400);
-				context.lineTo(400, 0);
-				context.lineTo(0, 0);
-
-				context.moveTo(0, 200);
-				context.lineTo(400, 200);
-
-				context.strokeStyle = "black";
-				context.stroke();
-			}
-
-			border();
-
-			var data = new Map();
-
-			var xhr = new XMLHttpRequest();
-			var lines = [];
-			var file;
-
-			var id = context.getImageData(0, 0, 1, 1);
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-					file = xhr.responseText;
-					lines = xhr.responseText.split("\n");
-					
-					var i = 0;
-					lines.forEach(function (item) {
-						var vals = item.split("\t");
-
-						if (vals) {
-							var x = parseFloat(vals[0]);
-							var y = parseFloat(vals[1]);
-							data[x] = y;
-							
-							var px = 200 + 20 * x;
-							var py = 200 - 20 * y;
-							
-							context.moveTo(px, py);
-							context.arc(px, py, 0.4, 0, 2 * Math.PI, false);
-      							context.fillStyle = 'green';
-							context.stroke();
-      							//context.fill();
-							
-							console.log("(" + x + ", " + y + ")");
-							console.log("\t(" + px + ", " + py + ")");
-						}
-						
-					});
-				}
-			}
-
-			xhr.open('GET', '/data/graph');
-			xhr.send();
-		</script>
 
 	</div>
 </body>

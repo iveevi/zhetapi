@@ -54,7 +54,7 @@ public:
 
 	std::string display() const;
 
-	size_t variables() const {
+	size_t ins() const {
 		return m_params.size();
 	}
 

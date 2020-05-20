@@ -357,10 +357,6 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
 	stree *st = new stree(str);
-
-	cout << "STREE:" << endl;
-	st->print();
-
 	node *out = convert(st, tbl);
 	*this = out;
 }
@@ -921,21 +917,18 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 				new node {new ftr(fr), {}, cfg_ptr}
 			}, cfg_ptr};
 
-			for (stree *s : st->children()) {
-				cout << "Looped - acc = " << acc << endl;
+			for (stree *s : st->children())
 				out->leaves[1]->leaves.push_back(convert(s));
-			}
 
 			acc.clear();
 			num++;
 		} catch(...) {}
 	}
 
-	cout << "Num: " << num << endl;
-	st->print();
-
-	if (!num)
+	if (!num) {
+		cout << "Could not find symbol : " << acc << endl;
 		throw undefined_symbol(acc);
+	}
 
 	return out;
 }
