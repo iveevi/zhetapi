@@ -3,6 +3,7 @@
 
 /* C++ Standard Libraries */
 #include <cmath>
+#include <cassert>
 #include <functional>
 #include <queue>
 #include <string>
@@ -24,6 +25,12 @@ class functor;
  * @brief The enumeration
  * label is used to label nodes
  * of an expression tree.
+ *
+ * Clarifications:
+ *  - l_logarithmic implies a
+ *  logarithm of a variable base.
+ *  - l_constant_logarithmic implies
+ *  a logarithm of a constant base.
  */
 enum nd_label {
 	l_none,
@@ -300,6 +307,9 @@ private:
 	void differentiate_as_power(const std::string &);
 	void differentiate_as_exponential(const std::string &);
 	void differentiate_as_trigonometric(const std::string &);
+	void differentiate_as_logarithmic(const std::string &);
+	void differentiate_as_constant_logarithmic(const std::string &);
+	void differentiate_as_function(const std::string &);
 
 	std::string display_as_operand(nd_label) const;
 	std::string display_as_trigonometric() const;
@@ -654,6 +664,12 @@ template <class T>
 void node <T> ::differentiate(const std::string &var)
 {
 	switch (type) {
+	case l_constant_logarithmic:
+		differentiate_as_constant_logarithmic(var);
+		break;
+	case l_logarithmic:
+		differentiate_as_logarithmic(var);
+		break;
 	case l_trigonometric:
 		differentiate_as_trigonometric(var);
 		break;
@@ -668,6 +684,9 @@ void node <T> ::differentiate(const std::string &var)
 		break;
 	case l_divided:
 		differentiate_as_divided(var);
+		break;
+	case l_function:
+		differentiate_as_function(var);
 		break;
 	case l_separable:
 		leaves[0]->differentiate(var);
@@ -793,6 +812,9 @@ node <T> *node <T> ::copy() const
 	node *cpy;
 
 	cpy = new node(copy(tok), type, {}, cfg_ptr);
+	
+	cpy->pars = pars;
+
 	for (node *nd : leaves)
 		cpy->leaves.push_back(nd->copy());
 	
@@ -908,10 +930,13 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 
 			acc.clear();
 			num++;
+
+			continue;
 		} catch(...) {}
 		
 		try {
 			fr = tbl.find_ftr(acc);
+
 			out = new node {get(op_mul), {
 				out,
 				new node {new ftr(fr), {}, cfg_ptr}
@@ -922,6 +947,8 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 
 			acc.clear();
 			num++;
+
+			continue;
 		} catch(...) {}
 	}
 
@@ -997,6 +1024,12 @@ void node <T> ::label_as_operation()
 		type = l_trigonometric;
 		break;
 	case op_log:
+		if (leaves[0]->type == l_constant)
+			type = l_constant_logarithmic;
+		else
+			type = l_logarithmic;
+
+		break;
 	default:
 		break;
 	}
@@ -1287,49 +1320,106 @@ void node <T> ::differentiate_as_power(const std::string &var)
 template <class T>
 void node <T> ::differentiate_as_exponential(const std::string &var)
 {
+	node *cpy;
+
+	cpy = leaves[1]->copy();
+	cpy->differentiate(var);
+
 	T val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 
-	val = log(val);
-
-	node *r = leaves[1]->copy();
-	
-	node *rd = r->copy();
-	rd->differentiate({var});
-
-	node *lf = new node(get(op_mul), {
-			rd,
-			new node(new opd(val), {}, cfg_ptr),
+	set(get(op_mul), {
+		cpy,
+		new node {get(op_mul), {
+			new node {new opd(log(val)), {}, cfg_ptr},
+			new node {get(op_exp), {
+				leaves[0],
+				leaves[1]
+			}, cfg_ptr}
+		}, cfg_ptr}
 	}, cfg_ptr);
-
-	node *rf = new node(get(op_exp), {
-			new node(new opd(exp(1)), {}, cfg_ptr),
-			new node(get(op_mul), {
-					r,
-					new node(new opd(val), {}, cfg_ptr)
-			}, cfg_ptr),
-	}, cfg_ptr);
-
-	delete tok;
-	tok = get(op_mul);
-
-	delete leaves[0];
-	leaves[0] = lf;
-
-	delete leaves[1];
-	leaves[1] = rf;
 }
 
 template <class T>
 void node <T> ::differentiate_as_trigonometric(const std::string &var)
 {
+	node *cpy;
+	
+	cpy = leaves[0]->copy();
+	cpy->differentiate(var);
+
 	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
 	case op_sin:
-		tok = get(op_cos);
+		set(get(op_mul), {
+			cpy,
+			new node {get(op_cos), {
+				leaves[0]
+			}, cfg_ptr},
+		}, cfg_ptr);
+
 		break;
 	case op_cos:
 		set(get(op_mul), {
-			new node(new opd(-1), {}, cfg_ptr),
-			copy()
+			new node {new opd(-1), {}, cfg_ptr},
+			new node {get(op_mul), {
+				cpy,
+				new node {get(op_sin), {
+					leaves[0]
+				}, cfg_ptr},
+			}, cfg_ptr}
+		}, cfg_ptr);
+		break;
+	case op_tan:
+		set(get(op_mul), {
+			cpy,
+			new node {get(op_exp), {
+				new node {get(op_sec), {
+					leaves[0],
+				}, cfg_ptr},
+				new node {new opd(2), {}, cfg_ptr}
+			}, cfg_ptr}
+		}, cfg_ptr);
+		break;
+	case op_csc:
+		set(get(op_mul), {
+			new node {new opd(-1), {}, cfg_ptr},
+			new node {get(op_mul), {
+				cpy,
+				new node {get(op_mul), {
+					new node {get(op_csc), {
+						leaves[0]->copy()
+					}, cfg_ptr},
+					new node {get(op_cot), {
+						leaves[0]
+					}, cfg_ptr}
+				}, cfg_ptr}
+			}, cfg_ptr}
+		}, cfg_ptr);
+		break;
+	case op_sec:
+		set(get(op_mul), {
+			cpy,
+			new node {get(op_mul), {
+				new node {get(op_sec), {
+					leaves[0]->copy()
+				}, cfg_ptr},
+				new node {get(op_tan), {
+					leaves[0]
+				}, cfg_ptr}
+			}, cfg_ptr}
+		}, cfg_ptr);
+		break;
+	case op_cot:
+		set(get(op_mul), {
+			new node {new opd(-1), {}, cfg_ptr},
+			new node {get(op_mul), {
+				cpy,
+				new node {get(op_exp), {
+					new node {get(op_csc), {
+						leaves[0],
+					}, cfg_ptr},
+					new node {new opd(2), {}, cfg_ptr}
+				}, cfg_ptr}
+			}, cfg_ptr}
 		}, cfg_ptr);
 		break;
 	default:
@@ -1338,11 +1428,106 @@ void node <T> ::differentiate_as_trigonometric(const std::string &var)
 }
 
 template <class T>
+void node <T> ::differentiate_as_logarithmic(const std::string &var)
+{
+}
+
+template <class T>
+void node <T> ::differentiate_as_constant_logarithmic(const std::string &var)
+{
+	T val = log(leaves[0]->value());
+
+	node *cpy = leaves[1]->copy();
+	cpy->differentiate(var);
+
+	set(get(op_div), {
+		cpy,
+		new node {get(op_mul), {
+			new node {new opd(val), {}, cfg_ptr},
+			leaves[1]
+		}, cfg_ptr},
+	}, cfg_ptr);
+}
+
+template <class T>
+void node <T> ::differentiate_as_function(const std::string &var)
+{
+	// Move using declaration to class
+	using ftr = functor <T>;
+	
+	ftr *ft = dynamic_cast <ftr *> (tok);
+
+	// Remove asserts later
+	assert(ft->ins() == leaves.size() && leaves.size() > 0);
+
+	std::vector <node *> terms;
+
+	node *out;
+	node *cpy;
+	node *lcp;
+	
+	ftr tmp;
+
+	// First Node
+	tmp = ft->differentiate((*ft)[0].symbol());
+	
+	lcp = copy();
+	lcp->retokenize(new ftr(tmp));
+
+	cpy = leaves[0]->copy();
+
+	cpy->differentiate(var);
+	// cpy->label_all();
+
+	out = new node {get(op_add), {
+		new node {get(op_mul), {
+			lcp,
+			cpy
+		}, cfg_ptr},
+		new node {new opd(0), l_none, {}, cfg_ptr}
+	}, cfg_ptr};
+
+	// Other parameters
+	for (int i = 1; i < ft->ins(); i++) {
+		tmp = ft->differentiate((*ft)[i].symbol());
+
+		lcp = copy();
+		lcp->retokenize(new ftr(tmp));
+
+		cpy = leaves[i]->copy();
+
+		cpy->differentiate(var);
+		// cpy->label_all();
+
+		/* cout << "\t#" << (i + 1) << endl;
+		
+		cout << "\t\t(a): " << tmp << endl;
+		cout << "\t\t(b): " << cpy->display() << endl; */
+
+		out = new node {get(op_add), {
+			new node {get(op_mul), {
+				lcp,
+				cpy
+			}, cfg_ptr},
+			out
+		}, cfg_ptr};
+	}
+
+	// cout << endl;
+
+	*this = out->copy();
+}
+
+template <class T>
 std::string node <T> ::display_as_operand(nd_label required) const
 {
 	std::string out = display();
 
 	switch (required) {
+	case l_trigonometric:
+		if (type == l_separable)
+			out = "(" + out + ")";
+		break;
 	case l_exp:
 	case l_power:
 	case l_exponential:
@@ -1367,7 +1552,8 @@ std::string node <T> ::display_as_trigonometric() const
 {
 	std::string stropn;
 
-	stropn = leaves[0]->display();
+	stropn = leaves[0]->display_as_operand(l_trigonometric);
+
 	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
 	case op_sin:
 		return "sin " + stropn;

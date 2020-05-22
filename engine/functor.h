@@ -66,7 +66,7 @@ public:
 	/* Virtual functions inehrited
 	 * from the token class. */
 	std::string str() const;
-:
+
 	type caller() const;
 
 	/* Debugging functions */
@@ -74,6 +74,8 @@ public:
 
 	/* Operators for the
 	 * functor class */
+	const variable <T> &operator[](size_t);
+	
 	template <class ... U>
 	const T &operator()(U ...);
 
@@ -190,8 +192,9 @@ functor <T> ::functor(const std::string &str, params pars,
 
 template <class T>
 functor <T> ::functor(const functor &other) : m_name(other.m_name),
-	m_params(other.m_params), m_root(other.m_root)
+	m_params(other.m_params)
 {
+	m_root = new node <T> (other.m_root);
 	compress();
 }
 
@@ -280,6 +283,11 @@ void functor <T> ::print() const
 	m_root->print();
 }
 
+template <class T>
+const variable <T> &functor <T> ::operator[](size_t i)
+{
+	return m_params[i];
+}
 
 template <class T>
 template <class ... U>

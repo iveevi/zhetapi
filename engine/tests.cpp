@@ -94,7 +94,7 @@ void test_function()
 {
 	cout << endl << "BEGINNING FUNCTION TEST" << endl;
 
-	clock_t start, end;
+	/* clock_t start, end;
 
 	string str = "f(x, y, z) = 3(sin x)(-5x^2 - y^2 + 3z) + (x^3 - xyz)^3 - 20z";
 	// string str = "f(x, y, z) = 3x + yz";
@@ -115,16 +115,17 @@ void test_function()
 
 	cout << "f(2, 3, 4) = " << f(2, 3, 4) << endl;
 
-	cout << endl << f.display() << endl;
+	cout << endl << f.display() << endl; */
 
 	table <double> tbl {
 		variable <double> {"e", exp(1)},
 		variable <double> {"pi", acos(-1)},
 		variable <double> {"phi", (1 + sqrt(5))/2},
-		functor <double> {"g(x) = x^3"}
+		functor <double> {"g(x, y) = x^3 + y^2"}
 	};
 
-	functor <double> h("h(x) = x * g(x)", tbl);
+	functor <double> h("h(x) = 2^(x^2)", tbl);
+
 	functor <double> g("m(x) = sin x", tbl);
 
 	cout << endl << h.display() << endl;
