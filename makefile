@@ -1,6 +1,6 @@
 graph: build
 	@echo "[BUILDING GRAPHER]\n"
-	nvcc engine/graph.cpp -g -lfl -lGL -lglut -o build/graph
+	nvcc engine/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph
 
 tests: build
 	@echo "[BUILDING TESTS]\n"
@@ -12,10 +12,6 @@ texifier: build
 	touch build/texifier.in
 	touch build/texifier.out
 	
-	# flex -o build/texifier.yy.c texifier/texifier.l
-	# bison -o build/texifier.tab.c texifier/texifier.y
-	
-	# g++ texifier/texifier.cpp -lfl -o build/texifier -DDEBUG=0
 	g++ texifier/texifier.cpp -o build/texifier
 
 driver: build

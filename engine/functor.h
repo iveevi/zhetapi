@@ -38,6 +38,8 @@ protected:
 	
 	variables m_map;
 public:
+	/* Constructors of the
+	 * functor class */
 	functor(const std::string & = "", table <T> = table <T> ());
 	functor(const std::string &, const std::vector <std::string> &,
 		const std::string &);
@@ -45,6 +47,13 @@ public:
 	functor(const std::string &, params, node <T> *);
 
 	functor(const functor &);
+
+	/* Informative functions
+	 * and/or methods of the
+	 * functor class. */
+	size_t ins() const;
+
+	const std::string &symbol() const;
 
 	/* Functional methods
 	 * of the functor class */
@@ -54,16 +63,10 @@ public:
 
 	std::string display() const;
 
-	size_t ins() const {
-		return m_params.size();
-	}
-
-	const std::string &symbol() const;
-
 	/* Virtual functions inehrited
 	 * from the token class. */
 	std::string str() const;
-
+:
 	type caller() const;
 
 	/* Debugging functions */
@@ -91,15 +94,15 @@ public:
 			const functor <U> &);
 
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &,
-		const functor <U> &);
-
-	template <class U>
 	friend bool operator>(const functor <U> &,
 		const functor <U> &);
 
 	template <class U>
 	friend bool operator<(const functor <U> &,
+		const functor <U> &);
+
+	template <class U>
+	friend std::ostream &operator<<(std::ostream &,
 		const functor <U> &);
 protected:
 	template <class ... U>
@@ -193,9 +196,32 @@ functor <T> ::functor(const functor &other) : m_name(other.m_name),
 }
 
 template <class T>
+size_t functor <T> ::ins() const
+{
+	return m_params.size();
+}
+
+template <class T>
 const std::string &functor <T> ::symbol() const
 {
 	return m_name;
+}
+
+template <class T>
+std::string functor <T> ::display() const
+{
+	std::string out;
+
+	out += m_name + "("; // if it doesnt have a name, generate a random one (deg_#)
+	for (size_t i = 0; i < m_params.size(); i++) {
+		out += m_params[i].symbol();
+
+		if (i < m_params.size() - 1)
+			out += ", ";
+	}
+
+	out += ") = " + m_root->display();
+	return out;
 }
 
 template <class T>
@@ -220,6 +246,40 @@ const T &functor <T> ::compute(const std::vector <T> &vals)
 
 	return *val;
 }
+
+template <class T>
+const functor <T> &functor <T> ::differentiate
+	(const std::string &var) const
+{
+	node <T> *diffed = new node <T> (m_root);
+
+	diffed->label({var});
+
+	diffed->differentiate(var);
+	
+	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
+
+	return *out;
+}
+
+template <class T>
+std::string functor <T> ::str() const
+{
+	return display();
+}
+
+template <class T>
+token::type functor <T> ::caller() const
+{
+	return FUNCTOR;
+}
+
+template <class T>
+void functor <T> ::print() const
+{
+	m_root->print();
+}
+
 
 template <class T>
 template <class ... U>
@@ -346,6 +406,25 @@ const functor <T> &operator/(const functor <T> &a, const functor <T> &b)
 }
 
 template <class T>
+bool operator>(const functor <T> &lhs, const functor <T> &rhs)
+{
+	return lhs.m_name > rhs.m_name;
+}
+
+template <class T>
+bool operator<(const functor <T> &lhs, const functor <T> &rhs)
+{
+	return lhs.m_name < rhs.m_name;
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const functor <T> &func)
+{
+	os << func.display();
+	return os;
+}
+
+template <class T>
 template <class ... U>
 void functor <T> ::gather(std::vector <T> &vals,
 	T first, U ... args)
@@ -359,6 +438,14 @@ void functor <T> ::gather(std::vector <T> &vals,
 	T first)
 {
 	vals.push_back(first);
+}
+
+template <class T>
+void functor <T> ::compress()
+{
+	m_root->label_all();
+	m_root->compress();
+	build();
 }
 
 template <class T>
@@ -385,85 +472,6 @@ void functor <T> ::build()
 		for (node <T> *nd : current->children())
 			que.push(nd);
 	}
-}
-
-template <class T>
-void functor <T> ::compress()
-{
-	m_root->label_all();
-	m_root->compress();
-	build();
-}
-
-// Beginning of differentiation work
-template <class T>
-const functor <T> &functor <T> ::differentiate
-	(const std::string &var) const
-{
-	node <T> *diffed = new node <T> (m_root);
-
-	diffed->label({var});
-
-	diffed->differentiate(var);
-	
-	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
-
-	return *out;
-}
-
-template <class T>
-void functor <T> ::print() const
-{
-	m_root->print();
-}
-
-template <class T>
-std::string functor <T> ::display() const
-{
-	std::string out;
-
-	out += m_name + "("; // if it doesnt have a name, generate a random one (deg_#)
-	for (size_t i = 0; i < m_params.size(); i++) {
-		out += m_params[i].symbol();
-
-		if (i < m_params.size() - 1)
-			out += ", ";
-	}
-
-	out += ") = " + m_root->display();
-	return out;
-}
-
-template <class T>
-std::ostream &operator<<(std::ostream &os, const functor <T> &func)
-{
-	os << func.display();
-	return os;
-}
-
-// move to table.h
-template <class T>
-bool operator>(const functor <T> &lhs, const functor <T> &rhs)
-{
-	return lhs.m_name > rhs.m_name;
-}
-
-template <class T>
-bool operator<(const functor <T> &lhs, const functor <T> &rhs)
-{
-	return lhs.m_name < rhs.m_name;
-}
-
-template <class T>
-token::type functor <T> ::caller() const
-{
-	return FUNCTOR;
-}
-
-template <class T>
-std::string functor <T> ::str() const
-{
-	return display();
 }
 
 #endif

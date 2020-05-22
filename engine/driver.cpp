@@ -18,8 +18,9 @@
 #include "variable.h"
 
 #define MAX_COUNT	4096
-#define FIFO_R_FILE	"/home/ram/zhetapi/build/web2drv"
-#define FIFO_W_FILE	"/home/ram/zhetapi/build/drv2web"
+
+#define FIFO_R_FILE	"/home/ram/zhetapi/build/driver_in"
+#define FIFO_W_FILE	"/home/ram/zhetapi/build/driver_out"
 
 using namespace std;
 
@@ -135,7 +136,48 @@ vector <string> scan(string line)
 				tbl.insert_var(vr);
 			}
 		} else {
-			out.push_back(str);
+			double val;
+		
+			int vars = 0;
+			string name;
+
+			table <double> cpy = tbl;
+
+			int ses = 2;
+			while (true) {
+				try {
+					val = expression <double> ::in_place_evaluate(str, cpy);
+					cout << "Attempt successful" << endl;
+					break;
+				} catch (node <double> ::undefined_symbol e) {
+					cout << "Is function: \"" << e.what() << "\"" << endl;
+					cpy.insert_var(variable <double> {e.what(), 0.0});
+					name = e.what();
+					vars++;
+				}
+			}
+			
+			cout << "vars: " << vars << endl;
+
+			if (vars == 1) {
+				string ftr = "f(" + name + ") = " + str;
+
+				std::time_t rawtime;
+				std::tm* timeinfo;
+				
+				char buffer[80];
+
+				std::time(&rawtime);
+				timeinfo = std::localtime(&rawtime);
+
+				std::strftime(buffer,80,"%Y-%m-%d-%H-%M-%S",timeinfo);
+
+				cout << "SINGLE VARIABLE" << endl;
+				cout << buffer << endl;
+				pref = "GRAPH[" + ftr + "]: " + string(buffer);
+			} else {
+				out.push_back(str);
+			}
 		}
 	}
 

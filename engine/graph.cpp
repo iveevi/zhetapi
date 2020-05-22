@@ -4,8 +4,6 @@
 
 #include "functor.h"
 
-#define	PIXELS	200.0
-
 table <double> tbl {
 	variable <double> {"e", exp(1)},
 	variable <double> {"pi", acos(0)}
@@ -16,13 +14,14 @@ int main()
 	string line;
 
 	double range;
+	double pixels;
 
 	double cx;
 	double cy;
 
 	getline(cin, line);
 
-	cin >> range >> cx;
+	cin >> range >> cx >> pixels;
 
 	ofstream fout("../output.log");
 
@@ -31,10 +30,10 @@ int main()
 	fout << "cx: " << cx << endl;
 	fout << "range: " << range << endl;
 
-	cx *= range/PIXELS;
+	cx *= range/pixels;
 
 	fout << "cx [conv]: " << cx << endl;
 
-	for (double i = -range - cx; i <= range - cx; i += range/(2 * PIXELS))
+	for (double i = -range - cx; i <= range - cx; i += range/(2 * pixels))
 		cout << i << "\t" << f(i) << endl;
 }

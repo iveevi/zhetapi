@@ -3,7 +3,7 @@ import subprocess
 
 PIPE_DIR = "/home/ram/zhetapi/build/"
 
-fout = open(PIPE_DIR + "web2drv", "wb")
+fout = open(PIPE_DIR + "driver_in", "wb")
 
 # Regular text to Zhetapi Engine
 def compute(input):
@@ -13,7 +13,7 @@ def compute(input):
     fout.write(bytearray(in_bytes))
     fout.flush()
 
-    fin = open(PIPE_DIR + "drv2web", "r")
+    fin = open(PIPE_DIR + "driver_out", "r")
 
     x = fin.readline()
     fin.close()

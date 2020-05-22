@@ -8,226 +8,295 @@
 	};
 </script>
 
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js">
-</script>
-
-<h1 align="center" lang="latex">$\Large\mathbf{Zhetapi}$</h1>
-
-<form method="POST" align="center">
-	<input name="text">
-	<input type="submit" value="Solve">
-</form>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
 
 <body align="center">
+	<h1 align="center" lang="latex">$\Large\mathbf{Zhetapi}$</h1>
+
+	<!-- <hr> -->
+
+	<style>
+		input {
+			margin: 0;
+			padding: 10;
+		}
+
+		canvas {
+			height: 62%;
+			width: 80%;
+			margin: 0px;
+		}
+	</style>
+
+	<form method="POST" align="center">
+
+		<div>
+			<input size=60 width=600 name="text" style="height: 100px;">
+		</div>
+
+		<div>
+			<input type="submit" value="Go" style="margin-top: 10px;
+			font-family: 'Courier New', Courier, monospace;">
+		</div>
+
+	</form>
 
 	<div vertical layout align="center">
 
 		{% if input %}
-		<h2 align="center">$\large\mathbf{Result}$</h2>
+
+		<!-- <hr> -->
+
+		<!-- <h2 align="center"> $\large\mathbf{Result}$ </h2> -->
+
 		<div> ${{input}} = \mathbf{ {{out}} }$ </div>
 
 		{% if date %}
-		<canvas id="graph" width=400 height=400 style="border: 2px solid black;"></canvas>
 
-		<script type="text/javascript" language="javascript">
+		<div>
+			<canvas id="graph" style="border: 2px solid black; margin-top: 10px;"></canvas>
 
-			var canvas = document.getElementById("graph");
+			<script type="text/javascript" language="javascript">
 
-			var center = [0, 0];
-			var dx = 20;
-			var dy = 20;
+				// Global Variables
+				var canvas = document.getElementById("graph");
+				var context = canvas.getContext("2d");
 
-			canvas.addEventListener("mousedown", click, false);
-			canvas.addEventListener("mouseup", release, false);
-			canvas.addEventListener("mousemove", drag, false);
+				canvas.height = window.innerHeight;
+				canvas.width = window.innerWidth;
 
-			canvas.addEventListener("wheel", ftr);
+				var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+				var rect = canvas.getBoundingClientRect();
 
-			function ftr(event) {
-				console.log("Dir: " + Math.sign(event.deltaY));
-				if (event.deltaY < 0) {
-					dx *= 1.5;
-					dy *= 1.5;
-					/* ping.open('GET', '/zin/{{graph}}/{{ftr}}/' + 200/dx);
-					xhr.open('GET', '/graph/{{graph}}_' + 200/dx); */
-					xhr.open('GET', '/graph/{{date}}/{{ftr}}/' + 200 / dx + '/' + center[0]);
-					xhr.send();
-				} else {
-					dx /= 1.5;
-					dy /= 1.5;
-					/* ping.open('GET', '/zin/{{graph}}/{{ftr}}/' + 200/dx);
-					xhr.open('GET', '/graph/{{graph}}_' + 200/dx); */
-					xhr.open('GET', '/graph/{{date}}/{{ftr}}/' + 200 / dx + '/' + center[0]);
-					xhr.send();
-				}
-			}
+				var xhr = new XMLHttpRequest();
 
-			var context = canvas.getContext("2d");
+				var center = [0, 0];
+				var start = [0, 0];
 
-			context.beginPath();
+				var clicked = false;
 
-			var data = new Map();
+				var dx = 20;
+				var dy = 20;
 
-			var xhr = new XMLHttpRequest();
+				var pdx = 0;
+				var pdy = 0;
 
-			var ping = new XMLHttpRequest();
+				var tdx = 0;
+				var tdy = 0;
 
-			ping.onreadystatechange = function () { }
+				// Canvas Listeners
+				canvas.addEventListener("mousedown", function (event) {
+					canvas.focus();
 
-			var lines = [];
-			var file;
+					imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
 
-			function init() {
-				context.moveTo(0, 200 - center[1]);
-				context.lineTo(400, 200 - center[1]);
+					start = [event.clientX - rect.left, event.clientY - rect.top];
 
-				context.moveTo(200 + center[0], 0);
-				context.lineTo(200 + center[0], 400);
+					clicked = true;
 
-				context.strokeStyle = "black";
-				context.stroke();
-			}
+					pdx = 0;
+					pdy = 0;
 
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState == 4 && xhr.status == 200) {
-					file = xhr.responseText;
-					lines = xhr.responseText.split("\n");
+					tdx = 0;
+					tdy = 0;
+				}, false);
 
-					canvas.width = canvas.width;
+				canvas.addEventListener("mouseup", function (event) {
+					center = [center[0] + tdx, center[1] - tdy];
+					clicked = false;
 
-					var i = 0;
+					canvas.style.cursor = "default";
 
-					ppy = 200;
-					lines.forEach(function (item) {
-						var vals = item.split("\t");
-
-						if (vals) {
-							var x = parseFloat(vals[0]);
-							var y = parseFloat(vals[1]);
-							data[x] = y;
-
-							var px = 200 + (dx * x) + center[0];
-							var py = 200 - (dy * y) - center[1];
-
-							console.log("(" + x + ", " + y + ") -> (" + px + ", " + py + ")");
-
-							if (Math.abs(ppy - py) < 300)
-								context.lineTo(px, py);
-							else
-								context.moveTo(px, py);
-							//context.arc(px, py, 1, 0, 2 * Math.PI, false);
-							context.strokeStyle = "#FF0000";
-							context.stroke();
-
-							ppy = py;
-						}
-
-					});
-
-					init();
-				}
-			}
-
-			xhr.open('GET', '/graph/{{date}}/{{ftr}}/' + 200 / dx + '/' + center[0]);
-			xhr.send();
-
-			var clicked = false;
-			var start = [0, 0];
-
-			var pdx = 0;
-			var pdy = 0;
-
-			var tdx = 0;
-			var tdy = 0;
-
-			var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-
-			function click(event) {
-				//console.log(event);
-				start = [event.clientX - rect.left, event.clientY - rect.top]
-				imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-				clicked = true;
-				pdx = 0;
-				pdy = 0;
-
-				tdx = 0;
-				tdy = 0;
-			}
-
-			function release(event) {
-				clicked = false;
+					draw();
+				}, false);
 
 
-				// console.log("trsl: (%d, %d)", tdx, tdy);
-				center = [center[0] + tdx, center[1] - tdy];
+				canvas.addEventListener("mousemove", function (event) {
+					if (clicked) {
+						canvas.style.cursor = "move";
 
-				xhr.open('GET', '/graph/{{date}}/{{ftr}}/' + 200 / dx + '/' + center[0]);
-				xhr.send();
+						var x = event.clientX - rect.left;
+						var y = event.clientY - rect.top;
 
-				console.log(center);
+						var dx = x - start[0];
+						var dy = y - start[1];
 
-				canvas.style.cursor = "default";
-			}
+						context.putImageData(imageData, dx, dy);
 
-			// now clear the right-most pixels:
-			//context.clearRect(context.canvas.width-1, 0, 1, context.canvas.height);
+						pdx = dx;
+						pdy = dy;
 
-			var rect = canvas.getBoundingClientRect();
+						tdx = dx;
+						tdy = dy;
 
-			function drag(event) {
-				if (clicked) {
-					canvas.style.cursor = "move";
-					//context.putImageData(imageData, 0, 0);
-					var x = event.clientX - rect.left;
-					var y = event.clientY - rect.top;
+						if (tdx > 0)
+							context.clearRect(0, 0, tdx, canvas.height);
+						else
+							context.clearRect(canvas.width + tdx, 0, Math.abs(tdx), canvas.height);
 
-					var dx = x - start[0];
-					var dy = y - start[1];
+						if (tdy > 0)
+							context.clearRect(0, 0, canvas.width, tdy);
+						else
+							context.clearRect(0, canvas.height + tdy, canvas.width, Math.abs(tdy));
+					}
+				}, false);
 
-					// console.log("dx: " + dx + ", dy: " + dy);
 
-					// var imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-					/* if (dx > 0) {
-						var imageData = context.getImageData(dx, 0, context.canvas.width - dx, context.canvas.height);
+				canvas.addEventListener("wheel", function (event) {
+					console.log("@(x, y): (%g, %g)", event.clientX - rect.left, event.clientY - rect.top);
+
+					if (event.deltaY < 0) {
+						dx *= 2;
+						dy *= 2;						
 					} else {
-						var imageData = context.getImageData(canvas.Math.abs(dx), 0, Math.abs(dx), context.canvas.height);
-					} */
-
-					// console.log(imageData);
-
-					// context.putImageData(imageData, dx - pdx, dy - pdy);
-					context.putImageData(imageData, dx, dy);
-
-					pdx = dx;
-					pdy = dy;
-
-					tdx = dx;
-					tdy = dy;
-
-					if (tdx > 0) {
-						context.clearRect(0, 0, tdx, 400);
-					} else {
-						context.clearRect(400 + tdx, 0, Math.abs(tdx), 400);
+						dx /= 2;
+						dy /= 2;
 					}
 
-					if (tdy > 0) {
-						context.clearRect(0, 0, 400, tdy);
-					} else {
-						context.clearRect(0, 400 + tdy, 400, Math.abs(tdy));
+					draw();
+				});
+
+				// Axes and Scale (Ticks) Drawing
+				function init() {
+					context.beginPath();
+
+					context.moveTo(0, canvas.height / 2 - center[1]);
+					context.lineTo(canvas.width, canvas.height / 2 - center[1]);
+
+					context.moveTo(canvas.width / 2 + center[0], 0);
+					context.lineTo(canvas.width / 2 + center[0], canvas.height);
+
+					context.strokeStyle = "black";
+					context.lineWidth = 2;
+
+					context.stroke();
+
+					context.beginPath();
+
+					var range = canvas.width/dx;
+
+                          		var inc = Math.pow(10, Math.floor(Math.log10(range)) - 1);
+
+					// Minor Ticks (1)
+					// var inc = 1;
+
+					for (var i = canvas.width / 2 + center[0] + inc * dx; i < canvas.width; i += inc * dx) {
+						context.moveTo(i, 0);
+						context.lineTo(i, canvas.height);
 					}
 
-					// console.log("trsl: (%d, %d)", tdx, tdy);
+					for (var i = canvas.width / 2 + center[0] - inc * dx; i > 0; i -= inc * dx) {
+						context.moveTo(i, 0);
+						context.lineTo(i, canvas.height);
+					}
 
+					for (var i = canvas.height / 2 - center[1] + inc * dx; i < canvas.height; i += inc * dx) {
+						context.moveTo(0, i);
+						context.lineTo(canvas.width, i);
+					}
+
+					for (var i = canvas.height / 2 - center[1] - inc * dx; i > 0; i -= inc * dx) {
+						context.moveTo(0, i);
+						context.lineTo(canvas.width, i);
+					}
+
+					context.lineWidth = 0.5;
+					context.strokeStyle = "#c9ccd1";
+					context.stroke();
+
+					context.beginPath();
+
+					// Major Ticks (5)
+
+					inc *= 5;
+
+					for (var i = canvas.width / 2 + center[0] + inc * dx; i < canvas.width; i += inc * dx) {
+						context.moveTo(i, 0);
+						context.lineTo(i, canvas.height);
+					}
+
+					for (var i = canvas.width / 2 + center[0] - inc * dx; i > 0; i -= inc * dx) {
+						context.moveTo(i, 0);
+						context.lineTo(i, canvas.height);
+					}
+
+					for (var i = canvas.height / 2 - center[1] + inc * dx; i < canvas.height; i += inc * dx) {
+						context.moveTo(0, i);
+						context.lineTo(canvas.width, i);
+					}
+
+					for (var i = canvas.height / 2 - center[1] - inc * dx; i > 0; i -= inc * dx) {
+						context.moveTo(0, i);
+						context.lineTo(canvas.width, i);
+					}
+
+					context.strokeStyle = "#aaaeb5";
+					context.stroke();
 				}
-			}
 
-		</script>
+				// Pinger (XML Object) Setup
+				xhr.onreadystatechange = function () {
+					if (xhr.readyState == 4 && xhr.status == 200) {
+						lines = xhr.responseText.split("\n");
+
+						canvas.width = canvas.width;
+
+						var i = 0;
+
+						var ppy = canvas.height / 2;
+						lines.forEach(function (item) {
+
+							var vals = item.split("\t");
+
+							if (vals) {
+								var x = parseFloat(vals[0]);
+								var y = parseFloat(vals[1]);
+
+								var px = canvas.width / 2 + (dx * x) + center[0];
+								var py = canvas.height / 2 - (dy * y) - center[1];
+
+								if (Math.abs(ppy - py) < canvas.height)
+									context.lineTo(px, py);
+								else
+									context.moveTo(px, py);
+
+								context.strokeStyle = "#00FF00";
+								context.stroke();
+
+								ppy = py;
+							}
+
+						});
+
+						init();
+					}
+				}
+
+				// Window Resize Event Handler
+				window.onresize = function () {
+					canvas.height = window.innerHeight;
+					canvas.width = window.innerWidth;
+
+					draw();
+				}
+
+				// Drawing (Aux) Function
+				function draw() {
+					xhr.open('GET', '/graph/{{date}}/{{ftr}}/' + canvas.width / (2 * dx) + '/' + center[0] + '/' + canvas.width / 2);
+					xhr.send();
+				}
+
+				draw();
+
+			</script>
+		</div>
 
 		{% endif %}
 
 		{% endif %}
 
-		<a href="/"><input type="submit" name="session" value="Home" style="margin-top:0.5cm;"></a>
+		<a href="/"><input type="submit" name="session" value="Home" style="margin-top: 50px;
+			margin-bottom: 50px; font-family: 'Courier New', Courier, monospace;" align="center"></a>
 
 	</div>
 

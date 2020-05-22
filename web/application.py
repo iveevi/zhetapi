@@ -24,11 +24,11 @@ for f in files:
 def home():
     return render_template('home.html')
 
-@app.route('/graph/<string:date>/<string:ftr>/<string:range>/<string:center>')
-def graph(date, ftr, range, center):
-    os.system("echo -e \"" + ftr + "\\n" + str(range) + "\\n" + str(center) +
-              "\" | /home/ram/zhetapi/build/graph > /home/ram/zhetapi/web/data/graph_" + date + "_" + range + "_" + center)
-    return send_from_directory(app.config["DATA"], filename="graph_%s_%s_%s" % (date, str(range), str(center)), as_attachment=True)
+@app.route('/graph/<string:date>/<string:ftr>/<string:range>/<string:center>/<string:width>')
+def graph(date, ftr, range, center, width):
+    os.system("echo -e \"" + ftr + "\\n" + str(range) + "\\n" + str(center) + "\\n" + str(width) +
+              "\" | /home/ram/zhetapi/build/graph > /home/ram/zhetapi/web/data/graph_" + date + "_" + range + "_" + center + "_" + width)
+    return send_from_directory(app.config["DATA"], filename="graph_%s_%s_%s_%s" % (date, str(range), str(center), str(width)), as_attachment=True)
 
 
 @app.route('/calculate')
