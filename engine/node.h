@@ -87,6 +87,8 @@ public:
 	/* Alias that need to be
 	 * defined earlier to be
 	 * used later */
+
+	friend class functor <T>;
 	
 	using params = std::vector <variable <double>>;
 
@@ -233,6 +235,8 @@ public:
 	 * node object.
 	 */
 	void retokenize(token *);
+
+	void reparametrize(params);
 
 	/**
 	 * @brief Getter method to return
@@ -495,6 +499,12 @@ void node <T> ::retokenize(token *t)
 }
 
 template <class T>
+void node <T> ::reparametrize(params pr)
+{
+	pars = pr;
+}
+
+template <class T>
 node <T> *node <T> ::child_at(size_t i)
 {
 	return leaves[i];
@@ -578,6 +588,7 @@ template <class T>
 void node <T> ::label_all()
 {
 	std::vector <std::string> names;
+	
 	for (auto var : pars)
 		names.push_back(var.symbol());
 
@@ -952,7 +963,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	}
 
 	if (!num) {
-		cout << "Could not find disassemble cluster: " << acc << endl;
+		// cout << "Could not disassemble cluster: " << acc << endl;
 		throw undefined_symbol(acc);
 	}
 

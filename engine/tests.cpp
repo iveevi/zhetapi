@@ -814,6 +814,16 @@ void test_ml()
 
 	cout << endl << "COMPOUND: " << compound << endl;
 	compound.print();
+
+	functor <double> comp_a = compound.differentiate("a");
+	functor <double> comp_b = compound.differentiate("b");
+	functor <double> comp_c = compound.differentiate("c");
+	functor <double> comp_d = compound.differentiate("d");
+
+	cout << endl << "comp_a: " << comp_a << endl;
+	cout << endl << "comp_b: " << comp_b << endl;
+	cout << endl << "comp_c: " << comp_c << endl;
+	cout << endl << "comp_d: " << comp_d << endl;
 }
 
 void test_lagrange_interpolation()

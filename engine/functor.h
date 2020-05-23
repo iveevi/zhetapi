@@ -185,7 +185,7 @@ functor <T> ::functor(const std::string &str, params pars,
 {
 	m_name = str;
 	m_params = pars;
-	m_root = tree;
+	m_root = new node <T> (tree);
 
 	compress();
 }
@@ -194,6 +194,14 @@ template <class T>
 functor <T> ::functor(const functor &other) : m_name(other.m_name),
 	m_params(other.m_params)
 {
+	/* cout << "OTHER-PARS:" << endl;
+	for (auto var : other.m_params)
+		cout << "\tvar: " << var.symbol() << endl;
+	
+	cout << "THIS-PARS:" << endl;
+	for (auto var : m_params)
+		cout << "\tvar: " << var.symbol() << endl; */
+
 	m_root = new node <T> (other.m_root);
 	compress();
 }
@@ -257,9 +265,9 @@ const functor <T> &functor <T> ::differentiate
 	node <T> *diffed = new node <T> (m_root);
 
 	diffed->label({var});
-
 	diffed->differentiate(var);
-	
+	diffed->reparametrize(m_params);
+
 	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
 
 	return *out;
