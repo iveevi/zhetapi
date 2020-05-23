@@ -777,8 +777,24 @@ void test_ml()
 	}
 }
 
+void test_lagrange_interpolation()
+{
+	cout << "BEGINNING LAGRANGE INTERPOLATION TEST" << endl;
+
+	vector <pair <double, double>> data {
+		{1, 6},
+		{2, -7},
+		{3, 6},
+		{7, 1}
+	};
+
+	functor <double> ftr = utility::interpolate_lagrange(data);
+
+	cout << endl << "Function (Curve): " << ftr << endl;
+}
+
 vector <std::function <void ()>> tests = {
-	test_function
+	test_lagrange_interpolation
 };
 
 int main()

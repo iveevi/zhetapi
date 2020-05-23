@@ -49,6 +49,31 @@ namespace utility {
 
 		return basis;
 	}
+
+	template <class T>
+	const functor <T> &interpolate_lagrange(const std::vector <std::pair
+			<T, T>> &points)
+	{
+		functor <T> *out = new functor <T> ("f(x) = 0");
+
+		for (int i = 0; i < points.size(); i++) {
+			functor <T> *term = new functor <T> ("f(x) = " + to_string(points[i].second));
+
+			for (int j = 0; j < points.size(); j++) {
+				if (i == j)
+					continue;
+
+				functor <T> *tmp = new functor <T> ("f(x) = (x - " + to_string(points[j].first)
+					+ ")/(" + to_string(points[i].first) + " - " + to_string(points[j].first) + ")");
+
+				*term = (*term * *tmp);
+			}
+
+			*out = (*out + *term);
+		}
+
+		return *out;
+	}
 };
 
 #endif
