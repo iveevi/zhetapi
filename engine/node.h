@@ -366,8 +366,7 @@ template <class T>
 node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
-	stree *st = new stree(str);
-	node *out = convert(st, tbl);
+	node *out = convert(new stree(str), tbl);
 	*this = out;
 }
 
@@ -943,7 +942,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			}, cfg_ptr};
 
 			for (stree *s : st->children())
-				out->leaves[1]->leaves.push_back(convert(s));
+				out->leaves[1]->leaves.push_back(convert(s, tbl));
 
 			acc.clear();
 			num++;
@@ -953,7 +952,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	}
 
 	if (!num) {
-		cout << "Could not find symbol : " << acc << endl;
+		cout << "Could not find disassemble cluster: " << acc << endl;
 		throw undefined_symbol(acc);
 	}
 

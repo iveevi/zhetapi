@@ -775,6 +775,45 @@ void test_ml()
 		cout << "\tcost[R]: " << cost(30, s, 400, -30, 30) << endl;
 		// cout << "\t\tcost[R]: " << cost_two(-30, s, 400, -30, 30) << endl;
 	}
+
+	functor <double> ft("f(a, b, c, d, l, r, LR, RL) = a * (c*l + d*r) + b * (c*RL + d*LR)");
+
+	cout << endl << "FT: " << ft << endl;
+	ft.print();
+
+	functor <double> ft_a = ft.differentiate("a");
+	functor <double> ft_c = ft.differentiate("b");
+	functor <double> ft_b = ft.differentiate("c");
+	functor <double> ft_d = ft.differentiate("d");
+
+	cout << endl << "ft_a: " << ft_a << endl;
+	cout << "ft_b: " << ft_b << endl;
+	cout << "ft_c: " << ft_c << endl;
+	cout << "ft_d: " << ft_d << endl;
+
+	tbl.insert_ftr(ft);
+
+	functor <double> sigmoid("s(x, alpha) = alpha/(1 + e^(-x)) - alpha/2", tbl);
+	
+	cout << endl << "SIGMOID: " << sigmoid << endl;
+	sigmoid.print();
+
+	functor <double> sig_a = sigmoid.differentiate("alpha");
+	functor <double> sig_x = sigmoid.differentiate("x");
+
+	cout << endl << "sig_a: " << sig_a << endl;
+	cout << endl << "sig_x: " << sig_x << endl;
+
+	tbl.insert_ftr(sigmoid);
+
+	cout << endl;
+
+	tbl.print();
+
+	functor <double> compound("steer(a, b, c, d, A, r, l, LR, RL) = s(f(a, b, c, d, r, l, LR, RL), A)", tbl);
+
+	cout << endl << "COMPOUND: " << compound << endl;
+	compound.print();
 }
 
 void test_lagrange_interpolation()
@@ -794,7 +833,7 @@ void test_lagrange_interpolation()
 }
 
 vector <std::function <void ()>> tests = {
-	test_lagrange_interpolation
+	test_ml
 };
 
 int main()
