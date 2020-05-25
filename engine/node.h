@@ -49,7 +49,10 @@ enum nd_label {
 	l_power_uncertain,
 	l_function_constant,
 	l_operation_constant,
-	l_constant_logarithmic
+	l_constant_logarithmic,
+	l_summation,
+	l_summation_variable,
+	l_summation_function
 };
 
 /**
@@ -74,7 +77,10 @@ std::string strlabs[] = {
 	"power uncertain",
 	"function constant",
 	"operation constant",
-	"constant logarithmic"
+	"constant logarithmic",
+	"summation",
+	"summation variable",
+	"summation function"
 };
 
 /**
@@ -296,9 +302,13 @@ private:
 
 	node *convert(stree *, table <T> = table <T> ()) const;
 	node *convert_operation(stree *, table <T> = table <T> ()) const;
+	node *convert_summation(stree *, table <T> = table <T> ()) const;
 	node *convert_variable_cluster(stree *, table <T> = table <T> ()) const;
 
+	bool special() const;
+
 	void label_as_operation();
+	void label_as_special(const std::vector <std::string> &vars);
 
 	void compress_as_separable();
 	void compress_as_multiplied();
@@ -370,7 +380,19 @@ template <class T>
 node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
-	node *out = convert(new stree(str), tbl);
+	stree *st = new stree(str);
+
+	if (str.find("sum") != string::npos) {
+		cout << endl << "STREE:" << endl;
+		st->print();
+	}
+
+	node *out = convert(st, tbl);
+	if (str.find("sum") != string::npos) {
+		cout << endl << "OUT:" << endl;
+		out->print();
+	}
+
 	*this = out;
 }
 
@@ -559,15 +581,26 @@ const T &node <T> ::value() const
 {
 	std::vector <token *> vals;
 	std::vector <T> hard;
+
+	opn *optr;
 	
 	switch (tok->caller()) {
 	case token::OPERAND:
 		return (dynamic_cast <opd *> (tok))->get();
 	case token::OPERATION:
+		optr = dynamic_cast <opn *> (tok);
+
+		switch (cfg_ptr->code(optr->fmt())) {
+		case op_sum:
+			for (auto itr : leaves)
+				vals.push_back(itr->tok);
+			return (new opd((*optr)(vals)))->get();
+		}
+
 		for (auto itr : leaves)
 			vals.push_back(new opd(itr->value()));
 		
-		return (new opd((*(dynamic_cast <opn *> (tok)))(vals)))->get();
+		return (new opd((*optr)(vals)))->get();
 	case token::VARIABLE:
 		if (!(dynamic_cast <var *> (tok))->is_param()) 
 			return (dynamic_cast <var *> (tok))->get();
@@ -601,6 +634,9 @@ void node <T> ::label(const std::vector <std::string> &vars)
 	std::string sym;
 	
 	bool constant = true;
+
+	if (special())
+		return label_as_special(vars);
 
 	for (auto nd : leaves)
 		nd->label(vars);
@@ -741,8 +777,10 @@ std::string node <T> ::display() const
 	case l_constant:
 		return tok->str();
 	case l_variable:
+	case l_summation_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	case l_function:
+	case l_summation_function:
 		return display_as_function();
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
@@ -757,6 +795,9 @@ std::string node <T> ::display() const
 		return "log_{" + leaves[0]->display() + "} (" + leaves[1]->display() + ")";
 	case l_trigonometric:
 		return display_as_trigonometric();
+	case l_summation:
+		return "sum^{" + leaves[2]->display() + "}_{" + leaves[0]->display() + " = " + leaves[1]->display()
+			+ "} " + leaves[3]->display();
 	default:
 		return "?";
 		//throw unlabeled_node("Unlabeled node [" + strlabs[type] + "], could not display it.");
@@ -880,6 +921,9 @@ node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 template <class T>
 node <T> *node <T> ::convert_operation(stree *st, table <T> tbl) const
 {
+	if (st->str() == "sum")
+		return convert_summation(st, tbl);
+
 	node *out = new node {get(st->str()), {}, cfg_ptr};
 	
 	for (stree *s : st->children())
@@ -971,6 +1015,50 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 }
 
 template <class T>
+node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
+{
+	// Requires 4 operands
+	// [remove asserts later]
+	assert(st->children().size() == 4);
+
+	string str = st->children()[0]->str();
+	string eqn = st->children()[3]->str();
+
+	node *out = new node {get(st->str()), {
+		new node {new var {str, T(), true}, {}, cfg_ptr},
+		convert(st->children()[1]),
+		convert(st->children()[2]),
+		new node {new ftr {"f(" + str + ") = " + eqn}, {
+			new node {new var {str, T(), true}, {}, cfg_ptr}
+		}, cfg_ptr}
+	}, cfg_ptr};
+
+	return out;
+}
+
+template <class T>
+bool node <T> ::special() const
+{
+	opn *optr;
+	switch (tok->caller()) {
+	case token::OPERATION:
+		optr = dynamic_cast <opn *> (tok);
+		switch (cfg_ptr->code(optr->fmt())) {
+		case op_sum:
+			return true;
+		default:
+			break;
+		}
+
+		break;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+template <class T>
 void node <T> ::label_as_operation()
 {
 	bool constant = true;
@@ -1042,6 +1130,28 @@ void node <T> ::label_as_operation()
 		break;
 	default:
 		break;
+	}
+}
+
+template <class T>
+void node <T> ::label_as_special(const std::vector <std::string> &vars)
+{
+	// Early checking
+	opn *optr = dynamic_cast <opn *> (tok);
+
+	if (optr) {
+		switch (cfg_ptr->code(optr->fmt())) {
+		case op_sum:
+			leaves[0]->type = l_summation_variable;
+			leaves[1]->label(vars);
+			leaves[2]->label(vars);
+			leaves[3]->type = l_summation_function;
+			leaves[3]->leaves[0]->type = l_summation_variable;
+			type = l_summation;
+			return;
+		default:
+			break;
+		}
 	}
 }
 

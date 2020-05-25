@@ -18,7 +18,9 @@ using namespace std;
 
 void test_variable()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING VARIABLE TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	variable <double> x("x", false, 12);
 
@@ -31,7 +33,9 @@ void test_variable()
 
 void test_expression()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING EXPRESSION TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	table <double> tbl;
 
@@ -58,7 +62,9 @@ void test_expression()
 }
 void test_variable_parsing()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING VARIABLE PARSING TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	table <double> tbl;
 
@@ -92,7 +98,9 @@ void test_variable_parsing()
 
 void test_function()
 {
-	cout << endl << "BEGINNING FUNCTION TEST" << endl;
+	cout << endl << string(100, '#') << endl;
+	cout << "BEGINNING FUNCTION TEST" << endl;
+	cout << string(100, '#') << endl;
 
 	/* clock_t start, end;
 
@@ -155,11 +163,29 @@ void test_function()
 	cout << b.display() << endl;
 	cout << c.display() << endl;
 	cout << d.display() << endl;
+
+	functor <double> p("f(s_1, s_2) = s_1*s_2");
+
+	cout << endl << "p: " << p << endl;
+	p.print();
+
+	cout << "p(4, 5): " << p(4, 5) << endl;
+
+	functor <double> smp("f(x) = sum^{x}_{i = 0} i");
+
+	cout << endl << "smp: " << smp << endl;
+	smp.print();
+
+	cout << endl << "smp(3) = " << smp(3) << endl;
+	cout << "smp(4) = " << smp(4) << endl;
+	cout << "smp(10) = " << smp(10) << endl;
 }
 
 void test_matrix()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING MATRIX TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	/* double **mat = new double *[2];
 	mat[0] = {1, 2};
@@ -352,7 +378,9 @@ void test_matrix()
 
 void test_root_finding()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING ROOT FINDING TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	string str = "f(x) = (x^2 - 3)(x - 4)(x + 5)";
 	
@@ -456,7 +484,10 @@ void test_root_finding()
 
 void test_multivariable_root_finding()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING MULTIVARIABLE ROOT FINDING TEST" << endl;
+	cout << string('#', 100) << endl;
+
 	string str = "h(x, y) = x^2 + 2y - 5";
 
 	cout << endl << "Function: " << str << endl;
@@ -486,7 +517,9 @@ void test_multivariable_root_finding()
 
 void test_gmp()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING GMP LIBRARY TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	mpz_class a, b, c;
 
@@ -533,7 +566,10 @@ void test_gmp()
 
 void test_node()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING STREE AND NODE TEST" << endl;
+	cout << string('#', 100) << endl;
+
 	// node <double> nd = ("4 + 654 - 231");
 	stree st("45 + 65");
 
@@ -546,7 +582,9 @@ void test_node()
 
 void test_table()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING OF TABLE TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	table <double> tbl;
 	
@@ -613,7 +651,9 @@ void test_table()
 
 void test_config()
 {
+	cout << string('#', 100) << endl;
 	cout << endl << "BEGINNING CONFIG TEST" << endl;
+	cout << string('#', 100) << endl;
 	
 	vector <opcode> codes {
 		op_add,
@@ -657,7 +697,9 @@ void test_config()
 
 void test_gram_shmidt()
 {
+	cout << string('#', 100) << endl;
 	cout << "BEGINNING GRAM-SHMIDT TEST" << endl;
+	cout << string('#', 100) << endl;
 
 	using ld = vector <double>;
 	
@@ -737,6 +779,10 @@ void test_gram_shmidt()
 
 void test_ml()
 {
+	cout << endl << string('=', 100) << endl;
+	cout << "BEGINNING ML TEST" << endl;
+	cout << string('=', 100) << endl;
+
 	table <double> tbl;
 
 	tbl.insert_var(variable <double> ("e", exp(1)));
@@ -747,8 +793,6 @@ void test_ml()
 
 	functor <double> cost_one = cost.differentiate("wone");
 	functor <double> cost_two = cost.differentiate("wtwo");
-	
-	cout << endl << "BEGINNING ML TEST" << endl;
 
 	cout << endl << cost << endl;
 	cout << cost_one << endl;
@@ -828,7 +872,9 @@ void test_ml()
 
 void test_lagrange_interpolation()
 {
+	cout << string(100, '#') << endl;
 	cout << "BEGINNING LAGRANGE INTERPOLATION TEST" << endl;
+	cout << string(100, '#') << endl;
 
 	vector <pair <double, double>> data {
 		{1, 6},
@@ -843,7 +889,8 @@ void test_lagrange_interpolation()
 }
 
 vector <std::function <void ()>> tests = {
-	test_ml
+	test_ml,
+	test_function
 };
 
 int main()

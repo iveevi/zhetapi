@@ -3,6 +3,10 @@
 	#include <vector>
 	#include <string>
 	
+	#ifdef YYDEBUG
+		yydebug = 1;
+	#endif
+	
 	extern "C" int yylex();
   	
 	void yyerror(stree *(&), const char *);
@@ -32,6 +36,8 @@
 %token	LBRACKET	RBRACKET
 
 %token	END
+%token	EQUALS
+%token	SUM
 %token	SEPARATOR
 
 %union {
@@ -79,7 +85,10 @@
 %precedence	SIN	COS	TAN
 %precedence	CSC	SEC 	COT
 %precedence	LOG	LN	LG
+%precedence	SUM
 %precedence	SEPARATOR
+
+%precedence	EQUALS
 
 %%
 
@@ -242,7 +251,16 @@ sclr:	NUMBER { // Number
 /* Parenthesis: parenthesized expressions */
 prth:	LPAREN expr RPAREN { // Parenthesis
    		$$ = $2;
-} %prec LPAREN;
+} %prec LPAREN
+    |	SUM SUPERSCRIPT LBRACE expr RBRACE
+    	SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
+		$$ = new stree("sum", l_operation, {
+			$8,
+			$10,
+			$4,
+			$12
+		});
+} %prec SUM
    
 %%
 

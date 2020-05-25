@@ -128,17 +128,17 @@ functor <T> ::functor(const std::string &in, table <T> tbl)
 	if (in.empty())
 		return;
 
-	size_t count = 0;
+	// size_t count = 0;
 	size_t index;
 	for (int i = 0; i < in.length(); i++) {
 		if (in[i] == '=') {
 			index = i;
-			count++;
+			break;
 		}
 	}
 
-	if (count != 1)
-		throw invalid_definition();
+	/* if (count != 1)
+		throw invalid_definition(); */
 
 	name = in.substr(0, index);
 	expr = in.substr(index + 1);

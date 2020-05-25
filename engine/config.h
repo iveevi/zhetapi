@@ -26,7 +26,8 @@ enum opcode {
 	op_csc,
 	op_sec,
 	op_cot,
-	op_log
+	op_log,
+	op_sum
 };
 
 enum tcode {
@@ -153,7 +154,23 @@ config <T> ::config() : config({
 				throw typename opn::token_mismatch();
 			return log((dynamic_cast <opd *> (ins[1]))->get())
 				/ log((dynamic_cast <opd *> (ins[0]))->get());
-		}, op_log}}, -1, 0, 1) {}
+		}, op_log},
+		{"sum", "sum^{$3}_{$1 = $2} $4", 4, [&](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_var || code(ins[1]) != t_opd ||
+				code(ins[2]) != t_opd || code(ins[3]) != t_ftr)
+				throw typename opn::token_mismatch();
+
+			opd *start = dynamic_cast <opd *> (ins[1]);
+			opd *end = dynamic_cast <opd *> (ins[2]);
+			
+			ftr *expr = dynamic_cast <ftr *> (ins[3]);
+
+			T value = zero;
+			for (int i = start->get(); i <= end->get(); i++)
+				value += (*expr)(i);
+			
+			return value;
+		}, op_sum}}, -1, 0, 1) {}
 
 template <class T>
 config <T> ::config(const std::vector <specs> &st, const T &n,

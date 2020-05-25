@@ -26,6 +26,9 @@
 "sec"		{return SEC;}
 "cot"		{return COT;}
 
+"sum"		{return SUM;}
+
+"="		{return EQUALS;}
 
 "^"		{return SUPERSCRIPT;}
 "_"		{return SUBSCRIPT;}
@@ -47,6 +50,11 @@
 ","		{return SEPARATOR;}
 
 [A-Za-z]+ {
+		yylval.ident = yytext;
+		return IDENT;
+}
+
+[A-Za-z]+_[A-Za-z0-9]+ {
 		yylval.ident = yytext;
 		return IDENT;
 }
