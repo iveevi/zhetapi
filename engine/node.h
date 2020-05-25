@@ -94,7 +94,7 @@ public:
 	 * defined earlier to be
 	 * used later */
 
-	friend class functor <T>;
+	// friend class functor <T>;
 	
 	using params = std::vector <variable <double>>;
 
@@ -154,6 +154,9 @@ public:
 	 * REQUIRES UPDATE ^^
 	 */
 	node(std::string, table <T> = table <T> (),
+			params = params(), cfg * = new cfg());
+
+	node(stree *, table <T> = table <T> (),
 			params = params(), cfg * = new cfg());
 
 	/**
@@ -392,6 +395,15 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 		cout << endl << "OUT:" << endl;
 		out->print();
 	}
+
+	*this = out;
+}
+
+template <class T>
+node <T> ::node(stree *raw, table <T> tbl, params prs, cfg *cptr)
+	: pars(prs), cfg_ptr(cptr)
+{
+	node *out = convert(raw, tbl);
 
 	*this = out;
 }
@@ -764,6 +776,9 @@ void node <T> ::traverse(std::function <void (node)> fobj)
 template <class T>
 std::string node <T> ::display() const
 {
+	string str;
+	size_t i;
+
 	switch (type) {
 	case l_separable:
 		if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
@@ -780,8 +795,15 @@ std::string node <T> ::display() const
 	case l_summation_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	case l_function:
-	case l_summation_function:
 		return display_as_function();
+	case l_summation_function:
+		str = (dynamic_cast <ftr *> (tok))->display();
+
+		i = str.find(")");
+		if (i != string::npos)
+			return str.substr(i, str.length() - i);
+		
+		return "?";
 	// case l_polynomial: Unnecessary label?
 	case l_exp:
 	case l_power:
@@ -1022,15 +1044,18 @@ node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
 	assert(st->children().size() == 4);
 
 	string str = st->children()[0]->str();
-	string eqn = st->children()[3]->str();
+	// string eqn = st->children()[3]->str();
 
 	node *out = new node {get(st->str()), {
 		new node {new var {str, T(), true}, {}, cfg_ptr},
 		convert(st->children()[1]),
 		convert(st->children()[2]),
-		new node {new ftr {"f(" + str + ") = " + eqn}, {
-			new node {new var {str, T(), true}, {}, cfg_ptr}
-		}, cfg_ptr}
+		new node {new ftr {
+			"f", 
+			st->children()[3],
+			{var {str, T(), true}},
+			tbl},
+		{}, cfg_ptr}
 	}, cfg_ptr};
 
 	return out;
@@ -1146,7 +1171,6 @@ void node <T> ::label_as_special(const std::vector <std::string> &vars)
 			leaves[1]->label(vars);
 			leaves[2]->label(vars);
 			leaves[3]->type = l_summation_function;
-			leaves[3]->leaves[0]->type = l_summation_variable;
 			type = l_summation;
 			return;
 		default:
@@ -1612,6 +1636,7 @@ void node <T> ::differentiate_as_function(const std::string &var)
 		tmp = ft->differentiate((*ft)[i].symbol());
 
 		lcp = copy();
+
 		lcp->retokenize(new ftr(tmp));
 
 		cpy = leaves[i]->copy();

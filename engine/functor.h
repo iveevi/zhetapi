@@ -45,6 +45,8 @@ public:
 		const std::string &);
 
 	functor(const std::string &, params, node <T> *);
+	functor(const std::string &, stree *, const params &,
+			table <T> tbl = table <T> ());
 
 	functor(const functor &);
 
@@ -54,6 +56,10 @@ public:
 	size_t ins() const;
 
 	const std::string &symbol() const;
+
+	/* Modifiers */
+	void rebase(const std::string &, stree *, const params &,
+			table <T> = table <T> ());
 
 	/* Functional methods
 	 * of the functor class */
@@ -191,6 +197,16 @@ functor <T> ::functor(const std::string &str, params pars,
 }
 
 template <class T>
+functor <T> ::functor(const std::string &str, stree *raw, const params &pr,
+		table <T> tbl)
+{
+	m_name = str;
+	m_params = pr;
+
+	m_root = new node <T> (raw, tbl, pr); 
+}
+
+template <class T>
 functor <T> ::functor(const functor &other) : m_name(other.m_name),
 	m_params(other.m_params)
 {
@@ -216,6 +232,16 @@ template <class T>
 const std::string &functor <T> ::symbol() const
 {
 	return m_name;
+}
+
+template <class T>
+void functor <T> ::rebase(const std::string &str, stree *raw, const params &pr,
+		table <T> tbl)
+{
+	m_name = str;
+	m_params = pr;
+
+	m_root = new node <T> (raw, tbl, pr); 
 }
 
 template <class T>

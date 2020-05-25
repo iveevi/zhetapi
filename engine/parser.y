@@ -21,8 +21,11 @@
 
 %token	PLUS
 %token	MINUS
+
 %token	MULT
 %token	DIV
+
+%token	SUM
 
 %token	SIN	COS	TAN
 %token	CSC	SEC	COT
@@ -37,7 +40,6 @@
 
 %token	END
 %token	EQUALS
-%token	SUM
 %token	SEPARATOR
 
 %union {
@@ -48,6 +50,7 @@
 	stree			*dopn;
 	stree			*dpnt;
 	stree			*prth;
+	stree			*summ;
 	stree			*sclr;
 	stree			*func;
 	
@@ -69,6 +72,7 @@
 %type	<dopn>	dopn
 %type	<dpnt>	dpnt
 %type	<prth>	prth
+%type	<summ>	summ
 %type	<sclr>	sclr
 %type	<pack>	pack
 %type	<func>	func
@@ -81,11 +85,12 @@
 %precedence	LBRACE		RBRACE
 %precedence	LPAREN		RPAREN
 
+%precedence	SUM
+
 %precedence	SUPERSCRIPT	SUBSCRIPT
 %precedence	SIN	COS	TAN
 %precedence	CSC	SEC 	COT
 %precedence	LOG	LN	LG
-%precedence	SUM
 %precedence	SEPARATOR
 
 %precedence	EQUALS
@@ -202,7 +207,10 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
    |	SIN expr { // Sin
 		$$ = new stree("sin", l_operation, {$2});
-} %prec SIN;
+} %prec SIN
+   |	summ {
+   		$$ = $1;
+} %prec SUM
 
 /* Direct Operand: dependant, scalar or parenthesized expression */
 dopn: 	dopn SUPERSCRIPT dopn {
@@ -251,8 +259,9 @@ sclr:	NUMBER { // Number
 /* Parenthesis: parenthesized expressions */
 prth:	LPAREN expr RPAREN { // Parenthesis
    		$$ = $2;
-} %prec LPAREN
-    |	SUM SUPERSCRIPT LBRACE expr RBRACE
+} %prec LPAREN;
+
+summ:	SUM SUPERSCRIPT LBRACE expr RBRACE
     	SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
 		$$ = new stree("sum", l_operation, {
 			$8,
@@ -260,7 +269,7 @@ prth:	LPAREN expr RPAREN { // Parenthesis
 			$4,
 			$12
 		});
-} %prec SUM
+} %prec SUM;
    
 %%
 

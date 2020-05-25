@@ -171,7 +171,7 @@ void test_function()
 
 	cout << "p(4, 5): " << p(4, 5) << endl;
 
-	functor <double> smp("f(x) = sum^{x}_{i = 0} i");
+	functor <double> smp("f(x) = sum^{x}_{i = 0} i^2");
 
 	cout << endl << "smp: " << smp << endl;
 	smp.print();
@@ -895,6 +895,8 @@ vector <std::function <void ()>> tests = {
 
 int main()
 {
+	// yydebug = 1;
+
 	for (auto t : tests) {
 		try {
 			t();

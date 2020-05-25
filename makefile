@@ -24,7 +24,7 @@ driver:		build parsers
 
 parsers:
 	flex -o build/lex.yy.c engine/lexer.l
-	bison -o build/parser.tab.c engine/parser.y
+	bison -t -o build/parser.tab.c engine/parser.y
 
 build:
 	@echo "[CREATING BUILD DIRECTORY]\n"
