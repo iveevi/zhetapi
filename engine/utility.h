@@ -114,6 +114,41 @@ namespace utility {
 
 		return {l, u};
 	}
+
+	template <class T>
+	const element <T> &solve_linear_equation(const matrix <T> &a, const element <T> &b)
+	{
+		std::pair <matrix <T>, matrix <T>> out = lu_factorize(a);
+
+		matrix <T> L = out.first;
+		matrix <T> U = out.second;
+
+		size_t size = a.get_rows();
+
+		element <T> *y = new element <T> (size, -1);
+		element <T> *x = new element <T> (size, -1);
+
+		T value;
+		for (size_t i = 0; i < size; i++) {
+			value = 0;
+
+			for (size_t j = 0; j < i; j++)
+				value += (*y)[j] * L[i][j];
+
+			(*y)[i] = (b[i] - value)/L[i][i];
+		}
+
+		for (size_t i = size - 1; i != -1; i--) {
+			value = 0;
+
+			for (size_t j = size - 1; j > i; j--)
+				value += (*x)[j] * U[i][j];
+
+			(*x)[i] = ((*y)[i] - value)/U[i][i];
+		}
+
+		return *x;
+	}
 };
 
 #endif

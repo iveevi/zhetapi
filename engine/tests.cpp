@@ -894,6 +894,7 @@ void test_general()
 	cout << "GENERAL TEST" << endl;
 	cout << string(100, '=') << endl;
 
+	// Factorial
 	cout << endl << string(30, '-') << endl;
 	cout << "Factorials" << endl;
 	cout << string(30, '-') << endl;
@@ -905,6 +906,7 @@ void test_general()
 
 	cout << "f(5) = " << f(5) << endl;
 
+	// LU Factorization
 	cout << endl << string(30, '-') << endl;
 	cout << "LU Factorization" << endl;
 	cout << string(30, '-') << endl;
@@ -924,6 +926,23 @@ void test_general()
 	
 	cout << endl << "L:" << endl << L;
 	cout << endl << "U:" << endl << U;
+
+	cout << endl << "L * U:" << endl << L * U;
+
+	// Linear Equations
+	cout << endl << string(30, '-') << endl;
+	cout << "Solving Linear Equations" << endl;
+	cout << string(30, '-') << endl;
+
+	cout << endl << "A:" << endl << A;
+
+	element <double> b = vector <double> {1, 2, 3};
+	
+	cout << endl << "b:" << endl << b;
+
+	element <double> x = utility::solve_linear_equation(A, b);
+	
+	cout << endl << "x:" << endl << x;
 }
 
 vector <function <void ()>> tests = {

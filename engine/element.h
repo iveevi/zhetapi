@@ -29,7 +29,7 @@ public:
 
 	size_t length() const;
 
-	T operator[](size_t);
+	T &operator[](size_t);
 	const T &operator[](size_t) const;
 
 	T norm() const;
@@ -95,7 +95,7 @@ size_t element <T> ::length() const
 }
 
 template <class T>
-T element <T> ::operator[](size_t i)
+T &element <T> ::operator[](size_t i)
 {
 	return this->m_array[i][0];
 }
