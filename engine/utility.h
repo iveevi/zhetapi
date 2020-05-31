@@ -74,6 +74,46 @@ namespace utility {
 
 		return *out;
 	}
+
+	template <class T>
+	std::pair <matrix <T> , matrix <T>> lu_factorize(const matrix <T> &a)
+	{
+		assert(a.get_rows() == a.get_cols());
+
+		size_t size = a.get_rows();
+		
+		matrix <T> u(size, size, 0);
+		matrix <T> l(size, size, 0);
+
+		T value;
+		for (size_t i = 0; i < size; i++) {
+			for (int j = i; j < size; j++) {
+				value = 0;
+
+				for (int k = 0; k < i; k++)
+					value += l[i][k] * u[k][j];
+
+				u[i][j] = a[i][j] - value;
+			}
+
+			for (int j = i; j < size; j++) {
+				value = 0;
+
+				if (i == j) {
+					l[i][i] = 1;
+				} else {
+					value = 0;
+
+					for (int k = 0; k < i; k++)
+						value += l[j][k] * u[k][i];
+
+					l[j][i] = (a[j][i] - value) / u[i][i];
+				}
+			}
+		}
+
+		return {l, u};
+	}
 };
 
 #endif

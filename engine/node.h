@@ -52,7 +52,8 @@ enum nd_label {
 	l_constant_logarithmic,
 	l_summation,
 	l_summation_variable,
-	l_summation_function
+	l_summation_function,
+	l_factorial
 };
 
 /**
@@ -80,7 +81,8 @@ std::string strlabs[] = {
 	"constant logarithmic",
 	"summation",
 	"summation variable",
-	"summation function"
+	"summation function",
+	"factorial"
 };
 
 /**
@@ -384,18 +386,8 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
 	stree *st = new stree(str);
-
-	if (str.find("sum") != string::npos) {
-		cout << endl << "STREE:" << endl;
-		st->print();
-	}
-
+	st->print();
 	node *out = convert(st, tbl);
-	if (str.find("sum") != string::npos) {
-		cout << endl << "OUT:" << endl;
-		out->print();
-	}
-
 	*this = out;
 }
 
@@ -801,7 +793,7 @@ std::string node <T> ::display() const
 
 		i = str.find(")");
 		if (i != string::npos)
-			return str.substr(i, str.length() - i);
+			return str.substr(i + 4, str.length());
 		
 		return "?";
 	// case l_polynomial: Unnecessary label?
@@ -820,6 +812,8 @@ std::string node <T> ::display() const
 	case l_summation:
 		return "sum^{" + leaves[2]->display() + "}_{" + leaves[0]->display() + " = " + leaves[1]->display()
 			+ "} " + leaves[3]->display();
+	case l_factorial:
+		return leaves[0]->display() + "!";
 	default:
 		return "?";
 		//throw unlabeled_node("Unlabeled node [" + strlabs[type] + "], could not display it.");
@@ -1113,24 +1107,6 @@ void node <T> ::label_as_operation()
 		type = l_divided;
 		break;
 	case op_exp:
-		/* if (leaves[0]->type == l_variable) {
-			if (leaves[1]->type == l_constant)
-				type = l_power;
-			else
-				break;
-		} else if (leaves[0]->type == l_constant) {
-			if (leaves[1]->type == l_constant)
-				type = l_constant;
-			else if (leaves[1]->type == l_variable)
-				type = l_exponential;
-			else
-				break;
-		} else {
-			type = l_exp;
-		} */
-
-		// If it not an operation constant,
-		// it is a power node
 		if (leaves[0]->type == l_constant
 				|| leaves[0]->type == l_operation_constant)
 			type = l_exponential;
@@ -1151,7 +1127,9 @@ void node <T> ::label_as_operation()
 			type = l_constant_logarithmic;
 		else
 			type = l_logarithmic;
-
+		break;
+	case op_fac:
+		type = l_factorial;
 		break;
 	default:
 		break;

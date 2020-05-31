@@ -171,7 +171,7 @@ void test_function()
 
 	cout << "p(4, 5): " << p(4, 5) << endl;
 
-	functor <double> smp("f(x) = sum^{x}_{i = 0} i^2");
+	functor <double> smp("f(x) = sum^{x}_{i = 0} (sin(i) * i^2)");
 
 	cout << endl << "smp: " << smp << endl;
 	smp.print();
@@ -888,9 +888,46 @@ void test_lagrange_interpolation()
 	cout << endl << "Function (Curve): " << ftr << endl;
 }
 
-vector <std::function <void ()>> tests = {
-	test_ml,
-	test_function
+void test_general()
+{
+	cout << string(100, '=') << endl;
+	cout << "GENERAL TEST" << endl;
+	cout << string(100, '=') << endl;
+
+	cout << endl << string(30, '-') << endl;
+	cout << "Factorials" << endl;
+	cout << string(30, '-') << endl;
+
+	functor <double> f("f(x) = x! + 5!");
+
+	cout << endl << f << endl;
+	f.print();
+
+	cout << "f(5) = " << f(5) << endl;
+
+	cout << endl << string(30, '-') << endl;
+	cout << "LU Factorization" << endl;
+	cout << string(30, '-') << endl;
+
+	matrix <double> A  = vector <vector <double>> {
+		{2, -1, 2},
+		{-4, 6, 3},
+		{-4, -2, 8}
+	};
+
+	cout << endl << "A:" << endl << A;
+
+	pair <matrix <double>, matrix <double>> out = utility::lu_factorize(A);
+
+	matrix <double> L = out.first;
+	matrix <double> U = out.second;
+	
+	cout << endl << "L:" << endl << L;
+	cout << endl << "U:" << endl << U;
+}
+
+vector <function <void ()>> tests = {
+	test_general
 };
 
 int main()

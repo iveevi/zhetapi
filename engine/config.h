@@ -27,7 +27,8 @@ enum opcode {
 	op_sec,
 	op_cot,
 	op_log,
-	op_sum
+	op_sum,
+	op_fac
 };
 
 enum tcode {
@@ -83,6 +84,9 @@ public:
 	static tcode code(token *);
 
 	static T read(const std::string &);
+
+	// auto convertion
+	// static tuple <T
 };
 
 using namespace std;
@@ -170,7 +174,19 @@ config <T> ::config() : config({
 				value += (*expr)(i);
 			
 			return value;
-		}, op_sum}}, -1, 0, 1) {}
+		}, op_sum},
+		{"!", "$1!", 1, [&](const std::vector <token *> &ins) {
+			if (code(ins[0]) != t_opd)
+				throw typename opn::token_mismatch();
+
+			opd *start = dynamic_cast <opd *> (ins[0]);
+
+			T value = one;
+			for (int i = start->get(); i > 0; i--)
+				value *= i;
+
+			return value;
+		}, op_fac}}, -1, 0, 1) {}
 
 template <class T>
 config <T> ::config(const std::vector <specs> &st, const T &n,

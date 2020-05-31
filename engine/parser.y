@@ -34,6 +34,8 @@
 %token	SUPERSCRIPT
 %token	SUBSCRIPT
 
+%token	FACTORIAL
+
 %token	LPAREN		RPAREN
 %token	LBRACE		RBRACE
 %token	LBRACKET	RBRACKET
@@ -88,9 +90,13 @@
 %precedence	SUM
 
 %precedence	SUPERSCRIPT	SUBSCRIPT
+
 %precedence	SIN	COS	TAN
 %precedence	CSC	SEC 	COT
 %precedence	LOG	LN	LG
+
+%precedence	FACTORIAL
+
 %precedence	SEPARATOR
 
 %precedence	EQUALS
@@ -208,9 +214,9 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
    |	SIN expr { // Sin
 		$$ = new stree("sin", l_operation, {$2});
 } %prec SIN
-   |	summ {
-   		$$ = $1;
-} %prec SUM
+   |	expr FACTORIAL { // Factorial
+   		$$ = new stree("!", l_operation, {$1});
+} %prec FACTORIAL;
 
 /* Direct Operand: dependant, scalar or parenthesized expression */
 dopn: 	dopn SUPERSCRIPT dopn {

@@ -38,6 +38,8 @@
 "*"		{return MULT;}
 "/"		{return DIV;}
 
+"!"		{return FACTORIAL;}
+
 "("		{return LPAREN;}
 ")"		{return RPAREN;}
 
