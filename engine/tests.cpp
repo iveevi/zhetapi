@@ -883,7 +883,7 @@ void test_lagrange_interpolation()
 		{7, 1}
 	};
 
-	functor <double> ftr = utility::interpolate_lagrange(data);
+	functor <double> ftr = utility::lagrange_interpolate(data);
 
 	cout << endl << "Function (Curve): " << ftr << endl;
 }
@@ -899,7 +899,7 @@ void test_general()
 	cout << "Factorials" << endl;
 	cout << string(30, '-') << endl;
 
-	functor <double> f("f(x) = x! + 5!");
+	functor <double> f("f(x) = sum^{x}_{i = 0} i!");
 
 	cout << endl << f << endl;
 	f.print();
@@ -943,6 +943,18 @@ void test_general()
 	element <double> x = utility::solve_linear_equation(A, b);
 	
 	cout << endl << "x:" << endl << x;
+	
+	cout << endl << string(30, '-') << endl;
+	cout << "Reduced Polynomial Fitting" << endl;
+	cout << string(30, '-') << endl;
+
+	functor <double> fit = utility::reduced_polynomial_fitting(vector <pair <double, double>> {
+		{-1, 3},
+		{1, 1},
+		{2, 6}
+	});
+
+	cout << fit << endl;
 }
 
 vector <function <void ()>> tests = {

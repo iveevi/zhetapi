@@ -5,8 +5,7 @@
 
 namespace utility {
 	template <class T>
-	std::vector <element <T>> gram_shmidt(const std::vector
-			<element <T>> &span) {
+	std::vector <element <T>> gram_shmidt(const std::vector <element <T>> &span) {
 		assert(span.size());
 
 		std::vector <element <T>> basis = {span[0]};
@@ -28,8 +27,7 @@ namespace utility {
 	}
 	
 	template <class T>
-	std::vector <element <T>> gram_shmidt_normalized(const std::vector
-			<element <T>> &span) {
+	std::vector <element <T>> gram_shmidt_normalized(const std::vector <element <T>> &span) {
 		assert(span.size());
 
 		std::vector <element <T>> basis = {span[0].normalize()};
@@ -51,8 +49,7 @@ namespace utility {
 	}
 
 	template <class T>
-	const functor <T> &interpolate_lagrange(const std::vector <std::pair
-			<T, T>> &points)
+	const functor <T> &lagrange_interpolate(const std::vector <std::pair <T, T>> &points)
 	{
 		functor <T> *out = new functor <T> ("f(x) = 0");
 
@@ -148,6 +145,41 @@ namespace utility {
 		}
 
 		return *x;
+	}
+
+	template <class T>
+	const functor <T> &reduced_polynomial_fitting(const std::vector <std::pair <T, T>> &points)
+	{
+		size_t degree = points.size();
+
+		matrix <T> coefficients(degree, degree, [&](size_t i, size_t j) {
+			return pow(points[i].first, degree - (j + 1));
+		});
+
+		element <T> out(degree, [&](size_t i) {
+			return points[i].second;
+		});
+		
+		element <T> constants = solve_linear_equation(coefficients, out);
+		
+		std::string str = "f(x) = 0";
+
+		for (size_t i = 0; i < degree; i++) {
+			if (constants[i] == 0)
+				continue;
+
+			string sign = " + ";
+			if (constants[i] < 0)
+				sign = " - ";
+
+			str += sign + std::to_string(abs(constants[i])) + "x^" + std::to_string(degree - (i + 1));
+		}
+
+		cout << "string: \"" << str << "\"" << endl;
+
+		functor <T> *ftr = new functor <T> (str);
+
+		return *ftr;
 	}
 };
 

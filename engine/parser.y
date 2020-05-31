@@ -45,16 +45,7 @@
 %token	SEPARATOR
 
 %union {
-	stree			*expr;
-	stree			*coll;
-	stree			*term;
-	stree			*felm;
-	stree			*dopn;
-	stree			*dpnt;
-	stree			*prth;
-	stree			*summ;
-	stree			*sclr;
-	stree			*func;
+	stree			*tree;
 	
 	std::vector <stree *>	*pack;
 
@@ -67,17 +58,20 @@
 %type	<ident>	IDENT
 
 /* Types for non-terminal symbols */
-%type	<expr>	expr
-%type	<coll>	coll
-%type	<term>	term
-%type	<felm>	felm
-%type	<dopn>	dopn
-%type	<dpnt>	dpnt
-%type	<prth>	prth
-%type	<summ>	summ
-%type	<sclr>	sclr
+%type	<tree>	expr
+%type	<tree>	sclr
+%type	<tree>	dpnt
+%type	<tree>	term
+%type	<tree>	idnt
+%type	<tree>	slcl
+%type	<tree>	vrcl
+%type	<tree>	prth
+%type	<tree>	felm
+%type	<tree>	func
+%type	<tree>	summ
+%type	<tree>	coll
+
 %type	<pack>	pack
-%type	<func>	func
 
 /* Precedence information to resolve ambiguity */
 %left	PLUS	MINUS
@@ -103,72 +97,98 @@
 
 %%
 
-/* make computations based to template type later */
-
-/* Input: general user input */
 input:	expr END {
-		root = $1;
-		return 0;
+     	root = $1;
+	return 0;
 };
 
-/* Expression: general exprression */
 expr:  	expr SUPERSCRIPT expr { // Exponentiation
-		$$ = new stree("^", l_operation, {$1, $3});
+	$$ = new stree("^", l_operation, {$1, $3});
 } %prec SUPERSCRIPT
 
    |	expr MULT expr { // Multiplication
-		$$ = new stree("*", l_operation, {$1, $3});
+	$$ = new stree("*", l_operation, {$1, $3});
 } %prec MULT
 
    |	expr DIV expr { // Division
-		$$ = new stree("/", l_operation, {$1, $3});
+	$$ = new stree("/", l_operation, {$1, $3});
 } %prec DIV
 
    |	expr PLUS expr { // Addition
-		$$ = new stree("+", l_operation, {$1, $3});
+	$$ = new stree("+", l_operation, {$1, $3});
 } %prec PLUS
 
    |	expr MINUS expr { // Subtraction
-		$$ = new stree("-", l_operation, {$1, $3});
+	$$ = new stree("-", l_operation, {$1, $3});
 } %prec MINUS
 
-   | 	MINUS coll {
-		$$ = new stree("*", l_operation, {
-			new stree ("-1", l_number, {}), $2
-		});
-} %prec MINUS
+   |	MINUS coll {
+	$$ = new stree("*", l_operation, {
+		new stree ("-1", l_number, {}), $2
+	});
+}
 
    |	coll {
-   		$$ = $1;
-} %prec LOG;
+   	$$ = $1;
+};
 
-/* Collective: terms and miscellanics */
-coll:	term felm { // Implicit Multiplication: term and non-arithmetic operation
-		$$ = new stree ("*", l_operation, {$1, $2});
-} %prec LOG
+coll:	term summ {
+    	$$ = new stree("*", l_operation, {$1, $2});
+}
 
-    |	felm {
-    		$$ = $1;
-} %prec LOG
+    |	summ {
+    	$$ = $1;
+}
 
     |	term {
-    		$$ = $1;
-} %prec MULT;
+    	$$ = $1;
+};
 
-/* Term: algebraic term */
-term:	term term { // Implicit Multiplication: two or more terms
-		$$ = new stree ("*", l_operation, {$1, $2});
-} %prec MULT
+term:	sclr dpnt {
+    	$$ = new stree("*", l_operation, {$1, $2});
+}
 
-    |	func { // Function call
-    		$$ = $1;
-} %prec LOG
-    		
-    |	dopn { // Direct Operand
-    		$$ = $1;
-} %prec LOG;
+    |	dpnt {
+    	$$ = $1;
+}
 
-/* Functional Elementary Operations: non-arithmetic operations */
+    |	slcl {
+    	$$ = $1;
+};
+
+dpnt:	dpnt SUPERSCRIPT LPAREN expr RPAREN {
+    	$$ = new stree("^", l_operation, {$1, $4});
+}
+
+    |	dpnt SUPERSCRIPT term {
+    	$$ = new stree("^", l_operation, {$1, $3});
+}
+    
+    |	dpnt dpnt {
+    	$$ = new stree("*", l_operation, {$1, $2});
+}
+
+    |	prth {
+    	$$ = $1;
+}
+
+    |	felm {
+    	$$ = $1;
+}
+
+    |	vrcl {
+    	$$ = $1;
+};
+
+summ:	SUM SUPERSCRIPT LBRACE expr RBRACE SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
+		$$ = new stree("sum", l_operation, {
+			$8,
+			$10,
+			$4,
+			$12
+		});
+};
+
 felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 		$$ = new stree("log", l_operation, {$4, $6});
 } %prec LOG
@@ -214,25 +234,36 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
    |	SIN expr { // Sin
 		$$ = new stree("sin", l_operation, {$2});
 } %prec SIN
-   |	expr FACTORIAL { // Factorial
-   		$$ = new stree("!", l_operation, {$1});
-} %prec FACTORIAL;
 
-/* Direct Operand: dependant, scalar or parenthesized expression */
-dopn: 	dopn SUPERSCRIPT dopn {
-		$$ = new stree("^", l_operation, {$1, $3});
-} %prec SUPERSCRIPT
+   |	felm FACTORIAL {
+   	$$ = new stree("!", l_operation, {$1});
+};
 
-    |	dpnt {
-    		$$ = $1;
+prth:	prth FACTORIAL {
+    	$$ = new stree("!", l_operation, {$1});
 }
 
-    |	sclr {
-    		$$ = $1;
+    |	LPAREN expr RPAREN {
+    	$$ = $2;
+};
+
+vrcl:	func FACTORIAL {
+    	$$ = new stree("!", l_operation, {$1});
+}
+    |	func {
+    	$$ = $1;
 }
 
-    |	prth {
-    		$$ = $1;
+    |	idnt FACTORIAL {
+    	$$ = new stree("!", l_operation, {$1});
+}
+
+    |	idnt {
+    	$$ = $1;
+};
+
+idnt:	IDENT {
+   	$$ = new stree($1, l_variable_cluster, {});
 };
 
 func:	dpnt LPAREN pack RPAREN {
@@ -242,41 +273,29 @@ func:	dpnt LPAREN pack RPAREN {
 };
 
 pack:	%empty
+
     |	expr {
     		$$ = new std::vector <stree *> {$1};
-} %prec LOG
+}
 
     |	pack SEPARATOR expr {
     		$$ = $1;
 
 		$$->push_back($3);
-} %prec SEPARATOR
-
-/* Dependant: variable, function */
-dpnt:	IDENT { // Variable
-    		$$ = new stree {$1, l_variable_cluster, {}};
 };
 
-/* Scalar: pure numerical values */
-sclr:	NUMBER { // Number
-		$$ = new stree {$1, l_number, {}};
+slcl:	sclr FACTORIAL {
+   	$$ = new stree("!", l_operation, {$1});
+}
+
+    |	sclr {
+    	$$ = $1;
 };
 
-/* Parenthesis: parenthesized expressions */
-prth:	LPAREN expr RPAREN { // Parenthesis
-   		$$ = $2;
-} %prec LPAREN;
+sclr:	NUMBER {
+   	$$ = new stree($1, l_number, {});
+};
 
-summ:	SUM SUPERSCRIPT LBRACE expr RBRACE
-    	SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
-		$$ = new stree("sum", l_operation, {
-			$8,
-			$10,
-			$4,
-			$12
-		});
-} %prec SUM;
-   
 %%
 
 void yyerror(stree *(&n), const char *error)

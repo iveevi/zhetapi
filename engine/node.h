@@ -386,7 +386,7 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	: pars(params), cfg_ptr(cptr)
 {
 	stree *st = new stree(str);
-	st->print();
+	// st->print();
 	node *out = convert(st, tbl);
 	*this = out;
 }
