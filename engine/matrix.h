@@ -5,6 +5,10 @@
 #include <functional>
 #include <utility>
 #include <vector>
+#include <iostream>
+#include <sstream>
+
+#include "functor.h"
 
 #ifdef minor
 

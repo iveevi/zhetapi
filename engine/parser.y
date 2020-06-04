@@ -239,14 +239,6 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
    	$$ = new stree("!", l_operation, {$1});
 };
 
-prth:	prth FACTORIAL {
-    	$$ = new stree("!", l_operation, {$1});
-}
-
-    |	LPAREN expr RPAREN {
-    	$$ = $2;
-};
-
 vrcl:	func FACTORIAL {
     	$$ = new stree("!", l_operation, {$1});
 }
@@ -262,11 +254,7 @@ vrcl:	func FACTORIAL {
     	$$ = $1;
 };
 
-idnt:	IDENT {
-   	$$ = new stree($1, l_variable_cluster, {});
-};
-
-func:	dpnt LPAREN pack RPAREN {
+func:	idnt LPAREN pack RPAREN {
     		$$ = $1;
 
 		$$->set_children(*($3));
@@ -282,6 +270,18 @@ pack:	%empty
     		$$ = $1;
 
 		$$->push_back($3);
+};
+
+prth:	prth FACTORIAL {
+    	$$ = new stree("!", l_operation, {$1});
+}
+
+    |	LPAREN expr RPAREN {
+    	$$ = $2;
+};
+
+idnt:	IDENT {
+   	$$ = new stree($1, l_variable_cluster, {});
 };
 
 slcl:	sclr FACTORIAL {

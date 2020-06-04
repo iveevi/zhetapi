@@ -54,7 +54,7 @@ public:
 	 * and/or methods of the
 	 * functor class. */
 	size_t ins() const;
-
+	
 	const std::string &symbol() const;
 
 	/* Modifiers */

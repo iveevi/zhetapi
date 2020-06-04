@@ -96,7 +96,7 @@ public:
 	 * defined earlier to be
 	 * used later */
 
-	// friend class functor <T>;
+	friend class functor <T>;
 	
 	using params = std::vector <variable <double>>;
 
@@ -528,6 +528,9 @@ template <class T>
 void node <T> ::reparametrize(params pr)
 {
 	pars = pr;
+
+	for (node *nd : leaves)
+		nd->reparametrize(pr);
 }
 
 template <class T>
@@ -666,7 +669,7 @@ void node <T> ::label(const std::vector <std::string> &vars)
 		break;
 	case token::VARIABLE:
 		sym = (dynamic_cast <var *> (tok))->symbol();
-
+		
 		if (find(vars.begin(), vars.end(), sym) != vars.end())
 			type = l_variable;
 		else
@@ -682,6 +685,11 @@ void node <T> ::label(const std::vector <std::string> &vars)
 template <class T>
 void node <T> ::compress()
 {
+	/* cout << string(30, '_') << endl;
+	cout << "[COMP] PARS @ " << this << ":" << endl;
+	for (auto vr : pars)
+		cout << "vr: " << vr.symbol() << endl; */
+
 	if (type == l_operation_constant
 			|| type == l_function_constant) {
 		tok = new opd(value());
@@ -698,6 +706,9 @@ void node <T> ::compress()
 		compress_as_separable();
 		break;
 	case l_multiplied:
+		// cout << "MULT DECOMP:" << endl;
+		// print();
+
 		compress_as_multiplied();
 		break;
 	case l_divided:
@@ -829,8 +840,19 @@ void node <T> ::print(int num, int lev) const
 		counter--;
 	}
 
+	std::string pr = "[";
+
+	for (int i = 0; i < pars.size(); i++) {
+		pr += pars[i].symbol();
+
+		if (i < pars.size() - 1)
+			pr += ", ";
+	}
+
+	pr += "]";
+
 	std::cout << "#" << num << " - [" << strlabs[type] << "] "
-		<< tok->str() << " @ " << this << endl;
+		<< tok->str() << " @ " << this << ", " << pr << endl;
 
 	counter = 0;
 	for (node *itr : leaves) {
@@ -986,6 +1008,13 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 				out,
 				new node {new var {vitr->symbol(), true}, {}, cfg_ptr}
 			}, cfg_ptr};
+			
+			for (stree *s : st->children()) {
+				out = new node {get(op_mul), {
+					out,
+					convert(s, tbl)
+				}, cfg_ptr};
+			}
 
 			acc.clear();
 			num++;
@@ -993,10 +1022,18 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 
 		try {
 			vr = tbl.find_var(acc);
+			
 			out = new node {get(op_mul), {
 				out,
 				new node {new var(vr), {}, cfg_ptr}
 			}, cfg_ptr};
+
+			for (stree *s : st->children()) {
+				out = new node {get(op_mul), {
+					out,
+					convert(s, tbl)
+				}, cfg_ptr};
+			}
 
 			acc.clear();
 			num++;
@@ -1161,18 +1198,34 @@ template <class T>
 void node <T> ::compress_as_separable()
 {
 	T val;
+	T sign;
+
+	if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
+		sign = cfg_ptr->one;
+	else
+		sign = cfg_ptr->negative;
 
 	for (node *nd : leaves)
 		nd->compress();
 
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
-		if (val == 0)
-			set(leaves[1]);
+		if (val == 0) {
+			tok = get(op_mul);
+			leaves[0]->tok = new opd(sign);
+			
+			label_all();
+			compress();
+		}
 	} else if (leaves[1]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
-		if (val == 0)
-			set(leaves[0]);
+		if (val == 0) {
+			tok = get(op_mul);
+			leaves[1]->tok = new opd(sign);
+			
+			label_all();
+			compress();
+		}
 	}
 }
 
@@ -1198,7 +1251,6 @@ void node <T> ::compress_as_multiplied()
 	std::vector <token *> vals;
 
 	opn *optr = get(op_mul);
-
 	opd *constant = new opd(1);
 	node *temp, *t;
 	node *current;
@@ -1240,8 +1292,17 @@ void node <T> ::compress_as_multiplied()
 		}
 	}
 
-	for (auto nd : misc)
-		nd->compress();
+	node *addr = nullptr;
+	for (size_t i = 0; i < misc.size(); i++) {
+		if (misc[i]->type == l_function_constant
+			&& (dynamic_cast <ftr *> (misc[i]->tok))->ins() > 0
+			&& misc[i]->leaves.size() < 1) {
+			addr = misc[i];
+			continue;
+		}
+
+		misc[i]->compress();
+	}
 
 	tok = nullptr;
 	if (constant->get() == 0) {

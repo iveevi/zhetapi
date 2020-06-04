@@ -1,6 +1,10 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+#include <vector>
+#include <utility>
+
+#include "matrix.h"
 #include "element.h"
 
 namespace utility {
@@ -10,7 +14,7 @@ namespace utility {
 
 		std::vector <element <T>> basis = {span[0]};
 		
-		element <double> nelem;
+		element <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
 			nelem = span[i];
 
@@ -32,7 +36,7 @@ namespace utility {
 
 		std::vector <element <T>> basis = {span[0].normalize()};
 	
-		element <double> nelem;
+		element <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
 			nelem = span[i];
 
@@ -175,11 +179,169 @@ namespace utility {
 			str += sign + std::to_string(abs(constants[i])) + "x^" + std::to_string(degree - (i + 1));
 		}
 
-		cout << "string: \"" << str << "\"" << endl;
-
 		functor <T> *ftr = new functor <T> (str);
 
 		return *ftr;
+	}
+
+	template <class T>
+	std::vector <T> gradient_descent(std::vector <pair <T, T>> data,
+		std::vector <T> weights, functor <T> ftr, size_t in,
+		size_t reps, size_t rounds, T _gamma, T diff, T eps)
+	{
+		table <T> tbl {ftr};
+
+		config <T> *cptr = new config <T> {};
+
+		std::vector <variable <T>> pars;
+		std::vector <variable <T>> vars;
+
+		std::vector <node <T> *> lvs;
+
+		for (size_t i = 0; i < ftr.ins(); i++) {
+			pars.push_back(ftr[i]);
+
+			if (i != in)
+				vars.push_back(ftr[i]);
+
+			lvs.push_back(new node <T> {new variable <T> 
+					{ftr[i].symbol(), true}, {}, cptr});
+		}
+
+		pars.push_back(variable <T> {"y", true});
+
+		node <T> *pk = new node <T> {cptr->alloc_opn(op_exp), {
+			new node <T> {cptr->alloc_opn(op_sub), {
+				new node <T> {new variable <T> {"y", true}, {}, cptr},
+				new node <T> {new functor <T> {ftr}, lvs, cptr}
+			}, cptr},
+			new node <T> {new operand <T> (2), {}, cptr},
+		}, cptr};
+
+		pk->reparametrize(pars);
+
+		functor <T> cost {"cost", pars, pk};
+
+		std::vector <functor <T>> gradients;
+
+		for (size_t i = 0; i < ftr.ins(); i++) {
+			if (i == in)
+				continue;
+
+			gradients.push_back(cost.differentiate(ftr[i].symbol()));
+		}
+
+		T old;
+		T value;
+
+		T err;
+
+		T x;
+		T y;
+
+		T gamma;
+		T best;
+		
+		best = 0;
+		for (auto pnt : data) {
+			std::vector <T> ins = weights;
+
+			ins.push_back(pnt.first);
+			ins.push_back(pnt.second);
+
+			best += cost.compute(ins);
+		}
+
+		std::vector <T> bvls = weights;
+		for (int n = 0; n < reps; n++) {
+			std::vector <T> ws;
+
+			for (auto vl : weights)
+				ws.push_back(vl + diff * n);
+
+			gamma = _gamma;
+
+			std::vector <T> pvls;
+
+			for (auto vl : ws)
+				pvls.push_back(vl);
+
+			old = 0;
+			for (auto pnt : data) {
+				std::vector <T> ins = pvls;
+
+				ins.push_back(pnt.first);
+				ins.push_back(pnt.second);
+
+				old += cost.compute(ins);
+			}
+
+			std::vector <T> wds(ws.size(), 0.0);
+
+			std::vector <T> cvls;
+			for (int i = 0; i < rounds; i++) {
+				cvls.clear();
+
+				for (auto vl : ws)
+					cvls.push_back(vl);
+
+				for (auto pnt : data) {
+					x = pnt.first;
+					y = pnt.second;
+
+					std::vector <T> ivls = cvls;
+
+					ivls.push_back(x);
+					ivls.push_back(y);
+					
+					err = cost.compute(ivls);
+
+					for (size_t i = 0; i < wds.size(); i++)
+						wds[i] += gamma * gradients[i].compute(ivls);
+				}
+
+				for (size_t i = 0; i < ws.size(); i++)
+					ws[i] -= wds[i]/data.size();
+
+				value = 0;
+				for (auto pnt : data) {
+					std::vector <T> ins = ws;
+
+					ins.push_back(pnt.first);
+					ins.push_back(pnt.second);
+
+					value += cost.compute(ins);
+				}
+
+				if (old <= value) {
+					for (size_t i = 0; i < ws.size(); i++)
+						ws[i] = cvls[i];
+
+					gamma *= 2;
+				} else {
+					gamma /= 2;
+
+					if (old - value < eps)
+						break;
+
+					old = value;
+				}
+
+				gamma = min(100.0, gamma);
+			}
+
+			if (best > old) {
+				diff *= -0.5;
+
+				bvls = ws;
+			} else {
+				diff *= -2;
+			}
+			
+			best = min(best, old);
+		}
+		
+		return bvls;
 	}
 };
 
