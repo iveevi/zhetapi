@@ -185,7 +185,7 @@ namespace utility {
 	}
 
 	template <class T>
-	std::vector <T> gradient_descent(std::vector <pair <T, T>> data,
+	std::pair <T, std::vector <T>> gradient_descent(std::vector <pair <T, T>> data,
 		std::vector <T> weights, functor <T> ftr, size_t in,
 		size_t reps, size_t rounds, T _gamma, T diff, T eps)
 	{
@@ -341,7 +341,45 @@ namespace utility {
 			best = min(best, old);
 		}
 		
-		return bvls;
+		return {best, bvls};
+	}
+
+	// exception for when root finding
+	// hits an extrema. Later store the
+	// vector wchih produced this exception.
+	class extrema_exception {
+	};
+
+	template <class T>
+	element <T> find_root(functor <T> ftr, const element <T> &guess, size_t rounds)
+	{
+		element <T> sol = guess;
+
+		element <functor <T>> J_raw(ftr.ins(), [&](size_t i) {
+			// allow differentiation in index w/ respect
+			// to the parameters/variables
+			return ftr.differentiate(ftr[i].symbol());
+		});
+
+		for (size_t i = 0; i < rounds; i++) {
+			T val = ftr(sol);
+
+			if (val == 0)
+				break;
+
+			element <T> J_mod(ftr.ins(), [&](size_t i) {
+				T tmp = J_raw[i](sol);
+
+				if (tmp == 0)
+					throw extrema_exception();
+
+				return val/tmp;
+			});
+
+			sol -= J_mod;
+		}
+
+		return sol;
 	}
 };
 

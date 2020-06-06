@@ -6,27 +6,76 @@
 #include <gmpxx.h>
 
 #include "utility.h"
+#include "network.h"
 
 using namespace std;
 
 int main()
 {
-	// Data Setup
-	vector <pair <double, double>> D {
-		{0, 0},
-		{1, 3},
-		{2, 4},
-		{5, 5},
-		{9, 14}
-	};
+	functor <double> ftr("f(x, y) = x^2 + y^2");
 
-	functor <double> model("model(a, b, x) = ax^2 + bx^(0.5)");
+	cout << ftr << endl;
 
-	vector <double> ws = utility::gradient_descent(D, {1, 1}, model, 2, 10, 500, 0.0001, 0.1, 1E-10);
+	functor <double> ftr_x = ftr.differentiate("x");
+	functor <double> ftr_y = ftr.differentiate("y");
+	
+	cout << ftr_x << endl;
+	cout << ftr_y << endl;
 
-	printf("\nSummary\n");
-	cout << string(20, '=') << endl;
+	size_t rounds = 10;
+
+	vector <double> pars {1, 1};
+
+	cout << endl << "Initial Guess(es):" << endl;
+
+	for (size_t i = 0; i < ftr.ins(); i++)
+		cout << ftr[i].symbol() << ": " << pars[i] << endl;
+
+	cout << "Value: " << ftr.compute(pars) << endl;
+
+	for (size_t i = 0; i < rounds; i++) {
+		double val = ftr.compute(pars);
+
+		if (val == 0) {
+			cout << endl << "Found Root!" << endl;
+			break;
+		}
+
+		double dx = ftr_x.compute(pars);
+		double dy = ftr_y.compute(pars);
+
+		if (dx == 0 || dy == 0) {
+			cout << endl << "Shifting..." << endl;
+
+			pars[0] += 10;
+			pars[1] += 10;
+
+			continue;
+		}
+
+		pars[0] -= val/dx;
+		pars[1] -= val/dy;
 		
-	for (size_t i = 0; i < ws.size(); i++)
-		printf("Best ws[%lu]:\t%g\n", i, ws[i]);
+		cout << endl << "Round #" << (i + 1) << endl;
+
+		for (size_t i = 0; i < ftr.ins(); i++)
+			cout << ftr[i].symbol() << ": " << pars[i] << endl;
+
+		cout << "ftr: " << val << endl;
+		cout << "ftr_x: " << dx << endl;
+		cout << "ftr_y: " << dy << endl;
+
+		cout << "Value: " << ftr.compute(pars) << endl;
+	}
+
+	cout << endl << "Result(s):" << endl;
+
+	for (size_t i = 0; i < ftr.ins(); i++)
+		cout << ftr[i].symbol() << ": " << pars[i] << endl;
+	
+	cout << "Value: " << ftr.compute(pars) << endl;
+
+	element <double> elem {0, 0};
+
+	cout << endl << "Solution:" << endl << utility::find_root(ftr, {1, 1}, 10) << endl;
 }

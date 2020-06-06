@@ -18,6 +18,9 @@
 #include "node.h"
 
 template <class T>
+class element;
+
+template <class T>
 class functor : public token {
 public:
 	class invalid_definition {};
@@ -80,8 +83,10 @@ public:
 
 	/* Operators for the
 	 * functor class */
-	const variable <T> &operator[](size_t);
+	const variable <T> &operator[](size_t) const;
 	
+	const T &operator()(const element <T> &);
+
 	template <class ... U>
 	const T &operator()(U ...);
 
@@ -318,9 +323,20 @@ void functor <T> ::print() const
 }
 
 template <class T>
-const variable <T> &functor <T> ::operator[](size_t i)
+const variable <T> &functor <T> ::operator[](size_t i) const
 {
 	return m_params[i];
+}
+
+template <class T>
+const T &functor <T> ::operator()(const element <T> &args)
+{
+	std::vector <T> vals;
+
+	for (size_t i = 0; i < args.size(); i++)
+		vals.push_back(args[i]);
+
+	return compute(vals);
 }
 
 template <class T>

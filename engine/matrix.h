@@ -45,6 +45,8 @@ public:
 
 	~matrix();
 
+	std::pair <size_t, size_t> get_dimensions() const;
+
 	size_t get_rows() const;
 	size_t get_cols() const;
 
@@ -56,6 +58,11 @@ public:
 
 	T *operator[](size_t);
 	const T *operator[](size_t) const;
+
+	void operator+=(const matrix &);
+	void operator-=(const matrix &);
+	void operator*=(const matrix &);
+	void operator/=(const matrix &);
 
 	T determinant() const;
 
@@ -242,6 +249,12 @@ matrix <T> ::~matrix()
 }
 
 template <class T>
+std::pair <size_t, size_t> matrix <T> ::get_dimensions() const
+{
+	return {rows, cols};
+}
+
+template <class T>
 size_t matrix <T> ::get_rows() const
 {
 	return rows;
@@ -299,6 +312,34 @@ template <class T>
 const T *matrix <T> ::operator[](size_t i) const
 {
 	return m_array[i];
+}
+
+template <class T>
+void matrix <T> ::operator+=(const matrix <T> &other)
+{
+	assert(rows == other.rows && cols == other.cols);
+
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++)
+			m_array[i][j] += other.m_array[i][j];
+	}
+}
+
+template <class T>
+void matrix <T> ::operator-=(const matrix <T> &other)
+{
+	assert(rows == other.rows && cols == other.cols);
+
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++)
+			m_array[i][j] -= other.m_array[i][j];
+	}
+}
+
+template <class T>
+void matrix <T> ::operator*=(const matrix <T> &other)
+{
+	(*this) = (*this) * other;
 }
 
 template <class T>
@@ -403,7 +444,8 @@ std::string matrix <T> ::display() const
 
 		oss << '|';
 
-		oss << "\n";
+		if (i < rows - 1)
+			oss << "\n";
 	}
 
 	return oss.str();

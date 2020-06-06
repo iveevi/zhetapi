@@ -1221,7 +1221,7 @@ void node <T> ::compress_as_separable()
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 		if (val == 0) {
 			tok = get(op_mul);
-			leaves[1]->tok = new opd(sign);
+			leaves[1]->tok = new opd(cfg_ptr->one);
 			
 			label_all();
 			compress();

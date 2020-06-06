@@ -1,8 +1,7 @@
 #ifndef ELEMENT_H_
 #define ELEMENT_H_
 
-#define DEF_D	3
-#define DEF_T	double
+#include "matrix.h"
 
 /**
  * @brief Representative
@@ -21,13 +20,15 @@ public:
 	element(const matrix <T> &);
 
 	element(const std::vector <T> &);
+	element(const std::initializer_list <T> &);
+
 	element(size_t, T *);
 	element(size_t = 0, T = T());
 	element(size_t, std::function <T (size_t)>);
 
 	const element <T> &operator=(const matrix <T> &);
 
-	size_t length() const;
+	size_t size() const;
 
 	T &operator[](size_t);
 	const T &operator[](size_t) const;
@@ -63,6 +64,10 @@ element <T> ::element(const std::vector <T> &ref) : matrix <T> (ref)
 }
 
 template <class T>
+element <T> ::element(const std::initializer_list <T>  &ref)
+	: element(std::vector <T> (ref)) {}
+
+template <class T>
 element <T> ::element(size_t rs, T *ref)
 {
 
@@ -89,7 +94,7 @@ const element <T> &element <T> ::operator=(const matrix <T> &other)
 }
 
 template <class T>
-size_t element <T> ::length() const
+size_t element <T> ::size() const
 {
 	return this->rows;
 }

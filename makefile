@@ -22,6 +22,10 @@ driver:		build parsers
 	
 	g++ engine/driver.cpp -lfl -g -o build/driver -DDEBUG=0
 
+cli:		build parsers
+	@echo "[BUILDING CLI]\n"	
+	g++ engine/cli.cpp -lfl -g -o build/cli -DDEBUG=0
+
 parsers:
 	flex -o build/lex.yy.c engine/lexer.l
 	bison -t -o build/parser.tab.c engine/parser.y
