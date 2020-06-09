@@ -37,11 +37,16 @@ public:
 	matrix(const std::vector <T> &);
 	matrix(const std::vector <std::vector <T>> &);
 
+	matrix(const std::initializer_list <std::initializer_list <T>> &);
+
 	matrix(size_t, size_t, T = T());
 	matrix(size_t, size_t, T, T **);
 
 	matrix(size_t, size_t, std::function <T (size_t)>);
+	matrix(size_t, size_t, std::function <T *(size_t)>);
+	
 	matrix(size_t, size_t, std::function <T (size_t, size_t)>);
+	matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
 
 	~matrix();
 
@@ -76,6 +81,8 @@ public:
 	const matrix &adjugate() const;
 	const matrix &cofactor() const;
 	const matrix &transpose() const;
+
+	bool symmetric() const;
 
 	std::string display() const;
 
@@ -188,6 +195,33 @@ matrix <T> ::matrix(const std::vector <std::vector <T>> &ref)
 }
 
 template <class T>
+matrix <T> ::matrix(const std::initializer_list <std::initializer_list <T>> &sq)
+{
+	rows = sq.size();
+
+	assert(rows > 0);
+
+	cols = sq.begin()->size();
+
+	assert(cols > 0);
+	
+	m_array = new T *[rows];
+
+	size_t i = 0;
+	for (auto lt : sq) {
+		m_array[i] = new T[cols];
+
+		size_t j = 0;
+		for (auto t : lt) {
+			assert(i < rows && j < lt.size());
+			m_array[i][j++] = t;
+		}
+
+		i++;
+	}
+}
+
+template <class T>
 matrix <T> ::matrix(size_t rs, size_t cs, T val)
 {
 	rows = rs;
@@ -227,7 +261,24 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 
 template <class T>
 matrix <T> ::matrix(size_t rs, size_t cs,
-		std::function <T (size_t, size_t)> gen)
+		std::function <T *(size_t)> gen)
+{
+	rows = rs;
+	cols = cs;
+
+	m_array = new T *[rows];
+
+	for (int i = 0; i < rows; i++) {
+		m_array[i] = new T[cols];
+		
+		for (int j = 0; j < cols; j++)
+			m_array[i][j] = *gen(i);
+	}
+}
+
+template <class T>
+matrix <T> ::matrix(size_t rs, size_t cs,
+		std::function <T *(size_t, size_t)> gen)
 {
 	rows = rs;
 	cols = cs;
@@ -243,9 +294,26 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 }
 
 template <class T>
+matrix <T> ::matrix(size_t rs, size_t cs,
+		std::function <T (size_t, size_t)> gen)
+{
+	rows = rs;
+	cols = cs;
+
+	m_array = new T *[rows];
+
+	for (int i = 0; i < rows; i++) {
+		m_array[i] = new T[cols];
+		
+		for (int j = 0; j < cols; j++)
+			m_array[i][j] = *gen(i, j);
+	}
+}
+
+template <class T>
 matrix <T> ::~matrix()
 {
-	// delete[] m_array;
+	delete[] m_array;
 }
 
 template <class T>
@@ -427,6 +495,19 @@ const matrix <T> &matrix <T> ::transpose() const
 	});
 
 	return *out;
+}
+
+template <class T>
+bool matrix <T> ::symmetric() const
+{
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++) {
+			if (m_array[i][j] != m_array[j][i])
+				return false;
+		}
+	}
+
+	return true;
 }
 
 template <class T>

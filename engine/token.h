@@ -19,7 +19,6 @@ public:
 	 * [type] - new data type to allow function
 	 * caller inspection */
 	enum type {
-		BASE,
 		OPERAND,
 		OPERATION,
 		VARIABLE,
@@ -29,24 +28,14 @@ public:
 	/* Virtual:
 	 * [type] [caller]() - inspector function passed
 	 * on to all derived classes */
-	virtual type caller() const;
+	virtual type caller() const = 0;
 
 	/* Virtual:
 	 * string [str]() - returns the string
 	 * representation of the token */
-	virtual std::string str() const;
+	virtual std::string str() const = 0;
+
+	virtual token *copy() const = 0;
 };
-
-/* Virtualized member functions:
- * caller and str methods */
-token::type token::caller() const
-{
-	return BASE;
-}
-
-std::string token::str() const
-{
-	return "NA";
-}
 
 #endif

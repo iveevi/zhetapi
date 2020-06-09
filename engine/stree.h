@@ -9,6 +9,7 @@
  * labeling the stree nodes.
  */
 enum st_label {
+	l_na,
 	l_number,
 	l_operation,
 	l_variable_cluster,
@@ -21,9 +22,11 @@ enum st_label {
  * in st_label.
  */
 std::string st_str_labs[] = {
+	"na",
 	"number",
 	"operation",
 	"variable cluster",
+	"functor"
 };
 
 /**
@@ -47,6 +50,10 @@ public:
 			const std::vector <stree *> &);
 
 	stree(const std::string &);
+
+	~stree();
+
+	const stree &operator=(const stree &);
 
 	const st_label &kind() const;
 	const std::string &str() const;
@@ -85,9 +92,34 @@ stree::stree(const std::string &str)
 	// and inputted
 	yyparse(out);
 
-	set(out);
+	*this = *out;
 
+	delete[] stripped;
 	delete out;
+}
+
+stree::~stree()
+{
+	for (size_t i = 0; i < leaves.size(); i++)
+		delete leaves[i];
+}
+
+const stree &stree::operator=(const stree &other)
+{
+	if (this != &other) {
+		rep = other.rep;
+		type = other.type;
+
+		leaves.clear();
+		for (auto s : other.leaves) {
+			stree *tmp = new stree("", l_na, {});
+			*tmp = *s;
+
+			leaves.push_back(tmp);
+		}
+	}
+
+	return *this;
 }
 
 const st_label &stree::kind() const

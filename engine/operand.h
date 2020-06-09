@@ -55,7 +55,8 @@ public:
 	operand &operator=(const operand &);
 
 	type caller() const override;
-	std::string str() const override; 
+	std::string str() const override;
+	token *copy() const override;
 
 	/* Friends:
 	 * std::ostream &operator<<(std::ostream &, const operand
@@ -230,6 +231,12 @@ template <typename data_t>
 std::string operand <data_t> ::str() const
 {
 	return std::to_string(val);
+}
+
+template <class T>
+token *operand <T> ::copy() const
+{
+	return new operand(*this);
 }
 
 #endif

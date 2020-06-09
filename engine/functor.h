@@ -53,6 +53,8 @@ public:
 
 	functor(const functor &);
 
+	~functor();
+
 	/* Informative functions
 	 * and/or methods of the
 	 * functor class. */
@@ -66,7 +68,7 @@ public:
 
 	/* Functional methods
 	 * of the functor class */
-	const T &compute(const std::vector <T> &);
+	T compute(const std::vector <T> &);
 
 	const functor &differentiate(const std::string &) const;
 
@@ -74,9 +76,9 @@ public:
 
 	/* Virtual functions inehrited
 	 * from the token class. */
-	std::string str() const;
-
-	type caller() const;
+	std::string str() const override;
+	type caller() const override;
+	token *copy() const override;
 
 	/* Debugging functions */
 	void print() const;
@@ -85,10 +87,10 @@ public:
 	 * functor class */
 	const variable <T> &operator[](size_t) const;
 	
-	const T &operator()(const element <T> &);
+	T operator()(const element <T> &);
 
 	template <class ... U>
-	const T &operator()(U ...);
+	T operator()(U ...);
 
 	template <class U>
 	friend const functor <U> &operator+(const functor <U> &,
@@ -136,8 +138,10 @@ functor <T> ::functor(const std::string &in, table <T> tbl)
 
 	// Exit if the function is
 	// "supposed" to be empty
-	if (in.empty())
+	if (in.empty()) {
+		m_root = nullptr;
 		return;
+	}
 
 	// size_t count = 0;
 	size_t index;
@@ -215,16 +219,15 @@ template <class T>
 functor <T> ::functor(const functor &other) : m_name(other.m_name),
 	m_params(other.m_params)
 {
-	/* cout << "OTHER-PARS:" << endl;
-	for (auto var : other.m_params)
-		cout << "\tvar: " << var.symbol() << endl;
-	
-	cout << "THIS-PARS:" << endl;
-	for (auto var : m_params)
-		cout << "\tvar: " << var.symbol() << endl; */
-
 	m_root = new node <T> (other.m_root);
 	compress();
+}
+
+template <class T>
+functor <T> ::~functor()
+{
+	if (m_root)
+		delete m_root;
 }
 
 template <class T>
@@ -267,7 +270,7 @@ std::string functor <T> ::display() const
 }
 
 template <class T>
-const T &functor <T> ::compute(const std::vector <T> &vals)
+T functor <T> ::compute(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
@@ -279,14 +282,14 @@ const T &functor <T> ::compute(const std::vector <T> &vals)
 
 	// Get value, restore tree
 	// and return value
-	T *val = new T(m_root->value());
+	T val = m_root->value();
 
 	for (size_t i = 0; i < m_params.size(); i++) {
 		for (auto &p : m_map[m_params[i].symbol()])
 			p->retokenize(new variable <T> (m_params[i].symbol(), true));
 	}
 
-	return *val;
+	return val;
 }
 
 template <class T>
@@ -300,6 +303,8 @@ const functor <T> &functor <T> ::differentiate
 	diffed->reparametrize(m_params);
 
 	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
+
+	delete diffed;
 
 	return *out;
 }
@@ -317,6 +322,12 @@ token::type functor <T> ::caller() const
 }
 
 template <class T>
+token *functor <T> ::copy() const
+{
+	return new functor(*this); 
+}
+
+template <class T>
 void functor <T> ::print() const
 {
 	m_root->print();
@@ -329,7 +340,7 @@ const variable <T> &functor <T> ::operator[](size_t i) const
 }
 
 template <class T>
-const T &functor <T> ::operator()(const element <T> &args)
+T functor <T> ::operator()(const element <T> &args)
 {
 	std::vector <T> vals;
 
@@ -341,7 +352,7 @@ const T &functor <T> ::operator()(const element <T> &args)
 
 template <class T>
 template <class ... U>
-const T &functor <T> ::operator()(U ... args)
+T functor <T> ::operator()(U ... args)
 {
 	std::vector <T> vals;
 	gather(vals, args...);

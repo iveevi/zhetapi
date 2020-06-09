@@ -186,7 +186,11 @@ public:
 	 */
 	node(token *t, nd_label l, std::vector <node *> lv, cfg *);
 
+	~node();
+
 	/* Operators of the node class */
+	const node &operator=(const node &);
+
 	template <class U>
 	friend const node <U> &operator+(const node <U> &, const node <U> &);
 
@@ -266,7 +270,7 @@ public:
 
 	bool valid() const;
 
-	const T &value() const;
+	T value() const;
 
 	void label_all();
 	void label(const std::vector <std::string> &);
@@ -314,6 +318,8 @@ private:
 
 	void label_as_operation();
 	void label_as_special(const std::vector <std::string> &vars);
+
+	void clear();
 
 	void compress_as_separable();
 	void compress_as_multiplied();
@@ -388,7 +394,10 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 	stree *st = new stree(str);
 	// st->print();
 	node *out = convert(st, tbl);
-	*this = out;
+	*this = *out;
+
+	delete out;
+	delete st;
 }
 
 template <class T>
@@ -397,23 +406,21 @@ node <T> ::node(stree *raw, table <T> tbl, params prs, cfg *cptr)
 {
 	node *out = convert(raw, tbl);
 
-	*this = out;
+	*this = *out;
+
+	delete out;
 }
 
 template <class T>
 node <T> ::node(node *other)
 {
-	*this = *(other->copy());
-	pars = other->pars;
-	cfg_ptr = other->cfg_ptr;
+	*this = *other;
 }
 
 template <class T>
 node <T> ::node(const node &other)
 {
-	*this = *(other.copy());
-	pars = other.pars;
-	cfg_ptr = other.cfg_ptr;
+	*this = other;
 }
 
 template <class T>
@@ -429,11 +436,39 @@ template <class T>
 node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
 	: tok(t), type(l), leaves(lv), cfg_ptr(cptr) {}
 
+template <class T>
+node <T> ::~node()
+{
+	delete tok;
+
+	for (size_t i = 0; i < leaves.size(); i++)
+		delete leaves[i];
+}
+
 /* Operators
  *
  * [NOTE]: Assumes
  * both operands have
- * the same cfg_ptr. */
+ * the same ptr. */
+template <class T>
+const node <T> &node <T> ::operator=(const node <T> &other)
+{
+	if (this != &other) {
+		tok = other.tok->copy();
+		type = other.type;
+
+		// change cptr to shared_ptr
+		cfg_ptr = other.cfg_ptr;
+		pars = other.pars;
+
+		clear();
+		for (size_t i = 0; i < other.leaves.size(); i++)
+			leaves.push_back(other.leaves[i]->copy());
+	}
+
+	return *this;
+}
+
 template <class T>
 const node <T> &operator+(const node <T> &a, const node <T> &b)
 {
@@ -521,6 +556,7 @@ token *node <T> ::get_token()
 template <class T>
 void node <T> ::retokenize(token *t)
 {
+	delete tok;
 	tok = t;
 }
 
@@ -584,12 +620,14 @@ bool node <T> ::valid() const
 }
 
 template <class T>
-const T &node <T> ::value() const
+T node <T> ::value() const
 {
 	std::vector <token *> vals;
 	std::vector <T> hard;
 
 	opn *optr;
+
+	T tmp;
 	
 	switch (tok->caller()) {
 	case token::OPERAND:
@@ -601,13 +639,18 @@ const T &node <T> ::value() const
 		case op_sum:
 			for (auto itr : leaves)
 				vals.push_back(itr->tok);
-			return (new opd((*optr)(vals)))->get();
+			return (*optr)(vals);
 		}
 
 		for (auto itr : leaves)
 			vals.push_back(new opd(itr->value()));
+
+		tmp = (*optr)(vals);
+
+		for (size_t i = 0; i < vals.size(); i++)
+			delete vals[i];
 		
-		return (new opd((*optr)(vals)))->get();
+		return tmp;
 	case token::VARIABLE:
 		if (!(dynamic_cast <var *> (tok))->is_param()) 
 			return (dynamic_cast <var *> (tok))->get();
@@ -685,16 +728,17 @@ void node <T> ::label(const std::vector <std::string> &vars)
 template <class T>
 void node <T> ::compress()
 {
-	/* cout << string(30, '_') << endl;
-	cout << "[COMP] PARS @ " << this << ":" << endl;
-	for (auto vr : pars)
-		cout << "vr: " << vr.symbol() << endl; */
 
 	if (type == l_operation_constant
 			|| type == l_function_constant) {
-		tok = new opd(value());
+		T tmp = value();
+
+		delete tok;
+		clear();
+
+		tok = new opd(tmp);
 		type = l_constant;
-		leaves.clear();
+
 		return;
 	}
 	
@@ -754,12 +798,16 @@ void node <T> ::differentiate(const std::string &var)
 		leaves[1]->differentiate(var);
 		break;
 	case l_variable:
+		delete tok;
+
 		tok = new opd(1);
 		break;
 	case l_operation_constant:
 	case l_constant:
+		delete tok;
+		clear();
+
 		tok = new opd(0);
-		leaves.clear();
 		type = l_constant;
 		break;
 	default:
@@ -900,12 +948,24 @@ node <T> *node <T> ::copy() const
 {
 	node *cpy;
 
-	cpy = new node(copy(tok), type, {}, cfg_ptr);
+	cpy = new node(tok->copy(), type, {}, cfg_ptr);
 	
 	cpy->pars = pars;
 
-	for (node *nd : leaves)
-		cpy->leaves.push_back(nd->copy());
+	node *tmp;
+	for (size_t i = 0; i < leaves.size(); i++) {
+		tmp = leaves[i]->copy();
+
+		/* cout << "RECEIVED:" << endl;
+		tmp->print();
+		cout << "-------------------" << endl; */
+
+		cpy->leaves.push_back(tmp);
+	}
+
+	/* cout << "-------------------" << endl;
+	cout << "RETURNED:" << endl;
+	cpy->print(); */
 	
 	return cpy;
 }
@@ -1195,6 +1255,14 @@ void node <T> ::label_as_special(const std::vector <std::string> &vars)
 }
 
 template <class T>
+void node <T> ::clear()
+{
+	for (size_t i = 0; i < leaves.size(); i++)
+		delete leaves[i];
+	leaves.clear();
+}
+
+template <class T>
 void node <T> ::compress_as_separable()
 {
 	T val;
@@ -1212,6 +1280,8 @@ void node <T> ::compress_as_separable()
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 		if (val == 0) {
 			tok = get(op_mul);
+
+			delete leaves[0]->tok;
 			leaves[0]->tok = new opd(sign);
 			
 			label_all();
@@ -1221,6 +1291,8 @@ void node <T> ::compress_as_separable()
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 		if (val == 0) {
 			tok = get(op_mul);
+			
+			delete leaves[1]->tok;
 			leaves[1]->tok = new opd(cfg_ptr->one);
 			
 			label_all();
@@ -1277,14 +1349,22 @@ void node <T> ::compress_as_multiplied()
 				new opd(current->value()),
 				constant
 			};
+
 			constant = new opd((*optr)(vals));
+
+			vals.clear();
+
 			break;
 		case l_constant:
 			vals = {
 				constant,
 				current->tok
 			};
+
 			constant = new opd((*optr)(vals));
+
+			vals.clear();
+
 			break;
 		default:
 			misc.push_back(current);
@@ -1292,17 +1372,8 @@ void node <T> ::compress_as_multiplied()
 		}
 	}
 
-	node *addr = nullptr;
-	for (size_t i = 0; i < misc.size(); i++) {
-		if (misc[i]->type == l_function_constant
-			&& (dynamic_cast <ftr *> (misc[i]->tok))->ins() > 0
-			&& misc[i]->leaves.size() < 1) {
-			addr = misc[i];
-			continue;
-		}
-
+	for (size_t i = 0; i < misc.size(); i++)
 		misc[i]->compress();
-	}
 
 	tok = nullptr;
 	if (constant->get() == 0) {
@@ -1463,7 +1534,8 @@ void node <T> ::differentiate_as_divided(const std::string &var)
 	rcpy->differentiate({var});
 	
 	tok = get(op_div);
-	leaves = {
+
+	std::vector <node *> lv_cpy = {
 		new node(get(op_sub), {
 			new node(get(op_mul), {lcpy, leaves[1]}, cfg_ptr),
 			new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
@@ -1474,6 +1546,8 @@ void node <T> ::differentiate_as_divided(const std::string &var)
 				new node(new opd(2), {}, cfg_ptr)
 		}, cfg_ptr),
 	};
+
+	leaves = lv_cpy;
 }
 
 template <class T>

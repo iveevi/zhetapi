@@ -24,7 +24,9 @@ public:
 
 	element(size_t, T *);
 	element(size_t = 0, T = T());
+	
 	element(size_t, std::function <T (size_t)>);
+	element(size_t, std::function <T *(size_t)>);
 
 	const element <T> &operator=(const matrix <T> &);
 
@@ -64,7 +66,7 @@ element <T> ::element(const std::vector <T> &ref) : matrix <T> (ref)
 }
 
 template <class T>
-element <T> ::element(const std::initializer_list <T>  &ref)
+element <T> ::element(const std::initializer_list <T> &ref)
 	: element(std::vector <T> (ref)) {}
 
 template <class T>
@@ -78,6 +80,10 @@ element <T> ::element(size_t rs, T def) : matrix <T> (rs, 1, def) {}
 
 template <class T>
 element <T> ::element(size_t rs, std::function <T (size_t)> gen)
+	: matrix <T> (rs, 1, gen) {}
+
+template <class T>
+element <T> ::element(size_t rs, std::function <T *(size_t)> gen)
 	: matrix <T> (rs, 1, gen) {}
 
 template <class T>

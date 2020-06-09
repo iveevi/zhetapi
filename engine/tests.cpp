@@ -78,4 +78,9 @@ int main()
 	element <double> elem {0, 0};
 
 	cout << endl << "Solution:" << endl << utility::find_root(ftr, {1, 1}, 10) << endl;
+
+	matrix <double> mat {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+
+	cout << endl << "Mat:" << endl << mat << endl;
+	cout << endl << "Symmatric: " << std::boolalpha << mat.symmetric() << endl;
 }

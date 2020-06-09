@@ -358,7 +358,7 @@ namespace utility {
 		element <functor <T>> J_raw(ftr.ins(), [&](size_t i) {
 			// allow differentiation in index w/ respect
 			// to the parameters/variables
-			return ftr.differentiate(ftr[i].symbol());
+			return new functor <T> (ftr.differentiate(ftr[i].symbol()));
 		});
 
 		for (size_t i = 0; i < rounds; i++) {

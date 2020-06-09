@@ -142,6 +142,7 @@ public:
 
 	type caller() const override;
 	std::string str() const override;
+	token *copy() const override;
 	
 	/* Friends:
 	 * std::ostream &operator<<(std::ostream &, const variable
@@ -428,6 +429,12 @@ std::string variable <data_t> ::str() const
 		scin << val;
 
 	return scin.str();
-} 
+}
+
+template <class T>
+token *variable <T> ::copy() const
+{
+	return new variable(name, val, param);
+}
 
 #endif

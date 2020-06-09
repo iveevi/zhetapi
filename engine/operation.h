@@ -65,9 +65,11 @@ public:
 	T operator()(const std::vector <token *> &) const;
 
 	std::string fmt() const;
-	std::string str() const;
+	std::string str() const override;
 
-	type caller() const;
+	type caller() const override;
+
+	token *copy() const override;
 
 	class count_mismatch {};
 	class token_mismatch {};
@@ -116,6 +118,12 @@ template <class T>
 token::type operation <T> ::caller() const
 {
 	return OPERATION;
+}
+
+template <class T>
+token *operation <T> ::copy() const
+{
+	return new operation(*this);
 }
 
 #endif
