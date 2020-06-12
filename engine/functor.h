@@ -63,6 +63,7 @@ public:
 	const std::string &symbol() const;
 
 	/* Modifiers */
+	void rename(const std::string &);
 	void rebase(const std::string &, stree *, const params &,
 			table <T> = table <T> ());
 
@@ -85,6 +86,8 @@ public:
 
 	/* Operators for the
 	 * functor class */
+	const functor &operator=(const functor &);
+
 	const variable <T> &operator[](size_t) const;
 	
 	T operator()(const element <T> &);
@@ -190,7 +193,6 @@ functor <T> ::functor(const std::string &in, table <T> tbl)
 		m_params.push_back(variable <T> (str, true));
 	
 	m_root = new node <T> (expr, tbl, m_params);
-
 	compress();
 }
 
@@ -201,7 +203,6 @@ functor <T> ::functor(const std::string &str, params pars,
 	m_name = str;
 	m_params = pars;
 	m_root = new node <T> (tree);
-
 	compress();
 }
 
@@ -240,6 +241,12 @@ template <class T>
 const std::string &functor <T> ::symbol() const
 {
 	return m_name;
+}
+
+template <class T>
+void functor <T> ::rename(const std::string &str)
+{
+	m_name = str;
 }
 
 template <class T>
@@ -331,6 +338,19 @@ template <class T>
 void functor <T> ::print() const
 {
 	m_root->print();
+}
+
+template <class T>
+const functor <T> &functor <T> ::operator=(const functor <T> &other)
+{
+	if (this != &other) {
+		m_name = other.m_name;
+		m_params = other.m_params;
+		m_root = new node <T> (other.m_root);
+		compress();
+	}
+
+	return *this;
 }
 
 template <class T>

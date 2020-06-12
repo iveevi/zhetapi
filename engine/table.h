@@ -168,6 +168,12 @@ const table <T> &table <T> ::operator=(const table &other)
 		vtree_size = other.vtree_size;
 		ftree_size = other.ftree_size;
 	}
+
+	// cout << string(50, '_') << endl;
+	// cout << "ASSIGNMENT OPERATOR:" << endl;
+	// print();
+
+	return *this;
 }
 
 template <class T>
@@ -616,7 +622,7 @@ void table <T> ::print_var(__var_node *vnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << vnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << vnd << "]" << std::endl;
 		break;
 	case 1:
 		std::cout << "Level #" << lev << " -- Left: ";
@@ -625,7 +631,7 @@ void table <T> ::print_var(__var_node *vnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << vnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << vnd << "]" << std::endl;
 		break;
 	case -1:
 		std::cout << "Level #" << lev << " -- Right: ";
@@ -634,7 +640,7 @@ void table <T> ::print_var(__var_node *vnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << vnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << vnd << "]" << std::endl;
 		break;
 	}
 	
@@ -662,7 +668,7 @@ void table <T> ::print_ftr(__ftr_node *fnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << fnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << fnd << "]" << std::endl;
 		break;
 	case 1:
 		std::cout << "Level #" << lev << " -- Left: ";
@@ -671,7 +677,7 @@ void table <T> ::print_ftr(__ftr_node *fnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << fnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << fnd << "]" << std::endl;
 		break;
 	case -1:
 		std::cout << "Level #" << lev << " -- Right: ";
@@ -680,7 +686,7 @@ void table <T> ::print_ftr(__ftr_node *fnd, int lev, int dir) const
 			std::cout << "NULL";
 		else
 			std::cout << fnd->val;
-		std::cout << std::endl;;
+		std::cout << " [@" << fnd << "]" << std::endl;
 		break;
 	}
 	

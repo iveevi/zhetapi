@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 /* Engine Headers */
 #include "variable.h"
@@ -143,7 +144,7 @@ private:
 	 */
 	params pars;
 
-	cfg *cfg_ptr;
+	shared_ptr <cfg> cfg_ptr;
 public:
 	/* Constructors of the
 	 * node class */
@@ -156,10 +157,10 @@ public:
 	 * REQUIRES UPDATE ^^
 	 */
 	node(std::string, table <T> = table <T> (),
-			params = params(), cfg * = new cfg());
+			params = params(), shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
 
 	node(stree *, table <T> = table <T> (),
-			params = params(), cfg * = new cfg());
+			params = params(), shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
 
 	/**
 	 * @brief Node copy constructor
@@ -178,13 +179,13 @@ public:
 	 * more complex functions, where
 	 * labeling is a post action.
 	 */
-	node(token *t, std::vector <node *> lv, cfg *);
+	node(token *t, std::vector <node *> lv, shared_ptr <cfg> );
 	
 	/**
 	 * @brief Node constructor, for
 	 * all its members.
 	 */
-	node(token *t, nd_label l, std::vector <node *> lv, cfg *);
+	node(token *t, nd_label l, std::vector <node *> lv, shared_ptr <cfg> );
 
 	~node();
 
@@ -225,7 +226,7 @@ public:
 	 * complex functions where labeling
 	 * is pushed to the very end of the process.
 	 */
-	void set(token *, std::vector <node *>, cfg *);
+	void set(token *, std::vector <node *>, shared_ptr <cfg>);
 
 	/**
 	 * @brief Setter method to change
@@ -234,7 +235,7 @@ public:
 	 * and similar methods in the functor
 	 * class.
 	 */
-	void set(token *, nd_label, std::vector <node *>, cfg *);
+	void set(token *, nd_label, std::vector <node *>, shared_ptr <cfg>);
 
 	/**
 	 * @brief Getter method for
@@ -388,7 +389,7 @@ public:
 
 /* Constructors */
 template <class T>
-node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
+node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> cptr)
 	: pars(params), cfg_ptr(cptr)
 {
 	stree *st = new stree(str);
@@ -398,10 +399,13 @@ node <T> ::node(std::string str, table <T> tbl, params params, cfg *cptr)
 
 	delete out;
 	delete st;
+
+	/* cout << "CONSTRUCTOR ONE:" << endl;
+	print(); */
 }
 
 template <class T>
-node <T> ::node(stree *raw, table <T> tbl, params prs, cfg *cptr)
+node <T> ::node(stree *raw, table <T> tbl, params prs, shared_ptr <cfg> cptr)
 	: pars(prs), cfg_ptr(cptr)
 {
 	node *out = convert(raw, tbl);
@@ -409,36 +413,58 @@ node <T> ::node(stree *raw, table <T> tbl, params prs, cfg *cptr)
 	*this = *out;
 
 	delete out;
+
+	/* cout << "CONSTRUCTOR TWO:" << endl;
+	print(); */
 }
 
 template <class T>
 node <T> ::node(node *other)
 {
 	*this = *other;
+
+	/* cout << "CONSTRUCTOR THREE:" << endl;
+	print(); */
 }
 
 template <class T>
 node <T> ::node(const node &other)
 {
 	*this = other;
+
+	cout << "Copying into this @" << this << endl;
+
+	/* cout << "CONSTRUCTOR FOUR:" << endl;
+	print(); */
 }
 
 template <class T>
-node <T> ::node(token *t, std::vector <node <T> *> lv, cfg *cptr)
+node <T> ::node(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	leaves = lv;
 	cfg_ptr = cptr;
 	type = l_none;
+
+	/* cout << "CONSTRUCTOR FIVE:" << endl;
+	print(); */
 }
 
 template <class T>
-node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
-	: tok(t), type(l), leaves(lv), cfg_ptr(cptr) {}
+node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+	: tok(t), type(l), leaves(lv), cfg_ptr(cptr)
+{
+
+	/* cout << "CONSTRUCTOR SIX:" << endl;
+	print(); */
+}
 
 template <class T>
 node <T> ::~node()
 {
+	/* cout << "DECONSTRUCTOR:" << endl;
+	print(); */
+
 	delete tok;
 
 	for (size_t i = 0; i < leaves.size(); i++)
@@ -453,6 +479,8 @@ node <T> ::~node()
 template <class T>
 const node <T> &node <T> ::operator=(const node <T> &other)
 {
+	// cout << string(30, '_') << endl;
+	// cout << "Assigning into this @" << this << endl;
 	if (this != &other) {
 		tok = other.tok->copy();
 		type = other.type;
@@ -465,6 +493,9 @@ const node <T> &node <T> ::operator=(const node <T> &other)
 		for (size_t i = 0; i < other.leaves.size(); i++)
 			leaves.push_back(other.leaves[i]->copy());
 	}
+
+	// cout << "Result:" << endl;
+	// print();
 
 	return *this;
 }
@@ -530,7 +561,7 @@ void node <T> ::set(params p)
 }
 
 template <class T>
-void node <T> ::set(token *t, std::vector <node <T> *> lv, cfg *cptr)
+void node <T> ::set(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	leaves = lv;
@@ -539,7 +570,7 @@ void node <T> ::set(token *t, std::vector <node <T> *> lv, cfg *cptr)
 }
 
 template <class T>
-void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, cfg *cptr)
+void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	type = l;
@@ -890,12 +921,12 @@ void node <T> ::print(int num, int lev) const
 
 	std::string pr = "[";
 
-	for (int i = 0; i < pars.size(); i++) {
+	/* for (int i = 0; i < pars.size(); i++) {
 		pr += pars[i].symbol();
 
 		if (i < pars.size() - 1)
 			pr += ", ";
-	}
+	} */
 
 	pr += "]";
 

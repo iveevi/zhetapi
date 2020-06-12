@@ -8,6 +8,7 @@
 #include "element.h"
 
 namespace utility {
+
 	template <class T>
 	std::vector <element <T>> gram_shmidt(const std::vector <element <T>> &span) {
 		assert(span.size());
@@ -347,8 +348,7 @@ namespace utility {
 	// exception for when root finding
 	// hits an extrema. Later store the
 	// vector wchih produced this exception.
-	class extrema_exception {
-	};
+	class extrema_exception {};
 
 	template <class T>
 	element <T> find_root(functor <T> ftr, const element <T> &guess, size_t rounds)
@@ -381,6 +381,7 @@ namespace utility {
 
 		return sol;
 	}
+
 };
 
 #endif

@@ -45,13 +45,13 @@ public:
 	expression(std::string = "");
 
 	// Includes caching, change to references
-	const T &evaluate(std::string = "", table <T> = table <T> ());
+	T evaluate(std::string = "", table <T> = table <T> ());
 
 	// Without caching
-	static const T &in_place_evaluate(std::string = "", table <T> = table <T> ());
+	static T in_place_evaluate(std::string = "", table <T> = table <T> ());
 
 	// Without caching, and with formatting
-	static const T&in_place_evaluate_formatted(const char *, ...);
+	static T in_place_evaluate_formatted(const char *, ...);
 
 	// User changeable buffer size
 	static int BUF_SIZE;
@@ -68,7 +68,7 @@ expression <T> ::expression(std::string str)
 	: m_cached(str) {}
 
 template <class T>
-const T &expression <T> ::evaluate(std::string str, table <T> tbl)
+T expression <T> ::evaluate(std::string str, table <T> tbl)
 {
 	if (str.empty() && m_cached.empty())
 		throw invalid_expr();
@@ -77,21 +77,29 @@ const T &expression <T> ::evaluate(std::string str, table <T> tbl)
 		m_cached = str;
 
 	node <T> *out = new node <T> (str, tbl);
-	return out->value();
+
+	T val = out->value();
+	delete out;
+
+	return val;
 }
 
 template <class T>
-const T &expression <T> ::in_place_evaluate(std::string str, table <T> tbl)
+T expression <T> ::in_place_evaluate(std::string str, table <T> tbl)
 {
 	if (str.empty())
 		throw invalid_expr();
 
 	node <T> *out = new node <T> (str, tbl);
-	return out->value();
+
+	T val = out->value();
+	delete out;
+
+	return val;
 }
 
 template <class T>
-const T &expression <T> ::in_place_evaluate_formatted(const char *format, ...)
+T expression <T> ::in_place_evaluate_formatted(const char *format, ...)
 {
 	va_list arg;
 	int done;

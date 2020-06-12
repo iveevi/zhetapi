@@ -5,82 +5,42 @@
 
 #include <gmpxx.h>
 
-#include "utility.h"
+#include "expression.h"
+#include "algorithms.h"
+#include "combinatorial.h"
 #include "network.h"
 
 using namespace std;
 
 int main()
 {
-	functor <double> ftr("f(x, y) = x^2 + y^2");
+	vector <pair <double, double>> D {
+		{0, 0},
+		{1, 3},
+		{2, 4},
+		{5, 5},
+		{9, 14}
+	};
+
+	table <double> tbl;
+
+	functor <double> ftr("f(a, b, c, x) = ax^2 + bx + c");
+	tbl.insert_ftr(ftr);
+
+	functor <double> ftr_dx = ftr.differentiate("x");
+	ftr_dx.rename("g");
+	tbl.insert_ftr(ftr_dx);
+
+	functor <double> c("C(a, b, c, x, y) = (f(a, b, c, x) - y)^2", tbl);
+
+	functor <double> c_dx("Cp(a, b, c, x, y) = (g(a, b, c, x) - y)^2", tbl);
 
 	cout << ftr << endl;
+	cout << ftr_dx << endl;
+	cout << c << endl;
+	cout << c_dx << endl;
 
-	functor <double> ftr_x = ftr.differentiate("x");
-	functor <double> ftr_y = ftr.differentiate("y");
-	
-	cout << ftr_x << endl;
-	cout << ftr_y << endl;
+	cout << "2 + 5 - 7 * 7: " << expression <double> ::in_place_evaluate("2 + 5 - 7 * 7") << endl;
 
-	size_t rounds = 10;
-
-	vector <double> pars {1, 1};
-
-	cout << endl << "Initial Guess(es):" << endl;
-
-	for (size_t i = 0; i < ftr.ins(); i++)
-		cout << ftr[i].symbol() << ": " << pars[i] << endl;
-
-	cout << "Value: " << ftr.compute(pars) << endl;
-
-	for (size_t i = 0; i < rounds; i++) {
-		double val = ftr.compute(pars);
-
-		if (val == 0) {
-			cout << endl << "Found Root!" << endl;
-			break;
-		}
-
-		double dx = ftr_x.compute(pars);
-		double dy = ftr_y.compute(pars);
-
-		if (dx == 0 || dy == 0) {
-			cout << endl << "Shifting..." << endl;
-
-			pars[0] += 10;
-			pars[1] += 10;
-
-			continue;
-		}
-
-		pars[0] -= val/dx;
-		pars[1] -= val/dy;
-		
-		cout << endl << "Round #" << (i + 1) << endl;
-
-		for (size_t i = 0; i < ftr.ins(); i++)
-			cout << ftr[i].symbol() << ": " << pars[i] << endl;
-
-		cout << "ftr: " << val << endl;
-		cout << "ftr_x: " << dx << endl;
-		cout << "ftr_y: " << dy << endl;
-
-		cout << "Value: " << ftr.compute(pars) << endl;
-	}
-
-	cout << endl << "Result(s):" << endl;
-
-	for (size_t i = 0; i < ftr.ins(); i++)
-		cout << ftr[i].symbol() << ": " << pars[i] << endl;
-	
-	cout << "Value: " << ftr.compute(pars) << endl;
-
-	element <double> elem {0, 0};
-
-	cout << endl << "Solution:" << endl << utility::find_root(ftr, {1, 1}, 10) << endl;
-
-	matrix <double> mat {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-
-	cout << endl << "Mat:" << endl << mat << endl;
-	cout << endl << "Symmatric: " << std::boolalpha << mat.symmetric() << endl;
+	cout << utility::binom(476.0, 2.0) << endl;
 }
