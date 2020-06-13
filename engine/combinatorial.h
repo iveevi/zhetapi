@@ -2,6 +2,9 @@
 #define COMBINATORIAL_H_
 
 #include <cmath>
+#include <vector>
+
+#include "rational.h"
 
 namespace utility {
 
@@ -91,6 +94,12 @@ namespace utility {
 	template <class T>
 	T gcd(T a, T b, T (*mod)(T, T) = std::fmod, T eps = 0)
 	{
+		if (a == 0 || b == 0)
+			return 1;
+
+		a = std::abs(a);
+		b = std::abs(b);
+
 		if (a > b)
 			std::swap(a, b);
 
@@ -111,7 +120,7 @@ namespace utility {
 	 * from the modulus function which is passed.
 	 */
 	template <class T>
-	T lcd(T a, T b, T(*mod)(T, T) = std::fmod, T eps = 0)
+	T lcm(T a, T b, T(*mod)(T, T) = std::fmod, T eps = 0)
 	{
 		return a * b / gcd(a, b, mod, eps);
 	}
@@ -125,6 +134,12 @@ namespace utility {
 	template <class T>
 	T integral_gcd(T a, T b)
 	{
+		if (a == 0 || b == 0)
+			return 1;
+
+		a = std::abs(a);
+		b = std::abs(b);
+
 		if (a > b)
 			std::swap(a, b);
 
@@ -177,6 +192,34 @@ namespace utility {
 				tmp += binom(i + 1, j, gamma) * ibs[j];
 			
 			ibs.push_back(-tmp/(i + 1));
+		}
+
+		return ibs;
+	}
+
+	template <class T>
+	std::vector <rational <T>> bernoulli_sequence_rational(T n)
+	{
+		std::vector <rational <T>> ibs = {{1, 1}};
+
+		rational <T> tmp;
+		for (T i = 1; i <= n; i++) {
+			tmp = {0, 1};
+
+			if (i == 1) {
+				ibs.push_back({-1, 2});
+				continue;
+			}
+
+			if (i % 2 == 1) {
+				ibs.push_back({0, 1});
+				continue;
+			}
+
+			for (T j = 0; j < i; j++)
+				tmp += rational <T> {integral_binom(i + 1, j), 1} * ibs[j];
+			
+			ibs.push_back(rational <T> {-1, (i + 1)} * tmp);
 		}
 
 		return ibs;
