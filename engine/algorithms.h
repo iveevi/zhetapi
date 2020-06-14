@@ -381,6 +381,38 @@ namespace utility {
 
 		return sol;
 	}
+	
+	/* template <class T>
+	T find_root(functor <T> ftr, const element <T> &guess, size_t rounds)
+	{
+		element <T> sol = guess;
+
+		element <functor <T>> J_raw(ftr.ins(), [&](size_t i) {
+			// allow differentiation in index w/ respect
+			// to the parameters/variables
+			return new functor <T> (ftr.differentiate(ftr[i].symbol()));
+		});
+
+		for (size_t i = 0; i < rounds; i++) {
+			T val = ftr(sol);
+
+			if (val == 0)
+				break;
+
+			element <T> J_mod(ftr.ins(), [&](size_t i) {
+				T tmp = J_raw[i](sol);
+
+				if (tmp == 0)
+					throw extrema_exception();
+
+				return val/tmp;
+			});
+
+			sol -= J_mod;
+		}
+
+		return sol;
+	} */
 
 };
 

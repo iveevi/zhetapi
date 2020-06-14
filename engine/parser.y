@@ -70,6 +70,8 @@
 %type	<tree>	func
 %type	<tree>	summ
 %type	<tree>	coll
+%type	<tree>	spex
+%type	<tree>	sbex
 
 %type	<pack>	pack
 
@@ -180,13 +182,29 @@ dpnt:	dpnt SUPERSCRIPT LPAREN expr RPAREN {
     	$$ = $1;
 };
 
-summ:	SUM SUPERSCRIPT LBRACE expr RBRACE SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
+summ:	SUM spex SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE expr {
 		$$ = new stree("sum", l_operation, {
-			$8,
-			$10,
-			$4,
-			$12
+			$5,
+			$7,
+			$2,
+			$9
 		});
+}
+    |	SUM SUBSCRIPT LBRACE dpnt EQUALS expr RBRACE spex expr {
+		$$ = new stree("sum", l_operation, {
+			$4,
+			$6,
+			$8,
+			$9
+		});
+};
+
+spex:	SUPERSCRIPT LBRACE expr RBRACE {
+    		$$ = $3;
+};
+
+sbex:	SUBSCRIPT LBRACE expr RBRACE {
+    		$$ = $3;
 };
 
 felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {

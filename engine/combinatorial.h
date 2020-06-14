@@ -13,10 +13,14 @@ namespace utility {
 	//////////////////////////////////////////
 
 	/* @brief Exception for asserting that
-	 * a template parameter must be
-	 * of an integral type.
+	 * a certain input be non-negative.
 	 */
-	class non_integral_type {};
+	class negative_block_exception {};
+
+	/* @brief Exception for asserting that
+	 * a certain input be strictly positive.
+	 */
+	class positive_flow_exception {};
 
 	//////////////////////////////////////////
 	// Perliminary Helper Functions
@@ -197,6 +201,28 @@ namespace utility {
 		return ibs;
 	}
 
+	/**
+	 * @brief Returns the specified Bernoulli number,
+	 * using the Bernoulli sequence generator.
+	 */
+	template <class T>
+	T bernoulli_number_real(T n, T (*gamma)(T) = std::tgamma)
+	{
+		if (n <= 0)
+			throw positive_flow_exception();
+
+		return bernoulli_sequence_real(n, gamma)[n - 1];
+	}
+
+	/**
+	 * @brief Rational equivalent of the real Bernoulli
+	 * sequence generator, only that a list of rational
+	 * numbers are returned. Should be used when precision
+	 * is wished to be kept. Note that if the returned
+	 * sequence appears to be incorrect, it is possible
+	 * that the range of the template parameter is too
+	 * small.
+	 */
 	template <class T>
 	std::vector <rational <T>> bernoulli_sequence_rational(T n)
 	{
@@ -223,6 +249,20 @@ namespace utility {
 		}
 
 		return ibs;
+	}
+
+	/**
+	 * @brief Return sthe specified Bernoulli number as a
+	 * rational number using the rational Bernoulli sequence
+	 * generator.
+	 */
+	template <class T>
+	T bernoulli_number_rational(T n, T (*gamma)(T) = std::tgamma)
+	{
+		if (n <= 0)
+			throw positive_flow_exception();
+
+		return bernoulli_sequence_rational(n)[n - 1];
 	}
 
 }

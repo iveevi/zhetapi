@@ -1,0 +1,142 @@
+# EXTREMA FITTING
+
+	vector <pair <double, double>> D {
+		{0, 0},
+		{1, 3},
+		{2, 4},
+		{5, 5},
+		{9, 14}
+	};
+
+	vector <pair <double, double>> M {
+		{1, 2},
+		{2, 0.5},
+		{5, 10.0/7.0}
+	};
+
+	table <double> tbl;
+
+	functor <double> ftr("f(a, b, c, x) = ax^5 + bx^3 + cx");
+	tbl.insert_ftr(ftr);
+
+	functor <double> ftr_x = ftr.differentiate("x");
+	ftr_x.rename("g");
+	tbl.insert_ftr(ftr_x);
+
+	functor <double> cost("C(a, b, c, x, y) = (f(a, b, c, x) - y)^2", tbl);
+
+	functor <double> c_x("Cp(a, b, c, x, y) = (g(a, b, c, x) - y)^2", tbl);
+
+	cout << ftr << endl;
+	cout << ftr_x << endl;
+
+	cout << endl << cost << endl;
+	cout << c_x << endl;
+
+	functor <double> c_a = cost.differentiate("a");
+	functor <double> c_b = cost.differentiate("b");
+	functor <double> c_c = cost.differentiate("c");
+	
+	functor <double> c_x_a = c_x.differentiate("a");
+	functor <double> c_x_b = c_x.differentiate("b");
+	functor <double> c_x_c = c_x.differentiate("c");
+
+	cout << endl << c_a << endl;
+	cout << c_b << endl;
+	cout << c_c << endl;
+	
+	cout << endl << c_x_a << endl;
+	cout << c_x_b << endl;
+	cout << c_x_c << endl;
+
+	size_t rounds = 10;
+
+	double a = 1;
+	double b = 1;
+	double c = 1;
+
+	double d_gamma = 0.01;
+	double m_gamma = 0.001;
+	
+	double m_err = 0;
+	for (auto pr : M)
+		m_err += c_x(a, b, c, pr.first, pr.second);
+	
+	double d_err = 0;
+	for (auto pr : D)
+		d_err += cost(a, b, c, pr.first, pr.second);
+
+	cout << string(15, '_') << endl;
+	cout << "m_err: " << m_err << endl;
+	cout << "d_err: " << d_err << endl;
+
+	for (size_t i = 0; i < rounds; i++) {
+		double m_err = 0;
+		for (auto pr : M)
+			m_err += c_x(a, b, c, pr.first, pr.second);
+		
+		double d_err = 0;
+		for (auto pr : D)
+			d_err += cost(a, b, c, pr.first, pr.second);
+
+		double ca = a;
+		double cb = c;
+		double cc = c;
+
+		double da = 0;
+		double db = 0;
+		double dc = 0;
+
+		for (auto pr : M) {
+			da += m_gamma * c_x_a(ca, cb, cc, pr.first, pr.second);
+			db += m_gamma * c_x_b(ca, cb, cc, pr.first, pr.second);
+			dc += m_gamma * c_x_c(ca, cb, cc, pr.first, pr.second);
+		}
+
+		a -= da;
+		b -= db;
+		c -= dc;
+
+		da = 0;
+		db = 0;
+		dc = 0;
+
+		for (auto pr : D) {
+			da += m_gamma * c_a(ca, cb, cc, pr.first, pr.second);
+			db += m_gamma * c_b(ca, cb, cc, pr.first, pr.second);
+			dc += m_gamma * c_c(ca, cb, cc, pr.first, pr.second);
+		}
+
+		a -= da;
+		b -= db;
+		c -= dc;
+		
+		double m_err_n = 0;
+		for (auto pr : M)
+			m_err += c_x(a, b, c, pr.first, pr.second);
+		
+		double d_err_n = 0;
+		for (auto pr : D)
+			d_err += cost(a, b, c, pr.first, pr.second);
+
+		if (m_err_n < m_err && d_err_n < d_err) {
+			d_gamma /= 2;
+			m_gamma /= 2;
+
+			cout << string(15, '_') << endl;
+			cout << "m_err: " << m_err_n << endl;
+			cout << "d_err: " << d_err_n << endl;
+		} else {
+			a = ca;
+			b = cb;
+			c = cc;
+			
+			d_gamma *= 2;
+			m_gamma *= 2;
+		}
+	}
+
+	cout << string(15, '_') << endl;
+	cout << "a: " << a << endl;
+	cout << "b: " << b << endl;
+	cout << "c: " << c << endl;

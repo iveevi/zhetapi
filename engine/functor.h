@@ -45,7 +45,7 @@ public:
 	 * functor class */
 	functor(const std::string & = "", table <T> = table <T> ());
 	functor(const std::string &, const std::vector <std::string> &,
-		const std::string &);
+		const std::string &, table <T> = table <T> ());
 
 	functor(const std::string &, params, node <T> *);
 	functor(const std::string &, stree *, const params &,
@@ -74,6 +74,8 @@ public:
 	const functor &differentiate(const std::string &) const;
 
 	std::string display() const;
+
+	nd_class classify();
 
 	/* Virtual functions inehrited
 	 * from the token class. */
@@ -197,6 +199,17 @@ functor <T> ::functor(const std::string &in, table <T> tbl)
 }
 
 template <class T>
+functor <T> ::functor(const std::string &str, const std::vector <std::string>
+		&names, const std::string &expr, table <T> tbl) : m_name(str)
+{
+	for (auto s : names)
+		m_params.push_back(variable <T> (s, true));
+
+	m_root = new node <T> (expr, tbl, m_params);
+	compress();
+}
+
+template <class T>
 functor <T> ::functor(const std::string &str, params pars,
 	node <T> *tree)
 {
@@ -274,6 +287,14 @@ std::string functor <T> ::display() const
 
 	out += ") = " + m_root->display();
 	return out;
+}
+
+template <class T>
+nd_class functor <T> ::classify()
+{
+	m_root->classify();
+
+	return m_root->get_cls();
 }
 
 template <class T>

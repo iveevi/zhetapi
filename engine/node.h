@@ -86,6 +86,20 @@ std::string strlabs[] = {
 	"factorial"
 };
 
+enum nd_class {
+	c_none,
+	c_polynomial,
+	c_rational,
+	c_exponential
+};
+
+std::string strclass[] = {
+	"none",
+	"polynomial",
+	"rational",
+	"exponential"
+};
+
 /**
  * @brief Singular node class,
  * used in expression trees.
@@ -128,6 +142,8 @@ private:
 	 * as compression and differentiation
 	 */
 	nd_label type;
+
+	nd_class cls;
 
 	/**
 	 * @brief Children of this node
@@ -264,6 +280,7 @@ public:
 	std::vector <node *> children();
 
 	nd_label kind();
+	nd_class get_cls();
 	// void relabel(label);
 	
 	/* Functional methods of
@@ -275,6 +292,8 @@ public:
 
 	void label_all();
 	void label(const std::vector <std::string> &);
+
+	void classify();
 
 	void compress();
 
@@ -390,7 +409,7 @@ public:
 /* Constructors */
 template <class T>
 node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> cptr)
-	: pars(params), cfg_ptr(cptr)
+	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
 	// st->print();
@@ -432,7 +451,7 @@ node <T> ::node(const node &other)
 {
 	*this = other;
 
-	cout << "Copying into this @" << this << endl;
+	// cout << "Copying into this @" << this << endl;
 
 	/* cout << "CONSTRUCTOR FOUR:" << endl;
 	print(); */
@@ -618,6 +637,12 @@ nd_label node <T> ::kind()
 	return type;
 }
 
+template <class T>
+nd_class node <T> ::get_cls()
+{
+	return cls;
+}
+
 /* Functional Methods */
 template <class T>
 bool node <T> ::valid() const
@@ -752,6 +777,33 @@ void node <T> ::label(const std::vector <std::string> &vars)
 		break;
 	case token::OPERAND:
 		type = l_constant;
+		break;
+	}
+}
+
+template <class T>
+void node <T> ::classify()
+{
+	for (auto nd : leaves)
+		nd->classify();
+
+	switch (type) {
+	case l_constant:
+	case l_operation_constant:
+	case l_variable:
+	case l_power:
+		cls = c_polynomial;
+		break;
+	case l_separable:
+	case l_multiplied:
+		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
+			cls = c_polynomial;
+		break;
+	case l_divided:
+		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
+			cls = c_rational;
+		break;
+	default:
 		break;
 	}
 }
@@ -930,7 +982,7 @@ void node <T> ::print(int num, int lev) const
 
 	pr += "]";
 
-	std::cout << "#" << num << " - [" << strlabs[type] << "] "
+	std::cout << "#" << num << " - [" << strclass[cls] << ", " << strlabs[type] << "] "
 		<< tok->str() << " @ " << this << ", " << pr << endl;
 
 	counter = 0;
