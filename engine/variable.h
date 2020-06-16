@@ -436,7 +436,7 @@ std::string variable <data_t> ::str() const
 template <class T>
 token *variable <T> ::copy() const
 {
-	return new variable(name, val, param);
+	return new variable(name, param, val);
 }
 
 template <class T>

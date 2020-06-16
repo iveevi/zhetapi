@@ -2,39 +2,45 @@
 #include <ctime>
 #include <iostream>
 #include <vector>
+#include <complex>
 
 #include <gmpxx.h>
 
+#include "zcomplex.h"
 #include "algorithms.h"
+#include "calculus.h"
+#include "combinatorial.h"
 #include "expression.h"
 #include "network.h"
-#include "combinatorial.h"
-#include "rational.h"
 #include "polynomial.h"
+#include "rational.h"
 
 using namespace std;
 
+bool operator<(const zcomplex <long double> &a, const zcomplex <long double> &b)
+{
+	return norm(a) < norm(b);
+}
+
+bool operator<=(const zcomplex <long double> &a, const zcomplex <long double> &b)
+{
+	return norm(a) <= norm(b);
+}
+
 int main()
 {
-	functor <double> ftr {"f", {"x", "y"}, "2 + 4x + 6 + 6y^2 + 7y^2 + 1"};
+	polynomial <zcomplex <long double>> f {1, 4, 4, 0};
 
-	cout << string(30, '_') << endl;
-	cout << ftr << endl << string(30, '=') << endl;
-	ftr.print();
-	
-	node <double> a {"2 + 2xy", table <double> (), {{"x", true}, {"y", true}}};
-	node <double> b {"2yx + 2", table <double> (), {{"x", true}, {"y", true}}};
+	vector <zcomplex <long double>> rts = f.roots(10000, 1E-500L, {0.4, 0.9});
 
-	cout << endl << "Nodes:" << endl;
-	a.print();
-	b.print();
+	cout << endl << "rts:" << endl;
 
-	bool bl = a.matches(b);
+	for (auto val : rts)
+		cout << "\t" << val << endl;
 
-	cout << endl << std::boolalpha << "Matching: " << bl << endl;
+	auto ftrs = utility::solve_hlde_constant(f);
 
-	/* network <double> c (vector <size_t> {3, 5, 6, 1});
-
-	cout << "Networks:" << endl;
-	c.print(); */
+	cout << "Solutions:" << endl;
+	for (auto ftr : ftrs)
+		cout << "\t" << ftr << endl;
 }

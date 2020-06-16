@@ -141,17 +141,17 @@ config <T> ::config() : config({
 		{"csc", "csc $1", 1, [](const std::vector <token *> &ins) {
 			if (code(ins[0]) != t_opd)
 				throw typename opn::token_mismatch();
-			return 1 / sin((dynamic_cast <opd *> (ins[0]))->get());
+			return T(1) / sin((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_csc},
 		{"sec", "sec $1", 1, [](const std::vector <token *> &ins) {
 			if (code(ins[0]) != t_opd)
 				throw typename opn::token_mismatch();
-			return 1 / cos((dynamic_cast <opd *> (ins[0]))->get());
+			return T(1) / cos((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_sec},
 		{"cot", "cot $1", 1, [](const std::vector <token *> &ins) {
 			if (code(ins[0]) != t_opd)
 				throw typename opn::token_mismatch();
-			return 1/ tan((dynamic_cast <opd *> (ins[0]))->get());
+			return T(1) / tan((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_cot},
 		{"log", "log_$1 $2", 2, [](const std::vector <token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
@@ -170,7 +170,7 @@ config <T> ::config() : config({
 			ftr *expr = dynamic_cast <ftr *> (ins[3]);
 
 			T value = zero;
-			for (int i = start->get(); i <= end->get(); i++)
+			for (T i = start->get(); i <= end->get(); i += T(1))
 				value += (*expr)(i);
 			
 			return value;
@@ -181,12 +181,12 @@ config <T> ::config() : config({
 
 			opd *start = dynamic_cast <opd *> (ins[0]);
 
-			T value = one;
-			for (int i = start->get(); i > 0; i--)
+			size_t value = 1;
+			for (size_t i = (double) start->get(); i > 0; i--)
 				value *= i;
 
-			return value;
-		}, op_fac}}, -1, 0, 1) {}
+			return T(value);
+		}, op_fac}}, T(-1), T(0), T(1)) {}
 
 template <class T>
 config <T> ::config(const std::vector <specs> &st, const T &n,

@@ -289,7 +289,7 @@ node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> 
 	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
-	// st->print();
+	
 	node *out = convert(st, tbl);
 	*this = *out;
 
@@ -298,9 +298,6 @@ node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> 
 
 	reparametrize(params);
 	simplify();
-
-	/* cout << "CONSTRUCTOR ONE:" << endl;
-	print(); */
 }
 
 template <class T>
@@ -947,7 +944,7 @@ std::string node <T> ::display() const
 	case l_exp:
 	case l_power:
 	case l_exponential:
-		return leaves[0]->display_as_operand(type) + " ^ " + leaves[1]->display_as_operand(type);
+		return leaves[0]->display_as_operand(type) + "^" + leaves[1]->display_as_operand(type);
 	// remove operation constant later
 	case l_operation_constant:
 		return std::to_string(value());
@@ -1127,13 +1124,13 @@ node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
 	// string eqn = st->children()[3]->str();
 
 	node *out = new node {get(st->str()), {
-		new node {new var {str, T(), true}, {}, cfg_ptr},
+		new node {new var {str, true, T()}, {}, cfg_ptr},
 		convert(st->children()[1]),
 		convert(st->children()[2]),
 		new node {new ftr {
 			"f", 
 			st->children()[3],
-			{var {str, T(), true}},
+			{var {str, true, T()}},
 			tbl},
 		{}, cfg_ptr}
 	}, cfg_ptr};
@@ -1437,7 +1434,7 @@ void node <T> ::compress_as_separable()
 
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
-		if (val == 0) {
+		if (val == T(0)) {
 			tok = get(op_mul);
 
 			delete leaves[0]->tok;
@@ -1448,7 +1445,7 @@ void node <T> ::compress_as_separable()
 		}
 	} else if (leaves[1]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
-		if (val == 0) {
+		if (val == T(0)) {
 			tok = get(op_mul);
 			
 			delete leaves[1]->tok;
@@ -1496,8 +1493,8 @@ void node <T> ::compress_as_multiplied()
 		case l_variable:
 			name = (dynamic_cast <var*> (current->tok))->symbol();
 			if (chart.find(name) == chart.end())
-				chart[name] = 0;
-			chart[name]++;
+				chart[name] = T(0);
+			chart[name] += T(1);
 			break;
 		case l_operation_constant:
 			vals = {
@@ -1531,19 +1528,19 @@ void node <T> ::compress_as_multiplied()
 		misc[i]->compress();
 
 	tok = nullptr;
-	if (constant->get() == 0) {
+	if (constant->get() == T(0)) {
 		set(new opd(0), l_constant, {}, cfg_ptr);
 		return;
 	}
 
-	if (constant->get() != 1)
+	if (constant->get() != T(1))
 		set(constant, l_constant, {}, cfg_ptr);
 
 	for (auto itr : chart) {
 		if (tok)
 			temp = copy();
 
-		if (itr.second == 1) {
+		if (itr.second == T(1)) {
 			t = new node(new var(itr.first, true), {}, cfg_ptr);
 		} else {
 			t = new node(get(op_exp), {
@@ -1583,7 +1580,7 @@ void node <T> ::compress_as_divided()
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 
-		if (val == 1) {
+		if (val == T(1)) {
 			delete tok;
 			tok = get(op_exp);
 
@@ -1591,7 +1588,7 @@ void node <T> ::compress_as_divided()
 
 			delete leaves[1];
 			leaves[1] = new node(new opd(-1), {}, cfg_ptr);
-		} else if (val == 0) {
+		} else if (val == T(0)) {
 			set(new opd(0), {}, cfg_ptr);
 		}
 	} else if (leaves[1]->type == l_constant) {
@@ -1637,9 +1634,9 @@ void node <T> ::compress_as_power()
 	
 	if (leaves[1]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
-		if (val == 1)
+		if (val == T(1))
 			set(leaves[0]);
-		else if (val == 0)
+		else if (val == T(0))
 			set(new opd(1), {}, cfg_ptr);
 	}
 }
@@ -1654,7 +1651,7 @@ void node <T> ::compress_as_exponential()
 
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
-		if (val == 1)
+		if (val == T(1))
 			set(new opd(1), {}, cfg_ptr);
 		else if (val == 0)
 			set(new opd(0), {}, cfg_ptr);
@@ -1949,7 +1946,8 @@ std::string node <T> ::display_as_operand(nd_label required) const
 
 	switch (required) {
 	case l_trigonometric:
-		if (type == l_separable)
+		if (type == l_separable
+			|| type == l_multiplied)
 			out = "(" + out + ")";
 		break;
 	case l_exp:
@@ -1975,22 +1973,26 @@ template <class T>
 std::string node <T> ::display_as_trigonometric() const
 {
 	std::string stropn;
+	std::string space = " ";
 
 	stropn = leaves[0]->display_as_operand(l_trigonometric);
 
+	if (stropn[0] == '(')
+		space = "";
+
 	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
 	case op_sin:
-		return "sin " + stropn;
+		return "sin" + space + stropn;
 	case op_cos:
-		return "cos " + stropn;
+		return "cos" + space + stropn;
 	case op_tan:
-		return "tan " + stropn;
+		return "tan" + space + stropn;
 	case op_csc:
-		return "csc " + stropn;
+		return "csc" + space + stropn;
 	case op_sec:
-		return "sec " + stropn;
+		return "sec" + space + stropn;
 	case op_cot:
-		return "cot " + stropn;
+		return "cot" + space + stropn;
 	}
 
 	throw node_error("Node labeled as trigonometric, \
