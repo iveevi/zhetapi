@@ -26,7 +26,17 @@ public:
 	T coefficient(size_t) const;
 
 	// Functional Methods
+	
+	/**
+	 * @brief Integrates the polynomial, with
+	 * the constant C being 0.
+	 */
+	polynomial integrate() const;
+	T integrate(const T &, const T &) const;
+
 	polynomial differentiate() const;
+	T differentiate(const T &) const;
+
 	std::pair <polynomial, T> synthetic_divide(const T &) const;
 
 	T operator()(const T &) const;
@@ -68,6 +78,33 @@ polynomial <T> polynomial <T> ::differentiate() const
 		out.push_back((coeffs.size() - (i + 1)) * coeffs[i]);
 
 	return polynomial(out);
+}
+
+template <class T>
+T polynomial <T> ::differentiate(const T &val) const
+{
+	return differentiate()(val);
+}
+
+template <class T>
+polynomial <T> polynomial <T> ::integrate() const
+{
+	std::vector <T> out;
+
+	for (size_t i = 0; i < coeffs.size(); i++)
+		out.push_back(coeffs[i] / T(coeffs.size() - i));
+
+	out.push_back(0);
+
+	return polynomial(out);
+}
+
+template <class T>
+T polynomial <T> ::integrate(const T &a, const T &b) const
+{
+	polynomial prim = integrate();
+
+	return prim(b) - prim(a);
 }
 
 template <class T>

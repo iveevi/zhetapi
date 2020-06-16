@@ -16,40 +16,25 @@ using namespace std;
 
 int main()
 {
-	functor <double> f("f(x) = sum^{x}_{i = 0} i");
-	functor <double> g("g", {"x"}, "sum_{i = 0}^{x} i");
+	functor <double> ftr {"f", {"x", "y"}, "2 + 4x + 6 + 6y^2 + 7y^2 + 1"};
 
-	functor <double> p("p", {"i"}, "i^2 + i");
+	cout << string(30, '_') << endl;
+	cout << ftr << endl << string(30, '=') << endl;
+	ftr.print();
+	
+	node <double> a {"2 + 2xy", table <double> (), {{"x", true}, {"y", true}}};
+	node <double> b {"2yx + 2", table <double> (), {{"x", true}, {"y", true}}};
 
-	cout << f << endl;
-	cout << g << endl;
+	cout << endl << "Nodes:" << endl;
+	a.print();
+	b.print();
 
-	cout << endl << "f @ 10:\t" << f(10) << endl;
-	cout << "g @ 10:\t" << g(10) << endl;
+	bool bl = a.matches(b);
 
-	cout << endl << "Pre Classification:";
-	p.print();
+	cout << endl << std::boolalpha << "Matching: " << bl << endl;
 
-	if (p.classify() == c_polynomial)
-		cout << endl << "Function p is polynomic" << endl;
+	/* network <double> c (vector <size_t> {3, 5, 6, 1});
 
-	cout << endl << "Post Classification:" << endl;
-	p.print();
-
-	polynomial <double> a({1, 2, 4, 0});
-
-	cout << endl << a << endl;
-	cout << "a(1): " << a(2) << endl;
-
-	polynomial <double> b {1, 2, 0, 5, 0, 4};
-
-	cout << endl << b << endl;
-	cout << "b(1): " << b(2) << endl;
-
-	cout << endl << b.differentiate() << endl;
-
-	pair <polynomial <double>, double> pr = a.synthetic_divide(2);
-
-	cout << endl << "q: " << pr.first << endl;
-	cout << "r: " << pr.second << endl;
+	cout << "Networks:" << endl;
+	c.print(); */
 }

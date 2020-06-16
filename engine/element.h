@@ -36,7 +36,8 @@ public:
 	const T &operator[](size_t) const;
 
 	T norm() const;
-	const element <T> &normalize() const;
+
+	void normalize();
 
 	template <class U>
 	friend U inner(const element <U> &, const element <U> &);
@@ -124,16 +125,12 @@ T element <T> ::norm() const
 }
 
 template <class T>
-const element <T> &element <T> ::normalize() const
+void element <T> ::normalize()
 {
 	T dt = norm();
 
-	element <T> *out = new element <T> (this->rows,
-		[&](size_t i) {
-			return (*this)[i]/dt;
-	});
-
-	return *out;
+	for (size_t i = 0; i < size(); i++)
+		(*this)[i] /= dt;
 }
 
 template <class T>
@@ -141,7 +138,7 @@ T inner(const element <T> &a, const element <T> &b)
 {
 	T acc = 0;
 
-	assert(a.length() == b.length());
+	assert(a.size() == b.size());
 	for (size_t i = 0; i < a.rows; i++)
 		acc += a[i] * b[i];
 

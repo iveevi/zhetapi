@@ -69,6 +69,8 @@ public:
 	void operator*=(const matrix &);
 	void operator/=(const matrix &);
 
+	void swap_rows(size_t, size_t);
+
 	T determinant() const;
 
 	T minor(size_t, size_t) const;
@@ -112,6 +114,8 @@ public:
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const matrix <U> &);
+
+	static matrix identity(size_t);
 protected:
 	T determinant(const matrix &) const;
 };
@@ -278,7 +282,7 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 
 template <class T>
 matrix <T> ::matrix(size_t rs, size_t cs,
-		std::function <T *(size_t, size_t)> gen)
+		std::function <T (size_t, size_t)> gen)
 {
 	rows = rs;
 	cols = cs;
@@ -295,7 +299,7 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 
 template <class T>
 matrix <T> ::matrix(size_t rs, size_t cs,
-		std::function <T (size_t, size_t)> gen)
+		std::function <T *(size_t, size_t)> gen)
 {
 	rows = rs;
 	cols = cs;
@@ -408,6 +412,12 @@ template <class T>
 void matrix <T> ::operator*=(const matrix <T> &other)
 {
 	(*this) = (*this) * other;
+}
+
+template <class T>
+void matrix <T> ::swap_rows(size_t a, size_t b)
+{
+	std::swap(m_array[a], m_array[b]);
 }
 
 template <class T>
@@ -618,6 +628,17 @@ std::ostream &operator<<(std::ostream &os, const matrix <T> &a)
 {
 	os << a.display();
 	return os;
+}
+
+template <class T>
+matrix <T> matrix <T> ::identity(size_t dim)
+{
+	return matrix {dim, dim, [](size_t i, size_t j) {
+		if (i == j)
+			return T(1);
+
+		return T(0);
+	}};
 }
 
 // Private helper methods

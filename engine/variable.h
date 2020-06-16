@@ -143,6 +143,8 @@ public:
 	type caller() const override;
 	std::string str() const override;
 	token *copy() const override;
+
+	bool operator==(token *) const override;
 	
 	/* Friends:
 	 * std::ostream &operator<<(std::ostream &, const variable
@@ -366,7 +368,7 @@ bool operator==(const variable <data_t> &right, const variable <data_t> &left)
 	// The name of the violated variable
 	
 	if (right.param || left.param) // Distinguish later
-		throw variable <data_t> ::bypass_attempt_exception("needs change");
+		throw typename variable <data_t> ::bypass_attempt_exception();
 	return right.name == left.name;
 }
 
@@ -435,6 +437,15 @@ template <class T>
 token *variable <T> ::copy() const
 {
 	return new variable(name, val, param);
+}
+
+template <class T>
+bool variable <T> ::operator==(token *t) const
+{
+	if (t->caller() != token::VARIABLE)
+		return false;
+
+	return name == (dynamic_cast <variable *> (t))->symbol();
 }
 
 #endif

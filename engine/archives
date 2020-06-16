@@ -1,5 +1,4 @@
 # EXTREMA FITTING
-
 	vector <pair <double, double>> D {
 		{0, 0},
 		{1, 3},
@@ -140,3 +139,133 @@
 	cout << "a: " << a << endl;
 	cout << "b: " << b << endl;
 	cout << "c: " << c << endl;
+
+# PSLQ
+	element <double> x {2 * sqrt(2) + acos(-1), 1, acos(-1), sqrt(2)};
+
+	cout << "x:" << endl << x << endl;
+
+	x.normalize();
+
+	cout << endl << "x:" << endl << x << endl;
+
+	vector <double> partials(x.size());
+
+	for (int i = x.size() - 1; i >= 0; i--) {
+		if (i != x.size() - 1)
+			partials[i] = x[i] * x[i] + partials[i + 1];
+		else
+			partials[i] = x[i] * x[i];
+	}
+
+	cout << endl << "Partials:" << endl;
+
+	for (auto dbl : partials)
+		cout << "\t" << dbl << endl;
+
+	matrix <double> H_x {x.size(), x.size() - 1, [&](size_t i, size_t j) {
+		if (i == j)
+			return partials[i + 1] / partials[i];
+
+		if (i > j)
+			return -(x[i] * x[j]) / (partials[j] * partials[j + 1]);
+
+		return 0.0;
+	}};
+
+	matrix <double> A = hermite_reducing_matrix(H_x);
+	matrix <double> Q = matrix <double> ::identity(x.size() - 1);
+
+	double gamma = 1.2;
+
+	size_t n = x.size();
+	for (size_t i = 0; i < 3; i++) {
+		cout << endl << "A:" << endl << A << endl;
+
+		double mx = 0;
+
+		size_t mr = 0;
+
+		matrix <double> tmp = A * H_x * Q;
+
+		cout << endl << "tmp:" << endl << tmp << endl;
+
+		for (size_t r = 0; r < n - 1; r++) {
+			double t = pow(gamma, r) * abs(tmp[r][r]);
+
+			if (t > mx) {
+				mr = r;
+				mx = t;
+			}
+		}
+
+		cout << endl << "mr:" << mr << endl;
+
+		A.swap_rows(mr, mr + 1);
+
+		cout << "A:" << endl << A << endl;
+
+		if (mr != n - 2) {
+			double a = tmp[mr][mr];
+			double b = tmp[mr][mr + 1];
+
+			double d = hypot(a, b);
+
+			matrix <double> P = {n - 1, n - 1, [&](size_t i, size_t j) {
+				if (i == mr + 1 && j == mr)
+					return b/d;
+				if (i == mr && j == mr + 1)
+					return -b/d;
+				if (i == j == mr ||
+					i == j == mr + 1)
+					return a/d;
+				if (i == j)
+					return 1.0;
+				return 0.0;
+			}};
+
+			Q = Q * P;
+		} else {
+			cout << "Skip S3" << endl;
+		}
+
+		tmp = A * H_x * Q;
+
+		cout << endl << "tmp:" << endl << tmp << endl;
+
+		matrix <double> D = hermite_reducing_matrix(tmp);
+
+		cout << endl << "D:" << endl << D << endl;
+
+		A = D * A;
+	}
+	
+	cout << endl << "A:" << endl << A << endl;
+
+	cout << endl << "inv(A):" << endl << A.inverse() << endl;
+
+# HERMITE REDUCTION
+/* Make member of matrix class */
+template <class T>
+matrix <T> hermite_reducing_matrix(const matrix <T> &H)
+{
+	matrix <T> D {H.get_rows(), H.get_rows(), [&](size_t i, size_t j) {
+		if (i == j)
+			return T(1);
+
+		return T(0);
+	}};
+
+	for (size_t j = 0; j < D.get_cols(); j++) {
+		for (size_t i = j + 1; i < D.get_rows(); i++) {
+			T val = 0;
+
+			for (size_t k = j + 1; k <= i; k++)
+				val += D[i][k] * H[k][j];
+
+			D[i][j] = floor(-val/H[j][j] + 0.5);
+		}
+	}
+
+	return D;
+}

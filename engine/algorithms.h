@@ -77,6 +77,7 @@ namespace utility {
 		return *out;
 	}
 
+	/* Make member */
 	template <class T>
 	std::pair <matrix <T> , matrix <T>> lu_factorize(const matrix <T> &a)
 	{

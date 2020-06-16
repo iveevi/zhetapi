@@ -71,6 +71,8 @@ public:
 
 	token *copy() const override;
 
+	bool operator==(token *) const override;
+
 	class count_mismatch {};
 	class token_mismatch {};
 };
@@ -124,6 +126,17 @@ template <class T>
 token *operation <T> ::copy() const
 {
 	return new operation(*this);
+}
+
+template <class T>
+bool operation <T> ::operator==(token *t) const
+{
+	if (t->caller() != token::OPERATION)
+		return false;
+
+	return (ops == (dynamic_cast <operation *> (t))->ops)
+		&& (input == (dynamic_cast <operation *> (t))->input)
+		&& (output == (dynamic_cast <operation *> (t))->output);
 }
 
 #endif

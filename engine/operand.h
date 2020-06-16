@@ -58,6 +58,8 @@ public:
 	std::string str() const override;
 	token *copy() const override;
 
+	bool operator==(token *) const override;
+
 	/* Friends:
 	 * std::ostream &operator<<(std::ostream &, const operand
 	 *   <data_t> &) - outputs the value of val onto the stream
@@ -237,6 +239,15 @@ template <class T>
 token *operand <T> ::copy() const
 {
 	return new operand(*this);
+}
+
+template <class T>
+bool operand <T> ::operator==(token *t) const
+{
+	if (t->caller() != token::OPERAND)
+		return false;
+
+	return val == (dynamic_cast <operand *> (t))->get();
 }
 
 #endif

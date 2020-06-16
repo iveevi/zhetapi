@@ -107,17 +107,11 @@ std::string strclass[] = {
 template <class T>
 class node {
 public:
-	/* Alias that need to be
-	 * defined earlier to be
-	 * used later */
-
+	// Friends
 	friend class functor <T>;
 	
-	using params = std::vector <variable <double>>;
-
-	/* Class aliases, to avoid
-	 * potential errors from
-	 * using the wrong token type */
+	// Aliases
+	using params = std::vector <variable <T>>;
 
 	using opn = operation <T>;
 	using opd = operand <T>;
@@ -125,89 +119,85 @@ public:
 	using ftr = functor <T>;
 	using cfg = config <T>;
 private:
-	/* Member instances of
-	 * the node class */
+	// Members
+	token *tok;			// Main unit being stored
 
-	/**
-	 * @brief The main piece of
-	 * information being stored in
-	 * each node class.
-	 */
-	token *tok;
+	nd_label type;			// Auxiliary labeling
+					// for compression and differentiation
 
-	/**
-	 * @brief Used to label the node.
-	 * This information is used in
-	 * more complex functions such
-	 * as compression and differentiation
-	 */
-	nd_label type;
+	nd_class cls = c_none;		// Auxiliary labeling
+					// for function specifics
 
-	nd_class cls;
+	params pars;			// List of parameters that should be
+					// considered in every process
 
-	/**
-	 * @brief Children of this node
-	 * object. There is no fixed
-	 * number of children, as the number
-	 * of operands of operations varies.
-	 */
-	std::vector <node *> leaves;
+	shared_ptr <cfg> cfg_ptr;	// Ptr to the operation and numeric
+					// configurations
 
-	/**
-	 * @brief List of variable names
-	 * that are the names of paramters
-	 * (of a function).
-	 */
-	params pars;
-
-	shared_ptr <cfg> cfg_ptr;
+	std::vector <node *> leaves;	// Leaves of the current tree node
 public:
-	/* Constructors of the
-	 * node class */
-
-	/**
-	 * @brief Node constructor, based
-	 * on input string. Uses the flex/bison
-	 * lexer/parser system to construct tree.
-	 *
-	 * REQUIRES UPDATE ^^
-	 */
-	node(std::string, table <T> = table <T> (),
-			params = params(), shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
-
-	node(stree *, table <T> = table <T> (),
-			params = params(), shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
-
-	/**
-	 * @brief Node copy constructor
-	 * from a pointer to a node object.
-	 */
-	node(node *);
-
-	/**
-	 * @brief Node copy constructor.
-	 */
+	// Constructors
+	node(std::string, table <T> = table <T> (), params = params(),
+			shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
+	node(stree *, table <T> = table <T> (), params = params(), shared_ptr
+			<cfg> = shared_ptr <cfg> (new cfg()));
+	node(token *t, nd_label l, std::vector <node *> lv, shared_ptr <cfg>);
+	node(token *t, std::vector <node *> lv, shared_ptr <cfg>);
 	node(const node &);
+	node(node *);
+	node();
 
-	/**
-	 * @brief Node constructor, ignoring
-	 * the label of the node. Used in
-	 * more complex functions, where
-	 * labeling is a post action.
-	 */
-	node(token *t, std::vector <node *> lv, shared_ptr <cfg> );
-	
-	/**
-	 * @brief Node constructor, for
-	 * all its members.
-	 */
-	node(token *t, nd_label l, std::vector <node *> lv, shared_ptr <cfg> );
-
+	// Deconstructor
 	~node();
-
-	/* Operators of the node class */
+	
+	// Assignment Operator
 	const node &operator=(const node &);
+	
+	// Setters
+	void set(node *);
+	void set(params);
+	void set(token *, std::vector <node *>, shared_ptr <cfg>);
+	void set(token *, nd_label, std::vector <node *>, shared_ptr <cfg>);
 
+	void retokenize(token *);
+	void reparametrize(params);
+
+	// Getters
+	token *get_token() const;
+	nd_class get_class() const;
+	nd_label get_label() const;
+	params get_params() const;
+	shared_ptr <cfg> get_config() const;
+	std::vector <node *> get_leaves() const;
+
+	node *child_at(size_t) const;
+	node *operator[](size_t) const;
+
+	// Functional
+	bool valid() const;
+
+	bool matches(node *) const;
+	bool matches(const node &) const;
+
+	T value() const;
+
+	void simplify();
+	void compress();
+	void differentiate(const std::string &);
+	
+	void classify();
+	void label_all();
+	void label(const std::vector <std::string> &);
+	
+	// Helper
+	void print(int = 1, int = 0) const;
+	void address_print(int = 1, int = 0) const;
+
+	void traverse(const std::function <void (node)> &);
+	
+	std::string display() const;
+
+	// Arithmetic 
 	template <class U>
 	friend const node <U> &operator+(const node <U> &, const node <U> &);
 
@@ -219,134 +209,40 @@ public:
 	
 	template <class U>
 	friend const node <U> &operator/(const node <U> &, const node <U> &);
-
-	/* Modifiers and getter methods
-	 * of the node class */
-
-	/**
-	 * @brief Setter method to transfer
-	 * the contents of one node object to
-	 * this one. Used to change the representation
-	 * of the object without changing its memory
-	 * address.
-	 */
-	void set(node *);
-
-	void set(params);
-
-	/**
-	 * @brief Setter method to transfer
-	 * content of one node to this node
-	 * object, ignoring the label. Used to
-	 * simplify node tranfers in more
-	 * complex functions where labeling
-	 * is pushed to the very end of the process.
-	 */
-	void set(token *, std::vector <node *>, shared_ptr <cfg>);
-
-	/**
-	 * @brief Setter method to change
-	 * the node's contents without changing
-	 * its address. Required by compression
-	 * and similar methods in the functor
-	 * class.
-	 */
-	void set(token *, nd_label, std::vector <node *>, shared_ptr <cfg>);
-
-	/**
-	 * @brief Getter method for
-	 * obtaining the token member
-	 * of this node object.
-	 */
-	token *get_token();
-
-	/**
-	 * @brief Setter method for
-	 * setting or changing the
-	 * token member of this
-	 * node object.
-	 */
-	void retokenize(token *);
-
-	void reparametrize(params);
-
-	/**
-	 * @brief Getter method to return
-	 * the indexed child of this node object.
-	 * Used primarily outside this class.
-	 */
-	node *child_at(size_t);
-
-	std::vector <node *> children();
-
-	nd_label kind();
-	nd_class get_cls();
-	// void relabel(label);
-	
-	/* Functional methods of
-	 * the node class */
-
-	bool valid() const;
-
-	T value() const;
-
-	void label_all();
-	void label(const std::vector <std::string> &);
-
-	void classify();
-
-	void compress();
-
-	void differentiate(const std::string &);
-
-	// template <class F> 
-	// void traverse(const F &);
-
-	void traverse(std::function <void (node)> );
-	
-	std::string display() const;
-
-	/* Functions mainly for
-	 * debugging the node class */
-
-	/**
-	 * @brief Node printer. Mainly
-	 * used for debugging the
-	 * expression tree.
-	 */
-	void print(int = 1, int = 0) const;
-
-	void address_print(int = 1, int = 0) const;
 private:
-	/* Helper methods of the
-	 * node class, used by
-	 * other methods in the
-	 * public interface of this
-	 * class */
+	// Token Factories
 	opn *get(opcode) const;
 	opn *get(const std::string &) const;
 
+	// Memory Functions
 	node *copy() const;
-	token *copy(token *) const;
+	
+	void clear();
 
+	// Stree Convertion
 	node *convert(stree *, table <T> = table <T> ()) const;
 	node *convert_operation(stree *, table <T> = table <T> ()) const;
 	node *convert_summation(stree *, table <T> = table <T> ()) const;
 	node *convert_variable_cluster(stree *, table <T> = table <T> ()) const;
 
+	// Special Nodes
 	bool special() const;
 
+	// Labeling Methods
 	void label_as_operation();
 	void label_as_special(const std::vector <std::string> &vars);
 
-	void clear();
+	// Node Matching
+	bool matches_term(const node &) const;
 
+	// Compression Methods
 	void compress_as_separable();
 	void compress_as_multiplied();
 	void compress_as_divided();
 	void compress_as_power();
 	void compress_as_exponential();
 
+	// Differentiation Methods
 	void differentiate_as_multiplied(const std::string &);
 	void differentiate_as_divided(const std::string &);
 	void differentiate_as_power(const std::string &);
@@ -356,18 +252,15 @@ private:
 	void differentiate_as_constant_logarithmic(const std::string &);
 	void differentiate_as_function(const std::string &);
 
+	// Display Methods
 	std::string display_as_operand(nd_label) const;
 	std::string display_as_trigonometric() const;
 	std::string display_as_function() const;
 public:
-	/* Exception classes, which
-	 * are used in other functions */
-
-	class invalid_definition {};
-	class syntax_error {};
-	class invalid_call {};
+	// Exceptions
 	class incomputable_tree {};
-	
+
+	// Base class for informative exceptions
 	class node_error {
 		std::string str;
 	public:
@@ -379,34 +272,18 @@ public:
 		}
 	};
 	
+	// Exception for unknown symbols
 	class undefined_symbol : public node_error {
 	public:
 		undefined_symbol(std::string s)
 			: node_error(s) {}
 	};
-
-	//class undefined_symbol : public node_error {};
-	class fatal_error : public node_error {
-		fatal_error(std::string s) :
-			node_error(s) {}
-	};
-
-	class unlabeled_node : public node_error {
-	public:
-		unlabeled_node(std::string s) :
-			node_error(s) {}
-	};
-
-	/* Augmneted data structures,
-	 * used in comperssion methods  */
-
-	struct term_table {
-		opd *constant;
-		// std::vector
-	};
 };
 
-/* Constructors */
+//////////////////////////////////////////
+// Constructors
+//////////////////////////////////////////
+
 template <class T>
 node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> cptr)
 	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
@@ -418,6 +295,9 @@ node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> 
 
 	delete out;
 	delete st;
+
+	reparametrize(params);
+	simplify();
 
 	/* cout << "CONSTRUCTOR ONE:" << endl;
 	print(); */
@@ -433,27 +313,18 @@ node <T> ::node(stree *raw, table <T> tbl, params prs, shared_ptr <cfg> cptr)
 
 	delete out;
 
+	reparametrize(prs);
+	simplify();
+
 	/* cout << "CONSTRUCTOR TWO:" << endl;
 	print(); */
 }
 
 template <class T>
-node <T> ::node(node *other)
+node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+	: tok(t), type(l), leaves(lv), cfg_ptr(cptr)
 {
-	*this = *other;
-
-	/* cout << "CONSTRUCTOR THREE:" << endl;
-	print(); */
-}
-
-template <class T>
-node <T> ::node(const node &other)
-{
-	*this = other;
-
-	// cout << "Copying into this @" << this << endl;
-
-	/* cout << "CONSTRUCTOR FOUR:" << endl;
+	/* cout << "CONSTRUCTOR SIX:" << endl;
 	print(); */
 }
 
@@ -470,13 +341,36 @@ node <T> ::node(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
 }
 
 template <class T>
-node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
-	: tok(t), type(l), leaves(lv), cfg_ptr(cptr)
+node <T> ::node(const node &other)
 {
+	*this = other;
 
-	/* cout << "CONSTRUCTOR SIX:" << endl;
+	simplify();
+
+	// cout << "Copying into this @" << this << endl;
+
+	/* cout << "CONSTRUCTOR FOUR:" << endl;
 	print(); */
 }
+
+template <class T>
+node <T> ::node(node *other)
+{
+	*this = *other;
+
+	simplify();
+
+	/* cout << "CONSTRUCTOR THREE:" << endl;
+	print(); */
+}
+
+template <class T>
+node <T> ::node() : tok(nullptr), type(l_none), cls(c_none),
+	pars({}), cfg_ptr(nullptr), leaves({}) {}
+
+//////////////////////////////////////////
+// Deconstructors
+//////////////////////////////////////////
 
 template <class T>
 node <T> ::~node()
@@ -490,11 +384,10 @@ node <T> ::~node()
 		delete leaves[i];
 }
 
-/* Operators
- *
- * [NOTE]: Assumes
- * both operands have
- * the same ptr. */
+//////////////////////////////////////////
+// Assignment Operator
+//////////////////////////////////////////
+
 template <class T>
 const node <T> &node <T> ::operator=(const node <T> &other)
 {
@@ -503,6 +396,7 @@ const node <T> &node <T> ::operator=(const node <T> &other)
 	if (this != &other) {
 		tok = other.tok->copy();
 		type = other.type;
+		cls = other.cls;
 
 		// change cptr to shared_ptr
 		cfg_ptr = other.cfg_ptr;
@@ -519,51 +413,10 @@ const node <T> &node <T> ::operator=(const node <T> &other)
 	return *this;
 }
 
-template <class T>
-const node <T> &operator+(const node <T> &a, const node <T> &b)
-{
-	node <T> *out = new node <T> (a.get(op_add), {
-			new node <T> (a),
-			new node <T> (b)
-	}, a.cfg_ptr);
+//////////////////////////////////////////
+// Setters
+//////////////////////////////////////////
 
-	return *out;
-}
-
-template <class T>
-const node <T> &operator-(const node <T> &a, const node <T> &b)
-{
-	node <T> *out = new node <T> (a.get(op_sub), {
-			new node <T> (a),
-			new node <T> (b)
-	}, a.cfg_ptr);
-
-	return *out;
-}
-
-template <class T>
-const node <T> &operator*(const node <T> &a, const node <T> &b)
-{
-	node <T> *out = new node <T> (a.get(op_mul), {
-			new node <T> (a),
-			new node <T> (b)
-	}, a.cfg_ptr);
-
-	return *out;
-}
-
-template <class T>
-const node <T> &operator/(const node <T> &a, const node <T> &b)
-{
-	node <T> *out = new node <T> (a.get(op_div), {
-			new node <T> (a),
-			new node <T> (b)
-	}, a.cfg_ptr);
-
-	return *out;
-}
-
-/* Setters and Getters */
 template <class T>
 void node <T> ::set(node *nd)
 {
@@ -598,12 +451,6 @@ void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, shared_pt
 }
 
 template <class T>
-token *node <T> ::get_token()
-{
-	return tok;
-}
-
-template <class T>
 void node <T> ::retokenize(token *t)
 {
 	delete tok;
@@ -619,31 +466,62 @@ void node <T> ::reparametrize(params pr)
 		nd->reparametrize(pr);
 }
 
+//////////////////////////////////////////
+// Getters
+//////////////////////////////////////////
+
 template <class T>
-node <T> *node <T> ::child_at(size_t i)
+token *node <T> ::get_token() const
 {
-	return leaves[i];
+	return tok;
 }
 
 template <class T>
-std::vector <node <T> *> node <T> ::children()
+nd_class node <T> ::get_class() const
 {
-	return leaves;
+	return cls;
 }
 
 template <class T>
-nd_label node <T> ::kind()
+nd_label node <T> ::get_label() const
 {
 	return type;
 }
 
 template <class T>
-nd_class node <T> ::get_cls()
+typename node <T> ::params node <T> ::get_params() const
 {
-	return cls;
+	return pars;
 }
 
-/* Functional Methods */
+template <class T>
+shared_ptr <typename node <T> ::cfg> node <T> ::get_config() const
+{
+	return cfg_ptr;
+}
+
+template <class T>
+std::vector <node <T> *> node <T> ::get_leaves() const
+{
+	return leaves;
+}
+
+template <class T>
+node <T> *node <T> ::child_at(size_t i) const
+{
+	return leaves[i];
+}
+
+template <class T>
+node <T> *node <T> ::operator[](size_t i) const
+{
+	return leaves[i];
+}
+
+//////////////////////////////////////////
+// Functional
+//////////////////////////////////////////
+
 template <class T>
 bool node <T> ::valid() const
 {
@@ -673,6 +551,71 @@ bool node <T> ::valid() const
 	}
 
 	return true;
+}
+
+template <class T>
+bool node <T> ::matches(const node <T> &other) const
+{
+	std::vector <node> first;
+	std::vector <node> second;
+
+	queue <node> que;
+
+	node current;
+
+	if (type == l_separable)
+		que.push(*this);
+	else
+		first.push_back(*this);
+
+	while (!que.empty()) {
+		current = que.front();
+		que.pop();
+
+		switch (current.type) {
+		case l_separable:
+			que.push(current[0]);
+			que.push(current[1]);
+			break;
+		default:
+			first.push_back(current);
+			break;
+		}
+	}
+	
+	if (other.type == l_separable)
+		que.push(other);
+	else
+		second.push_back(other);
+
+	while (!que.empty()) {
+		current = que.front();
+		que.pop();
+
+		switch (current.type) {
+		case l_separable:
+			que.push(current[0]);
+			que.push(current[1]);
+			break;
+		default:
+			second.push_back(current);
+			break;
+		}
+	}
+
+	std::vector <node> complete;
+
+	for (auto nd : first) {
+		for (auto itr = second.begin(); itr != second.end(); itr++) {
+			if (nd.matches_term(*itr)) {
+				complete.push_back(nd);
+				second.erase(itr);
+				break;
+			}
+		}
+	}
+
+	return ((first.size() == complete.size()) && second.empty());
 }
 
 template <class T>
@@ -724,88 +667,11 @@ T node <T> ::value() const
 }
 
 template <class T>
-void node <T> ::label_all()
+void node <T> ::simplify()
 {
-	std::vector <std::string> names;
-	
-	for (auto var : pars)
-		names.push_back(var.symbol());
-
-	label(names);
-}
-
-template <class T>
-void node <T> ::label(const std::vector <std::string> &vars)
-{
-	std::string sym;
-	
-	bool constant = true;
-
-	if (special())
-		return label_as_special(vars);
-
-	for (auto nd : leaves)
-		nd->label(vars);
-
-	switch (tok->caller()) {
-	case token::OPERATION:
-		label_as_operation();
-		break;
-	case token::FUNCTOR:
-		type = l_function;
-		
-		for (node *nd : leaves) {
-			if (nd->type != l_constant &&
-					nd->type != l_operation_constant) {
-				constant = false;
-				break;
-			}
-		}
-		
-		if (constant)
-			type = l_function_constant;
-
-		break;
-	case token::VARIABLE:
-		sym = (dynamic_cast <var *> (tok))->symbol();
-		
-		if (find(vars.begin(), vars.end(), sym) != vars.end())
-			type = l_variable;
-		else
-			type = l_constant;
-
-		break;
-	case token::OPERAND:
-		type = l_constant;
-		break;
-	}
-}
-
-template <class T>
-void node <T> ::classify()
-{
-	for (auto nd : leaves)
-		nd->classify();
-
-	switch (type) {
-	case l_constant:
-	case l_operation_constant:
-	case l_variable:
-	case l_power:
-		cls = c_polynomial;
-		break;
-	case l_separable:
-	case l_multiplied:
-		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
-			cls = c_polynomial;
-		break;
-	case l_divided:
-		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
-			cls = c_rational;
-		break;
-	default:
-		break;
-	}
+	label_all();
+	compress();
+	label_all();
 }
 
 template <class T>
@@ -899,7 +765,146 @@ void node <T> ::differentiate(const std::string &var)
 }
 
 template <class T>
-void node <T> ::traverse(std::function <void (node)> fobj)
+void node <T> ::classify()
+{
+	for (auto nd : leaves)
+		nd->classify();
+
+	switch (type) {
+	case l_constant:
+	case l_operation_constant:
+	case l_variable:
+	case l_power:
+		cls = c_polynomial;
+		break;
+	case l_separable:
+	case l_multiplied:
+		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
+			cls = c_polynomial;
+		break;
+	case l_divided:
+		if (leaves[0]->cls == leaves[1]->cls == c_polynomial)
+			cls = c_rational;
+		break;
+	default:
+		break;
+	}
+}
+
+template <class T>
+void node <T> ::label_all()
+{
+	std::vector <std::string> names;
+	
+	for (auto var : pars)
+		names.push_back(var.symbol());
+
+	label(names);
+}
+
+template <class T>
+void node <T> ::label(const std::vector <std::string> &vars)
+{
+	std::string sym;
+	
+	bool constant = true;
+
+	if (special())
+		return label_as_special(vars);
+
+	for (auto nd : leaves)
+		nd->label(vars);
+
+	switch (tok->caller()) {
+	case token::OPERATION:
+		label_as_operation();
+		break;
+	case token::FUNCTOR:
+		type = l_function;
+		
+		for (node *nd : leaves) {
+			if (nd->type != l_constant &&
+					nd->type != l_operation_constant) {
+				constant = false;
+				break;
+			}
+		}
+		
+		if (constant)
+			type = l_function_constant;
+
+		break;
+	case token::VARIABLE:
+		sym = (dynamic_cast <var *> (tok))->symbol();
+		
+		if (find(vars.begin(), vars.end(), sym) != vars.end())
+			type = l_variable;
+		else
+			type = l_constant;
+
+		break;
+	case token::OPERAND:
+		type = l_constant;
+		break;
+	}
+}
+
+//////////////////////////////////////////
+// Helper
+//////////////////////////////////////////
+template <class T>
+void node <T> ::print(int num, int lev) const
+{
+	int counter = lev;
+	while (counter > 0) {
+		std::cout << "\t";
+		counter--;
+	}
+
+	std::string pr = "[";
+
+	/* for (int i = 0; i < pars.size(); i++) {
+		pr += pars[i].symbol();
+
+		if (i < pars.size() - 1)
+			pr += ", ";
+	} */
+
+	pr += "]";
+
+	std::cout << "#" << num << " - [" << strclass[cls] << ", " << strlabs[type] << "] "
+		<< tok->str() << " @ " << this << ", " << pr << endl;
+
+	counter = 0;
+	for (node *itr : leaves) {
+		if (itr == nullptr)
+			continue;
+		itr->print(++counter, lev + 1);
+	}
+}
+
+template <class T>
+void node <T> ::address_print(int num, int lev) const
+{
+	int counter = lev;
+	while (counter > 0) {
+		std::cout << "\t";
+		counter--;
+	}
+
+	std::cout << "#" << num << " - [" << strlabs[type] << "] "
+		<< " @ " << this << std::endl;
+
+	counter = 0;
+	for (node *itr : leaves) {
+		if (itr == nullptr)
+			continue;
+		itr->address_print(++counter, lev + 1);
+	}
+}
+
+template <class T>
+void node <T> ::traverse(const std::function <void (node)> &fobj)
 {
 	fobj(*this);
 
@@ -958,62 +963,61 @@ std::string node <T> ::display() const
 		return leaves[0]->display() + "!";
 	default:
 		return "?";
-		//throw unlabeled_node("Unlabeled node [" + strlabs[type] + "], could not display it.");
 	}
 }
-/* Debugging Methods */
+
+//////////////////////////////////////////
+// Arithmetic
+//////////////////////////////////////////
+
 template <class T>
-void node <T> ::print(int num, int lev) const
+const node <T> &operator+(const node <T> &a, const node <T> &b)
 {
-	int counter = lev;
-	while (counter > 0) {
-		std::cout << "\t";
-		counter--;
-	}
+	node <T> *out = new node <T> (a.get(op_add), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
 
-	std::string pr = "[";
-
-	/* for (int i = 0; i < pars.size(); i++) {
-		pr += pars[i].symbol();
-
-		if (i < pars.size() - 1)
-			pr += ", ";
-	} */
-
-	pr += "]";
-
-	std::cout << "#" << num << " - [" << strclass[cls] << ", " << strlabs[type] << "] "
-		<< tok->str() << " @ " << this << ", " << pr << endl;
-
-	counter = 0;
-	for (node *itr : leaves) {
-		if (itr == nullptr)
-			continue;
-		itr->print(++counter, lev + 1);
-	}
+	return *out;
 }
 
 template <class T>
-void node <T> ::address_print(int num, int lev) const
+const node <T> &operator-(const node <T> &a, const node <T> &b)
 {
-	int counter = lev;
-	while (counter > 0) {
-		std::cout << "\t";
-		counter--;
-	}
+	node <T> *out = new node <T> (a.get(op_sub), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
 
-	std::cout << "#" << num << " - [" << strlabs[type] << "] "
-		<< " @ " << this << std::endl;
-
-	counter = 0;
-	for (node *itr : leaves) {
-		if (itr == nullptr)
-			continue;
-		itr->address_print(++counter, lev + 1);
-	}
+	return *out;
 }
 
-/* Helper Methods */
+template <class T>
+const node <T> &operator*(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_mul), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
+template <class T>
+const node <T> &operator/(const node <T> &a, const node <T> &b)
+{
+	node <T> *out = new node <T> (a.get(op_div), {
+			new node <T> (a),
+			new node <T> (b)
+	}, a.cfg_ptr);
+
+	return *out;
+}
+
+//////////////////////////////////////////
+// Token Factories
+//////////////////////////////////////////
+
 template <class T>
 typename node <T> ::opn *node <T> ::get(opcode ocode) const
 {
@@ -1025,6 +1029,10 @@ typename node <T> ::opn *node <T> ::get(const std::string &str) const
 {
 	return cfg_ptr->alloc_opn(str);
 }
+
+//////////////////////////////////////////
+// Memory Functions
+//////////////////////////////////////////
 
 template <class T>
 node <T> *node <T> ::copy() const
@@ -1054,21 +1062,16 @@ node <T> *node <T> ::copy() const
 }
 
 template <class T>
-token *node <T> ::copy(token *t) const
+void node <T> ::clear()
 {
-	switch (t->caller()) {
-	case token::OPERAND:
-		return new opd((dynamic_cast <opd *> (t))->get());
-	case token::OPERATION:
-		return get((dynamic_cast <opn *> (t))->fmt());
-	case token::VARIABLE:
-		return new var(*(dynamic_cast <var *> (t)));
-	case token::FUNCTOR:
-		return new ftr(*(dynamic_cast <ftr *> (t)));
-	}
-
-	return nullptr;
+	for (size_t i = 0; i < leaves.size(); i++)
+		delete leaves[i];
+	leaves.clear();
 }
+
+//////////////////////////////////////////
+// Stree Convertion
+//////////////////////////////////////////
 
 template <class T>
 node <T> *node <T> ::convert(stree *st, table <T> tbl) const
@@ -1109,6 +1112,31 @@ node <T> *node <T> ::convert_operation(stree *st, table <T> tbl) const
 	
 	for (stree *s : st->children())
 		out->leaves.push_back(convert(s, tbl));
+
+	return out;
+}
+
+template <class T>
+node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
+{
+	// Requires 4 operands
+	// [remove asserts later]
+	assert(st->children().size() == 4);
+
+	string str = st->children()[0]->str();
+	// string eqn = st->children()[3]->str();
+
+	node *out = new node {get(st->str()), {
+		new node {new var {str, T(), true}, {}, cfg_ptr},
+		convert(st->children()[1]),
+		convert(st->children()[2]),
+		new node {new ftr {
+			"f", 
+			st->children()[3],
+			{var {str, T(), true}},
+			tbl},
+		{}, cfg_ptr}
+	}, cfg_ptr};
 
 	return out;
 }
@@ -1210,30 +1238,9 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	return out;
 }
 
-template <class T>
-node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
-{
-	// Requires 4 operands
-	// [remove asserts later]
-	assert(st->children().size() == 4);
-
-	string str = st->children()[0]->str();
-	// string eqn = st->children()[3]->str();
-
-	node *out = new node {get(st->str()), {
-		new node {new var {str, T(), true}, {}, cfg_ptr},
-		convert(st->children()[1]),
-		convert(st->children()[2]),
-		new node {new ftr {
-			"f", 
-			st->children()[3],
-			{var {str, T(), true}},
-			tbl},
-		{}, cfg_ptr}
-	}, cfg_ptr};
-
-	return out;
-}
+//////////////////////////////////////////
+// Special Nodes
+//////////////////////////////////////////
 
 template <class T>
 bool node <T> ::special() const
@@ -1256,6 +1263,10 @@ bool node <T> ::special() const
 
 	return false;
 }
+
+//////////////////////////////////////////
+// Labeling Methods
+//////////////////////////////////////////
 
 template <class T>
 void node <T> ::label_as_operation()
@@ -1337,13 +1348,78 @@ void node <T> ::label_as_special(const std::vector <std::string> &vars)
 	}
 }
 
+//////////////////////////////////////////
+// Node Matching
+//////////////////////////////////////////
+
 template <class T>
-void node <T> ::clear()
+bool node <T> ::matches_term(const node <T> &other) const
 {
-	for (size_t i = 0; i < leaves.size(); i++)
-		delete leaves[i];
-	leaves.clear();
+	std::vector <node> first;
+	std::vector <node> second;
+
+	queue <node> que;
+
+	node current;
+
+	if (type == l_multiplied)
+		que.push(*this);
+	else
+		first.push_back(*this);
+
+	while (!que.empty()) {
+		current = que.front();
+		que.pop();
+
+		switch (current.type) {
+		case l_multiplied:
+			que.push(current[0]);
+			que.push(current[1]);
+			break;
+		default:
+			first.push_back(current);
+			break;
+		}
+	}
+	
+	if (other.type == l_multiplied)
+		que.push(other);
+	else
+		second.push_back(other);
+
+	while (!que.empty()) {
+		current = que.front();
+		que.pop();
+
+		switch (current.type) {
+		case l_multiplied:
+			que.push(current[0]);
+			que.push(current[1]);
+			break;
+		default:
+			second.push_back(current);
+			break;
+		}
+	}
+
+	std::vector <node> complete;
+
+	for (auto nd : first) {
+		for (auto itr = second.begin(); itr != second.end(); itr++) {
+			if ((*nd.tok) == itr->tok) {
+				complete.push_back(nd);
+				second.erase(itr);
+				break;
+			}
+		}
+	}
+
+	return ((first.size() == complete.size()) && second.empty());
 }
+
+//////////////////////////////////////////
+// Compression Methods
+//////////////////////////////////////////
 
 template <class T>
 void node <T> ::compress_as_separable()
@@ -1387,17 +1463,13 @@ void node <T> ::compress_as_separable()
 template <class T>
 void node <T> ::compress_as_multiplied()
 {
-	/* FIX: add linear space specific constant, such
-	 * as ONE and ZERO
-	 *
-	 * REASON: allows the client/user to create
-	 * different kinds of linear spaces, specifying
-	 * what the value of the identity or reflexive
-	 * values are */
+	/* cout << string(50, '_') << endl;
+	cout << "PRE-COMPRESSION:" << endl; 
+	print(); */
 
-	// put the following ds
-	// into a single augumented
-	// data structure
+	/* put the following ds
+	 into a single augumented
+	 data structure */
 	std::unordered_map <std::string, T> chart;
 	std::vector <node *> misc;
 	std::queue <node *> que;
@@ -1495,6 +1567,9 @@ void node <T> ::compress_as_multiplied()
 			set(itr->tok, itr->leaves, cfg_ptr);
 		}
 	}
+	
+	/* cout << "POST-COMPRESSION:" << endl; 
+	print(); */
 }
 
 template <class T>
@@ -1585,6 +1660,10 @@ void node <T> ::compress_as_exponential()
 			set(new opd(0), {}, cfg_ptr);
 	}
 }
+
+//////////////////////////////////////////
+// Differentiation Methods
+//////////////////////////////////////////
 
 template <class T>
 void node <T> ::differentiate_as_multiplied(const std::string &var)
@@ -1858,6 +1937,10 @@ void node <T> ::differentiate_as_function(const std::string &var)
 
 	*this = out->copy();
 }
+
+//////////////////////////////////////////
+// Display Methods
+//////////////////////////////////////////
 
 template <class T>
 std::string node <T> ::display_as_operand(nd_label required) const

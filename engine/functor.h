@@ -83,6 +83,8 @@ public:
 	type caller() const override;
 	token *copy() const override;
 
+	bool operator==(token *) const override;
+
 	/* Debugging functions */
 	void print() const;
 
@@ -356,6 +358,16 @@ token *functor <T> ::copy() const
 }
 
 template <class T>
+bool functor <T> ::operator==(token *t) const
+{
+	if (t->caller() != token::FUNCTOR)
+		return false;
+
+	return (m_name == (dynamic_cast <functor *> (t))->m_name)
+		&& (m_params == (dynamic_cast <functor *> (t))->m_params);
+}
+
+template <class T>
 void functor <T> ::print() const
 {
 	m_root->print();
@@ -574,12 +586,12 @@ void functor <T> ::build()
 		current = que.front();
 		que.pop();
 
-		if (current->kind() == l_variable) {
+		if (current->get_label() == l_variable) {
 			name = (dynamic_cast <variable <T> *> (current->get_token()))->symbol();
 			m_map[name].push_back(current);
 		}
 
-		for (node <T> *nd : current->children())
+		for (node <T> *nd : current->get_leaves())
 			que.push(nd);
 	}
 }

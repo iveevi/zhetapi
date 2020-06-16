@@ -36,6 +36,8 @@ public:
 	virtual std::string str() const = 0;
 
 	virtual token *copy() const = 0;
+
+	virtual bool operator==(token *) const = 0;
 };
 
 #endif
