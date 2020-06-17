@@ -8,11 +8,28 @@
 	extern "C" int yylex();
 %}
 
+DIGIT    [0-9]
+
 %%
 
+{DIGIT}+("/"{DIGIT}+)? {
+		yylval.ident = yytext;
+		return RATIONAL;
+}
+
+{DIGIT}+("/"{DIGIT}+)? {
+		yylval.ident = yytext;
+		return RATIONAL_COMPLEX;
+}
+
 -?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) {
-		yylval.value = yytext;
-		return NUMBER;
+		yylval.ident = yytext;
+		return REAL;
+}
+
+-?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?)i {
+		yylval.ident = yytext;
+		return REAL_COMPLEX;
 }
 
 "log"		{return LOG;}

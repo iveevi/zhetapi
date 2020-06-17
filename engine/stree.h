@@ -11,6 +11,12 @@
 enum st_label {
 	l_na,
 	l_number,
+	l_number_real,
+	l_number_rational,
+	l_complex_real,
+	l_complex_rational,
+	l_vector,
+	l_matrix,
 	l_operation,
 	l_variable_cluster,
 	l_functor
@@ -24,6 +30,12 @@ enum st_label {
 std::string st_str_labs[] = {
 	"na",
 	"number",
+	"number - real",
+	"number - rational",
+	"complex - real",
+	"complex - rational",
+	"vector",
+	"matrix",
 	"operation",
 	"variable cluster",
 	"functor"

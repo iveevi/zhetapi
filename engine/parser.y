@@ -17,7 +17,10 @@
 %parse-param	{stree *(&root)}
 
 %token	IDENT
-%token	NUMBER
+%token	REAL
+%token	RATIONAL
+%token	REAL_COMPLEX
+%token	RATIONAL_COMPLEX
 
 %token	PLUS
 %token	MINUS
@@ -50,16 +53,21 @@
 	std::vector <stree *>	*pack;
 
 	const char		*ident;
-	const char		*value;
 }
 
 /* Types for the terminal symbols */
-%type	<value>	NUMBER
+%type	<ident>	REAL
+%type	<ident>	RATIONAL
+%type	<ident>	REAL_COMPLEX
+%type	<ident>	RATIONAL_COMPLEX
 %type	<ident>	IDENT
 
 /* Types for non-terminal symbols */
 %type	<tree>	expr
 %type	<tree>	sclr
+%type	<tree>	numr
+%type	<tree>	matr
+%type	<tree>	vect
 %type	<tree>	dpnt
 %type	<tree>	term
 %type	<tree>	idnt
@@ -73,6 +81,8 @@
 %type	<tree>	spex
 %type	<tree>	sbex
 
+%type	<pack>	vpck
+%type	<pack>	epck
 %type	<pack>	pack
 
 /* Precedence information to resolve ambiguity */
@@ -309,9 +319,54 @@ slcl:	sclr FACTORIAL {
     |	sclr {
     	$$ = $1;
 };
+    
+sclr:	numr {
+    	$$ = $1;
+}
+    |	matr {
+	$$ = $1;
+}
+    |	vect {
+    	$$ = $1;
+};
 
-sclr:	NUMBER {
-   	$$ = new stree($1, l_number, {});
+numr:	REAL {
+   	$$ = new stree($1, l_number_real, {});
+}
+    |	RATIONAL {
+	$$ = new stree($1, l_number_rational, {});
+}
+    |	REAL_COMPLEX {
+	$$ = new stree($1, l_complex_real, {});
+}
+    |	RATIONAL_COMPLEX {
+	$$ = new stree($1, l_complex_rational, {});
+};
+
+matr:	LBRACKET vpck RBRACKET {
+    	$$ = new stree("M", l_matrix, *($2));
+};
+
+vpck:	vect {
+    		$$ = new std::vector <stree *> {$1};
+}
+    |	vpck SEPARATOR vect {
+    		$$ = $1;
+
+		$$->push_back($3);
+};
+
+vect:	LBRACKET epck RBRACKET {
+    	$$ = new stree("V", l_vector, *($2));
+};
+
+epck:	numr {
+    		$$ = new std::vector <stree *> {$1};
+}
+    |	epck SEPARATOR numr {
+    		$$ = $1;
+
+		$$->push_back($3);
 };
 
 %%

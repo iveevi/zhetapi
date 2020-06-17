@@ -19,33 +19,9 @@ using namespace std;
 
 int main()
 {
-	polynomial <zcomplex <long double>> f {1, 4, 4, 0};
+	yydebug = 1;
 
-	vector <zcomplex <long double>> rts = f.roots(10000, 1E-500L, {0.4, 0.9});
-
-	cout << endl << "rts:" << endl;
-
-	for (auto val : rts)
-		cout << "\t" << val << endl;
-
-	auto ftrs = utility::solve_hlde_constant(f);
-
-	cout << endl << "Solutions:" << endl;
-	for (auto ftr : ftrs)
-		cout << "\t" << ftr << endl;
-
-	functor <double> ftr("f", {"x"}, "x^3 + x^2");
-
-	cout << endl << "Function:" << endl << endl;
-
-	ftr.print();
-
-	cout << endl << "\t" << ftr << endl;
-	cout << "\t" << ftr.differentiate("x") << endl;
-
-	/* cout << endl << expression <double> ::in_place_evaluate("[2, 3].[5, 6]"); */
-
-	stree s = stree("x + 568");
+	stree s = stree("x + 568 + 34.56 + 3/4 + 12i + (1 + 2i) + [3, 4, 5] + [[1, 0], [0, 1]]");
 
 	cout << endl << "Stree:" << endl;
 
