@@ -183,7 +183,12 @@ public:
 
 	void simplify();
 	void compress();
+
 	void differentiate(const std::string &);
+	void stable_differentiate(const std::string &);
+
+	void integrate(const std::string &);
+	void stable_integrate(const std::string &);
 	
 	void classify();
 	void label_all();
@@ -251,6 +256,8 @@ private:
 	void differentiate_as_logarithmic(const std::string &);
 	void differentiate_as_constant_logarithmic(const std::string &);
 	void differentiate_as_function(const std::string &);
+
+	// Integration Methods
 
 	// Display Methods
 	std::string display_as_operand(nd_label) const;
@@ -759,6 +766,25 @@ void node <T> ::differentiate(const std::string &var)
 	default:
 		break;
 	}
+}
+
+template <class T>
+void node <T> ::stable_differentiate(const std::string &var)
+{
+	label(var);
+	differentiate(var);
+}
+
+template <class T>
+void node <T> ::integrate(const std::string &var)
+{
+}
+
+template <class T>
+void node <T> ::stable_integrate(const std::string &var)
+{
+	label(var);
+	integrate(var);
 }
 
 template <class T>

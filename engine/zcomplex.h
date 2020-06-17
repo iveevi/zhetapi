@@ -86,6 +86,16 @@ zcomplex <T> zcomplex <T> ::normalize() const
 	return *this/magnitude();
 }
 
+bool operator<(const zcomplex <long double> &a, const zcomplex <long double> &b)
+{
+	return norm(a) < norm(b);
+}
+
+bool operator<=(const zcomplex <long double> &a, const zcomplex <long double> &b)
+{
+	return norm(a) <= norm(b);
+}
+
 //////////////////////////////////////////
 // Output Methods
 //////////////////////////////////////////

@@ -72,6 +72,8 @@ public:
 	T compute(const std::vector <T> &);
 
 	const functor &differentiate(const std::string &) const;
+	
+	const functor &integrate(const std::string &) const;
 
 	std::string display() const;
 
@@ -335,6 +337,23 @@ const functor <T> &functor <T> ::differentiate
 	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
 
 	delete diffed;
+
+	return *out;
+}
+
+template <class T>
+const functor <T> &functor <T> ::integrate
+	(const std::string &var) const
+{
+	node <T> *prim = new node <T> (m_root);
+
+	prim->label({var});
+	prim->integrate(var);
+	prim->reparametrize(m_params);
+
+	functor *out = new functor("d(" + m_name + ")/d(" + var + ")", m_params, prim);
+
+	delete prim;
 
 	return *out;
 }

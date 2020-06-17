@@ -41,6 +41,9 @@ public:
 
 	template <class U>
 	friend U inner(const element <U> &, const element <U> &);
+
+	template <class U>
+	friend element <U> cross(const element <U> &, const element <U> &);
 };
 
 template <class T>
@@ -143,6 +146,18 @@ T inner(const element <T> &a, const element <T> &b)
 		acc += a[i] * b[i];
 
 	return acc;
+}
+
+template <class T>
+T cross(const element <T> &a, const element <T> &b)
+{
+	assert(a.size() == b.size() == 3);
+
+	return {
+		a[1] * b[2] - a[2] * b[1],
+		a[2] * b[0] - a[0] * b[2],
+		a[0] * b[1] - a[1] * b[0]
+	};
 }
 
 #endif
