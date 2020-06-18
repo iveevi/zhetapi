@@ -8,28 +8,6 @@
 #include "rational.h"
 #include "zcomplex.h"
 
-//////////////////////////////////////////
-// Type Checks
-//////////////////////////////////////////
-
-template <class>
-struct is_rational : public std::false_type {};
-
-template <class T>
-struct is_rational <rational <T>> : public std::true_type {};
-
-template <class>
-struct is_zcomplex_real : public std::false_type {};
-
-template <class T>
-struct is_zcomplex_real <zcomplex <T>> : public std::true_type {};
-
-template <class>
-struct is_zcomplex_rational : public std::false_type {};
-
-template <class T>
-struct is_zcomplex_rational <zcomplex <rational <T>>> : public std::true_type {};
-
 /**
  * @brief Represents a scalar type,
  * which could be either R (Real),
@@ -49,6 +27,10 @@ public:
 	// Conversions
 	operator T() const;
 
+	// Operators
+	template <class U>
+	friend bool operator==(const scalar <U> &, const scalar <U> &);
+
 	// Output
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const scalar <U> &);
@@ -67,6 +49,8 @@ scalar <T> ::scalar(T x) : dat(x)
 		kind = s_complex_real;
 	else if (is_rational <T> ::value)
 		kind = s_rational;
+	else if (std::is_integral <T> ::value)
+		kind = s_integer;
 	else
 		kind = s_real;
 }
@@ -79,6 +63,16 @@ template <class T>
 scalar <T> ::operator T() const
 {
 	return dat;
+}
+
+//////////////////////////////////////////
+// Operators
+//////////////////////////////////////////
+
+template <class T>
+bool operator==(const scalar <T> &a, const scalar <T> &b)
+{
+	return (T) a == (T) b;
 }
 
 //////////////////////////////////////////

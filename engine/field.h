@@ -1,72 +1,29 @@
 #ifndef FIELD_H_
 #define FIELD_H_
 
-#include <iostream>
-#include <string>
-
-#include "table.h"
-#include "rational.h"
-#include "element.h"
-#include "matrix.h"
-#include "zcomplex.h"
+#include "config.h"
 
 /**
- * @brief Represents the working
- * space of a zhetapi function
- * or application; the sets of
- * real, complex, rational, vector
- * and matrix fields.
- *
- * @tparam R The type of a scalar
- * real value. Defaults to
- * [long double].
- *
- * @tparam Z The type of a scalar
- * integer value (used in rationals).
- * Defaults to [long long int].
+ * @brief Contains a set of operations
+ * applicable to a set/field of elements
+ * which are of type/set T.
  */
-template <class R = long double, class Z = long long int>
-class field {
-public:
-	using Q = rational <Z>;
+template <class T>
+struct field {
+	config <T> cfg;
+	vtable <T> vtbl;
 
-	using RC = zcomplex <R>;
-	using QC = zcomplex <Q>;
-
-	using RM = matrix <R>;
-	using QM = matrix <Q>;
-private:
-	table <R> r;
-	table <Q> q;
-
-	table <RC> rc;
-	table <QC> qc;
-
-	table <RM> rm;
-	table <QM> qm;
-public:
 	field();
-
-	void print();
+	field(const config <T> &, const vtable <T> &);
 };
 
-template <class R, class Z>
-field <R, Z> ::field() : r(), q(), rc(), qc(), rm(), qm() {}
+template <class T>
+field <T> ::field() : cfg(), vtbl() {}
 
-template <class R, class Z>
-void field <R, Z> ::print()
-{
-	std::cout << std::string(50, '=') << endl;
-	std::cout << "REALS:" << endl;
-	std::cout << std::string(50, '=') << endl;
+// Specialization for defaults go here
 
-	r.print();
-	
-	std::cout << std::string(50, '=') << endl;
-	std::cout << "RATIONALS:" << endl;
-	std::cout << std::string(50, '=') << endl;
-
-	q.print();
-}
+template <class T>
+field <T> ::field(const config <T> &c, const vtable <T> &vt)
+	: cfg(c), vtbl() {}
 
 #endif

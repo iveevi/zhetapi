@@ -14,19 +14,19 @@
 #include "token.h"
 #include "variable.h"
 #include "operand.h"
-#include "table.h"
+#include "vtable.h"
 #include "node.h"
 
 template <class T>
 class element;
 
-template <class T>
+template <class T, class U>
 class functor : public token {
 public:
 	class invalid_definition {};
 	class syntax_error {};
 	class invalid_call {};
-	class incomputable_tree {};
+	class incompuvtable_tree {};
 	
 	using variables = std::unordered_map <std::string,
 	      std::vector <node <T> *>>;
@@ -43,13 +43,13 @@ protected:
 public:
 	/* Constructors of the
 	 * functor class */
-	functor(const std::string & = "", table <T> = table <T> ());
+	functor(const std::string & = "", vtable <T> = vtable <T> ());
 	functor(const std::string &, const std::vector <std::string> &,
-		const std::string &, table <T> = table <T> ());
+		const std::string &, vtable <T> = vtable <T> ());
 
 	functor(const std::string &, params, node <T> *);
 	functor(const std::string &, stree *, const params &,
-			table <T> tbl = table <T> ());
+			vtable <T> tbl = vtable <T> ());
 
 	functor(const functor &);
 
@@ -65,7 +65,7 @@ public:
 	/* Modifiers */
 	void rename(const std::string &);
 	void rebase(const std::string &, stree *, const params &,
-			table <T> = table <T> ());
+			vtable <T> = vtable <T> ());
 
 	/* Functional methods
 	 * of the functor class */
@@ -101,31 +101,31 @@ public:
 	template <class ... U>
 	T operator()(U ...);
 
-	template <class U>
+	template <class A, class B>
 	friend const functor <U> &operator+(const functor <U> &,
 			const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend const functor <U> &operator-(const functor <U> &,
 			const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend const functor <U> &operator*(const functor <U> &,
 			const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend const functor <U> &operator/(const functor <U> &,
 			const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend bool operator>(const functor <U> &,
 		const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend bool operator<(const functor <U> &,
 		const functor <U> &);
 
-	template <class U>
+	template <class A, class B>
 	friend std::ostream &operator<<(std::ostream &,
 		const functor <U> &);
 protected:
@@ -138,8 +138,8 @@ protected:
 	void build();
 };
 
-template <class T>
-functor <T> ::functor(const std::string &in, table <T> tbl)
+template <class T, class U>
+functor <T> ::functor(const std::string &in, vtable <T> tbl)
 {
 	std::vector <std::string> params;
 	std::string name;
@@ -202,9 +202,9 @@ functor <T> ::functor(const std::string &in, table <T> tbl)
 	compress();
 }
 
-template <class T>
+template <class T, class U>
 functor <T> ::functor(const std::string &str, const std::vector <std::string>
-		&names, const std::string &expr, table <T> tbl) : m_name(str)
+		&names, const std::string &expr, vtable <T> tbl) : m_name(str)
 {
 	for (auto s : names)
 		m_params.push_back(variable <T> (s, true));
@@ -213,7 +213,7 @@ functor <T> ::functor(const std::string &str, const std::vector <std::string>
 	compress();
 }
 
-template <class T>
+template <class T, class U>
 functor <T> ::functor(const std::string &str, params pars,
 	node <T> *tree)
 {
@@ -223,9 +223,9 @@ functor <T> ::functor(const std::string &str, params pars,
 	compress();
 }
 
-template <class T>
+template <class T, class U>
 functor <T> ::functor(const std::string &str, stree *raw, const params &pr,
-		table <T> tbl)
+		vtable <T> tbl)
 {
 	m_name = str;
 	m_params = pr;
@@ -233,7 +233,7 @@ functor <T> ::functor(const std::string &str, stree *raw, const params &pr,
 	m_root = new node <T> (raw, tbl, pr); 
 }
 
-template <class T>
+template <class T, class U>
 functor <T> ::functor(const functor &other) : m_name(other.m_name),
 	m_params(other.m_params)
 {
@@ -241,34 +241,34 @@ functor <T> ::functor(const functor &other) : m_name(other.m_name),
 	compress();
 }
 
-template <class T>
+template <class T, class U>
 functor <T> ::~functor()
 {
 	if (m_root)
 		delete m_root;
 }
 
-template <class T>
+template <class T, class U>
 size_t functor <T> ::ins() const
 {
 	return m_params.size();
 }
 
-template <class T>
+template <class T, class U>
 const std::string &functor <T> ::symbol() const
 {
 	return m_name;
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::rename(const std::string &str)
 {
 	m_name = str;
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::rebase(const std::string &str, stree *raw, const params &pr,
-		table <T> tbl)
+		vtable <T> tbl)
 {
 	m_name = str;
 	m_params = pr;
@@ -276,7 +276,7 @@ void functor <T> ::rebase(const std::string &str, stree *raw, const params &pr,
 	m_root = new node <T> (raw, tbl, pr); 
 }
 
-template <class T>
+template <class T, class U>
 std::string functor <T> ::display() const
 {
 	std::string out;
@@ -293,7 +293,7 @@ std::string functor <T> ::display() const
 	return out;
 }
 
-template <class T>
+template <class T, class U>
 nd_class functor <T> ::classify()
 {
 	m_root->classify();
@@ -301,7 +301,7 @@ nd_class functor <T> ::classify()
 	return m_root->get_cls();
 }
 
-template <class T>
+template <class T, class U>
 T functor <T> ::compute(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
@@ -324,7 +324,7 @@ T functor <T> ::compute(const std::vector <T> &vals)
 	return val;
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &functor <T> ::differentiate
 	(const std::string &var) const
 {
@@ -341,7 +341,7 @@ const functor <T> &functor <T> ::differentiate
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &functor <T> ::integrate
 	(const std::string &var) const
 {
@@ -358,25 +358,25 @@ const functor <T> &functor <T> ::integrate
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 std::string functor <T> ::str() const
 {
 	return display();
 }
 
-template <class T>
+template <class T, class U>
 token::type functor <T> ::caller() const
 {
 	return FUNCTOR;
 }
 
-template <class T>
+template <class T, class U>
 token *functor <T> ::copy() const
 {
 	return new functor(*this); 
 }
 
-template <class T>
+template <class T, class U>
 bool functor <T> ::operator==(token *t) const
 {
 	if (t->caller() != token::FUNCTOR)
@@ -386,13 +386,13 @@ bool functor <T> ::operator==(token *t) const
 		&& (m_params == (dynamic_cast <functor *> (t))->m_params);
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::print() const
 {
 	m_root->print();
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &functor <T> ::operator=(const functor <T> &other)
 {
 	if (this != &other) {
@@ -405,13 +405,13 @@ const functor <T> &functor <T> ::operator=(const functor <T> &other)
 	return *this;
 }
 
-template <class T>
+template <class T, class U>
 const variable <T> &functor <T> ::operator[](size_t i) const
 {
 	return m_params[i];
 }
 
-template <class T>
+template <class T, class U>
 T functor <T> ::operator()(const element <T> &args)
 {
 	std::vector <T> vals;
@@ -422,7 +422,7 @@ T functor <T> ::operator()(const element <T> &args)
 	return compute(vals);
 }
 
-template <class T>
+template <class T, class U>
 template <class ... U>
 T functor <T> ::operator()(U ... args)
 {
@@ -431,7 +431,7 @@ T functor <T> ::operator()(U ... args)
 	return compute(vals);
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &operator+(const functor <T> &a, const functor <T> &b)
 {
 	functor <T> *out = new functor <T> ();
@@ -465,7 +465,7 @@ const functor <T> &operator+(const functor <T> &a, const functor <T> &b)
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &operator-(const functor <T> &a, const functor <T> &b)
 {
 	functor <T> *out = new functor <T> ();
@@ -492,7 +492,7 @@ const functor <T> &operator-(const functor <T> &a, const functor <T> &b)
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &operator*(const functor <T> &a, const functor <T> &b)
 {
 	functor <T> *out = new functor <T> ();
@@ -519,7 +519,7 @@ const functor <T> &operator*(const functor <T> &a, const functor <T> &b)
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 const functor <T> &operator/(const functor <T> &a, const functor <T> &b)
 {
 	functor <T> *out = new functor <T> ();
@@ -546,26 +546,26 @@ const functor <T> &operator/(const functor <T> &a, const functor <T> &b)
 	return *out;
 }
 
-template <class T>
+template <class T, class U>
 bool operator>(const functor <T> &lhs, const functor <T> &rhs)
 {
 	return lhs.m_name > rhs.m_name;
 }
 
-template <class T>
+template <class T, class U>
 bool operator<(const functor <T> &lhs, const functor <T> &rhs)
 {
 	return lhs.m_name < rhs.m_name;
 }
 
-template <class T>
+template <class T, class U>
 std::ostream &operator<<(std::ostream &os, const functor <T> &func)
 {
 	os << func.display();
 	return os;
 }
 
-template <class T>
+template <class T, class U>
 template <class ... U>
 void functor <T> ::gather(std::vector <T> &vals,
 	T first, U ... args)
@@ -574,14 +574,14 @@ void functor <T> ::gather(std::vector <T> &vals,
 	gather(vals, args...);
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::gather(std::vector <T> &vals,
 	T first)
 {
 	vals.push_back(first);
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::compress()
 {
 	m_root->label_all();
@@ -589,7 +589,7 @@ void functor <T> ::compress()
 	build();
 }
 
-template <class T>
+template <class T, class U>
 void functor <T> ::build()
 {
 	m_map.clear();

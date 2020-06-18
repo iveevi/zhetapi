@@ -40,7 +40,7 @@ enum tcode {
 };
 
 // Forward Declarations
-template <class T>
+template <class T, class U>
 class functor;
 
 /**
@@ -55,7 +55,7 @@ public:
 	using opd = operand <T>;
 	using opn = operation <T>;
 	using var = variable <T>;
-	using ftr = functor <T>;
+	using ftr = functor <T, int>;
 
 	struct specs {
 		std::string in;
@@ -167,11 +167,12 @@ config <T> ::config() : config({
 			opd *start = dynamic_cast <opd *> (ins[1]);
 			opd *end = dynamic_cast <opd *> (ins[2]);
 			
-			ftr *expr = dynamic_cast <ftr *> (ins[3]);
+			// ftr *expr = dynamic_cast <ftr *> (ins[3]);
 
 			T value = zero;
-			for (T i = start->get(); i <= end->get(); i += T(1))
-				value += (*expr)(i);
+			
+			/* for (T i = start->get(); i <= end->get(); i += T(1))
+				value += (*expr)(i); */
 			
 			return value;
 		}, op_sum},
@@ -255,8 +256,8 @@ tcode config <T> ::code(token *t)
 		return t_opn;
 	if (dynamic_cast <var *> (t))
 		return t_var;
-	if (dynamic_cast <ftr *> (t))
-		return t_ftr;
+	// if (dynamic_cast <ftr *> (t))
+	// 	return t_ftr;
 	return t_nat;
 }
 

@@ -12,14 +12,16 @@
 #include <memory>
 
 /* Engine Headers */
-#include "variable.h"
 #include "config.h"
+#include "rational.h"
 #include "stree.h"
+#include "variable.h"
+#include "vtable.h"
 
 template <class T>
-class table;
+class vtable;
 
-template <class T>
+template <class T, class U>
 class functor;
 
 /**
@@ -38,7 +40,21 @@ enum nd_label {
 	l_power,
 	l_divided,
 	l_variable,
-	l_constant,
+
+	l_constant,		// keep to prevent errors
+	l_constant_real,
+	l_constant_rational,
+	l_constant_complex_real,
+	l_constant_complex_rational,
+	l_constant_vector_real,
+	l_constant_vector_rational,
+	l_constant_vector_complex_real,
+	l_constant_vector_complex_rational,
+	l_constant_matrix_real,
+	l_constant_matrix_rational,
+	l_constant_matrix_complex_real,
+	l_constant_matrix_complex_rational,
+
 	l_function,
 	l_exp,
 	l_polynomial,
@@ -67,7 +83,21 @@ std::string strlabs[] = {
 	"power",
 	"divided",
 	"variable",
+
 	"constant",
+	"constant real",
+	"constant rational",
+	"constant complex real",
+	"constant complex rational",
+	"constant vector real",
+	"constant vector rational",
+	"constant vector complex real",
+	"constant vector comlpex rational",
+	"constant matrix real",
+	"constant matrix rational",
+	"constant matrix complex real",
+	"constant matrix complex rational",
+
 	"function",
 	"exponent",
 	"polynomic",
@@ -104,19 +134,22 @@ std::string strclass[] = {
  * @brief Singular node class,
  * used in expression trees.
  */
-template <class T>
+template <class T, class U>
 class node {
 public:
 	// Friends
-	friend class functor <T>;
+	friend class functor <T, int>;
 	
 	// Aliases
 	using params = std::vector <variable <T>>;
 
+	using opd_r = operand <scalar <T>>;
+	using opd_q = operand <scalar <rational <U>>>;
+
 	using opn = operation <T>;
 	using opd = operand <T>;
 	using var = variable <T>;
-	using ftr = functor <T>;
+	using ftr = functor <T, int>;
 	using cfg = config <T>;
 private:
 	// Members
@@ -137,9 +170,9 @@ private:
 	std::vector <node *> leaves;	// Leaves of the current tree node
 public:
 	// Constructors
-	node(std::string, table <T> = table <T> (), params = params(),
+	node(std::string, vtable <T> = vtable <T> (), params = params(),
 			shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
-	node(stree *, table <T> = table <T> (), params = params(), shared_ptr
+	node(stree *, vtable <T> = vtable <T> (), params = params(), shared_ptr
 			<cfg> = shared_ptr <cfg> (new cfg()));
 	node(token *t, nd_label l, std::vector <node *> lv, shared_ptr <cfg>);
 	node(token *t, std::vector <node *> lv, shared_ptr <cfg>);
@@ -203,17 +236,17 @@ public:
 	std::string display() const;
 
 	// Arithmetic 
-	template <class U>
-	friend const node <U> &operator+(const node <U> &, const node <U> &);
+	template <class A, class B>
+	friend const node <A, B> &operator+(const node <A, B> &, const node <A, B> &);
 
-	template <class U>
-	friend const node <U> &operator-(const node <U> &, const node <U> &);
+	template <class A, class B>
+	friend const node <A, B> &operator-(const node <A, B> &, const node <A, B> &);
 	
-	template <class U>
-	friend const node <U> &operator*(const node <U> &, const node <U> &);
+	template <class A, class B>
+	friend const node <A, B> &operator*(const node <A, B> &, const node <A, B> &);
 	
-	template <class U>
-	friend const node <U> &operator/(const node <U> &, const node <U> &);
+	template <class A, class B>
+	friend const node <A, B> &operator/(const node <A, B> &, const node <A, B> &);
 private:
 	// Token Factories
 	opn *get(opcode) const;
@@ -225,15 +258,16 @@ private:
 	void clear();
 
 	// Stree Convertion
-	node *convert(stree *, table <T> = table <T> ()) const;
-	node *convert_operation(stree *, table <T> = table <T> ()) const;
-	node *convert_summation(stree *, table <T> = table <T> ()) const;
-	node *convert_variable_cluster(stree *, table <T> = table <T> ()) const;
+	node *convert(stree *, vtable <T> = vtable <T> ()) const;
+	node *convert_operation(stree *, vtable <T> = vtable <T> ()) const;
+	node *convert_summation(stree *, vtable <T> = vtable <T> ()) const;
+	node *convert_variable_cluster(stree *, vtable <T> = vtable <T> ()) const;
 
 	// Special Nodes
 	bool special() const;
 
 	// Labeling Methods
+	void label_as_operand();
 	void label_as_operation();
 	void label_as_special(const std::vector <std::string> &vars);
 
@@ -265,7 +299,7 @@ private:
 	std::string display_as_function() const;
 public:
 	// Exceptions
-	class incomputable_tree {};
+	class incompuvtable_tree {};
 
 	// Base class for informative exceptions
 	class node_error {
@@ -291,27 +325,33 @@ public:
 // Constructors
 //////////////////////////////////////////
 
-template <class T>
-node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> cptr)
+template <class T, class U>
+node <T, U> ::node(std::string str, vtable <T> tbl, params params, shared_ptr <cfg> cptr)
 	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
 
-	cout << "Node Stree:" << endl;
+	cout << endl << "Node Stree:" << endl;
 	st->print();
 	
 	node *out = convert(st, tbl);
+	cout << endl << "Out:" << endl;
+	out->print();
+
 	*this = *out;
 
 	delete out;
 	delete st;
 
+	cout << endl << "This:" << endl;
+	print();
+
 	reparametrize(params);
 	simplify();
 }
 
-template <class T>
-node <T> ::node(stree *raw, table <T> tbl, params prs, shared_ptr <cfg> cptr)
+template <class T, class U>
+node <T, U> ::node(stree *raw, vtable <T> tbl, params prs, shared_ptr <cfg> cptr)
 	: pars(prs), cfg_ptr(cptr)
 {
 	node *out = convert(raw, tbl);
@@ -327,16 +367,16 @@ node <T> ::node(stree *raw, table <T> tbl, params prs, shared_ptr <cfg> cptr)
 	print(); */
 }
 
-template <class T>
-node <T> ::node(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+template <class T, class U>
+node <T, U> ::node(token *t, nd_label l, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
 	: tok(t), type(l), leaves(lv), cfg_ptr(cptr)
 {
 	/* cout << "CONSTRUCTOR SIX:" << endl;
 	print(); */
 }
 
-template <class T>
-node <T> ::node(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+template <class T, class U>
+node <T, U> ::node(token *t, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	leaves = lv;
@@ -347,8 +387,8 @@ node <T> ::node(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
 	print(); */
 }
 
-template <class T>
-node <T> ::node(const node &other)
+template <class T, class U>
+node <T, U> ::node(const node &other)
 {
 	*this = other;
 
@@ -360,8 +400,8 @@ node <T> ::node(const node &other)
 	print(); */
 }
 
-template <class T>
-node <T> ::node(node *other)
+template <class T, class U>
+node <T, U> ::node(node *other)
 {
 	*this = *other;
 
@@ -371,16 +411,16 @@ node <T> ::node(node *other)
 	print(); */
 }
 
-template <class T>
-node <T> ::node() : tok(nullptr), type(l_none), cls(c_none),
+template <class T, class U>
+node <T, U> ::node() : tok(nullptr), type(l_none), cls(c_none),
 	pars({}), cfg_ptr(nullptr), leaves({}) {}
 
 //////////////////////////////////////////
 // Deconstructors
 //////////////////////////////////////////
 
-template <class T>
-node <T> ::~node()
+template <class T, class U>
+node <T, U> ::~node()
 {
 	/* cout << "DECONSTRUCTOR:" << endl;
 	print(); */
@@ -395,8 +435,8 @@ node <T> ::~node()
 // Assignment Operator
 //////////////////////////////////////////
 
-template <class T>
-const node <T> &node <T> ::operator=(const node <T> &other)
+template <class T, class U>
+const node <T, U> &node <T, U> ::operator=(const node <T, U> &other)
 {
 	// cout << string(30, '_') << endl;
 	// cout << "Assigning into this @" << this << endl;
@@ -424,8 +464,8 @@ const node <T> &node <T> ::operator=(const node <T> &other)
 // Setters
 //////////////////////////////////////////
 
-template <class T>
-void node <T> ::set(node *nd)
+template <class T, class U>
+void node <T, U> ::set(node *nd)
 {
 	tok = nd->tok;
 	type = nd->type;
@@ -433,14 +473,14 @@ void node <T> ::set(node *nd)
 	cfg_ptr = nd->cfg_ptr;
 }
 
-template <class T>
-void node <T> ::set(params p)
+template <class T, class U>
+void node <T, U> ::set(params p)
 {
 	pars = p;
 }
 
-template <class T>
-void node <T> ::set(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+template <class T, class U>
+void node <T, U> ::set(token *t, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	leaves = lv;
@@ -448,8 +488,8 @@ void node <T> ::set(token *t, std::vector <node <T> *> lv, shared_ptr <cfg> cptr
 	type = l_none;
 }
 
-template <class T>
-void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, shared_ptr <cfg> cptr)
+template <class T, class U>
+void node <T, U> ::set(token *t, nd_label l, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
 {
 	tok = t;
 	type = l;
@@ -457,15 +497,15 @@ void node <T> ::set(token *t, nd_label l, std::vector <node <T> *> lv, shared_pt
 	cfg_ptr = cptr;
 }
 
-template <class T>
-void node <T> ::retokenize(token *t)
+template <class T, class U>
+void node <T, U> ::retokenize(token *t)
 {
 	delete tok;
 	tok = t;
 }
 
-template <class T>
-void node <T> ::reparametrize(params pr)
+template <class T, class U>
+void node <T, U> ::reparametrize(params pr)
 {
 	pars = pr;
 
@@ -477,50 +517,50 @@ void node <T> ::reparametrize(params pr)
 // Getters
 //////////////////////////////////////////
 
-template <class T>
-token *node <T> ::get_token() const
+template <class T, class U>
+token *node <T, U> ::get_token() const
 {
 	return tok;
 }
 
-template <class T>
-nd_class node <T> ::get_class() const
+template <class T, class U>
+nd_class node <T, U> ::get_class() const
 {
 	return cls;
 }
 
-template <class T>
-nd_label node <T> ::get_label() const
+template <class T, class U>
+nd_label node <T, U> ::get_label() const
 {
 	return type;
 }
 
-template <class T>
-typename node <T> ::params node <T> ::get_params() const
+template <class T, class U>
+typename node <T, U> ::params node <T, U> ::get_params() const
 {
 	return pars;
 }
 
-template <class T>
-shared_ptr <typename node <T> ::cfg> node <T> ::get_config() const
+template <class T, class U>
+shared_ptr <typename node <T, U> ::cfg> node <T, U> ::get_config() const
 {
 	return cfg_ptr;
 }
 
-template <class T>
-std::vector <node <T> *> node <T> ::get_leaves() const
+template <class T, class U>
+std::vector <node <T, U> *> node <T, U> ::get_leaves() const
 {
 	return leaves;
 }
 
-template <class T>
-node <T> *node <T> ::child_at(size_t i) const
+template <class T, class U>
+node <T, U> *node <T, U> ::child_at(size_t i) const
 {
 	return leaves[i];
 }
 
-template <class T>
-node <T> *node <T> ::operator[](size_t i) const
+template <class T, class U>
+node <T, U> *node <T, U> ::operator[](size_t i) const
 {
 	return leaves[i];
 }
@@ -529,8 +569,8 @@ node <T> *node <T> ::operator[](size_t i) const
 // Functional
 //////////////////////////////////////////
 
-template <class T>
-bool node <T> ::valid() const
+template <class T, class U>
+bool node <T, U> ::valid() const
 {
 	size_t operands = 0;
 	
@@ -560,8 +600,8 @@ bool node <T> ::valid() const
 	return true;
 }
 
-template <class T>
-bool node <T> ::matches(const node <T> &other) const
+template <class T, class U>
+bool node <T, U> ::matches(const node <T, U> &other) const
 {
 	std::vector <node> first;
 	std::vector <node> second;
@@ -625,8 +665,8 @@ bool node <T> ::matches(const node <T> &other) const
 	return ((first.size() == complete.size()) && second.empty());
 }
 
-template <class T>
-T node <T> ::value() const
+template <class T, class U>
+T node <T, U> ::value() const
 {
 	std::vector <token *> vals;
 	std::vector <T> hard;
@@ -660,29 +700,34 @@ T node <T> ::value() const
 	case token::VARIABLE:
 		if (!(dynamic_cast <var *> (tok))->is_param()) 
 			return (dynamic_cast <var *> (tok))->get();
-		throw incomputable_tree();
+		throw incompuvtable_tree();
 	case token::FUNCTOR:
 		for (auto itr : leaves)
 			hard.push_back(itr->value());
 		
 		// change later to allow functions to accept
 		// different types of tokens for computation
-		return (dynamic_cast <ftr *> (tok))->compute(hard);
+		// return (dynamic_cast <ftr *> (tok))->compute(hard);
+		break;
 	}
 
-	throw incomputable_tree();
+	throw incompuvtable_tree();
 }
 
-template <class T>
-void node <T> ::simplify()
+template <class T, class U>
+void node <T, U> ::simplify()
 {
 	label_all();
+
+	cout << endl << "POST WHOLE LABEL:" << endl;
+	print();
+
 	compress();
 	label_all();
 }
 
-template <class T>
-void node <T> ::compress()
+template <class T, class U>
+void node <T, U> ::compress()
 {
 
 	if (type == l_operation_constant
@@ -721,8 +766,8 @@ void node <T> ::compress()
 	}
 }
 
-template <class T>
-void node <T> ::differentiate(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate(const std::string &var)
 {
 	switch (type) {
 	case l_constant_logarithmic:
@@ -771,27 +816,27 @@ void node <T> ::differentiate(const std::string &var)
 	}
 }
 
-template <class T>
-void node <T> ::stable_differentiate(const std::string &var)
+template <class T, class U>
+void node <T, U> ::stable_differentiate(const std::string &var)
 {
 	label(var);
 	differentiate(var);
 }
 
-template <class T>
-void node <T> ::integrate(const std::string &var)
+template <class T, class U>
+void node <T, U> ::integrate(const std::string &var)
 {
 }
 
-template <class T>
-void node <T> ::stable_integrate(const std::string &var)
+template <class T, class U>
+void node <T, U> ::stable_integrate(const std::string &var)
 {
 	label(var);
 	integrate(var);
 }
 
-template <class T>
-void node <T> ::classify()
+template <class T, class U>
+void node <T, U> ::classify()
 {
 	for (auto nd : leaves)
 		nd->classify();
@@ -817,8 +862,8 @@ void node <T> ::classify()
 	}
 }
 
-template <class T>
-void node <T> ::label_all()
+template <class T, class U>
+void node <T, U> ::label_all()
 {
 	std::vector <std::string> names;
 	
@@ -828,8 +873,8 @@ void node <T> ::label_all()
 	label(names);
 }
 
-template <class T>
-void node <T> ::label(const std::vector <std::string> &vars)
+template <class T, class U>
+void node <T, U> ::label(const std::vector <std::string> &vars)
 {
 	std::string sym;
 	
@@ -870,7 +915,7 @@ void node <T> ::label(const std::vector <std::string> &vars)
 
 		break;
 	case token::OPERAND:
-		type = l_constant;
+		label_as_operand();
 		break;
 	}
 }
@@ -878,8 +923,8 @@ void node <T> ::label(const std::vector <std::string> &vars)
 //////////////////////////////////////////
 // Helper
 //////////////////////////////////////////
-template <class T>
-void node <T> ::print(int num, int lev) const
+template <class T, class U>
+void node <T, U> ::print(int num, int lev) const
 {
 	int counter = lev;
 	while (counter > 0) {
@@ -909,8 +954,8 @@ void node <T> ::print(int num, int lev) const
 	}
 }
 
-template <class T>
-void node <T> ::address_print(int num, int lev) const
+template <class T, class U>
+void node <T, U> ::address_print(int num, int lev) const
 {
 	int counter = lev;
 	while (counter > 0) {
@@ -929,8 +974,8 @@ void node <T> ::address_print(int num, int lev) const
 	}
 }
 
-template <class T>
-void node <T> ::traverse(const std::function <void (node)> &fobj)
+template <class T, class U>
+void node <T, U> ::traverse(const std::function <void (node)> &fobj)
 {
 	fobj(*this);
 
@@ -938,8 +983,8 @@ void node <T> ::traverse(const std::function <void (node)> &fobj)
 		nd->traverse(fobj);
 }
 
-template <class T>
-std::string node <T> ::display() const
+template <class T, class U>
+std::string node <T, U> ::display() const
 {
 	string str;
 	size_t i;
@@ -996,45 +1041,45 @@ std::string node <T> ::display() const
 // Arithmetic
 //////////////////////////////////////////
 
-template <class T>
-const node <T> &operator+(const node <T> &a, const node <T> &b)
+template <class T, class U>
+const node <T, U> &operator+(const node <T, U> &a, const node <T, U> &b)
 {
-	node <T> *out = new node <T> (a.get(op_add), {
-			new node <T> (a),
-			new node <T> (b)
+	node <T, U> *out = new node <T, U> (a.get(op_add), {
+			new node <T, U> (a),
+			new node <T, U> (b)
 	}, a.cfg_ptr);
 
 	return *out;
 }
 
-template <class T>
-const node <T> &operator-(const node <T> &a, const node <T> &b)
+template <class T, class U>
+const node <T, U> &operator-(const node <T, U> &a, const node <T, U> &b)
 {
-	node <T> *out = new node <T> (a.get(op_sub), {
-			new node <T> (a),
-			new node <T> (b)
+	node <T, U> *out = new node <T, U> (a.get(op_sub), {
+			new node <T, U> (a),
+			new node <T, U> (b)
 	}, a.cfg_ptr);
 
 	return *out;
 }
 
-template <class T>
-const node <T> &operator*(const node <T> &a, const node <T> &b)
+template <class T, class U>
+const node <T, U> &operator*(const node <T, U> &a, const node <T, U> &b)
 {
-	node <T> *out = new node <T> (a.get(op_mul), {
-			new node <T> (a),
-			new node <T> (b)
+	node <T, U> *out = new node <T, U> (a.get(op_mul), {
+			new node <T, U> (a),
+			new node <T, U> (b)
 	}, a.cfg_ptr);
 
 	return *out;
 }
 
-template <class T>
-const node <T> &operator/(const node <T> &a, const node <T> &b)
+template <class T, class U>
+const node <T, U> &operator/(const node <T, U> &a, const node <T, U> &b)
 {
-	node <T> *out = new node <T> (a.get(op_div), {
-			new node <T> (a),
-			new node <T> (b)
+	node <T, U> *out = new node <T, U> (a.get(op_div), {
+			new node <T, U> (a),
+			new node <T, U> (b)
 	}, a.cfg_ptr);
 
 	return *out;
@@ -1044,14 +1089,14 @@ const node <T> &operator/(const node <T> &a, const node <T> &b)
 // Token Factories
 //////////////////////////////////////////
 
-template <class T>
-typename node <T> ::opn *node <T> ::get(opcode ocode) const
+template <class T, class U>
+typename node <T, U> ::opn *node <T, U> ::get(opcode ocode) const
 {
 	return cfg_ptr->alloc_opn(ocode);
 }
 
-template <class T>
-typename node <T> ::opn *node <T> ::get(const std::string &str) const
+template <class T, class U>
+typename node <T, U> ::opn *node <T, U> ::get(const std::string &str) const
 {
 	return cfg_ptr->alloc_opn(str);
 }
@@ -1060,8 +1105,8 @@ typename node <T> ::opn *node <T> ::get(const std::string &str) const
 // Memory Functions
 //////////////////////////////////////////
 
-template <class T>
-node <T> *node <T> ::copy() const
+template <class T, class U>
+node <T, U> *node <T, U> ::copy() const
 {
 	node *cpy;
 
@@ -1087,8 +1132,8 @@ node <T> *node <T> ::copy() const
 	return cpy;
 }
 
-template <class T>
-void node <T> ::clear()
+template <class T, class U>
+void node <T, U> ::clear()
 {
 	for (size_t i = 0; i < leaves.size(); i++)
 		delete leaves[i];
@@ -1099,12 +1144,20 @@ void node <T> ::clear()
 // Stree Convertion
 //////////////////////////////////////////
 
-template <class T>
-node <T> *node <T> ::convert(stree *st, table <T> tbl) const
+template <class T, class U>
+node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
 {
-	node *out;
+	node *out = nullptr;
 
 	T val;
+
+	U num;
+	U den;
+
+	char c;
+	char i;
+
+	istringstream iss;
 
 	switch (st->kind()) {
 	case l_operation:
@@ -1113,12 +1166,46 @@ node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 	case l_variable_cluster:
 		out = convert_variable_cluster(st, tbl);
 		break;
-	case l_number:
-		istringstream iss(st->str());
+	case l_complex_rational:
+		iss = istringstream(st->str());
+
+		iss >> num >> c >> den >> i;
+
+		if (c == 'i')
+			den = 1;
+		else
+			assert((i == 'i') && (c == '/'));
+
+		out = new node {new operand <zcomplex <rational <long long int>>>
+			({0, {num, den}}), l_constant_complex_rational, {}, cfg_ptr};
+		break;
+	case l_complex_real:
+		iss = istringstream(st->str());
+
+		iss >> val >> i;
+
+		assert(i == 'i');
+
+		out = new node {new operand <zcomplex <T>> ({0, val}),
+			l_constant_complex_real, {}, cfg_ptr};
+		break;
+	case l_number_rational:
+		iss = istringstream(st->str());
+
+		iss >> num >> c >> den;
+
+		if (c != '/')
+			den = 1;
+
+		out = new node {new opd_q ({{num, den}}),
+			l_constant_rational, {}, cfg_ptr};
+		break;
+	case l_number_real:
+		iss = istringstream(st->str());
 
 		iss >> val;
 
-		out = new node {new opd(val), l_constant, {}, cfg_ptr};
+		out = new node {new opd_r(val), l_constant, {}, cfg_ptr};
 		break;
 	}
 
@@ -1128,22 +1215,27 @@ node <T> *node <T> ::convert(stree *st, table <T> tbl) const
 	return out;
 }
 
-template <class T>
-node <T> *node <T> ::convert_operation(stree *st, table <T> tbl) const
+template <class T, class U>
+node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl) const
 {
-	if (st->str() == "sum")
-		return convert_summation(st, tbl);
+	/* if (st->str() == "sum")
+		return convert_summation(st, tbl); */
 
 	node *out = new node {get(st->str()), {}, cfg_ptr};
 	
-	for (stree *s : st->children())
-		out->leaves.push_back(convert(s, tbl));
+	node *cv;
+	for (stree *s : st->children()) {
+		cv = convert(s, tbl);
+
+		if (cv)
+			out->leaves.push_back(cv);
+	}
 
 	return out;
 }
 
-template <class T>
-node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
+/* template <class T, class U>
+node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl) const
 {
 	// Requires 4 operands
 	// [remove asserts later]
@@ -1165,10 +1257,10 @@ node <T> *node <T> ::convert_summation(stree *st, table <T> tbl) const
 	}, cfg_ptr};
 
 	return out;
-}
+} */
 
-template <class T>
-node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
+template <class T, class U>
+node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) const
 {
 	node *out;
 
@@ -1189,7 +1281,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 	std::string acc;
 
 	var vr;
-	ftr fr;
+	// ftr fr;
 
 	for (int i = 0; i < str.length(); i++) {
 		acc += str[i];
@@ -1209,7 +1301,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			for (stree *s : st->children()) {
 				out = new node {get(op_mul), {
 					out,
-					convert(s, tbl)
+					convert(s, vtbl)
 				}, cfg_ptr};
 			}
 
@@ -1218,7 +1310,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 		}
 
 		try {
-			vr = tbl.find_var(acc);
+			vr = vtbl.find(acc);
 			
 			out = new node {get(op_mul), {
 				out,
@@ -1228,7 +1320,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			for (stree *s : st->children()) {
 				out = new node {get(op_mul), {
 					out,
-					convert(s, tbl)
+					convert(s, vtbl)
 				}, cfg_ptr};
 			}
 
@@ -1238,7 +1330,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			continue;
 		} catch(...) {}
 		
-		try {
+		/* try {
 			fr = tbl.find_ftr(acc);
 
 			out = new node {get(op_mul), {
@@ -1253,7 +1345,7 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 			num++;
 
 			continue;
-		} catch(...) {}
+		} catch(...) {} */
 	}
 
 	if (!num) {
@@ -1268,8 +1360,8 @@ node <T> *node <T> ::convert_variable_cluster(stree *st, table <T> tbl) const
 // Special Nodes
 //////////////////////////////////////////
 
-template <class T>
-bool node <T> ::special() const
+template <class T, class U>
+bool node <T, U> ::special() const
 {
 	opn *optr;
 	switch (tok->caller()) {
@@ -1294,8 +1386,19 @@ bool node <T> ::special() const
 // Labeling Methods
 //////////////////////////////////////////
 
-template <class T>
-void node <T> ::label_as_operation()
+template <class T, class U>
+void node <T, U> ::label_as_operand()
+{
+	if (dynamic_cast <opd_r *> (tok) != nullptr)
+		type = l_constant_real;
+	else if (dynamic_cast <opd_q *> (tok) != nullptr)
+		type = l_constant_rational;
+	else
+		type = l_constant;
+}
+
+template <class T, class U>
+void node <T, U> ::label_as_operation()
 {
 	bool constant = true;
 	for (node *nd : leaves) {
@@ -1353,8 +1456,8 @@ void node <T> ::label_as_operation()
 	}
 }
 
-template <class T>
-void node <T> ::label_as_special(const std::vector <std::string> &vars)
+template <class T, class U>
+void node <T, U> ::label_as_special(const std::vector <std::string> &vars)
 {
 	// Early checking
 	opn *optr = dynamic_cast <opn *> (tok);
@@ -1378,8 +1481,8 @@ void node <T> ::label_as_special(const std::vector <std::string> &vars)
 // Node Matching
 //////////////////////////////////////////
 
-template <class T>
-bool node <T> ::matches_term(const node <T> &other) const
+template <class T, class U>
+bool node <T, U> ::matches_term(const node <T, U> &other) const
 {
 	std::vector <node> first;
 	std::vector <node> second;
@@ -1447,8 +1550,8 @@ bool node <T> ::matches_term(const node <T> &other) const
 // Compression Methods
 //////////////////////////////////////////
 
-template <class T>
-void node <T> ::compress_as_separable()
+template <class T, class U>
+void node <T, U> ::compress_as_separable()
 {
 	T val;
 	T sign;
@@ -1486,8 +1589,8 @@ void node <T> ::compress_as_separable()
 	}
 }
 
-template <class T>
-void node <T> ::compress_as_multiplied()
+template <class T, class U>
+void node <T, U> ::compress_as_multiplied()
 {
 	/* cout << string(50, '_') << endl;
 	cout << "PRE-COMPRESSION:" << endl; 
@@ -1598,8 +1701,8 @@ void node <T> ::compress_as_multiplied()
 	print(); */
 }
 
-template <class T>
-void node <T> ::compress_as_divided()
+template <class T, class U>
+void node <T, U> ::compress_as_divided()
 {
 	T val;
 	
@@ -1631,8 +1734,8 @@ void node <T> ::compress_as_divided()
 	}
 }
 
-template <class T>
-void node <T> ::compress_as_power()
+template <class T, class U>
+void node <T, U> ::compress_as_power()
 {
 	T val;
 
@@ -1670,8 +1773,8 @@ void node <T> ::compress_as_power()
 	}
 }
 
-template <class T>
-void node <T> ::compress_as_exponential()
+template <class T, class U>
+void node <T, U> ::compress_as_exponential()
 {
 	T val;
 
@@ -1691,8 +1794,8 @@ void node <T> ::compress_as_exponential()
 // Differentiation Methods
 //////////////////////////////////////////
 
-template <class T>
-void node <T> ::differentiate_as_multiplied(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_multiplied(const std::string &var)
 {
 	node *lcpy;
 	node *rcpy;
@@ -1711,8 +1814,8 @@ void node <T> ::differentiate_as_multiplied(const std::string &var)
 	};
 }
 
-template <class T>
-void node <T> ::differentiate_as_divided(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_divided(const std::string &var)
 {
 	node *denom = leaves[1]->copy();
 	node *lcpy = leaves[0]->copy();
@@ -1738,8 +1841,8 @@ void node <T> ::differentiate_as_divided(const std::string &var)
 	leaves = lv_cpy;
 }
 
-template <class T>
-void node <T> ::differentiate_as_power(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_power(const std::string &var)
 {
 	T val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 
@@ -1762,8 +1865,8 @@ void node <T> ::differentiate_as_power(const std::string &var)
 	}, cfg_ptr);
 }
 
-template <class T>
-void node <T> ::differentiate_as_exponential(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_exponential(const std::string &var)
 {
 	node *cpy;
 
@@ -1784,8 +1887,8 @@ void node <T> ::differentiate_as_exponential(const std::string &var)
 	}, cfg_ptr);
 }
 
-template <class T>
-void node <T> ::differentiate_as_trigonometric(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_trigonometric(const std::string &var)
 {
 	node *cpy;
 	
@@ -1872,13 +1975,13 @@ void node <T> ::differentiate_as_trigonometric(const std::string &var)
 	}
 }
 
-template <class T>
-void node <T> ::differentiate_as_logarithmic(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_logarithmic(const std::string &var)
 {
 }
 
-template <class T>
-void node <T> ::differentiate_as_constant_logarithmic(const std::string &var)
+template <class T, class U>
+void node <T, U> ::differentiate_as_constant_logarithmic(const std::string &var)
 {
 	T val = log(leaves[0]->value());
 
@@ -1894,12 +1997,10 @@ void node <T> ::differentiate_as_constant_logarithmic(const std::string &var)
 	}, cfg_ptr);
 }
 
-template <class T>
-void node <T> ::differentiate_as_function(const std::string &var)
+/* template <class T, class U>
+void node <T, U> ::differentiate_as_function(const std::string &var)
 {
 	// Move using declaration to class
-	using ftr = functor <T>;
-	
 	ftr *ft = dynamic_cast <ftr *> (tok);
 
 	// Remove asserts later
@@ -1945,10 +2046,10 @@ void node <T> ::differentiate_as_function(const std::string &var)
 		cpy->differentiate(var);
 		// cpy->label_all();
 
-		/* cout << "\t#" << (i + 1) << endl;
+		* cout << "\t#" << (i + 1) << endl;
 		
 		cout << "\t\t(a): " << tmp << endl;
-		cout << "\t\t(b): " << cpy->display() << endl; */
+		cout << "\t\t(b): " << cpy->display() << endl; *
 
 		out = new node {get(op_add), {
 			new node {get(op_mul), {
@@ -1962,14 +2063,14 @@ void node <T> ::differentiate_as_function(const std::string &var)
 	// cout << endl;
 
 	*this = out->copy();
-}
+} */
 
 //////////////////////////////////////////
 // Display Methods
 //////////////////////////////////////////
 
-template <class T>
-std::string node <T> ::display_as_operand(nd_label required) const
+template <class T, class U>
+std::string node <T, U> ::display_as_operand(nd_label required) const
 {
 	std::string out = display();
 
@@ -1998,8 +2099,8 @@ std::string node <T> ::display_as_operand(nd_label required) const
 	return out;
 }
 
-template <class T>
-std::string node <T> ::display_as_trigonometric() const
+template <class T, class U>
+std::string node <T, U> ::display_as_trigonometric() const
 {
 	std::string stropn;
 	std::string space = " ";
@@ -2025,11 +2126,11 @@ std::string node <T> ::display_as_trigonometric() const
 	}
 
 	throw node_error("Node labeled as trigonometric, \
-		but token is of an undetectable type");
+		but token is of an undetecvtable type");
 }
 
-template <class T>
-std::string node <T> ::display_as_function() const
+/* template <class T, class U>
+std::string node <T, U> ::display_as_function() const
 {
 	std::string out = (dynamic_cast <ftr *> (tok))->symbol();
 
@@ -2045,6 +2146,6 @@ std::string node <T> ::display_as_function() const
 	out += ")";
 
 	return out;
-}
+} */
 
 #endif

@@ -114,6 +114,9 @@ public:
 	friend const matrix <U> &operator/(const U &, const matrix <U> &);
 
 	template <class U>
+	friend bool operator==(const matrix <U> &, const matrix <U> &);
+
+	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const matrix <U> &);
 
 	static matrix identity(size_t);
@@ -622,6 +625,22 @@ template <class T>
 const matrix <T> &operator/(const T &scalar, const matrix <T> &a)
 {
 	return a / scalar;
+}
+
+template <class T>
+bool operator==(const matrix <T> &a, const matrix <T> &b)
+{
+	if (a.get_dimensions() != b.get_dimensions())
+		return false;
+
+	for (size_t i = 0; i  < a.get_rows(); i++) {
+		for (size_t j = 0; j < a.get_cols(); j++) {
+			if (a[i][j] != b[i][j])
+				return false;
+		}
+	}
+
+	return true;
 }
 
 template <class T>

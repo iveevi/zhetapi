@@ -1,6 +1,8 @@
 #ifndef OPERAND_H_
 #define OPERAND_H_
 
+#include <sstream>
+
 // Custom Built Libraries
 #include "token.h"
 
@@ -232,7 +234,11 @@ token::type operand <data_t> ::caller() const
 template <typename data_t>
 std::string operand <data_t> ::str() const
 {
-	return std::to_string(val);
+	std::ostringstream oss;
+
+	oss << val;
+
+	return oss.str();
 }
 
 template <class T>
@@ -244,7 +250,7 @@ token *operand <T> ::copy() const
 template <class T>
 bool operand <T> ::operator==(token *t) const
 {
-	if (t->caller() != token::OPERAND)
+	if (dynamic_cast <operand <T> *> (t) == nullptr)
 		return false;
 
 	return val == (dynamic_cast <operand *> (t))->get();

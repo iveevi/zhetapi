@@ -17,7 +17,7 @@ DIGIT    [0-9]
 		return RATIONAL;
 }
 
-{DIGIT}+("/"{DIGIT}+)? {
+{DIGIT}+("/"{DIGIT}+)?i {
 		yylval.ident = yytext;
 		return RATIONAL_COMPLEX;
 }

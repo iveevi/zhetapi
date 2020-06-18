@@ -19,7 +19,8 @@ private:
 public:
 	rational(T = 0, T = 1);
 
-	operator double() const;
+	operator bool() const;
+	explicit operator double() const;
 
 	/* Mathematical Operators - Members */
 	rational &operator+=(const rational &);
@@ -39,6 +40,25 @@ public:
 
 	template <class U>
 	friend rational <U> operator/(const rational <U> &, const rational <U> &);
+
+	/* Boolean Operators - Non Members */
+	template <class U>
+	friend bool operator==(const rational <U> &, const rational <U> &);
+	
+	template <class U>
+	friend bool operator!=(const rational <U> &, const rational <U> &);
+	
+	template <class U>
+	friend bool operator>(const rational <U> &, const rational <U> &);
+	
+	template <class U>
+	friend bool operator<(const rational <U> &, const rational <U> &);
+	
+	template <class U>
+	friend bool operator>=(const rational <U> &, const rational <U> &);
+	
+	template <class U>
+	friend bool operator<=(const rational <U> &, const rational <U> &);
 
 	/* Output Functions */
 	template <class U>
@@ -67,13 +87,23 @@ rational <T> ::rational(T p, T q) : a(p), b(q)
 //////////////////////////////////////////
 
 //////////////////////////////////////////
-// Operator Overloads
+// Conversion Operators
 //////////////////////////////////////////
 template <class T>
 rational <T> ::operator double() const
 {
 	return (double) a / (double) b;
 }
+
+template <class T>
+rational <T> ::operator bool() const
+{
+	return a > 0;
+}
+
+//////////////////////////////////////////
+// Arithmetic Operators
+//////////////////////////////////////////
 
 template <class T>
 rational <T> &rational <T> ::operator+=(const rational <T> &other)
@@ -157,6 +187,46 @@ rational <T> operator/(const rational <T> &a, const rational <T> &b)
 	out /= b;
 
 	return out;
+}
+
+//////////////////////////////////////////
+// Boolean Operators
+//////////////////////////////////////////
+
+template <class T>
+bool operator==(const rational <T> &a, const rational <T> &b)
+{
+	return (a.a == b.a) && (a.b == b.b);
+}
+
+template <class T>
+bool operator!=(const rational <T> &a, const rational <T> &b)
+{
+	return !(a == b);
+}
+
+template <class T>
+bool operator>(const rational <T> &a, const rational <T> &b)
+{
+	return (a.a * b.b) > (a.b * b.a);
+}
+
+template <class T>
+bool operator<(const rational <T> &a, const rational <T> &b)
+{
+	return (a.a * b.b) < (a.b * b.a);
+}
+
+template <class T>
+bool operator>=(const rational <T> &a, const rational <T> &b)
+{
+	return (a == b) || (a > b);
+}
+
+template <class T>
+bool operator<=(const rational <T> &a, const rational <T> &b)
+{
+	return (a == b) || (a < b);
 }
 
 //////////////////////////////////////////
