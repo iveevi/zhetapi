@@ -10,24 +10,6 @@
 #include "matrix.h"
 #include "zcomplex.h"
 
-enum set_id {
-	s_real,
-	s_rational
-};
-
-template <class U>
-struct number {
-	U _dat;
-
-	operator U() const;
-};
-
-template <class U>
-number ::operator U() const
-{
-	return _dat;
-}
-
 /**
  * @brief Represents the working
  * space of a zhetapi function

@@ -9,6 +9,7 @@
 #include <sstream>
 
 #include "functor.h"
+#include "number.h"
 
 #ifdef minor
 
@@ -23,7 +24,7 @@
  * that matrices in mathematics do.
  */
 template <class T>
-class matrix {
+class matrix : public number {
 protected:
 	T **m_array;
 

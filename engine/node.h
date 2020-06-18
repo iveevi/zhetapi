@@ -296,6 +296,9 @@ node <T> ::node(std::string str, table <T> tbl, params params, shared_ptr <cfg> 
 	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
+
+	cout << "Node Stree:" << endl;
+	st->print();
 	
 	node *out = convert(st, tbl);
 	*this = *out;
