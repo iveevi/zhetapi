@@ -11,6 +11,7 @@
 enum st_label {
 	l_na,
 	l_number,
+	l_number_integer,
 	l_number_real,
 	l_number_rational,
 	l_complex_real,
@@ -30,6 +31,7 @@ enum st_label {
 std::string st_str_labs[] = {
 	"na",
 	"number",
+	"number - integer",
 	"number - real",
 	"number - rational",
 	"complex - real",

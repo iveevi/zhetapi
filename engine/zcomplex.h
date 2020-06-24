@@ -5,8 +5,6 @@
 #include <initializer_list>
 #include <iostream>
 
-#include "number.h"
-
 /**
  * @brief The zcomplex class is an
  * extension of the std::complex
@@ -14,7 +12,7 @@
  * set of methods, such as normalization.
  */
 template <class T>
-class zcomplex : public std::complex <T>, public number {
+class zcomplex : public std::complex <T> {
 public:
 	// Constructor
 	zcomplex(const T & = 0);
@@ -75,6 +73,7 @@ bool zcomplex <T> ::is_real() const
 template <class T>
 zcomplex <T> ::operator double() const
 {
+	std::cout << "Zcompex conv: Here" << std::endl;
 	return (double) this->real();
 }
 

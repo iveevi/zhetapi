@@ -54,15 +54,15 @@ class operation : public token {
 	 * to the user or some higher level
 	 * class such as config.
 	 */
-	std::function <T (const std::vector <token *> &)> opn;
+	std::function <token *(const std::vector <token *> &)> opn;
 public:
 	operation();
 	operation(const operation &);
 	operation(const std::string &, const std::string &,
-			std::size_t,  const std::function
-			<T (const std::vector <token *> &)> &);
+			std::size_t,  std::function
+			<token *(const std::vector <token *> &)>);
 
-	T operator()(const std::vector <token *> &) const;
+	token *operator()(const std::vector <token *> &) const;
 
 	std::string fmt() const;
 	std::string str() const override;
@@ -91,12 +91,12 @@ operation <T> ::operation(const operation &other)
 
 template <class T>
 operation <T> ::operation(const std::string &in, const std::string &out,
-		std::size_t opers, const std::function
-		<T (const std::vector < token *> &)> &fopn) : input(in),
+		std::size_t opers, std::function
+		<token *(const std::vector <token *> &)> fopn) : input(in),
 		output(out), ops(opers), opn(fopn) {}
 
 template <class T>
-T operation <T> ::operator()(const std::vector <token *> &ins) const
+token *operation <T> ::operator()(const std::vector <token *> &ins) const
 {
 	if (ins.size() != ops)
 		throw count_mismatch();

@@ -12,7 +12,12 @@ DIGIT    [0-9]
 
 %%
 
-{DIGIT}+("/"{DIGIT}+)? {
+{DIGIT}+ {
+		yylval.ident = yytext;
+		return INTEGER;
+}
+
+{DIGIT}+"/"{DIGIT}+? {
 		yylval.ident = yytext;
 		return RATIONAL;
 }
@@ -22,12 +27,12 @@ DIGIT    [0-9]
 		return RATIONAL_COMPLEX;
 }
 
--?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) {
+([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?) {
 		yylval.ident = yytext;
 		return REAL;
 }
 
--?([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?)i {
+([0-9]+|[0-9]*\.[0-9]+([eE][-+]?[0-9]+)?)i {
 		yylval.ident = yytext;
 		return REAL_COMPLEX;
 }

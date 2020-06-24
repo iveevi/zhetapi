@@ -20,6 +20,7 @@ public:
 	 * caller inspection */
 	enum type {
 		OPERAND,
+		OPERATION_HOLDER,
 		OPERATION,
 		VARIABLE,
 		FUNCTOR

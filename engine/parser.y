@@ -18,6 +18,7 @@
 
 %token	IDENT
 %token	REAL
+%token	INTEGER
 %token	RATIONAL
 %token	REAL_COMPLEX
 %token	RATIONAL_COMPLEX
@@ -57,6 +58,7 @@
 
 /* Types for the terminal symbols */
 %type	<ident>	REAL
+%type	<ident>	INTEGER
 %type	<ident>	RATIONAL
 %type	<ident>	REAL_COMPLEX
 %type	<ident>	RATIONAL_COMPLEX
@@ -332,6 +334,9 @@ sclr:	numr {
 
 numr:	REAL {
    	$$ = new stree($1, l_number_real, {});
+}
+    |	INTEGER {
+	$$ = new stree($1, l_number_integer, {});
 }
     |	RATIONAL {
 	$$ = new stree($1, l_number_rational, {});

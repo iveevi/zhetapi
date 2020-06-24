@@ -83,10 +83,6 @@ rational <T> ::rational(T p, T q) : a(p), b(q)
 }
 
 //////////////////////////////////////////
-// Public Methods
-//////////////////////////////////////////
-
-//////////////////////////////////////////
 // Conversion Operators
 //////////////////////////////////////////
 template <class T>
@@ -98,7 +94,7 @@ rational <T> ::operator double() const
 template <class T>
 rational <T> ::operator bool() const
 {
-	return a > 0;
+	return a != 0;
 }
 
 //////////////////////////////////////////
@@ -130,6 +126,12 @@ rational <T> &rational <T> ::operator-=(const rational <T> &other)
 template <class T>
 rational <T> &rational <T> ::operator*=(const rational <T> &other)
 {
+	using namespace std;
+
+	cout << "Mutliplication:" << endl;
+	cout << "This: " << *this << endl;
+	cout << "Other: " << other << endl;
+
 	a *= other.a;
 	b *= other.b;
 
@@ -165,6 +167,10 @@ rational <T> operator-(const rational <T> &a, const rational <T> &b)
 	rational <T> out = a;
 
 	out -= b;
+
+	std::cout << "a: " << a << std::endl;
+	std::cout << "b: " << b << std::endl;
+	std::cout << "out: " << out << std::endl;
 
 	return out;
 }

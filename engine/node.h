@@ -12,11 +12,15 @@
 #include <memory>
 
 /* Engine Headers */
-#include "config.h"
+// #include "config.h"
 #include "rational.h"
+#include "zcomplex.h"
 #include "stree.h"
 #include "variable.h"
 #include "vtable.h"
+#include "barn.h"
+#include "operation_holder.h"
+#include "config.h"
 
 template <class T>
 class vtable;
@@ -43,6 +47,7 @@ enum nd_label {
 
 	l_constant,		// keep to prevent errors
 	l_constant_real,
+	l_constant_integer,
 	l_constant_rational,
 	l_constant_complex_real,
 	l_constant_complex_rational,
@@ -86,6 +91,7 @@ std::string strlabs[] = {
 
 	"constant",
 	"constant real",
+	"constant integer",
 	"constant rational",
 	"constant complex real",
 	"constant complex rational",
@@ -142,15 +148,19 @@ public:
 	
 	// Aliases
 	using params = std::vector <variable <T>>;
+	
+	using opd_r = operand <T>;
+	using opd_cr = operand <zcomplex <T>>;
 
-	using opd_r = operand <scalar <T>>;
-	using opd_q = operand <scalar <rational <U>>>;
+	using opd_z = operand <U>;
+	using opd_q = operand <rational <U>>;
+	using opd_cq = operand <zcomplex <rational <U>>>;
 
 	using opn = operation <T>;
 	using opd = operand <T>;
 	using var = variable <T>;
-	using ftr = functor <T, int>;
-	using cfg = config <T>;
+	// using ftr = functor <T, int>;
+	// using cfg = config <T>;
 private:
 	// Members
 	token *tok;			// Main unit being stored
@@ -164,18 +174,20 @@ private:
 	params pars;			// List of parameters that should be
 					// considered in every process
 
-	shared_ptr <cfg> cfg_ptr;	// Ptr to the operation and numeric
+	// shared_ptr <cfg> cfg_ptr;	// Ptr to the operation and numeric
 					// configurations
 
 	std::vector <node *> leaves;	// Leaves of the current tree node
+
+	barn <T, U> brn = barn <T, U> ();
 public:
 	// Constructors
-	node(std::string, vtable <T> = vtable <T> (), params = params(),
-			shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
-	node(stree *, vtable <T> = vtable <T> (), params = params(), shared_ptr
-			<cfg> = shared_ptr <cfg> (new cfg()));
-	node(token *t, nd_label l, std::vector <node *> lv, shared_ptr <cfg>);
-	node(token *t, std::vector <node *> lv, shared_ptr <cfg>);
+	node(std::string, vtable <T> = vtable <T> (), params = params());
+			// shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
+	node(stree *, vtable <T> = vtable <T> (), params = params()/*, shared_ptr
+			<cfg> = shared_ptr <cfg> (new cfg()) */);
+	node(token *t, nd_label l, std::vector <node *> lv/* shared_ptr <cfg> */);
+	node(token *t, std::vector <node *> lv/* shared_ptr <cfg> */);
 	node(const node &);
 	node(node *);
 	node();
@@ -189,8 +201,8 @@ public:
 	// Setters
 	void set(node *);
 	void set(params);
-	void set(token *, std::vector <node *>, shared_ptr <cfg>);
-	void set(token *, nd_label, std::vector <node *>, shared_ptr <cfg>);
+	void set(token *, std::vector <node *>/* shared_ptr <cfg> */);
+	void set(token *, nd_label, std::vector <node *> /*, shared_ptr <cfg> */);
 
 	void retokenize(token *);
 	void reparametrize(params);
@@ -200,7 +212,7 @@ public:
 	nd_class get_class() const;
 	nd_label get_label() const;
 	params get_params() const;
-	shared_ptr <cfg> get_config() const;
+	// shared_ptr <cfg> get_config() const;
 	std::vector <node *> get_leaves() const;
 
 	node *child_at(size_t) const;
@@ -212,7 +224,7 @@ public:
 	bool matches(node *) const;
 	bool matches(const node &) const;
 
-	T value() const;
+	token *value();
 
 	void simplify();
 	void compress();
@@ -258,10 +270,10 @@ private:
 	void clear();
 
 	// Stree Convertion
-	node *convert(stree *, vtable <T> = vtable <T> ()) const;
-	node *convert_operation(stree *, vtable <T> = vtable <T> ()) const;
-	node *convert_summation(stree *, vtable <T> = vtable <T> ()) const;
-	node *convert_variable_cluster(stree *, vtable <T> = vtable <T> ()) const;
+	node *convert(stree *, vtable <T> = vtable <T> ());
+	node *convert_operation(stree *, vtable <T> = vtable <T> ());
+	node *convert_summation(stree *, vtable <T> = vtable <T> ());
+	node *convert_variable_cluster(stree *, vtable <T> = vtable <T> ());
 
 	// Special Nodes
 	bool special() const;
@@ -299,7 +311,7 @@ private:
 	std::string display_as_function() const;
 public:
 	// Exceptions
-	class incompuvtable_tree {};
+	class incomputable_tree {};
 
 	// Base class for informative exceptions
 	class node_error {
@@ -326,8 +338,8 @@ public:
 //////////////////////////////////////////
 
 template <class T, class U>
-node <T, U> ::node(std::string str, vtable <T> tbl, params params, shared_ptr <cfg> cptr)
-	: pars(params), cfg_ptr(cptr), type(l_none), cls(c_none)
+node <T, U> ::node(std::string str, vtable <T> tbl, params params)
+	: pars(params), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
 
@@ -351,8 +363,8 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params, shared_ptr <c
 }
 
 template <class T, class U>
-node <T, U> ::node(stree *raw, vtable <T> tbl, params prs, shared_ptr <cfg> cptr)
-	: pars(prs), cfg_ptr(cptr)
+node <T, U> ::node(stree *raw, vtable <T> tbl, params prs)
+	: pars(prs)
 {
 	node *out = convert(raw, tbl);
 
@@ -368,19 +380,19 @@ node <T, U> ::node(stree *raw, vtable <T> tbl, params prs, shared_ptr <cfg> cptr
 }
 
 template <class T, class U>
-node <T, U> ::node(token *t, nd_label l, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
-	: tok(t), type(l), leaves(lv), cfg_ptr(cptr)
+node <T, U> ::node(token *t, nd_label l, std::vector <node <T, U> *> lv)
+	: tok(t), type(l), leaves(lv)
 {
 	/* cout << "CONSTRUCTOR SIX:" << endl;
 	print(); */
 }
 
 template <class T, class U>
-node <T, U> ::node(token *t, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
+node <T, U> ::node(token *t, std::vector <node <T, U> *> lv)
 {
 	tok = t;
 	leaves = lv;
-	cfg_ptr = cptr;
+	// cfg_ptr = cptr;
 	type = l_none;
 
 	/* cout << "CONSTRUCTOR FIVE:" << endl;
@@ -413,7 +425,7 @@ node <T, U> ::node(node *other)
 
 template <class T, class U>
 node <T, U> ::node() : tok(nullptr), type(l_none), cls(c_none),
-	pars({}), cfg_ptr(nullptr), leaves({}) {}
+	pars({}), leaves({}) {}
 
 //////////////////////////////////////////
 // Deconstructors
@@ -446,7 +458,7 @@ const node <T, U> &node <T, U> ::operator=(const node <T, U> &other)
 		cls = other.cls;
 
 		// change cptr to shared_ptr
-		cfg_ptr = other.cfg_ptr;
+		// cfg_ptr = other.cfg_ptr;
 		pars = other.pars;
 
 		clear();
@@ -470,7 +482,7 @@ void node <T, U> ::set(node *nd)
 	tok = nd->tok;
 	type = nd->type;
 	leaves = nd->leaves;
-	cfg_ptr = nd->cfg_ptr;
+	// cfg_ptr = nd->cfg_ptr;
 }
 
 template <class T, class U>
@@ -480,21 +492,21 @@ void node <T, U> ::set(params p)
 }
 
 template <class T, class U>
-void node <T, U> ::set(token *t, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
+void node <T, U> ::set(token *t, std::vector <node <T, U> *> lv)
 {
 	tok = t;
 	leaves = lv;
-	cfg_ptr = cptr;
+	// cfg_ptr = cptr;
 	type = l_none;
 }
 
 template <class T, class U>
-void node <T, U> ::set(token *t, nd_label l, std::vector <node <T, U> *> lv, shared_ptr <cfg> cptr)
+void node <T, U> ::set(token *t, nd_label l, std::vector <node <T, U> *> lv)
 {
 	tok = t;
 	type = l;
 	leaves = lv;
-	cfg_ptr = cptr;
+	// cfg_ptr = cptr;
 }
 
 template <class T, class U>
@@ -541,11 +553,11 @@ typename node <T, U> ::params node <T, U> ::get_params() const
 	return pars;
 }
 
-template <class T, class U>
+/* template <class T, class U>
 shared_ptr <typename node <T, U> ::cfg> node <T, U> ::get_config() const
 {
 	return cfg_ptr;
-}
+} */
 
 template <class T, class U>
 std::vector <node <T, U> *> node <T, U> ::get_leaves() const
@@ -666,19 +678,75 @@ bool node <T, U> ::matches(const node <T, U> &other) const
 }
 
 template <class T, class U>
-T node <T, U> ::value() const
+token *node <T, U> ::value()
 {
 	std::vector <token *> vals;
 	std::vector <T> hard;
 
+	std::vector <std::type_index> types;
+	
+	operation_holder *ophptr;
+	
 	opn *optr;
 
-	T tmp;
+	token *tmp;
+
+	opd_r *o_r;
+	opd_z *o_z;
+	opd_q *o_q;
+	opd_cr *o_cr;
+	opd_cq *o_cq;
 	
 	switch (tok->caller()) {
 	case token::OPERAND:
-		return (dynamic_cast <opd *> (tok))->get();
-	case token::OPERATION:
+		return tok;
+		/* o_r = dynamic_cast <opd_r *> (tok);
+		if (o_r != nullptr)
+			return o_r;
+
+		o_z = dynamic_cast <opd_z *> (tok);
+		if (o_z != nullptr)
+			return o_z;
+		
+		o_q = dynamic_cast <opd_q *> (tok);
+		if (o_q != nullptr)
+			return o_q;
+
+		o_z = dynamic_cast <opd_z *> (tok);
+		if (o_z != nullptr)
+			return o_z;
+		
+		o_q = dynamic_cast <opd_q *> (tok);
+		if (o_q != nullptr)
+			return o_q; */
+
+		throw incomputable_tree();
+	case token::OPERATION_HOLDER:
+		for (auto nd : leaves) {
+			types.push_back(typeid(*(nd->value())));
+			vals.push_back(nd->value());
+		}
+			// cout << "\tTYPE:" << typeid(*(nd->tok)).name() << endl;
+		
+		ophptr = dynamic_cast <operation_holder *> (tok);
+		/* if (brn.mkop(ophptr->rep, types) != nullptr)
+			cout << "\tINVALID OPERATION" << endl;
+		else
+			cout << "\tVALID OPERATION" << endl; */
+
+		tmp = brn.value(ophptr->rep, types, vals);
+
+		if (tmp == nullptr) {
+			cout << "err @ node:" << endl;
+			print();
+
+			throw incomputable_tree();
+		}
+
+		return tmp;
+
+		// break;
+	/* case token::OPERATION:
 		optr = dynamic_cast <opn *> (tok);
 
 		switch (cfg_ptr->code(optr->fmt())) {
@@ -689,29 +757,29 @@ T node <T, U> ::value() const
 		}
 
 		for (auto itr : leaves)
-			vals.push_back(new opd(itr->value()));
+			vals.push_back(itr->value());
 
 		tmp = (*optr)(vals);
 
 		for (size_t i = 0; i < vals.size(); i++)
 			delete vals[i];
 		
-		return tmp;
+		return tmp; */
 	case token::VARIABLE:
 		if (!(dynamic_cast <var *> (tok))->is_param()) 
-			return (dynamic_cast <var *> (tok))->get();
-		throw incompuvtable_tree();
-	case token::FUNCTOR:
+			return dynamic_cast <var *> (tok);
+		throw incomputable_tree();
+	/* case token::FUNCTOR:
 		for (auto itr : leaves)
 			hard.push_back(itr->value());
 		
 		// change later to allow functions to accept
 		// different types of tokens for computation
 		// return (dynamic_cast <ftr *> (tok))->compute(hard);
-		break;
+		break; */
 	}
 
-	throw incompuvtable_tree();
+	throw incomputable_tree();
 }
 
 template <class T, class U>
@@ -729,15 +797,14 @@ void node <T, U> ::simplify()
 template <class T, class U>
 void node <T, U> ::compress()
 {
-
 	if (type == l_operation_constant
 			|| type == l_function_constant) {
-		T tmp = value();
+		token *tmp = value();
 
 		delete tok;
 		clear();
 
-		tok = new opd(tmp);
+		tok = tmp;
 		type = l_constant;
 
 		return;
@@ -887,7 +954,7 @@ void node <T, U> ::label(const std::vector <std::string> &vars)
 		nd->label(vars);
 
 	switch (tok->caller()) {
-	case token::OPERATION:
+	case token::OPERATION_HOLDER:
 		label_as_operation();
 		break;
 	case token::FUNCTOR:
@@ -991,10 +1058,10 @@ std::string node <T, U> ::display() const
 
 	switch (type) {
 	case l_separable:
-		if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
-			return leaves[0]->display() + " + " + leaves[1]->display();
+		//if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
+		//	return leaves[0]->display() + " + " + leaves[1]->display();
 
-		return leaves[0]->display() + " - " + leaves[1]->display();
+		return leaves[0]->display() + " +/- " + leaves[1]->display();
 	case l_multiplied: 
 		return leaves[0]->display_as_operand(type) + " * " + leaves[1]->display_as_operand(type);
 	case l_divided:
@@ -1007,11 +1074,11 @@ std::string node <T, U> ::display() const
 	case l_function:
 		return display_as_function();
 	case l_summation_function:
-		str = (dynamic_cast <ftr *> (tok))->display();
+		// str = (dynamic_cast <ftr *> (tok))->display();
 
-		i = str.find(")");
+		/* i = str.find(")");
 		if (i != string::npos)
-			return str.substr(i + 4, str.length());
+			return str.substr(i + 4, str.length()); */
 		
 		return "?";
 	// case l_polynomial: Unnecessary label?
@@ -1092,13 +1159,15 @@ const node <T, U> &operator/(const node <T, U> &a, const node <T, U> &b)
 template <class T, class U>
 typename node <T, U> ::opn *node <T, U> ::get(opcode ocode) const
 {
-	return cfg_ptr->alloc_opn(ocode);
+	// return cfg_ptr->alloc_opn(ocode);
+	return nullptr;
 }
 
 template <class T, class U>
 typename node <T, U> ::opn *node <T, U> ::get(const std::string &str) const
 {
-	return cfg_ptr->alloc_opn(str);
+	// return cfg_ptr->alloc_opn(str);
+	return nullptr;
 }
 
 //////////////////////////////////////////
@@ -1110,7 +1179,7 @@ node <T, U> *node <T, U> ::copy() const
 {
 	node *cpy;
 
-	cpy = new node(tok->copy(), type, {}, cfg_ptr);
+	cpy = new node(tok->copy(), type, {});
 	
 	cpy->pars = pars;
 
@@ -1145,7 +1214,7 @@ void node <T, U> ::clear()
 //////////////////////////////////////////
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
+node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 {
 	node *out = nullptr;
 
@@ -1176,8 +1245,8 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
 		else
 			assert((i == 'i') && (c == '/'));
 
-		out = new node {new operand <zcomplex <rational <long long int>>>
-			({0, {num, den}}), l_constant_complex_rational, {}, cfg_ptr};
+		out = new node {new opd_cq({0, {num, den}}),
+			l_constant_complex_rational, {}};
 		break;
 	case l_complex_real:
 		iss = istringstream(st->str());
@@ -1186,8 +1255,8 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
 
 		assert(i == 'i');
 
-		out = new node {new operand <zcomplex <T>> ({0, val}),
-			l_constant_complex_real, {}, cfg_ptr};
+		out = new node {new opd_cr ({0, val}),
+			l_constant_complex_real, {}};
 		break;
 	case l_number_rational:
 		iss = istringstream(st->str());
@@ -1197,15 +1266,24 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
 		if (c != '/')
 			den = 1;
 
-		out = new node {new opd_q ({{num, den}}),
-			l_constant_rational, {}, cfg_ptr};
+		out = new node {new opd_q ({num, den}),
+			l_constant_rational, {}};
 		break;
 	case l_number_real:
 		iss = istringstream(st->str());
 
 		iss >> val;
 
-		out = new node {new opd_r(val), l_constant, {}, cfg_ptr};
+		out = new node {new opd_r(val), l_constant, {}};
+		break;
+	case l_number_integer:
+		iss = istringstream(st->str());
+
+		iss >> num;
+
+		out = new node {new opd_z(num), l_constant_integer, {}};
+		break;
+	default:
 		break;
 	}
 
@@ -1216,26 +1294,60 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl) const
 }
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl) const
+node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl)
 {
 	/* if (st->str() == "sum")
 		return convert_summation(st, tbl); */
 
-	node *out = new node {get(st->str()), {}, cfg_ptr};
+	node *out = new node {new operation_holder(st->str()), {}};
+
+	std::vector <std::type_index> fmt;
 	
 	node *cv;
 	for (stree *s : st->children()) {
 		cv = convert(s, tbl);
 
-		if (cv)
+		if (cv) {
 			out->leaves.push_back(cv);
+
+			/* cout << "cv (from " << s << ")" << endl;
+			cv->print();
+
+			cout << "\t\t" << typeid(cv->tok).name() << endl;
+			cout << "\t\t" << typeid(*(cv->tok)).name() << endl;
+			cout << "\t\t" << typeid(opd_z).name() << endl;
+			cout << "\t\t" << typeid(opd_r).name() << endl;
+			cout << "\t\t" << typeid(opd_z *).name() << endl;
+			cout << "\t\t" << typeid(opd_r *).name() << endl;
+
+			if (typeid(opd_z *) == typeid(cv->tok))
+				cout << "\tInteger" << endl;
+			else if (typeid(opd_r *) == typeid(cv->tok))
+				cout << "\tReal" << endl;
+			else
+				cout << "\tNone" << endl;
+
+			fmt.push_back(typeid(*(cv->tok))); */
+		}
 	}
+
+	/* token *tptr = brn.mkop(st->str(), fmt);
+
+	* if (tptr == nullptr) {
+		cout << "Failure to receive appropriate operand:" << endl;
+		st->print();
+		exit(0);
+	} *
+
+	// cout << "TOKEN: " << tptr->str() << " @ " << tptr << endl;
+
+	out->tok = tptr; */
 
 	return out;
 }
 
 /* template <class T, class U>
-node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl) const
+node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl)
 {
 	// Requires 4 operands
 	// [remove asserts later]
@@ -1245,7 +1357,7 @@ node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl) const
 	// string eqn = st->children()[3]->str();
 
 	node *out = new node {get(st->str()), {
-		new node {new var {str, true, T()}, {}, cfg_ptr},
+		new node {new var {str, true, T()}, {}},
 		convert(st->children()[1]),
 		convert(st->children()[2]),
 		new node {new ftr {
@@ -1253,25 +1365,25 @@ node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl) const
 			st->children()[3],
 			{var {str, true, T()}},
 			tbl},
-		{}, cfg_ptr}
-	}, cfg_ptr};
+		{}}
+	}};
 
 	return out;
 } */
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) const
+node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 {
-	node *out;
+	/* node *out;
 
 	node *save;
 	node *temp;
 	node *in;
 	
 	out = new node {get(op_mul), {
-		new node {new opd(1), l_none, {}, cfg_ptr},
-		new node {new opd(1), l_none, {}, cfg_ptr}
-	}, cfg_ptr};
+		new node {new opd(1), l_none, {}},
+		new node {new opd(1), l_none, {}}
+	}};
 
 	temp = out;
 
@@ -1295,14 +1407,14 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 		if (vitr != pars.end()) {
 			out = new node {get(op_mul), l_none, {
 				out,
-				new node {new var {vitr->symbol(), true}, {}, cfg_ptr}
-			}, cfg_ptr};
+				new node {new var {vitr->symbol(), true}, {}}
+			}};
 			
 			for (stree *s : st->children()) {
 				out = new node {get(op_mul), {
 					out,
 					convert(s, vtbl)
-				}, cfg_ptr};
+				}};
 			}
 
 			acc.clear();
@@ -1314,14 +1426,14 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 			
 			out = new node {get(op_mul), {
 				out,
-				new node {new var(vr), {}, cfg_ptr}
-			}, cfg_ptr};
+				new node {new var(vr), {}}
+			}};
 
-			for (stree *s : st->children()) {
+			for (stree * s : st->children()) {
 				out = new node {get(op_mul), {
 					out,
 					convert(s, vtbl)
-				}, cfg_ptr};
+				}};
 			}
 
 			acc.clear();
@@ -1330,13 +1442,13 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 			continue;
 		} catch(...) {}
 		
-		/* try {
+		* try {
 			fr = tbl.find_ftr(acc);
 
 			out = new node {get(op_mul), {
 				out,
-				new node {new ftr(fr), {}, cfg_ptr}
-			}, cfg_ptr};
+				new node {new ftr(fr), {}}
+			}};
 
 			for (stree *s : st->children())
 				out->leaves[1]->leaves.push_back(convert(s, tbl));
@@ -1345,7 +1457,7 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 			num++;
 
 			continue;
-		} catch(...) {} */
+		} catch(...) {} *
 	}
 
 	if (!num) {
@@ -1353,7 +1465,7 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 		throw undefined_symbol(acc);
 	}
 
-	return out;
+	return out; */
 }
 
 //////////////////////////////////////////
@@ -1363,7 +1475,7 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl) 
 template <class T, class U>
 bool node <T, U> ::special() const
 {
-	opn *optr;
+	/* opn *optr;
 	switch (tok->caller()) {
 	case token::OPERATION:
 		optr = dynamic_cast <opn *> (tok);
@@ -1377,7 +1489,7 @@ bool node <T, U> ::special() const
 		break;
 	default:
 		break;
-	}
+	} */
 
 	return false;
 }
@@ -1391,8 +1503,14 @@ void node <T, U> ::label_as_operand()
 {
 	if (dynamic_cast <opd_r *> (tok) != nullptr)
 		type = l_constant_real;
+	else if (dynamic_cast <opd_z *> (tok) != nullptr)
+		type = l_constant_integer;
 	else if (dynamic_cast <opd_q *> (tok) != nullptr)
 		type = l_constant_rational;
+	else if (dynamic_cast <opd_cr *> (tok) != nullptr)
+		type = l_constant_complex_real;
+	else if (dynamic_cast <opd_cq *> (tok) != nullptr)
+		type = l_constant_complex_rational;
 	else
 		type = l_constant;
 }
@@ -1402,19 +1520,33 @@ void node <T, U> ::label_as_operation()
 {
 	bool constant = true;
 	for (node *nd : leaves) {
-		if (nd->type != l_constant &&
-				nd->type != l_operation_constant) {
+		switch (nd->type) {
+		case l_constant:
+		case l_constant_real:
+		case l_constant_integer:
+		case l_constant_rational:
+		case l_constant_complex_real:
+		case l_constant_complex_rational:
+		case l_operation_constant:
+			break;
+		default:
 			constant = false;
 			break;
 		}
+
+		if (!constant)
+			break;
 	}
 	
 	if (constant) {
+		cout << "(const) this: " << this << endl;
 		type = l_operation_constant;
 		return;
+	} else {
+		cout << "(non - const) this: " << this << endl;
 	}
 
-	opn *optr = dynamic_cast <opn *> (tok);
+	/* opn *optr = dynamic_cast <opn *> (tok);
 	switch (cfg_ptr->code(optr->fmt())) {
 	case op_add:
 	case op_sub:
@@ -1453,7 +1585,7 @@ void node <T, U> ::label_as_operation()
 		break;
 	default:
 		break;
-	}
+	} */
 }
 
 template <class T, class U>
@@ -1462,7 +1594,7 @@ void node <T, U> ::label_as_special(const std::vector <std::string> &vars)
 	// Early checking
 	opn *optr = dynamic_cast <opn *> (tok);
 
-	if (optr) {
+	/* if (optr) {
 		switch (cfg_ptr->code(optr->fmt())) {
 		case op_sum:
 			leaves[0]->type = l_summation_variable;
@@ -1474,7 +1606,7 @@ void node <T, U> ::label_as_special(const std::vector <std::string> &vars)
 		default:
 			break;
 		}
-	}
+	} */
 }
 
 //////////////////////////////////////////
@@ -1556,7 +1688,7 @@ void node <T, U> ::compress_as_separable()
 	T val;
 	T sign;
 
-	if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
+	/* if (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt()) == op_add)
 		sign = cfg_ptr->one;
 	else
 		sign = cfg_ptr->negative;
@@ -1586,7 +1718,7 @@ void node <T, U> ::compress_as_separable()
 			label_all();
 			compress();
 		}
-	}
+	} */
 }
 
 template <class T, class U>
@@ -1599,7 +1731,7 @@ void node <T, U> ::compress_as_multiplied()
 	/* put the following ds
 	 into a single augumented
 	 data structure */
-	std::unordered_map <std::string, T> chart;
+	/* std::unordered_map <std::string, T> chart;
 	std::vector <node *> misc;
 	std::queue <node *> que;
 	std::string name;
@@ -1634,7 +1766,7 @@ void node <T, U> ::compress_as_multiplied()
 				constant
 			};
 
-			constant = new opd((*optr)(vals));
+			constant = dynamic_cast <opd *> ((*optr)(vals));
 
 			vals.clear();
 
@@ -1645,7 +1777,7 @@ void node <T, U> ::compress_as_multiplied()
 				current->tok
 			};
 
-			constant = new opd((*optr)(vals));
+			constant = dynamic_cast <opd *> ((*optr)(vals));
 
 			vals.clear();
 
@@ -1661,28 +1793,28 @@ void node <T, U> ::compress_as_multiplied()
 
 	tok = nullptr;
 	if (constant->get() == T(0)) {
-		set(new opd(0), l_constant, {}, cfg_ptr);
+		set(new opd(0), l_constant, {});
 		return;
 	}
 
 	if (constant->get() != T(1))
-		set(constant, l_constant, {}, cfg_ptr);
+		set(constant, l_constant, {});
 
 	for (auto itr : chart) {
 		if (tok)
 			temp = copy();
 
 		if (itr.second == T(1)) {
-			t = new node(new var(itr.first, true), {}, cfg_ptr);
+			t = new node(new var(itr.first, true), {});
 		} else {
 			t = new node(get(op_exp), {
-				new node(new var(itr.first, true), {}, cfg_ptr),
-				new node(new opd(itr.second), {}, cfg_ptr)
-			}, cfg_ptr);
+				new node(new var(itr.first, true), {}),
+				new node(new opd(itr.second), {})
+			});
 		}
 
 		if (tok) {
-			set(cfg_ptr->alloc_opn(op_mul), {temp, t}, cfg_ptr);
+			set(cfg_ptr->alloc_opn(op_mul), {temp, t});
 		} else {
 			set(t);
 		}
@@ -1691,13 +1823,13 @@ void node <T, U> ::compress_as_multiplied()
 	for (auto itr : misc) {
 		if (tok) {	
 			temp = copy();
-			set(cfg_ptr->alloc_opn(op_mul), {temp, itr}, cfg_ptr);
+			set(cfg_ptr->alloc_opn(op_mul), {temp, itr});
 		} else {
-			set(itr->tok, itr->leaves, cfg_ptr);
+			set(itr->tok, itr->leaves);
 		}
 	}
 	
-	/* cout << "POST-COMPRESSION:" << endl; 
+	* cout << "POST-COMPRESSION:" << endl; 
 	print(); */
 }
 
@@ -1719,18 +1851,18 @@ void node <T, U> ::compress_as_divided()
 			leaves[0] = leaves[1]->copy();
 
 			delete leaves[1];
-			leaves[1] = new node(new opd(-1), {}, cfg_ptr);
+			leaves[1] = new node(new opd(-1), {});
 		} else if (val == T(0)) {
-			set(new opd(0), {}, cfg_ptr);
+			set(new opd(0), {});
 		}
 	} else if (leaves[1]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[1]->tok))->get();
 
-		if (val == cfg_ptr->one) {
+		/* if (val == cfg_ptr->one) {
 			set(leaves[0]);
-		}
+		} */
 		/* else if (val == 0) <- throw zero division exception
-			set(new opd(1), {}, cfg_ptr); */
+			set(new opd(1), {}); */
 	}
 }
 
@@ -1769,7 +1901,7 @@ void node <T, U> ::compress_as_power()
 		if (val == T(1))
 			set(leaves[0]);
 		else if (val == T(0))
-			set(new opd(1), {}, cfg_ptr);
+			set(new opd(1), {});
 	}
 }
 
@@ -1784,9 +1916,9 @@ void node <T, U> ::compress_as_exponential()
 	if (leaves[0]->type == l_constant) {
 		val = (dynamic_cast <opd *> (leaves[0]->tok))->get();
 		if (val == T(1))
-			set(new opd(1), {}, cfg_ptr);
+			set(new opd(1), {});
 		else if (val == 0)
-			set(new opd(0), {}, cfg_ptr);
+			set(new opd(0), {});
 	}
 }
 
@@ -1809,8 +1941,8 @@ void node <T, U> ::differentiate_as_multiplied(const std::string &var)
 	rcpy->differentiate(var);
 	
 	leaves = {
-		new node(get(op_mul), {lcpy, leaves[1]}, cfg_ptr),
-		new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
+		new node(get(op_mul), {lcpy, leaves[1]}),
+		new node(get(op_mul), {leaves[0], rcpy}),
 	};
 }
 
@@ -1828,14 +1960,14 @@ void node <T, U> ::differentiate_as_divided(const std::string &var)
 
 	std::vector <node *> lv_cpy = {
 		new node(get(op_sub), {
-			new node(get(op_mul), {lcpy, leaves[1]}, cfg_ptr),
-			new node(get(op_mul), {leaves[0], rcpy}, cfg_ptr),
-		}, cfg_ptr),
+			new node(get(op_mul), {lcpy, leaves[1]}),
+			new node(get(op_mul), {leaves[0], rcpy}),
+		}),
 
 		new node(get(op_exp), {
 				denom,
-				new node(new opd(2), {}, cfg_ptr)
-		}, cfg_ptr),
+				new node(new opd(2), {})
+		}),
 	};
 
 	leaves = lv_cpy;
@@ -1855,14 +1987,14 @@ void node <T, U> ::differentiate_as_power(const std::string &var)
 	// delete leaves[1];
 	leaves[1] = new node(get(op_exp), {
 			leaves[0],
-			new node(new opd(val - 1), {}, cfg_ptr)
-	}, cfg_ptr);
+			new node(new opd(val - 1), {})
+	});
 	
 	// delete leaves[0];
 	leaves[0] = new node(get(op_mul), {
-			new node(new opd(val), {}, cfg_ptr),
+			new node(new opd(val), {}),
 			done
-	}, cfg_ptr);
+	});
 }
 
 template <class T, class U>
@@ -1878,13 +2010,13 @@ void node <T, U> ::differentiate_as_exponential(const std::string &var)
 	set(get(op_mul), {
 		cpy,
 		new node {get(op_mul), {
-			new node {new opd(log(val)), {}, cfg_ptr},
+			new node {new opd(log(val)), {}},
 			new node {get(op_exp), {
 				leaves[0],
 				leaves[1]
-			}, cfg_ptr}
-		}, cfg_ptr}
-	}, cfg_ptr);
+			}}
+		}}
+	});
 }
 
 template <class T, class U>
@@ -1895,26 +2027,26 @@ void node <T, U> ::differentiate_as_trigonometric(const std::string &var)
 	cpy = leaves[0]->copy();
 	cpy->differentiate(var);
 
-	switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
+	/* switch (cfg_ptr->code((dynamic_cast <opn *> (tok))->fmt())) {
 	case op_sin:
 		set(get(op_mul), {
 			cpy,
 			new node {get(op_cos), {
 				leaves[0]
-			}, cfg_ptr},
-		}, cfg_ptr);
+			}},
+		});
 
 		break;
 	case op_cos:
 		set(get(op_mul), {
-			new node {new opd(-1), {}, cfg_ptr},
+			new node {new opd(-1), {}},
 			new node {get(op_mul), {
 				cpy,
 				new node {get(op_sin), {
 					leaves[0]
-				}, cfg_ptr},
-			}, cfg_ptr}
-		}, cfg_ptr);
+				}},
+			}}
+		});
 		break;
 	case op_tan:
 		set(get(op_mul), {
@@ -1922,26 +2054,26 @@ void node <T, U> ::differentiate_as_trigonometric(const std::string &var)
 			new node {get(op_exp), {
 				new node {get(op_sec), {
 					leaves[0],
-				}, cfg_ptr},
-				new node {new opd(2), {}, cfg_ptr}
-			}, cfg_ptr}
-		}, cfg_ptr);
+				}},
+				new node {new opd(2), {}}
+			}}
+		});
 		break;
 	case op_csc:
 		set(get(op_mul), {
-			new node {new opd(-1), {}, cfg_ptr},
+			new node {new opd(-1), {}},
 			new node {get(op_mul), {
 				cpy,
 				new node {get(op_mul), {
 					new node {get(op_csc), {
 						leaves[0]->copy()
-					}, cfg_ptr},
+					}},
 					new node {get(op_cot), {
 						leaves[0]
-					}, cfg_ptr}
-				}, cfg_ptr}
-			}, cfg_ptr}
-		}, cfg_ptr);
+					}}
+				}}
+			}}
+		});
 		break;
 	case op_sec:
 		set(get(op_mul), {
@@ -1949,30 +2081,30 @@ void node <T, U> ::differentiate_as_trigonometric(const std::string &var)
 			new node {get(op_mul), {
 				new node {get(op_sec), {
 					leaves[0]->copy()
-				}, cfg_ptr},
+				}},
 				new node {get(op_tan), {
 					leaves[0]
-				}, cfg_ptr}
-			}, cfg_ptr}
-		}, cfg_ptr);
+				}}
+			}}
+		});
 		break;
 	case op_cot:
 		set(get(op_mul), {
-			new node {new opd(-1), {}, cfg_ptr},
+			new node {new opd(-1), {}},
 			new node {get(op_mul), {
 				cpy,
 				new node {get(op_exp), {
 					new node {get(op_csc), {
 						leaves[0],
-					}, cfg_ptr},
-					new node {new opd(2), {}, cfg_ptr}
-				}, cfg_ptr}
-			}, cfg_ptr}
-		}, cfg_ptr);
+					}},
+					new node {new opd(2), {}}
+				}}
+			}}
+		});
 		break;
 	default:
 		break;
-	}
+	} */
 }
 
 template <class T, class U>
@@ -1991,10 +2123,10 @@ void node <T, U> ::differentiate_as_constant_logarithmic(const std::string &var)
 	set(get(op_div), {
 		cpy,
 		new node {get(op_mul), {
-			new node {new opd(val), {}, cfg_ptr},
+			new node {new opd(val), {}},
 			leaves[1]
-		}, cfg_ptr},
-	}, cfg_ptr);
+		}},
+	});
 }
 
 /* template <class T, class U>
@@ -2029,9 +2161,9 @@ void node <T, U> ::differentiate_as_function(const std::string &var)
 		new node {get(op_mul), {
 			lcp,
 			cpy
-		}, cfg_ptr},
-		new node {new opd(0), l_none, {}, cfg_ptr}
-	}, cfg_ptr};
+		}},
+		new node {new opd(0), l_none, {}}
+	}};
 
 	// Other parameters
 	for (int i = 1; i < ft->ins(); i++) {
@@ -2055,9 +2187,9 @@ void node <T, U> ::differentiate_as_function(const std::string &var)
 			new node {get(op_mul), {
 				lcp,
 				cpy
-			}, cfg_ptr},
+			}},
 			out
-		}, cfg_ptr};
+		}};
 	}
 
 	// cout << endl;
@@ -2105,7 +2237,7 @@ std::string node <T, U> ::display_as_trigonometric() const
 	std::string stropn;
 	std::string space = " ";
 
-	stropn = leaves[0]->display_as_operand(l_trigonometric);
+	/* stropn = leaves[0]->display_as_operand(l_trigonometric);
 
 	if (stropn[0] == '(')
 		space = "";
@@ -2123,7 +2255,7 @@ std::string node <T, U> ::display_as_trigonometric() const
 		return "sec" + space + stropn;
 	case op_cot:
 		return "cot" + space + stropn;
-	}
+	} */
 
 	throw node_error("Node labeled as trigonometric, \
 		but token is of an undetecvtable type");

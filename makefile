@@ -1,3 +1,11 @@
+debug:		tests
+	@echo "\b[DEBUGGING PROGRAM]\n"
+	gdb ./build/tests
+
+run:		tests
+	@echo "\n[RUNNING PROGRAM]\n"
+	./build/tests
+
 graph:		build parsers
 	@echo "[BUILDING GRAPHER]\n"
 	nvcc web/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph
