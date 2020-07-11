@@ -1,3 +1,5 @@
 FROM gitpod/workspace-full
 
-RUN sudo apt-get install flex
+USER root
+
+RUN apt-get -yq update && apt install -yq flex
