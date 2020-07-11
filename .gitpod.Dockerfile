@@ -1,3 +1,3 @@
 FROM gitpod/workspace-full
 
-RUN sudo apt install flex
+RUN sudo apt-get install flex
