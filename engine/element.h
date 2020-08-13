@@ -35,9 +35,18 @@ public:
 	T &operator[](size_t);
 	const T &operator[](size_t) const;
 
+	// Concatenating vectors
+	element append_above(const element &);
+	element append_above(const T &);
+	
+	element append_below(const element &);
+	element append_below(const T &);
+
 	T norm() const;
 
 	void normalize();
+
+	element normalized();
 
 	template <class U>
 	friend U inner(const element <U> &, const element <U> &);
@@ -122,6 +131,68 @@ const T &element <T> ::operator[](size_t i) const
 }
 
 template <class T>
+element <T> element <T> ::append_above(const element <T> &v)
+{
+	size_t t_sz = size();
+	size_t v_sz = v.size();
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < v_sz; i++)
+		total.push_back(v[i]);
+
+	for (size_t i = 0; i < t_sz; i++)
+		total.push_back((*this)[i]);
+
+	return element(total);
+}
+
+template <class T>
+element <T> element <T> ::append_above(const T &x)
+{
+	size_t t_sz = size();
+
+	std::vector <T> total {x};
+
+	for (size_t i = 0; i < t_sz; i++)
+		total.push_back((*this)[i]);
+
+	return element(total);
+}
+
+template <class T>
+element <T> element <T> ::append_below(const element <T> &v)
+{
+	size_t t_sz = size();
+	size_t v_sz = v.size();
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < t_sz; i++)
+		total.push_back((*this)[i]);
+
+	for (size_t i = 0; i < v_sz; i++)
+		total.push_back(v[i]);
+
+	return element(total);
+}
+
+template <class T>
+element <T> element <T> ::append_below(const T &x)
+{
+	size_t t_sz = size();
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < t_sz; i++)
+		total.push_back((*this)[i]);
+
+	total.push_back(x);
+
+	return element(total);
+}
+
+template <class T>
 T element <T> ::norm() const
 {
 	return sqrt(inner(*this, *this));
@@ -134,6 +205,19 @@ void element <T> ::normalize()
 
 	for (size_t i = 0; i < size(); i++)
 		(*this)[i] /= dt;
+}
+
+template <class T>
+element <T> element <T> ::normalized()
+{
+	std::vector <T> out;
+
+	T dt = norm();
+
+	for (size_t i = 0; i < size(); i++)
+		out.push_back((*this)[i]/dt);
+
+	return element(out);
 }
 
 template <class T>

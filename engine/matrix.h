@@ -167,8 +167,6 @@ matrix <T> ::matrix(const std::vector <T> &ref)
 	assert(rows > 0);
 
 	cols = 1;
-
-	assert(cols > 0);
 	
 	m_array = new T *[rows];
 
