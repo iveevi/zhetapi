@@ -297,17 +297,17 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	AB_OP_FTR(^, CQ, CQ, CQ, Q(1));
 
 	// Trigonometry
-	AU_OP(std::sin, Z, R);
-	AU_OP_FTR(std::sin, Q, R, sin(R (in->get())));
-	AU_OP(std::sin, R, R);
+	AU_OP(sin, Z, R);
+	AU_OP_FTR(sin, Q, R, sin(R (in->get())));
+	AU_OP(sin, R, R);
 	
-	AU_OP(std::cos, Z, R);
-	AU_OP_FTR(std::sin, Q, R, cos(R (in->get())));
-	AU_OP(std::cos, R, R);
+	AU_OP(cos, Z, R);
+	AU_OP_FTR(sin, Q, R, cos(R (in->get())));
+	AU_OP(cos, R, R);
 	
-	AU_OP(std::tan, Z, R);
-	AU_OP_FTR(std::sin, Q, R, tan(R (in->get())));
-	AU_OP(std::tan, R, R);
+	AU_OP(tan, Z, R);
+	AU_OP_FTR(sin, Q, R, tan(R (in->get())));
+	AU_OP(tan, R, R);
 }
 
 template <class R, class Z>

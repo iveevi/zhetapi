@@ -4,6 +4,7 @@
 #include <initializer_list>
 #include <iostream>
 #include <vector>
+#include <cmath>
 
 /**
  * @brief Represents a polynomial,

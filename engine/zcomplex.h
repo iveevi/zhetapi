@@ -73,7 +73,7 @@ bool zcomplex <T> ::is_real() const
 template <class T>
 zcomplex <T> ::operator double() const
 {
-	std::cout << "Zcompex conv: Here" << std::endl;
+	// std::cout << "Zcompex conv: Here" << std::endl;
 	return (double) this->real();
 }
 

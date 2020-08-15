@@ -1,6 +1,6 @@
 run:		tests
 	@echo "\n[RUNNING PROGRAM]\n"
-	./build/tests
+	./build/tests < ./tests/tests.in
 
 debug:		tests
 	@echo "\b[DEBUGGING PROGRAM]\n"
@@ -14,9 +14,9 @@ tests:		build parsers
 	@echo "[BUILDING TESTS]\n"
 	g++ tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
-ex:		build parsers
+exp:		build parsers
 	@echo "[BUILDING TESTS]\n"
-	g++ tests/ex.cpp -lfl -lgmpxx -lgmp -lglut -lGL -g -o build/ex
+	g++ tests/exp.cpp -lfl -lgmpxx -lgmp -lglut -lGL -g -o build/exp
 
 texifier:	build
 	@echo "[BUILDING TEXIFIER]\n"

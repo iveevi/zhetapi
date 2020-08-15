@@ -46,19 +46,19 @@ enum nd_label {
 	l_variable,
 
 	l_constant,		// keep to prevent errors
-	l_constant_real,
 	l_constant_integer,
 	l_constant_rational,
-	l_constant_complex_real,
+	l_constant_real,
 	l_constant_complex_rational,
+	l_constant_complex_real,
+	l_constant_vector_rational,	// Convert integers to rationals for vec/mat
 	l_constant_vector_real,
-	l_constant_vector_rational,
-	l_constant_vector_complex_real,
 	l_constant_vector_complex_rational,
-	l_constant_matrix_real,
+	l_constant_vector_complex_real,
 	l_constant_matrix_rational,
-	l_constant_matrix_complex_real,
+	l_constant_matrix_real,
 	l_constant_matrix_complex_rational,
+	l_constant_matrix_complex_real,
 
 	l_function,
 	l_exp,
@@ -98,7 +98,7 @@ std::string strlabs[] = {
 	"constant vector real",
 	"constant vector rational",
 	"constant vector complex real",
-	"constant vector comlpex rational",
+	"constant vector complex rational",
 	"constant matrix real",
 	"constant matrix rational",
 	"constant matrix complex real",
@@ -155,6 +155,11 @@ public:
 	using opd_z = operand <U>;
 	using opd_q = operand <rational <U>>;
 	using opd_cq = operand <zcomplex <rational <U>>>;
+	
+	using opd_v_r = operand <element <T>>;
+	using opd_v_cr = operand <element <zcomplex <T>>>;	
+	using opd_v_q = operand <element <rational <U>>>;
+	using opd_v_cq = operand <element <zcomplex <rational <U>>>>;
 
 	using opn = operation <T>;
 	using opd = operand <T>;
@@ -323,6 +328,13 @@ public:
 		const std::string &what() const {
 			return str;
 		}
+	};
+	
+	// Exception for syntax error
+	class syntax_error : public node_error {
+	public:
+		syntax_error(std::string s)
+			: node_error(s) {}
 	};
 	
 	// Exception for unknown symbols
@@ -1223,10 +1235,25 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	U num;
 	U den;
 
+	nd_label mn;
+
 	char c;
 	char i;
 
 	istringstream iss;
+
+	vector <node *> vec;
+
+	// create aliases
+	vector <rational <U>> rats;
+	vector <T> reals;
+	vector <zcomplex <rational <U>>> crats;
+	vector <zcomplex <T>> creals;
+	
+	/* element <rational <U>> rats;
+	element <T> reals;
+	element <zcomplex <rational <U>>> crats;
+	element <zcomplex <T>> creals; */
 
 	switch (st->kind()) {
 	case l_operation:
@@ -1234,6 +1261,118 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 		break;
 	case l_variable_cluster:
 		out = convert_variable_cluster(st, tbl);
+		break;
+	case l_vector:
+		cout << "VECTOR" << endl;
+
+		for (stree *s : st->children())
+			vec.push_back(convert(s));
+
+		mn = l_none;
+		for (node *i : vec) {
+			i->print();
+			mn = max(mn, i->type);
+		}
+
+		cout << strlabs[mn] << endl;
+
+		// real & crat -> creal not crat
+
+		// turn into a function(mn, vec), then return function(mn, vec)
+		switch (mn) {
+		case l_constant_integer:
+		case l_constant_rational:
+			for (node *nd : vec) {
+				rational <U> tmp;
+				
+				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+				if (t1 != nullptr)
+					tmp = t1->get();
+				
+				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				if (t2 != nullptr)
+					tmp = t2->get();
+
+				rats.push_back(tmp);
+			}
+			
+			out = new node {new opd_v_q(rats), l_constant_vector_rational, {}};
+			break;
+		case l_constant_real:
+			for (node *nd : vec) {
+				T tmp;
+				
+				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+				if (t1 != nullptr)
+					tmp = t1->get();
+				
+				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				if (t2 != nullptr)
+					tmp = t2->get();
+				
+				auto t3 = dynamic_cast <operand <T> *> (nd->tok);
+				if (t3 != nullptr)
+					tmp = t3->get();
+
+				reals.push_back(tmp);
+			}
+			
+			out = new node {new opd_v_r(reals), l_constant_vector_real, {}};
+			break;
+		case l_constant_complex_rational:
+			for (node *nd : vec) {
+				zcomplex <rational <U>> tmp;
+				
+				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+				if (t1 != nullptr)
+					tmp = rational <U> (t1->get());
+				
+				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				if (t2 != nullptr)
+					tmp = t2->get();
+				
+				auto t3 = dynamic_cast <operand <zcomplex <rational <U>>> *> (nd->tok);
+				if (t3 != nullptr)
+					tmp = t3->get();
+
+				reals.push_back(tmp);
+			}
+			
+			out = new node {new opd_v_cq(crats), l_constant_vector_complex_rational, {}};
+			break;
+		case l_constant_complex_real:
+			for (node *nd : vec) {
+				zcomplex <T> tmp;
+				
+				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+				if (t1 != nullptr)
+					tmp = t1->get();
+				
+				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				if (t2 != nullptr)
+					tmp = (T) t2->get();
+				
+				auto t3 = dynamic_cast <operand <T> *> (nd->tok);
+				if (t3 != nullptr)
+					tmp = t3->get();
+				
+				auto t4 = dynamic_cast <operand <zcomplex <rational <U>>> *> (nd->tok);
+				if (t4 != nullptr)
+					tmp = (T) t4->get();
+				
+				auto t5 = dynamic_cast <operand <zcomplex <T>> *> (nd->tok);
+				if (t5 != nullptr)
+					tmp = t5->get();
+
+				creals.push_back(tmp);
+			}
+			
+			out = new node {new opd_v_cr(creals), l_constant_vector_complex_real, {}};
+			break;
+		default:
+			throw syntax_error("err");
+		}
+
 		break;
 	case l_complex_rational:
 		iss = istringstream(st->str());
@@ -1274,7 +1413,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 
 		iss >> val;
 
-		out = new node {new opd_r(val), l_constant, {}};
+		out = new node {new opd_r(val), l_constant_real, {}};
 		break;
 	case l_number_integer:
 		iss = istringstream(st->str());
