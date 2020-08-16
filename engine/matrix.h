@@ -85,6 +85,7 @@ public:
 	bool symmetric() const;
 
 	std::string display() const;
+	std::string display_nice() const;
 
 	template <class U>
 	friend const matrix <U> &operator+(const matrix <U> &, const matrix <U> &);
@@ -521,6 +522,37 @@ bool matrix <T> ::symmetric() const
 
 template <class T>
 std::string matrix <T> ::display() const
+{
+	std::ostringstream oss;
+
+	oss << "[";
+
+	for (int i = 0; i < rows; i++) {
+		if (cols > 1) {
+			oss << '[';
+
+			for (int j = 0; j < cols; j++) {
+				oss << m_array[i][j];
+				if (j != cols - 1)
+					oss << ", ";
+			}
+
+			oss << ']';
+		} else {
+			oss << m_array[i][0];
+		}
+
+		if (i < rows - 1)
+			oss << ", ";
+	}
+
+	oss << "]";
+
+	return oss.str();
+}
+
+template <class T>
+std::string matrix <T> ::display_nice() const
 {
 	std::ostringstream oss;
 	for (int i = 0; i < rows; i++) {

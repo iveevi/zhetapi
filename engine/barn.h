@@ -199,8 +199,17 @@ public:
 	using CR = zcomplex <R>;
 	using CQ = zcomplex <Q>;
 
-	using MR = matrix <R>;		// These matrix fields also include
-	using MQ = matrix <Q>;		// vector spaces of the corresponding sets
+	using MR = matrix <R>;
+	using MQ = matrix <Q>;
+
+	using MCR = matrix <CR>;
+	using MCQ = matrix <CQ>;
+
+	using VR = element <R>;
+	using VQ = element <Q>;
+
+	using VCR = element <CR>;
+	using VCQ = element <CQ>;
 
 	using opd_z = operand <Z>;
 	using opd_r = operand <R>;
@@ -308,6 +317,17 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	AU_OP(tan, Z, R);
 	AU_OP_FTR(sin, Q, R, tan(R (in->get())));
 	AU_OP(tan, R, R);
+
+	// Vector
+	AB_OP(+, VQ, VQ, VQ);
+	AB_OP(+, VR, VR, VR);
+	
+	AB_OP(-, VQ, VQ, VQ);
+	AB_OP(-, VR, VR, VR);
+
+	// Matrix
+	AB_OP(+, MQ, MQ, MQ);
+	AB_OP(+, MR, MR, MR);
 }
 
 template <class R, class Z>
@@ -374,6 +394,7 @@ token *barn <R, Z> ::value(const std::string &str,
 
 		cout << "Token Established: " << tptr->str() << endl;
 		
+		// Constants
 		operation <R> *opn_r = dynamic_cast <operation <R> *> (tptr);
 		if (opn_r != nullptr)
 			return (*opn_r)(vals);
@@ -393,6 +414,40 @@ token *barn <R, Z> ::value(const std::string &str,
 		operation <CQ> *opn_cq = dynamic_cast <operation <CQ> *> (tptr);
 		if (opn_cq != nullptr)
 			return (*opn_cq)(vals);
+
+		// Vectors
+		operation <VQ> *opn_vq = dynamic_cast <operation <VQ> *> (tptr);
+		if (opn_vq != nullptr)
+			return (*opn_vq)(vals);
+
+		operation <VR> *opn_vr = dynamic_cast <operation <VR> *> (tptr);
+		if (opn_vr != nullptr)
+			return (*opn_vr)(vals);
+
+		operation <VCQ> *opn_vcq = dynamic_cast <operation <VCQ> *> (tptr);
+		if (opn_vcq != nullptr)
+			return (*opn_vcq)(vals);
+
+		operation <VCR> *opn_vcr = dynamic_cast <operation <VCR> *> (tptr);
+		if (opn_vcr != nullptr)
+			return (*opn_vcr)(vals);
+
+		// Matrices
+		operation <MQ> *opn_mq = dynamic_cast <operation <MQ> *> (tptr);
+		if (opn_mq != nullptr)
+			return (*opn_mq)(vals);
+
+		operation <MR> *opn_mr = dynamic_cast <operation <MR> *> (tptr);
+		if (opn_mr != nullptr)
+			return (*opn_mr)(vals);
+
+		operation <MCQ> *opn_mcq = dynamic_cast <operation <MCQ> *> (tptr);
+		if (opn_mcq != nullptr)
+			return (*opn_mcq)(vals);
+
+		operation <MCR> *opn_mcr = dynamic_cast <operation <MCR> *> (tptr);
+		if (opn_mcr != nullptr)
+			return (*opn_mcr)(vals);
 	} else {
 		cout << "Invalid Token (Not Found)" << endl;
 	}

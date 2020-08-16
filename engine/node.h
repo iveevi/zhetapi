@@ -13,14 +13,14 @@
 
 /* Engine Headers */
 // #include "config.h"
-#include "rational.h"
-#include "zcomplex.h"
-#include "stree.h"
-#include "variable.h"
-#include "vtable.h"
-#include "barn.h"
-#include "operation_holder.h"
-#include "config.h"
+#include <rational.h>
+#include <zcomplex.h>
+#include <stree.h>
+#include <variable.h>
+#include <vtable.h>
+#include <barn.h>
+#include <operation_holder.h>
+#include <config.h>
 
 template <class T>
 class vtable;
@@ -90,19 +90,19 @@ std::string strlabs[] = {
 	"variable",
 
 	"constant",
-	"constant real",
 	"constant integer",
 	"constant rational",
-	"constant complex real",
+	"constant real",
 	"constant complex rational",
-	"constant vector real",
+	"constant complex real",
 	"constant vector rational",
-	"constant vector complex real",
+	"constant vector real",
 	"constant vector complex rational",
-	"constant matrix real",
+	"constant vector complex real",
 	"constant matrix rational",
-	"constant matrix complex real",
+	"constant matrix real",
 	"constant matrix complex rational",
+	"constant matrix complex real",
 
 	"function",
 	"exponent",
@@ -1249,6 +1249,9 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	vector <T> reals;
 	vector <zcomplex <rational <U>>> crats;
 	vector <zcomplex <T>> creals;
+
+	// flags
+	bool fl_real = false;
 	
 	/* element <rational <U>> rats;
 	element <T> reals;
@@ -1269,10 +1272,17 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 			vec.push_back(convert(s));
 
 		mn = l_none;
-		for (node *i : vec) {
-			i->print();
-			mn = max(mn, i->type);
+		for (node *nd : vec) {
+			nd->print();
+
+			if (nd->type == l_constant_real)
+				fl_real = true;
+
+			mn = max(mn, nd->type);
 		}
+
+		if ((mn == l_constant_complex_rational) && fl_real)
+			mn = l_constant_complex_real;
 
 		cout << strlabs[mn] << endl;
 
@@ -1335,7 +1345,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				if (t3 != nullptr)
 					tmp = t3->get();
 
-				reals.push_back(tmp);
+				crats.push_back(tmp);
 			}
 			
 			out = new node {new opd_v_cq(crats), l_constant_vector_complex_rational, {}};
@@ -1346,7 +1356,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				
 				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
 				if (t1 != nullptr)
-					tmp = t1->get();
+					tmp = (T) t1->get();
 				
 				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
 				if (t2 != nullptr)
@@ -1358,7 +1368,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				
 				auto t4 = dynamic_cast <operand <zcomplex <rational <U>>> *> (nd->tok);
 				if (t4 != nullptr)
-					tmp = (T) t4->get();
+					tmp = {(T) t4->get().real(), (T) t4->get().imag()};
 				
 				auto t5 = dynamic_cast <operand <zcomplex <T>> *> (nd->tok);
 				if (t5 != nullptr)

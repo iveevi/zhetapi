@@ -168,10 +168,6 @@ rational <T> operator-(const rational <T> &a, const rational <T> &b)
 
 	out -= b;
 
-	std::cout << "a: " << a << std::endl;
-	std::cout << "b: " << b << std::endl;
-	std::cout << "out: " << out << std::endl;
-
 	return out;
 }
 
