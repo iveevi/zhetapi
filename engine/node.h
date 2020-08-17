@@ -14,7 +14,7 @@
 /* Engine Headers */
 // #include "config.h"
 #include <rational.h>
-#include <zcomplex.h>
+#include <complex.h>
 #include <stree.h>
 #include <variable.h>
 #include <vtable.h>
@@ -26,7 +26,7 @@ template <class T>
 class vtable;
 
 template <class T, class U>
-class functor;
+class Function;
 
 /**
  * @brief The enumeration
@@ -51,7 +51,7 @@ enum nd_label {
 	l_constant_real,
 	l_constant_complex_rational,
 	l_constant_complex_real,
-	l_constant_vector_rational,	// Convert integers to rationals for vec/mat
+	l_constant_vector_rational,	// Convert integers to Rationals for vec/mat
 	l_constant_vector_real,
 	l_constant_vector_complex_rational,
 	l_constant_vector_complex_real,
@@ -59,6 +59,9 @@ enum nd_label {
 	l_constant_matrix_real,
 	l_constant_matrix_complex_rational,
 	l_constant_matrix_complex_real,
+
+	l_matrix_uncoded,	// leave martix as nodes
+	l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
 
 	l_function,
 	l_exp,
@@ -132,7 +135,7 @@ enum nd_class {
 std::string strclass[] = {
 	"none",
 	"polynomial",
-	"rational",
+	"Rational",
 	"exponential"
 };
 
@@ -144,27 +147,32 @@ template <class T, class U>
 class node {
 public:
 	// Friends
-	friend class functor <T, int>;
+	friend class Function <T, int>;
 	
 	// Aliases
 	using params = std::vector <variable <T>>;
 	
 	using opd_r = operand <T>;
-	using opd_cr = operand <zcomplex <T>>;
+	using opd_cr = operand <Complex <T>>;
 
 	using opd_z = operand <U>;
-	using opd_q = operand <rational <U>>;
-	using opd_cq = operand <zcomplex <rational <U>>>;
+	using opd_q = operand <Rational <U>>;
+	using opd_cq = operand <Complex <Rational <U>>>;
 	
-	using opd_v_r = operand <element <T>>;
-	using opd_v_cr = operand <element <zcomplex <T>>>;	
-	using opd_v_q = operand <element <rational <U>>>;
-	using opd_v_cq = operand <element <zcomplex <rational <U>>>>;
+	using opd_v_r = operand <Vector <T>>;
+	using opd_v_cr = operand <Vector <Complex <T>>>;	
+	using opd_v_q = operand <Vector <Rational <U>>>;
+	using opd_v_cq = operand <Vector <Complex <Rational <U>>>>;
+	
+	using opd_m_r = operand <Matrix <T>>;
+	using opd_m_cr = operand <Matrix <Complex <T>>>;	
+	using opd_m_q = operand <Matrix <Rational <U>>>;
+	using opd_m_cq = operand <Matrix <Complex <Rational <U>>>>;
 
 	using opn = operation <T>;
 	using opd = operand <T>;
 	using var = variable <T>;
-	// using ftr = functor <T, int>;
+	// using ftr = Function <T, int>;
 	// using cfg = config <T>;
 private:
 	// Members
@@ -229,7 +237,7 @@ public:
 	bool matches(node *) const;
 	bool matches(const node &) const;
 
-	token *value();
+	token *value() const;
 
 	void simplify();
 	void compress();
@@ -355,20 +363,21 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params)
 {
 	stree *st = new stree(str);
 
-	cout << endl << "Node Stree:" << endl;
-	st->print();
+	/* cout << endl << "Node Stree:" << endl;
+	st->print(); */
 	
 	node *out = convert(st, tbl);
-	cout << endl << "Out:" << endl;
-	out->print();
+	
+	/* cout << endl << "Out:" << endl;
+	out->print(); */
 
 	*this = *out;
 
 	delete out;
 	delete st;
 
-	cout << endl << "This:" << endl;
-	print();
+	/* cout << endl << "This:" << endl;
+	print(); */
 
 	reparametrize(params);
 	simplify();
@@ -690,7 +699,7 @@ bool node <T, U> ::matches(const node <T, U> &other) const
 }
 
 template <class T, class U>
-token *node <T, U> ::value()
+token *node <T, U> ::value() const
 {
 	std::vector <token *> vals;
 	std::vector <T> hard;
@@ -799,8 +808,8 @@ void node <T, U> ::simplify()
 {
 	label_all();
 
-	cout << endl << "POST WHOLE LABEL:" << endl;
-	print();
+	// cout << endl << "POST WHOLE LABEL:" << endl;
+	// print();
 
 	compress();
 	label_all();
@@ -1078,13 +1087,13 @@ std::string node <T, U> ::display() const
 		return leaves[0]->display_as_operand(type) + " * " + leaves[1]->display_as_operand(type);
 	case l_divided:
 		return leaves[0]->display_as_operand(type) + " / " + leaves[1]->display_as_operand(type);
-	case l_constant:
+	case l_constant ... l_constant_matrix_complex_real:
 		return tok->str();
 	case l_variable:
 	case l_summation_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
-	case l_function:
-		return display_as_function();
+	//case l_function:
+	//	return display_as_function();
 	case l_summation_function:
 		// str = (dynamic_cast <ftr *> (tok))->display();
 
@@ -1100,7 +1109,7 @@ std::string node <T, U> ::display() const
 		return leaves[0]->display_as_operand(type) + "^" + leaves[1]->display_as_operand(type);
 	// remove operation constant later
 	case l_operation_constant:
-		return std::to_string(value());
+		return value()->str();
 	case l_constant_logarithmic:
 	case l_logarithmic:
 		return "log_{" + leaves[0]->display() + "} (" + leaves[1]->display() + ")";
@@ -1245,18 +1254,27 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	vector <node *> vec;
 
 	// create aliases
-	vector <rational <U>> rats;
+	vector <Rational <U>> rats;
 	vector <T> reals;
-	vector <zcomplex <rational <U>>> crats;
-	vector <zcomplex <T>> creals;
+	vector <Complex <Rational <U>>> crats;
+	vector <Complex <T>> creals;
+	
+	vector <vector <Rational <U>>> m_rats;
+	vector <vector <T>> m_reals;
+	vector <vector <Complex <Rational <U>>>> m_crats;
+	vector <vector <Complex <T>>> m_creals;
+
+	// matrices
+	
+	vector <vector <node *>> mat;
 
 	// flags
 	bool fl_real = false;
 	
-	/* element <rational <U>> rats;
-	element <T> reals;
-	element <zcomplex <rational <U>>> crats;
-	element <zcomplex <T>> creals; */
+	/* Vector <Rational <U>> rats;
+	Vector <T> reals;
+	Vector <Complex <Rational <U>>> crats;
+	Vector <Complex <T>> creals; */
 
 	switch (st->kind()) {
 	case l_operation:
@@ -1265,16 +1283,154 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	case l_variable_cluster:
 		out = convert_variable_cluster(st, tbl);
 		break;
-	case l_vector:
-		cout << "VECTOR" << endl;
+	case l_matrix:
+		for (stree *s : st->children()) {
+			vec.clear();
 
+			for (stree *t : s->children())
+				vec.push_back(convert(t));
+
+			mat.push_back(vec);
+		}
+
+		mn = l_none;
+		for (auto row : mat) {
+			for (node *nd : row) {
+				if (nd->type == l_constant_real)
+					fl_real = true;
+
+				mn = max(mn, nd->type);
+			}
+		}
+
+		if ((mn == l_constant_complex_rational) && fl_real)
+			mn = l_constant_complex_real;
+		
+		switch (mn) {
+		case l_constant_integer:
+		case l_constant_rational:
+			for (auto row : mat) {
+				rats.clear();
+
+				for (node *nd : row) {
+					Rational <U> tmp;
+					
+					auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+					if (t1 != nullptr)
+						tmp = t1->get();
+					
+					auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
+					if (t2 != nullptr)
+						tmp = t2->get();
+
+					rats.push_back(tmp);
+				}
+
+				m_rats.push_back(rats);
+			}
+			
+			out = new node {new opd_m_q(m_rats), l_constant_matrix_rational, {}};
+			break;
+		case l_constant_real:
+			for (auto row : mat) {
+				reals.clear();
+
+				for (node *nd : row) {
+					T tmp;
+					
+					auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+					if (t1 != nullptr)
+						tmp = t1->get();
+					
+					auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
+					if (t2 != nullptr)
+						tmp = t2->get();
+					
+					auto t3 = dynamic_cast <operand <T> *> (nd->tok);
+					if (t3 != nullptr)
+						tmp = t3->get();
+
+					reals.push_back(tmp);
+				}
+
+				m_reals.push_back(reals);
+			}
+			
+			out = new node {new opd_m_r(m_reals), l_constant_matrix_real, {}};
+			break;
+		case l_constant_complex_rational:
+			for (auto row : mat) {
+				crats.clear();
+
+				for (node *nd : row) {
+					Complex <Rational <U>> tmp;
+					
+					auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+					if (t1 != nullptr)
+						tmp = Rational <U> (t1->get());
+					
+					auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
+					if (t2 != nullptr)
+						tmp = t2->get();
+					
+					auto t3 = dynamic_cast <operand <Complex <Rational <U>>> *> (nd->tok);
+					if (t3 != nullptr)
+						tmp = t3->get();
+
+					crats.push_back(tmp);
+				}
+
+				m_crats.push_back(crats);
+			}
+			
+			out = new node {new opd_m_cq(m_crats), l_constant_matrix_complex_rational, {}};
+			break;
+		case l_constant_complex_real:
+			for (auto row : mat) {
+				creals.clear();
+
+				for (node *nd : row) {
+					Complex <T> tmp;
+					
+					auto t1 = dynamic_cast <operand <U> *> (nd->tok);
+					if (t1 != nullptr)
+						tmp = (T) t1->get();
+					
+					auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
+					if (t2 != nullptr)
+						tmp = (T) t2->get();
+					
+					auto t3 = dynamic_cast <operand <T> *> (nd->tok);
+					if (t3 != nullptr)
+						tmp = t3->get();
+					
+					auto t4 = dynamic_cast <operand <Complex <Rational <U>>> *> (nd->tok);
+					if (t4 != nullptr)
+						tmp = {(T) t4->get().real(), (T) t4->get().imag()};
+					
+					auto t5 = dynamic_cast <operand <Complex <T>> *> (nd->tok);
+					if (t5 != nullptr)
+						tmp = t5->get();
+
+					creals.push_back(tmp);
+				}
+
+				m_creals.push_back(creals);
+			}
+			
+			out = new node {new opd_m_cr(m_creals), l_constant_matrix_complex_real, {}};
+			break;
+		default:
+			throw syntax_error("err");
+		}
+
+		break;
+	case l_vector:
 		for (stree *s : st->children())
 			vec.push_back(convert(s));
 
 		mn = l_none;
 		for (node *nd : vec) {
-			nd->print();
-
 			if (nd->type == l_constant_real)
 				fl_real = true;
 
@@ -1284,8 +1440,6 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 		if ((mn == l_constant_complex_rational) && fl_real)
 			mn = l_constant_complex_real;
 
-		cout << strlabs[mn] << endl;
-
 		// real & crat -> creal not crat
 
 		// turn into a function(mn, vec), then return function(mn, vec)
@@ -1293,13 +1447,13 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 		case l_constant_integer:
 		case l_constant_rational:
 			for (node *nd : vec) {
-				rational <U> tmp;
+				Rational <U> tmp;
 				
 				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
 				if (t1 != nullptr)
 					tmp = t1->get();
 				
-				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
 				if (t2 != nullptr)
 					tmp = t2->get();
 
@@ -1316,7 +1470,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				if (t1 != nullptr)
 					tmp = t1->get();
 				
-				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
 				if (t2 != nullptr)
 					tmp = t2->get();
 				
@@ -1331,17 +1485,17 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 			break;
 		case l_constant_complex_rational:
 			for (node *nd : vec) {
-				zcomplex <rational <U>> tmp;
+				Complex <Rational <U>> tmp;
 				
 				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
 				if (t1 != nullptr)
-					tmp = rational <U> (t1->get());
+					tmp = Rational <U> (t1->get());
 				
-				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
 				if (t2 != nullptr)
 					tmp = t2->get();
 				
-				auto t3 = dynamic_cast <operand <zcomplex <rational <U>>> *> (nd->tok);
+				auto t3 = dynamic_cast <operand <Complex <Rational <U>>> *> (nd->tok);
 				if (t3 != nullptr)
 					tmp = t3->get();
 
@@ -1352,13 +1506,13 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 			break;
 		case l_constant_complex_real:
 			for (node *nd : vec) {
-				zcomplex <T> tmp;
+				Complex <T> tmp;
 				
 				auto t1 = dynamic_cast <operand <U> *> (nd->tok);
 				if (t1 != nullptr)
 					tmp = (T) t1->get();
 				
-				auto t2 = dynamic_cast <operand <rational <U>> *> (nd->tok);
+				auto t2 = dynamic_cast <operand <Rational <U>> *> (nd->tok);
 				if (t2 != nullptr)
 					tmp = (T) t2->get();
 				
@@ -1366,11 +1520,11 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				if (t3 != nullptr)
 					tmp = t3->get();
 				
-				auto t4 = dynamic_cast <operand <zcomplex <rational <U>>> *> (nd->tok);
+				auto t4 = dynamic_cast <operand <Complex <Rational <U>>> *> (nd->tok);
 				if (t4 != nullptr)
 					tmp = {(T) t4->get().real(), (T) t4->get().imag()};
 				
-				auto t5 = dynamic_cast <operand <zcomplex <T>> *> (nd->tok);
+				auto t5 = dynamic_cast <operand <Complex <T>> *> (nd->tok);
 				if (t5 != nullptr)
 					tmp = t5->get();
 
@@ -1688,11 +1842,11 @@ void node <T, U> ::label_as_operation()
 	}
 	
 	if (constant) {
-		cout << "(const) this: " << this << endl;
+		// cout << "(const) this: " << this << endl;
 		type = l_operation_constant;
 		return;
 	} else {
-		cout << "(non - const) this: " << this << endl;
+		// cout << "(non - const) this: " << this << endl;
 	}
 
 	/* opn *optr = dynamic_cast <opn *> (tok);

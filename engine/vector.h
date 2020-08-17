@@ -1,34 +1,34 @@
 #ifndef ELEMENT_H_
 #define ELEMENT_H_
 
-#include "matrix.h"
+#include <matrix.h>
 
 /**
  * @brief Representative
- * of a general element,
+ * of a general Vector,
  * with components of type
- * T. In relation to a matrix,
+ * T. In relation to a Matrix,
  * these are only column vectors:
  * transpose them to get the
  * corresponding row vectors.
  */
 template <class T>
-class element : public matrix <T> {
+class Vector : public Matrix <T> {
 public:
-	element(T *);
-	element(const element &);
-	element(const matrix <T> &);
+	Vector(T *);
+	Vector(const Vector &);
+	Vector(const Matrix <T> &);
 
-	element(const std::vector <T> &);
-	element(const std::initializer_list <T> &);
+	Vector(const std::vector <T> &);
+	Vector(const std::initializer_list <T> &);
 
-	element(size_t, T *);
-	element(size_t = 0, T = T());
+	Vector(size_t, T *);
+	Vector(size_t = 0, T = T());
 	
-	element(size_t, std::function <T (size_t)>);
-	element(size_t, std::function <T *(size_t)>);
+	Vector(size_t, std::function <T (size_t)>);
+	Vector(size_t, std::function <T *(size_t)>);
 
-	const element <T> &operator=(const matrix <T> &);
+	const Vector <T> &operator=(const Matrix <T> &);
 
 	size_t size() const;
 
@@ -36,73 +36,73 @@ public:
 	const T &operator[](size_t) const;
 
 	// Concatenating vectors
-	element append_above(const element &);
-	element append_above(const T &);
+	Vector append_above(const Vector &);
+	Vector append_above(const T &);
 	
-	element append_below(const element &);
-	element append_below(const T &);
+	Vector append_below(const Vector &);
+	Vector append_below(const T &);
 
 	T norm() const;
 
 	void normalize();
 
-	element normalized();
+	Vector normalized();
 
 	template <class U>
-	friend U inner(const element <U> &, const element <U> &);
+	friend U inner(const Vector <U> &, const Vector <U> &);
 
 	template <class U>
-	friend element <U> cross(const element <U> &, const element <U> &);
+	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
 };
 
 template <class T>
-element <T> ::element(T *ref)
+Vector <T> ::Vector(T *ref)
 {
 }
 
 template <class T>
-element <T> ::element(const element &other) : matrix <T> (other) {}
+Vector <T> ::Vector(const Vector &other) : Matrix <T> (other) {}
 
 template <class T>
-element <T> ::element(const matrix <T> &other)
+Vector <T> ::Vector(const Matrix <T> &other)
 {
 	*this = other;
 }
 
 template <class T>
-element <T> ::element(const std::vector <T> &ref) : matrix <T> (ref)
+Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref)
 {
 	/* std::vector <std::vector <T>> pass(ref.size());
 	for (auto t : ref)
 		pass.push_back({t});
-	*this = matrix <T> (pass); */
+	*this = Matrix <T> (pass); */
 }
 
 template <class T>
-element <T> ::element(const std::initializer_list <T> &ref)
-	: element(std::vector <T> (ref)) {}
+Vector <T> ::Vector(const std::initializer_list <T> &ref)
+	: Vector(std::vector <T> (ref)) {}
 
 template <class T>
-element <T> ::element(size_t rs, T *ref)
+Vector <T> ::Vector(size_t rs, T *ref)
 {
 
 }
 
 template <class T>
-element <T> ::element(size_t rs, T def) : matrix <T> (rs, 1, def) {}
+Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
 
 template <class T>
-element <T> ::element(size_t rs, std::function <T (size_t)> gen)
-	: matrix <T> (rs, 1, gen) {}
+Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
+	: Matrix <T> (rs, 1, gen) {}
 
 template <class T>
-element <T> ::element(size_t rs, std::function <T *(size_t)> gen)
-	: matrix <T> (rs, 1, gen) {}
+Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
+	: Matrix <T> (rs, 1, gen) {}
 
 template <class T>
-const element <T> &element <T> ::operator=(const matrix <T> &other)
+const Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 {
-	element <T> *out = new element <T> (other.get_rows(),
+	Vector <T> *out = new Vector <T> (other.get_rows(),
 		[&](size_t i) {
 			return other[i][0];
 	});
@@ -113,25 +113,25 @@ const element <T> &element <T> ::operator=(const matrix <T> &other)
 }
 
 template <class T>
-size_t element <T> ::size() const
+size_t Vector <T> ::size() const
 {
 	return this->rows;
 }
 
 template <class T>
-T &element <T> ::operator[](size_t i)
+T &Vector <T> ::operator[](size_t i)
 {
 	return this->m_array[i][0];
 }
 
 template <class T>
-const T &element <T> ::operator[](size_t i) const
+const T &Vector <T> ::operator[](size_t i) const
 {
 	return this->m_array[i][0];
 }
 
 template <class T>
-element <T> element <T> ::append_above(const element <T> &v)
+Vector <T> Vector <T> ::append_above(const Vector <T> &v)
 {
 	size_t t_sz = size();
 	size_t v_sz = v.size();
@@ -144,11 +144,11 @@ element <T> element <T> ::append_above(const element <T> &v)
 	for (size_t i = 0; i < t_sz; i++)
 		total.push_back((*this)[i]);
 
-	return element(total);
+	return Vector(total);
 }
 
 template <class T>
-element <T> element <T> ::append_above(const T &x)
+Vector <T> Vector <T> ::append_above(const T &x)
 {
 	size_t t_sz = size();
 
@@ -157,11 +157,11 @@ element <T> element <T> ::append_above(const T &x)
 	for (size_t i = 0; i < t_sz; i++)
 		total.push_back((*this)[i]);
 
-	return element(total);
+	return Vector(total);
 }
 
 template <class T>
-element <T> element <T> ::append_below(const element <T> &v)
+Vector <T> Vector <T> ::append_below(const Vector <T> &v)
 {
 	size_t t_sz = size();
 	size_t v_sz = v.size();
@@ -174,11 +174,11 @@ element <T> element <T> ::append_below(const element <T> &v)
 	for (size_t i = 0; i < v_sz; i++)
 		total.push_back(v[i]);
 
-	return element(total);
+	return Vector(total);
 }
 
 template <class T>
-element <T> element <T> ::append_below(const T &x)
+Vector <T> Vector <T> ::append_below(const T &x)
 {
 	size_t t_sz = size();
 
@@ -189,17 +189,17 @@ element <T> element <T> ::append_below(const T &x)
 
 	total.push_back(x);
 
-	return element(total);
+	return Vector(total);
 }
 
 template <class T>
-T element <T> ::norm() const
+T Vector <T> ::norm() const
 {
 	return sqrt(inner(*this, *this));
 }
 
 template <class T>
-void element <T> ::normalize()
+void Vector <T> ::normalize()
 {
 	T dt = norm();
 
@@ -208,7 +208,7 @@ void element <T> ::normalize()
 }
 
 template <class T>
-element <T> element <T> ::normalized()
+Vector <T> Vector <T> ::normalized()
 {
 	std::vector <T> out;
 
@@ -217,11 +217,11 @@ element <T> element <T> ::normalized()
 	for (size_t i = 0; i < size(); i++)
 		out.push_back((*this)[i]/dt);
 
-	return element(out);
+	return Vector(out);
 }
 
 template <class T>
-T inner(const element <T> &a, const element <T> &b)
+T inner(const Vector <T> &a, const Vector <T> &b)
 {
 	T acc = 0;
 
@@ -233,7 +233,7 @@ T inner(const element <T> &a, const element <T> &b)
 }
 
 template <class T>
-T cross(const element <T> &a, const element <T> &b)
+T cross(const Vector <T> &a, const Vector <T> &b)
 {
 	assert(a.size() == b.size() == 3);
 

@@ -15,16 +15,16 @@
 
 	table <double> tbl;
 
-	functor <double> ftr("f(a, b, c, x) = ax^5 + bx^3 + cx");
+	Function <double> ftr("f(a, b, c, x) = ax^5 + bx^3 + cx");
 	tbl.insert_ftr(ftr);
 
-	functor <double> ftr_x = ftr.differentiate("x");
+	Function <double> ftr_x = ftr.differentiate("x");
 	ftr_x.rename("g");
 	tbl.insert_ftr(ftr_x);
 
-	functor <double> cost("C(a, b, c, x, y) = (f(a, b, c, x) - y)^2", tbl);
+	Function <double> cost("C(a, b, c, x, y) = (f(a, b, c, x) - y)^2", tbl);
 
-	functor <double> c_x("Cp(a, b, c, x, y) = (g(a, b, c, x) - y)^2", tbl);
+	Function <double> c_x("Cp(a, b, c, x, y) = (g(a, b, c, x) - y)^2", tbl);
 
 	cout << ftr << endl;
 	cout << ftr_x << endl;
@@ -32,13 +32,13 @@
 	cout << endl << cost << endl;
 	cout << c_x << endl;
 
-	functor <double> c_a = cost.differentiate("a");
-	functor <double> c_b = cost.differentiate("b");
-	functor <double> c_c = cost.differentiate("c");
+	Function <double> c_a = cost.differentiate("a");
+	Function <double> c_b = cost.differentiate("b");
+	Function <double> c_c = cost.differentiate("c");
 	
-	functor <double> c_x_a = c_x.differentiate("a");
-	functor <double> c_x_b = c_x.differentiate("b");
-	functor <double> c_x_c = c_x.differentiate("c");
+	Function <double> c_x_a = c_x.differentiate("a");
+	Function <double> c_x_b = c_x.differentiate("b");
+	Function <double> c_x_c = c_x.differentiate("c");
 
 	cout << endl << c_a << endl;
 	cout << c_b << endl;
@@ -141,7 +141,7 @@
 	cout << "c: " << c << endl;
 
 # PSLQ
-	element <double> x {2 * sqrt(2) + acos(-1), 1, acos(-1), sqrt(2)};
+	Vector <double> x {2 * sqrt(2) + acos(-1), 1, acos(-1), sqrt(2)};
 
 	cout << "x:" << endl << x << endl;
 
@@ -163,7 +163,7 @@
 	for (auto dbl : partials)
 		cout << "\t" << dbl << endl;
 
-	matrix <double> H_x {x.size(), x.size() - 1, [&](size_t i, size_t j) {
+	Matrix <double> H_x {x.size(), x.size() - 1, [&](size_t i, size_t j) {
 		if (i == j)
 			return partials[i + 1] / partials[i];
 
@@ -173,8 +173,8 @@
 		return 0.0;
 	}};
 
-	matrix <double> A = hermite_reducing_matrix(H_x);
-	matrix <double> Q = matrix <double> ::identity(x.size() - 1);
+	Matrix <double> A = hermite_reducing_Matrix(H_x);
+	Matrix <double> Q = Matrix <double> ::identity(x.size() - 1);
 
 	double gamma = 1.2;
 
@@ -186,7 +186,7 @@
 
 		size_t mr = 0;
 
-		matrix <double> tmp = A * H_x * Q;
+		Matrix <double> tmp = A * H_x * Q;
 
 		cout << endl << "tmp:" << endl << tmp << endl;
 
@@ -211,7 +211,7 @@
 
 			double d = hypot(a, b);
 
-			matrix <double> P = {n - 1, n - 1, [&](size_t i, size_t j) {
+			Matrix <double> P = {n - 1, n - 1, [&](size_t i, size_t j) {
 				if (i == mr + 1 && j == mr)
 					return b/d;
 				if (i == mr && j == mr + 1)
@@ -233,7 +233,7 @@
 
 		cout << endl << "tmp:" << endl << tmp << endl;
 
-		matrix <double> D = hermite_reducing_matrix(tmp);
+		Matrix <double> D = hermite_reducing_Matrix(tmp);
 
 		cout << endl << "D:" << endl << D << endl;
 
@@ -245,11 +245,11 @@
 	cout << endl << "inv(A):" << endl << A.inverse() << endl;
 
 # HERMITE REDUCTION
-/* Make member of matrix class */
+/* Make member of Matrix class */
 template <class T>
-matrix <T> hermite_reducing_matrix(const matrix <T> &H)
+Matrix <T> hermite_reducing_Matrix(const Matrix <T> &H)
 {
-	matrix <T> D {H.get_rows(), H.get_rows(), [&](size_t i, size_t j) {
+	Matrix <T> D {H.get_rows(), H.get_rows(), [&](size_t i, size_t j) {
 		if (i == j)
 			return T(1);
 

@@ -11,7 +11,7 @@
  * with respect to the default variable
  * "x". Should be used for polynomials
  * to gain a performance boost over
- * the regular functor class objects.
+ * the regular Function class objects.
  */
 template <class T>
 class polynomial {

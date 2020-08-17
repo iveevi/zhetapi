@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 
-#include "rational.h"
+#include "Rational.h"
 
 namespace utility {
 
@@ -216,7 +216,7 @@ namespace utility {
 
 	/**
 	 * @brief Rational equivalent of the real Bernoulli
-	 * sequence generator, only that a list of rational
+	 * sequence generator, only that a list of Rational
 	 * numbers are returned. Should be used when precision
 	 * is wished to be kept. Note that if the returned
 	 * sequence appears to be incorrect, it is possible
@@ -224,11 +224,11 @@ namespace utility {
 	 * small.
 	 */
 	template <class T>
-	std::vector <rational <T>> bernoulli_sequence_rational(T n)
+	std::vector <Rational <T>> bernoulli_sequence_Rational(T n)
 	{
-		std::vector <rational <T>> ibs = {{1, 1}};
+		std::vector <Rational <T>> ibs = {{1, 1}};
 
-		rational <T> tmp;
+		Rational <T> tmp;
 		for (T i = 1; i <= n; i++) {
 			tmp = {0, 1};
 
@@ -243,9 +243,9 @@ namespace utility {
 			}
 
 			for (T j = 0; j < i; j++)
-				tmp += rational <T> {integral_binom(i + 1, j), 1} * ibs[j];
+				tmp += Rational <T> {integral_binom(i + 1, j), 1} * ibs[j];
 			
-			ibs.push_back(rational <T> {-1, (i + 1)} * tmp);
+			ibs.push_back(Rational <T> {-1, (i + 1)} * tmp);
 		}
 
 		return ibs;
@@ -253,16 +253,16 @@ namespace utility {
 
 	/**
 	 * @brief Return sthe specified Bernoulli number as a
-	 * rational number using the rational Bernoulli sequence
+	 * Rational number using the Rational Bernoulli sequence
 	 * generator.
 	 */
 	template <class T>
-	T bernoulli_number_rational(T n, T (*gamma)(T) = std::tgamma)
+	T bernoulli_number_Rational(T n, T (*gamma)(T) = std::tgamma)
 	{
 		if (n <= 0)
 			throw positive_flow_exception();
 
-		return bernoulli_sequence_rational(n)[n - 1];
+		return bernoulli_sequence_Rational(n)[n - 1];
 	}
 
 }

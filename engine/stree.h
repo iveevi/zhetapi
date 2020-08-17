@@ -20,7 +20,7 @@ enum st_label {
 	l_matrix,
 	l_operation,
 	l_variable_cluster,
-	l_functor
+	l_fn
 };
 
 /**
@@ -33,14 +33,14 @@ std::string st_str_labs[] = {
 	"number",
 	"number - integer",
 	"number - real",
-	"number - rational",
+	"number - Rational",
 	"complex - real",
-	"complex - rational",
+	"complex - Rational",
 	"vector",
 	"matrix",
 	"operation",
 	"variable cluster",
-	"functor"
+	"function"
 };
 
 /**
@@ -79,8 +79,8 @@ public:
 	void print(int = 1, int = 0) const;
 };
 
-#include "../build/parser.tab.c"
-#include "../build/lex.yy.c"
+#include <parser.tab.c>
+#include <lex.yy.c>
 
 stree::stree(const std::string &str, st_label lab,
 		const std::vector <stree *> &lv)

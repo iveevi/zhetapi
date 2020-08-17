@@ -4,18 +4,18 @@
 #include <vector>
 #include <utility>
 
-#include "matrix.h"
-#include "element.h"
+#include "Matrix.h"
+#include "Vector.h"
 
 namespace utility {
 
 	template <class T>
-	std::vector <element <T>> gram_shmidt(const std::vector <element <T>> &span) {
+	std::vector <Vector <T>> gram_shmidt(const std::vector <Vector <T>> &span) {
 		assert(span.size());
 
-		std::vector <element <T>> basis = {span[0]};
+		std::vector <Vector <T>> basis = {span[0]};
 		
-		element <T> nelem;
+		Vector <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
 			nelem = span[i];
 
@@ -32,12 +32,12 @@ namespace utility {
 	}
 	
 	template <class T>
-	std::vector <element <T>> gram_shmidt_normalized(const std::vector <element <T>> &span) {
+	std::vector <Vector <T>> gram_shmidt_normalized(const std::vector <Vector <T>> &span) {
 		assert(span.size());
 
-		std::vector <element <T>> basis = {span[0].normalize()};
+		std::vector <Vector <T>> basis = {span[0].normalize()};
 	
-		element <T> nelem;
+		Vector <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
 			nelem = span[i];
 
@@ -54,18 +54,18 @@ namespace utility {
 	}
 
 	template <class T>
-	const functor <T> &lagrange_interpolate(const std::vector <std::pair <T, T>> &points)
+	const Function <T> &lagrange_interpolate(const std::vector <std::pair <T, T>> &points)
 	{
-		functor <T> *out = new functor <T> ("f(x) = 0");
+		Function <T> *out = new Function <T> ("f(x) = 0");
 
 		for (int i = 0; i < points.size(); i++) {
-			functor <T> *term = new functor <T> ("f(x) = " + to_string(points[i].second));
+			Function <T> *term = new Function <T> ("f(x) = " + to_string(points[i].second));
 
 			for (int j = 0; j < points.size(); j++) {
 				if (i == j)
 					continue;
 
-				functor <T> *tmp = new functor <T> ("f(x) = (x - " + to_string(points[j].first)
+				Function <T> *tmp = new Function <T> ("f(x) = (x - " + to_string(points[j].first)
 					+ ")/(" + to_string(points[i].first) + " - " + to_string(points[j].first) + ")");
 
 				*term = (*term * *tmp);
@@ -79,14 +79,14 @@ namespace utility {
 
 	/* Make member */
 	template <class T>
-	std::pair <matrix <T> , matrix <T>> lu_factorize(const matrix <T> &a)
+	std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
 	{
 		assert(a.get_rows() == a.get_cols());
 
 		size_t size = a.get_rows();
 		
-		matrix <T> u(size, size, 0);
-		matrix <T> l(size, size, 0);
+		Matrix <T> u(size, size, 0);
+		Matrix <T> l(size, size, 0);
 
 		T value;
 		for (size_t i = 0; i < size; i++) {
@@ -119,17 +119,17 @@ namespace utility {
 	}
 
 	template <class T>
-	const element <T> &solve_linear_equation(const matrix <T> &a, const element <T> &b)
+	const Vector <T> &solve_linear_equation(const Matrix <T> &a, const Vector <T> &b)
 	{
-		std::pair <matrix <T>, matrix <T>> out = lu_factorize(a);
+		std::pair <Matrix <T>, Matrix <T>> out = lu_factorize(a);
 
-		matrix <T> L = out.first;
-		matrix <T> U = out.second;
+		Matrix <T> L = out.first;
+		Matrix <T> U = out.second;
 
 		size_t size = a.get_rows();
 
-		element <T> *y = new element <T> (size, -1);
-		element <T> *x = new element <T> (size, -1);
+		Vector <T> *y = new Vector <T> (size, -1);
+		Vector <T> *x = new Vector <T> (size, -1);
 
 		T value;
 		for (size_t i = 0; i < size; i++) {
@@ -154,19 +154,19 @@ namespace utility {
 	}
 
 	template <class T>
-	const functor <T> &reduced_polynomial_fitting(const std::vector <std::pair <T, T>> &points)
+	const Function <T> &reduced_polynomial_fitting(const std::vector <std::pair <T, T>> &points)
 	{
 		size_t degree = points.size();
 
-		matrix <T> coefficients(degree, degree, [&](size_t i, size_t j) {
+		Matrix <T> coefficients(degree, degree, [&](size_t i, size_t j) {
 			return pow(points[i].first, degree - (j + 1));
 		});
 
-		element <T> out(degree, [&](size_t i) {
+		Vector <T> out(degree, [&](size_t i) {
 			return points[i].second;
 		});
 		
-		element <T> constants = solve_linear_equation(coefficients, out);
+		Vector <T> constants = solve_linear_equation(coefficients, out);
 		
 		std::string str = "f(x) = 0";
 
@@ -181,14 +181,14 @@ namespace utility {
 			str += sign + std::to_string(abs(constants[i])) + "x^" + std::to_string(degree - (i + 1));
 		}
 
-		functor <T> *ftr = new functor <T> (str);
+		Function <T> *ftr = new Function <T> (str);
 
 		return *ftr;
 	}
 
 	template <class T>
 	std::pair <T, std::vector <T>> gradient_descent(std::vector <pair <T, T>> data,
-		std::vector <T> weights, functor <T> ftr, size_t in,
+		std::vector <T> weights, Function <T> ftr, size_t in,
 		size_t reps, size_t rounds, T _gamma, T diff, T eps)
 	{
 		table <T> tbl {ftr};
@@ -215,16 +215,16 @@ namespace utility {
 		node <T> *pk = new node <T> {cptr->alloc_opn(op_exp), {
 			new node <T> {cptr->alloc_opn(op_sub), {
 				new node <T> {new variable <T> {"y", true}, {}, cptr},
-				new node <T> {new functor <T> {ftr}, lvs, cptr}
+				new node <T> {new Function <T> {ftr}, lvs, cptr}
 			}, cptr},
 			new node <T> {new operand <T> (2), {}, cptr},
 		}, cptr};
 
 		pk->reparametrize(pars);
 
-		functor <T> cost {"cost", pars, pk};
+		Function <T> cost {"cost", pars, pk};
 
-		std::vector <functor <T>> gradients;
+		std::vector <Function <T>> gradients;
 
 		for (size_t i = 0; i < ftr.ins(); i++) {
 			if (i == in)
@@ -352,14 +352,14 @@ namespace utility {
 	class extrema_exception {};
 
 	template <class T>
-	element <T> find_root(functor <T> ftr, const element <T> &guess, size_t rounds)
+	Vector <T> find_root(Function <T> ftr, const Vector <T> &guess, size_t rounds)
 	{
-		element <T> sol = guess;
+		Vector <T> sol = guess;
 
-		element <functor <T>> J_raw(ftr.ins(), [&](size_t i) {
+		Vector <Function <T>> J_raw(ftr.ins(), [&](size_t i) {
 			// allow differentiation in index w/ respect
 			// to the parameters/variables
-			return new functor <T> (ftr.differentiate(ftr[i].symbol()));
+			return new Function <T> (ftr.differentiate(ftr[i].symbol()));
 		});
 
 		for (size_t i = 0; i < rounds; i++) {
@@ -368,7 +368,7 @@ namespace utility {
 			if (val == 0)
 				break;
 
-			element <T> J_mod(ftr.ins(), [&](size_t i) {
+			Vector <T> J_mod(ftr.ins(), [&](size_t i) {
 				T tmp = J_raw[i](sol);
 
 				if (tmp == 0)

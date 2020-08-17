@@ -9,14 +9,14 @@
 #include <typeindex>
 #include <typeinfo>
 
-#include "element.h"
-#include "matrix.h"
-#include "operand.h"
-#include "operation.h"
-#include "rational.h"
-#include "token.h"
-#include "vtable.h"
-#include "zcomplex.h"
+#include <vector.h>
+#include <matrix.h>
+#include <operand.h>
+#include <operation.h>
+#include <rational.h>
+#include <token.h>
+#include <vtable.h>
+#include <complex.h>
 
 #define AB_OP(str, A, B, O)									\
 	ops.push_back({										\
@@ -180,36 +180,36 @@
  * @brief Represents the working
  * space of a [zhetapi] function
  * or application; the sets of
- * integer, real, complex, rational,
- * vector and matrix fields.
+ * integer, real, complex, Rational,
+ * vector and Matrix fields.
  *
  * @tparam R The type of a scalar
  * real value. Defaults to
  * [long double].
  *
  * @tparam Z The type of a scalar
- * integer value (used in rationals).
+ * integer value (used in Rationals).
  * Defaults to [long long int].
  */
 template <class R = long double, class Z = long long int>
 class barn {
 public:
-	using Q = rational <Z>;
+	using Q = Rational <Z>;
 
-	using CR = zcomplex <R>;
-	using CQ = zcomplex <Q>;
+	using CR = Complex <R>;
+	using CQ = Complex <Q>;
 
-	using MR = matrix <R>;
-	using MQ = matrix <Q>;
+	using MR = Matrix <R>;
+	using MQ = Matrix <Q>;
 
-	using MCR = matrix <CR>;
-	using MCQ = matrix <CQ>;
+	using MCR = Matrix <CR>;
+	using MCQ = Matrix <CQ>;
 
-	using VR = element <R>;
-	using VQ = element <Q>;
+	using VR = Vector <R>;
+	using VQ = Vector <Q>;
 
-	using VCR = element <CR>;
-	using VCQ = element <CQ>;
+	using VCR = Vector <CR>;
+	using VCQ = Vector <CQ>;
 
 	using opd_z = operand <Z>;
 	using opd_r = operand <R>;
@@ -245,7 +245,7 @@ public:
 
 	token *mkop(const std::string &, const std::vector <std::type_index> &);
 	token *value(const std::string &, const std::vector <std::type_index> &,
-			const std::vector <token *> &);
+			const std::vector <token *> &) const;
 
 	void print();
 };
@@ -324,10 +324,28 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	
 	AB_OP(-, VQ, VQ, VQ);
 	AB_OP(-, VR, VR, VR);
+	
+	AB_OP_FTR(., VQ, VQ, Q, inner(a->get(), b->get()));
+	AB_OP_FTR(., VR, VR, R, inner(a->get(), b->get()));
+	
+	AB_OP_FTR(shur, VQ, VQ, VQ, shur(a->get(), b->get()));
+	AB_OP_FTR(shur, VR, VR, VR, shur(a->get(), b->get()));
+
+	AU_OP_FTR(transpose, VQ, MQ, in->get().transpose());
+	AU_OP_FTR(transpose, VR, MR, in->get().transpose());
 
 	// Matrix
 	AB_OP(+, MQ, MQ, MQ);
 	AB_OP(+, MR, MR, MR);
+	
+	AB_OP(-, MQ, MQ, MQ);
+	AB_OP(-, MR, MR, MR);
+	
+	AB_OP_FTR(shur, MQ, MQ, MQ, shur(a->get(), b->get()));
+	AB_OP_FTR(shur, MR, MR, MR, shur(a->get(), b->get()));
+
+	AU_OP_FTR(transpose, MQ, MQ, in->get().transpose());
+	AU_OP_FTR(transpose, MR, MR, in->get().transpose());
 }
 
 template <class R, class Z>
@@ -364,7 +382,7 @@ token *barn <R, Z> ::mkop(const std::string &str,
 template <class R, class Z>
 token *barn <R, Z> ::value(const std::string &str,
 		const std::vector <std::type_index> &types,
-		const std::vector <token *> &vals)
+		const std::vector <token *> &vals) const
 {
 	auto it = ops.end();
 
@@ -387,12 +405,10 @@ token *barn <R, Z> ::value(const std::string &str,
 		}
 	}
 
-	using namespace std;
-
 	if (it != ops.end()) {
 		token *tptr = it->second;
 
-		cout << "Token Established: " << tptr->str() << endl;
+		// cout << "Token Established: " << tptr->str() << endl;
 		
 		// Constants
 		operation <R> *opn_r = dynamic_cast <operation <R> *> (tptr);
@@ -449,7 +465,7 @@ token *barn <R, Z> ::value(const std::string &str,
 		if (opn_mcr != nullptr)
 			return (*opn_mcr)(vals);
 	} else {
-		cout << "Invalid Token (Not Found)" << endl;
+		std::cout << "Invalid Token (Not Found)" << std::endl;
 	}
 
 	return nullptr;

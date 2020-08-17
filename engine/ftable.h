@@ -2,16 +2,16 @@
 #define TABLE_H_
 
 #include "node.h"
-#include "functor.h"
+#include "Function.h"
 #include "variable.h"
 
 template <class T, class U>
-class functor;
+class Function;
 
 template <class T, class U>
 class ftable {
 public:
-	using ftr = functor <T, U>;
+	using ftr = Function <T, U>;
 
 	struct node {
 		ftr val;

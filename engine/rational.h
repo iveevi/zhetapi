@@ -5,64 +5,64 @@
 #include <algorithm>
 
 /**
- * @brief Represents the rational
+ * @brief Represents the Rational
  * number a/b where a and b are
  * both of type T.
  */
 template <class T>
-class rational {
+class Rational {
 public:
 	class non_integral_type {};
 private:
 	T a;
 	T b;
 public:
-	rational(T = 0, T = 1);
+	Rational(T = 0, T = 1);
 
 	operator bool() const;
 	explicit operator double() const;
 
 	/* Mathematical Operators - Members */
-	rational &operator+=(const rational &);
-	rational &operator-=(const rational &);
-	rational &operator*=(const rational &);
-	rational &operator/=(const rational &);
+	Rational &operator+=(const Rational &);
+	Rational &operator-=(const Rational &);
+	Rational &operator*=(const Rational &);
+	Rational &operator/=(const Rational &);
 
 	/* Mathematical Operators - Non-Members */
 	template <class U>
-	friend rational <U> operator+(const rational <U> &, const rational <U> &);
+	friend Rational <U> operator+(const Rational <U> &, const Rational <U> &);
 
 	template <class U>
-	friend rational <U> operator-(const rational <U> &, const rational <U> &);
+	friend Rational <U> operator-(const Rational <U> &, const Rational <U> &);
 
 	template <class U>
-	friend rational <U> operator*(const rational <U> &, const rational <U> &);
+	friend Rational <U> operator*(const Rational <U> &, const Rational <U> &);
 
 	template <class U>
-	friend rational <U> operator/(const rational <U> &, const rational <U> &);
+	friend Rational <U> operator/(const Rational <U> &, const Rational <U> &);
 
 	/* Boolean Operators - Non Members */
 	template <class U>
-	friend bool operator==(const rational <U> &, const rational <U> &);
+	friend bool operator==(const Rational <U> &, const Rational <U> &);
 	
 	template <class U>
-	friend bool operator!=(const rational <U> &, const rational <U> &);
+	friend bool operator!=(const Rational <U> &, const Rational <U> &);
 	
 	template <class U>
-	friend bool operator>(const rational <U> &, const rational <U> &);
+	friend bool operator>(const Rational <U> &, const Rational <U> &);
 	
 	template <class U>
-	friend bool operator<(const rational <U> &, const rational <U> &);
+	friend bool operator<(const Rational <U> &, const Rational <U> &);
 	
 	template <class U>
-	friend bool operator>=(const rational <U> &, const rational <U> &);
+	friend bool operator>=(const Rational <U> &, const Rational <U> &);
 	
 	template <class U>
-	friend bool operator<=(const rational <U> &, const rational <U> &);
+	friend bool operator<=(const Rational <U> &, const Rational <U> &);
 
 	/* Output Functions */
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const rational <U> &);
+	friend std::ostream &operator<<(std::ostream &, const Rational <U> &);
 private:
 	void simplify();
 
@@ -74,7 +74,7 @@ private:
 //////////////////////////////////////////
 
 template <class T>
-rational <T> ::rational(T p, T q) : a(p), b(q)
+Rational <T> ::Rational(T p, T q) : a(p), b(q)
 {
 	if (!std::is_integral <T> ::value)
 		throw non_integral_type();
@@ -86,13 +86,13 @@ rational <T> ::rational(T p, T q) : a(p), b(q)
 // Conversion Operators
 //////////////////////////////////////////
 template <class T>
-rational <T> ::operator double() const
+Rational <T> ::operator double() const
 {
 	return (double) a / (double) b;
 }
 
 template <class T>
-rational <T> ::operator bool() const
+Rational <T> ::operator bool() const
 {
 	return a != 0;
 }
@@ -102,7 +102,7 @@ rational <T> ::operator bool() const
 //////////////////////////////////////////
 
 template <class T>
-rational <T> &rational <T> ::operator+=(const rational <T> &other)
+Rational <T> &Rational <T> ::operator+=(const Rational <T> &other)
 {
 	a = a * other.b + b * other.a;
 	b *= other.b;
@@ -113,7 +113,7 @@ rational <T> &rational <T> ::operator+=(const rational <T> &other)
 }
 
 template <class T>
-rational <T> &rational <T> ::operator-=(const rational <T> &other)
+Rational <T> &Rational <T> ::operator-=(const Rational <T> &other)
 {
 	a = a * other.b - b * other.a;
 	b *= other.b;
@@ -124,13 +124,9 @@ rational <T> &rational <T> ::operator-=(const rational <T> &other)
 }
 
 template <class T>
-rational <T> &rational <T> ::operator*=(const rational <T> &other)
+Rational <T> &Rational <T> ::operator*=(const Rational <T> &other)
 {
 	using namespace std;
-
-	cout << "Mutliplication:" << endl;
-	cout << "This: " << *this << endl;
-	cout << "Other: " << other << endl;
 
 	a *= other.a;
 	b *= other.b;
@@ -141,7 +137,7 @@ rational <T> &rational <T> ::operator*=(const rational <T> &other)
 }
 
 template <class T>
-rational <T> &rational <T> ::operator/=(const rational <T> &other)
+Rational <T> &Rational <T> ::operator/=(const Rational <T> &other)
 {
 	a *= other.b;
 	b *= other.a;
@@ -152,9 +148,9 @@ rational <T> &rational <T> ::operator/=(const rational <T> &other)
 }
 
 template <class T>
-rational <T> operator+(const rational <T> &a, const rational <T> &b)
+Rational <T> operator+(const Rational <T> &a, const Rational <T> &b)
 {
-	rational <T> out = a;
+	Rational <T> out = a;
 
 	out += b;
 
@@ -162,9 +158,9 @@ rational <T> operator+(const rational <T> &a, const rational <T> &b)
 }
 
 template <class T>
-rational <T> operator-(const rational <T> &a, const rational <T> &b)
+Rational <T> operator-(const Rational <T> &a, const Rational <T> &b)
 {
-	rational <T> out = a;
+	Rational <T> out = a;
 
 	out -= b;
 
@@ -172,9 +168,9 @@ rational <T> operator-(const rational <T> &a, const rational <T> &b)
 }
 
 template <class T>
-rational <T> operator*(const rational <T> &a, const rational <T> &b)
+Rational <T> operator*(const Rational <T> &a, const Rational <T> &b)
 {
-	rational <T> out = a;
+	Rational <T> out = a;
 
 	out *= b;
 
@@ -182,9 +178,9 @@ rational <T> operator*(const rational <T> &a, const rational <T> &b)
 }
 
 template <class T>
-rational <T> operator/(const rational <T> &a, const rational <T> &b)
+Rational <T> operator/(const Rational <T> &a, const Rational <T> &b)
 {
-	rational <T> out = a;
+	Rational <T> out = a;
 
 	out /= b;
 
@@ -196,37 +192,37 @@ rational <T> operator/(const rational <T> &a, const rational <T> &b)
 //////////////////////////////////////////
 
 template <class T>
-bool operator==(const rational <T> &a, const rational <T> &b)
+bool operator==(const Rational <T> &a, const Rational <T> &b)
 {
 	return (a.a == b.a) && (a.b == b.b);
 }
 
 template <class T>
-bool operator!=(const rational <T> &a, const rational <T> &b)
+bool operator!=(const Rational <T> &a, const Rational <T> &b)
 {
 	return !(a == b);
 }
 
 template <class T>
-bool operator>(const rational <T> &a, const rational <T> &b)
+bool operator>(const Rational <T> &a, const Rational <T> &b)
 {
 	return (a.a * b.b) > (a.b * b.a);
 }
 
 template <class T>
-bool operator<(const rational <T> &a, const rational <T> &b)
+bool operator<(const Rational <T> &a, const Rational <T> &b)
 {
 	return (a.a * b.b) < (a.b * b.a);
 }
 
 template <class T>
-bool operator>=(const rational <T> &a, const rational <T> &b)
+bool operator>=(const Rational <T> &a, const Rational <T> &b)
 {
 	return (a == b) || (a > b);
 }
 
 template <class T>
-bool operator<=(const rational <T> &a, const rational <T> &b)
+bool operator<=(const Rational <T> &a, const Rational <T> &b)
 {
 	return (a == b) || (a < b);
 }
@@ -236,7 +232,7 @@ bool operator<=(const rational <T> &a, const rational <T> &b)
 //////////////////////////////////////////
 
 template <class T>
-std::ostream &operator<<(std::ostream &os, const rational <T> &rat)
+std::ostream &operator<<(std::ostream &os, const Rational <T> &rat)
 {
 	if (rat.a == 0)
 		os << 0;
@@ -253,7 +249,7 @@ std::ostream &operator<<(std::ostream &os, const rational <T> &rat)
 //////////////////////////////////////////
 
 template <class T>
-void rational <T> ::simplify()
+void Rational <T> ::simplify()
 {
 	if (b < 0) {
 		a *= -1;
@@ -267,7 +263,7 @@ void rational <T> ::simplify()
 }
 
 template <class T>
-T rational <T> ::gcd(T a, T b)
+T Rational <T> ::gcd(T a, T b)
 {
 		if (a == 0 || b == 0)
 			return 1;

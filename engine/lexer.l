@@ -60,7 +60,11 @@ DIGIT    [0-9]
 "*"		{return MULT;}
 "/"		{return DIV;}
 
+"\shur"		{return SHUR;}
+"^T"		{return TRANSPOSE;}
+
 "!"		{return FACTORIAL;}
+"."		{return DOT;}
 
 "("		{return LPAREN;}
 ")"		{return RPAREN;}

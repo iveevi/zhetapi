@@ -6,19 +6,19 @@
 #include <iostream>
 
 /**
- * @brief The zcomplex class is an
+ * @brief The Complex class is an
  * extension of the std::complex
  * class which includes a more convenient
  * set of methods, such as normalization.
  */
 template <class T>
-class zcomplex : public std::complex <T> {
+class Complex : public std::complex <T> {
 public:
 	// Constructor
-	zcomplex(const T & = 0);
-	zcomplex(const T &, const T &);
+	Complex(const T & = 0);
+	Complex(const T &, const T &);
 
-	zcomplex(const std::complex <T> &);
+	Complex(const std::complex <T> &);
 
 	// Getters
 	T magnitude() const;
@@ -28,14 +28,14 @@ public:
 	operator double() const;
 
 	// Functional Methods
-	zcomplex normalize() const;
+	Complex normalize() const;
 
 	// Output Methods
 	template <class U>
-	friend std::string std::to_string(const zcomplex <U> &);
+	friend std::string std::to_string(const Complex <U> &);
 
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const zcomplex <U> &);
+	friend std::ostream &operator<<(std::ostream &, const Complex <U> &);
 };
 
 //////////////////////////////////////////
@@ -43,15 +43,15 @@ public:
 //////////////////////////////////////////
 
 template <class T>
-zcomplex <T> ::zcomplex(const T &re)
+Complex <T> ::Complex(const T &re)
 	: std::complex <T> (re) {}
 
 template <class T>
-zcomplex <T> ::zcomplex(const T &re, const T &im)
+Complex <T> ::Complex(const T &re, const T &im)
 	: std::complex <T> (re, im) {}
 
 template <class T>
-zcomplex <T> ::zcomplex(const std::complex <T> &z)
+Complex <T> ::Complex(const std::complex <T> &z)
 	: std::complex <T> (z) {}
 
 //////////////////////////////////////////
@@ -59,19 +59,19 @@ zcomplex <T> ::zcomplex(const std::complex <T> &z)
 //////////////////////////////////////////
 
 template <class T>
-T zcomplex <T> ::magnitude() const
+T Complex <T> ::magnitude() const
 {
 	return sqrt(norm(*this));
 }
 
 template <class T>
-bool zcomplex <T> ::is_real() const
+bool Complex <T> ::is_real() const
 {
 	return this->imag() == 0;
 }
 
 template <class T>
-zcomplex <T> ::operator double() const
+Complex <T> ::operator double() const
 {
 	// std::cout << "Zcompex conv: Here" << std::endl;
 	return (double) this->real();
@@ -82,17 +82,17 @@ zcomplex <T> ::operator double() const
 //////////////////////////////////////////
 
 template <class T>
-zcomplex <T> zcomplex <T> ::normalize() const
+Complex <T> Complex <T> ::normalize() const
 {
 	return *this/magnitude();
 }
 
-bool operator<(const zcomplex <long double> &a, const zcomplex <long double> &b)
+bool operator<(const Complex <long double> &a, const Complex <long double> &b)
 {
 	return norm(a) < norm(b);
 }
 
-bool operator<=(const zcomplex <long double> &a, const zcomplex <long double> &b)
+bool operator<=(const Complex <long double> &a, const Complex <long double> &b)
 {
 	return norm(a) <= norm(b);
 }
@@ -103,7 +103,7 @@ bool operator<=(const zcomplex <long double> &a, const zcomplex <long double> &b
 namespace std {
 
 	template <class T>
-	std::string to_string(const zcomplex <T> &z)
+	std::string to_string(const Complex <T> &z)
 	{
 		std::string str;
 
@@ -126,7 +126,7 @@ namespace std {
 }
 
 template <class T>
-std::ostream &operator<<(std::ostream &os, const zcomplex <T> &z)
+std::ostream &operator<<(std::ostream &os, const Complex <T> &z)
 {
 	bool pl = false;
 

@@ -39,6 +39,10 @@
 %token	SUBSCRIPT
 
 %token	FACTORIAL
+%token	DOT
+
+%token	SHUR
+%token	TRANSPOSE
 
 %token	LPAREN		RPAREN
 %token	LBRACE		RBRACE
@@ -116,7 +120,19 @@ input:	expr END {
 	return 0;
 };
 
-expr:  	expr SUPERSCRIPT expr { // Exponentiation
+expr:  	expr DOT expr { // Dot Product
+	$$ = new stree(".", l_operation, {$1, $3});
+} %prec DOT
+
+   |	expr TRANSPOSE { // Exponentiation
+	$$ = new stree("transpose", l_operation, {$1});
+} %prec SUPERSCRIPT
+
+   |	expr SHUR expr { // Exponentiation
+	$$ = new stree("shur", l_operation, {$1, $3});
+} %prec SUPERSCRIPT
+
+   |	expr SUPERSCRIPT expr { // Exponentiation
 	$$ = new stree("^", l_operation, {$1, $3});
 } %prec SUPERSCRIPT
 

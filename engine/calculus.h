@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "polynomial.h"
-#include "zcomplex.h"
+#include "Complex.h"
 
 namespace utility {
 
@@ -24,30 +24,30 @@ namespace utility {
 	 * linear differential equation with constant coefficients.
 	 */
 	template <class T>
-	std::vector <functor <zcomplex <T>>> solve_hlde_constant(const polynomial <zcomplex <T>> &p,
-			size_t rounds = 10000, const zcomplex <T> &eps = 1E-100L,
-			const zcomplex <T> &start = {0.4, 0.9})
+	std::vector <Function <Complex <T>>> solve_hlde_constant(const polynomial <Complex <T>> &p,
+			size_t rounds = 10000, const Complex <T> &eps = 1E-100L,
+			const Complex <T> &start = {0.4, 0.9})
 	{
-		std::vector <zcomplex <T>> roots = p.roots(rounds, eps, start);
+		std::vector <Complex <T>> roots = p.roots(rounds, eps, start);
 
-		std::vector <functor <zcomplex <T>>> out;
+		std::vector <Function <Complex <T>>> out;
 
-		std::vector <zcomplex <T>> inserted;
+		std::vector <Complex <T>> inserted;
 
-		table <zcomplex <T>> tbl {
-			variable <zcomplex <T>> {"e", false, exp(1)}
+		table <Complex <T>> tbl {
+			variable <Complex <T>> {"e", false, exp(1)}
 		};
 
 		for (auto vl : roots) {
-			if (vl == zcomplex <T> {0, 0})
+			if (vl == Complex <T> {0, 0})
 				continue;
 
-			auto itr = std::find_if(inserted.begin(), inserted.end(), [&](const zcomplex <T> &a) {
+			auto itr = std::find_if(inserted.begin(), inserted.end(), [&](const Complex <T> &a) {
 				return pow(norm(vl - a), 10.5) < norm(eps);
 			});
 
 			if (itr != inserted.end()) {
-				size_t deg = std::count_if(inserted.begin(), inserted.end(), [&](const zcomplex <T> &a) {
+				size_t deg = std::count_if(inserted.begin(), inserted.end(), [&](const Complex <T> &a) {
 					return pow(norm(vl - a), 10.5) < norm(eps);
 				});
 				
@@ -71,7 +71,7 @@ namespace utility {
 			}
 		}
 
-		size_t deg = std::count(roots.begin(), roots.end(), zcomplex <T> {0, 0});
+		size_t deg = std::count(roots.begin(), roots.end(), Complex <T> {0, 0});
 
 		if (deg > 0)
 			out.push_back({"f", {"x"}, "x^" + std::to_string(deg - 1), tbl});

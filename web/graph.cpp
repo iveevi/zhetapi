@@ -2,7 +2,7 @@
 
 #include <GL/glut.h>
 
-#include "functor.h"
+#include "Function.h"
 
 table <double> tbl {
 	variable <double> {"e", exp(1)},
@@ -25,7 +25,7 @@ int main()
 
 	ofstream fout("../output.log");
 
-	functor <double> f(line, tbl);
+	Function <double> f(line, tbl);
 
 	fout << "cx: " << cx << endl;
 	fout << "range: " << range << endl;

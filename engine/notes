@@ -1,7 +1,7 @@
-Rename classes to upper case:
-	- element -> Vector
-	- functor -> Function
-	- zcomplex -> Complex
+Class naming:
+	- Classes which are meant to be hidden to the user should be lower case
+	- Usable classes (polynomials, functions, vectors, matrices, etc.)
+	  should be upper case
 
 Remove the inheritance connection between the operations and the general token
 class.
@@ -9,6 +9,3 @@ class.
 Later remove the immediate transition from i to the imaginary number; if indeed
 the user has not yet defined a variable i, then make i equal to the imaginary
 number.
-
-Change printing of vectors and matrices to [...] and [[...]...] (add modes for
-printing)

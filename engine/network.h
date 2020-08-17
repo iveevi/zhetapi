@@ -6,7 +6,7 @@
 #include <vector>
 
 // Engine Headers
-#include "functor.h"
+#include "Function.h"
 
 /**
  * @brief This class represents
@@ -40,7 +40,7 @@ public:
 		std::vector <T> weights;
 		T bias;
 
-		functor <T> *ftr;
+		Function <T> *ftr;
 
 		layer *previous;
 	};
@@ -72,7 +72,7 @@ private:
 	/* @brief The sigmoid function
 	 * for restricting the domain of
 	 * the output of the neurons. */
-	functor <T> *sigmoid;
+	Function <T> *sigmoid;
 public:
 	network();
 	network(const std::vector <size_t> &);

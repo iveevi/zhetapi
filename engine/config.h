@@ -11,7 +11,7 @@
 #include "operand.h"
 #include "operation.h"
 #include "variable.h"
-// #include "functor.h"
+// #include "Function.h"
 
 enum opcode {
 	op_nao,
@@ -41,7 +41,7 @@ enum tcode {
 
 // Forward Declarations
 template <class T, class U>
-class functor;
+class Function;
 
 /**
  * @brief A class used as a method
@@ -55,7 +55,7 @@ public:
 	using opd = operand <T>;
 	using opn = operation <T>;
 	using var = variable <T>;
-	using ftr = functor <T, int>;
+	using ftr = Function <T, int>;
 
 	struct specs {
 		std::string in;

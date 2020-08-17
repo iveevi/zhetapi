@@ -100,7 +100,7 @@ vector <string> scan(string line)
 
 				name = left.substr(0, i);
 
-				functor <double> nf(str, tbl);
+				Function <double> nf(str, tbl);
 				
 				tbl.remove_ftr(name);
 				tbl.insert_ftr(nf);

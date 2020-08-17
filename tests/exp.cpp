@@ -2,18 +2,18 @@
 
 #include "../engine/matrix.h"
 #include "../engine/polynomial.h"
-#include "../engine/rational.h"
+#include "../engine/Rational.h"
 
 using namespace std;
 
 int main()
 {
-	matrix <rational <int>> A {
+	matrix <Rational <int>> A {
 		{1, 2, 4, 4},
 		{1, 16, 256, 4}
 	};
 
-	/* matrix <rational <int>> A {
+	/* matrix <Rational <int>> A {
 		{1, 2, 4, 8, 4},
 		{1, 9, 81, 729, 9},
 		{1, 16, 256, 4096, 4}

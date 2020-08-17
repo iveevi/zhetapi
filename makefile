@@ -12,7 +12,7 @@ graph:		build parsers
 
 tests:		build parsers
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
+	g++ -I engine -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
 exp:		build parsers
 	@echo "[BUILDING TESTS]\n"

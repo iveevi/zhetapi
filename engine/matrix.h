@@ -15,45 +15,45 @@
 #endif
 
 /**
- * @brief A general matrix class
+ * @brief A general Matrix class
  * (could be a single row/col vector)
  * that supports conventional operations
  * that matrices in mathematics do.
  */
 template <class T>
-class matrix {
+class Matrix {
 protected:
 	T **m_array;
 
 	size_t rows;
 	size_t cols;
 public:
-	matrix();
-	matrix(const matrix <T> &);
+	Matrix();
+	Matrix(const Matrix <T> &);
 
-	matrix(T **);
-	matrix(const std::vector <T> &);
-	matrix(const std::vector <std::vector <T>> &);
+	Matrix(T **);
+	Matrix(const std::vector <T> &);
+	Matrix(const std::vector <std::vector <T>> &);
 
-	matrix(const std::initializer_list <std::initializer_list <T>> &);
+	Matrix(const std::initializer_list <std::initializer_list <T>> &);
 
-	matrix(size_t, size_t, T = T());
-	matrix(size_t, size_t, T, T **);
+	Matrix(size_t, size_t, T = T());
+	Matrix(size_t, size_t, T, T **);
 
-	matrix(size_t, size_t, std::function <T (size_t)>);
-	matrix(size_t, size_t, std::function <T *(size_t)>);
+	Matrix(size_t, size_t, std::function <T (size_t)>);
+	Matrix(size_t, size_t, std::function <T *(size_t)>);
 	
-	matrix(size_t, size_t, std::function <T (size_t, size_t)>);
-	matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
+	Matrix(size_t, size_t, std::function <T (size_t, size_t)>);
+	Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
 
-	~matrix();
+	~Matrix();
 
 	std::pair <size_t, size_t> get_dimensions() const;
 
 	size_t get_rows() const;
 	size_t get_cols() const;
 
-	const matrix &slice(const std::pair <size_t, size_t> &,
+	const Matrix &slice(const std::pair <size_t, size_t> &,
 			const std::pair <size_t, size_t> &) const;
 
 	void set(size_t, size_t, T);
@@ -62,10 +62,10 @@ public:
 	T *operator[](size_t);
 	const T *operator[](size_t) const;
 
-	void operator+=(const matrix &);
-	void operator-=(const matrix &);
-	void operator*=(const matrix &);
-	void operator/=(const matrix &);
+	void operator+=(const Matrix &);
+	void operator-=(const Matrix &);
+	void operator*=(const Matrix &);
+	void operator/=(const Matrix &);
 
 	void swap_rows(size_t, size_t);
 
@@ -77,10 +77,10 @@ public:
 	T cofactor(size_t, size_t) const;
 	T cofactor(const std::pair <size_t, size_t> &) const;
 
-	const matrix &inverse() const;
-	const matrix &adjugate() const;
-	const matrix &cofactor() const;
-	const matrix &transpose() const;
+	const Matrix &inverse() const;
+	const Matrix &adjugate() const;
+	const Matrix &cofactor() const;
+	const Matrix &transpose() const;
 
 	bool symmetric() const;
 
@@ -88,45 +88,45 @@ public:
 	std::string display_nice() const;
 
 	template <class U>
-	friend const matrix <U> &operator+(const matrix <U> &, const matrix <U> &);
+	friend const Matrix <U> &operator+(const Matrix <U> &, const Matrix <U> &);
 	
 	template <class U>
-	friend const matrix <U> &operator-(const matrix <U> &, const matrix <U> &);
+	friend const Matrix <U> &operator-(const Matrix <U> &, const Matrix <U> &);
 
 	template <class U>
-	friend const matrix <U> &operator*(const matrix <U> &, const matrix <U> &);
+	friend const Matrix <U> &operator*(const Matrix <U> &, const Matrix <U> &);
 
 	/* template <class U>
-	friend const U &operator*(const matrix <U> &, const matrix <U> &); */
+	friend const U &operator*(const Matrix <U> &, const Matrix <U> &); */
 
 	template <class U>
-	friend const matrix <U> &operator*(const matrix <U> &, const U &);
+	friend const Matrix <U> &operator*(const Matrix <U> &, const U &);
 	
 	template <class U>
-	friend const matrix <U> &operator*(const U &, const matrix <U> &);
+	friend const Matrix <U> &operator*(const U &, const Matrix <U> &);
 	
 	template <class U>
-	friend const matrix <U> &operator/(const matrix <U> &, const U &);
+	friend const Matrix <U> &operator/(const Matrix <U> &, const U &);
 	
 	template <class U>
-	friend const matrix <U> &operator/(const U &, const matrix <U> &);
+	friend const Matrix <U> &operator/(const U &, const Matrix <U> &);
 
 	template <class U>
-	friend bool operator==(const matrix <U> &, const matrix <U> &);
+	friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const matrix <U> &);
+	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
 
-	static matrix identity(size_t);
+	static Matrix identity(size_t);
 protected:
-	T determinant(const matrix &) const;
+	T determinant(const Matrix &) const;
 };
 
 template <class T>
-matrix <T> ::matrix() : rows(0), cols(0), m_array(nullptr) {}
+Matrix <T> ::Matrix() : rows(0), cols(0), m_array(nullptr) {}
 
 template <class T>
-matrix <T> ::matrix(const matrix <T> &other) : rows(other.rows),
+Matrix <T> ::Matrix(const Matrix <T> &other) : rows(other.rows),
 		cols(other.cols)
 {
 	m_array = new T *[rows];
@@ -140,7 +140,7 @@ matrix <T> ::matrix(const matrix <T> &other) : rows(other.rows),
 }
 
 template <class T>
-matrix <T> ::matrix(T **ref)
+Matrix <T> ::Matrix(T **ref)
 {
 	rows = sizeof(ref)/sizeof(T);
 
@@ -161,7 +161,7 @@ matrix <T> ::matrix(T **ref)
 }
 
 template <class T>
-matrix <T> ::matrix(const std::vector <T> &ref)
+Matrix <T> ::Matrix(const std::vector <T> &ref)
 {
 	rows = ref.size();
 
@@ -176,7 +176,7 @@ matrix <T> ::matrix(const std::vector <T> &ref)
 }
 
 template <class T>
-matrix <T> ::matrix(const std::vector <std::vector <T>> &ref)
+Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref)
 {
 	rows = ref.size();
 
@@ -199,7 +199,7 @@ matrix <T> ::matrix(const std::vector <std::vector <T>> &ref)
 }
 
 template <class T>
-matrix <T> ::matrix(const std::initializer_list <std::initializer_list <T>> &sq)
+Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
 {
 	rows = sq.size();
 
@@ -226,7 +226,7 @@ matrix <T> ::matrix(const std::initializer_list <std::initializer_list <T>> &sq)
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rs, size_t cs, T val)
+Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
 {
 	rows = rs;
 	cols = cs;
@@ -242,12 +242,12 @@ matrix <T> ::matrix(size_t rs, size_t cs, T val)
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rows, size_t cols, T val, T **ref)
+Matrix <T> ::Matrix(size_t rows, size_t cols, T val, T **ref)
 {
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rs, size_t cs,
+Matrix <T> ::Matrix(size_t rs, size_t cs,
 		std::function <T (size_t)> gen)
 {
 	rows = rs;
@@ -264,7 +264,7 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rs, size_t cs,
+Matrix <T> ::Matrix(size_t rs, size_t cs,
 		std::function <T *(size_t)> gen)
 {
 	rows = rs;
@@ -281,7 +281,7 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rs, size_t cs,
+Matrix <T> ::Matrix(size_t rs, size_t cs,
 		std::function <T (size_t, size_t)> gen)
 {
 	rows = rs;
@@ -298,7 +298,7 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 }
 
 template <class T>
-matrix <T> ::matrix(size_t rs, size_t cs,
+Matrix <T> ::Matrix(size_t rs, size_t cs,
 		std::function <T *(size_t, size_t)> gen)
 {
 	rows = rs;
@@ -315,35 +315,35 @@ matrix <T> ::matrix(size_t rs, size_t cs,
 }
 
 template <class T>
-matrix <T> ::~matrix()
+Matrix <T> ::~Matrix()
 {
 	delete[] m_array;
 }
 
 template <class T>
-std::pair <size_t, size_t> matrix <T> ::get_dimensions() const
+std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
 {
 	return {rows, cols};
 }
 
 template <class T>
-size_t matrix <T> ::get_rows() const
+size_t Matrix <T> ::get_rows() const
 {
 	return rows;
 }
 
 template <class T>
-size_t matrix <T> ::get_cols() const
+size_t Matrix <T> ::get_cols() const
 {
 	return cols;
 }
 
 template <class T>
-const matrix <T> &matrix <T> ::slice(const std::pair <size_t, size_t> &start,
+const Matrix <T> &Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 		const std::pair <size_t, size_t> &end) const
 {
 	/* The following asserts make sure the pairs
-	 * are in bounds of the matrix and that they
+	 * are in bounds of the Matrix and that they
 	 * are in order */
 	assert(start.first <= end.first && start.second <= end.second);
 
@@ -353,8 +353,8 @@ const matrix <T> &matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 			end.first < rows && end.second < cols);
 
 	/* Slicing is inclusive of the last
-	 * element passed */
-	matrix <T> *out = new matrix <T> (end.first - start.first + 1,
+	 * Vector passed */
+	Matrix <T> *out = new Matrix <T> (end.first - start.first + 1,
 			end.second - start.second + 1, [&](size_t i, size_t j) {
 			return m_array[i + start.first][j + start.second];
 	});
@@ -363,31 +363,31 @@ const matrix <T> &matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 }
 
 template <class T>
-void matrix <T> ::set(size_t row, size_t col, T val)
+void Matrix <T> ::set(size_t row, size_t col, T val)
 {
 	m_array[row][col] = val;
 }
 
 template <class T>
-const T &matrix <T> ::get(size_t row, size_t col) const
+const T &Matrix <T> ::get(size_t row, size_t col) const
 {
 	return m_array[row][col];
 }
 
 template <class T>
-T *matrix <T> ::operator[](size_t i)
+T *Matrix <T> ::operator[](size_t i)
 {
 	return m_array[i];
 }
 
 template <class T>
-const T *matrix <T> ::operator[](size_t i) const
+const T *Matrix <T> ::operator[](size_t i) const
 {
 	return m_array[i];
 }
 
 template <class T>
-void matrix <T> ::operator+=(const matrix <T> &other)
+void Matrix <T> ::operator+=(const Matrix <T> &other)
 {
 	assert(rows == other.rows && cols == other.cols);
 
@@ -398,7 +398,7 @@ void matrix <T> ::operator+=(const matrix <T> &other)
 }
 
 template <class T>
-void matrix <T> ::operator-=(const matrix <T> &other)
+void Matrix <T> ::operator-=(const Matrix <T> &other)
 {
 	assert(rows == other.rows && cols == other.cols);
 
@@ -409,27 +409,27 @@ void matrix <T> ::operator-=(const matrix <T> &other)
 }
 
 template <class T>
-void matrix <T> ::operator*=(const matrix <T> &other)
+void Matrix <T> ::operator*=(const Matrix <T> &other)
 {
 	(*this) = (*this) * other;
 }
 
 template <class T>
-void matrix <T> ::swap_rows(size_t a, size_t b)
+void Matrix <T> ::swap_rows(size_t a, size_t b)
 {
 	std::swap(m_array[a], m_array[b]);
 }
 
 template <class T>
-T matrix <T> ::determinant() const
+T Matrix <T> ::determinant() const
 {
 	return determinant(*this);
 }
 
 template <class T>
-T matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
+T Matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
 {
-	matrix <T> *out = new matrix <T> (rows - 1, cols - 1);
+	Matrix <T> *out = new Matrix <T> (rows - 1, cols - 1);
 
 	size_t a;
 	size_t b;
@@ -458,39 +458,39 @@ T matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
 }
 
 template <class T>
-T matrix <T> ::minor(size_t i, size_t j) const
+T Matrix <T> ::minor(size_t i, size_t j) const
 {
 	return minor({i, j});
 }
 
 template <class T>
-T matrix <T> ::cofactor(const std::pair <size_t, size_t> &pr) const
+T Matrix <T> ::cofactor(const std::pair <size_t, size_t> &pr) const
 {
 	return (((pr.first + pr.second) % 2) ? -1 : 1) * minor(pr);
 }
 
 template <class T>
-T matrix <T> ::cofactor(size_t i, size_t j) const
+T Matrix <T> ::cofactor(size_t i, size_t j) const
 {
 	return cofactor({i, j});
 }
 
 template <class T>
-const matrix <T> &matrix <T> ::inverse() const
+const Matrix <T> &Matrix <T> ::inverse() const
 {
 	return adjugate() / determinant();
 }
 
 template <class T>
-const matrix <T> &matrix <T> ::adjugate() const
+const Matrix <T> &Matrix <T> ::adjugate() const
 {
 	return cofactor().transpose();
 }
 
 template <class T>
-const matrix <T> &matrix <T> ::cofactor() const
+const Matrix <T> &Matrix <T> ::cofactor() const
 {
-	matrix <T> *out = new matrix(rows, cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix(rows, cols, [&](size_t i, size_t j) {
 		return cofactor(i, j);
 	});
 
@@ -498,9 +498,9 @@ const matrix <T> &matrix <T> ::cofactor() const
 }
 
 template <class T>
-const matrix <T> &matrix <T> ::transpose() const
+const Matrix <T> &Matrix <T> ::transpose() const
 {
-	matrix <T> *out = new matrix <T> (cols, rows, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (cols, rows, [&](size_t i, size_t j) {
 		return m_array[j][i];
 	});
 
@@ -508,7 +508,19 @@ const matrix <T> &matrix <T> ::transpose() const
 }
 
 template <class T>
-bool matrix <T> ::symmetric() const
+const Matrix <T> &shur(const Matrix <T> &a, const Matrix <T> &b)
+{
+	assert(a.get_rows() == b.get_rows() && a.get_cols() == b.get_cols());
+
+	Matrix <T> *out = new Matrix <T> (a.get_rows(), b.get_cols(), [&](size_t i, size_t j) {
+		return a[i][j] * b[i][j];
+	});
+
+	return *out;
+}
+
+template <class T>
+bool Matrix <T> ::symmetric() const
 {
 	for (size_t i = 0; i < rows; i++) {
 		for (size_t j = 0; j < cols; j++) {
@@ -521,7 +533,7 @@ bool matrix <T> ::symmetric() const
 }
 
 template <class T>
-std::string matrix <T> ::display() const
+std::string Matrix <T> ::display() const
 {
 	std::ostringstream oss;
 
@@ -552,7 +564,7 @@ std::string matrix <T> ::display() const
 }
 
 template <class T>
-std::string matrix <T> ::display_nice() const
+std::string Matrix <T> ::display_nice() const
 {
 	std::ostringstream oss;
 	for (int i = 0; i < rows; i++) {
@@ -574,11 +586,11 @@ std::string matrix <T> ::display_nice() const
 }
 
 template <class T>
-const matrix <T> &operator+(const matrix <T> &a, const matrix <T> &b)
+const Matrix <T> &operator+(const Matrix <T> &a, const Matrix <T> &b)
 {
 	assert(a.rows == b.rows && a.cols == b.cols);
 	
-	matrix <T> *out = new matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
 		return a[i][j] + b[i][j];
 	});
 
@@ -586,11 +598,11 @@ const matrix <T> &operator+(const matrix <T> &a, const matrix <T> &b)
 }
 
 template <class T>
-const matrix <T> &operator-(const matrix <T> &a, const matrix <T> &b)
+const Matrix <T> &operator-(const Matrix <T> &a, const Matrix <T> &b)
 {
 	assert(a.rows == b.rows && a.cols == b.cols);
 
-	matrix <T> *out = new matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
 		return a[i][j] - b[i][j];
 	});
 
@@ -598,11 +610,11 @@ const matrix <T> &operator-(const matrix <T> &a, const matrix <T> &b)
 }
 
 template <class T>
-const matrix <T> &operator*(const matrix <T> &a, const matrix <T> &b)
+const Matrix <T> &operator*(const Matrix <T> &a, const Matrix <T> &b)
 {
 	assert(a.cols == b.rows);
 
-	matrix <T> *out = new matrix <T> (a.rows, b.cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (a.rows, b.cols, [&](size_t i, size_t j) {
 		T acc = 0;
 
 		for (size_t k = 0; k < a.cols; k++) {
@@ -616,16 +628,16 @@ const matrix <T> &operator*(const matrix <T> &a, const matrix <T> &b)
 }
 
 /* template <class T>
-const T &matrix <T> ::operator*(const matrix <T> &a, const matrix <T> &b)
+const T &Matrix <T> ::operator*(const Matrix <T> &a, const Matrix <T> &b)
 {
 	assert(a.cols == b.rows && a.rows == b.cols == 1);
 	return (a * b)[0][0];
 } */
 
 template <class T>
-const matrix <T> &operator*(const matrix <T> &a, const T &scalar)
+const Matrix <T> &operator*(const Matrix <T> &a, const T &scalar)
 {
-	matrix <T> *out = new matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
 		return a[i][j] * scalar;
 	});
 
@@ -633,15 +645,15 @@ const matrix <T> &operator*(const matrix <T> &a, const T &scalar)
 }
 
 template <class T>
-const matrix <T> &operator*(const T &scalar, const matrix <T> &a)
+const Matrix <T> &operator*(const T &scalar, const Matrix <T> &a)
 {
 	return a * scalar;
 }
 
 template <class T>
-const matrix <T> &operator/(const matrix <T> &a, const T &scalar)
+const Matrix <T> &operator/(const Matrix <T> &a, const T &scalar)
 {
-	matrix <T> *out = new matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+	Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
 		return a[i][j] / scalar;
 	});
 
@@ -649,13 +661,13 @@ const matrix <T> &operator/(const matrix <T> &a, const T &scalar)
 }
 
 template <class T>
-const matrix <T> &operator/(const T &scalar, const matrix <T> &a)
+const Matrix <T> &operator/(const T &scalar, const Matrix <T> &a)
 {
 	return a / scalar;
 }
 
 template <class T>
-bool operator==(const matrix <T> &a, const matrix <T> &b)
+bool operator==(const Matrix <T> &a, const Matrix <T> &b)
 {
 	if (a.get_dimensions() != b.get_dimensions())
 		return false;
@@ -671,16 +683,16 @@ bool operator==(const matrix <T> &a, const matrix <T> &b)
 }
 
 template <class T>
-std::ostream &operator<<(std::ostream &os, const matrix <T> &a)
+std::ostream &operator<<(std::ostream &os, const Matrix <T> &a)
 {
 	os << a.display();
 	return os;
 }
 
 template <class T>
-matrix <T> matrix <T> ::identity(size_t dim)
+Matrix <T> Matrix <T> ::identity(size_t dim)
 {
-	return matrix {dim, dim, [](size_t i, size_t j) {
+	return Matrix {dim, dim, [](size_t i, size_t j) {
 		if (i == j)
 			return T(1);
 
@@ -690,11 +702,11 @@ matrix <T> matrix <T> ::identity(size_t dim)
 
 // Private helper methods
 template <class T>
-T matrix <T> ::determinant(const matrix <T> &a) const
+T Matrix <T> ::determinant(const Matrix <T> &a) const
 {
 	/* The determinant of an abitrary
-	 * matrix is defined only if it
-	 * is a square matrix */
+	 * Matrix is defined only if it
+	 * is a square Matrix */
 	assert(a.rows == a.cols && a.rows > 0);
 
 	size_t n;
@@ -709,9 +721,9 @@ T matrix <T> ::determinant(const matrix <T> &a) const
 
 	T det = 0;
 
-	matrix <T> *temp;
+	Matrix <T> *temp;
 	for (size_t i = 0; i < n; i++) {
-		temp = new matrix <T> (n - 1, n - 1);
+		temp = new Matrix <T> (n - 1, n - 1);
 
 		for (size_t j = 0; j < n - 1; j++) {
 			t = 0;
