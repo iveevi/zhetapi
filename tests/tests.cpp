@@ -7,14 +7,6 @@
 
 #include <gmpxx.h>
 
-/*
-#include "../engine/barn.h"
-#include "../engine/node.h"
-#include "../engine/polynomial.h"
-#include "../engine/Rational.h"
-#include "../engine/Complex.h"
-*/
-
 #include <barn.h>
 #include <node.h>
 #include <polynomial.h>

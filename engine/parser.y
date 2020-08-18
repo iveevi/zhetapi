@@ -41,6 +41,9 @@
 %token	FACTORIAL
 %token	DOT
 
+%token	BINOM
+%token	CHOOSE
+
 %token	SHUR
 %token	TRANSPOSE
 
@@ -104,7 +107,11 @@
 %precedence	SUPERSCRIPT	SUBSCRIPT
 
 %precedence	SIN	COS	TAN
-%precedence	CSC	SEC 	COT
+%precedence	CSC	SEC	COT
+
+%precedence	SINH	COSH	TANH
+%precedence	CSCH	SECH 	COTH
+
 %precedence	LOG	LN	LG
 
 %precedence	FACTORIAL
@@ -126,11 +133,19 @@ expr:  	expr DOT expr { // Dot Product
 
    |	expr TRANSPOSE { // Exponentiation
 	$$ = new stree("transpose", l_operation, {$1});
-} %prec SUPERSCRIPT
+} %prec TRANSPOSE
 
    |	expr SHUR expr { // Exponentiation
 	$$ = new stree("shur", l_operation, {$1, $3});
-} %prec SUPERSCRIPT
+} %prec SHUR
+
+   |	expr CHOOSE expr { // Exponentiation
+	$$ = new stree("binom", l_operation, {$1, $3});
+} %prec CHOOSE
+
+   |	expr BINOM expr { // Exponentiation
+	$$ = new stree("binom", l_operation, {$1, $3});
+} %prec BINOM
 
    |	expr SUPERSCRIPT expr { // Exponentiation
 	$$ = new stree("^", l_operation, {$1, $3});
@@ -256,14 +271,42 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 			new stree("10", l_number, {}), $2
 		});
 } %prec LOG
+   
+   |	COTH expr { // Cot
+		$$ = new stree("coth", l_operation, {$2});
+} %prec COTH
+
+   |	SECH expr { // Sec
+		$$ = new stree("sech", l_operation, {$2});
+} %prec SECH
+
+   |	CSCH expr { // Csc
+		$$ = new stree("csch", l_operation, {$2});
+} %prec CSCH
+
+   |	TANH expr { // Tan
+		$$ = new stree("tanh", l_operation, {$2});
+} %prec TANH
+
+   |	COSH expr { // Cos
+		$$ = new stree("cosh", l_operation, {$2});
+} %prec COSH
+
+   |	SINH expr { // Sin
+		$$ = new stree("sinh", l_operation, {$2});
+} %prec SINH
+
+   |	felm FACTORIAL {
+   	$$ = new stree("!", l_operation, {$1});
+};
 
    |	COT expr { // Cot
 		$$ = new stree("cot", l_operation, {$2});
-} %prec CSC
+} %prec COT
 
    |	SEC expr { // Sec
 		$$ = new stree("sec", l_operation, {$2});
-} %prec CSC
+} %prec SEC
 
    |	CSC expr { // Csc
 		$$ = new stree("csc", l_operation, {$2});

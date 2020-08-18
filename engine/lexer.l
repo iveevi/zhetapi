@@ -48,7 +48,20 @@ DIGIT    [0-9]
 "sec"		{return SEC;}
 "cot"		{return COT;}
 
+"sinh"		{return SINH;}
+"cosh"		{return COSH;}
+"tanh"		{return TANH;}
+"csch"		{return CSCH;}
+"sech"		{return SECH;}
+"coth"		{return COTH;}
+
 "sum"		{return SUM;}
+
+"shur"		{return SHUR;}
+"choose"	{return CHOOSE;}
+"binom"		{return BINOM;}
+
+"^T"		{return TRANSPOSE;}
 
 "="		{return EQUALS;}
 
@@ -59,9 +72,6 @@ DIGIT    [0-9]
 "+"		{return PLUS;}
 "*"		{return MULT;}
 "/"		{return DIV;}
-
-"\shur"		{return SHUR;}
-"^T"		{return TRANSPOSE;}
 
 "!"		{return FACTORIAL;}
 "."		{return DOT;}

@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 
-#include "Rational.h"
+#include "rational.h"
 
 namespace utility {
 

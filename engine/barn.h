@@ -1,6 +1,7 @@
 #ifndef BARN_H_
 #define BARN_H_
 
+// C/C++ Headers
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -9,14 +10,16 @@
 #include <typeindex>
 #include <typeinfo>
 
-#include <vector.h>
+// Engine Headers
+#include <combinatorial.h>
+#include <complex.h>
 #include <matrix.h>
 #include <operand.h>
 #include <operation.h>
 #include <rational.h>
 #include <token.h>
+#include <vector.h>
 #include <vtable.h>
-#include <complex.h>
 
 #define AB_OP(str, A, B, O)									\
 	ops.push_back({										\
@@ -311,12 +314,49 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	AU_OP(sin, R, R);
 	
 	AU_OP(cos, Z, R);
-	AU_OP_FTR(sin, Q, R, cos(R (in->get())));
+	AU_OP_FTR(cos, Q, R, cos(R (in->get())));
 	AU_OP(cos, R, R);
 	
 	AU_OP(tan, Z, R);
-	AU_OP_FTR(sin, Q, R, tan(R (in->get())));
+	AU_OP_FTR(tan, Q, R, tan(R (in->get())));
 	AU_OP(tan, R, R);
+	
+	AU_OP_FTR(csc, Z, R, 1/sin(in->get()));
+	AU_OP_FTR(csc, Q, R, 1/sin(R (in->get())));
+	AU_OP_FTR(csc, R, R, 1/sin(in->get()));
+	
+	AU_OP_FTR(sec, Z, R, 1/cos(in->get()));
+	AU_OP_FTR(sec, Q, R, 1/cos(R (in->get())));
+	AU_OP_FTR(sec, R, R, 1/cos(in->get()));
+	
+	AU_OP_FTR(cot, Z, R, 1/tan(in->get()));
+	AU_OP_FTR(cot, Q, R, 1/tan(R (in->get())));
+	AU_OP_FTR(cot, R, R, 1/tan(in->get()));
+
+	// Hyperbolic Functions
+	AU_OP(sinh, Z, R);
+	AU_OP_FTR(sinh, Q, R, sinh(R (in->get())));
+	AU_OP(sinh, R, R);
+	
+	AU_OP(cosh, Z, R);
+	AU_OP_FTR(cosh, Q, R, cosh(R (in->get())));
+	AU_OP(cosh, R, R);
+	
+	AU_OP(tanh, Z, R);
+	AU_OP_FTR(tanh, Q, R, tanh(R (in->get())));
+	AU_OP(tanh, R, R);
+	
+	AU_OP_FTR(csch, Z, R, 1/sinh(in->get()));
+	AU_OP_FTR(csch, Q, R, 1/sinh(R (in->get())));
+	AU_OP_FTR(csch, R, R, 1/sinh(in->get()));
+	
+	AU_OP_FTR(sech, Z, R, 1/cosh(in->get()));
+	AU_OP_FTR(sech, Q, R, 1/cosh(R (in->get())));
+	AU_OP_FTR(sech, R, R, 1/cosh(in->get()));
+	
+	AU_OP_FTR(coth, Z, R, 1/tanh(in->get()));
+	AU_OP_FTR(coth, Q, R, 1/tanh(R (in->get())));
+	AU_OP_FTR(coth, R, R, 1/tanh(in->get()));
 
 	// Vector
 	AB_OP(+, VQ, VQ, VQ);
@@ -346,6 +386,17 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 
 	AU_OP_FTR(transpose, MQ, MQ, in->get().transpose());
 	AU_OP_FTR(transpose, MR, MR, in->get().transpose());
+
+	// Other Linear Algebra
+	AB_OP(*, MQ, VQ, MQ);
+	AB_OP(*, VQ, MQ, MQ);
+
+	// Combinatorics
+	AU_OP_FTR(!, Z, Z, utility::integral_factorial(in->get())); 
+	
+	AB_OP_FTR(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
+
+	// Add API functions
 }
 
 template <class R, class Z>
