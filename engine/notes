@@ -1,7 +1,21 @@
-Class naming:
-	- Classes which are meant to be hidden to the user should be lower case
-	- Usable classes (polynomials, functions, vectors, matrices, etc.)
-	  should be upper case
+==========
+Additions:
+==========
+
+Add API functions as standard with lexing/parsing. Otherwise allow Function
+objects to refer to C/C++ functions.
+
+Add a data set class for arbitary input/output dimensions. Use its structure to
+make regression techiniques smoother. Add items like Vandermonde matrices, and
+such.
+
+Add Gaussian elimination.
+
+Add more general matrix/vector concatenation operations.
+
+==============
+Modifications:
+==============
 
 Remove the inheritance connection between the operations and the general token
 class. (Replace instead with operation_holder)
@@ -10,5 +24,13 @@ Later remove the immediate transition from i to the imaginary number; if indeed
 the user has not yet defined a variable i, then make i equal to the imaginary
 number.
 
-Add API functions as standard with lexing/parsing. Otherwise allow Function
-objects to refer to C/C++ functions.
+==========
+Standards:
+==========
+
+------------
+Class names:
+------------
+	- Classes which are meant to be hidden to the user should be lower case
+	- Usable classes (polynomials, functions, vectors, matrices, etc.)
+	  should be upper case

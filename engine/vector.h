@@ -36,10 +36,7 @@ public:
 	const T &operator[](size_t) const;
 
 	// Concatenating vectors
-	Vector append_above(const Vector &);
 	Vector append_above(const T &);
-	
-	Vector append_below(const Vector &);
 	Vector append_below(const T &);
 
 	T norm() const;
@@ -131,23 +128,6 @@ const T &Vector <T> ::operator[](size_t i) const
 }
 
 template <class T>
-Vector <T> Vector <T> ::append_above(const Vector <T> &v)
-{
-	size_t t_sz = size();
-	size_t v_sz = v.size();
-
-	std::vector <T> total;
-
-	for (size_t i = 0; i < v_sz; i++)
-		total.push_back(v[i]);
-
-	for (size_t i = 0; i < t_sz; i++)
-		total.push_back((*this)[i]);
-
-	return Vector(total);
-}
-
-template <class T>
 Vector <T> Vector <T> ::append_above(const T &x)
 {
 	size_t t_sz = size();
@@ -156,23 +136,6 @@ Vector <T> Vector <T> ::append_above(const T &x)
 
 	for (size_t i = 0; i < t_sz; i++)
 		total.push_back((*this)[i]);
-
-	return Vector(total);
-}
-
-template <class T>
-Vector <T> Vector <T> ::append_below(const Vector <T> &v)
-{
-	size_t t_sz = size();
-	size_t v_sz = v.size();
-
-	std::vector <T> total;
-
-	for (size_t i = 0; i < t_sz; i++)
-		total.push_back((*this)[i]);
-
-	for (size_t i = 0; i < v_sz; i++)
-		total.push_back(v[i]);
 
 	return Vector(total);
 }

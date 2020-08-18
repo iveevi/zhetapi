@@ -16,7 +16,8 @@ tests:		build parsers
 
 exp:		build parsers
 	@echo "[BUILDING TESTS]\n"
-	g++ tests/exp.cpp -lfl -lgmpxx -lgmp -lglut -lGL -g -o build/exp
+	g++ -I engine tests/exp.cpp -lfl -lgmpxx -lgmp -lglut -lGL -g -o build/exp
+	./build/exp
 
 texifier:	build
 	@echo "[BUILDING TEXIFIER]\n"

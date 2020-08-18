@@ -14,6 +14,9 @@
 
 #endif
 
+template <class T>
+class Vector;
+
 /**
  * @brief A general Matrix class
  * (could be a single row/col vector)
@@ -56,19 +59,38 @@ public:
 	const Matrix &slice(const std::pair <size_t, size_t> &,
 			const std::pair <size_t, size_t> &) const;
 
+	Matrix slice(const std::pair <size_t, size_t> &,
+			const std::pair <size_t, size_t> &);
+
 	void set(size_t, size_t, T);
+
 	const T &get(size_t, size_t) const;
+
+	Vector <T> get_column(size_t) const;
 
 	T *operator[](size_t);
 	const T *operator[](size_t) const;
+
+	// Concatenating matrices
+	Matrix append_above(const Matrix &);
+	Matrix append_below(const Matrix &);
+
+	Matrix append_left(const Matrix &);
+	Matrix append_right(const Matrix &);
 
 	void operator+=(const Matrix &);
 	void operator-=(const Matrix &);
 	void operator*=(const Matrix &);
 	void operator/=(const Matrix &);
 
+	// Row operations
+	void add_rows(size_t, size_t, T);
 	void swap_rows(size_t, size_t);
 
+	void multiply_row(size_t, T);
+
+
+	// Values
 	T determinant() const;
 
 	T minor(size_t, size_t) const;
@@ -117,10 +139,18 @@ public:
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
 
+	// Special matrix generation
 	static Matrix identity(size_t);
+
+	// Ostream settings
+	static bool nice;
 protected:
 	T determinant(const Matrix &) const;
 };
+
+// Set static variables
+template <class T>
+bool Matrix <T> ::nice = false;
 
 template <class T>
 Matrix <T> ::Matrix() : rows(0), cols(0), m_array(nullptr) {}
@@ -363,6 +393,30 @@ const Matrix <T> &Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 }
 
 template <class T>
+Matrix <T> Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
+		const std::pair <size_t, size_t> &end)
+{
+	/* The following asserts make sure the pairs
+	 * are in bounds of the Matrix and that they
+	 * are in order */
+	assert(start.first <= end.first && start.second <= end.second);
+
+	assert(start.first >= 0 && start.second >= 0 &&
+			start.first < rows && start.second < cols);
+	assert(end.first >= 0 && end.second >= 0 &&
+			end.first < rows && end.second < cols);
+
+	/* Slicing is inclusive of the last
+	 * Vector passed */
+	Matrix <T> *out = new Matrix <T> (end.first - start.first + 1,
+			end.second - start.second + 1, [&](size_t i, size_t j) {
+			return m_array[i + start.first][j + start.second];
+	});
+
+	return *out;
+}
+
+template <class T>
 void Matrix <T> ::set(size_t row, size_t col, T val)
 {
 	m_array[row][col] = val;
@@ -375,6 +429,14 @@ const T &Matrix <T> ::get(size_t row, size_t col) const
 }
 
 template <class T>
+Vector <T> Matrix <T> ::get_column(size_t n) const
+{
+	return Vector <T> (rows, [&](size_t i) {
+		return m_array[i][n];
+	});
+}
+
+template <class T>
 T *Matrix <T> ::operator[](size_t i)
 {
 	return m_array[i];
@@ -384,6 +446,130 @@ template <class T>
 const T *Matrix <T> ::operator[](size_t i) const
 {
 	return m_array[i];
+}
+
+template <class T>
+Matrix <T> Matrix <T> ::append_above(const Matrix &m)
+{
+	assert(cols == m.cols);
+
+	size_t t_rows = rows;
+	size_t m_rows = m.rows;
+
+	std::vector <std::vector <T>> row;
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < m_rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < cols; j++)
+			total.push_back(m[i][j]);
+
+		row.push_back(total);
+	}
+
+	for (size_t i = 0; i < t_rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < cols; j++)
+			total.push_back(m_array[i][j]);
+
+		row.push_back(total);
+	}
+
+	return Matrix(row);
+}
+
+template <class T>
+Matrix <T> Matrix <T> ::append_below(const Matrix &m)
+{
+	assert(cols == m.cols);
+
+	size_t t_rows = rows;
+	size_t m_rows = m.rows;
+
+	std::vector <std::vector <T>> row;
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < t_rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < cols; j++)
+			total.push_back(m_array[i][j]);
+
+		row.push_back(total);
+	}
+
+	for (size_t i = 0; i < m_rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < cols; j++)
+			total.push_back(m[i][j]);
+
+		row.push_back(total);
+	}
+
+	return Matrix(row);
+}
+
+template <class T>
+Matrix <T> Matrix <T> ::append_left(const Matrix &m)
+{
+	assert(rows == m.rows);
+
+	size_t t_cols = cols;
+	size_t m_cols = m.cols;
+
+	std::vector <std::vector <T>> row;
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < m_cols; j++)
+			total.push_back(m[i][j]);
+
+		row.push_back(total);
+	}
+
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < t_cols; j++)
+			row[i].push_back(m_array[i][j]);
+	}
+
+	return Matrix(row);
+}
+
+template <class T>
+Matrix <T> Matrix <T> ::append_right(const Matrix &m)
+{
+	assert(rows == m.rows);
+
+	size_t t_cols = cols;
+	size_t m_cols = m.cols;
+
+	std::vector <std::vector <T>> row;
+
+	std::vector <T> total;
+
+	for (size_t i = 0; i < rows; i++) {
+		total.clear();
+
+		for (size_t j = 0; j < t_cols; j++)
+			total.push_back(m_array[i][j]);
+
+		row.push_back(total);
+	}
+
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < m_cols; j++)
+			row[i].push_back(m[i][j]);
+	}
+
+	return Matrix(row);
 }
 
 template <class T>
@@ -414,10 +600,25 @@ void Matrix <T> ::operator*=(const Matrix <T> &other)
 	(*this) = (*this) * other;
 }
 
+// R(A) = R(A) + kR(B)
+template <class T>
+void Matrix <T> ::add_rows(size_t a, size_t b, T k)
+{
+	for (size_t i = 0; i < cols; i++)
+		m_array[a][i] += k * m_array[b][i];
+}
+
 template <class T>
 void Matrix <T> ::swap_rows(size_t a, size_t b)
 {
 	std::swap(m_array[a], m_array[b]);
+}
+
+template <class T>
+void Matrix <T> ::multiply_row(size_t a, T k)
+{
+	for (size_t i = 0; i < cols; i++)
+		m_array[a][i] *= k;
 }
 
 template <class T>
@@ -683,13 +884,6 @@ bool operator==(const Matrix <T> &a, const Matrix <T> &b)
 }
 
 template <class T>
-std::ostream &operator<<(std::ostream &os, const Matrix <T> &a)
-{
-	os << a.display();
-	return os;
-}
-
-template <class T>
 Matrix <T> Matrix <T> ::identity(size_t dim)
 {
 	return Matrix {dim, dim, [](size_t i, size_t j) {
@@ -741,6 +935,18 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 	}
 
 	return det;
+}
+
+// Ostream
+template <class T>
+std::ostream &operator<<(std::ostream &os, const Matrix <T> &a)
+{
+	if (Matrix <T> ::nice)
+		os << a.display_nice();
+	else
+		os << a.display();
+
+	return os;
 }
 
 #endif

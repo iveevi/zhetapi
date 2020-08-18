@@ -363,21 +363,21 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params)
 {
 	stree *st = new stree(str);
 
-	/* cout << endl << "Node Stree:" << endl;
-	st->print(); */
+	cout << endl << "Node Stree:" << endl;
+	st->print();
 	
 	node *out = convert(st, tbl);
 	
-	/* cout << endl << "Out:" << endl;
-	out->print(); */
+	cout << endl << "Out:" << endl;
+	out->print();
 
 	*this = *out;
 
 	delete out;
 	delete st;
 
-	/* cout << endl << "This:" << endl;
-	print(); */
+	cout << endl << "This:" << endl;
+	print();
 
 	reparametrize(params);
 	simplify();

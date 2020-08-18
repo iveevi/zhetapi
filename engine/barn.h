@@ -1,7 +1,7 @@
 #ifndef BARN_H_
 #define BARN_H_
 
-// C/C++ Headers
+// C/C++ headers
 #include <cmath>
 #include <functional>
 #include <iostream>
@@ -10,7 +10,7 @@
 #include <typeindex>
 #include <typeinfo>
 
-// Engine Headers
+// Engine headers
 #include <combinatorial.h>
 #include <complex.h>
 #include <matrix.h>
@@ -21,7 +21,7 @@
 #include <vector.h>
 #include <vtable.h>
 
-#define AB_OP(str, A, B, O)									\
+#define __add_binary_operation(str, A, B, O)									\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -45,11 +45,11 @@
 			}									\
 	});
 
-#define ABH_OP(str, A, B, O)									\
-	AB_OP(str, A, B, O)									\
-	AB_OP(str, B, A, O)
+#define __add_heterogenous_binary_operation(str, A, B, O)									\
+	__add_binary_operation(str, A, B, O)									\
+	__add_binary_operation(str, B, A, O)
 
-#define AB_OP_FTR(str, A, B, O, ftr)								\
+#define __add_binary_operation_ftr(str, A, B, O, ftr)								\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -73,7 +73,7 @@
 			}									\
 	});
 
-#define ABH_OP_FTR(str, A, B, O, ftr)								\
+#define __add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)								\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -120,26 +120,26 @@
 			}									\
 	});
 
-#define AB_OP_SET(str)										\
-	AB_OP(str, Z, Z, Z);									\
-	AB_OP(str, R, R, R);									\
-	AB_OP(str, Q, Q, Q);									\
-	AB_OP(str, CR, CR, CR);									\
-	AB_OP(str, CQ, CQ, CQ);									\
+#define __add_binary_operation_set(str)										\
+	__add_binary_operation(str, Z, Z, Z);									\
+	__add_binary_operation(str, R, R, R);									\
+	__add_binary_operation(str, Q, Q, Q);									\
+	__add_binary_operation(str, CR, CR, CR);									\
+	__add_binary_operation(str, CQ, CQ, CQ);									\
 												\
-	ABH_OP(str, R, Z, R);									\
-	ABH_OP_FTR(str, Z, Q, Q, Q(a->get()) str b->get());					\
-	ABH_OP(str, R, Q, R);									\
-	ABH_OP(str, R, CR, CR);									\
-	ABH_OP_FTR(str, R, CQ, CR, CR(a->get() str R(b->get().real()), R(b->get().imag())));	\
-	ABH_OP_FTR(str, Z, CR, CR, CR(a->get() str b->get().real(), b->get().imag()));		\
-	ABH_OP_FTR(str, Z, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
-	ABH_OP_FTR(str, Q, CR, CR, CR(R(a->get()) str b->get().real(), b->get().imag()));	\
-	ABH_OP_FTR(str, Q, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
-	ABH_OP_FTR(str, CR, CQ, CR, CR(a->get().real() str (R) b->get().real(),			\
+	__add_heterogenous_binary_operation(str, R, Z, R);									\
+	__add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());					\
+	__add_heterogenous_binary_operation(str, R, Q, R);									\
+	__add_heterogenous_binary_operation(str, R, CR, CR);									\
+	__add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str R(b->get().real()), R(b->get().imag())));	\
+	__add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str b->get().real(), b->get().imag()));		\
+	__add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
+	__add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get()) str b->get().real(), b->get().imag()));	\
+	__add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
+	__add_heterogenous_binary_operation_ftr(str, CR, CQ, CR, CR(a->get().real() str (R) b->get().real(),			\
 		a->get().imag() str (R) b->get().imag()));
 
-#define AU_OP(str, I, O)									\
+#define __add_unary_operation(str, I, O)									\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -159,7 +159,7 @@
 			}									\
 	});
 
-#define AU_OP_FTR(str, I, O, ftr)								\
+#define __add_unary_operation_ftr(str, I, O, ftr)								\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -265,169 +265,138 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	//////////////////////////////////////////
 	
 	// Addition and Subtraction
-	AB_OP_SET(+);
-	AB_OP_SET(-);
+	__add_binary_operation_set(+);
+	__add_binary_operation_set(-);
 
 	// Multiplication
-	AB_OP(*, Z, Z, Z);
-	AB_OP(*, R, R, R);
-	AB_OP(*, Q, Q, Q);
-	AB_OP(*, CR, CR, CR);
-	AB_OP(*, CQ, CQ, CQ);
+	__add_binary_operation(*, Z, Z, Z);
+	__add_binary_operation(*, R, R, R);
+	__add_binary_operation(*, Q, Q, Q);
+	__add_binary_operation(*, CR, CR, CR);
+	__add_binary_operation(*, CQ, CQ, CQ);
 
-	ABH_OP(*, R, Z, R);
-	ABH_OP(*, Z, Q, Q);
-	ABH_OP_FTR(*, R, Q, R, a->get() * (R) b->get());
-	ABH_OP(*, R, CR, CR);
-	ABH_OP_FTR(*, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	ABH_OP_FTR(*, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	ABH_OP_FTR(*, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
-	ABH_OP_FTR(*, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
-	ABH_OP(*, Q, CQ, CQ);
+	__add_heterogenous_binary_operation(*, R, Z, R);
+	__add_heterogenous_binary_operation(*, Z, Q, Q);
+	__add_heterogenous_binary_operation_ftr(*, R, Q, R, a->get() * (R) b->get());
+	__add_heterogenous_binary_operation(*, R, CR, CR);
+	__add_heterogenous_binary_operation_ftr(*, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation(*, Q, CQ, CQ);
 
 	// Division
-	AB_OP(/, R, R, R);
-	AB_OP(/, Q, Q, Q);
-	AB_OP(/, CR, CR, CR);
-	AB_OP(/, CQ, CQ, CQ);
+	__add_binary_operation(/, R, R, R);
+	__add_binary_operation(/, Q, Q, Q);
+	__add_binary_operation(/, CR, CR, CR);
+	__add_binary_operation(/, CQ, CQ, CQ);
 
-	ABH_OP(/, R, Z, R);
-	ABH_OP(/, Z, Q, Q);
-	ABH_OP_FTR(/, R, Q, R, a->get() * (R) b->get());
-	ABH_OP(/, R, CR, CR);
-	ABH_OP_FTR(/, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	ABH_OP_FTR(/, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	ABH_OP_FTR(/, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
-	ABH_OP_FTR(/, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
-	ABH_OP(/, Q, CQ, CQ);
+	__add_heterogenous_binary_operation(/, R, Z, R);
+	__add_heterogenous_binary_operation(/, Z, Q, Q);
+	__add_heterogenous_binary_operation_ftr(/, R, Q, R, a->get() * (R) b->get());
+	__add_heterogenous_binary_operation(/, R, CR, CR);
+	__add_heterogenous_binary_operation_ftr(/, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation(/, Q, CQ, CQ);
 
 	// Exponentiation
-	AB_OP_FTR(^, Z, Z, Z, (Z) pow(a->get(), b->get()));
-	AB_OP_FTR(^, R, R, R, pow(a->get(), b->get()));
-	AB_OP_FTR(^, Q, Q, R, pow((R) a->get(), (R) b->get()));
-	AB_OP_FTR(^, CR, CR, CR, 1);
-	AB_OP_FTR(^, CQ, CQ, CQ, Q(1));
+	__add_binary_operation_ftr(^, Z, Z, Z, (Z) pow(a->get(), b->get()));
+	__add_binary_operation_ftr(^, R, R, R, pow(a->get(), b->get()));
+	__add_binary_operation_ftr(^, Q, Q, R, pow((R) a->get(), (R) b->get()));
+	__add_binary_operation_ftr(^, CR, CR, CR, 1);
+	__add_binary_operation_ftr(^, CQ, CQ, CQ, Q(1));
 
 	// Trigonometry
-	AU_OP(sin, Z, R);
-	AU_OP_FTR(sin, Q, R, sin(R (in->get())));
-	AU_OP(sin, R, R);
+	__add_unary_operation(sin, Z, R);
+	__add_unary_operation_ftr(sin, Q, R, sin(R (in->get())));
+	__add_unary_operation(sin, R, R);
 	
-	AU_OP(cos, Z, R);
-	AU_OP_FTR(cos, Q, R, cos(R (in->get())));
-	AU_OP(cos, R, R);
+	__add_unary_operation(cos, Z, R);
+	__add_unary_operation_ftr(cos, Q, R, cos(R (in->get())));
+	__add_unary_operation(cos, R, R);
 	
-	AU_OP(tan, Z, R);
-	AU_OP_FTR(tan, Q, R, tan(R (in->get())));
-	AU_OP(tan, R, R);
+	__add_unary_operation(tan, Z, R);
+	__add_unary_operation_ftr(tan, Q, R, tan(R (in->get())));
+	__add_unary_operation(tan, R, R);
 	
-	AU_OP_FTR(csc, Z, R, 1/sin(in->get()));
-	AU_OP_FTR(csc, Q, R, 1/sin(R (in->get())));
-	AU_OP_FTR(csc, R, R, 1/sin(in->get()));
+	__add_unary_operation_ftr(csc, Z, R, 1/sin(in->get()));
+	__add_unary_operation_ftr(csc, Q, R, 1/sin(R (in->get())));
+	__add_unary_operation_ftr(csc, R, R, 1/sin(in->get()));
 	
-	AU_OP_FTR(sec, Z, R, 1/cos(in->get()));
-	AU_OP_FTR(sec, Q, R, 1/cos(R (in->get())));
-	AU_OP_FTR(sec, R, R, 1/cos(in->get()));
+	__add_unary_operation_ftr(sec, Z, R, 1/cos(in->get()));
+	__add_unary_operation_ftr(sec, Q, R, 1/cos(R (in->get())));
+	__add_unary_operation_ftr(sec, R, R, 1/cos(in->get()));
 	
-	AU_OP_FTR(cot, Z, R, 1/tan(in->get()));
-	AU_OP_FTR(cot, Q, R, 1/tan(R (in->get())));
-	AU_OP_FTR(cot, R, R, 1/tan(in->get()));
+	__add_unary_operation_ftr(cot, Z, R, 1/tan(in->get()));
+	__add_unary_operation_ftr(cot, Q, R, 1/tan(R (in->get())));
+	__add_unary_operation_ftr(cot, R, R, 1/tan(in->get()));
 
 	// Hyperbolic Functions
-	AU_OP(sinh, Z, R);
-	AU_OP_FTR(sinh, Q, R, sinh(R (in->get())));
-	AU_OP(sinh, R, R);
+	__add_unary_operation(sinh, Z, R);
+	__add_unary_operation_ftr(sinh, Q, R, sinh(R (in->get())));
+	__add_unary_operation(sinh, R, R);
 	
-	AU_OP(cosh, Z, R);
-	AU_OP_FTR(cosh, Q, R, cosh(R (in->get())));
-	AU_OP(cosh, R, R);
+	__add_unary_operation(cosh, Z, R);
+	__add_unary_operation_ftr(cosh, Q, R, cosh(R (in->get())));
+	__add_unary_operation(cosh, R, R);
 	
-	AU_OP(tanh, Z, R);
-	AU_OP_FTR(tanh, Q, R, tanh(R (in->get())));
-	AU_OP(tanh, R, R);
+	__add_unary_operation(tanh, Z, R);
+	__add_unary_operation_ftr(tanh, Q, R, tanh(R (in->get())));
+	__add_unary_operation(tanh, R, R);
 	
-	AU_OP_FTR(csch, Z, R, 1/sinh(in->get()));
-	AU_OP_FTR(csch, Q, R, 1/sinh(R (in->get())));
-	AU_OP_FTR(csch, R, R, 1/sinh(in->get()));
+	__add_unary_operation_ftr(csch, Z, R, 1/sinh(in->get()));
+	__add_unary_operation_ftr(csch, Q, R, 1/sinh(R (in->get())));
+	__add_unary_operation_ftr(csch, R, R, 1/sinh(in->get()));
 	
-	AU_OP_FTR(sech, Z, R, 1/cosh(in->get()));
-	AU_OP_FTR(sech, Q, R, 1/cosh(R (in->get())));
-	AU_OP_FTR(sech, R, R, 1/cosh(in->get()));
+	__add_unary_operation_ftr(sech, Z, R, 1/cosh(in->get()));
+	__add_unary_operation_ftr(sech, Q, R, 1/cosh(R (in->get())));
+	__add_unary_operation_ftr(sech, R, R, 1/cosh(in->get()));
 	
-	AU_OP_FTR(coth, Z, R, 1/tanh(in->get()));
-	AU_OP_FTR(coth, Q, R, 1/tanh(R (in->get())));
-	AU_OP_FTR(coth, R, R, 1/tanh(in->get()));
+	__add_unary_operation_ftr(coth, Z, R, 1/tanh(in->get()));
+	__add_unary_operation_ftr(coth, Q, R, 1/tanh(R (in->get())));
+	__add_unary_operation_ftr(coth, R, R, 1/tanh(in->get()));
 
 	// Vector
-	AB_OP(+, VQ, VQ, VQ);
-	AB_OP(+, VR, VR, VR);
+	__add_binary_operation(+, VQ, VQ, VQ);
+	__add_binary_operation(+, VR, VR, VR);
 	
-	AB_OP(-, VQ, VQ, VQ);
-	AB_OP(-, VR, VR, VR);
+	__add_binary_operation(-, VQ, VQ, VQ);
+	__add_binary_operation(-, VR, VR, VR);
 	
-	AB_OP_FTR(., VQ, VQ, Q, inner(a->get(), b->get()));
-	AB_OP_FTR(., VR, VR, R, inner(a->get(), b->get()));
+	__add_binary_operation_ftr(., VQ, VQ, Q, inner(a->get(), b->get()));
+	__add_binary_operation_ftr(., VR, VR, R, inner(a->get(), b->get()));
 	
-	AB_OP_FTR(shur, VQ, VQ, VQ, shur(a->get(), b->get()));
-	AB_OP_FTR(shur, VR, VR, VR, shur(a->get(), b->get()));
+	__add_binary_operation_ftr(shur, VQ, VQ, VQ, shur(a->get(), b->get()));
+	__add_binary_operation_ftr(shur, VR, VR, VR, shur(a->get(), b->get()));
 
-	AU_OP_FTR(transpose, VQ, MQ, in->get().transpose());
-	AU_OP_FTR(transpose, VR, MR, in->get().transpose());
+	__add_unary_operation_ftr(transpose, VQ, MQ, in->get().transpose());
+	__add_unary_operation_ftr(transpose, VR, MR, in->get().transpose());
 
 	// Matrix
-	AB_OP(+, MQ, MQ, MQ);
-	AB_OP(+, MR, MR, MR);
+	__add_binary_operation(+, MQ, MQ, MQ);
+	__add_binary_operation(+, MR, MR, MR);
 	
-	AB_OP(-, MQ, MQ, MQ);
-	AB_OP(-, MR, MR, MR);
+	__add_binary_operation(-, MQ, MQ, MQ);
+	__add_binary_operation(-, MR, MR, MR);
 	
-	AB_OP_FTR(shur, MQ, MQ, MQ, shur(a->get(), b->get()));
-	AB_OP_FTR(shur, MR, MR, MR, shur(a->get(), b->get()));
+	__add_binary_operation_ftr(shur, MQ, MQ, MQ, shur(a->get(), b->get()));
+	__add_binary_operation_ftr(shur, MR, MR, MR, shur(a->get(), b->get()));
 
-	AU_OP_FTR(transpose, MQ, MQ, in->get().transpose());
-	AU_OP_FTR(transpose, MR, MR, in->get().transpose());
+	__add_unary_operation_ftr(transpose, MQ, MQ, in->get().transpose());
+	__add_unary_operation_ftr(transpose, MR, MR, in->get().transpose());
 
 	// Other Linear Algebra
-	AB_OP(*, MQ, VQ, MQ);
-	AB_OP(*, VQ, MQ, MQ);
+	__add_binary_operation(*, MQ, VQ, MQ);
+	__add_binary_operation(*, VQ, MQ, MQ);
 
 	// Combinatorics
-	AU_OP_FTR(!, Z, Z, utility::integral_factorial(in->get())); 
+	__add_unary_operation_ftr(!, Z, Z, utility::integral_factorial(in->get())); 
 	
-	AB_OP_FTR(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
+	__add_binary_operation_ftr(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
 
 	// Add API functions
-}
-
-template <class R, class Z>
-token *barn <R, Z> ::mkop(const std::string &str,
-		const std::vector <std::type_index> &types)
-{
-	auto it = ops.end();
-
-	for (auto itr = ops.begin(); itr != ops.end(); itr++) {
-		if (itr->first.first == str &&
-			itr->first.second.size() == types.size()) {
-			bool ps = true;
-
-			for (size_t i = 0; i < types.size(); i++) {
-				if (types[i] != itr->first.second[i]) {
-					ps = false;
-					break;
-				}
-			}
-
-			if (ps) {
-				it = itr;
-				break;
-			}
-		}
-	}
-
-	if (it != ops.end())
-		return it->second->copy();
-
-	return nullptr;
 }
 
 template <class R, class Z>

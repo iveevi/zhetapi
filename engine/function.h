@@ -29,7 +29,7 @@ public:
 	class incompuvtable_tree {};
 	
 	using variables = std::unordered_map <std::string,
-	      std::vector <node <T> *>>;
+	      std::vector <node <T, U> *>>;
 
 	using params = std::vector <variable <T>>;
 protected:
@@ -37,7 +37,7 @@ protected:
 	
 	params m_params;
 
-	node <T> *m_root;
+	node <T, U> *m_root;
 	
 	variables m_map;
 public:
@@ -47,7 +47,7 @@ public:
 	Function(const std::string &, const std::vector <std::string> &,
 		const std::string &, vtable <T> = vtable <T> ());
 
-	Function(const std::string &, params, node <T> *);
+	Function(const std::string &, params, node <T, U> *);
 	Function(const std::string &, stree *, const params &,
 			vtable <T> tbl = vtable <T> ());
 
@@ -69,7 +69,9 @@ public:
 
 	/* Functional methods
 	 * of the Function class */
-	T compute(const std::vector <T> &);
+
+	// return token: provide methods to return coorect (auto) value
+	token *compute(const std::vector <T> &);
 
 	const Function &differentiate(const std::string &) const;
 	
@@ -96,41 +98,42 @@ public:
 
 	const variable <T> &operator[](size_t) const;
 	
-	T operator()(const Vector <T> &);
+	token *operator()(const Vector <T> &);
 
-	template <class ... U>
-	T operator()(U ...);
-
-	template <class A, class B>
-	friend const Function <U> &operator+(const Function <U> &,
-			const Function <U> &);
+	template <class ... V>
+	token *operator()(V ...);
 
 	template <class A, class B>
-	friend const Function <U> &operator-(const Function <U> &,
-			const Function <U> &);
+	friend const Function <A, B> &operator+(const Function <A, B> &,
+			const Function <A, B> &);
 
 	template <class A, class B>
-	friend const Function <U> &operator*(const Function <U> &,
-			const Function <U> &);
+	friend const Function <A, B> &operator-(const Function <A, B> &,
+			const Function <A, B> &);
 
 	template <class A, class B>
-	friend const Function <U> &operator/(const Function <U> &,
-			const Function <U> &);
+	friend const Function <A, B> &operator*(const Function <A, B> &,
+			const Function <A, B> &);
 
 	template <class A, class B>
-	friend bool operator>(const Function <U> &,
-		const Function <U> &);
+	friend const Function <A, B> &operator/(const Function <A, B> &,
+			const Function <A, B> &);
 
 	template <class A, class B>
-	friend bool operator<(const Function <U> &,
-		const Function <U> &);
+	friend bool operator>(const Function <A, B> &,
+		const Function <A, B> &);
+
+	template <class A, class B>
+	friend bool operator<(const Function <A, B> &,
+		const Function <A, B> &);
 
 	template <class A, class B>
 	friend std::ostream &operator<<(std::ostream &,
-		const Function <U> &);
+		const Function <A, B> &);
 protected:
-	template <class ... U>
-	static void gather(std::vector <T> &, T, U ...);
+	// change gather
+	template <class ... V>
+	static void gather(std::vector <T> &, T, V ...);
 
 	static void gather(std::vector <T> &, T);
 
@@ -139,7 +142,7 @@ protected:
 };
 
 template <class T, class U>
-Function <T> ::Function(const std::string &in, vtable <T> tbl)
+Function <T, U> ::Function(const std::string &in, vtable <T> tbl)
 {
 	std::vector <std::string> params;
 	std::string name;
@@ -197,87 +200,90 @@ Function <T> ::Function(const std::string &in, vtable <T> tbl)
 
 	for (std::string str : params)
 		m_params.push_back(variable <T> (str, true));
+
+	cout << "expr: " << expr << endl;
 	
-	m_root = new node <T> (expr, tbl, m_params);
+	m_root = new node <T, U> (expr, tbl, m_params);
+
 	compress();
 }
 
 template <class T, class U>
-Function <T> ::Function(const std::string &str, const std::vector <std::string>
+Function <T, U> ::Function(const std::string &str, const std::vector <std::string>
 		&names, const std::string &expr, vtable <T> tbl) : m_name(str)
 {
 	for (auto s : names)
 		m_params.push_back(variable <T> (s, true));
 
-	m_root = new node <T> (expr, tbl, m_params);
+	m_root = new node <T, U> (expr, tbl, m_params);
 	compress();
 }
 
 template <class T, class U>
-Function <T> ::Function(const std::string &str, params pars,
-	node <T> *tree)
+Function <T, U> ::Function(const std::string &str, params pars,
+	node <T, U> *tree)
 {
 	m_name = str;
 	m_params = pars;
-	m_root = new node <T> (tree);
+	m_root = new node <T, U> (tree);
 	compress();
 }
 
 template <class T, class U>
-Function <T> ::Function(const std::string &str, stree *raw, const params &pr,
+Function <T, U> ::Function(const std::string &str, stree *raw, const params &pr,
 		vtable <T> tbl)
 {
 	m_name = str;
 	m_params = pr;
 
-	m_root = new node <T> (raw, tbl, pr); 
+	m_root = new node <T, U> (raw, tbl, pr); 
 }
 
 template <class T, class U>
-Function <T> ::Function(const Function &other) : m_name(other.m_name),
+Function <T, U> ::Function(const Function &other) : m_name(other.m_name),
 	m_params(other.m_params)
 {
-	m_root = new node <T> (other.m_root);
+	m_root = new node <T, U> (other.m_root);
 	compress();
 }
 
 template <class T, class U>
-Function <T> ::~Function()
+Function <T, U> ::~Function()
 {
 	if (m_root)
 		delete m_root;
 }
 
 template <class T, class U>
-size_t Function <T> ::ins() const
+size_t Function <T, U> ::ins() const
 {
 	return m_params.size();
 }
 
 template <class T, class U>
-const std::string &Function <T> ::symbol() const
+const std::string &Function <T, U> ::symbol() const
 {
 	return m_name;
 }
 
 template <class T, class U>
-void Function <T> ::rename(const std::string &str)
+void Function <T, U> ::rename(const std::string &str)
 {
 	m_name = str;
 }
 
 template <class T, class U>
-void Function <T> ::rebase(const std::string &str, stree *raw, const params &pr,
+void Function <T, U> ::rebase(const std::string &str, stree *raw, const params &pr,
 		vtable <T> tbl)
 {
 	m_name = str;
 	m_params = pr;
 
-	m_root = new node <T> (raw, tbl, pr); 
+	m_root = new node <T, U> (raw, tbl, pr); 
 }
 
 template <class T, class U>
-std::string Function <T> ::display() const
+std::string Function <T, U> ::display() const
 {
 	std::string out;
 
@@ -294,7 +300,7 @@ std::string Function <T> ::display() const
 }
 
 template <class T, class U>
-nd_class Function <T> ::classify()
+nd_class Function <T, U> ::classify()
 {
 	m_root->classify();
 
@@ -302,7 +308,7 @@ nd_class Function <T> ::classify()
 }
 
 template <class T, class U>
-T Function <T> ::compute(const std::vector <T> &vals)
+token *Function <T, U> ::compute(const std::vector <T> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
@@ -314,7 +320,7 @@ T Function <T> ::compute(const std::vector <T> &vals)
 
 	// Get value, restore tree
 	// and return value
-	T val = m_root->value();
+	token *val = m_root->value();
 
 	for (size_t i = 0; i < m_params.size(); i++) {
 		for (auto &p : m_map[m_params[i].symbol()])
@@ -325,10 +331,10 @@ T Function <T> ::compute(const std::vector <T> &vals)
 }
 
 template <class T, class U>
-const Function <T> &Function <T> ::differentiate
+const Function <T, U> &Function <T, U> ::differentiate
 	(const std::string &var) const
 {
-	node <T> *diffed = new node <T> (m_root);
+	node <T, U> *diffed = new node <T, U> (m_root);
 
 	diffed->label({var});
 	diffed->differentiate(var);
@@ -342,10 +348,10 @@ const Function <T> &Function <T> ::differentiate
 }
 
 template <class T, class U>
-const Function <T> &Function <T> ::integrate
+const Function <T, U> &Function <T, U> ::integrate
 	(const std::string &var) const
 {
-	node <T> *prim = new node <T> (m_root);
+	node <T, U> *prim = new node <T, U> (m_root);
 
 	prim->label({var});
 	prim->integrate(var);
@@ -359,25 +365,25 @@ const Function <T> &Function <T> ::integrate
 }
 
 template <class T, class U>
-std::string Function <T> ::str() const
+std::string Function <T, U> ::str() const
 {
 	return display();
 }
 
 template <class T, class U>
-token::type Function <T> ::caller() const
+token::type Function <T, U> ::caller() const
 {
 	return FUNCTOR;
 }
 
 template <class T, class U>
-token *Function <T> ::copy() const
+token *Function <T, U> ::copy() const
 {
 	return new Function(*this); 
 }
 
 template <class T, class U>
-bool Function <T> ::operator==(token *t) const
+bool Function <T, U> ::operator==(token *t) const
 {
 	if (t->caller() != token::FUNCTOR)
 		return false;
@@ -387,18 +393,18 @@ bool Function <T> ::operator==(token *t) const
 }
 
 template <class T, class U>
-void Function <T> ::print() const
+void Function <T, U> ::print() const
 {
 	m_root->print();
 }
 
 template <class T, class U>
-const Function <T> &Function <T> ::operator=(const Function <T> &other)
+const Function <T, U> &Function <T, U> ::operator=(const Function <T, U> &other)
 {
 	if (this != &other) {
 		m_name = other.m_name;
 		m_params = other.m_params;
-		m_root = new node <T> (other.m_root);
+		m_root = new node <T, U> (other.m_root);
 		compress();
 	}
 
@@ -406,13 +412,13 @@ const Function <T> &Function <T> ::operator=(const Function <T> &other)
 }
 
 template <class T, class U>
-const variable <T> &Function <T> ::operator[](size_t i) const
+const variable <T> &Function <T, U> ::operator[](size_t i) const
 {
 	return m_params[i];
 }
 
 template <class T, class U>
-T Function <T> ::operator()(const Vector <T> &args)
+token *Function <T, U> ::operator()(const Vector <T> &args)
 {
 	std::vector <T> vals;
 
@@ -423,8 +429,8 @@ T Function <T> ::operator()(const Vector <T> &args)
 }
 
 template <class T, class U>
-template <class ... U>
-T Function <T> ::operator()(U ... args)
+template <class ... V>
+token *Function <T, U> ::operator()(V ... args)
 {
 	std::vector <T> vals;
 	gather(vals, args...);
@@ -432,16 +438,16 @@ T Function <T> ::operator()(U ... args)
 }
 
 template <class T, class U>
-const Function <T> &operator+(const Function <T> &a, const Function <T> &b)
+const Function <T, U> &operator+(const Function <T, U> &a, const Function <T, U> &b)
 {
-	Function <T> *out = new Function <T> ();
+	Function <T, U> *out = new Function <T, U> ();
 
 	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
 
-	typename Function <T> ::params as = a.m_params;
-	typename Function <T> ::params bs = b.m_params;
+	typename Function <T, U> ::params as = a.m_params;
+	typename Function <T, U> ::params bs = b.m_params;
 
-	out->m_params = typename Function <T> ::params(as.size() + bs.size());
+	out->m_params = typename Function <T, U> ::params(as.size() + bs.size());
 
 	std::sort(as.begin(), as.end());
 	std::sort(bs.begin(), bs.end());
@@ -458,7 +464,7 @@ const Function <T> &operator+(const Function <T> &a, const Function <T> &b)
 	 * [REASON]: Easily error prone for
 	 * other kinds of operations. */
 
-	out->m_root = new node <T> (*a.m_root + *b.m_root);
+	out->m_root = new node <T, U> (*a.m_root + *b.m_root);
 
 	out->m_root->set(out->m_params);
 
@@ -466,16 +472,16 @@ const Function <T> &operator+(const Function <T> &a, const Function <T> &b)
 }
 
 template <class T, class U>
-const Function <T> &operator-(const Function <T> &a, const Function <T> &b)
+const Function <T, U> &operator-(const Function <T, U> &a, const Function <T, U> &b)
 {
-	Function <T> *out = new Function <T> ();
+	Function <T, U> *out = new Function <T, U> ();
 
 	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
 
-	typename Function <T> ::params as = a.m_params;
-	typename Function <T> ::params bs = b.m_params;
+	typename Function <T, U> ::params as = a.m_params;
+	typename Function <T, U> ::params bs = b.m_params;
 
-	out->m_params = typename Function <T> ::params(as.size() + bs.size());
+	out->m_params = typename Function <T, U> ::params(as.size() + bs.size());
 
 	std::sort(as.begin(), as.end());
 	std::sort(bs.begin(), bs.end());
@@ -485,7 +491,7 @@ const Function <T> &operator-(const Function <T> &a, const Function <T> &b)
 
 	out->m_params.resize(it - out->m_params.begin());
 
-	out->m_root = new node <T> (*a.m_root - *b.m_root);
+	out->m_root = new node <T, U> (*a.m_root - *b.m_root);
 
 	out->m_root->set(out->m_params);
 
@@ -493,16 +499,16 @@ const Function <T> &operator-(const Function <T> &a, const Function <T> &b)
 }
 
 template <class T, class U>
-const Function <T> &operator*(const Function <T> &a, const Function <T> &b)
+const Function <T, U> &operator*(const Function <T, U> &a, const Function <T, U> &b)
 {
-	Function <T> *out = new Function <T> ();
+	Function <T, U> *out = new Function <T, U> ();
 
 	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
 
-	typename Function <T> ::params as = a.m_params;
-	typename Function <T> ::params bs = b.m_params;
+	typename Function <T, U> ::params as = a.m_params;
+	typename Function <T, U> ::params bs = b.m_params;
 
-	out->m_params = typename Function <T> ::params(as.size() + bs.size());
+	out->m_params = typename Function <T, U> ::params(as.size() + bs.size());
 
 	std::sort(as.begin(), as.end());
 	std::sort(bs.begin(), bs.end());
@@ -512,7 +518,7 @@ const Function <T> &operator*(const Function <T> &a, const Function <T> &b)
 
 	out->m_params.resize(it - out->m_params.begin());
 
-	out->m_root = new node <T> (*a.m_root * *b.m_root);
+	out->m_root = new node <T, U> (*a.m_root * *b.m_root);
 
 	out->m_root->set(out->m_params);
 
@@ -520,16 +526,16 @@ const Function <T> &operator*(const Function <T> &a, const Function <T> &b)
 }
 
 template <class T, class U>
-const Function <T> &operator/(const Function <T> &a, const Function <T> &b)
+const Function <T, U> &operator/(const Function <T, U> &a, const Function <T, U> &b)
 {
-	Function <T> *out = new Function <T> ();
+	Function <T, U> *out = new Function <T, U> ();
 
 	out->m_name = "(" + a.m_name + " + " + b.m_name + ")";
 
-	typename Function <T> ::params as = a.m_params;
-	typename Function <T> ::params bs = b.m_params;
+	typename Function <T, U> ::params as = a.m_params;
+	typename Function <T, U> ::params bs = b.m_params;
 
-	out->m_params = typename Function <T> ::params(as.size() + bs.size());
+	out->m_params = typename Function <T, U> ::params(as.size() + bs.size());
 
 	std::sort(as.begin(), as.end());
 	std::sort(bs.begin(), bs.end());
@@ -539,7 +545,7 @@ const Function <T> &operator/(const Function <T> &a, const Function <T> &b)
 
 	out->m_params.resize(it - out->m_params.begin());
 
-	out->m_root = new node <T> (*a.m_root / *b.m_root);
+	out->m_root = new node <T, U> (*a.m_root / *b.m_root);
 
 	out->m_root->set(out->m_params);
 
@@ -547,42 +553,42 @@ const Function <T> &operator/(const Function <T> &a, const Function <T> &b)
 }
 
 template <class T, class U>
-bool operator>(const Function <T> &lhs, const Function <T> &rhs)
+bool operator>(const Function <T, U> &lhs, const Function <T, U> &rhs)
 {
 	return lhs.m_name > rhs.m_name;
 }
 
 template <class T, class U>
-bool operator<(const Function <T> &lhs, const Function <T> &rhs)
+bool operator<(const Function <T, U> &lhs, const Function <T, U> &rhs)
 {
 	return lhs.m_name < rhs.m_name;
 }
 
 template <class T, class U>
-std::ostream &operator<<(std::ostream &os, const Function <T> &func)
+std::ostream &operator<<(std::ostream &os, const Function <T, U> &func)
 {
 	os << func.display();
 	return os;
 }
 
 template <class T, class U>
-template <class ... U>
-void Function <T> ::gather(std::vector <T> &vals,
-	T first, U ... args)
+template <class ... V>
+void Function <T, U> ::gather(std::vector <T> &vals,
+	T first, V ... args)
 {
 	vals.push_back(first);
 	gather(vals, args...);
 }
 
 template <class T, class U>
-void Function <T> ::gather(std::vector <T> &vals,
+void Function <T, U> ::gather(std::vector <T> &vals,
 	T first)
 {
 	vals.push_back(first);
 }
 
 template <class T, class U>
-void Function <T> ::compress()
+void Function <T, U> ::compress()
 {
 	m_root->label_all();
 	m_root->compress();
@@ -590,15 +596,15 @@ void Function <T> ::compress()
 }
 
 template <class T, class U>
-void Function <T> ::build()
+void Function <T, U> ::build()
 {
 	m_map.clear();
 	m_root->label_all();
 
-	std::queue <node <T> *> que;
+	std::queue <node <T, U> *> que;
 	std::string name;
 
-	node <T> *current;
+	node <T, U> *current;
 
 	que.push(m_root);
 	while (!que.empty()) {
@@ -610,7 +616,7 @@ void Function <T> ::build()
 			m_map[name].push_back(current);
 		}
 
-		for (node <T> *nd : current->get_leaves())
+		for (node <T, U> *nd : current->get_leaves())
 			que.push(nd);
 	}
 }
