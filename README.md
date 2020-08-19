@@ -12,7 +12,7 @@ This project is a work in progress.
 
 The Zhetapi library comes with many abilities. They are listed below:
 
-* **Evaluation of complex expressions:**
+### **Evaluation of complex expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
@@ -24,7 +24,7 @@ two integers yields and integers, the division of two rational numbers stays
 rational, and the product of an matrix with integer compenents with a rational
 scalar yields a matrix with rational components.
 
-* **Customization of operands:**
+### Customization of operands
 
 As mentioned in above, the engine is sensetive to overloads of certain
 operations. In addition, users can create their own set of operations and
@@ -33,18 +33,18 @@ corresponding overloads or add more overloads.
 As of right now, however, due to the way in which the engine parses expressions,
 one cannot add new symbols for operations.
 
-* **Usage and Declaration of Variables:**
+### Usage and Declaration of Variables
 
 The library provides tools which allow the user to store variables and retrieve
 them in the scope of a certain setting space. Users can then refer to these
 variables, and their values can be retrieved or changed.
 
-* **User Defined Functions:**
+### User Defined Functions
 
 Users can create their own mathematical functions, which can then be used as any
 other C++ functor object.
 
-* **Linear Algbebra:**
+### Linear Algbebra
 
 The library also provides way in which the user can do linear algebra. The
 classes `Vector` and `Matrix` come with a variety of methods on their own, which
@@ -53,7 +53,7 @@ include performing computation as well as manipulation of their representations.
 In addition to these classes, the library provides standard algorithms such Gram
 Shmidt and LU Factorization (see below).
 
-### Overview of Usable Classes
+## Overview of Usable Classes
 
 Below are the currently usable classes.
 
@@ -62,6 +62,25 @@ Below are the currently usable classes.
 | `Vector`	| A vector in linear algebra	|
 | `Matrix`	| A matrix in linear algebra	|
 | `Polynomial`	| A polynomial in algebra	|
+
+
+## Modules
+
+The directory structure of the repository is presented below.
+
+```
+.
++-- cli
++-- engine
++-- makefile
++-- tests
++-- texifier
++-- web
+```
+
+The most significant of these directories is the `engine` directory. This
+directory contains all the code that runs the classes and features of the
+library. 
 
 ## Most Recent Stable Commit
 
