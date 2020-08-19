@@ -85,6 +85,7 @@ public:
 
 	// Row operations
 	void add_rows(size_t, size_t, T);
+	
 	void swap_rows(size_t, size_t);
 
 	void multiply_row(size_t, T);

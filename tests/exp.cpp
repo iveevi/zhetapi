@@ -6,73 +6,86 @@
 
 #include <matrix.h>
 #include <vector.h>
+#include <rational.h>
 
 using namespace std;
 
-Matrix <double> vandermonde(vector <pair <double, double>> S, size_t deg)
+Matrix <Rational <int>> vandermonde(vector <pair <Rational <int>, Rational <int>>> S, size_t deg)
 {
-	return Matrix <double> {S.size(), deg + 1, [&](size_t i, size_t j) {
-		return pow(S[i].first, deg - j);
+	return Matrix <Rational <int>> {S.size(), deg + 1, [&](size_t i, size_t j) {
+		Rational <int> t = 1;
+
+		for (size_t k = 0; k < deg - j; k++)
+			t *= S[i].first;
+
+		return t;
 	}};
 }
 
 // Copy instead of pass by reference
-Matrix <double> extended_gauss_jordan(Matrix <double> A)
+Matrix <Rational <int>> extended_gauss_jordan(Matrix <Rational <int>> A)
 {
 	size_t n = A.get_rows();
 
-	double k;
+	Rational <int> k;
 	for (size_t i = 0; i < n; i++) {
 		for (size_t j = i + 1; j < n; j++) {
 			k = A[j][i]/A[i][i];
 
-			A.add_rows(j, i, -k);
+			for (size_t q = 0; q < A.get_cols(); q++)
+				A[j][q] -= k * A[i][q];
 		}
 	}
 
 	for (int i = n - 1; i > -1; i--) {
 		for (int j = i - 1; j > -1; j--) {
 			k = A[j][i]/A[i][i];
+
+			for (size_t q = 0; q < A.get_cols(); q++)
+				A[j][q] -= k * A[i][q];
 			
-			A.add_rows(j, i, -k);
+			// A.add_rows(j, i, -k);
 		}
 	}
 
-	for (size_t i = 0; i < n; i++)
-		A.multiply_row(i, 1/A[i][i]);
+	for (size_t i = 0; i < n; i++) {
+		Rational <int> t = A[i][i];
 
+		for (size_t j = 0; j < A.get_cols(); j++)
+			A[i][j] /= t;
+	}
+	
 	return A;
 }
 
 // Max fitting (>)
-pair <double, double> find_range(Vector <double> Qa, Vector <double> c)
+pair <Rational <int>, Rational <int>> find_range(Vector <Rational <int>> Qa, Vector <Rational <int>> c)
 {
 	size_t rows = Qa.size();
 
-	double mn = -numeric_limits <double> ::infinity();
-	double mx = numeric_limits <double> ::infinity();
+	Rational <int> mn = {-1, 0};
+	Rational <int> mx = {1, 0};
 
 	for (size_t i = 0; i < rows; i++) {
-		if (Qa[i] < 0) {
+		if (Qa[i] < Rational <int> {0, 1})
 			mx = min(mx, c[i]/Qa[i]);
-		} else {
+		else
 			mn = max(mn, c[i]/Qa[i]);
-		}
 	}
 
 	return {mn, mx};
 }
 
-double optimum(Vector <double> Qa, Vector <double> c)
+Rational <int> optimum(Vector <Rational <int>> Qa, Vector <Rational <int>> c)
 {
 	return inner(Qa, c)/inner(Qa, Qa);
 }
 
 int main()
 {
-	Matrix <double> ::nice = true;
+	// Matrix <Rational <int>> ::nice = true;
 
-	vector <pair <double, double>> D {
+	vector <pair <Rational <int>, Rational <int>>> D {
 		{0, 0},
 		{2, 4},
 		{6, 2},
@@ -81,17 +94,17 @@ int main()
 		{16, 4}
 	};
 
-	vector <pair <double, double>> Sf {
+	vector <pair <Rational <int>, Rational <int>>> Sf {
 		{2, 4},
 		{9, 9},
 		{16, 4}
 	};
 
-	auto y = Vector <double> {D.size(), [&](size_t i) {
+	auto y = Vector <Rational <int>> {D.size(), [&](size_t i) {
 		return D[i].second;
 	}};
 
-	auto y_hat = Vector <double> {Sf.size(), [&](size_t i) {
+	auto y_hat = Vector <Rational <int>> {Sf.size(), [&](size_t i) {
 		return Sf[i].second;
 	}};
 
@@ -100,33 +113,16 @@ int main()
 
 	auto P_Sf_rest = P_Sf.slice({0, 1}, {2, Sf.size()});
 
-	auto P_Sf_first = -1.0 * P_Sf.get_column(0);
-
-	cout << "P:\n" << P_D << endl;
-	cout << "P':\n" << P_Sf << endl;
-
-	cout << "y:\n" << y << endl;
-	cout << "(y):\n" << y_hat << endl;
-
-	cout << "P'(+1):\n" << P_Sf_first << endl;
-	cout << "P'(-1):\n" << P_Sf_rest << endl;
+	auto P_Sf_first = (Rational <int> (-1)) * P_Sf.get_column(0);
 
 	auto S_pre = P_Sf_first.append_right(y_hat);
 
-	cout << "S':\n" << S_pre << endl;
-
 	auto Aug = P_Sf_rest.append_right(S_pre);
-
-	cout << "Aug:\n" << Aug << endl;
 
 	auto I_Aug = extended_gauss_jordan(Aug);
 
-	cout << "I_Aug:\n" << I_Aug << endl;
-
 	auto S = (I_Aug.slice({0, Sf.size()}, {I_Aug.get_rows() - 1, 
-				I_Aug.get_cols() - 1})).append_above({{0, 1}});
-
-	cout << "S:\n" << S << endl;
+				I_Aug.get_cols() - 1})).append_above({{1, 0}});
 
 	auto Q = P_D * S;
 
@@ -135,26 +131,26 @@ int main()
 
 	auto c = y - Qb;
 
-	cout << "Q:\n" << Q << endl;
 
-	pair <double, double> range = find_range(Qa, c);
+	pair <Rational <int>, Rational <int>> range = find_range(Qa, c);
 
-	cout << "range-min: " << range.first << endl;
-	cout << "range-max: " << range.second << endl;
+	Rational <int> lambda = optimum(Qa, c);
 
-	double lambda = optimum(Qa, c);
+	Rational <int> p = 0;
 
-	cout << "lambda: " << lambda << endl;
-
-	double p = 0;
-	if (fabs(range.first - lambda) < fabs(range.second - lambda))
-		p = range.first;
-	else
+	if (range.first.is_inf()) {
 		p = range.second;
+	} else if (range.second.is_inf()) {
+		p = range.first;
+	} else {
+		if (abs(range.first - lambda) < abs(range.second - lambda)) {
+			p = range.first;
+		} else {
+			p = range.second;
+		}
+	}
 
-	cout << "optimal p: " << p << endl;
-
-	auto a = Vector <double> {{p}, {1}};
+	auto a = Vector <Rational <int>> {{p}, {1}};
 
 	auto params = S * a;
 

@@ -20,7 +20,10 @@ public:
 	Rational(T = 0, T = 1);
 
 	operator bool() const;
+	
 	explicit operator double() const;
+
+	bool is_inf() const;
 
 	/* Mathematical Operators - Members */
 	Rational &operator+=(const Rational &);
@@ -60,6 +63,9 @@ public:
 	template <class U>
 	friend bool operator<=(const Rational <U> &, const Rational <U> &);
 
+	template <class U>
+	friend Rational <U> abs(const Rational <U> &);
+
 	/* Output Functions */
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Rational <U> &);
@@ -85,6 +91,13 @@ Rational <T> ::Rational(T p, T q) : a(p), b(q)
 //////////////////////////////////////////
 // Conversion Operators
 //////////////////////////////////////////
+
+template <class T>
+Rational <T> ::operator bool() const
+{
+	return a != 0;
+}
+
 template <class T>
 Rational <T> ::operator double() const
 {
@@ -92,9 +105,9 @@ Rational <T> ::operator double() const
 }
 
 template <class T>
-Rational <T> ::operator bool() const
+bool Rational <T> ::is_inf() const
 {
-	return a != 0;
+	return b == 0;
 }
 
 //////////////////////////////////////////
@@ -282,6 +295,17 @@ T Rational <T> ::gcd(T a, T b)
 		}
 
 		return std::min(a, b);
+}
+
+// Extra functions
+
+template <class T>
+Rational <T> abs(const Rational <T> &a)
+{
+	if (a < Rational <int> {0, 1})
+		return {-a.a, a.b};
+	
+	return a;
 }
 
 #endif
