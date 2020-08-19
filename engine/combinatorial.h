@@ -224,7 +224,7 @@ namespace utility {
 	 * small.
 	 */
 	template <class T>
-	std::vector <Rational <T>> bernoulli_sequence_Rational(T n)
+	std::vector <Rational <T>> bernoulli_sequence_rational(T n)
 	{
 		std::vector <Rational <T>> ibs = {{1, 1}};
 
@@ -257,12 +257,12 @@ namespace utility {
 	 * generator.
 	 */
 	template <class T>
-	T bernoulli_number_Rational(T n, T (*gamma)(T) = std::tgamma)
+	T bernoulli_number_rational(T n, T (*gamma)(T) = std::tgamma)
 	{
 		if (n <= 0)
 			throw positive_flow_exception();
 
-		return bernoulli_sequence_Rational(n)[n - 1];
+		return bernoulli_sequence_rational(n)[n - 1];
 	}
 
 }

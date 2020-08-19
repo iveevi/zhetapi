@@ -12,7 +12,7 @@ This project is a work in progress.
 
 The Zhetapi library comes with many abilities. They are listed below:
 
-### **Evaluation of complex expressions
+### Evaluation of complex expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
@@ -53,15 +53,39 @@ include performing computation as well as manipulation of their representations.
 In addition to these classes, the library provides standard algorithms such Gram
 Shmidt and LU Factorization (see below).
 
+### Standard Algorithms
+
+In addition to a collection of classes the library provides, there are also
+common standard algorithms which are implemented such as gradient descent and
+root finding, as well as Gram Shmidt and LU factorization, a mentioned above.
+
+Below are the currently implemented algorithms.
+
+| Function Name			| Description																						| Header (In `engine`)	|
+| :---------------------------:	| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------: |
+| `gram_shmidt`			| Performs the Gram Shmidt process on the given set of vectors.																| `algorithm.h`		|
+| `gram_shmidt_normalized`	| Same as `gram_shmidt` but returns a basis of normalized vectors.															| `algorithm.h`		|
+| `lagrange_interpolate`	| Performs Lagrange interpolation on the given set of poitns. Returns the appropriate polynomial.											| `algorithm.h`		|
+| `lu_factorize`		| Returns the LU factorization of a matrix.																		| `algorithm.h`		|
+| `solve_linear_equation`	| Solves the linear equation `Ax = b` given `A` and `b`.																| `algorithm.h`		|
+| `reduced_polynomial_fitting`	| Returns a polynomial which goes through the given set of points. Differs from `lagrange_interpolate` in that it returns a simplified polynomial.					| `algorithm.h`		|
+| `gradient_descent`		| Applies gradient descent to a given function on the given set of data.														| `algorithm.h`		|
+| `find_root`			| Uses Newton's method to find the root of the given function.																| `algorithm.h`		|
+| `solve_hlde_constant`		| Solves the homogenous linear differential equation with constant coefficients represented by the given polynomial. Returns a list of functions as a basis to the solution space.	| `calculus.h`		|
+| `bernoulli_sequence_real`	| Generates the first `n` terms of the Bernoulli sequence.																| `combinatorial.h`	|
+| `bernoulli_sequence_rational`	| Generates the first `n` terms of the Bernoulli sequence as rational numbers.														| `combinatorial.h`	|
+| `bernoulli_number_real`	| Generates the `n`th Bernoulli number.																			| `combinatorial.h`	|
+| `bernoulli_number_rational`	| Generates the `n`th Bernoulli number as a rational number.																| `combinatorial.h`	|
+
 ## Overview of Usable Classes
 
 Below are the currently usable classes.
 
-| Class Name	| Description			|
-| :----------:	| -----------------------------	| 
-| `Vector`	| A vector in linear algebra	|
-| `Matrix`	| A matrix in linear algebra	|
-| `Polynomial`	| A polynomial in algebra	|
+| Class Name	| Description			| Header (In `engine`)	|
+| :--------:	| ----------------------------- | :---------------------------: |
+| `Vector`	| A vector in linear algebra	| `vector.h`			|
+| `Matrix`	| A matrix in linear algebra	| `matrix.h`			|
+| `Polynomial`	| A polynomial in algebra	| `polynomial.h`		|
 
 
 ## Modules
