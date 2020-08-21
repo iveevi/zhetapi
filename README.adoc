@@ -1,4 +1,4 @@
-image::zhetapi-logo.png
+image::zhetapi-logo.png[]
 
 # Zhetapi ℤHΠ
 
@@ -55,6 +55,13 @@ variables, and their values can be retrieved or changed.
 
 Users can create their own mathematical functions, which can then be used as any
 other C++ functor object.
+
+### Calculus
+
+The `Function` object can be differentiated in terms of any of its variables, to
+get its gradients and such. This process is symbolic, which has the advantage
+that one has a closed form for the derivative, but the disadvantage that it
+could be very complicated.
 
 ### Linear Algbebra
 
@@ -137,21 +144,58 @@ Below are the currently usable classes.
 
 ## Modules
 
-The directory structure of the repository is presented below.
+A description of each directory is presented below:
 
-```
-.
-+-- cli
-+-- engine
-+-- makefile
-+-- tests
-+-- texifier
-+-- web
-```
+|===
 
-The most significant of these directories is the `engine` directory. This
-directory contains all the code that runs the classes and features of the
-library. 
+| Directory | Description
+
+| cli | Code for the Command Line Interface application of Zhetapi.
+
+| engine | Contains all the library code and headers. Can be cloned by users
+and used on the go.
+
+| tests | Code to test library feastures.
+
+| texifier | Code to convert plain text math to Latex.
+
+| web | Code to run the web server for the Zhetapi website (not up).
+
+|===
+
+## Upcoming Features
+
+### Simplification of Functions
+
+Currently, the `Function` objects lack the complete ability to simplify their
+representations. (Some of this functionality does already exist, such as the
+fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
+actions.) For example, it is not yet possible to have the object recognize that
+`3xy + 5yx` is the same as `8xy`. This feature wuold also help in stabilizing
+the expanding complication of derivatives.
+
+### Integration
+
+Although differentiation is a current feature, integration is not. This feature
+will be implemented as soon as the current frame work has been properly placed.
+
+### Exact Forms of Numbers
+
+One recognizes, simply by looking at the first few digits, that the number
+3.141592 is most nearly pi, and that the number 2.7182817 is most nearly Euler's
+number. The hope is that at some point, the library will be able to reach similar
+conclusions, through the help of integer relations algorithms such as PSLQ.
+
+### More Algorithms in Linear Algebra
+
+Although there are a few standard linear algebra algorithms, the hope is that
+more will be added. These include QR factorization, SVD, diagonalization, etc.
+
+### Machine Learning
+
+A solid foundation for linear algebra is already present in the library. The
+next move would be to implement machine learning utilities, such as Deep Neural
+Networks.
 
 ## Most Recent Stable Commit
 
