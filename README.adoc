@@ -8,7 +8,7 @@ users.
 
 This project is a work in progress.
 
-## Usage
+## Features
 
 The Zhetapi library comes with many abilities. They are listed below:
 
@@ -196,6 +196,17 @@ more will be added. These include QR factorization, SVD, diagonalization, etc.
 A solid foundation for linear algebra is already present in the library. The
 next move would be to implement machine learning utilities, such as Deep Neural
 Networks.
+
+## References
+
+Below is a list of resources used in the making of this project.
+
+ . Strang, Gilbert. _Introduction to linear algebra._ Wellesley, MA: Cambridge Press, 2016. Print.
+ . Apostol, Tom M. _Calculus._ New York: J. Wiley, 1967. Print.
+ . Apostol, Tom M. _Calculus._ Waltham, Mass: Blaisdell Pub. Co, 1967. Print.
+ . Graham, Ronald L., Donald E. Knuth, and Oren Patashnik. _Concrete mathematics : a foundation for computer science._ Reading, Mass: Addison-Wesley, 1994. Print.
+ . Stroustrup, Bjarne. _The C++ programming language._ Upper Saddle River, NJ: Addison-Wesley, 2013. Print.
+ . Press, William H., et al. _Numerical recipes : the art of scientific computing._ Cambridge, UK New York: Cambridge University Press, 2007. Print.
 
 ## Most Recent Stable Commit
 
