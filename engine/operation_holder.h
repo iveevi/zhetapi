@@ -1,22 +1,32 @@
 #ifndef OPERATION_HOLDER_H_
 #define OPERATION_HOLDER_H_
 
+// C/C++ headers
 #include <string>
 
-#include "token.h"
+// Engine headers
+#include <token.h>
 
+// Make this more flexible
+// to the user later on
 enum codes {
 	add,
 	sub,
 	mul,
-	dvs
+	dvs,
+	shr,
+	fct,
+	pwr
 };
 
 std::string strcodes[] = {
 	"add",
 	"subtract",
 	"multiply",
-	"divide"
+	"divide",
+	"shur",
+	"factorial",
+	"power"
 };
 
 struct operation_holder : public token {
@@ -43,6 +53,12 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = mul;
 	else if (str == "/")
 		code = dvs;
+	else if (str == "shur")
+		code = shr;
+	else if (str == "!")
+		code = fct;
+	else if (str == "^")
+		code = pwr;
 }
 
 token::type operation_holder::caller() const

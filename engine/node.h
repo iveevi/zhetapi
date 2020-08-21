@@ -369,11 +369,12 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params)
 	node *out = convert(st, tbl);
 	
 	cout << endl << "Out:" << endl;
+	out->address_print();
 	out->print();
 
 	*this = *out;
 
-	delete out;
+	// delete out;
 	delete st;
 
 	cout << endl << "This:" << endl;
@@ -1051,8 +1052,8 @@ void node <T, U> ::address_print(int num, int lev) const
 		counter--;
 	}
 
-	std::cout << "#" << num << " - [" << strlabs[type] << "] "
-		<< " @ " << this << std::endl;
+	std::cout << "#" << num << " - [" << strlabs[type] << "] @ "
+		<< this << std::endl;
 
 	counter = 0;
 	for (node *itr : leaves) {

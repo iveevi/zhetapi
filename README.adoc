@@ -24,6 +24,18 @@ two integers yields and integers, the division of two rational numbers stays
 rational, and the product of an matrix with integer compenents with a rational
 scalar yields a matrix with rational components.
 
+The `expression.h` header contains the functions `expr` and `exprf` to evaluate
+expressions represented by strings. The difference is that `exprf` takes a
+formatted string, while `expr` takes in a string object.
+
+```{cpp}
+// Not formatted, should print "1.0"
+cout << (expr <double, int> ("1 + 2!/2.0"))->str() << endl; // should print "1.0"
+
+// Formatted, should also print "1.0"
+cout << (exprf <double, int> ("%d + %d!/2.0", 1, 2))->str() << endl;
+```
+
 ### Customization of operands
 
 As mentioned in above, the engine is sensetive to overloads of certain
@@ -61,7 +73,7 @@ root finding, as well as Gram Shmidt and LU factorization, a mentioned above.
 
 Below are the currently implemented algorithms.
 
-| Function Name			| Description																						| Header (In `engine`)	|
+| Function Name			| Description																						| Engine Header		|
 | :---------------------------:	| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------: |
 | `gram_shmidt`			| Performs the Gram Shmidt process on the given set of vectors.																| `algorithm.h`		|
 | `gram_shmidt_normalized`	| Same as `gram_shmidt` but returns a basis of normalized vectors.															| `algorithm.h`		|
@@ -81,7 +93,7 @@ Below are the currently implemented algorithms.
 
 Below are the currently usable classes.
 
-| Class Name	| Description			| Header (In `engine`)	|
+| Class Name	| Description			| Engine Header			|
 | :--------:	| ----------------------------- | :---------------------------: |
 | `Vector`	| A vector in linear algebra	| `vector.h`			|
 | `Matrix`	| A matrix in linear algebra	| `matrix.h`			|

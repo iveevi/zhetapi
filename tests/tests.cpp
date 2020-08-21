@@ -16,6 +16,7 @@
 #include <node.h>
 #include <polynomial.h>
 #include <rational.h>
+#include <expression.h>
 
 using namespace std;
 
@@ -26,9 +27,9 @@ int main()
 	while (getline(cin, line)) {
 		cout << "In: " << line << endl;
 
-		node <double, int> nd = string(line);
+		// node <double, int> nd = string(line);
 
-		cout << "Out: " << nd.display() << "\n" << endl;
+		cout << "Out: " << (expr <double, int> (line))->str() << "\n" << endl;
 	}
 
 	Function <double, int> f("f(x) = x^2");
