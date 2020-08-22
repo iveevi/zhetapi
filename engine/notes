@@ -24,6 +24,13 @@ Later remove the immediate transition from i to the imaginary number; if indeed
 the user has not yet defined a variable i, then make i equal to the imaginary
 number.
 
+Change operation factory in node.h.
+
+Make operations and classes more efficient, i.e. computation of complex numbers
+or polynomials, etc. Test the speedup through benchmark tests.
+
+Try compiling the parser/lexer instead of including them.
+
 =====
 Bugs:
 =====

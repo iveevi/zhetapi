@@ -71,7 +71,7 @@ public:
 	 * of the Function class */
 
 	// return token: provide methods to return coorect (auto) value
-	token *compute(const std::vector <T> &);
+	token *compute(const std::vector <node <T, U> *> &);
 
 	const Function &differentiate(const std::string &) const;
 	
@@ -132,10 +132,14 @@ public:
 		const Function <A, B> &);
 protected:
 	// change gather
-	template <class ... V>
-	static void gather(std::vector <T> &, T, V ...);
+	template <class A, class ... B>
+	static void gather(std::vector <node <T, U> *> &, A, B ...);
 
-	static void gather(std::vector <T> &, T);
+	template <class A>
+	static void gather(std::vector <node <T, U> *> &, A);
+
+	template <class A>
+	static node <T, U> *convert(A);
 
 	void compress();
 	void build();
@@ -308,14 +312,14 @@ nd_class Function <T, U> ::classify()
 }
 
 template <class T, class U>
-token *Function <T, U> ::compute(const std::vector <T> &vals)
+token *Function <T, U> ::compute(const std::vector <node <T, U> *> &vals)
 {
 	if (vals.size() != m_params.size())
 		throw invalid_call();
 
 	for (size_t i = 0; i < m_params.size(); i++) {
 		for (auto &p : m_map[m_params[i].symbol()])
-			p->retokenize(new operand <T> {vals[i]});
+			p->set(vals[i]);
 	}
 
 	// Get value, restore tree
@@ -432,8 +436,10 @@ template <class T, class U>
 template <class ... V>
 token *Function <T, U> ::operator()(V ... args)
 {
-	std::vector <T> vals;
+	std::vector <node <T, U> *> vals;
+
 	gather(vals, args...);
+
 	return compute(vals);
 }
 
@@ -572,19 +578,45 @@ std::ostream &operator<<(std::ostream &os, const Function <T, U> &func)
 }
 
 template <class T, class U>
-template <class ... V>
-void Function <T, U> ::gather(std::vector <T> &vals,
-	T first, V ... args)
+template <class A, class ... B>
+void Function <T, U> ::gather(std::vector <node <T, U> *> &vals,
+	A first, B ... args)
 {
-	vals.push_back(first);
+	vals.push_back(convert(first));
+
 	gather(vals, args...);
 }
 
 template <class T, class U>
-void Function <T, U> ::gather(std::vector <T> &vals,
-	T first)
+template <class A>
+void Function <T, U> ::gather(std::vector <node <T, U> *> &vals,
+	A first)
 {
-	vals.push_back(first);
+	vals.push_back(convert(first));
+}
+
+template <class T, class U>
+template <class A>
+node <T, U> *Function <T, U> ::convert(A x)
+{
+	// Scalars
+	if (typeid(A) == typeid(T))
+		return new node <T, U> {new operand <T> (x), l_constant_real};
+	if (typeid(A) == typeid(U))
+		return new node <T, U> {new operand <U> (x), l_constant_integer};
+	if (typeid(A) == typeid(Rational <U>))
+		return new node <T, U> {new operand <Rational <U>> (x), l_constant_rational};
+	
+	// Complex numbers
+	if (typeid(A) == typeid(Complex <T>))
+		return new node <T, U> {new operand <Complex <T>> (x), l_constant_complex_real};
+	//if (typeid(A) == typeid(Complex <U>))
+	//	return new {operand <Complex <U>> (x), l_constant_matrix_complex_rational};
+	//if (typeid(A) == typeid(Complex <Rational <U>>))
+	//	return new operand <Complex <Rational <U>>> (x);
+
+	// If no matches, return null
+	return nullptr;
 }
 
 template <class T, class U>

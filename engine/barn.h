@@ -304,6 +304,7 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	// Exponentiation
 	__add_binary_operation_ftr(^, Z, Z, Z, (Z) pow(a->get(), b->get()));
 	__add_binary_operation_ftr(^, R, R, R, pow(a->get(), b->get()));
+	__add_binary_operation_ftr(^, R, Z, R, pow(a->get(), b->get()));
 	__add_binary_operation_ftr(^, Q, Q, R, pow((R) a->get(), (R) b->get()));
 	__add_binary_operation_ftr(^, CR, CR, CR, 1);
 	__add_binary_operation_ftr(^, CQ, CQ, CQ, Q(1));
@@ -357,8 +358,11 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	__add_unary_operation_ftr(coth, Z, R, 1/tanh(in->get()));
 	__add_unary_operation_ftr(coth, Q, R, 1/tanh(R (in->get())));
 	__add_unary_operation_ftr(coth, R, R, 1/tanh(in->get()));
+	
+	//////////////////////////////////////////
+	// Vector Operations
+	//////////////////////////////////////////
 
-	// Vector
 	__add_binary_operation(+, VQ, VQ, VQ);
 	__add_binary_operation(+, VR, VR, VR);
 	
@@ -373,8 +377,11 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 
 	__add_unary_operation_ftr(transpose, VQ, MQ, in->get().transpose());
 	__add_unary_operation_ftr(transpose, VR, MR, in->get().transpose());
+	
+	//////////////////////////////////////////
+	// Matrix Operations
+	//////////////////////////////////////////
 
-	// Matrix
 	__add_binary_operation(+, MQ, MQ, MQ);
 	__add_binary_operation(+, MR, MR, MR);
 	
@@ -391,12 +398,16 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	__add_binary_operation(*, MQ, VQ, MQ);
 	__add_binary_operation(*, VQ, MQ, MQ);
 
-	// Combinatorics
+	//////////////////////////////////////////
+	// Combinatorial Operations
+	//////////////////////////////////////////
 	__add_unary_operation_ftr(!, Z, Z, utility::integral_factorial(in->get())); 
 	
 	__add_binary_operation_ftr(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
 
-	// Add API functions
+	//////////////////////////////////////////
+	// API functions
+	//////////////////////////////////////////
 }
 
 template <class R, class Z>

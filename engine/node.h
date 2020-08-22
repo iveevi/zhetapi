@@ -199,7 +199,7 @@ public:
 			// shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
 	node(stree *, vtable <T> = vtable <T> (), params = params()/*, shared_ptr
 			<cfg> = shared_ptr <cfg> (new cfg()) */);
-	node(token *t, nd_label l, std::vector <node *> lv/* shared_ptr <cfg> */);
+	node(token *t, nd_label l, std::vector <node *> lv = {}/* shared_ptr <cfg> */);
 	node(token *t, std::vector <node *> lv/* shared_ptr <cfg> */);
 	node(const node &);
 	node(node *);
@@ -762,6 +762,10 @@ token *node <T, U> ::value() const
 			cout << "err @ node:" << endl;
 			print();
 
+			cout << "vals:" << endl;
+			for (auto tok : vals)
+				cout << "\tt: " << tok->str() << endl;
+
 			throw incomputable_tree();
 		}
 
@@ -1052,8 +1056,8 @@ void node <T, U> ::address_print(int num, int lev) const
 		counter--;
 	}
 
-	std::cout << "#" << num << " - [" << strlabs[type] << "] @ "
-		<< this << std::endl;
+	std::cout << "#" << num << " - [" << strlabs[type] << "] ("
+		<< tok << ") @ " << this << std::endl;
 
 	counter = 0;
 	for (node *itr : leaves) {
@@ -1091,6 +1095,7 @@ std::string node <T, U> ::display() const
 	case l_constant ... l_constant_matrix_complex_real:
 		return tok->str();
 	case l_variable:
+		return (dynamic_cast <var *> (tok))->symbol();
 	case l_summation_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	//case l_function:
@@ -1678,15 +1683,17 @@ node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl)
 template <class T, class U>
 node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 {
-	/* node *out;
+	// vtbl includes variables not in the function!!
+
+	node *out;
 
 	node *save;
 	node *temp;
 	node *in;
 	
-	out = new node {get(op_mul), {
-		new node {new opd(1), l_none, {}},
-		new node {new opd(1), l_none, {}}
+	out = new node {new operation_holder("*"), {
+		new node {new operand <U> (1), l_none, {}},
+		new node {new operand <U> (1), l_none, {}}
 	}};
 
 	temp = out;
@@ -1709,13 +1716,13 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 		);
 
 		if (vitr != pars.end()) {
-			out = new node {get(op_mul), l_none, {
+			out = new node {new operation_holder("*"), l_none, {
 				out,
 				new node {new var {vitr->symbol(), true}, {}}
 			}};
 			
 			for (stree *s : st->children()) {
-				out = new node {get(op_mul), {
+				out = new node {new operation_holder("*"), {
 					out,
 					convert(s, vtbl)
 				}};
@@ -1728,13 +1735,13 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 		try {
 			vr = vtbl.find(acc);
 			
-			out = new node {get(op_mul), {
+			out = new node {new operation_holder("*"), {
 				out,
 				new node {new var(vr), {}}
 			}};
 
 			for (stree * s : st->children()) {
-				out = new node {get(op_mul), {
+				out = new node {new operation_holder("*"), {
 					out,
 					convert(s, vtbl)
 				}};
@@ -1746,7 +1753,7 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 			continue;
 		} catch(...) {}
 		
-		* try {
+		/*try {
 			fr = tbl.find_ftr(acc);
 
 			out = new node {get(op_mul), {
@@ -1761,7 +1768,7 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 			num++;
 
 			continue;
-		} catch(...) {} *
+		} catch(...) {} */
 	}
 
 	if (!num) {
@@ -1769,7 +1776,12 @@ node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
 		throw undefined_symbol(acc);
 	}
 
-	return out; */
+	cout << "VARPACK:" << endl;
+
+	out->address_print();
+	out->print();
+
+	return out;
 }
 
 //////////////////////////////////////////

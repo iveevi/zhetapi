@@ -10,7 +10,7 @@
 namespace utility {
 
 	template <class T>
-	std::vector <Vector <T>> gram_shmidt(const std::vector <Vector <T>> &span) {
+	std::vector <Vector <T>> gram_schmidt(const std::vector <Vector <T>> &span) {
 		assert(span.size());
 
 		std::vector <Vector <T>> basis = {span[0]};
@@ -32,7 +32,7 @@ namespace utility {
 	}
 	
 	template <class T>
-	std::vector <Vector <T>> gram_shmidt_normalized(const std::vector <Vector <T>> &span) {
+	std::vector <Vector <T>> gram_schmidt_normalized(const std::vector <Vector <T>> &span) {
 		assert(span.size());
 
 		std::vector <Vector <T>> basis = {span[0].normalize()};

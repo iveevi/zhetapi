@@ -135,9 +135,10 @@ Below are the currently usable classes.
 
 | Class Name | Description | Engine Header
 
-| `Vector`	| A vector in linear algebra	| `vector.h`
-| `Matrix`	| A matrix in linear algebra	| `matrix.h`
-| `Polynomial`	| A polynomial in algebra	| `polynomial.h`
+| `Vector` | A vector in linear algebra | `vector.h`
+| `Matrix` | A matrix in linear algebra | `matrix.h`
+| `Polynomial` | A polynomial in algebra | `polynomial.h`
+| `Complex` | A complex number in mathematics | `complex.h`
 
 |===
 
@@ -150,10 +151,12 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| cli | Code for the Command Line Interface application of Zhetapi.
+| cli | Code for the Command Line Interface (CLI) application of Zhetapi. The
+CLI will allow the user to directly compute expressions and declare functions
+from the command line -- it will essentially be a calculator app like `octave`.
 
-| engine | Contains all the library code and headers. Can be cloned by users
-and used on the go.
+| engine | Contains all the library code and headers. Can be cloned by users and
+used immediately if all the prerequites are present (see the next section).
 
 | tests | Code to test library features.
 
@@ -166,21 +169,33 @@ capabilities.
 
 |===
 
+## Usage
+
+The prerequisites for using the library are `bison` and `flex`, which are used
+to parse inputs.
+
+Apart from this, the user only need to clone the repository and are run `make
+parsers` in the repository directory. After this, they simple include the files
+in `engine` whenever necessary.
+
 ## Upcoming Features
 
 ### Simplification of Functions
 
-Currently, the `Function` objects lack the complete ability to simplify their
-representations. (Some of this functionality does already exist, such as the
-fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
+Currently, objects of the `Function` class lack the complete ability to simplify
+their representations. (Some of this functionality does already exist, such as
+the fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
 actions.) For example, it is not yet possible to have the object recognize that
-`3xy + 5yx` is the same as `8xy`. This feature would also help in stabilizing
-the expanding complication of derivatives.
+`3xy + 5yx` is the same as `8xy`. This feature would also help reduce the
+complexity of derivates of these objects.
 
-### Integration
+### Integration and Differentiation
 
-Although differentiation is a current feature, integration is not. This feature
-will be implemented as soon as the current framework has been properly placed.
+While symbolic differentiation is current feature, integration is not. This
+feature will be implemented as soon as the current framework has been properly
+placed.  In addition, we would like to add other kinds of differntiation and
+integration, such as automatic differentiation, and different types of numerical
+integration (quadrature, etc.).
 
 ### Exact Forms of Numbers
 

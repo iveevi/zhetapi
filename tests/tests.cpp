@@ -36,5 +36,8 @@ int main()
 
 	cout << f << endl;
 
-	cout << f(10) << endl;
+
+	f.print();
+
+	cout << (f(10.0))->str() << endl;
 }
