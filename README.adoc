@@ -38,7 +38,7 @@ cout << (exprf <double, int> ("%d + %d!/2.0", 1, 2))->str() << endl;
 
 ### Customization of Operands
 
-As mentioned in above, the engine is sensitive to overloads of certain
+As mentioned above, the engine is sensitive to overloads of certain
 operations. In addition, users can create their own set of operations and
 corresponding overloads or add more overloads.
 
@@ -47,8 +47,8 @@ one cannot add new symbols for operations.
 
 ### Usage and Declaration of Variables
 
-The library provides constructs which allow the user to store variables and retrieve
-them in the scope of a certain setting space. Users can then refer to these
+The library provides constructs which allow the user to store variables and
+retrieve them in the scope of the `Barn` class. Users can then refer to these
 variables, and their values can be retrieved or changed.
 
 ### User Defined Functions
