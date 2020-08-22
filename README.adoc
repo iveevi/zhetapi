@@ -6,6 +6,9 @@ Zhetapi (ℤHΠ) is a C++ computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
 users.
 
+The library features have only been tested on Linux. Support for Windows has not
+been confirmed yet.
+
 This project is a work in progress.
 
 ## Features
