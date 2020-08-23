@@ -29,7 +29,11 @@ int main()
 
 		// node <double, int> nd = string(line);
 
-		cout << "Out: " << (expr <double, int> (line))->str() << "\n" << endl;
+		// cout << "Out: " << (expr <double, int> (line))->str() << "\n" << endl;
+		// cout << "Out: " << (expr(line))->str() << "\n" << endl;
+		// cout << "Out: " << (expr(line))->str() << "\n" << endl;
+		//cout << "Out: " << (cmp.expr(line))->str() << "\n" << endl;
+		cout << "Out: " << expr_str(line) << "\n" << endl;
 	}
 
 	Function <double, int> f("f(x) = x^2");
@@ -40,4 +44,14 @@ int main()
 	f.print();
 
 	cout << (f(10.0))->str() << endl;
+	
+	Function <double, int> g("g(x) = x . [1, 2, 3]");
+	
+	cout << (g(Vector <int> {1, 2, 3}))->str() << endl;
+
+	Function <double, int> dg = g.differentiate(0);
+
+	cout << endl << dg << endl;
+
+	dg.print();
 }

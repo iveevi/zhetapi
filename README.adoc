@@ -11,79 +11,156 @@ It is being developed in Linux and has only been tested for it.
 
 ## Features
 
-The Zhetapi library comes with many abilities. They are listed below:
-
-### Evaluation of Complex Expressions
+## Evaluation of Complex Expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
 matrices.
 
-The framework of library allows the evaluation to be sensitive to certain types of
-operations and their corresponding operations. For example, multiplication of
-two integers yields and integers, the division of two rational numbers stays
-rational, and the product of a matrix with integer components with a rational
-scalar yields a matrix with rational components.
+The framework of the library allows the evaluation to be sensitive to certain
+types of operations and their corresponding operations. For example,
+multiplication of two integers yields an integers, the division of two rational
+numbers stays rational, and the product of a matrix, whose components are
+integers, with a rational scalar yields a matrix with rational components.
 
-The `expression.h` header contains the functions `expr` and `exprf` to evaluate
-expressions represented by strings. The difference is that `exprf` takes a
-formatted string, while `expr` takes in a string object.
+The `expression.h` header contains `expr_str()` and `exprf_str()`, which return
+the value of the passed expression as a string. The difference in these two lies
+in the fact that `exprf_str()` takes in a formatted string, while `expr_str()`
+takes a string object.
 
 ```{cpp}
 // Not formatted, prints "1.0"
-cout << (expr <double, int> ("1 + 2!/2.0"))->str() << endl;
+cout << expr_str("1 + 2!/2.0") << endl;
 
 // Formatted, also prints "1.0"
-cout << (exprf <double, int> ("%d + %d!/2.0", 1, 2))->str() << endl;
+cout << exprf_str("%d + %d!/2.0", 1, 2) << endl;
 ```
 
-### Customization of Operands
+### Customization of Operations
 
-As mentioned above, the engine is sensitive to overloads of certain
-operations. In addition, users can create their own set of operations and
-corresponding overloads or add more overloads.
+As mentioned above, the engine is sensitive to overloads of certain operations.
+On top of this, users can create their own set of operations and corresponding
+overloads or add more overloads. This is possible through the `Barn` class and
+macros provided by the library.
 
-As of right now, however, due to the way in which the engine parses expressions,
+```{cpp}
+// Define the operation
+// &: (Z, Z) to Z,
+// &(a, b) = a(a + b)
+__add_binary_operation_ftr(&, Z, Z, Z, (a->get() + b->get()) * a->get());
+
+// Define the operation
+// &: (R, Q) to R,
+// &(a, b) = a(a + b)
+__add_binary_operation_ftr(&, R, Q, R, (a->get() + b->get()) * a->get());
+```
+
+Here, the `typedef`s `Z`, `Q`, and `R` refer to integer, rational and real
+operands. Below is a table of all supported operand types.
+
+|===
+
+| `typedef` | Operand type
+
+| `Z` | Integers, Z
+| `Q` | Rationals, Q
+| `R` | Reals, R
+
+| `CZ` | Gaussian integer, Z[i]
+| `CQ` | Complex number with rational parts, Q[i]
+| `CR` | Complex numbers, C
+
+| `VZ` | Vector with integral components
+| `VQ` | Vector with rational components
+| `VR` | Vector with real components
+| `VCZ` | Vector with components in Z[i]
+| `VCQ` | Vector with components in Q[i]
+| `VCR` | Vector with complex components
+
+| `MZ` | Matrix with integral components
+| `MQ` | Matrix with rational components
+| `MR` | Matrix with real components
+| `MCZ` | Matrix with components in Z[i]
+| `MCQ` | Matrix with components in Q[i]
+| `MCR` | Matrix with complex components
+
+|===
+
+As of right now, however, due to how the engine parses expressions,
 one cannot add new symbols for operations.
 
 ### Usage and Declaration of Variables
 
-The library provides constructs which allow the user to store variables and
+The library provides constructs that allow the user to store variables and
 retrieve them in the scope of the `Barn` class. Users can then refer to these
 variables, and their values can be retrieved or changed.
 
+```{cpp}
+Variable <double> x{"x", 46};
+
+Barn <double, int> brn;
+
+brn.add(x);
+
+// Prints "[x] - 46"
+cout << brn.get("x") << endl;
+
+// Generates an exception
+cout << brn.get("y") << endl;
+```
+
 ### User Defined Functions
 
-Users can create their own mathematical functions, which can then be used as any
-other C++ functor object.
+Users can create mathematical functions, which can then be used as any other C++
+functor object.
+
+```{cpp}
+Function <double, int> f = "f(x) = x^2";
+
+// Prints "10"
+cout << f(10) << endl;
+
+// Prints "9/16"
+cout << f(Rational <int> {3, 4}) << endl;
+
+// Prints "25.0"
+cout << f(5.0) << endl;
+```
 
 ### Calculus
 
-An object of class `Function` can be differentiated in any variable its
+An object of class `Function` can be differentiated in terms of any of its
 variables, to get its gradients and such. This process is symbolic, which has
 the advantage that one has a closed form for the derivative, but the
 disadvantage that it could be very complicated.
 
+```{cpp}
+Function <double, int> f = "f(x) = x^2";
+
+// Compute df/dx
+Function <double, int> df = f.differentiate(0);
+
+// Prints "f(x) = x^2"
+cout << f << endl;
+
+// Prints "df/dx(x) = 2x"
+cout << df << endl;
+```
+
 ### Linear Algebra
 
-The library also provides way in which the user can do linear algebra. The
+The library also provides ways in which the user can do linear algebra. The
 classes `Vector` and `Matrix` come with a variety of methods on their own, which
 include performing computation as well as manipulation of their representations.
 
-In addition to these classes, the library provides standard algorithms such Gram
+In addition to these classes, the library provides standard algorithms such as Gram
 Schmidt and LU Factorization (see below).
 
 ### Standard Algorithms
 
-In addition to a collection of classes the library provides, there are also
-common standard algorithms which are implemented such as gradient descent and
-root finding, as well as Gram Schmidt and LU factorization, a mentioned above.
-
-Below are the currently implemented algorithms.
-
 |===
 
-| Function Name	| Description | Engine Header
+| Function | Description | Engine Header
 
 | `gram_schmidt` | Performs the Gram Schmidt process on the given
 set of vectors.	| `algorithm.h`
@@ -99,7 +176,7 @@ points. Returns the appropriate polynomial. | `algorithm.h`
 | `solve_linear_equation` | Solves the linear equation `Ax = b` given `A` and
 `b`. | `algorithm.h`
 
-| `reduced_polynomial_fitting` | Returns a polynomial which goes through the
+| `reduced_polynomial_fitting` | Returns a polynomial that goes through the
 given set of points. Differs from `lagrange_interpolate` in that it returns a
 simplified polynomial. | `algorithm.h`
 
@@ -114,17 +191,17 @@ with constant coefficients represented by the given polynomial. Returns a list
 of functions as a basis to the solution space. | `calculus.h`
 
 | `bernoulli_sequence_real` | Generates the first `n` terms of the Bernoulli
-sequence. | `combinatorial.h` 
+sequence. | `combinatorial.h`
 
 | `bernoulli_sequence_rational` | Generates the first `n` terms of the Bernoulli
-sequence as rational numbers. | `combinatorial.h` 
+sequence as rational numbers. | `combinatorial.h`
 
 | `bernoulli_number_real` | Generates the `n` th Bernoulli number.
-| `combinatorial.h` 
+| `combinatorial.h`
 
 | `bernoulli_number_rational` | Generates the `n` th Bernoulli number as a
 rational number.
-| `combinatorial.h` 
+| `combinatorial.h`
 
 |===
 
@@ -156,17 +233,17 @@ A description of each directory is presented below:
 CLI will allow the user to directly compute expressions and declare functions
 from the command line -- it will essentially be a calculator app like `octave`.
 
-| engine | Contains all the library code and headers. Can be cloned by users and
-used immediately if all the prerequites are present (see the next section).
+| engine | Contains the library template headers. All library features are
+present in this module. It will later contain API functions.
 
 | tests | Code to test library features.
 
-| texifier | Code to convert plain text math to Latex. Used in the website to
-turn results into Latex form.
+| texifier | Code to convert plain text math to Latex. Used on the website to
+turn results in Latex form.
 
-| web | Code to run the web server for the Zhetapi website. This website
-supports computation of mathematical expressions and it also provides graphing
-capabilities.
+| web | Code to run the webserver for the Zhetapi website. This website
+supports the computation of mathematical expressions and it also provides graphing
+capabilities. This is still in early developement.
 
 |===
 
@@ -175,26 +252,28 @@ capabilities.
 The prerequisites for using the library are `bison` and `flex`, which are used
 to parse inputs.
 
-Apart from this, the user only need to clone the repository and are run `make
-parsers` in the repository directory. After this, they simple include the files
+Apart from this, the user only needs to clone the repository and are run `make
+parsers` in the repository directory. After this, one simply include the files
 in `engine` whenever necessary.
 
-## Upcoming Features
+## Whats Next?
 
 ### Simplification of Functions
 
 Currently, objects of the `Function` class lack the complete ability to simplify
-their representations. (Some of this functionality does already exist, such as
+their representations. Some of this functionality does already exist, such as
 the fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
-actions.) For example, it is not yet possible to have the object recognize that
-`3xy + 5yx` is the same as `8xy`. This feature would also help reduce the
-complexity of derivates of these objects.
+actions.
+
+As an example which is not yet featuerd, it is not yet possible to have the
+object recognize that `3xy + 5yx` is the same as `8xy`. This feature would also
+help reduce the complexity of derivates of these objects.
 
 ### Integration and Differentiation
 
-While symbolic differentiation is current feature, integration is not. This
+Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
-placed.  In addition, we would like to add other kinds of differntiation and
+placed.  In addition, we would like to add other kinds of differentiation and
 integration, such as automatic differentiation, and different types of numerical
 integration (quadrature, etc.).
 
@@ -216,6 +295,12 @@ more will be added. These include QR factorization, SVD, diagonalization, etc.
 A solid foundation for linear algebra is already present in the library. The
 next move would be to implement machine learning utilities, such as Deep Neural
 Networks.
+
+### Improve Semantics
+
+The aim of the library is to allow the user to perform mathematical tasks with
+ease. Thus, notational convenience of library features is important and is a
+task that remains to be seen through.
 
 ## References
 

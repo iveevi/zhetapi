@@ -20,19 +20,19 @@
 // Exception class
 class invalid_expr {};
 
-template <class T, class U>
-token *expr(std::string str, vtable <T> tbl = vtable <T> ())
+template <class T = double, class U = int>
+std::string expr_str(std::string str, vtable <T> tbl = vtable <T> ())
 {
 	if (str.empty())
 		throw invalid_expr();
 
-	node <T, U> *out = new node <T, U> (str, tbl);
+	node <T, U> out(str, tbl);
 
-	return out->get_token();
+	return out.value()->str();
 }
 
-template <class T, class U>
-token *exprf(const char *format, ...)
+template <class T = double, class U = int>
+std::string exprf_str(const char *format, ...)
 {
 	va_list arg;
 	int done;
@@ -46,11 +46,11 @@ token *exprf(const char *format, ...)
 	if (done < 0)
 		throw invalid_expr();
 	
-	return expr <T, U> (std::string(buf));
+	return expr_str <T, U> (std::string(buf));
 }
 
-template <class T, class U>
-token *exprf(barn <T, U> brn, const char *format, ...)
+template <class T = double, class U = int>
+std::string exprf_str(barn <T, U> brn, const char *format, ...)
 {
 	va_list arg;
 	int done;
@@ -64,7 +64,7 @@ token *exprf(barn <T, U> brn, const char *format, ...)
 	if (done < 0)
 		throw invalid_expr();
 	
-	return expr <T, U> (std::string(buf));
+	return expr_str <T, U> (std::string(buf));
 }
 
 #endif

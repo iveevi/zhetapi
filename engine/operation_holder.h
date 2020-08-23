@@ -16,7 +16,8 @@ enum codes {
 	dvs,
 	shr,
 	fct,
-	pwr
+	pwr,
+	dot
 };
 
 std::string strcodes[] = {
@@ -26,7 +27,8 @@ std::string strcodes[] = {
 	"divide",
 	"shur",
 	"factorial",
-	"power"
+	"power",
+	"dot"
 };
 
 struct operation_holder : public token {
@@ -59,6 +61,8 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = fct;
 	else if (str == "^")
 		code = pwr;
+	else if (str == ".")
+		code = dot;
 }
 
 token::type operation_holder::caller() const

@@ -35,6 +35,17 @@ public:
 	T &operator[](size_t);
 	const T &operator[](size_t) const;
 
+	// Conversion operators
+	operator int() const;
+	operator double() const;
+
+	operator Rational <int> () const;
+
+	operator Complex <double> () const;
+
+	operator Vector <double> () const;
+	operator Vector <Rational <int>> () const;
+
 	// Concatenating vectors
 	Vector append_above(const T &);
 	Vector append_below(const T &);
@@ -126,6 +137,55 @@ const T &Vector <T> ::operator[](size_t i) const
 {
 	return this->m_array[i][0];
 }
+
+// Move these to matrix
+template <class T>
+Vector <T> ::operator double() const
+{
+	return (double) (*this)[0];
+}
+
+template <class T>
+Vector <T> ::operator int() const
+{
+	return (int) (*this)[0];
+}
+
+template <class T>
+Vector <T> ::operator Rational <int> () const
+{
+	return Rational <int> {(*this)[0], 1};
+}
+
+template <class T>
+Vector <T> ::operator Complex <double> () const
+{
+	return Complex <double> {(*this)[0]};
+}
+
+template <class T>
+Vector <T> ::operator Vector <double> () const
+{
+	std::vector <double> vec;
+
+	for (size_t i = 0; i < size(); i++)
+		vec.push_back((*this)[i]);
+	
+	return Vector <double> {vec};
+}
+
+template <class T>
+Vector <T> ::operator Vector <Rational <int>> () const
+{
+	std::vector <Rational <int>> vec;
+
+	for (size_t i = 0; i < size(); i++)
+		vec.push_back((*this)[i]);
+	
+	return Vector <Rational <int>> {vec};
+}
+
+// end conversions
 
 template <class T>
 Vector <T> Vector <T> ::append_above(const T &x)

@@ -73,6 +73,7 @@ public:
 	// return token: provide methods to return coorect (auto) value
 	token *compute(const std::vector <node <T, U> *> &);
 
+	const Function &differentiate(size_t) const;
 	const Function &differentiate(const std::string &) const;
 	
 	const Function &integrate(const std::string &) const;
@@ -332,6 +333,25 @@ token *Function <T, U> ::compute(const std::vector <node <T, U> *> &vals)
 	}
 
 	return val;
+}
+
+template <class T, class U>
+const Function <T, U> &Function <T, U> ::differentiate
+	(size_t i) const
+{
+	std::string var = m_params[i].symbol();
+
+	node <T, U> *diffed = new node <T, U> (m_root);
+
+	diffed->label({var});
+	diffed->differentiate(var);
+	diffed->reparametrize(m_params);
+
+	Function *out = new Function("d(" + m_name + ")/d(" + var + ")", m_params, diffed);
+
+	delete diffed;
+
+	return *out;
 }
 
 template <class T, class U>
@@ -601,19 +621,27 @@ node <T, U> *Function <T, U> ::convert(A x)
 {
 	// Scalars
 	if (typeid(A) == typeid(T))
-		return new node <T, U> {new operand <T> (x), l_constant_real};
+		return new node <T, U> {new operand <T> (x), l_constant_real, {}};
 	if (typeid(A) == typeid(U))
-		return new node <T, U> {new operand <U> (x), l_constant_integer};
+		return new node <T, U> {new operand <U> (x), l_constant_integer, {}};
 	if (typeid(A) == typeid(Rational <U>))
-		return new node <T, U> {new operand <Rational <U>> (x), l_constant_rational};
+		return new node <T, U> {new operand <Rational <U>> (x), l_constant_rational, {}};
 	
 	// Complex numbers
 	if (typeid(A) == typeid(Complex <T>))
-		return new node <T, U> {new operand <Complex <T>> (x), l_constant_complex_real};
-	//if (typeid(A) == typeid(Complex <U>))
-	//	return new {operand <Complex <U>> (x), l_constant_matrix_complex_rational};
-	//if (typeid(A) == typeid(Complex <Rational <U>>))
-	//	return new operand <Complex <Rational <U>>> (x);
+		return new node <T, U> {new operand <Complex <T>> (x), l_constant_complex_real, {}};
+	/* if (typeid(A) == typeid(Complex <U>))
+		return new {operand <Complex <U>> (x), l_constant_matrix_complex_rational};
+	if (typeid(A) == typeid(Complex <Rational <U>>))
+		return new operand <Complex <Rational <U>>> (x); */
+
+	// Vectors
+	if (typeid(A) == typeid(Vector <T>))
+		return new node <T, U> {new operand <Vector <T>> (x), l_constant_vector_real, {}};
+	if (typeid(A) == typeid(Vector <U>))
+		return new node <T, U> {new operand <Vector <Rational <U>>> (x), l_constant_vector_rational, {}};
+	if (typeid(A) == typeid(Vector <Rational <U>>))
+		return new node <T, U> {new operand <Vector <Rational <U>>> (x), l_constant_vector_rational, {}};
 
 	// If no matches, return null
 	return nullptr;

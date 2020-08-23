@@ -360,26 +360,34 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	__add_unary_operation_ftr(coth, R, R, 1/tanh(in->get()));
 	
 	//////////////////////////////////////////
-	// Vector Operations
+	// Vector operations
 	//////////////////////////////////////////
 
+	// Addition
 	__add_binary_operation(+, VQ, VQ, VQ);
 	__add_binary_operation(+, VR, VR, VR);
 	
+	// Subtraction
 	__add_binary_operation(-, VQ, VQ, VQ);
 	__add_binary_operation(-, VR, VR, VR);
+
+	// Scalar multiplication
+	__add_binary_operation_ftr(*, Z, VQ, VQ, ((Q) a->get()) * b->get());
 	
+	// Dot product
 	__add_binary_operation_ftr(., VQ, VQ, Q, inner(a->get(), b->get()));
 	__add_binary_operation_ftr(., VR, VR, R, inner(a->get(), b->get()));
 	
+	// Shur product
 	__add_binary_operation_ftr(shur, VQ, VQ, VQ, shur(a->get(), b->get()));
 	__add_binary_operation_ftr(shur, VR, VR, VR, shur(a->get(), b->get()));
 
+	// Transposition
 	__add_unary_operation_ftr(transpose, VQ, MQ, in->get().transpose());
 	__add_unary_operation_ftr(transpose, VR, MR, in->get().transpose());
 	
 	//////////////////////////////////////////
-	// Matrix Operations
+	// Matrix operations
 	//////////////////////////////////////////
 
 	__add_binary_operation(+, MQ, MQ, MQ);

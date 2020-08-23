@@ -40,18 +40,16 @@ class Function;
  *  a logarithm of a constant base.
  */
 enum nd_label {
+	// Default
 	l_none,
-	l_power,
-	l_divided,
-	l_variable,
 
-	l_constant,		// keep to prevent errors
+	// Constants
 	l_constant_integer,
 	l_constant_rational,
 	l_constant_real,
 	l_constant_complex_rational,
 	l_constant_complex_real,
-	l_constant_vector_rational,	// Convert integers to Rationals for vec/mat
+	l_constant_vector_rational,
 	l_constant_vector_real,
 	l_constant_vector_complex_rational,
 	l_constant_vector_complex_real,
@@ -60,9 +58,18 @@ enum nd_label {
 	l_constant_matrix_complex_rational,
 	l_constant_matrix_complex_real,
 
-	l_matrix_uncoded,	// leave martix as nodes
+	// Operations
+	l_dot,
+
+	// off
+
+	l_matrix_uncoded,	// leave martix as nodes (with variables)
 	l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
 
+	l_constant,		// keep to prevent errors
+	l_power,
+	l_divided,
+	l_variable,
 	l_function,
 	l_exp,
 	l_polynomial,
@@ -87,12 +94,10 @@ enum nd_label {
  * in the label enumeration.
  */
 std::string strlabs[] = {
+	// Default
 	"none",
-	"power",
-	"divided",
-	"variable",
 
-	"constant",
+	// Constants
 	"constant integer",
 	"constant rational",
 	"constant real",
@@ -107,6 +112,18 @@ std::string strlabs[] = {
 	"constant matrix complex rational",
 	"constant matrix complex real",
 
+	// Operations
+	"dot",
+
+	// off
+	"vector uncoded",
+	"matrix uncoded",
+
+	"constant",
+
+	"power",
+	"divided",
+	"variable",
 	"function",
 	"exponent",
 	"polynomic",
@@ -1862,6 +1879,15 @@ void node <T, U> ::label_as_operation()
 		// cout << "(non - const) this: " << this << endl;
 	}
 
+	codes code = (dynamic_cast <operation_holder *> (tok))->code;
+
+	switch (code) {
+	case dot:
+		type = l_dot;
+		break;
+	}
+
+
 	/* opn *optr = dynamic_cast <opn *> (tok);
 	switch (cfg_ptr->code(optr->fmt())) {
 	case op_add:
@@ -2431,7 +2457,7 @@ void node <T, U> ::differentiate_as_logarithmic(const std::string &var)
 template <class T, class U>
 void node <T, U> ::differentiate_as_constant_logarithmic(const std::string &var)
 {
-	T val = log(leaves[0]->value());
+	/* T val = log(leaves[0]->value());
 
 	node *cpy = leaves[1]->copy();
 	cpy->differentiate(var);
@@ -2442,12 +2468,13 @@ void node <T, U> ::differentiate_as_constant_logarithmic(const std::string &var)
 			new node {new opd(val), {}},
 			leaves[1]
 		}},
-	});
+	}); */
 }
 
-/* template <class T, class U>
+template <class T, class U>
 void node <T, U> ::differentiate_as_function(const std::string &var)
 {
+	/*
 	// Move using declaration to class
 	ftr *ft = dynamic_cast <ftr *> (tok);
 
@@ -2510,8 +2537,8 @@ void node <T, U> ::differentiate_as_function(const std::string &var)
 
 	// cout << endl;
 
-	*this = out->copy();
-} */
+	*this = out->copy(); */
+}
 
 //////////////////////////////////////////
 // Display Methods
