@@ -73,7 +73,9 @@ public:
 	using opd_m_q = operand <Matrix <Rational <U>>>;
 	using opd_m_cq = operand <Matrix <Complex <Rational <U>>>>;
 
-	using opn = operation <T>;
+	// replace above with types.h
+
+	using opn = operation;
 	using opd = operand <T>;
 	using var = variable <T>;
 	// using ftr = Function <T, int>;
@@ -534,7 +536,7 @@ bool node <T, U> ::valid() const
 			}
 		}
 
-		if (operands != (dynamic_cast <opn *> (tok))->operands())
+		if (operands != (dynamic_cast <opn *> (tok))->inputs())
 			return false;
 	}
 

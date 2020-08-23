@@ -21,7 +21,7 @@
 #include <vector.h>
 #include <vtable.h>
 
-#define __add_binary_operation(str, A, B, O)									\
+#define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -31,7 +31,7 @@
 				}								\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
@@ -45,11 +45,11 @@
 			}									\
 	});
 
-#define __add_heterogenous_binary_operation(str, A, B, O)									\
-	__add_binary_operation(str, A, B, O)									\
+#define __add_heterogenous_binary_operation(str, A, B, O)					\
+	__add_binary_operation(str, A, B, O)							\
 	__add_binary_operation(str, B, A, O)
 
-#define __add_binary_operation_ftr(str, A, B, O, ftr)								\
+#define __add_binary_operation_ftr(str, A, B, O, ftr)						\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -59,7 +59,7 @@
 				}								\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
@@ -83,7 +83,7 @@
 				}								\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
@@ -106,7 +106,7 @@
 				}								\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#B) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#A) + ")",			\
@@ -120,33 +120,39 @@
 			}									\
 	});
 
-#define __add_binary_operation_set(str)										\
-	__add_binary_operation(str, Z, Z, Z);									\
-	__add_binary_operation(str, R, R, R);									\
-	__add_binary_operation(str, Q, Q, Q);									\
-	__add_binary_operation(str, CR, CR, CR);									\
-	__add_binary_operation(str, CQ, CQ, CQ);									\
+#define __add_binary_operation_set(str)								\
+	__add_binary_operation(str, Z, Z, Z);							\
+	__add_binary_operation(str, R, R, R);							\
+	__add_binary_operation(str, Q, Q, Q);							\
+	__add_binary_operation(str, CR, CR, CR);						\
+	__add_binary_operation(str, CQ, CQ, CQ);						\
 												\
-	__add_heterogenous_binary_operation(str, R, Z, R);									\
-	__add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());					\
-	__add_heterogenous_binary_operation(str, R, Q, R);									\
-	__add_heterogenous_binary_operation(str, R, CR, CR);									\
-	__add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str R(b->get().real()), R(b->get().imag())));	\
-	__add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str b->get().real(), b->get().imag()));		\
-	__add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
-	__add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get()) str b->get().real(), b->get().imag()));	\
-	__add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str b->get().real(), b->get().imag()));		\
-	__add_heterogenous_binary_operation_ftr(str, CR, CQ, CR, CR(a->get().real() str (R) b->get().real(),			\
-		a->get().imag() str (R) b->get().imag()));
+	__add_heterogenous_binary_operation(str, R, Z, R);					\
+	__add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
+	__add_heterogenous_binary_operation(str, R, Q, R);					\
+	__add_heterogenous_binary_operation(str, R, CR, CR);					\
+	__add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str			\
+				R(b->get().real()), R(b->get().imag())));			\
+	__add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	__add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	__add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get())			\
+				str b->get().real(), b->get().imag()));				\
+	__add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	__add_heterogenous_binary_operation_ftr(str, CR, CQ, CR,				\
+			CR(a->get().real() str (R) b->get().real(),				\
+				a->get().imag() str (R) b->get().imag()));
 
-#define __add_unary_operation(str, I, O)									\
+#define __add_unary_operation(str, I, O)							\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {typeid(operand <I>)}		\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#I) + ")",					\
 				1, 								\
@@ -159,14 +165,14 @@
 			}									\
 	});
 
-#define __add_unary_operation_ftr(str, I, O, ftr)								\
+#define __add_unary_operation_ftr(str, I, O, ftr)						\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {typeid(operand <I>)}		\
 			},									\
 												\
-			new operation <O> {							\
+			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#I) + ")",					\
 				1, 								\
@@ -446,63 +452,8 @@ token *Barn <R, Z> ::value(const std::string &str,
 
 	if (it != ops.end()) {
 		token *tptr = it->second;
-
-		// cout << "Token Established: " << tptr->str() << endl;
-		
-		// Constants
-		operation <R> *opn_r = dynamic_cast <operation <R> *> (tptr);
-		if (opn_r != nullptr)
-			return (*opn_r)(vals);
-
-		operation <Z> *opn_z = dynamic_cast <operation <Z> *> (tptr);
-		if (opn_z != nullptr)
-			return (*opn_z)(vals);
-
-		operation <Q> *opn_q = dynamic_cast <operation <Q> *> (tptr);
-		if (opn_q != nullptr)
-			return (*opn_q)(vals);
-
-		operation <CR> *opn_cr = dynamic_cast <operation <CR> *> (tptr);
-		if (opn_cr != nullptr)
-			return (*opn_cr)(vals);
-
-		operation <CQ> *opn_cq = dynamic_cast <operation <CQ> *> (tptr);
-		if (opn_cq != nullptr)
-			return (*opn_cq)(vals);
-
-		// Vectors
-		operation <VQ> *opn_vq = dynamic_cast <operation <VQ> *> (tptr);
-		if (opn_vq != nullptr)
-			return (*opn_vq)(vals);
-
-		operation <VR> *opn_vr = dynamic_cast <operation <VR> *> (tptr);
-		if (opn_vr != nullptr)
-			return (*opn_vr)(vals);
-
-		operation <VCQ> *opn_vcq = dynamic_cast <operation <VCQ> *> (tptr);
-		if (opn_vcq != nullptr)
-			return (*opn_vcq)(vals);
-
-		operation <VCR> *opn_vcr = dynamic_cast <operation <VCR> *> (tptr);
-		if (opn_vcr != nullptr)
-			return (*opn_vcr)(vals);
-
-		// Matrices
-		operation <MQ> *opn_mq = dynamic_cast <operation <MQ> *> (tptr);
-		if (opn_mq != nullptr)
-			return (*opn_mq)(vals);
-
-		operation <MR> *opn_mr = dynamic_cast <operation <MR> *> (tptr);
-		if (opn_mr != nullptr)
-			return (*opn_mr)(vals);
-
-		operation <MCQ> *opn_mcq = dynamic_cast <operation <MCQ> *> (tptr);
-		if (opn_mcq != nullptr)
-			return (*opn_mcq)(vals);
-
-		operation <MCR> *opn_mcr = dynamic_cast <operation <MCR> *> (tptr);
-		if (opn_mcr != nullptr)
-			return (*opn_mcr)(vals);
+		operation *optr = dynamic_cast <operation *> (tptr);
+		return (*optr)(vals);
 	} else {
 		std::cout << "Invalid Token (Not Found)" << std::endl;
 	}

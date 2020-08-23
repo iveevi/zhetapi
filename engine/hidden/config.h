@@ -53,7 +53,7 @@ template <class T>
 class config {
 public:
 	using opd = operand <T>;
-	using opn = operation <T>;
+	using opn = operation;
 	using var = variable <T>;
 	using ftr = Function <T, int>;
 

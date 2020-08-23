@@ -17,8 +17,11 @@
  * for appropriate template argument is left
  * of the user, as mentioned later.
  */
-template <class T>
 class operation : public token {
+public:
+	// Aliases
+	using mapper = std::function <token *(const std::vector <token *> &)>;
+private:
 	/* Member instance of the
 	 * operation token class. */
 
@@ -54,18 +57,19 @@ class operation : public token {
 	 * to the user or some higher level
 	 * class such as config.
 	 */
-	std::function <token *(const std::vector <token *> &)> opn;
+	mapper opn;
 public:
 	operation();
 	operation(const operation &);
 	operation(const std::string &, const std::string &,
-			std::size_t,  std::function
-			<token *(const std::vector <token *> &)>);
+			std::size_t,  mapper);
 
 	token *operator()(const std::vector <token *> &) const;
 
 	std::string fmt() const;
 	std::string str() const override;
+
+	std::size_t inputs() const;
 
 	type caller() const override;
 
@@ -77,11 +81,9 @@ public:
 	class token_mismatch {};
 };
 
-template <class T>
-operation <T> ::operation() : input(""), output(""), ops(0) {}
+operation::operation() : input(""), output(""), ops(0) {}
 
-template <class T>
-operation <T> ::operation(const operation &other)
+operation::operation(const operation &other)
 {
 	input = other.input;
 	output = other.output;
@@ -89,54 +91,52 @@ operation <T> ::operation(const operation &other)
 	opn = other.opn;
 }
 
-template <class T>
-operation <T> ::operation(const std::string &in, const std::string &out,
-		std::size_t opers, std::function
-		<token *(const std::vector <token *> &)> fopn) : input(in),
-		output(out), ops(opers), opn(fopn) {}
+operation::operation(const std::string &in, const std::string &out, std::size_t
+		opers, mapper fopn) : input(in), output(out), ops(opers),
+		opn(fopn) {}
 
-template <class T>
-token *operation <T> ::operator()(const std::vector <token *> &ins) const
+token *operation::operator()(const std::vector <token *> &ins) const
 {
 	if (ins.size() != ops)
 		throw count_mismatch();
 	return opn(ins);
 }
 
-template <class T>
-std::string operation <T> ::fmt() const
+std::string operation::fmt() const
 {
 	return input;
 }
 
-template <class T>
-std::string operation <T> ::str() const
+std::string operation::str() const
 {
 	return "[" + input + "](" + std::to_string(ops)
 		+ ") - [" + output + "]";
 }
 
-template <class T>
-token::type operation <T> ::caller() const
+std::size_t operation::inputs() const
+{
+	return ops;
+}
+
+token::type operation::caller() const
 {
 	return OPERATION;
 }
 
-template <class T>
-token *operation <T> ::copy() const
+token *operation::copy() const
 {
 	return new operation(*this);
 }
 
-template <class T>
-bool operation <T> ::operator==(token *t) const
+bool operation::operator==(token *t) const
 {
-	if (t->caller() != token::OPERATION)
+	operation *optr = dynamic_cast <operation *> (t);
+	if (optr == nullptr)
 		return false;
 
-	return (ops == (dynamic_cast <operation *> (t))->ops)
-		&& (input == (dynamic_cast <operation *> (t))->input)
-		&& (output == (dynamic_cast <operation *> (t))->output);
+	return (ops == optr->ops)
+		&& (input == optr->input)
+		&& (output == optr->output);
 }
 
 #endif
