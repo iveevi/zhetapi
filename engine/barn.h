@@ -195,7 +195,7 @@
  * Defaults to [long long int].
  */
 template <class R = long double, class Z = long long int>
-class barn {
+class Barn {
 public:
 	using Q = Rational <Z>;
 
@@ -236,7 +236,7 @@ private:
 
 	std::vector <std::pair <ID, token *>> ops;
 public:
-	barn();
+	Barn();
 
 	void put_z(const Z &);
 	void put_r(const R &);
@@ -258,7 +258,7 @@ public:
 //////////////////////////////////////////
 
 template <class R, class Z>
-barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
+Barn <R, Z> ::Barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 {
 	//////////////////////////////////////////
 	// Real Scalar Arithemtic
@@ -419,7 +419,7 @@ barn <R, Z> ::barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 }
 
 template <class R, class Z>
-token *barn <R, Z> ::value(const std::string &str,
+token *Barn <R, Z> ::value(const std::string &str,
 		const std::vector <std::type_index> &types,
 		const std::vector <token *> &vals) const
 {
@@ -511,7 +511,7 @@ token *barn <R, Z> ::value(const std::string &str,
 }
 
 template <class R, class Z>
-void barn <R, Z> ::print()
+void Barn <R, Z> ::print()
 {
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "INTEGERS:" << std::endl;

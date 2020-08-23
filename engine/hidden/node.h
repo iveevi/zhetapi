@@ -21,126 +21,13 @@
 #include <barn.h>
 #include <operation_holder.h>
 #include <config.h>
+#include <label.h>
 
 template <class T>
 class vtable;
 
 template <class T, class U>
 class Function;
-
-/**
- * @brief The enumeration
- * label is used to label nodes
- * of an expression tree.
- *
- * Clarifications:
- *  - l_logarithmic implies a
- *  logarithm of a variable base.
- *  - l_constant_logarithmic implies
- *  a logarithm of a constant base.
- */
-enum nd_label {
-	// Default
-	l_none,
-
-	// Constants
-	l_constant_integer,
-	l_constant_rational,
-	l_constant_real,
-	l_constant_complex_rational,
-	l_constant_complex_real,
-	l_constant_vector_rational,
-	l_constant_vector_real,
-	l_constant_vector_complex_rational,
-	l_constant_vector_complex_real,
-	l_constant_matrix_rational,
-	l_constant_matrix_real,
-	l_constant_matrix_complex_rational,
-	l_constant_matrix_complex_real,
-
-	// Operations
-	l_dot,
-
-	// off
-
-	l_matrix_uncoded,	// leave martix as nodes (with variables)
-	l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
-
-	l_constant,		// keep to prevent errors
-	l_power,
-	l_divided,
-	l_variable,
-	l_function,
-	l_exp,
-	l_polynomial,
-	l_separable,
-	l_multiplied,
-	l_exponential,
-	l_logarithmic,
-	l_trigonometric,
-	l_power_uncertain,
-	l_function_constant,
-	l_operation_constant,
-	l_constant_logarithmic,
-	l_summation,
-	l_summation_variable,
-	l_summation_function,
-	l_factorial
-};
-
-/**
- * @brief String representations
- * of the corresponding labels
- * in the label enumeration.
- */
-std::string strlabs[] = {
-	// Default
-	"none",
-
-	// Constants
-	"constant integer",
-	"constant rational",
-	"constant real",
-	"constant complex rational",
-	"constant complex real",
-	"constant vector rational",
-	"constant vector real",
-	"constant vector complex rational",
-	"constant vector complex real",
-	"constant matrix rational",
-	"constant matrix real",
-	"constant matrix complex rational",
-	"constant matrix complex real",
-
-	// Operations
-	"dot",
-
-	// off
-	"vector uncoded",
-	"matrix uncoded",
-
-	"constant",
-
-	"power",
-	"divided",
-	"variable",
-	"function",
-	"exponent",
-	"polynomic",
-	"separable",
-	"multiplied",
-	"exponential",
-	"logarithmic",
-	"trigonometric",
-	"power uncertain",
-	"function constant",
-	"operation constant",
-	"constant logarithmic",
-	"summation",
-	"summation variable",
-	"summation function",
-	"factorial"
-};
 
 enum nd_class {
 	c_none,
@@ -209,7 +96,7 @@ private:
 
 	std::vector <node *> leaves;	// Leaves of the current tree node
 
-	barn <T, U> brn = barn <T, U> ();
+	Barn <T, U> brn = Barn <T, U> ();
 public:
 	// Constructors
 	node(std::string, vtable <T> = vtable <T> (), params = params());
@@ -324,6 +211,9 @@ private:
 	void compress_as_exponential();
 
 	// Differentiation Methods
+	void differentiate_as_dot(const std::string &);
+	
+	// off
 	void differentiate_as_multiplied(const std::string &);
 	void differentiate_as_divided(const std::string &);
 	void differentiate_as_power(const std::string &);
@@ -880,6 +770,10 @@ template <class T, class U>
 void node <T, U> ::differentiate(const std::string &var)
 {
 	switch (type) {
+	case l_dot:
+		differentiate_as_dot(var);
+		break;
+	// off
 	case l_constant_logarithmic:
 		differentiate_as_constant_logarithmic(var);
 		break;
@@ -2268,6 +2162,19 @@ void node <T, U> ::compress_as_exponential()
 // Differentiation Methods
 //////////////////////////////////////////
 
+template <class T, class U>
+void node <T, U> ::differentiate_as_dot(const std::string &var)
+{
+	node *left = leaves[0];
+	node *right = leaves[1];
+
+	/* if (left->type == l_variable)
+		set(right->tok, {});
+	else
+		set(left->tok, {}); */
+}
+
+// off
 template <class T, class U>
 void node <T, U> ::differentiate_as_multiplied(const std::string &var)
 {

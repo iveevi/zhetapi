@@ -50,7 +50,7 @@ std::string exprf_str(const char *format, ...)
 }
 
 template <class T = double, class U = int>
-std::string exprf_str(barn <T, U> brn, const char *format, ...)
+std::string exprf_str(Barn <T, U> brn, const char *format, ...)
 {
 	va_list arg;
 	int done;

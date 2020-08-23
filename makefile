@@ -12,7 +12,7 @@ graph:		build parsers
 
 tests:		build parsers
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
+	g++ -I engine -I engine/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
 exp:		build parsers
 	@echo "[BUILDING TESTS]\n"
@@ -40,8 +40,8 @@ cli:		build parsers
 	g++ cli/cli.cpp -lfl -g -o build/cli -DDEBUG=0
 
 parsers:
-	flex -o build/lex.yy.c engine/lexer.l
-	bison -t -o build/parser.tab.c engine/parser.y
+	flex -o build/lex.yy.c engine/hidden/lexer.l
+	bison -t -o build/parser.tab.c engine/hidden/parser.y
 
 build:
 	@echo "[CREATING BUILD DIRECTORY]\n"
