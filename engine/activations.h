@@ -1,6 +1,8 @@
 #ifndef ACTIVATIONS_H_
 #define ACTIVATIONS_H_
 
+#include <algorithm>
+
 namespace ml {
 
 	// Scalar activation
@@ -49,7 +51,7 @@ namespace ml {
 	template <class T>
 	T __relu(T x)
 	{
-		return max(x, 0);
+		return std::max(x, (T) 0);
 	}
 
 	template <class T>
@@ -63,7 +65,7 @@ namespace ml {
 
 	// ReLU activation class
 	template <class T>
-	class ReLU : Activation <T, T> {
+	class ReLU : public Activation <T, T> {
 	public:
 		ReLU();
 	};
@@ -92,7 +94,7 @@ namespace ml {
 
 	// Derivate of Leaky ReLU as a class
 	template <class T>
-	class __DLeakyReLU : Activation <T, T> {
+	class __DLeakyReLU : public Activation <T, T> {
 		T alpha;
 	public:
 		__DLeakyReLU(T);
@@ -111,7 +113,7 @@ namespace ml {
 
 	// Leaky ReLU class
 	template <class T>
-	class LeakyReLU : Activation <T, T> {
+	class LeakyReLU : public Activation <T, T> {
 		T alpha;
 	public:
 		LeakyReLU(T);

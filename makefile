@@ -6,6 +6,14 @@ debug:		tests
 	@echo "\b[DEBUGGING PROGRAM]\n"
 	gdb ./build/tests
 
+ml:		ml_build
+	@echo "\n[RUNNING PROGRAM]\n"
+	./build/ml
+
+ml_build:	build parsers
+	@echo "[BUILDING GRAPHER]\n"
+	g++ -I engine -I engine/hidden tests/ml.cpp -g -lfl -o build/ml
+
 graph:		build parsers
 	@echo "[BUILDING GRAPHER]\n"
 	nvcc web/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph

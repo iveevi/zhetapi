@@ -1,5 +1,5 @@
-#ifndef POLYNOMIAL_H_
-#define POLYNOMIAL_H_
+#ifndef Polynomial_H_
+#define Polynomial_H_
 
 #include <initializer_list>
 #include <iostream>
@@ -7,20 +7,20 @@
 #include <cmath>
 
 /**
- * @brief Represents a polynomial,
+ * @brief Represents a Polynomial,
  * with respect to the default variable
- * "x". Should be used for polynomials
+ * "x". Should be used for Polynomials
  * to gain a performance boost over
  * the regular Function class objects.
  */
 template <class T>
-class polynomial {
+class Polynomial {
 	std::vector <T> coeffs;		// Represents the coefficients of
 					// the polynomial
 public:
-	// Constructors
-	polynomial(const std::vector <T> &);
-	polynomial(const std::initializer_list <T> &);
+	// Constructor
+	Polynomial(const std::vector <T> &);
+	Polynomial(const std::initializer_list <T> &);
 
 	// Getters
 	size_t degree() const;
@@ -28,22 +28,22 @@ public:
 	T coefficient(size_t) const;
 
 	// Functional Methods
-	polynomial integrate() const;
+	Polynomial integrate() const;
 	T integrate(const T &, const T &) const;
 
-	polynomial differentiate() const;
+	Polynomial differentiate() const;
 	T differentiate(const T &) const;
 
 	std::vector <T> roots(size_t, const T &, const T & = exp(1.0)) const;
 
-	std::pair <polynomial, T> synthetic_divide(const T &) const;
+	std::pair <Polynomial, T> synthetic_divide(const T &) const;
 
 	T evaluate(const T &) const;
 	T operator()(const T &) const;
 
 	// Output Methods
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const polynomial <U> &);
+	friend std::ostream &operator<<(std::ostream &, const Polynomial <U> &);
 };
 
 //////////////////////////////////////////
@@ -51,28 +51,28 @@ public:
 //////////////////////////////////////////
 
 template <class T>
-polynomial <T> ::polynomial(const std::vector <T> &ref) : coeffs(ref)
+Polynomial <T> ::Polynomial(const std::vector <T> &ref) : coeffs(ref)
 {
 	if (coeffs.size() == 0)
 		coeffs = {0};
 }
 
 template <class T>
-polynomial <T> ::polynomial(const std::initializer_list <T> &ref)
-	: polynomial(std::vector <T> {ref}) {}
+Polynomial <T> ::Polynomial(const std::initializer_list <T> &ref)
+	: Polynomial(std::vector <T> {ref}) {}
 
 //////////////////////////////////////////
 // Getters
 //////////////////////////////////////////
 
 template <class T>
-size_t polynomial <T> ::degree() const
+size_t Polynomial <T> ::degree() const
 {
 	return coeffs.size() - 1;
 }
 
 template <class T>
-T polynomial <T> ::coefficient(size_t deg) const
+T Polynomial <T> ::coefficient(size_t deg) const
 {
 	return coeffs[deg];
 }
@@ -82,28 +82,28 @@ T polynomial <T> ::coefficient(size_t deg) const
 //////////////////////////////////////////
 
 template <class T>
-polynomial <T> polynomial <T> ::differentiate() const
+Polynomial <T> Polynomial <T> ::differentiate() const
 {
 	std::vector <T> out;
 
 	for (size_t i = 0; i < coeffs.size() - 1; i++)
 		out.push_back((coeffs.size() - (i + 1)) * coeffs[i]);
 
-	return polynomial(out);
+	return Polynomial(out);
 }
 
 template <class T>
-T polynomial <T> ::differentiate(const T &val) const
+T Polynomial <T> ::differentiate(const T &val) const
 {
 	return differentiate()(val);
 }
 
 /**
- * @brief Integrates the polynomial, with
+ * @brief Integrates the Polynomial, with
  * the constant C being 0.
  */
 template <class T>
-polynomial <T> polynomial <T> ::integrate() const
+Polynomial <T> Polynomial <T> ::integrate() const
 {
 	std::vector <T> out;
 
@@ -112,20 +112,20 @@ polynomial <T> polynomial <T> ::integrate() const
 
 	out.push_back(0);
 
-	return polynomial(out);
+	return Polynomial(out);
 }
 
 template <class T>
-T polynomial <T> ::integrate(const T &a, const T &b) const
+T Polynomial <T> ::integrate(const T &a, const T &b) const
 {
-	polynomial prim = integrate();
+	Polynomial prim = integrate();
 
 	return prim(b) - prim(a);
 }
 
 /**
  * @brief Solves the roots of the representative
- * polynomial using the Durand-Kerner method.
+ * Polynomial using the Durand-Kerner method.
  *
  * @param rounds The number of iteration to be
  * performed by the method.
@@ -136,7 +136,7 @@ T polynomial <T> ::integrate(const T &a, const T &b) const
  * will exit early.
  */
 template <class T>
-std::vector <T> polynomial <T> ::roots(size_t rounds, const T &eps,
+std::vector <T> Polynomial <T> ::roots(size_t rounds, const T &eps,
 		const T &seed) const
 {
 	std::vector <T> rts;
@@ -174,7 +174,7 @@ std::vector <T> polynomial <T> ::roots(size_t rounds, const T &eps,
 }
 
 template <class T>
-std::pair <polynomial <T>, T> polynomial <T> ::synthetic_divide(const T &root) const
+std::pair <Polynomial <T>, T> Polynomial <T> ::synthetic_divide(const T &root) const
 {
 	std::vector <T> qs {coeffs[0]};
 
@@ -186,11 +186,11 @@ std::pair <polynomial <T>, T> polynomial <T> ::synthetic_divide(const T &root) c
 		rem = coeffs[i] + rem * root;
 	}
 
-	return {polynomial(qs), rem};
+	return {Polynomial(qs), rem};
 }
 
 template <class T>
-T polynomial <T> ::evaluate(const T &in) const
+T Polynomial <T> ::evaluate(const T &in) const
 {
 	T acc = 0;
 
@@ -201,7 +201,7 @@ T polynomial <T> ::evaluate(const T &in) const
 }
 
 template <class T>
-T polynomial <T> ::operator()(const T &in) const
+T Polynomial <T> ::operator()(const T &in) const
 {
 	T acc = 0;
 
@@ -216,7 +216,7 @@ T polynomial <T> ::operator()(const T &in) const
 //////////////////////////////////////////
 
 template <class T>
-std::ostream &operator<<(std::ostream &os, const polynomial <T> &p)
+std::ostream &operator<<(std::ostream &os, const Polynomial <T> &p)
 {
 	size_t i = 0;
 	if (i >= 0) {
