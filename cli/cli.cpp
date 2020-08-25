@@ -1,7 +1,7 @@
-#include <iostream>
-#include <fstream>
 #include <vector>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
@@ -39,7 +39,7 @@ std::ostream &operator<<(std::ostream &os, const token &tok)
 
 	os << out;
 
-	return out;
+	return os;
 }
 	
 void parse_file(ifstream &fin)
@@ -84,12 +84,17 @@ void parse_file(ifstream &fin)
 
 		if (!str.empty())
 			tokens.push_back(str);
+
+		for (std::string str : tokens)
+			cout << "str: " << str << endl;
+
+		cout << "-----------------------------" << endl;
 	}
 }
 
 int main()
 {
-	ifstream fin("sample");
+	ifstream fin("cli/sample");
 
 	parse_file(fin);
 }
