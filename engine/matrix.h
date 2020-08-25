@@ -34,6 +34,7 @@ public:
 	Matrix();
 	Matrix(const Matrix <T> &);
 
+	Matrix(T);
 	Matrix(T **);
 	Matrix(const std::vector <T> &);
 	Matrix(const std::vector <std::vector <T>> &);
@@ -149,7 +150,7 @@ protected:
 	T determinant(const Matrix &) const;
 };
 
-// Set static variables
+// Set static Variables
 template <class T>
 bool Matrix <T> ::nice = false;
 
@@ -169,6 +170,13 @@ Matrix <T> ::Matrix(const Matrix <T> &other) : rows(other.rows),
 			m_array[i][j] = other[i][j];
 	}
 }
+
+/*
+ * Acts as a conversion from T to Matrix <T>, which is necessary in the Barn
+ * class.
+ */
+template <class T>
+Matrix <T> ::Matrix(T x) : Matrix({{x}}) {}
 
 template <class T>
 Matrix <T> ::Matrix(T **ref)

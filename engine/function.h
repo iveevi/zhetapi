@@ -11,11 +11,7 @@
 #include <unordered_map>
 
 // Engine Headers
-#include "token.h"
-#include "variable.h"
-#include "operand.h"
-#include "vtable.h"
-#include "node.h"
+#include <node.h>
 
 template <class T>
 class Vector;
@@ -28,10 +24,10 @@ public:
 	class invalid_call {};
 	class incompuvtable_tree {};
 	
-	using variables = std::unordered_map <std::string,
+	using Variables = std::unordered_map <std::string,
 	      std::vector <node <T, U> *>>;
 
-	using params = std::vector <variable <T>>;
+	using params = std::vector <Variable <T>>;
 protected:
 	std::string m_name;
 	
@@ -39,7 +35,7 @@ protected:
 
 	node <T, U> *m_root;
 	
-	variables m_map;
+	Variables m_map;
 public:
 	/* Constructors of the
 	 * Function class */
@@ -97,7 +93,7 @@ public:
 	 * Function class */
 	const Function &operator=(const Function &);
 
-	const variable <T> &operator[](size_t) const;
+	const Variable <T> &operator[](size_t) const;
 	
 	token *operator()(const Vector <T> &);
 
@@ -204,7 +200,7 @@ Function <T, U> ::Function(const std::string &in, vtable <T> tbl)
 	m_name = name;
 
 	for (std::string str : params)
-		m_params.push_back(variable <T> (str, true));
+		m_params.push_back(Variable <T> (str, true));
 
 	cout << "expr: " << expr << endl;
 	
@@ -218,7 +214,7 @@ Function <T, U> ::Function(const std::string &str, const std::vector <std::strin
 		&names, const std::string &expr, vtable <T> tbl) : m_name(str)
 {
 	for (auto s : names)
-		m_params.push_back(variable <T> (s, true));
+		m_params.push_back(Variable <T> (s, true));
 
 	m_root = new node <T, U> (expr, tbl, m_params);
 	compress();
@@ -329,7 +325,7 @@ token *Function <T, U> ::compute(const std::vector <node <T, U> *> &vals)
 
 	for (size_t i = 0; i < m_params.size(); i++) {
 		for (auto &p : m_map[m_params[i].symbol()])
-			p->retokenize(new variable <T> (m_params[i].symbol(), true));
+			p->retokenize(new Variable <T> (m_params[i].symbol(), true));
 	}
 
 	return val;
@@ -436,7 +432,7 @@ const Function <T, U> &Function <T, U> ::operator=(const Function <T, U> &other)
 }
 
 template <class T, class U>
-const variable <T> &Function <T, U> ::operator[](size_t i) const
+const Variable <T> &Function <T, U> ::operator[](size_t i) const
 {
 	return m_params[i];
 }
@@ -671,8 +667,8 @@ void Function <T, U> ::build()
 		current = que.front();
 		que.pop();
 
-		if (current->get_label() == l_variable) {
-			name = (dynamic_cast <variable <T> *> (current->get_token()))->symbol();
+		if (current->get_label() == l_Variable) {
+			name = (dynamic_cast <Variable <T> *> (current->get_token()))->symbol();
 			m_map[name].push_back(current);
 		}
 

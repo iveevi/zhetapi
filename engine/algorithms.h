@@ -195,8 +195,8 @@ namespace utility {
 
 		config <T> *cptr = new config <T> {};
 
-		std::vector <variable <T>> pars;
-		std::vector <variable <T>> vars;
+		std::vector <Variable <T>> pars;
+		std::vector <Variable <T>> vars;
 
 		std::vector <node <T> *> lvs;
 
@@ -206,15 +206,15 @@ namespace utility {
 			if (i != in)
 				vars.push_back(ftr[i]);
 
-			lvs.push_back(new node <T> {new variable <T> 
+			lvs.push_back(new node <T> {new Variable <T> 
 					{ftr[i].symbol(), true}, {}, cptr});
 		}
 
-		pars.push_back(variable <T> {"y", true});
+		pars.push_back(Variable <T> {"y", true});
 
 		node <T> *pk = new node <T> {cptr->alloc_opn(op_exp), {
 			new node <T> {cptr->alloc_opn(op_sub), {
-				new node <T> {new variable <T> {"y", true}, {}, cptr},
+				new node <T> {new Variable <T> {"y", true}, {}, cptr},
 				new node <T> {new Function <T> {ftr}, lvs, cptr}
 			}, cptr},
 			new node <T> {new operand <T> (2), {}, cptr},
@@ -358,7 +358,7 @@ namespace utility {
 
 		Vector <Function <T>> J_raw(ftr.ins(), [&](size_t i) {
 			// allow differentiation in index w/ respect
-			// to the parameters/variables
+			// to the parameters/Variables
 			return new Function <T> (ftr.differentiate(ftr[i].symbol()));
 		});
 

@@ -3,7 +3,7 @@
 
 #include "node.h"
 #include "Function.h"
-#include "variable.h"
+#include "Variable.h"
 
 template <class T, class U>
 class Function;

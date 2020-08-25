@@ -19,7 +19,7 @@ enum st_label {
 	l_vector,
 	l_matrix,
 	l_operation,
-	l_variable_cluster,
+	l_Variable_cluster,
 	l_fn
 };
 
@@ -39,7 +39,7 @@ std::string st_str_labs[] = {
 	"vector",
 	"matrix",
 	"operation",
-	"variable cluster",
+	"Variable cluster",
 	"function"
 };
 

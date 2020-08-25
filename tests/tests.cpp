@@ -33,7 +33,7 @@ int main()
 		// cout << "Out: " << (expr(line))->str() << "\n" << endl;
 		// cout << "Out: " << (expr(line))->str() << "\n" << endl;
 		//cout << "Out: " << (cmp.expr(line))->str() << "\n" << endl;
-		cout << "Out: " << expr_str(line) << "\n" << endl;
+		cout << "Out: " << expr(line) << "\n" << endl;
 	}
 
 	Function <double, int> f("f(x) = x^2");

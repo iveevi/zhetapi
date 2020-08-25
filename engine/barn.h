@@ -18,8 +18,10 @@
 #include <operation.h>
 #include <rational.h>
 #include <token.h>
+#include <types.h>
 #include <vector.h>
 #include <vtable.h>
+#include <variable.h>
 
 #define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
@@ -200,43 +202,22 @@
  * integer value (used in Rationals).
  * Defaults to [long long int].
  */
-template <class R = long double, class Z = long long int>
+template <class T = long double, class U = long long int>
 class Barn {
 public:
-	using Q = Rational <Z>;
-
-	using CR = Complex <R>;
-	using CQ = Complex <Q>;
-
-	using MR = Matrix <R>;
-	using MQ = Matrix <Q>;
-
-	using MCR = Matrix <CR>;
-	using MCQ = Matrix <CQ>;
-
-	using VR = Vector <R>;
-	using VQ = Vector <Q>;
-
-	using VCR = Vector <CR>;
-	using VCQ = Vector <CQ>;
-
-	using opd_z = operand <Z>;
-	using opd_r = operand <R>;
-	using opd_q = operand <Q>;
-	using opd_cr = operand <CR>;
-	using opd_cq = operand <CQ>;
-
+	__TYPEDEFS__
+	
 	using ID = std::pair <std::string, std::vector <std::type_index>>;
 private:
-	vtable <Z> z;
-	vtable <R> r;
-	vtable <Q> q;
+	vtable <R> v_stack_r;
+	vtable <Q> v_stack_q;
+	vtable <Z> v_stack_z;
 
-	vtable <CR> rc;
-	vtable <CQ> qc;
+	vtable <CQ> v_stack_cq;
+	vtable <CR> v_stack_cr;
 
-	vtable <MR> rm;
-	vtable <MQ> qm;
+	vtable <MQ> v_stack_mq;
+	vtable <MR> v_stack_mr;
 
 	// ftable <R, Z> maps;
 
@@ -244,13 +225,16 @@ private:
 public:
 	Barn();
 
-	void put_z(const Z &);
+	/* void put_z(const Z &);
 	void put_r(const R &);
 	void put_q(const Q &);
 	void put_rc(const CR &);
 	void put_qc(const CQ &);
 	void put_rm(const MR &);
-	void put_qm(const MQ &);
+	void put_qm(const MQ &); */
+
+	template <class A>
+	void put(Variable <A>);
 
 	token *mkop(const std::string &, const std::vector <std::type_index> &);
 	token *value(const std::string &, const std::vector <std::type_index> &,
@@ -263,8 +247,9 @@ public:
 // Constructors
 //////////////////////////////////////////
 
-template <class R, class Z>
-Barn <R, Z> ::Barn() : z(), r(), q(), rc(), qc(), rm(), qm()
+template <class T, class U>
+Barn <T, U> ::Barn() : v_stack_z(), v_stack_r(), v_stack_q(), v_stack_cq(),
+	v_stack_cr(), v_stack_mq(), v_stack_mr()
 {
 	//////////////////////////////////////////
 	// Real Scalar Arithemtic
@@ -283,12 +268,21 @@ Barn <R, Z> ::Barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 
 	__add_heterogenous_binary_operation(*, R, Z, R);
 	__add_heterogenous_binary_operation(*, Z, Q, Q);
-	__add_heterogenous_binary_operation_ftr(*, R, Q, R, a->get() * (R) b->get());
+	__add_heterogenous_binary_operation_ftr(*, R, Q, R, a->get() * (R)
+			b->get());
 	__add_heterogenous_binary_operation(*, R, CR, CR);
-	__add_heterogenous_binary_operation_ftr(*, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(*, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(*, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(*, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, R, CQ, CR, CR(a->get() * (R)
+				b->get().real(), a->get() * (R)
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Z, CR, CR, CR(a->get() * (R)
+				b->get().real(), a->get() * (R)
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Z, CQ, CQ, CQ((Q) a->get() *
+				b->get().real(), (Q) a->get() *
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(*, Q, CR, CR, CR((R) a->get() *
+				b->get().real(), (R) a->get() *
+				b->get().imag()));
 	__add_heterogenous_binary_operation(*, Q, CQ, CQ);
 
 	// Division
@@ -299,12 +293,21 @@ Barn <R, Z> ::Barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 
 	__add_heterogenous_binary_operation(/, R, Z, R);
 	__add_heterogenous_binary_operation(/, Z, Q, Q);
-	__add_heterogenous_binary_operation_ftr(/, R, Q, R, a->get() * (R) b->get());
+	__add_heterogenous_binary_operation_ftr(/, R, Q, R, a->get() * (R)
+			b->get());
 	__add_heterogenous_binary_operation(/, R, CR, CR);
-	__add_heterogenous_binary_operation_ftr(/, R, CQ, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(/, Z, CR, CR, CR(a->get() * (R) b->get().real(), a->get() * (R) b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(/, Z, CQ, CQ, CQ((Q) a->get() * b->get().real(), (Q) a->get() * b->get().imag()));
-	__add_heterogenous_binary_operation_ftr(/, Q, CR, CR, CR((R) a->get() * b->get().real(), (R) a->get() * b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, R, CQ, CR, CR(a->get() * (R)
+				b->get().real(), a->get() * (R)
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Z, CR, CR, CR(a->get() * (R)
+				b->get().real(), a->get() * (R)
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Z, CQ, CQ, CQ((Q) a->get() *
+				b->get().real(), (Q) a->get() *
+				b->get().imag()));
+	__add_heterogenous_binary_operation_ftr(/, Q, CR, CR, CR((R) a->get() *
+				b->get().real(), (R) a->get() *
+				b->get().imag()));
 	__add_heterogenous_binary_operation(/, Q, CQ, CQ);
 
 	// Exponentiation
@@ -415,17 +418,41 @@ Barn <R, Z> ::Barn() : z(), r(), q(), rc(), qc(), rm(), qm()
 	//////////////////////////////////////////
 	// Combinatorial Operations
 	//////////////////////////////////////////
-	__add_unary_operation_ftr(!, Z, Z, utility::integral_factorial(in->get())); 
+	__add_unary_operation_ftr(!, Z, Z,
+			utility::integral_factorial(in->get())); 
 	
-	__add_binary_operation_ftr(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
+	__add_binary_operation_ftr(binom, Z, Z, Z,
+			utility::integral_binom(a->get(), b->get()));
 
 	//////////////////////////////////////////
 	// API functions
 	//////////////////////////////////////////
 }
 
-template <class R, class Z>
-token *Barn <R, Z> ::value(const std::string &str,
+template <class T, class U>
+template <class A>
+void Barn <T, U> ::put(Variable <A> var)
+{
+	if (typeid(A) == typeid(Z))
+		v_stack_z.insert(var);
+	if (typeid(A) == typeid(R))
+		v_stack_r.insert(var);
+	if (typeid(A) == typeid(Q))
+		v_stack_q.insert(var);
+	
+	if (typeid(A) == typeid(CR))
+		v_stack_cr.insert(var);
+	if (typeid(A) == typeid(CQ))
+		v_stack_cq.insert(var);
+	
+	if (typeid(A) == typeid(VR))
+		v_stack_mr.insert(var);
+	if (typeid(A) == typeid(VQ))
+		v_stack_mq.insert(var);
+}
+
+template <class T, class U>
+token *Barn <T, U> ::value(const std::string &str,
 		const std::vector <std::type_index> &types,
 		const std::vector <token *> &vals) const
 {
@@ -461,50 +488,50 @@ token *Barn <R, Z> ::value(const std::string &str,
 	return nullptr;
 }
 
-template <class R, class Z>
-void Barn <R, Z> ::print()
+template <class T, class U>
+void Barn <T, U> ::print()
 {
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "INTEGERS:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	z.print();
+	v_stack_z.print();
 
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "REALS:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	r.print();
+	v_stack_r.print();
 	
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "RATIONALS:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	q.print();
-	
-	std::cout << std::string(50, '=') << std::endl;
-	std::cout << "REAL COMPLEX:" << std::endl;
-	std::cout << std::string(50, '=') << std::endl;
-
-	rc.print();
+	v_stack_q.print();
 
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "RATIONAL COMPLEX:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	qc.print();
+	v_stack_cq.print();
 	
 	std::cout << std::string(50, '=') << std::endl;
-	std::cout << "REAL MATRICES:" << std::endl;
+	std::cout << "REAL COMPLEX:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	rm.print();
+	v_stack_cr.print();
 	
 	std::cout << std::string(50, '=') << std::endl;
 	std::cout << "RATIONAL MATRICES:" << std::endl;
 	std::cout << std::string(50, '=') << std::endl;
 
-	qm.print();
+	v_stack_mq.print();
+	
+	std::cout << std::string(50, '=') << std::endl;
+	std::cout << "REAL MATRICES:" << std::endl;
+	std::cout << std::string(50, '=') << std::endl;
+
+	v_stack_mr.print();
 }
 
 #endif

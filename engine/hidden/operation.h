@@ -12,7 +12,7 @@
 /**
  * @brief Represent a mathematical
  * operation, which can base computations
- * not only of operands, but also variables,
+ * not only of operands, but also Variables,
  * Functions, and other tokens. Type checking
  * for appropriate template argument is left
  * of the user, as mentioned later.

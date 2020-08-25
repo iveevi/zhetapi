@@ -8,7 +8,7 @@
 
 /**
  * @brief Represents a Polynomial,
- * with respect to the default variable
+ * with respect to the default Variable
  * "x". Should be used for Polynomials
  * to gain a performance boost over
  * the regular Function class objects.

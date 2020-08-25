@@ -8,7 +8,7 @@
  *
  * Clarifications:
  *  - l_logarithmic implies a
- *  logarithm of a variable base.
+ *  logarithm of a Variable base.
  *  - l_constant_logarithmic implies
  *  a logarithm of a constant base.
  */
@@ -36,13 +36,13 @@ enum nd_label {
 
 	// off
 
-	l_matrix_uncoded,	// leave martix as nodes (with variables)
+	l_matrix_uncoded,	// leave martix as nodes (with Variables)
 	l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
 
 	l_constant,		// keep to prevent errors
 	l_power,
 	l_divided,
-	l_variable,
+	l_Variable,
 	l_function,
 	l_exp,
 	l_polynomial,
@@ -56,7 +56,7 @@ enum nd_label {
 	l_operation_constant,
 	l_constant_logarithmic,
 	l_summation,
-	l_summation_variable,
+	l_summation_Variable,
 	l_summation_function,
 	l_factorial
 };
@@ -96,7 +96,7 @@ std::string strlabs[] = {
 
 	"power",
 	"divided",
-	"variable",
+	"Variable",
 	"function",
 	"exponent",
 	"polynomic",
@@ -110,7 +110,7 @@ std::string strlabs[] = {
 	"operation constant",
 	"constant logarithmic",
 	"summation",
-	"summation variable",
+	"summation Variable",
 	"summation function",
 	"factorial"
 };
@@ -124,7 +124,7 @@ bool is_constant(nd_label type)
 	return false;
 }
 
-bool is_variable(nd_label type)
+bool is_Variable(nd_label type)
 {
 	return !is_constant(type);
 }

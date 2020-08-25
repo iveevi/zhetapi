@@ -2,46 +2,33 @@
 #define NODE_H_
 
 /* C++ Standard Libraries */
-#include <cmath>
 #include <cassert>
+#include <cmath>
 #include <functional>
+#include <memory>
 #include <queue>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <memory>
 
 /* Engine Headers */
 // #include "config.h"
-#include <rational.h>
+#include <barn.h>
+#include <class.h>
 #include <complex.h>
+#include <config.h>
+#include <label.h>
+#include <operation_holder.h>
+#include <rational.h>
 #include <stree.h>
 #include <variable.h>
 #include <vtable.h>
-#include <barn.h>
-#include <operation_holder.h>
-#include <config.h>
-#include <label.h>
 
 template <class T>
 class vtable;
 
 template <class T, class U>
 class Function;
-
-enum nd_class {
-	c_none,
-	c_polynomial,
-	c_rational,
-	c_exponential
-};
-
-std::string strclass[] = {
-	"none",
-	"polynomial",
-	"Rational",
-	"exponential"
-};
 
 /**
  * @brief Singular node class,
@@ -54,7 +41,7 @@ public:
 	friend class Function <T, int>;
 	
 	// Aliases
-	using params = std::vector <variable <T>>;
+	using params = std::vector <Variable <T>>;
 	
 	using opd_r = operand <T>;
 	using opd_cr = operand <Complex <T>>;
@@ -77,7 +64,7 @@ public:
 
 	using opn = operation;
 	using opd = operand <T>;
-	using var = variable <T>;
+	using var = Variable <T>;
 	// using ftr = Function <T, int>;
 	// using cfg = config <T>;
 private:
@@ -192,7 +179,7 @@ private:
 	node *convert(stree *, vtable <T> = vtable <T> ());
 	node *convert_operation(stree *, vtable <T> = vtable <T> ());
 	node *convert_summation(stree *, vtable <T> = vtable <T> ());
-	node *convert_variable_cluster(stree *, vtable <T> = vtable <T> ());
+	node *convert_Variable_cluster(stree *, vtable <T> = vtable <T> ());
 
 	// Special Nodes
 	bool special() const;
@@ -804,7 +791,7 @@ void node <T, U> ::differentiate(const std::string &var)
 		leaves[0]->differentiate(var);
 		leaves[1]->differentiate(var);
 		break;
-	case l_variable:
+	case l_Variable:
 		delete tok;
 
 		tok = new opd(1);
@@ -850,7 +837,7 @@ void node <T, U> ::classify()
 	switch (type) {
 	case l_constant:
 	case l_operation_constant:
-	case l_variable:
+	case l_Variable:
 	case l_power:
 		cls = c_polynomial;
 		break;
@@ -915,7 +902,7 @@ void node <T, U> ::label(const std::vector <std::string> &vars)
 		sym = (dynamic_cast <var *> (tok))->symbol();
 		
 		if (find(vars.begin(), vars.end(), sym) != vars.end())
-			type = l_variable;
+			type = l_Variable;
 		else
 			type = l_constant;
 
@@ -1007,9 +994,9 @@ std::string node <T, U> ::display() const
 		return leaves[0]->display_as_operand(type) + " / " + leaves[1]->display_as_operand(type);
 	case l_constant ... l_constant_matrix_complex_real:
 		return tok->str();
-	case l_variable:
+	case l_Variable:
 		return (dynamic_cast <var *> (tok))->symbol();
-	case l_summation_variable:
+	case l_summation_Variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	//case l_function:
 	//	return display_as_function();
@@ -1199,8 +1186,8 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	case l_operation:
 		out = convert_operation(st, tbl);
 		break;
-	case l_variable_cluster:
-		out = convert_variable_cluster(st, tbl);
+	case l_Variable_cluster:
+		out = convert_Variable_cluster(st, tbl);
 		break;
 	case l_matrix:
 		for (stree *s : st->children()) {
@@ -1594,9 +1581,9 @@ node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl)
 } */
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert_variable_cluster(stree *st, vtable <T> vtbl)
+node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
 {
-	// vtbl includes variables not in the function!!
+	// vtbl includes Variables not in the function!!
 
 	node *out;
 
@@ -1835,7 +1822,7 @@ void node <T, U> ::label_as_special(const std::vector <std::string> &vars)
 	/* if (optr) {
 		switch (cfg_ptr->code(optr->fmt())) {
 		case op_sum:
-			leaves[0]->type = l_summation_variable;
+			leaves[0]->type = l_summation_Variable;
 			leaves[1]->label(vars);
 			leaves[2]->label(vars);
 			leaves[3]->type = l_summation_function;
@@ -1992,7 +1979,7 @@ void node <T, U> ::compress_as_multiplied()
 			que.push(current->leaves[0]);
 			que.push(current->leaves[1]);
 			break;
-		case l_variable:
+		case l_Variable:
 			name = (dynamic_cast <var*> (current->tok))->symbol();
 			if (chart.find(name) == chart.end())
 				chart[name] = T(0);
@@ -2170,7 +2157,7 @@ void node <T, U> ::differentiate_as_dot(const std::string &var)
 	node *left = leaves[0];
 	node *right = leaves[1];
 
-	/* if (left->type == l_variable)
+	/* if (left->type == l_Variable)
 		set(right->tok, {});
 	else
 		set(left->tok, {}); */
@@ -2468,7 +2455,7 @@ std::string node <T, U> ::display_as_operand(nd_label required) const
 	case l_power:
 	case l_exponential:
 		if (type != l_constant
-			&& type != l_variable)
+			&& type != l_Variable)
 			out = "(" + out + ")";
 		break;
 	case l_multiplied:

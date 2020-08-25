@@ -262,7 +262,7 @@ felm:	LOG SUBSCRIPT LBRACE expr RBRACE expr {
 
    |	LN expr { // Natural log
 		$$ = new stree("log", l_operation, {
-			new stree("e", l_variable_cluster, {}), $2
+			new stree("e", l_Variable_cluster, {}), $2
 		});
 } %prec LN
 
@@ -370,7 +370,7 @@ prth:	prth FACTORIAL {
 };
 
 idnt:	IDENT {
-   	$$ = new stree($1, l_variable_cluster, {});
+   	$$ = new stree($1, l_Variable_cluster, {});
 };
 
 slcl:	sclr FACTORIAL {

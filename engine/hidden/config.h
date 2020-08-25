@@ -54,7 +54,7 @@ class config {
 public:
 	using opd = operand <T>;
 	using opn = operation;
-	using var = variable <T>;
+	using var = Variable <T>;
 	using ftr = Function <T, int>;
 
 	struct specs {

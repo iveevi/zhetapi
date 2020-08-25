@@ -11,15 +11,15 @@
 
 /* Variable Class:
  *
- * Represents a variable in mathematics
- * which can be used as a dummy variable
+ * Represents a Variable in mathematics
+ * which can be used as a dummy Variable
  * for custom functions and has the safe
  * ability to read and write the value
  * is stores */
 template <typename data_t>
-class variable : public token {
+class Variable : public token {
 	/* std::string [name] - the name of the
-	 * variable that will be taken into account
+	 * Variable that will be taken into account
 	 * when creating custom functions and using
 	 * them later on */
 	std::string name;
@@ -29,9 +29,9 @@ class variable : public token {
 	 * the val member in the operand class */
 	data_t val;
 
-	/* bool [param] - a boolean variable that
+	/* bool [param] - a boolean Variable that
 	 * represents whether or not the current
-	 * variable object is being used a parameter
+	 * Variable object is being used a parameter
 	 * (dummy) or to hold information */
 	bool param;
 public:
@@ -39,7 +39,7 @@ public:
 	 * Bypass_Attempt_Exception Class:
 	 *
 	 * Represents the error thrown whenever
-	 * the value of the variable object is
+	 * the value of the Variable object is
 	 * attempted to be accessed while it is
 	 * supposed to be a parameter
 	 */
@@ -54,33 +54,33 @@ public:
 	#define DSTRING ""
 
 	/* Constructors:
-	 * variable() - creates a new variable object
+	 * Variable() - creates a new Variable object
 	 *   that is by default a dummy parameter
-	 * variable(std::string, boolean, data_t) - creates
-	 *   a new variable object with corresponding
+	 * Variable(std::string, boolean, data_t) - creates
+	 *   a new Variable object with corresponding
 	 *   members with respect to the passed parameters,
-	 *   private member variable [val] is defaulted
+	 *   private member Variable [val] is defaulted
 	 *   to the default value of data_t */
-	variable();
-	variable(const std::string &, const data_t & = data_t());
+	Variable();
+	Variable(const std::string &, const data_t & = data_t());
 
 	// change to const refs
-	variable(std::string, bool, data_t = data_t());
+	Variable(std::string, bool, data_t = data_t());
 
-	variable(const variable &);
+	Variable(const Variable &);
 
 	/* Virtualized Member Functions:
 	 * void [set](bool) - changes whether or not the
-	 *   current variable object acts as a dummy
+	 *   current Variable object acts as a dummy
 	 *   or as a value
 	 * void [set](data_t) - sets the private member
-	 *   variable [val] to the value that is passed
+	 *   Variable [val] to the value that is passed
 	 * void [set](std::string) - sets the private
-	 *   member variable [name] to the string
+	 *   member Variable [name] to the string
 	 *   that is passed
 	 * void [set](data_t, std::string) - sets
 	 *   the name, [name], and value, [val], of
-	 *   the current variable object
+	 *   the current Variable object
 	 * void operator[](bool) - does the same thing
 	 *   as void [set](bool)
 	 * void operator[](data_t) - does the same thing
@@ -96,10 +96,10 @@ public:
 	 *   (unchangeable) reference to the value of the
 	 *   object or throws a bypass attempt exception
 	 * const std::string &[get]() const - returns the name
-	 *   of the current variable object
+	 *   of the current Variable object
 	 * const std::pair <data_t, std::string> &[get]()
 	 *   const - returns a tuple of the value and name of
-	 *   the current variable object, or throws a bypass
+	 *   the current Variable object, or throws a bypass
 	 *   attempt exception if the object is a dummy
 	 * data_t &operator() - does the same thing as
 	 *   data_t &[get]()
@@ -133,7 +133,7 @@ public:
 
 	bool is_param() const {return param;}
 
-	// returns the name of the variable
+	// returns the name of the Variable
 	virtual const std::string &symbol() const;
 
 	virtual data_t ttype() const {
@@ -147,55 +147,59 @@ public:
 	bool operator==(token *) const override;
 	
 	/* Friends:
-	 * std::ostream &operator<<(std::ostream &, const variable
-	 *   <data_t> &) - outputs the name of the passed variable
+	 * std::ostream &operator<<(std::ostream &, const Variable
+	 *   <data_t> &) - outputs the name of the passed Variable
 	 *   object, its value, and whether or not it is a dummy
-	 * std::istream &operator>>(std::istream &, variable &) - reads
+	 * std::istream &operator>>(std::istream &, Variable &) - reads
 	 *   information from the passed istream object, and modifies
-	 *   the passed variable object appropriately */
+	 *   the passed Variable object appropriately */
 	template <typename type>
 	friend std::ostream &operator<<(std::ostream &os, const
-		variable <type> &);
+		Variable <type> &);
 
 	template <typename type>
-	friend std::istream &operator>>(std::istream &is, variable
+	friend std::istream &operator>>(std::istream &is, Variable
 		<type> &);
 
 	/* Comparison Functions:
 	 *
 	 * The following comparison operators
 	 * execute by comparing the values of
-	 * the variables, and throw a bypass
-	 * attempt error if any of the variables
+	 * the Variables, and throw a bypass
+	 * attempt error if any of the Variables
 	 * are parameters */
 	template <typename type>
-	friend bool operator==(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator==(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
 
 	template <typename type>
-	friend bool operator!=(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator!=(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
 
 	template <typename type>
-	friend bool operator>(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator>(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
 
 	template <typename type>
-	friend bool operator<(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator<(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
 
 	template <typename type>
-	friend bool operator>=(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator>=(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
 
 	template <typename type>
-	friend bool operator<=(const variable <type> &, const
-		variable <type> &) noexcept(false);
+	friend bool operator<=(const Variable <type> &, const
+		Variable <type> &) noexcept(false);
+
+	// on
+	template <class A>
+	operator Variable <A> ();
 };
 
-/* Default variable specification using
+/* Default Variable specification using
  * the default numerical type/info structure */
-typedef variable <def_t> var_t;
+typedef Variable <def_t> var_t;
 
 /* Variable Class Member Functions
  *
@@ -204,56 +208,56 @@ typedef variable <def_t> var_t;
  *
  * Constructors: */
 template <typename data_t>
-variable <data_t> ::variable() : val(data_t()), name("x"),
+Variable <data_t> ::Variable() : val(data_t()), name("x"),
 	param(false) {}
 
 template <class T>
-variable <T> ::variable(const std::string &str, const T &dt)
+Variable <T> ::Variable(const std::string &str, const T &dt)
 	: val(dt), name(str), param(false) {}
 
 template <typename data_t>
-variable <data_t> ::variable(std::string str, bool bl, data_t vl)
+Variable <data_t> ::Variable(std::string str, bool bl, data_t vl)
 	: val(vl), name(str), param(bl) {}
 
 template <class T>
-variable <T> ::variable(const variable &other) : name(other.name),
+Variable <T> ::Variable(const Variable &other) : name(other.name),
 	val(other.val), param(other.param) {}
 
 /* Virtualized member functions:
  * setters, getters and operators */
 template <typename data_t>
-void variable <data_t> ::set(bool bl)
+void Variable <data_t> ::set(bool bl)
 {
 	param = bl;
 }
 
 template <typename data_t>
-void variable <data_t> ::set(data_t vl)
+void Variable <data_t> ::set(data_t vl)
 {
 	val = vl;
 }
 
 template <typename data_t>
-void variable <data_t> ::set(std::string str)
+void Variable <data_t> ::set(std::string str)
 {
 	name = str;
 }
 
 template <typename data_t>
-void variable <data_t> ::set(data_t vl, std::string str)
+void Variable <data_t> ::set(data_t vl, std::string str)
 {
 	val = vl;
 	name = str;
 }
 
 template <typename data_t>
-void variable <data_t> ::operator[](bool bl)
+void Variable <data_t> ::operator[](bool bl)
 {
 	param = bl;
 }
 
 template <typename data_t>
-void variable <data_t> ::operator[](data_t vl)
+void Variable <data_t> ::operator[](data_t vl)
 {
 	if (param)
 		throw bypass_attempt_exception();
@@ -261,7 +265,7 @@ void variable <data_t> ::operator[](data_t vl)
 }
 
 template <typename data_t>
-data_t &variable <data_t> ::get()
+data_t &Variable <data_t> ::get()
 {
 	if (param)
 		throw bypass_attempt_exception();
@@ -269,7 +273,7 @@ data_t &variable <data_t> ::get()
 }
 
 template <typename data_t>
-const data_t &variable <data_t> ::get() const
+const data_t &Variable <data_t> ::get() const
 {
 	if (param)
 		throw bypass_attempt_exception();
@@ -277,13 +281,13 @@ const data_t &variable <data_t> ::get() const
 }
 
 template <typename data_t>
-const std::string &variable <data_t> ::get(int dm) const
+const std::string &Variable <data_t> ::get(int dm) const
 {
 	return name;
 }
 
 template <typename data_t>
-const std::pair <data_t, std::string> &variable <data_t> ::get
+const std::pair <data_t, std::string> &Variable <data_t> ::get
 		(std::string dstr) const
 {
 	if (param)
@@ -292,13 +296,13 @@ const std::pair <data_t, std::string> &variable <data_t> ::get
 }
 
 template <typename data_t>
-void variable <data_t> ::operator[](std::string str)
+void Variable <data_t> ::operator[](std::string str)
 {
 	name = str;
 }
 
 template <typename data_t>
-const data_t &variable <data_t> ::operator*() const
+const data_t &Variable <data_t> ::operator*() const
 {
 	if (param)
 		throw bypass_attempt_exception();
@@ -306,13 +310,13 @@ const data_t &variable <data_t> ::operator*() const
 }
 
 template <typename data_t>
-const std::string &variable <data_t> ::operator*(int dm) const
+const std::string &Variable <data_t> ::operator*(int dm) const
 {
 	return name;
 }
 
 template <typename data_t>
-data_t &variable <data_t> ::operator*()
+data_t &Variable <data_t> ::operator*()
 {
 	if (param)
 		throw bypass_attempt_exception();
@@ -320,7 +324,7 @@ data_t &variable <data_t> ::operator*()
 }
 
 template <typename data_t>
-const std::pair <data_t, std::string> &variable <data_t> ::operator*
+const std::pair <data_t, std::string> &Variable <data_t> ::operator*
 		(std::string dstr) const
 {
 	if (param)
@@ -329,7 +333,7 @@ const std::pair <data_t, std::string> &variable <data_t> ::operator*
 }
 
 template <typename data_t>
-const std::string &variable <data_t> ::symbol() const
+const std::string &Variable <data_t> ::symbol() const
 {
 	return name;
 }
@@ -337,7 +341,7 @@ const std::string &variable <data_t> ::symbol() const
 /* Friend functions: ostream and
  * istream utilities */
 template <typename data_t>
-std::ostream &operator<<(std::ostream &os, const variable <data_t> &var)
+std::ostream &operator<<(std::ostream &os, const Variable <data_t> &var)
 {
 	os << "[" << var.name << "] - ";
 
@@ -350,7 +354,7 @@ std::ostream &operator<<(std::ostream &os, const variable <data_t> &var)
 }
 
 template <typename data_t>
-std::istream &operator>>(std::istream &is, variable <data_t> &var)
+std::istream &operator>>(std::istream &is, Variable <data_t> &var)
 {
 	// Implement in the general scope
 	// Later, after trees
@@ -361,66 +365,66 @@ std::istream &operator>>(std::istream &is, variable <data_t> &var)
  * functions by comparing values, and throws
  * a bypass error if one argument is a parameter */
 template <typename data_t>
-bool operator==(const variable <data_t> &right, const variable <data_t> &left)
+bool operator==(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	// Later, add constructor for
 	// Bypass exception that takes in
-	// The name of the violated variable
+	// The name of the violated Variable
 	
 	if (right.param || left.param) // Distinguish later
-		throw typename variable <data_t> ::bypass_attempt_exception();
+		throw typename Variable <data_t> ::bypass_attempt_exception();
 	return right.name == left.name;
 }
 
 template <typename data_t>
-bool operator!=(const variable <data_t> &right, const variable <data_t> &left)
+bool operator!=(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception();
+		throw Variable <data_t> ::bypass_attempt_exception();
 	return right.name != left.name;
 }
 
 template <typename data_t>
-bool operator>(const variable <data_t> &right, const variable <data_t> &left)
+bool operator>(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	//if (right.param || left.param)
-	//	throw variable <data_t> ::bypass_attempt_exception();
+	//	throw Variable <data_t> ::bypass_attempt_exception();
 	return right.name > left.name;
 }
 
 template <typename data_t>
-bool operator<(const variable <data_t> &right, const variable <data_t> &left)
+bool operator<(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	//if (right.param || left.param)
-	//	throw variable <data_t> ::bypass_attempt_exception();
+	//	throw Variable <data_t> ::bypass_attempt_exception();
 	return right.name < left.name;
 }
 
 template <typename data_t>
-bool operator>=(const variable <data_t> &right, const variable <data_t> &left)
+bool operator>=(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception();
+		throw Variable <data_t> ::bypass_attempt_exception();
 	return right.name >= left.name;
 }
 
 template <typename data_t>
-bool operator<=(const variable <data_t> &right, const variable <data_t> &left)
+bool operator<=(const Variable <data_t> &right, const Variable <data_t> &left)
 {
 	if (right.param || left.param)
-		throw variable <data_t> ::bypass_attempt_exception;
+		throw Variable <data_t> ::bypass_attempt_exception;
 	return right.name <= left.name;
 }
 
 /* Derived member functions */
 template <typename data_t>
-token::type variable <data_t> ::caller() const
+token::type Variable <data_t> ::caller() const
 {
 	return VARIABLE;
 }
 
 template <typename data_t>
-std::string variable <data_t> ::str() const
+std::string Variable <data_t> ::str() const
 {
 	std::ostringstream scin;
 
@@ -434,18 +438,29 @@ std::string variable <data_t> ::str() const
 }
 
 template <class T>
-token *variable <T> ::copy() const
+token *Variable <T> ::copy() const
 {
-	return new variable(name, param, val);
+	return new Variable(name, param, val);
 }
 
 template <class T>
-bool variable <T> ::operator==(token *t) const
+bool Variable <T> ::operator==(token *t) const
 {
 	if (t->caller() != token::VARIABLE)
 		return false;
 
-	return name == (dynamic_cast <variable *> (t))->symbol();
+	return name == (dynamic_cast <Variable *> (t))->symbol();
+}
+
+/*
+ * Conversion between variables as a casting of their values. Required
+ * for compilation purposes in the Barn class.
+ */
+template <class T>
+template <class A>
+Variable <T> ::operator Variable <A> ()
+{
+	return Variable <A> {name, param, (A) val};
 }
 
 #endif

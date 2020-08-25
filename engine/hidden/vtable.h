@@ -2,12 +2,12 @@
 #define VTABLE_H_
 
 template <class T>
-class variable;
+class Variable;
 
 template <class T>
 class vtable {
 public:
-	using var = variable <T>;
+	using var = Variable <T>;
 	
 	struct node {
 		var val;

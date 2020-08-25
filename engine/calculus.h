@@ -35,7 +35,7 @@ namespace utility {
 		std::vector <Complex <T>> inserted;
 
 		table <Complex <T>> tbl {
-			variable <Complex <T>> {"e", false, exp(1)}
+			Variable <Complex <T>> {"e", false, exp(1)}
 		};
 
 		for (auto vl : roots) {

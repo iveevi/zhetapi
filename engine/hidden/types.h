@@ -8,6 +8,33 @@
 #include <vector.h>
 #include <matrix.h>
 
+#define __TYPEDEFS__			\
+	typedef U Z;			\
+	typedef Rational <Z> Q;		\
+	typedef T R;			\
+                                        \
+	typedef Complex <R> CR;         \
+	typedef Complex <Q> CQ;         \
+                                        \
+	typedef Vector <R> VR;          \
+	typedef Vector <Q> VQ;          \
+                                        \
+	typedef Vector <CR> VCR;        \
+	typedef Vector <CQ> VCQ;        \
+                                        \
+	typedef Matrix <R> MR;          \
+	typedef Matrix <Q> MQ;          \
+                                        \
+	typedef Matrix <CR> MCR;        \
+	typedef Matrix <CQ> MCQ;        \
+                                        \
+	typedef operand <Z> opd_z;      \
+	typedef operand <R> opd_r;      \
+	typedef operand <Q> opd_q;      \
+                                        \
+	typedef operand <CR> opd_cr;    \
+	typedef operand <CQ> opd_cq;
+
 /*
  * TYPES:
  *
@@ -20,42 +47,14 @@
 template <class T, class U>
 class types {
 public:
-	/////////////////////
-	// Aliases
-	/////////////////////
-	
-	// Raw types
-	using Q = Rational <Z>;
-
-	using CR = Complex <R>;
-	using CQ = Complex <Q>;
-
-	using MR = Matrix <R>;
-	using MQ = Matrix <Q>;
-
-	using MCR = Matrix <CR>;
-	using MCQ = Matrix <CQ>;
-
-	using VR = Vector <R>;
-	using VQ = Vector <Q>;
-
-	using VCR = Vector <CR>;
-	using VCQ = Vector <CQ>;
-
-	// Wrapped types
-	using opd_z = operand <Z>;
-	using opd_r = operand <R>;
-	using opd_q = operand <Q>;
-
-	using opd_cr = operand <CR>;
-	using opd_cq = operand <CQ>;
+	__TYPEDEFS__
 	
 	/////////////////////
 	// Token identifiers
 	/////////////////////
 	
-	static is_zero(token *tptr);
-	static is_one(token *tptr);
+	static bool is_zero(token *tptr);
+	static bool is_one(token *tptr);
 };
 
 template <class T, class U>

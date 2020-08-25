@@ -18,27 +18,27 @@ class operand : public token {
 	data_t val;
 public:
 	/* Constructors:
-	 * operand() - sets the private member variable
+	 * operand() - sets the private member Variable
 	 *   [val] to the default value of data_t
-	 * operand(data_t) - sets the private member variable
+	 * operand(data_t) - sets the private member Variable
 	 *   [val] to whatever value is passed */
 	operand();
 	explicit operand(data_t);
 	operand(const operand &);
 
 	/* Virtualized Member Functions:
-	 * void [set](data_t) - sets the private member variable
+	 * void [set](data_t) - sets the private member Variable
 	 *   to whatever value is passed
 	 * void operator[](data_t) - sets the private member
-	 *   variable to whatever value is passed
+	 *   Variable to whatever value is passed
 	 * data_t &[get]() - returns a reference to the private
-	 *   member variable
+	 *   member Variable
 	 * const data_t &[get]() - returns a constant (unchangeable)
-	 *   reference to the private member variable
+	 *   reference to the private member Variable
 	 * data_t &operator*() - returns a reference to the private
-	 *   member variable
+	 *   member Variable
 	 * const data_t &operator*() - returns a constant (unchangeable)
-	 *   reference to the private member variable */
+	 *   reference to the private member Variable */
 	virtual void set(data_t);
 	virtual void operator[](data_t);
 	
