@@ -6,11 +6,11 @@
 namespace ml {
 
 	// Scalar activation
-	template <class T, class U>
+	template <class T>
 	class Activation {
 	public:
 		// Aliases
-		using ftr = U (*)(T);
+		using ftr = T (*)(T);
 	private:
 		// Activation
 		ftr act;
@@ -20,7 +20,7 @@ namespace ml {
 	public:
 		Activation(ftr, ftr);
 
-		U operator()(T);
+		T operator()(T);
 
 		const Activation &derivative() const;
 
@@ -28,21 +28,21 @@ namespace ml {
 		class null_activation {};
 	};
 
-	template <class T, class U>
-	Activation <T, U> ::Activation(ftr a, ftr b) : act(a), d_act(b)
+	template <class T>
+	Activation <T> ::Activation(ftr a, ftr b) : act(a), d_act(b)
 	{
 		if (a == nullptr)
 			throw null_activation();
 	}
 
-	template <class T, class U>
-	U Activation <T, U> ::operator()(T x)
+	template <class T>
+	T Activation <T> ::operator()(T x)
 	{
 		return (*act)(x);
 	}
 
-	template <class T, class U>
-	const Activation <T, U> &Activation <T, U> ::derivative() const
+	template <class T>
+	const Activation <T> &Activation <T> ::derivative() const
 	{
 		return Activation(d_act, nullptr);
 	}
@@ -65,13 +65,13 @@ namespace ml {
 
 	// ReLU activation class
 	template <class T>
-	class ReLU : public Activation <T, T> {
+	class ReLU : public Activation <T> {
 	public:
 		ReLU();
 	};
 
 	template <class T>
-	ReLU <T> ::ReLU() : Activation<T, T> (&__relu, &__d_relu) {}
+	ReLU <T> ::ReLU() : Activation<T> (&__relu, &__d_relu) {}
 
 	// Leaky ReLU activation function
 	template <class T>
@@ -94,7 +94,7 @@ namespace ml {
 
 	// Derivate of Leaky ReLU as a class
 	template <class T>
-	class __DLeakyReLU : public Activation <T, T> {
+	class __DLeakyReLU : public Activation <T> {
 		T alpha;
 	public:
 		__DLeakyReLU(T);
@@ -103,7 +103,8 @@ namespace ml {
 	};
 
 	template <class T>
-	__DLeakyReLU <T> ::__DLeakyReLU(T al) : alpha(al) {}
+	__DLeakyReLU <T> ::__DLeakyReLU(T al) : alpha(al),
+			Activation <T> (&__d_leaky_relu, nullptr) {}
 
 	template <class T>
 	T __DLeakyReLU <T> ::operator()(T x)
@@ -113,19 +114,19 @@ namespace ml {
 
 	// Leaky ReLU class
 	template <class T>
-	class LeakyReLU : public Activation <T, T> {
+	class LeakyReLU : public Activation <T> {
 		T alpha;
 	public:
 		LeakyReLU(T);
 
 		T operator()(T);
 		
-		const Activation <T, T> &derivative() const;
+		const Activation <T> &derivative() const;
 	};
 
 	template <class T>
 	LeakyReLU <T> ::LeakyReLU(T al) : alpha(al),
-			Activation<T, T> (&__leaky_relu, &__d_leaky_relu) {}
+			Activation<T> (&__leaky_relu, &__d_leaky_relu) {}
 	
 	template <class T>
 	T LeakyReLU <T> ::operator()(T x)
@@ -134,7 +135,7 @@ namespace ml {
 	}
 
 	template <class T>
-	const Activation <T, T> &LeakyReLU <T> ::derivative() const
+	const Activation <T> &LeakyReLU <T> ::derivative() const
 	{
 		return __DLeakyReLU <T> (alpha);
 	}

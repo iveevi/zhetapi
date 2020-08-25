@@ -91,6 +91,8 @@ public:
 
 	void multiply_row(size_t, T);
 
+	// Miscellanious opertions
+	void randomize();
 
 	// Values
 	T determinant() const;
