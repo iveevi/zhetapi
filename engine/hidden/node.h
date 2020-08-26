@@ -23,6 +23,7 @@
 #include <stree.h>
 #include <variable.h>
 #include <vtable.h>
+#include <types.h>
 
 template <class T>
 class vtable;
@@ -41,27 +42,10 @@ public:
 	friend class Function <T, int>;
 	
 	// Aliases
+	__TYPEDEFS__
+
 	using params = std::vector <Variable <T>>;
 	
-	using opd_r = operand <T>;
-	using opd_cr = operand <Complex <T>>;
-
-	using opd_z = operand <U>;
-	using opd_q = operand <Rational <U>>;
-	using opd_cq = operand <Complex <Rational <U>>>;
-	
-	using opd_v_r = operand <Vector <T>>;
-	using opd_v_cr = operand <Vector <Complex <T>>>;	
-	using opd_v_q = operand <Vector <Rational <U>>>;
-	using opd_v_cq = operand <Vector <Complex <Rational <U>>>>;
-	
-	using opd_m_r = operand <Matrix <T>>;
-	using opd_m_cr = operand <Matrix <Complex <T>>>;	
-	using opd_m_q = operand <Matrix <Rational <U>>>;
-	using opd_m_cq = operand <Matrix <Complex <Rational <U>>>>;
-
-	// replace above with types.h
-
 	using opn = operation;
 	using opd = operand <T>;
 	using var = Variable <T>;
@@ -193,6 +177,9 @@ private:
 	bool matches_term(const node &) const;
 
 	// Compression Methods
+	void compress_as_dot();
+	
+	// off
 	void compress_as_separable();
 	void compress_as_multiplied();
 	void compress_as_divided();
@@ -258,25 +245,16 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params)
 	: pars(params), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
-
-	cout << endl << "Node Stree:" << endl;
-	st->print();
 	
 	node *out = convert(st, tbl);
-	
-	cout << endl << "Out:" << endl;
-	out->address_print();
-	out->print();
 
 	*this = *out;
 
 	// delete out;
 	delete st;
 
-	cout << endl << "This:" << endl;
-	print();
-
 	reparametrize(params);
+
 	simplify();
 }
 
@@ -292,29 +270,18 @@ node <T, U> ::node(stree *raw, vtable <T> tbl, params prs)
 
 	reparametrize(prs);
 	simplify();
-
-	/* cout << "CONSTRUCTOR TWO:" << endl;
-	print(); */
 }
 
 template <class T, class U>
 node <T, U> ::node(token *t, nd_label l, std::vector <node <T, U> *> lv)
-	: tok(t), type(l), leaves(lv)
-{
-	/* cout << "CONSTRUCTOR SIX:" << endl;
-	print(); */
-}
+	: tok(t), type(l), leaves(lv) {}
 
 template <class T, class U>
 node <T, U> ::node(token *t, std::vector <node <T, U> *> lv)
 {
 	tok = t;
 	leaves = lv;
-	// cfg_ptr = cptr;
 	type = l_none;
-
-	/* cout << "CONSTRUCTOR FIVE:" << endl;
-	print(); */
 }
 
 template <class T, class U>
@@ -323,11 +290,6 @@ node <T, U> ::node(const node &other)
 	*this = other;
 
 	simplify();
-
-	// cout << "Copying into this @" << this << endl;
-
-	/* cout << "CONSTRUCTOR FOUR:" << endl;
-	print(); */
 }
 
 template <class T, class U>
@@ -336,9 +298,6 @@ node <T, U> ::node(node *other)
 	*this = *other;
 
 	simplify();
-
-	/* cout << "CONSTRUCTOR THREE:" << endl;
-	print(); */
 }
 
 template <class T, class U>
@@ -352,9 +311,6 @@ node <T, U> ::node() : tok(nullptr), type(l_none), cls(c_none),
 template <class T, class U>
 node <T, U> ::~node()
 {
-	/* cout << "DECONSTRUCTOR:" << endl;
-	print(); */
-
 	delete tok;
 
 	for (size_t i = 0; i < leaves.size(); i++)
@@ -368,24 +324,17 @@ node <T, U> ::~node()
 template <class T, class U>
 const node <T, U> &node <T, U> ::operator=(const node <T, U> &other)
 {
-	// cout << string(30, '_') << endl;
-	// cout << "Assigning into this @" << this << endl;
 	if (this != &other) {
 		tok = other.tok->copy();
 		type = other.type;
 		cls = other.cls;
 
-		// change cptr to shared_ptr
-		// cfg_ptr = other.cfg_ptr;
 		pars = other.pars;
 
 		clear();
 		for (size_t i = 0; i < other.leaves.size(); i++)
 			leaves.push_back(other.leaves[i]->copy());
 	}
-
-	// cout << "Result:" << endl;
-	// print();
 
 	return *this;
 }
@@ -400,7 +349,6 @@ void node <T, U> ::set(node *nd)
 	tok = nd->tok;
 	type = nd->type;
 	leaves = nd->leaves;
-	// cfg_ptr = nd->cfg_ptr;
 }
 
 template <class T, class U>
@@ -414,7 +362,6 @@ void node <T, U> ::set(token *t, std::vector <node <T, U> *> lv)
 {
 	tok = t;
 	leaves = lv;
-	// cfg_ptr = cptr;
 	type = l_none;
 }
 
@@ -424,7 +371,6 @@ void node <T, U> ::set(token *t, nd_label l, std::vector <node <T, U> *> lv)
 	tok = t;
 	type = l;
 	leaves = lv;
-	// cfg_ptr = cptr;
 }
 
 template <class T, class U>
@@ -708,12 +654,7 @@ template <class T, class U>
 void node <T, U> ::simplify()
 {
 	label_all();
-
-	// cout << endl << "POST WHOLE LABEL:" << endl;
-	// print();
-
 	compress();
-	label_all();
 }
 
 template <class T, class U>
@@ -733,6 +674,10 @@ void node <T, U> ::compress()
 	}
 	
 	switch (type) {
+	case l_dot:
+		compress_as_dot();
+		break;
+	// off
 	case l_power:
 		compress_as_power();
 		break;
@@ -740,9 +685,6 @@ void node <T, U> ::compress()
 		compress_as_separable();
 		break;
 	case l_multiplied:
-		// cout << "MULT DECOMP:" << endl;
-		// print();
-
 		compress_as_multiplied();
 		break;
 	case l_divided:
@@ -791,7 +733,7 @@ void node <T, U> ::differentiate(const std::string &var)
 		leaves[0]->differentiate(var);
 		leaves[1]->differentiate(var);
 		break;
-	case l_Variable:
+	case l_variable:
 		delete tok;
 
 		tok = new opd(1);
@@ -837,7 +779,7 @@ void node <T, U> ::classify()
 	switch (type) {
 	case l_constant:
 	case l_operation_constant:
-	case l_Variable:
+	case l_variable:
 	case l_power:
 		cls = c_polynomial;
 		break;
@@ -902,7 +844,7 @@ void node <T, U> ::label(const std::vector <std::string> &vars)
 		sym = (dynamic_cast <var *> (tok))->symbol();
 		
 		if (find(vars.begin(), vars.end(), sym) != vars.end())
-			type = l_Variable;
+			type = l_variable;
 		else
 			type = l_constant;
 
@@ -927,17 +869,17 @@ void node <T, U> ::print(int num, int lev) const
 
 	std::string pr = "[";
 
-	/* for (int i = 0; i < pars.size(); i++) {
+	for (int i = 0; i < pars.size(); i++) {
 		pr += pars[i].symbol();
 
 		if (i < pars.size() - 1)
 			pr += ", ";
-	} */
+	}
 
 	pr += "]";
 
 	std::cout << "#" << num << " - [" << strclass[cls] << ", " << strlabs[type] << "] "
-		<< tok->str() << " @ " << this << ", " << pr << endl;
+		<< tok->str() << " (" << tok << ") @ " << this << ", " << pr << endl;
 
 	counter = 0;
 	for (node *itr : leaves) {
@@ -994,7 +936,7 @@ std::string node <T, U> ::display() const
 		return leaves[0]->display_as_operand(type) + " / " + leaves[1]->display_as_operand(type);
 	case l_constant ... l_constant_matrix_complex_real:
 		return tok->str();
-	case l_Variable:
+	case l_variable:
 		return (dynamic_cast <var *> (tok))->symbol();
 	case l_summation_Variable:
 		return (dynamic_cast <var *> (tok))->symbol();
@@ -1186,7 +1128,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	case l_operation:
 		out = convert_operation(st, tbl);
 		break;
-	case l_Variable_cluster:
+	case l_variable_cluster:
 		out = convert_Variable_cluster(st, tbl);
 		break;
 	case l_matrix:
@@ -1671,15 +1613,8 @@ node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
 		} catch(...) {} */
 	}
 
-	if (!num) {
-		// cout << "Could not disassemble cluster: " << acc << endl;
+	if (!num)
 		throw undefined_symbol(acc);
-	}
-
-	cout << "VARPACK:" << endl;
-
-	out->address_print();
-	out->print();
 
 	return out;
 }
@@ -1723,10 +1658,14 @@ void node <T, U> ::label_as_operand()
 		type = l_constant_integer;
 	else if (dynamic_cast <opd_q *> (tok) != nullptr)
 		type = l_constant_rational;
-	else if (dynamic_cast <opd_cr *> (tok) != nullptr)
-		type = l_constant_complex_real;
 	else if (dynamic_cast <opd_cq *> (tok) != nullptr)
 		type = l_constant_complex_rational;
+	else if (dynamic_cast <opd_cr *> (tok) != nullptr)
+		type = l_constant_complex_real;
+	else if (dynamic_cast <opd_v_q *> (tok) != nullptr)
+		type = l_constant_vector_rational;
+	else if (dynamic_cast <opd_v_r *> (tok) != nullptr)
+		type = l_constant_vector_real;
 	else
 		type = l_constant;
 }
@@ -1736,30 +1675,15 @@ void node <T, U> ::label_as_operation()
 {
 	bool constant = true;
 	for (node *nd : leaves) {
-		switch (nd->type) {
-		case l_constant:
-		case l_constant_real:
-		case l_constant_integer:
-		case l_constant_rational:
-		case l_constant_complex_real:
-		case l_constant_complex_rational:
-		case l_operation_constant:
-			break;
-		default:
+		if (!is_constant(nd->type)) {
 			constant = false;
 			break;
 		}
-
-		if (!constant)
-			break;
 	}
 	
 	if (constant) {
-		// cout << "(const) this: " << this << endl;
 		type = l_operation_constant;
 		return;
-	} else {
-		// cout << "(non - const) this: " << this << endl;
 	}
 
 	codes code = (dynamic_cast <operation_holder *> (tok))->code;
@@ -1768,49 +1692,13 @@ void node <T, U> ::label_as_operation()
 	case dot:
 		type = l_dot;
 		break;
-	}
-
-
-	/* opn *optr = dynamic_cast <opn *> (tok);
-	switch (cfg_ptr->code(optr->fmt())) {
-	case op_add:
-	case op_sub:
-		type = l_separable;
-		break;
-	case op_mul:
+	case mul:
 		type = l_multiplied;
 		break;
-	case op_div:
-		type = l_divided;
+	case pwr:
+		type = l_power;
 		break;
-	case op_exp:
-		if (leaves[0]->type == l_constant
-				|| leaves[0]->type == l_operation_constant)
-			type = l_exponential;
-		else if (leaves[1]->type == l_constant
-				|| leaves[1]->type == l_operation_constant)
-			type = l_power;
-		break;
-	case op_sin:
-	case op_cos:
-	case op_tan:
-	case op_csc:
-	case op_sec:
-	case op_cot:
-		type = l_trigonometric;
-		break;
-	case op_log:
-		if (leaves[0]->type == l_constant)
-			type = l_constant_logarithmic;
-		else
-			type = l_logarithmic;
-		break;
-	case op_fac:
-		type = l_factorial;
-		break;
-	default:
-		break;
-	} */
+	}
 }
 
 template <class T, class U>
@@ -1947,115 +1835,35 @@ void node <T, U> ::compress_as_separable()
 }
 
 template <class T, class U>
+void node <T, U> ::compress_as_dot()
+{
+	for (node *nd : leaves) 
+		nd->compress();
+}
+
+template <class T, class U>
 void node <T, U> ::compress_as_multiplied()
 {
-	/* cout << string(50, '_') << endl;
-	cout << "PRE-COMPRESSION:" << endl; 
-	print(); */
+	token *tptr;
 
-	/* put the following ds
-	 into a single augumented
-	 data structure */
-	/* std::unordered_map <std::string, T> chart;
-	std::vector <node *> misc;
-	std::queue <node *> que;
-	std::string name;
+	for (node *nd : leaves)
+		nd->compress();
 	
-	std::vector <token *> vals;
+	if (is_constant(leaves[0]->type)) {
+		tptr = leaves[0]->tok;
 
-	opn *optr = get(op_mul);
-	opd *constant = new opd(1);
-	node *temp, *t;
-	node *current;
+		if (types <T, U> ::is_one(tptr))
+			set(leaves[1]);
+		else if (types <T, U> ::is_zero(tptr))
+			set(new opd_z(0), {});
+	} else if (is_constant(leaves[0]->type)) {
+		tptr = leaves[1]->tok;
 
-	que.push(this);
-
-	while (!que.empty()) {
-		current = que.front();
-		que.pop();
-
-		switch (current->type) {
-		case l_multiplied:
-			que.push(current->leaves[0]);
-			que.push(current->leaves[1]);
-			break;
-		case l_Variable:
-			name = (dynamic_cast <var*> (current->tok))->symbol();
-			if (chart.find(name) == chart.end())
-				chart[name] = T(0);
-			chart[name] += T(1);
-			break;
-		case l_operation_constant:
-			vals = {
-				new opd(current->value()),
-				constant
-			};
-
-			constant = dynamic_cast <opd *> ((*optr)(vals));
-
-			vals.clear();
-
-			break;
-		case l_constant:
-			vals = {
-				constant,
-				current->tok
-			};
-
-			constant = dynamic_cast <opd *> ((*optr)(vals));
-
-			vals.clear();
-
-			break;
-		default:
-			misc.push_back(current);
-			break;
-		}
+		if (types <T, U> ::is_one(tptr))
+			set(leaves[0]);
+		else if (types <T, U> ::is_zero(tptr))
+			set(new opd_z(0), {});
 	}
-
-	for (size_t i = 0; i < misc.size(); i++)
-		misc[i]->compress();
-
-	tok = nullptr;
-	if (constant->get() == T(0)) {
-		set(new opd(0), l_constant, {});
-		return;
-	}
-
-	if (constant->get() != T(1))
-		set(constant, l_constant, {});
-
-	for (auto itr : chart) {
-		if (tok)
-			temp = copy();
-
-		if (itr.second == T(1)) {
-			t = new node(new var(itr.first, true), {});
-		} else {
-			t = new node(get(op_exp), {
-				new node(new var(itr.first, true), {}),
-				new node(new opd(itr.second), {})
-			});
-		}
-
-		if (tok) {
-			set(cfg_ptr->alloc_opn(op_mul), {temp, t});
-		} else {
-			set(t);
-		}
-	}
-
-	for (auto itr : misc) {
-		if (tok) {	
-			temp = copy();
-			set(cfg_ptr->alloc_opn(op_mul), {temp, itr});
-		} else {
-			set(itr->tok, itr->leaves);
-		}
-	}
-	
-	* cout << "POST-COMPRESSION:" << endl; 
-	print(); */
 }
 
 template <class T, class U>
@@ -2094,9 +1902,12 @@ void node <T, U> ::compress_as_divided()
 template <class T, class U>
 void node <T, U> ::compress_as_power()
 {
+	/* cout << "PRE POWER:" << endl;
+	print(); */
+
 	T val;
 
-	node *lr;
+	/* node *lr;
 	node *cpy;
 	if (leaves[0]->type == l_multiplied) {
 		cpy = copy();
@@ -2116,7 +1927,7 @@ void node <T, U> ::compress_as_power()
 			nd->compress();
 		
 		return;
-	}
+	} */
 
 	for (node *nd : leaves)
 		nd->compress();
@@ -2128,6 +1939,9 @@ void node <T, U> ::compress_as_power()
 		else if (val == T(0))
 			set(new opd(1), {});
 	}
+
+	/* cout << "POST POWER:" << endl;
+	print(); */
 }
 
 template <class T, class U>
@@ -2157,7 +1971,7 @@ void node <T, U> ::differentiate_as_dot(const std::string &var)
 	node *left = leaves[0];
 	node *right = leaves[1];
 
-	/* if (left->type == l_Variable)
+	/* if (left->type == l_variable)
 		set(right->tok, {});
 	else
 		set(left->tok, {}); */
@@ -2455,7 +2269,7 @@ std::string node <T, U> ::display_as_operand(nd_label required) const
 	case l_power:
 	case l_exponential:
 		if (type != l_constant
-			&& type != l_Variable)
+			&& type != l_variable)
 			out = "(" + out + ")";
 		break;
 	case l_multiplied:

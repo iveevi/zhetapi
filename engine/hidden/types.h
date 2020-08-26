@@ -32,8 +32,20 @@
 	typedef operand <R> opd_r;      \
 	typedef operand <Q> opd_q;      \
                                         \
-	typedef operand <CR> opd_cr;    \
-	typedef operand <CQ> opd_cq;
+	typedef operand <CR> opd_cr;	\
+	typedef operand <CQ> opd_cq;	\
+					\
+	typedef operand <VR> opd_v_r;	\
+	typedef operand <VQ> opd_v_q;	\
+					\
+	typedef operand <VCR> opd_v_cr;	\
+	typedef operand <VCQ> opd_v_cq;	\
+					\
+	typedef operand <MR> opd_m_r;	\
+	typedef operand <MQ> opd_m_q;	\
+					\
+	typedef operand <MCR> opd_m_cr;	\
+	typedef operand <MCQ> opd_m_cq;
 
 /*
  * TYPES:
@@ -68,7 +80,7 @@ bool types <T, U> ::is_zero(token *tptr)
 	if (_oq != nullptr)
 		return (_oq->get() == 0);
 	
-	opd_z *_or = dynamic_cast <opd_r *> (tptr);
+	opd_r *_or = dynamic_cast <opd_r *> (tptr);
 	if (_or != nullptr)
 		return (_or->get() == 0);
 
@@ -86,7 +98,7 @@ bool types <T, U> ::is_one(token *tptr)
 	if (_oq != nullptr)
 		return (_oq->get() == 1);
 	
-	opd_z *_or = dynamic_cast <opd_r *> (tptr);
+	opd_r *_or = dynamic_cast <opd_r *> (tptr);
 	if (_or != nullptr)
 		return (_or->get() == 1);
 

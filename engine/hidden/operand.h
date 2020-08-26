@@ -96,6 +96,10 @@ public:
 	
 	template <typename type>
 	friend bool &operator<=(const operand &, const operand &);
+
+	// on
+	template <class A>
+	operator operand <A> ();
 };
 
 /* Default operand specification
@@ -254,6 +258,13 @@ bool operand <T> ::operator==(token *t) const
 		return false;
 
 	return val == (dynamic_cast <operand *> (t))->get();
+}
+
+template <class T>
+template <class A>
+operand <T> ::operator operand <A> ()
+{
+	return operand <A> {(A) val};
 }
 
 #endif

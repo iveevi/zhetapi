@@ -19,7 +19,7 @@ enum st_label {
 	l_vector,
 	l_matrix,
 	l_operation,
-	l_Variable_cluster,
+	l_variable_cluster,
 	l_fn
 };
 

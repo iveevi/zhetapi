@@ -42,7 +42,7 @@ enum nd_label {
 	l_constant,		// keep to prevent errors
 	l_power,
 	l_divided,
-	l_Variable,
+	l_variable,
 	l_function,
 	l_exp,
 	l_polynomial,
@@ -93,10 +93,10 @@ std::string strlabs[] = {
 	"matrix uncoded",
 
 	"constant",
-
+	
 	"power",
 	"divided",
-	"Variable",
+	"variable",
 	"function",
 	"exponent",
 	"polynomic",
@@ -110,21 +110,21 @@ std::string strlabs[] = {
 	"operation constant",
 	"constant logarithmic",
 	"summation",
-	"summation Variable",
+	"summation variable",
 	"summation function",
 	"factorial"
 };
 
 bool is_constant(nd_label type)
 {
-	if ((type > l_constant_integer) &&
-			(type < l_constant_matrix_complex_real))
+	if ((type >= l_constant_integer) &&
+			(type <= l_constant_matrix_complex_real))
 		return true;
 
 	return false;
 }
 
-bool is_Variable(nd_label type)
+bool is_variable(nd_label type)
 {
 	return !is_constant(type);
 }

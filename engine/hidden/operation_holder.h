@@ -17,7 +17,7 @@ enum codes {
 	shr,
 	fct,
 	pwr,
-	dot
+	dot	// Dot product
 };
 
 std::string strcodes[] = {

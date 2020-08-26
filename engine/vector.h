@@ -1,7 +1,10 @@
 #ifndef ELEMENT_H_
 #define ELEMENT_H_
 
+// Engine headers
+#include <complex.h>
 #include <matrix.h>
+#include <rational.h>
 
 /**
  * @brief Representative
@@ -36,15 +39,15 @@ public:
 	const T &operator[](size_t) const;
 
 	// Conversion operators
-	operator int() const;
-	operator double() const;
+	explicit operator int() const;
+	explicit operator double() const;
 
-	operator Rational <int> () const;
+	explicit operator Rational <int> () const;
 
-	operator Complex <double> () const;
+	explicit operator Complex <double> () const;
 
-	operator Vector <double> () const;
-	operator Vector <Rational <int>> () const;
+	explicit operator Vector <double> () const;
+	explicit operator Vector <Rational <int>> () const;
 
 	// Concatenating vectors
 	Vector append_above(const T &);

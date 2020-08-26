@@ -1,3 +1,6 @@
+mem:		tests
+	valgrind --leak-check=full --track-origins=yes build/tests < tests/tests.in
+
 run:		tests
 	@echo "\n[RUNNING PROGRAM]\n"
 	./build/tests < ./tests/tests.in
@@ -41,11 +44,15 @@ driver:		build parsers
 	touch build/driver.in
 	touch build/driver.out
 	
-	g++ web/driver.cpp -lfl -g -o build/driver -DDEBUG=0
+	g++ web/driver.cpp -lfl -g -o build/driver
 
-cli:		build parsers
+cli:		cli_build
+	@echo "\n[RUNNING CLI]\n"
+	./build/cli
+
+cli_build:	build parsers
 	@echo "[BUILDING CLI]\n"	
-	g++ cli/cli.cpp -lfl -g -o build/cli -DDEBUG=0
+	g++ cli/cli.cpp -lfl -g -o build/cli
 
 parsers:
 	flex -o build/lex.yy.c engine/hidden/lexer.l

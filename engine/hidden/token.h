@@ -41,11 +41,11 @@ public:
 	virtual bool operator==(token *) const = 0;
 };
 
-std::ostream &operator<<(std::ostream &os, token *tptr)
+/* std::ostream &operator<<(std::ostream &os, token *tptr)
 {
 	os << tptr->str();
 
 	return os;
-}
+} */
 
 #endif

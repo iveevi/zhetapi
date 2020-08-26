@@ -1,3 +1,4 @@
+
 // C/C++ headers
 #include <iostream>
 #include <vector>
@@ -10,18 +11,16 @@
 #include <vector.h>
 #include <rational.h>
 
-#define INF numeric_limits <double> ::infinity()
-
 using namespace std;
 
-typedef vector <pair <double, double>> DataSet;
+typedef vector <pair <Rational <int>, Rational <int>>> DataSet;
 
-typedef Vector <double> Vec;
-typedef Matrix <double> Mat;
+typedef Vector <Rational <int>> Vec;
+typedef Matrix <Rational <int>> Mat;
 
-typedef pair <double, double> Range;
+typedef pair <Rational <int>, Rational <int>> Range;
 
-typedef double Scalar;
+typedef Rational <int> Scalar;
 
 Mat vandermonde(DataSet S, size_t deg)
 {
@@ -73,11 +72,11 @@ Range find_range(Vec Qa, Vec c)
 {
 	size_t rows = Qa.size();
 
-	Scalar mx = INF;
-	Scalar mn = -INF;
+	Scalar mn = {-1, 0};
+	Scalar mx = {1, 0};
 
 	for (size_t i = 0; i < rows; i++) {
-		if (Qa[i] < 0)
+		if (Qa[i] < Scalar {0, 1})
 			mx = min(mx, c[i]/Qa[i]);
 		else
 			mn = max(mn, c[i]/Qa[i]);
@@ -107,12 +106,16 @@ Scalar optimum(Vec Qa, Vec c)
 
 Scalar error(Vec Qa, Vec c, Scalar value)
 {
-	Scalar sum = 0;
+	Scalar sum {0, 1};
 
 	for (size_t i = 0; i < Qa.size(); i++) {
 		Scalar tmp = Qa[i] * value - c[i];
 
 		sum += tmp * tmp;
+
+		cout << "sum: " << (double) sum << endl;
+		cout << "\t" << tmp << ", " << tmp * tmp << endl;
+		cout << "\tsum: " << sum << endl;
 	}
 
 	return sum;
@@ -158,16 +161,16 @@ Vec psa(DataSet D, DataSet Sf)
 
 	Scalar p = 0;
 
-	if ((range.first == INF) || (range.second == -INF)) {
+	if (range.first.is_inf()) {
 		p = range.second;
-	} else if ((range.second == INF) || (range.second == -INF)) {
+	} else if (range.second.is_inf()) {
 		p = range.first;
 	} else {
 		cout << "lambda: " << lambda << endl;
-		cout << "\terr: " << error(Qa, c, lambda) << endl;
+		cout << "\terr: " << (double) error(Qa, c, lambda) << endl;
 		cout << "range: (" << range.first << ", " << range.second << ")" << endl;
-		cout << "\ta: " << error(Qa, c, range.first) << endl;
-		cout << "\tb: " << error(Qa, c, range.second) << endl;
+		cout << "\ta: " << (double) error(Qa, c, range.first) << endl;
+		cout << "\tb: " << (double) error(Qa, c, range.second) << endl;
 		// If lambda is in C(p) = [a, b]
 		//if ((lambda >= range.first) && (lambda <= range.second)) {
 		//	p = lambda;

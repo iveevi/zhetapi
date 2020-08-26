@@ -202,8 +202,6 @@ Function <T, U> ::Function(const std::string &in, vtable <T> tbl)
 	for (std::string str : params)
 		m_params.push_back(Variable <T> (str, true));
 
-	cout << "expr: " << expr << endl;
-	
 	m_root = new node <T, U> (expr, tbl, m_params);
 
 	compress();
@@ -617,15 +615,15 @@ node <T, U> *Function <T, U> ::convert(A x)
 {
 	// Scalars
 	if (typeid(A) == typeid(T))
-		return new node <T, U> {new operand <T> (x), l_constant_real, {}};
+		return new node <T, U> {new operand <T> ((T) x), l_constant_real, {}};
 	if (typeid(A) == typeid(U))
-		return new node <T, U> {new operand <U> (x), l_constant_integer, {}};
+		return new node <T, U> {new operand <U> ((U) x), l_constant_integer, {}};
 	if (typeid(A) == typeid(Rational <U>))
-		return new node <T, U> {new operand <Rational <U>> (x), l_constant_rational, {}};
+		return new node <T, U> {new operand <Rational <U>> ((Rational <U>) x), l_constant_rational, {}};
 	
 	// Complex numbers
 	if (typeid(A) == typeid(Complex <T>))
-		return new node <T, U> {new operand <Complex <T>> (x), l_constant_complex_real, {}};
+		return new node <T, U> {new operand <Complex <T>> ((T) x), l_constant_complex_real, {}};
 	/* if (typeid(A) == typeid(Complex <U>))
 		return new {operand <Complex <U>> (x), l_constant_matrix_complex_rational};
 	if (typeid(A) == typeid(Complex <Rational <U>>))
@@ -633,11 +631,11 @@ node <T, U> *Function <T, U> ::convert(A x)
 
 	// Vectors
 	if (typeid(A) == typeid(Vector <T>))
-		return new node <T, U> {new operand <Vector <T>> (x), l_constant_vector_real, {}};
+		return new node <T, U> {new operand <Vector <T>> ((Vector <T>) x), l_constant_vector_real, {}};
 	if (typeid(A) == typeid(Vector <U>))
-		return new node <T, U> {new operand <Vector <Rational <U>>> (x), l_constant_vector_rational, {}};
+		return new node <T, U> {new operand <Vector <Rational <U>>> ((Vector <Rational <U>>) x), l_constant_vector_rational, {}};
 	if (typeid(A) == typeid(Vector <Rational <U>>))
-		return new node <T, U> {new operand <Vector <Rational <U>>> (x), l_constant_vector_rational, {}};
+		return new node <T, U> {new operand <Vector <Rational <U>>> ((Vector <Rational <U>>) x), l_constant_vector_rational, {}};
 
 	// If no matches, return null
 	return nullptr;
@@ -667,7 +665,7 @@ void Function <T, U> ::build()
 		current = que.front();
 		que.pop();
 
-		if (current->get_label() == l_Variable) {
+		if (current->get_label() == l_variable) {
 			name = (dynamic_cast <Variable <T> *> (current->get_token()))->symbol();
 			m_map[name].push_back(current);
 		}
