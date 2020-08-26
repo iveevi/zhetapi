@@ -72,6 +72,8 @@ token::type operation_holder::caller() const
 
 token *operation_holder::copy() const
 {
+	// instead of having to re-evaluate
+	// codes, pass the code as well
 	return new operation_holder(rep);
 }
 

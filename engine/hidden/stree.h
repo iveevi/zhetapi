@@ -100,10 +100,6 @@ stree::stree(const std::string &str)
 
 	stree *out;
 
-	// later add passing config
-	// to notify how to expect
-	// operators to be shown
-	// and inputted
 	yyparse(out);
 
 	*this = *out;

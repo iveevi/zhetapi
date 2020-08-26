@@ -22,19 +22,11 @@ using namespace std;
 
 int main()
 {
-	string line;
+	string line = "3 + 4";
 
-	while (getline(cin, line)) {
-		cout << "In: " << line << endl;
+	cout << line << ": " << expr(line) << endl;
 
-		cout << "Out: " << expr(line) << "\n" << endl;
-	}
-
-	Function <double, int> f("f(x) = x^2");
-
-	cout << f << endl;
-
-	f.print();
-
-	cout << (f(10.0))->str() << endl;
+	cout << "sizeof(node): " << sizeof(node <double, int>) << endl;
+	cout << "sizeof(barn): " << sizeof(Barn <double, int>) << endl;
+	cout << "sizeof(barn *): " << sizeof(Barn <double, int> *) << endl;
 }

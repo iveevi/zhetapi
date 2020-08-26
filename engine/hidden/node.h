@@ -69,7 +69,7 @@ private:
 
 	std::vector <node *> leaves;	// Leaves of the current tree node
 
-	Barn <T, U> brn = Barn <T, U> ();
+	Barn <T, U> *brn = new Barn <T, U> ();
 public:
 	// Constructors
 	node(std::string, vtable <T> = vtable <T> (), params = params());
@@ -242,7 +242,7 @@ public:
 
 template <class T, class U>
 node <T, U> ::node(std::string str, vtable <T> tbl, params params)
-	: pars(params), type(l_none), cls(c_none)
+	: tok(nullptr), pars(params), type(l_none), cls(c_none)
 {
 	stree *st = new stree(str);
 	
@@ -250,7 +250,7 @@ node <T, U> ::node(std::string str, vtable <T> tbl, params params)
 
 	*this = *out;
 
-	// delete out;
+	delete out;
 	delete st;
 
 	reparametrize(params);
@@ -312,6 +312,7 @@ template <class T, class U>
 node <T, U> ::~node()
 {
 	delete tok;
+	delete brn;
 
 	for (size_t i = 0; i < leaves.size(); i++)
 		delete leaves[i];
@@ -325,6 +326,9 @@ template <class T, class U>
 const node <T, U> &node <T, U> ::operator=(const node <T, U> &other)
 {
 	if (this != &other) {
+		if (tok != nullptr)
+			delete tok;
+
 		tok = other.tok->copy();
 		type = other.type;
 		cls = other.cls;
@@ -598,7 +602,7 @@ token *node <T, U> ::value() const
 		else
 			cout << "\tVALID OPERATION" << endl; */
 
-		tmp = brn.value(ophptr->rep, types, vals);
+		tmp = brn->value(ophptr->rep, types, vals);
 
 		if (tmp == nullptr) {
 			cout << "err @ node:" << endl;
@@ -1056,16 +1060,8 @@ node <T, U> *node <T, U> ::copy() const
 	for (size_t i = 0; i < leaves.size(); i++) {
 		tmp = leaves[i]->copy();
 
-		/* cout << "RECEIVED:" << endl;
-		tmp->print();
-		cout << "-------------------" << endl; */
-
 		cpy->leaves.push_back(tmp);
 	}
-
-	/* cout << "-------------------" << endl;
-	cout << "RETURNED:" << endl;
-	cpy->print(); */
 	
 	return cpy;
 }
@@ -1075,6 +1071,7 @@ void node <T, U> ::clear()
 {
 	for (size_t i = 0; i < leaves.size(); i++)
 		delete leaves[i];
+
 	leaves.clear();
 }
 
@@ -1447,9 +1444,6 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 template <class T, class U>
 node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl)
 {
-	/* if (st->str() == "sum")
-		return convert_summation(st, tbl); */
-
 	node *out = new node {new operation_holder(st->str()), {}};
 
 	std::vector <std::type_index> fmt;
@@ -1458,41 +1452,9 @@ node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl)
 	for (stree *s : st->children()) {
 		cv = convert(s, tbl);
 
-		if (cv) {
+		if (cv)
 			out->leaves.push_back(cv);
-
-			/* cout << "cv (from " << s << ")" << endl;
-			cv->print();
-
-			cout << "\t\t" << typeid(cv->tok).name() << endl;
-			cout << "\t\t" << typeid(*(cv->tok)).name() << endl;
-			cout << "\t\t" << typeid(opd_z).name() << endl;
-			cout << "\t\t" << typeid(opd_r).name() << endl;
-			cout << "\t\t" << typeid(opd_z *).name() << endl;
-			cout << "\t\t" << typeid(opd_r *).name() << endl;
-
-			if (typeid(opd_z *) == typeid(cv->tok))
-				cout << "\tInteger" << endl;
-			else if (typeid(opd_r *) == typeid(cv->tok))
-				cout << "\tReal" << endl;
-			else
-				cout << "\tNone" << endl;
-
-			fmt.push_back(typeid(*(cv->tok))); */
-		}
 	}
-
-	/* token *tptr = brn.mkop(st->str(), fmt);
-
-	* if (tptr == nullptr) {
-		cout << "Failure to receive appropriate operand:" << endl;
-		st->print();
-		exit(0);
-	} *
-
-	// cout << "TOKEN: " << tptr->str() << " @ " << tptr << endl;
-
-	out->tok = tptr; */
 
 	return out;
 }

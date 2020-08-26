@@ -1,5 +1,5 @@
 mem:		tests
-	valgrind --leak-check=full --track-origins=yes build/tests < tests/tests.in
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
 
 run:		tests
 	@echo "\n[RUNNING PROGRAM]\n"
