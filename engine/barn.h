@@ -224,14 +224,7 @@ private:
 	std::vector <std::pair <ID, token *>> ops;
 public:
 	Barn();
-
-	/* void put_z(const Z &);
-	void put_r(const R &);
-	void put_q(const Q &);
-	void put_rc(const CR &);
-	void put_qc(const CQ &);
-	void put_rm(const MR &);
-	void put_qm(const MQ &); */
+	~Barn();
 
 	template <class A>
 	void put(Variable <A>);
@@ -427,6 +420,13 @@ Barn <T, U> ::Barn() : v_stack_z(), v_stack_r(), v_stack_q(), v_stack_cq(),
 	//////////////////////////////////////////
 	// API functions
 	//////////////////////////////////////////
+}
+
+template <class T, class U>
+Barn <T, U> ::~Barn()
+{
+	for (auto pr : ops)
+		delete pr.second;
 }
 
 template <class T, class U>
