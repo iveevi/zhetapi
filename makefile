@@ -1,3 +1,12 @@
+# GPU testing
+gpu:		gpu_build
+	@echo "\n[RUNNING GPU TESTS]\n"
+	./build/gpu
+
+gpu_build:	build parsers
+	@echo "[BUILDING GPU TESTER]\n"
+	nvcc -I engine -I engine/hidden tests/gpu.cu -g -lfl -o build/gpu
+
 mem:		tests
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
 
@@ -14,7 +23,7 @@ ml:		ml_build
 	./build/ml
 
 ml_build:	build parsers
-	@echo "[BUILDING GRAPHER]\n"
+	@echo "[BUILDING ML TESTER]\n"
 	g++ -I engine -I engine/hidden tests/ml.cpp -g -lfl -o build/ml
 
 graph:		build parsers
