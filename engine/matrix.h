@@ -92,7 +92,7 @@ public:
 	void multiply_row(size_t, T);
 
 	// Miscellanious opertions
-	void randomize();
+	void randomize(const std::function <T ()> &);
 
 	// Values
 	T determinant() const;
@@ -630,6 +630,15 @@ void Matrix <T> ::multiply_row(size_t a, T k)
 {
 	for (size_t i = 0; i < cols; i++)
 		m_array[a][i] *= k;
+}
+
+template <class T>
+void Matrix <T> ::randomize(const std::function<T ()> &ftr)
+{
+	for (size_t i = 0; i < rows; i++) {
+		for (size_t j = 0; j < cols; j++)
+			m_array[i][j] = ftr();
+	}
 }
 
 template <class T>
