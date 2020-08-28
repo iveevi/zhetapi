@@ -12,18 +12,18 @@
 #include <vector>
 
 /* Engine Headers */
-// #include "config.h"
-#include <barn.h>
-#include <class.h>
-#include <complex.h>
-#include <config.h>
-#include <label.h>
-#include <operation_holder.h>
-#include <rational.h>
-#include <stree.h>
-#include <variable.h>
-#include <vtable.h>
-#include <types.h>
+// #include "config.hpp"
+#include <barn.hpp>
+#include <class.hpp>
+#include <complex.hpp>
+#include <config.hpp>
+#include <label.hpp>
+#include <operation_holder.hpp>
+#include <rational.hpp>
+#include <stree.hpp>
+#include <variable.hpp>
+#include <vtable.hpp>
+#include <types.hpp>
 
 template <class T>
 class vtable;
@@ -69,17 +69,19 @@ private:
 
 	std::vector <node *> leaves;	// Leaves of the current tree node
 
-	Barn <T, U> *brn = new Barn <T, U> ();
+	Barn <T, U> *brn;
 public:
 	// Constructors
 	node(std::string, vtable <T> = vtable <T> (), params = params());
 			// shared_ptr <cfg> = shared_ptr <cfg> (new cfg()));
-	node(stree *, vtable <T> = vtable <T> (), params = params()/*, shared_ptr
+	node(stree, vtable <T> = vtable <T> (), params = params()/*, shared_ptr
 			<cfg> = shared_ptr <cfg> (new cfg()) */);
 	node(token *t, nd_label l, std::vector <node *> lv = {}/* shared_ptr <cfg> */);
 	node(token *t, std::vector <node *> lv/* shared_ptr <cfg> */);
 	node(const node &);
 	node(node *);
+
+	// on
 	node();
 
 	// Deconstructor
@@ -159,11 +161,21 @@ private:
 	
 	void clear();
 
+	// Conversion
+	void initialize(stree);
+
+	void initialize_as_operation(stree);
+	void initialize_as_variable_cluster(stree);
+
+	static token *convert_to_z(const std::string &);
+	static token *convert_to_q(const std::string &);
+	static token *convert_to_r(const std::string &);
+
 	// Stree Convertion
-	node *convert(stree *, vtable <T> = vtable <T> ());
-	node *convert_operation(stree *, vtable <T> = vtable <T> ());
-	node *convert_summation(stree *, vtable <T> = vtable <T> ());
-	node *convert_Variable_cluster(stree *, vtable <T> = vtable <T> ());
+	node convert(stree, vtable <T> = vtable <T> ());
+	node convert_operation(stree, vtable <T> = vtable <T> ());
+	node convert_summation(stree, vtable <T> = vtable <T> ());
+	node convert_Variable_cluster(stree, vtable <T> = vtable <T> ());
 
 	// Special Nodes
 	bool special() const;
@@ -241,34 +253,37 @@ public:
 //////////////////////////////////////////
 
 template <class T, class U>
-node <T, U> ::node(std::string str, vtable <T> tbl, params params)
-	: tok(nullptr), pars(params), type(l_none), cls(c_none)
+node <T, U> ::node(std::string str, vtable <T> tbl, params __params)
+	: tok(nullptr), brn(nullptr), pars(__params), type(l_none), cls(c_none)
 {
-	stree *st = new stree(str);
-	
-	node *out = convert(st, tbl);
+	// Use the member constructor above
+	brn = new Barn <T, U> ();
 
-	*this = *out;
+	// Implicit conversion from string
+	// to stree
+	initialize(str);
 
-	delete out;
-	delete st;
-
-	reparametrize(params);
+	reparametrize(pars);
 
 	simplify();
+	
+	cout << "This:" << endl;
+	print();
 }
 
 template <class T, class U>
-node <T, U> ::node(stree *raw, vtable <T> tbl, params prs)
-	: pars(prs)
+node <T, U> ::node(stree raw, vtable <T> tbl, params __params)
+	: tok(nullptr), brn(nullptr), pars(__params), type(l_none), cls(c_none)
 {
-	node *out = convert(raw, tbl);
+	// Use the member constructor above
+	brn = new Barn <T, U> ();
 
-	*this = *out;
+	// Implicit conversion from string
+	// to stree
+	initialize(raw);
 
-	delete out;
+	reparametrize(pars);
 
-	reparametrize(prs);
 	simplify();
 }
 
@@ -672,7 +687,8 @@ void node <T, U> ::compress()
 		clear();
 
 		tok = tmp;
-		type = l_constant;
+
+		type = constant_label <T, U> (tok);
 
 		return;
 	}
@@ -1080,9 +1096,114 @@ void node <T, U> ::clear()
 //////////////////////////////////////////
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
+void node <T, U> ::initialize(stree s)
 {
-	node *out = nullptr;
+	cout << "initializing..." << endl;
+
+	std::string str = s.str();
+
+	switch (s.kind()) {
+	case l_number_real:
+		tok = convert_to_r(str);
+		type = l_constant_real;
+		break;
+	case l_number_rational:
+		tok = convert_to_q(str);
+		type = l_constant_rational;
+		break;
+	case l_number_integer:
+		tok = convert_to_z(str);
+		type = l_constant_integer;
+		break;
+	case l_variable_cluster:
+		initialize_as_variable_cluster(s);
+		break;
+	case l_operation:
+		initialize_as_operation(s);
+		break;
+	}
+}
+
+template <class T, class U>
+void node <T, U> ::initialize_as_operation(stree s)
+{
+	tok = new operation_holder(s.str());
+
+	node *cv;
+	for (stree *t : s.children()) {
+		cv = new node(*t);
+
+		if (cv)
+			leaves.push_back(cv);
+	}
+}
+
+template <class T, class U>
+void node <T, U> ::initialize_as_variable_cluster(stree s)
+{
+	std::string str = s.str();
+
+	// Set up the unit (also make macros for
+	// the symbols of operations, until users are allowed
+	// to make their own)
+	tok = new operation_holder("*");
+
+	leaves = {
+		new node {types <T, U> ::one(), l_constant_integer, {}},
+		new node {types <T, U> ::one(), l_constant_integer, {}}
+	};
+
+	std::string acc;
+}
+
+template <class T, class U>
+token *node <T, U> ::convert_to_z(const std::string &str)
+{
+	std::istringstream iss = std::istringstream(str);
+
+	U val;
+
+	iss >> val;
+
+	return new opd_z(val);
+}
+
+template <class T, class U>
+token *node <T, U> ::convert_to_q(const std::string &str)
+{
+	std::istringstream iss = std::istringstream(str);
+
+	U num;
+	U den;
+
+	char c;
+
+	iss >> num >> c >> den;
+
+	if (c != '/') {
+		// throw something instead
+		den = 1;
+	}
+
+	return new opd_q({num, den});
+}
+
+template <class T, class U>
+token *node <T, U> ::convert_to_r(const std::string &str)
+{
+	std::istringstream iss = std::istringstream(str);
+
+	T val;
+
+	iss >> val;
+
+	return new opd_r(val);
+}
+
+template <class T, class U>
+node <T, U> node <T, U> ::convert(stree st, vtable <T> tbl)
+{
+	node out;
 
 	T val;
 
@@ -1121,7 +1242,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 	Vector <Complex <Rational <U>>> crats;
 	Vector <Complex <T>> creals; */
 
-	switch (st->kind()) {
+	switch (st.kind()) {
 	case l_operation:
 		out = convert_operation(st, tbl);
 		break;
@@ -1129,7 +1250,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 		out = convert_Variable_cluster(st, tbl);
 		break;
 	case l_matrix:
-		for (stree *s : st->children()) {
+		for (stree *s : st.children()) {
 			vec.clear();
 
 			for (stree *t : s->children())
@@ -1174,7 +1295,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				m_rats.push_back(rats);
 			}
 			
-			out = new node {new opd_m_q(m_rats), l_constant_matrix_rational, {}};
+			out = node {new opd_m_q(m_rats), l_constant_matrix_rational, {}};
 			break;
 		case l_constant_real:
 			for (auto row : mat) {
@@ -1201,7 +1322,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				m_reals.push_back(reals);
 			}
 			
-			out = new node {new opd_m_r(m_reals), l_constant_matrix_real, {}};
+			out = node {new opd_m_r(m_reals), l_constant_matrix_real, {}};
 			break;
 		case l_constant_complex_rational:
 			for (auto row : mat) {
@@ -1228,7 +1349,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				m_crats.push_back(crats);
 			}
 			
-			out = new node {new opd_m_cq(m_crats), l_constant_matrix_complex_rational, {}};
+			out = node {new opd_m_cq(m_crats), l_constant_matrix_complex_rational, {}};
 			break;
 		case l_constant_complex_real:
 			for (auto row : mat) {
@@ -1263,7 +1384,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				m_creals.push_back(creals);
 			}
 			
-			out = new node {new opd_m_cr(m_creals), l_constant_matrix_complex_real, {}};
+			out = node {new opd_m_cr(m_creals), l_constant_matrix_complex_real, {}};
 			break;
 		default:
 			throw syntax_error("err");
@@ -1271,7 +1392,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 
 		break;
 	case l_vector:
-		for (stree *s : st->children())
+		for (stree *s : st.children())
 			vec.push_back(convert(s));
 
 		mn = l_none;
@@ -1305,7 +1426,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				rats.push_back(tmp);
 			}
 			
-			out = new node {new opd_v_q(rats), l_constant_vector_rational, {}};
+			out = node {new opd_v_q(rats), l_constant_vector_rational, {}};
 			break;
 		case l_constant_real:
 			for (node *nd : vec) {
@@ -1326,7 +1447,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				reals.push_back(tmp);
 			}
 			
-			out = new node {new opd_v_r(reals), l_constant_vector_real, {}};
+			out = node {new opd_v_r(reals), l_constant_vector_real, {}};
 			break;
 		case l_constant_complex_rational:
 			for (node *nd : vec) {
@@ -1347,7 +1468,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				crats.push_back(tmp);
 			}
 			
-			out = new node {new opd_v_cq(crats), l_constant_vector_complex_rational, {}};
+			out = node {new opd_v_cq(crats), l_constant_vector_complex_rational, {}};
 			break;
 		case l_constant_complex_real:
 			for (node *nd : vec) {
@@ -1376,7 +1497,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 				creals.push_back(tmp);
 			}
 			
-			out = new node {new opd_v_cr(creals), l_constant_vector_complex_real, {}};
+			out = node {new opd_v_cr(creals), l_constant_vector_complex_real, {}};
 			break;
 		default:
 			throw syntax_error("err");
@@ -1384,7 +1505,7 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 
 		break;
 	case l_complex_rational:
-		iss = istringstream(st->str());
+		iss = istringstream(st.str());
 
 		iss >> num >> c >> den >> i;
 
@@ -1393,43 +1514,43 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 		else
 			assert((i == 'i') && (c == '/'));
 
-		out = new node {new opd_cq({0, {num, den}}),
+		out = node {new opd_cq({0, {num, den}}),
 			l_constant_complex_rational, {}};
 		break;
 	case l_complex_real:
-		iss = istringstream(st->str());
+		iss = istringstream(st.str());
 
 		iss >> val >> i;
 
 		assert(i == 'i');
 
-		out = new node {new opd_cr ({0, val}),
+		out = node {new opd_cr ({0, val}),
 			l_constant_complex_real, {}};
 		break;
 	case l_number_rational:
-		iss = istringstream(st->str());
+		iss = istringstream(st.str());
 
 		iss >> num >> c >> den;
 
 		if (c != '/')
 			den = 1;
 
-		out = new node {new opd_q ({num, den}),
+		out = node {new opd_q ({num, den}),
 			l_constant_rational, {}};
 		break;
 	case l_number_real:
-		iss = istringstream(st->str());
+		iss = istringstream(st.str());
 
 		iss >> val;
 
-		out = new node {new opd_r(val), l_constant_real, {}};
+		out = node {new opd_r(val), l_constant_real, {}};
 		break;
 	case l_number_integer:
-		iss = istringstream(st->str());
+		iss = istringstream(st.str());
 
 		iss >> num;
 
-		out = new node {new opd_z(num), l_constant_integer, {}};
+		out = node {new opd_z(num), l_constant_integer, {}};
 		break;
 	default:
 		break;
@@ -1442,14 +1563,14 @@ node <T, U> *node <T, U> ::convert(stree *st, vtable <T> tbl)
 }
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert_operation(stree *st, vtable <T> tbl)
+node <T, U> node <T, U> ::convert_operation(stree st, vtable <T> tbl)
 {
-	node *out = new node {new operation_holder(st->str()), {}};
+	node *out = new node {new operation_holder(st.str()), {}};
 
 	std::vector <std::type_index> fmt;
 	
 	node *cv;
-	for (stree *s : st->children()) {
+	for (stree *s : st.children()) {
 		cv = convert(s, tbl);
 
 		if (cv)
@@ -1485,11 +1606,11 @@ node <T, U> *node <T, U> ::convert_summation(stree *st, vtable <T> tbl)
 } */
 
 template <class T, class U>
-node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
+node <T, U> node <T, U> ::convert_Variable_cluster(stree st, vtable <T> vtbl)
 {
 	// vtbl includes Variables not in the function!!
 
-	node *out;
+	node out;
 
 	node *save;
 	node *temp;
@@ -1504,7 +1625,7 @@ node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
 
 	int num = 0;
 
-	std::string str = st->str();
+	std::string str = st.str();
 	std::string acc;
 
 	var vr;
@@ -1525,7 +1646,7 @@ node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
 				new node {new var {vitr->symbol(), true}, {}}
 			}};
 			
-			for (stree *s : st->children()) {
+			for (stree *s : st.children()) {
 				out = new node {new operation_holder("*"), {
 					out,
 					convert(s, vtbl)
@@ -1544,7 +1665,7 @@ node <T, U> *node <T, U> ::convert_Variable_cluster(stree *st, vtable <T> vtbl)
 				new node {new var(vr), {}}
 			}};
 
-			for (stree * s : st->children()) {
+			for (stree * s : st.children()) {
 				out = new node {new operation_holder("*"), {
 					out,
 					convert(s, vtbl)

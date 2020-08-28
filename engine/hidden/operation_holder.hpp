@@ -5,7 +5,7 @@
 #include <string>
 
 // Engine headers
-#include <token.h>
+#include <token.hpp>
 
 // Make this more flexible
 // to the user later on

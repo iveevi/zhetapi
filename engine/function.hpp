@@ -11,7 +11,7 @@
 #include <unordered_map>
 
 // Engine Headers
-#include <node.h>
+#include <node.hpp>
 
 template <class T>
 class Vector;

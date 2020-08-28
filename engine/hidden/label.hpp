@@ -1,6 +1,8 @@
 #ifndef LABEL_H_
 #define LABEL_H_
 
+#include <types.hpp>
+
 /**
  * @brief The enumeration
  * label is used to label nodes
@@ -117,8 +119,9 @@ std::string strlabs[] = {
 
 bool is_constant(nd_label type)
 {
-	if ((type >= l_constant_integer) &&
-			(type <= l_constant_matrix_complex_real))
+	if ((type >= l_constant_integer)
+			&& (type <= l_constant_matrix_complex_real)
+			|| (type == l_operation_constant))
 		return true;
 
 	return false;
@@ -127,6 +130,17 @@ bool is_constant(nd_label type)
 bool is_variable(nd_label type)
 {
 	return !is_constant(type);
+}
+
+template <class T, class U>
+nd_label constant_label(token *tptr)
+{
+	if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
+		return l_constant_integer;
+	if (dynamic_cast <typename types <T, U> ::opd_q *> (tptr))
+		return l_constant_rational;
+	if (dynamic_cast <typename types <T, U> ::opd_r *> (tptr))
+		return l_constant_real;
 }
 
 #endif

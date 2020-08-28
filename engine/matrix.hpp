@@ -388,10 +388,8 @@ const Matrix <T> &Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 	 * are in order */
 	assert(start.first <= end.first && start.second <= end.second);
 
-	assert(start.first >= 0 && start.second >= 0 &&
-			start.first < rows && start.second < cols);
-	assert(end.first >= 0 && end.second >= 0 &&
-			end.first < rows && end.second < cols);
+	assert(start.first < rows && start.second < cols);
+	assert(end.first < rows && end.second < cols);
 
 	/* Slicing is inclusive of the last
 	 * Vector passed */
@@ -412,10 +410,8 @@ Matrix <T> Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
 	 * are in order */
 	assert(start.first <= end.first && start.second <= end.second);
 
-	assert(start.first >= 0 && start.second >= 0 &&
-			start.first < rows && start.second < cols);
-	assert(end.first >= 0 && end.second >= 0 &&
-			end.first < rows && end.second < cols);
+	assert(start.first < rows && start.second < cols);
+	assert(end.first < rows && end.second < cols);
 
 	/* Slicing is inclusive of the last
 	 * Vector passed */

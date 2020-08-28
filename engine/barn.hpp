@@ -11,17 +11,17 @@
 #include <typeinfo>
 
 // Engine headers
-#include <combinatorial.h>
-#include <complex.h>
-#include <matrix.h>
-#include <operand.h>
-#include <operation.h>
-#include <rational.h>
-#include <token.h>
-#include <types.h>
-#include <vector.h>
-#include <vtable.h>
-#include <variable.h>
+#include <combinatorial.hpp>
+#include <complex.hpp>
+#include <matrix.hpp>
+#include <operand.hpp>
+#include <operation.hpp>
+#include <rational.hpp>
+#include <token.hpp>
+#include <types.hpp>
+#include <vector.hpp>
+#include <vtable.hpp>
+#include <variable.hpp>
 
 #define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\

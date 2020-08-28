@@ -11,9 +11,9 @@
 #include <string>
 
 // Engine headers
-#include <node.h>
-#include <barn.h>
-#include <vtable.h>
+#include <node.hpp>
+#include <barn.hpp>
+#include <vtable.hpp>
 
 #define BUF_SIZE	1024
 

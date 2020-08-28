@@ -65,6 +65,7 @@ public:
 
 	stree(const std::string &);
 
+	stree(const stree &);
 	~stree();
 
 	const stree &operator=(const stree &);
@@ -106,6 +107,11 @@ stree::stree(const std::string &str)
 
 	delete[] stripped;
 	delete out;
+}
+
+stree::stree(const stree &other)
+{
+	*this = other;
 }
 
 stree::~stree()

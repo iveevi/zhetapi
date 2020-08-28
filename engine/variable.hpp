@@ -1,13 +1,13 @@
 #ifndef VARIALBE_H_
 #define VARIALBE_H_
 
-// C++ Standard Libraries
+// C/C++ headers
 #include <string>
 #include <iostream>
 #include <sstream>
 
-// Custom Built Libraries
-#include "token.h"
+// Engine headers
+#include <token.hpp>
 
 /* Variable Class:
  *

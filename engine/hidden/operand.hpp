@@ -1,10 +1,11 @@
 #ifndef OPERAND_H_
 #define OPERAND_H_
 
+// C/C++ headers
 #include <sstream>
 
-// Custom Built Libraries
-#include "token.h"
+// Engine headers
+#include <token.hpp>
 
 /* Operand Class:
  * 

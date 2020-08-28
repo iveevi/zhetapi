@@ -2,11 +2,11 @@
 #define TYPES_H_
 
 // Engine headers
-#include <operand.h>
-#include <rational.h>
-#include <complex.h>
-#include <vector.h>
-#include <matrix.h>
+#include <operand.hpp>
+#include <rational.hpp>
+#include <complex.hpp>
+#include <vector.hpp>
+#include <matrix.hpp>
 
 #define __TYPEDEFS__			\
 	typedef U Z;			\
@@ -47,6 +47,8 @@
 	typedef operand <MCR> opd_m_cr;	\
 	typedef operand <MCQ> opd_m_cq;
 
+#define	ONE	1
+
 /*
  * TYPES:
  *
@@ -62,12 +64,24 @@ public:
 	__TYPEDEFS__
 	
 	/////////////////////
+	// Token factories
+	/////////////////////
+
+	static token *one(); 
+	
+	/////////////////////
 	// Token identifiers
 	/////////////////////
 	
 	static bool is_zero(token *tptr);
 	static bool is_one(token *tptr);
 };
+
+template <class T, class U>
+token *types <T, U> ::one()
+{
+	return new opd_z(U (ONE));
+}
 
 template <class T, class U>
 bool types <T, U> ::is_zero(token *tptr)

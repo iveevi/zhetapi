@@ -2,9 +2,9 @@
 #define ELEMENT_H_
 
 // Engine headers
-#include <complex.h>
-#include <matrix.h>
-#include <rational.h>
+#include <complex.hpp>
+#include <matrix.hpp>
+#include <rational.hpp>
 
 /**
  * @brief Representative

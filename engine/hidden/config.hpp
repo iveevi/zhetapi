@@ -8,10 +8,10 @@
 #include <string>
 
 // Engine Headers
-#include "operand.h"
-#include "operation.h"
-#include "variable.h"
-// #include "Function.h"
+#include "operand.hpp"
+#include "operation.hpp"
+#include "variable.hpp"
+// #include "Function.hpp"
 
 enum opcode {
 	op_nao,
