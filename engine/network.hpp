@@ -7,9 +7,9 @@
 #include <functional>
 
 // Engine headers
-#include <activations.h>
-#include <vector.h>
-#include <matrix.h>
+#include <activations.hpp>
+#include <vector.hpp>
+#include <matrix.hpp>
 
 namespace ml {
 
@@ -39,9 +39,7 @@ namespace ml {
 
 		for (size_t i = 0; i < size - 1; i++) {
 			// Add extra column for constants (biases)
-			Matrix <T> mat(__layers[i + 1].first, __layers[i].first);
-
-			std::cout << "mat: " << mat << std::endl;
+			Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
 
 			__weights.push_back(mat);
 		}
@@ -55,7 +53,7 @@ namespace ml {
 		Vector <T> tmp = in;
 
 		for (size_t i = 0; i < __weights.size(); i++)
-			tmp = __weights[i] * tmp;
+			tmp = __weights[i] * tmp.append_above(T (1));
 		
 		return tmp;
 	}
@@ -63,6 +61,7 @@ namespace ml {
 	template <class T>
 	void DeepNeuralNetwork <T> ::randomize()
 	{
+		using namespace std;
 		for (auto &mat : __weights)
 			mat.randomize(__random);
 	}

@@ -19,8 +19,12 @@ debug:		tests
 	gdb ./build/tests
 
 ml:		ml_build
-	@echo "\n[RUNNING PROGRAM]\n"
+	@echo "\n[RUNNING ML]\n"
 	./build/ml
+
+ml_debug:	ml_build
+	@echo "\n[DEBUGGING ML]\n"
+	gdb ./build/ml
 
 ml_build:	build parsers
 	@echo "[BUILDING ML TESTER]\n"
