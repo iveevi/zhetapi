@@ -41,4 +41,13 @@ int main()
 	model.randomize();
 
 	cout << model({1, 1, 1, 1}) << endl;
+
+	/*Sigmoid <double> nsig;
+	ScaledSigmoid <double> ssig(1);
+
+	cout << nsig(0) << endl;
+	cout << nsig(5) << endl;
+
+	cout << ssig(0) << endl;
+	cout << ssig(5) << endl; */
 }

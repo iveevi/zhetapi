@@ -1,17 +1,19 @@
 #ifndef ACTIVATIONS_H_
 #define ACTIVATIONS_H_
 
+// Engine headers
 #include <algorithm>
+#include <functional>
 
 namespace ml {
 
 	// Scalar activation
-	template <class T>
+	template <class T, class U>
 	class Activation {
 	public:
 		// Aliases
-		using ftr = T (*)(T);
-	private:
+		using ftr = T;
+	protected:
 		// Activation
 		ftr act;
 
@@ -20,7 +22,7 @@ namespace ml {
 	public:
 		Activation(ftr, ftr);
 
-		T operator()(T);
+		T operator()(U);
 
 		const Activation &derivative() const;
 
@@ -28,21 +30,21 @@ namespace ml {
 		class null_activation {};
 	};
 
-	template <class T>
-	Activation <T> ::Activation(ftr a, ftr b) : act(a), d_act(b)
+	template <class T, class U>
+	Activation <T, U> ::Activation(ftr a, ftr b) : act(a), d_act(b)
 	{
 		if (a == nullptr)
 			throw null_activation();
 	}
 
-	template <class T>
-	T Activation <T> ::operator()(T x)
+	template <class T, class U>
+	T Activation <T, U> ::operator()(U x)
 	{
-		return (*act)(x);
+		return act(x);
 	}
 
-	template <class T>
-	const Activation <T> &Activation <T> ::derivative() const
+	template <class T, class U>
+	const Activation <T, U> &Activation <T, U> ::derivative() const
 	{
 		return Activation(d_act, nullptr);
 	}
@@ -65,13 +67,16 @@ namespace ml {
 
 	// ReLU activation class
 	template <class T>
-	class ReLU : public Activation <T> {
+	using __unary = std::function <T (T)>;
+
+	template <class T>
+	class ReLU : public Activation <__unary <T>, T> {
 	public:
 		ReLU();
 	};
 
 	template <class T>
-	ReLU <T> ::ReLU() : Activation<T> (&__relu, &__d_relu) {}
+	ReLU <T> ::ReLU() : Activation <__unary <T>, T> (&__relu, &__d_relu) {}
 
 	// Leaky ReLU activation function
 	template <class T>
@@ -91,6 +96,8 @@ namespace ml {
 		
 		return alpha;
 	}
+
+	/*
 
 	// Derivate of Leaky ReLU as a class
 	template <class T>
@@ -142,11 +149,91 @@ namespace ml {
 
 	// Logitstic activation function
 	template <class T>
-	T __logistic(T x)
+	T __sigmoid(T x)
 	{
 		return 1/(1 + exp(-x));
 	}
 
+	template <class T>
+	T __d_sigmoid(T x)
+	{
+		T tmp = 1/(1 + exp(-x));
+
+		return tmp * (T (1) - tmp);
+	}
+
+	// Sigmoid class
+	template <class T>
+	class Sigmoid : public Activation <T> {
+	public:
+		Sigmoid();
+	};
+
+	template <class T>
+	Sigmoid <T> ::Sigmoid() : Activation <T> (&__sigmoid, &__d_sigmoid) {}
+
+	// Logitstic activation function with scaling
+	template <class T>
+	T __scaled_sigmoid(T x, T alpha)
+	{
+		return 1/(1 + exp(-alpha * x));
+	}
+
+	template <class T>
+	T __d_scaled_sigmoid(T x, T alpha)
+	{
+		return alpha/(2 * cosh(alpha * x) + 2);
+	}
+
+	// Derivate of Scaled Sigmoid as a class
+	template <class T>
+	class __DScaledSigmoid : public Activation <T> {
+		T alpha;
+	public:
+		__DScaledSigmoid(T);
+
+		T operator()(T);
+	};
+
+	template <class T>
+	__DScaledSigmoid <T> ::__DScaledSigmoid(T al) : alpha(al),
+			Activation <T> (&__d_scaled_sigmoid, nullptr) {}
+
+	template <class T>
+	T __DScaledSigmoid <T> ::operator()(T x)
+	{
+		return this->act(x, alpha);
+	}
+
+	// Scaled Sigmoid class
+	template <class T>
+	class ScaledSigmoid : public Activation <T> {
+		T alpha;
+	public:
+		ScaledSigmoid(T);
+
+		T operator()(T);
+		
+		const Activation <T> &derivative() const;
+	};
+
+	template <class T>
+	ScaledSigmoid <T> ::ScaledSigmoid(T al) : alpha(al),
+			Activation<T> (&__scaled_sigmoid, &__d_scaled_sigmoid) {}
+	
+	template <class T>
+	T ScaledSigmoid <T> ::operator()(T x)
+	{
+		return this->act(x, alpha);
+	}
+
+	template <class T>
+	const Activation <T> &ScaledSigmoid <T> ::derivative() const
+	{
+		return __DScaledSigmoid <T> (alpha);
+	}
+
+	*/
 }
 
 #endif
