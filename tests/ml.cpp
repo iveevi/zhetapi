@@ -8,7 +8,7 @@
 
 #include <matrix.hpp>
 #include <vector.hpp>
-// #include <network.hpp>
+#include <network.hpp>
 
 using namespace std;
 using namespace ml;
@@ -54,14 +54,12 @@ int main()
 	cout << "ssigmoid activated:\t" << x.activate(ssig) << endl;
 	cout << "ssigmoid derivative:\t" << x.activate(ssig->derivative()) << endl;
 
-	/* DeepNeuralNetwork <double, __unary <double>> model({
-		{4, ReLU <double> ()},
-		{10, ReLU <double> ()},
-		{10, ReLU <double> ()},
-		{1, ReLU <double> ()}
-	}, []() {return rand()/(double) RAND_MAX;});
+	DeepNeuralNetwork <double> model({
+		{4, new ReLU <double> ()},
+		{4, new ReLU <double> ()}
+	}, []() {return 0.5 - rand()/(double) RAND_MAX;});
 
-	cout << model({1, 1, 1, 1}) << endl;
+	cout << model({1, -1, 5, -2}) << endl;
 
 	model.randomize();
 
@@ -69,14 +67,5 @@ int main()
 
 	model.randomize();
 
-	cout << model({1, 1, 1, 1}) << endl; */
-
-	/*Sigmoid <double> nsig;
-	ScaledSigmoid <double> ssig(1);
-
-	cout << nsig(0) << endl;
-	cout << nsig(5) << endl;
-
-	cout << ssig(0) << endl;
-	cout << ssig(5) << endl; */
+	cout << model({1, 1, 1, 1}) << endl;
 }

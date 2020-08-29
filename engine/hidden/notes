@@ -56,3 +56,9 @@ Namespaces:
 Everything that the library provides shold be enclosed in a zhetapi namespace.
 Use nested namespaces for specific modules of the library, such as machine
 learneing (ml).
+
+-------------
+Member names:
+-------------
+
+Should begin with a double underscore.

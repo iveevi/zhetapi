@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <vector>
 #include <functional>
+#include <memory>
 
 // Engine headers
 #include <activation.hpp>
@@ -20,28 +21,32 @@ namespace ml {
 	 * @tparam U is the type of activation parameter scheme, ie. unary or
 	 * binary
 	 */
-	template <class T, class U>
+	template <class T>
 	class DeepNeuralNetwork {
 	public:
-		typedef std::pair <std::size_t, Activation<T, U>> Layer;
+		typedef std::pair <std::size_t, shared_ptr <Activation<T>>> Layer;
+		typedef std::pair <std::size_t, Activation<T> *> PreLayer;
 	private:
 		std::vector <Layer>		__layers;
 		std::vector <Matrix <T>>	__weights;
 		std::function <T ()>		__random;
 		std::size_t			__isize;
 	public:
-		DeepNeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
+		DeepNeuralNetwork(const std::vector <PreLayer> &, const std::function <T ()> &);
 
 		Vector <T> operator()(const Vector <T> &) const;
 
 		void randomize();
 	};
 
-	template <class T, class U>
-	DeepNeuralNetwork <T, U> ::DeepNeuralNetwork(const std::vector <Layer> &layers,
-			const std::function <T ()> &random) : __layers(layers), __random(random),
+	template <class T>
+	DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <PreLayer> &layers,
+			const std::function <T ()> &random) : __random(random),
 			__isize(layers[0].first)
 	{
+		for (auto pr : layers)
+			__layers.push_back({pr.first, shared_ptr <Activation <T>> (pr.second)});
+
 		size_t size = __layers.size();
 
 		for (size_t i = 0; i < size - 1; i++) {
@@ -52,23 +57,24 @@ namespace ml {
 		}
 	}
 
-	template <class T, class U>
-	Vector <T> DeepNeuralNetwork <T, U> ::operator()(const Vector <T> &in) const
+	template <class T>
+	Vector <T> DeepNeuralNetwork <T> ::operator()(const Vector <T> &in) const
 	{
 		assert(in.size() == __isize);
 
-		Vector <T> tmp = in;
+		Vector <T> tmp = in.activate(__layers[0].second.get());
 
-		for (size_t i = 0; i < __weights.size(); i++)
-			tmp = __weights[i] * tmp.append_above(T (1));
+		for (size_t i = 0; i < __weights.size(); i++) {
+			tmp = (__weights[i] * tmp.append_above(T (1))) \
+			      .activate(__layers[i + 1].second.get());
+		}
 		
 		return tmp;
 	}
 
-	template <class T, class U>
-	void DeepNeuralNetwork <T, U> ::randomize()
+	template <class T>
+	void DeepNeuralNetwork <T> ::randomize()
 	{
-		using namespace std;
 		for (auto &mat : __weights)
 			mat.randomize(__random);
 	}
