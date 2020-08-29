@@ -48,3 +48,11 @@ Class names:
 	- Classes which are meant to be hidden to the user should be lower case
 	- Usable classes (polynomials, functions, vectors, matrices, etc.)
 	  should be upper case
+
+-----------
+Namespaces:
+-----------
+
+Everything that the library provides shold be enclosed in a zhetapi namespace.
+Use nested namespaces for specific modules of the library, such as machine
+learneing (ml).

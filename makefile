@@ -28,7 +28,7 @@ ml_debug:	ml_build
 
 ml_build:	build parsers
 	@echo "[BUILDING ML TESTER]\n"
-	g++ -I engine -I engine/hidden tests/ml.cpp -g -lfl -o build/ml
+	g++ -I engine -I engine/hidden -I engine/std tests/ml.cpp -g -lfl -o build/ml
 
 graph:		build parsers
 	@echo "[BUILDING GRAPHER]\n"

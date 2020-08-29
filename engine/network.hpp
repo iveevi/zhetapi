@@ -7,16 +7,23 @@
 #include <functional>
 
 // Engine headers
-#include <activations.hpp>
+#include <activation.hpp>
 #include <vector.hpp>
 #include <matrix.hpp>
 
 namespace ml {
 
-	template <class T>
+	/*
+	 * Deep Nerual Network
+	 *
+	 * @tparam T is the type with which calculations are performed
+	 * @tparam U is the type of activation parameter scheme, ie. unary or
+	 * binary
+	 */
+	template <class T, class U>
 	class DeepNeuralNetwork {
 	public:
-		typedef std::pair <std::size_t, Activation<T>> Layer;
+		typedef std::pair <std::size_t, Activation<T, U>> Layer;
 	private:
 		std::vector <Layer>		__layers;
 		std::vector <Matrix <T>>	__weights;
@@ -30,8 +37,8 @@ namespace ml {
 		void randomize();
 	};
 
-	template <class T>
-	DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <Layer> &layers,
+	template <class T, class U>
+	DeepNeuralNetwork <T, U> ::DeepNeuralNetwork(const std::vector <Layer> &layers,
 			const std::function <T ()> &random) : __layers(layers), __random(random),
 			__isize(layers[0].first)
 	{
@@ -45,8 +52,8 @@ namespace ml {
 		}
 	}
 
-	template <class T>
-	Vector <T> DeepNeuralNetwork <T> ::operator()(const Vector <T> &in) const
+	template <class T, class U>
+	Vector <T> DeepNeuralNetwork <T, U> ::operator()(const Vector <T> &in) const
 	{
 		assert(in.size() == __isize);
 
@@ -58,8 +65,8 @@ namespace ml {
 		return tmp;
 	}
 
-	template <class T>
-	void DeepNeuralNetwork <T> ::randomize()
+	template <class T, class U>
+	void DeepNeuralNetwork <T, U> ::randomize()
 	{
 		using namespace std;
 		for (auto &mat : __weights)

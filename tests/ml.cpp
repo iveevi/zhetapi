@@ -2,30 +2,59 @@
 #include <iostream>
 #include <random>
 
-#include <activations.hpp>
+#include <activation.hpp>
+
+#include <std_activation_classes.hpp>
+
 #include <matrix.hpp>
-#include <network.hpp>
+#include <vector.hpp>
+// #include <network.hpp>
 
 using namespace std;
 using namespace ml;
 
 int main()
 {
-	ReLU <double> act;
-
-	cout << act(10) << endl;
+	srand(clock());
+	
 
 	Matrix <double> A(3, 3);
 
 	cout << A << endl;
 
-	srand(clock());
-
 	A.randomize([]() {return rand()/(double) RAND_MAX;});
 
 	cout << A << endl;
 
-	DeepNeuralNetwork <double> model({
+	Vector <double> x(3);
+
+	cout << x << endl;
+	
+	x.randomize([]() {return 0.5 - rand()/(double) RAND_MAX;});
+	
+	Activation <double> *act = new Activation <double> ();
+
+	ReLU <double> *relu = new ReLU <double> ();
+	LeakyReLU <double> *lrelu = new LeakyReLU <double> (0.5);
+	
+	Sigmoid <double> *sig = new Sigmoid <double> ();
+	ScaledSigmoid <double> *ssig = new ScaledSigmoid <double> (0.5);
+	
+	cout << "original vector:\t" << x << endl;
+	
+	cout << "default activated:\t" << x.activate(act) << endl;
+	
+	cout << "relu activated:\t\t" << x.activate(relu) << endl;
+	cout << "relu derivative:\t" << x.activate(relu->derivative()) << endl;
+	cout << "lrelu activated:\t" << x.activate(lrelu) << endl;
+	cout << "lrelu derivative:\t" << x.activate(lrelu->derivative()) << endl;
+	
+	cout << "sigmoid activated:\t" << x.activate(sig) << endl;
+	cout << "sigmoid derivative:\t" << x.activate(sig->derivative()) << endl;
+	cout << "ssigmoid activated:\t" << x.activate(ssig) << endl;
+	cout << "ssigmoid derivative:\t" << x.activate(ssig->derivative()) << endl;
+
+	/* DeepNeuralNetwork <double, __unary <double>> model({
 		{4, ReLU <double> ()},
 		{10, ReLU <double> ()},
 		{10, ReLU <double> ()},
@@ -40,7 +69,7 @@ int main()
 
 	model.randomize();
 
-	cout << model({1, 1, 1, 1}) << endl;
+	cout << model({1, 1, 1, 1}) << endl; */
 
 	/*Sigmoid <double> nsig;
 	ScaledSigmoid <double> ssig(1);

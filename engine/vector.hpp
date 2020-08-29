@@ -5,6 +5,7 @@
 #include <complex.hpp>
 #include <matrix.hpp>
 #include <rational.hpp>
+#include <activation.hpp>
 
 /**
  * @brief Representative
@@ -55,10 +56,15 @@ public:
 
 	T norm() const;
 
+	// Normalization
 	void normalize();
 
 	Vector normalized();
 
+	// Machine learning
+	Vector activate(ml::Activation <T> *);
+
+	// Non-member functions
 	template <class U>
 	friend U inner(const Vector <U> &, const Vector <U> &);
 
@@ -246,6 +252,16 @@ Vector <T> Vector <T> ::normalized()
 	return Vector(out);
 }
 
+// Machine learning
+template <class T>
+Vector <T> Vector <T> ::activate(ml::Activation <T> *act)
+{
+	return Vector(this->rows, [&](size_t i) {
+			return (*act)(this->m_array[i][0]);
+		});
+}
+
+// Non-member functions
 template <class T>
 T inner(const Vector <T> &a, const Vector <T> &b)
 {
