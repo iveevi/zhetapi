@@ -73,7 +73,6 @@ Vector <T> ::Vector(T *ref)
 {
 }
 
-using namespace std;
 template <class T>
 Vector <T> ::Vector(const Vector &other) : Matrix <T> (other) {}
 
@@ -116,12 +115,27 @@ Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
 template <class T>
 const Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 {
-	Vector <T> *out = new Vector <T> (other.get_rows(),
-		[&](size_t i) {
-			return other[i][0];
-	});
+	// Clean this function with native
+	// member functions
+	if (this != &other) {
+		// Member function
+		for (size_t i = 0; i < this->rows; i++)
+			delete this->m_array[i];
 
-	*this = *out;
+		delete[] this->m_array;
+
+		// Rehabitate
+		this->rows = other.get_rows();
+
+		// Allocate
+		this->m_array = new T *[this->rows];
+
+		for (size_t i = 0; i < this->rows; i++) {
+			this->m_array[i] = new T[1];
+
+			this->m_array[i][0] = other[i][0];
+		}
+	}
 
 	return *this;
 }

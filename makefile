@@ -26,6 +26,10 @@ ml_debug:	ml_build
 	@echo "\n[DEBUGGING ML]\n"
 	gdb ./build/ml
 
+ml_mem:		ml_build
+	@echo "\n[DEBUGGING ML]\n"
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./build/ml
+
 ml_build:	build parsers
 	@echo "[BUILDING ML TESTER]\n"
 	g++ -I engine -I engine/hidden -I engine/std tests/ml.cpp -g -lfl -o build/ml

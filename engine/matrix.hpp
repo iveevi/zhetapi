@@ -125,7 +125,7 @@ public:
 	friend const Matrix <U> &operator-(const Matrix <U> &, const Matrix <U> &);
 
 	template <class U>
-	friend const Matrix <U> &operator*(const Matrix <U> &, const Matrix <U> &);
+	friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
 	/* template <class U>
 	friend const U &operator*(const Matrix <U> &, const Matrix <U> &); */
@@ -363,6 +363,9 @@ Matrix <T> ::Matrix(size_t rs, size_t cs,
 template <class T>
 Matrix <T> ::~Matrix()
 {
+	for (size_t i = 0; i < rows; i++)
+		delete m_array[i];
+
 	delete[] m_array;
 }
 
@@ -841,11 +844,11 @@ const Matrix <T> &operator-(const Matrix <T> &a, const Matrix <T> &b)
 }
 
 template <class T>
-const Matrix <T> &operator*(const Matrix <T> &a, const Matrix <T> &b)
+Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
 {
 	assert(a.cols == b.rows);
 
-	Matrix <T> *out = new Matrix <T> (a.rows, b.cols, [&](size_t i, size_t j) {
+	return Matrix <T> (a.rows, b.cols, [&](size_t i, size_t j) {
 		T acc = 0;
 
 		for (size_t k = 0; k < a.cols; k++) {
@@ -854,8 +857,6 @@ const Matrix <T> &operator*(const Matrix <T> &a, const Matrix <T> &b)
 
 		return acc;
 	});
-
-	return *out;
 }
 
 /* template <class T>
