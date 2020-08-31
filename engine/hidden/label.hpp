@@ -14,7 +14,7 @@
  *  - l_constant_logarithmic implies
  *  a logarithm of a constant base.
  */
-enum nd_label {
+enum lbl {
 	// Default
 	l_none,
 
@@ -117,7 +117,7 @@ std::string strlabs[] = {
 	"factorial"
 };
 
-bool is_constant(nd_label type)
+bool is_constant(lbl type)
 {
 	if ((type >= l_constant_integer)
 			&& (type <= l_constant_matrix_complex_real)
@@ -127,13 +127,13 @@ bool is_constant(nd_label type)
 	return false;
 }
 
-bool is_variable(nd_label type)
+bool is_variable(lbl type)
 {
 	return !is_constant(type);
 }
 
 template <class T, class U>
-nd_label constant_label(token *tptr)
+lbl constant_label(token *tptr)
 {
 	if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
 		return l_constant_integer;

@@ -1,7 +1,9 @@
 #ifndef CLASS_H_
 #define CLASS_H_
 
-enum nd_class {
+#include <string>
+
+enum cls {
 	c_none,
 	c_polynomial,
 	c_rational,
