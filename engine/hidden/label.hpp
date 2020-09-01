@@ -3,144 +3,148 @@
 
 #include <types.hpp>
 
-/**
- * @brief The enumeration
- * label is used to label nodes
- * of an expression tree.
- *
- * Clarifications:
- *  - l_logarithmic implies a
- *  logarithm of a Variable base.
- *  - l_constant_logarithmic implies
- *  a logarithm of a constant base.
- */
-enum lbl {
-	// Default
-	l_none,
+namespace zhetapi {
 
-	// Constants
-	l_constant_integer,
-	l_constant_rational,
-	l_constant_real,
-	l_constant_complex_rational,
-	l_constant_complex_real,
-	l_constant_vector_rational,
-	l_constant_vector_real,
-	l_constant_vector_complex_rational,
-	l_constant_vector_complex_real,
-	l_constant_matrix_rational,
-	l_constant_matrix_real,
-	l_constant_matrix_complex_rational,
-	l_constant_matrix_complex_real,
+	/**
+	 * @brief The enumeration
+	 * label is used to label nodes
+	 * of an expression tree.
+	 *
+	 * Clarifications:
+	 *  - l_logarithmic implies a
+	 *  logarithm of a Variable base.
+	 *  - l_constant_logarithmic implies
+	 *  a logarithm of a constant base.
+	 */
+	enum lbl {
+		// Default
+		l_none,
 
-	// Operations
-	l_dot,
+		// Constants
+		l_constant_integer,
+		l_constant_rational,
+		l_constant_real,
+		l_constant_complex_rational,
+		l_constant_complex_real,
+		l_constant_vector_rational,
+		l_constant_vector_real,
+		l_constant_vector_complex_rational,
+		l_constant_vector_complex_real,
+		l_constant_matrix_rational,
+		l_constant_matrix_real,
+		l_constant_matrix_complex_rational,
+		l_constant_matrix_complex_real,
 
-	// off
+		// Operations
+		l_dot,
 
-	l_matrix_uncoded,	// leave martix as nodes (with Variables)
-	l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
+		// off
 
-	l_constant,		// keep to prevent errors
-	l_power,
-	l_divided,
-	l_variable,
-	l_function,
-	l_exp,
-	l_polynomial,
-	l_separable,
-	l_multiplied,
-	l_exponential,
-	l_logarithmic,
-	l_trigonometric,
-	l_power_uncertain,
-	l_function_constant,
-	l_operation_constant,
-	l_constant_logarithmic,
-	l_summation,
-	l_summation_Variable,
-	l_summation_function,
-	l_factorial
-};
+		l_matrix_uncoded,	// leave martix as nodes (with Variables)
+		l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
 
-/**
- * @brief String representations
- * of the corresponding labels
- * in the label enumeration.
- */
-std::string strlabs[] = {
-	// Default
-	"none",
+		l_constant,		// keep to prevent errors
+		l_power,
+		l_divided,
+		l_variable,
+		l_function,
+		l_exp,
+		l_polynomial,
+		l_separable,
+		l_multiplied,
+		l_exponential,
+		l_logarithmic,
+		l_trigonometric,
+		l_power_uncertain,
+		l_function_constant,
+		l_operation_constant,
+		l_constant_logarithmic,
+		l_summation,
+		l_summation_Variable,
+		l_summation_function,
+		l_factorial
+	};
 
-	// Constants
-	"constant integer",
-	"constant rational",
-	"constant real",
-	"constant complex rational",
-	"constant complex real",
-	"constant vector rational",
-	"constant vector real",
-	"constant vector complex rational",
-	"constant vector complex real",
-	"constant matrix rational",
-	"constant matrix real",
-	"constant matrix complex rational",
-	"constant matrix complex real",
+	/**
+	 * @brief String representations
+	 * of the corresponding labels
+	 * in the label enumeration.
+	 */
+	std::string strlabs[] = {
+		// Default
+		"none",
 
-	// Operations
-	"dot",
+		// Constants
+		"constant integer",
+		"constant rational",
+		"constant real",
+		"constant complex rational",
+		"constant complex real",
+		"constant vector rational",
+		"constant vector real",
+		"constant vector complex rational",
+		"constant vector complex real",
+		"constant matrix rational",
+		"constant matrix real",
+		"constant matrix complex rational",
+		"constant matrix complex real",
 
-	// off
-	"vector uncoded",
-	"matrix uncoded",
+		// Operations
+		"dot",
 
-	"constant",
-	
-	"power",
-	"divided",
-	"variable",
-	"function",
-	"exponent",
-	"polynomic",
-	"separable",
-	"multiplied",
-	"exponential",
-	"logarithmic",
-	"trigonometric",
-	"power uncertain",
-	"function constant",
-	"operation constant",
-	"constant logarithmic",
-	"summation",
-	"summation variable",
-	"summation function",
-	"factorial"
-};
+		// off
+		"vector uncoded",
+		"matrix uncoded",
 
-bool is_constant(lbl type)
-{
-	if ((type >= l_constant_integer)
-			&& (type <= l_constant_matrix_complex_real)
-			|| (type == l_operation_constant))
-		return true;
+		"constant",
+		
+		"power",
+		"divided",
+		"variable",
+		"function",
+		"exponent",
+		"polynomic",
+		"separable",
+		"multiplied",
+		"exponential",
+		"logarithmic",
+		"trigonometric",
+		"power uncertain",
+		"function constant",
+		"operation constant",
+		"constant logarithmic",
+		"summation",
+		"summation variable",
+		"summation function",
+		"factorial"
+	};
 
-	return false;
-}
+	bool is_constant(lbl type)
+	{
+		if ((type >= l_constant_integer)
+				&& (type <= l_constant_matrix_complex_real)
+				|| (type == l_operation_constant))
+			return true;
 
-bool is_variable(lbl type)
-{
-	return !is_constant(type);
-}
+		return false;
+	}
 
-template <class T, class U>
-lbl constant_label(token *tptr)
-{
-	if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
-		return l_constant_integer;
-	if (dynamic_cast <typename types <T, U> ::opd_q *> (tptr))
-		return l_constant_rational;
-	if (dynamic_cast <typename types <T, U> ::opd_r *> (tptr))
-		return l_constant_real;
+	bool is_variable(lbl type)
+	{
+		return !is_constant(type);
+	}
+
+	template <class T, class U>
+	lbl constant_label(token *tptr)
+	{
+		if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
+			return l_constant_integer;
+		if (dynamic_cast <typename types <T, U> ::opd_q *> (tptr))
+			return l_constant_rational;
+		if (dynamic_cast <typename types <T, U> ::opd_r *> (tptr))
+			return l_constant_real;
+	}
+
 }
 
 #endif

@@ -9,134 +9,136 @@
 // Engine Headers
 #include <operand.hpp>
 
-/**
- * @brief Represent a mathematical
- * operation, which can base computations
- * not only of operands, but also Variables,
- * Functions, and other tokens. Type checking
- * for appropriate template argument is left
- * of the user, as mentioned later.
- */
-class operation : public token {
-public:
-	// Aliases
-	using mapper = std::function <token *(const std::vector <token *> &)>;
-private:
-	/* Member instance of the
-	 * operation token class. */
-
+namespace zhetapi {
 	/**
-	 * @brief The expected
-	 * input format of the
-	 * operation.
+	 * @brief Represent a mathematical
+	 * operation, which can base computations
+	 * not only of operands, but also Variables,
+	 * Functions, and other tokens. Type checking
+	 * for appropriate template argument is left
+	 * of the user, as mentioned later.
 	 */
-	std::string input;
+	class operation : public token {
+	public:
+		// Aliases
+		using mapper = std::function <token *(const std::vector <token *> &)>;
+	private:
+		/* Member instance of the
+		 * operation token class. */
 
-	/**
-	 * @brief The expected
-	 * output format of the
-	 * operation; includes
-	 * regex-like features.
-	 */
-	std::string output;
+		/**
+		 * @brief The expected
+		 * input format of the
+		 * operation.
+		 */
+		std::string input;
 
-	/**
-	 * @brief The number of
-	 * operands expected by
-	 * the operation. Used to
-	 * check input of computation.
-	 */
-	std::size_t ops;
+		/**
+		 * @brief The expected
+		 * output format of the
+		 * operation; includes
+		 * regex-like features.
+		 */
+		std::string output;
 
-	/**
-	 * @brief The actual operation;
-	 * takes a list of tokens and ouputs
-	 * a single value. Type checking
-	 * the arguments for appropriate
-	 * template argument is left
-	 * to the user or some higher level
-	 * class such as config.
-	 */
-	mapper opn;
-public:
-	operation();
-	operation(const operation &);
-	operation(const std::string &, const std::string &,
-			std::size_t,  mapper);
+		/**
+		 * @brief The number of
+		 * operands expected by
+		 * the operation. Used to
+		 * check input of computation.
+		 */
+		std::size_t ops;
 
-	token *operator()(const std::vector <token *> &) const;
+		/**
+		 * @brief The actual operation;
+		 * takes a list of tokens and ouputs
+		 * a single value. Type checking
+		 * the arguments for appropriate
+		 * template argument is left
+		 * to the user or some higher level
+		 * class such as config.
+		 */
+		mapper opn;
+	public:
+		operation();
+		operation(const operation &);
+		operation(const std::string &, const std::string &,
+				std::size_t,  mapper);
 
-	std::string fmt() const;
-	std::string str() const override;
+		token *operator()(const std::vector <token *> &) const;
 
-	std::size_t inputs() const;
+		std::string fmt() const;
+		std::string str() const override;
 
-	type caller() const override;
+		std::size_t inputs() const;
 
-	token *copy() const override;
+		type caller() const override;
 
-	bool operator==(token *) const override;
+		token *copy() const override;
 
-	class count_mismatch {};
-	class token_mismatch {};
-};
+		bool operator==(token *) const override;
 
-operation::operation() : input(""), output(""), ops(0) {}
+		class count_mismatch {};
+		class token_mismatch {};
+	};
 
-operation::operation(const operation &other)
-{
-	input = other.input;
-	output = other.output;
-	ops = other.ops;
-	opn = other.opn;
-}
+	operation::operation() : input(""), output(""), ops(0) {}
 
-operation::operation(const std::string &in, const std::string &out, std::size_t
-		opers, mapper fopn) : input(in), output(out), ops(opers),
-		opn(fopn) {}
+	operation::operation(const operation &other)
+	{
+		input = other.input;
+		output = other.output;
+		ops = other.ops;
+		opn = other.opn;
+	}
 
-token *operation::operator()(const std::vector <token *> &ins) const
-{
-	if (ins.size() != ops)
-		throw count_mismatch();
-	return opn(ins);
-}
+	operation::operation(const std::string &in, const std::string &out, std::size_t
+			opers, mapper fopn) : input(in), output(out), ops(opers),
+			opn(fopn) {}
 
-std::string operation::fmt() const
-{
-	return input;
-}
+	token *operation::operator()(const std::vector <token *> &ins) const
+	{
+		if (ins.size() != ops)
+			throw count_mismatch();
+		return opn(ins);
+	}
 
-std::string operation::str() const
-{
-	return "[" + input + "](" + std::to_string(ops)
-		+ ") - [" + output + "]";
-}
+	std::string operation::fmt() const
+	{
+		return input;
+	}
 
-std::size_t operation::inputs() const
-{
-	return ops;
-}
+	std::string operation::str() const
+	{
+		return "[" + input + "](" + std::to_string(ops)
+			+ ") - [" + output + "]";
+	}
 
-token::type operation::caller() const
-{
-	return OPERATION;
-}
+	std::size_t operation::inputs() const
+	{
+		return ops;
+	}
 
-token *operation::copy() const
-{
-	return new operation(*this);
-}
+	token::type operation::caller() const
+	{
+		return OPERATION;
+	}
 
-bool operation::operator==(token *t) const
-{
-	operation *optr = dynamic_cast <operation *> (t);
-	if (optr == nullptr)
-		return false;
+	token *operation::copy() const
+	{
+		return new operation(*this);
+	}
 
-	return (ops == optr->ops)
-		&& (input == optr->input)
-		&& (output == optr->output);
+	bool operation::operator==(token *t) const
+	{
+		operation *optr = dynamic_cast <operation *> (t);
+		if (optr == nullptr)
+			return false;
+
+		return (ops == optr->ops)
+			&& (input == optr->input)
+			&& (output == optr->output);
+	}
 }
 
 #endif
