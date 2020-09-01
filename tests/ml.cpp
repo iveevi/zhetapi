@@ -9,6 +9,7 @@
 #include <matrix.hpp>
 #include <vector.hpp>
 #include <network.hpp>
+#include <tensor.hpp>
 
 using namespace std;
 using namespace ml;
@@ -33,4 +34,8 @@ int main()
 	model.randomize();
 
 	cout << model({1, 1, 1, 1}) << endl;
+
+	Tensor <int> tensor({3, 1}, 4);
+
+	cout << tensor.print() << endl;
 }
