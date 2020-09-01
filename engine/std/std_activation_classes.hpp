@@ -18,9 +18,35 @@ namespace ml {
 	 * The obscure naming of the derivative classes is done to encourage
 	 * users to use the derivative member function.
 	 */
+	
+	// Linear activation class
+	template <class T>
+	class __DLinear : public Activation <T> {
+		T	__alpha;
+	public:
+		__DLinear(const T &alpha = T(1)) : __alpha(alpha) {}
+
+		T operator()(const T &x) const {
+			return __d_leaky_relu(x, __alpha);
+		}
+	};
+	
+	template <class T>
+	class Linear : public Activation <T> {
+		T	__alpha;
+	public:
+		Linear(const T &alpha = T(1)) : __alpha(alpha) {}
+
+		T operator()(const T &x) const {
+			return __leaky_relu(x, __alpha);
+		}
+
+		Activation <T> *derivative() const {
+			return new __DLinear <T> (__alpha);
+		}
+	};
 
 	// ReLU activation class
-		using namespace std;
 	template <class T>
 	class __DReLU : public Activation <T> {
 	public:

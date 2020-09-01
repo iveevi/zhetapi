@@ -18,8 +18,10 @@ int main()
 	srand(clock());
 
 	DeepNeuralNetwork <double> model({
-		{4, new ReLU <double> ()},
-		{10, new ReLU <double> ()}
+		{4, new Linear <double> ()},
+		{10, new Linear <double> ()},
+		{10, new Linear <double> ()},
+		{1, new Linear <double> ()}
 	}, []() {return 0.5 - rand()/(double) RAND_MAX;});
 
 	cout << model({1, -1, 5, -2}) << endl;

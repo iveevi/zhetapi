@@ -3,6 +3,19 @@
 
 namespace ml {
 
+	// Linear activation functions
+	template <class T>
+	T __linear(T x, T alpha)
+	{
+		return alpha * x;
+	}
+
+	template <class T>
+	T __d_linear(T x, T alpha)
+	{
+		return alpha;
+	}
+
 	// ReLU activation functions
 	template <class T>
 	T __relu(T x)

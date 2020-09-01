@@ -24,7 +24,7 @@ namespace ml {
 	template <class T>
 	class DeepNeuralNetwork {
 	public:
-		typedef std::pair <std::size_t, shared_ptr <Activation<T>>> Layer;
+		typedef std::pair <std::size_t, std::shared_ptr <Activation<T>>> Layer;
 		typedef std::pair <std::size_t, Activation<T> *> PreLayer;
 	private:
 		std::vector <Layer>		__layers;
@@ -45,7 +45,7 @@ namespace ml {
 			__isize(layers[0].first)
 	{
 		for (auto pr : layers)
-			__layers.push_back({pr.first, shared_ptr <Activation <T>> (pr.second)});
+			__layers.push_back({pr.first, std::shared_ptr <Activation <T>> (pr.second)});
 
 		size_t size = __layers.size();
 
