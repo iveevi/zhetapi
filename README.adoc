@@ -11,7 +11,7 @@ It is being developed in Linux and has only been tested for it.
 
 ## Features
 
-## Evaluation of Complex Expressions
+### Evaluation of Complex Expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
