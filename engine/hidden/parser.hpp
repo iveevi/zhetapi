@@ -25,6 +25,8 @@ namespace zhetapi {
 	using namespace boost::spirit;
 	using namespace boost::phoenix;
 
+	typedef ascii::blank_type skip;
+
 	// Parser
 	template <class T, class U>
 	struct parser : qi::grammar <siter, zhetapi::node ()> {
@@ -34,6 +36,8 @@ namespace zhetapi {
 		parser() : parser::base_type(__start) {
 			// Type parsers (change dependence on int_ and double_ parsers
 			// specifically)
+
+			// Reals
 			__z = int_;
 
 			__q = (int_ >> '/' >> int_) [
@@ -42,6 +46,7 @@ namespace zhetapi {
 
 			__r = double_;
 
+			// Complex
 			__cz = (__z >> 'i') [
 				_val = phoenix::construct <CZ> (0, _1)
 			];
@@ -54,7 +59,75 @@ namespace zhetapi {
 				_val = phoenix::construct <CR> (0, _1)
 			];
 
+			// Vector
+
+			__vz_inter = __z % ',';
+			__vq_inter = __q % ',';
+			__vr_inter = __r % ',';
+			__vcz_inter = __cz % ',';
+			__vcq_inter = __cq % ',';
+			__vcr_inter = __cr % ',';
+			
+			__vz = ('[' >> __vz_inter >> ']') [
+				_val = _1
+			];
+			
+			__vq = ('[' >> __vq_inter >> ']') [
+				_val = _1
+			];
+			
+			__vr = ('[' >> __vr_inter >> ']') [
+				_val = _1
+			];
+			
+			__vcz = ('[' >> __vcz_inter >> ']') [
+				_val = _1
+			];
+			
+			__vcq = ('[' >> __vcq_inter >> ']') [
+				_val = _1
+			];
+			
+			__vcr = ('[' >> __vcr_inter >> ']') [
+				_val = _1
+			];
+
+			// Matrix
+			
+			__mz_inter = __vz % ',';
+			__mq_inter = __vq % ',';
+			__mr_inter = __vr % ',';
+			__mcz_inter = __vcz % ',';
+			__mcq_inter = __vcq % ',';
+			__mcr_inter = __vcr % ',';
+			
+			__mz = ('[' >> __mz_inter >> ']') [
+				_val = _1
+			];
+			
+			__mq = ('[' >> __mq_inter >> ']') [
+				_val = _1
+			];
+			
+			__mr = ('[' >> __mr_inter >> ']') [
+				_val = _1
+			];
+			
+			__mcz = ('[' >> __mcz_inter >> ']') [
+				_val = _1
+			];
+			
+			__mcq = ('[' >> __mcq_inter >> ']') [
+				_val = _1
+			];
+			
+			__mcr = ('[' >> __mcr_inter >> ']') [
+				_val = _1
+			];
+			
 			// Token parsers
+
+			// Reals
 			__o_z = __z [
 				_val = phoenix::new_ <zhetapi::operand <Z>> (_1)
 			];
@@ -67,6 +140,7 @@ namespace zhetapi {
 				_val = phoenix::new_ <zhetapi::operand <R>> (_1)
 			];
 			
+			// Complex
 			__o_cz = __cz [
 				_val = phoenix::new_ <zhetapi::operand <CZ>> (_1)
 			];
@@ -79,11 +153,78 @@ namespace zhetapi {
 				_val = phoenix::new_ <zhetapi::operand <CR>> (_1)
 			];
 
+			// Vector
+			__o_vz = __vz [
+				_val = phoenix::new_ <zhetapi::operand <VZ>> (_1)
+			];
+			
+			__o_vq = __vq [
+				_val = phoenix::new_ <zhetapi::operand <VQ>> (_1)
+			];
+			
+			__o_vr = __vr [
+				_val = phoenix::new_ <zhetapi::operand <VR>> (_1)
+			];
+			
+			__o_vcz = __vcz [
+				_val = phoenix::new_ <zhetapi::operand <VCZ>> (_1)
+			];
+			
+			__o_vcq = __vcq [
+				_val = phoenix::new_ <zhetapi::operand <VCQ>> (_1)
+			];
+			
+			__o_vcr = __vcr [
+				_val = phoenix::new_ <zhetapi::operand <VCR>> (_1)
+			];
+
+			// Matrix
+			__o_mz = __mz [
+				_val = phoenix::new_ <zhetapi::operand <MZ>> (_1)
+			];
+			
+			__o_mq = __mq [
+				_val = phoenix::new_ <zhetapi::operand <MQ>> (_1)
+			];
+			
+			__o_mr = __mr [
+				_val = phoenix::new_ <zhetapi::operand <MR>> (_1)
+			];
+			
+			__o_mcz = __mcz [
+				_val = phoenix::new_ <zhetapi::operand <MCZ>> (_1)
+			];
+			
+			__o_mcq = __mcq [
+				_val = phoenix::new_ <zhetapi::operand <MCQ>> (_1)
+			];
+			
+			__o_mcr = __mcr [
+				_val = phoenix::new_ <zhetapi::operand <MCR>> (_1)
+			];
+
 			// Nodes
 			__node_opd = (
-					__o_cq
+					__o_mcq
+					| __o_mcr
+					| __o_mcz
+
+					| __o_mq
+					| __o_mr
+					| __o_mz
+					
+					| __o_vcq
+					| __o_vcr
+					| __o_vcz
+
+					| __o_vq
+					| __o_vr
+					| __o_vz
+
+					| __o_cq
 					| __o_cr
 					| __o_cz
+
 					| __o_q
 					| __o_r
 					| __o_z
@@ -95,25 +236,70 @@ namespace zhetapi {
 			__start = (__node_opd) [_val = _1];
 		}
 
-		qi::rule <siter, zhetapi::node ()>	__start;
+		qi::rule <siter, zhetapi::node ()>			__start;
 
 		// Token parsers
-		qi::rule <siter, zhetapi::token *()>	__o_z;
-		qi::rule <siter, zhetapi::token *()>	__o_q;
-		qi::rule <siter, zhetapi::token *()>	__o_r;
-		qi::rule <siter, zhetapi::token *()>	__o_cz;
-		qi::rule <siter, zhetapi::token *()>	__o_cq;
-		qi::rule <siter, zhetapi::token *()>	__o_cr;
+		qi::rule <siter, zhetapi::token *()>			__o_z;
+		qi::rule <siter, zhetapi::token *()>			__o_q;
+		qi::rule <siter, zhetapi::token *()>			__o_r;
+		qi::rule <siter, zhetapi::token *()>			__o_cz;
+		qi::rule <siter, zhetapi::token *()>			__o_cq;
+		qi::rule <siter, zhetapi::token *()>			__o_cr;
+		
+		qi::rule <siter, zhetapi::token *()>			__o_vz;
+		qi::rule <siter, zhetapi::token *()>			__o_vq;
+		qi::rule <siter, zhetapi::token *()>			__o_vr;
+		qi::rule <siter, zhetapi::token *()>			__o_vcz;
+		qi::rule <siter, zhetapi::token *()>			__o_vcq;
+		qi::rule <siter, zhetapi::token *()>			__o_vcr;
+		
+		qi::rule <siter, zhetapi::token *()>			__o_mz;
+		qi::rule <siter, zhetapi::token *()>			__o_mq;
+		qi::rule <siter, zhetapi::token *()>			__o_mr;
+		qi::rule <siter, zhetapi::token *()>			__o_mcz;
+		qi::rule <siter, zhetapi::token *()>			__o_mcq;
+		qi::rule <siter, zhetapi::token *()>			__o_mcr;
 		
 		// Type parsers
-		qi::rule <siter, Z ()>			__z;
-		qi::rule <siter, Q ()>			__q;
-		qi::rule <siter, R>			__r;
-		qi::rule <siter, CZ ()>			__cz;
-		qi::rule <siter, CQ>			__cq;
-		qi::rule <siter, CR>			__cr;
+		qi::rule <siter, Z ()>					__z;
+		qi::rule <siter, Q ()>					__q;
+		qi::rule <siter, R>					__r;
+		qi::rule <siter, CZ ()>					__cz;
+		qi::rule <siter, CQ>					__cq;
+		qi::rule <siter, CR>					__cr;
+		
+		qi::rule <siter, std::vector <Z> ()>			__vz;
+		qi::rule <siter, std::vector <Q> ()>			__vq;
+		qi::rule <siter, std::vector <R> ()>			__vr;
+		qi::rule <siter, std::vector <CZ> ()>			__vcz;
+		qi::rule <siter, std::vector <CQ> ()>			__vcq;
+		qi::rule <siter, std::vector <CR> ()>			__vcr;
+		
+		qi::rule <siter, std::vector <std::vector <Z>> ()>	__mz;
+		qi::rule <siter, std::vector <std::vector <Q>> ()>	__mq;
+		qi::rule <siter, std::vector <std::vector <R>> ()>	__mr;
+		qi::rule <siter, std::vector <std::vector <CZ>> ()>	__mcz;
+		qi::rule <siter, std::vector <std::vector <CQ>> ()>	__mcq;
+		qi::rule <siter, std::vector <std::vector <CR>> ()>	__mcr;
 
-		qi::rule <siter, zhetapi::node ()>	__node_opd;
+		// Vector and matrix intermediates
+		qi::rule <siter, std::vector <Z> ()>			__vz_inter;
+		qi::rule <siter, std::vector <Q> ()>			__vq_inter;
+		qi::rule <siter, std::vector <R> ()>			__vr_inter;
+		qi::rule <siter, std::vector <CZ> ()>			__vcz_inter;
+		qi::rule <siter, std::vector <CQ> ()>			__vcq_inter;
+		qi::rule <siter, std::vector <CR> ()>			__vcr_inter;
+		
+		qi::rule <siter, std::vector <std::vector <Z>> ()>	__mz_inter;
+		qi::rule <siter, std::vector <std::vector <Q>> ()>	__mq_inter;
+		qi::rule <siter, std::vector <std::vector <R>> ()>	__mr_inter;
+		qi::rule <siter, std::vector <std::vector <CZ>> ()>	__mcz_inter;
+		qi::rule <siter, std::vector <std::vector <CQ>> ()>	__mcq_inter;
+		qi::rule <siter, std::vector <std::vector <CR>> ()>	__mcr_inter;
+		
+
+		// Nodes
+		qi::rule <siter, zhetapi::node ()>			__node_opd;
 	};
 
 }

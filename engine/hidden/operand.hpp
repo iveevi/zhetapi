@@ -26,7 +26,8 @@ namespace zhetapi {
 		 * operand(data_t) - sets the private member Variable
 		 *   [val] to whatever value is passed */
 		operand();
-		explicit operand(data_t);
+		// operand(data_t);
+		operand(const data_t &);
 		operand(const operand &);
 
 		/* Virtualized Member Functions:
@@ -114,8 +115,11 @@ namespace zhetapi {
 	template <typename data_t>
 	operand <data_t> ::operand () : val(data_t()) {}
 
+	//template <typename data_t>
+	//operand <data_t> ::operand(data_t data) : val(data) {}
+	
 	template <typename data_t>
-	operand <data_t> ::operand(data_t data) : val(data) {}
+	operand <data_t> ::operand(const data_t &data) : val(data) {}
 
 	template <typename data_t>
 	operand <data_t> ::operand(const operand &other) : val(other.val) {}

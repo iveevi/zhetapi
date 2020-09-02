@@ -83,13 +83,7 @@ Vector <T> ::Vector(const Matrix <T> &other)
 }
 
 template <class T>
-Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref)
-{
-	/* std::vector <std::vector <T>> pass(ref.size());
-	for (auto t : ref)
-		pass.push_back({t});
-	*this = Matrix <T> (pass); */
-}
+Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
 
 template <class T>
 Vector <T> ::Vector(const std::initializer_list <T> &ref)

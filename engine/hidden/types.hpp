@@ -17,15 +17,19 @@
 		typedef Complex <Q> CQ;				\
 		typedef Complex <R> CR;				\
 								\
+		typedef Vector <Z> VZ;				\
 		typedef Vector <Q> VQ;				\
 		typedef Vector <R> VR;				\
 								\
+		typedef Vector <CZ> VCZ;			\
 		typedef Vector <CQ> VCQ;			\
 		typedef Vector <CR> VCR;			\
 								\
+		typedef Matrix <Z> MZ;				\
 		typedef Matrix <Q> MQ;				\
 		typedef Matrix <R> MR;				\
 								\
+		typedef Matrix <CZ> MCZ;			\
 		typedef Matrix <CQ> MCQ;			\
 		typedef Matrix <CR> MCR;			\
 								\

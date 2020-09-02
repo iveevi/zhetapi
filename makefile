@@ -10,7 +10,9 @@ gpu_build:	build
 mem:		tests
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
 
-run:		tests
+run:
+	@echo "[BUILDING TESTS]\n"
+	g++ -I engine -I engine/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 	@echo "\n[RUNNING PROGRAM]\n"
 	./build/tests < ./tests/tests.in
 

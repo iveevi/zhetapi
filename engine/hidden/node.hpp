@@ -24,7 +24,13 @@ namespace zhetapi {
 		node(token *, const std::vector <node> &);
 		
 		// Member functions
+
+		// Printing
 		void print(int = 1, int = 0) const;
+
+		std::string display(int = 1, int = 0) const;
+
+		friend std::ostream &operator<<(std::ostream &, const node &);
 	};
 
 	node::node() : __tptr(nullptr) {}
@@ -50,6 +56,34 @@ namespace zhetapi {
 		for (node itr : __leaves)
 			itr.print(++counter, lev + 1);
 	}
+	
+	std::string node::display(int num, int lev) const
+	{
+		std::ostringstream oss;
+
+		oss << std::endl;
+
+		int counter = lev;
+		while (counter > 0) {
+			oss << "\t";
+			counter--;
+		}
+
+		oss << "#" << num << " - " << __tptr->str() << " (" << __tptr << ") @ "
+			<< this << std::endl;
+
+		counter = 0;
+		for (node itr : __leaves)
+			oss << itr.display(++counter, lev + 1);
+
+		return oss.str();
+	}
+	
+	std::ostream &operator<<(std::ostream &os, const node &tree)
+	{
+		os << tree.display();
+	}
+
 }
 
 #endif
