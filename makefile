@@ -3,7 +3,7 @@ gpu:		gpu_build
 	@echo "\n[RUNNING GPU TESTS]\n"
 	./build/gpu
 
-gpu_build:	build parsers
+gpu_build:	build
 	@echo "[BUILDING GPU TESTER]\n"
 	nvcc -I engine -I engine/hidden tests/gpu.cu -g -lfl -o build/gpu
 
@@ -30,19 +30,19 @@ ml_mem:		ml_build
 	@echo "\n[DEBUGGING ML]\n"
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./build/ml
 
-ml_build:	build parsers
+ml_build:	build
 	@echo "[BUILDING ML TESTER]\n"
 	g++ -I engine -I engine/hidden -I engine/std tests/ml.cpp -g -lfl -o build/ml
 
-graph:		build parsers
+graph:		build
 	@echo "[BUILDING GRAPHER]\n"
 	nvcc web/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph
 
-tests:		build parsers
+tests:		build
 	@echo "[BUILDING TESTS]\n"
 	g++ -I engine -I engine/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
-exp:		build parsers
+exp:		build
 	@echo "[BUILDING TESTS]\n"
 	g++ -I engine tests/exp.cpp -lfl -lgmpxx -lgmp -lglut -lGL -g -o build/exp
 	./build/exp
@@ -55,7 +55,7 @@ texifier:	build
 	
 	g++ texifier/texifier.cpp -o build/texifier
 
-driver:		build parsers
+driver:		build
 	@echo "[BUILDING DRIVER]\n"
 	
 	touch build/driver.in
@@ -67,13 +67,9 @@ cli:		cli_build
 	@echo "\n[RUNNING CLI]\n"
 	./build/cli
 
-cli_build:	build parsers
+cli_build:	build
 	@echo "[BUILDING CLI]\n"	
 	g++ cli/cli.cpp -lfl -g -o build/cli
-
-parsers:
-	flex -o build/lex.yy.c engine/hidden/lexer.l
-	bison -t -o build/parser.tab.c engine/hidden/parser.y
 
 build:
 	@echo "[CREATING BUILD DIRECTORY]\n"

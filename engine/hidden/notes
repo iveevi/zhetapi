@@ -45,9 +45,11 @@ Standards:
 ------------
 Class names:
 ------------
-	- Classes which are meant to be hidden to the user should be lower case
+	- Classes which are meant to be hidden to the user should be lower_case
 	- Usable classes (polynomials, functions, vectors, matrices, etc.)
-	  should be upper case
+	  should be UpperCase
+	- Classes that are under the usable scope should be __UpperCase if their
+	  usage is discouraged 
 
 -----------
 Namespaces:
