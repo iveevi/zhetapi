@@ -8,44 +8,45 @@
 #include <vector.hpp>
 #include <matrix.hpp>
 
-#define __TYPEDEFS__				\
-		typedef U Z;			\
-		typedef Rational <Z> Q;		\
-		typedef T R;			\
-						\
-		typedef Complex <R> CR;         \
-		typedef Complex <Q> CQ;         \
-						\
-		typedef Vector <R> VR;          \
-		typedef Vector <Q> VQ;          \
-						\
-		typedef Vector <CR> VCR;        \
-		typedef Vector <CQ> VCQ;        \
-						\
-		typedef Matrix <R> MR;          \
-		typedef Matrix <Q> MQ;          \
-						\
-		typedef Matrix <CR> MCR;        \
-		typedef Matrix <CQ> MCQ;        \
-						\
-		typedef operand <Z> opd_z;      \
-		typedef operand <R> opd_r;      \
-		typedef operand <Q> opd_q;      \
-						\
-		typedef operand <CR> opd_cr;	\
-		typedef operand <CQ> opd_cq;	\
-						\
-		typedef operand <VR> opd_v_r;	\
-		typedef operand <VQ> opd_v_q;	\
-						\
-		typedef operand <VCR> opd_v_cr;	\
-		typedef operand <VCQ> opd_v_cq;	\
-						\
-		typedef operand <MR> opd_m_r;	\
-		typedef operand <MQ> opd_m_q;	\
-						\
-		typedef operand <MCR> opd_m_cr;	\
-		typedef operand <MCQ> opd_m_cq;
+#define __TYPEDEFS__						\
+		typedef U Z;					\
+		typedef Rational <Z> Q;				\
+		typedef T R;					\
+								\
+		typedef Complex <Z> CZ;				\
+		typedef Complex <Q> CQ;				\
+		typedef Complex <R> CR;				\
+								\
+		typedef Vector <Q> VQ;				\
+		typedef Vector <R> VR;				\
+								\
+		typedef Vector <CQ> VCQ;			\
+		typedef Vector <CR> VCR;			\
+								\
+		typedef Matrix <Q> MQ;				\
+		typedef Matrix <R> MR;				\
+								\
+		typedef Matrix <CQ> MCQ;			\
+		typedef Matrix <CR> MCR;			\
+								\
+		typedef zhetapi::operand <Z> opd_z;      	\
+		typedef zhetapi::operand <Q> opd_q;      	\
+		typedef zhetapi::operand <R> opd_r;      	\
+								\
+		typedef zhetapi::operand <CQ> opd_cq;		\
+		typedef zhetapi::operand <CR> opd_cr;		\
+								\
+		typedef zhetapi::operand <VQ> opd_v_q;		\
+		typedef zhetapi::operand <VR> opd_v_r;		\
+								\
+		typedef zhetapi::operand <VCQ> opd_v_cq;	\
+		typedef zhetapi::operand <VCR> opd_v_cr;	\
+								\
+		typedef zhetapi::operand <MQ> opd_m_q;		\
+		typedef zhetapi::operand <MR> opd_m_r;		\
+								\
+		typedef zhetapi::operand <MCQ> opd_m_cq;	\
+		typedef zhetapi::operand <MCR> opd_m_cr;
 
 #define	ONE	1
 

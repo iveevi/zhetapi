@@ -23,8 +23,6 @@ namespace zhetapi {
 		node();
 		node(token *, const std::vector <node> &);
 		
-		~node();
-
 		// Member functions
 		void print(int = 1, int = 0) const;
 	};
@@ -35,8 +33,6 @@ namespace zhetapi {
 		__leaves(leaves)
 	{
 		__tptr.reset(tptr);
-
-		std::cout << "tok: " << __tptr << " -> " << __tptr->str() << std::endl;
 	}
 
 	void node::print(int num, int lev) const
