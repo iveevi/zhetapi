@@ -28,7 +28,7 @@ namespace zhetapi {
 		siter iter = str.begin();
 		siter end = str.end();
 
-		bool r = qi::parse(iter, end, pr, __tree);
+		bool r = qi::phrase_parse(iter, end, pr, qi::space, __tree);
 
 		label(__tree);
 	
