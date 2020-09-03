@@ -44,7 +44,8 @@ namespace zhetapi {
 				_val = phoenix::construct <Q> (_1, _2)
 			];
 
-			__r = double_;
+			// __r = double_;
+			__r = qi::real_parser <R, qi::strict_real_policies <R>> ();
 
 			// Complex
 			__cz = (__z >> 'i') [
