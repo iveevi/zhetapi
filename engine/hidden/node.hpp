@@ -33,10 +33,10 @@ namespace zhetapi {
 		friend std::ostream &operator<<(std::ostream &, const node &);
 	};
 
-	node::node() : __tptr(nullptr) {}
+	node::node() : __tptr(nullptr), __label(l_none) {}
 	
 	node::node(token *tptr, const std::vector <node> &leaves) :
-		__leaves(leaves)
+		__leaves(leaves), __label(l_none)
 	{
 		__tptr.reset(tptr);
 	}
@@ -49,8 +49,9 @@ namespace zhetapi {
 			counter--;
 		}
 
-		std::cout << "#" << num << " - " << __tptr->str() << " (" << __tptr << ") @ "
-			<< this << std::endl;
+		std::cout << "#" << num << " - " << __tptr->str() << " (" <<
+			__tptr << ", " << strlabs[__label] << ") @ " << this <<
+			std::endl;
 
 		counter = 0;
 		for (node itr : __leaves)

@@ -4,6 +4,8 @@
 // Engine headers
 #include <node_manager.hpp>
 
+// #define DEBUG_PARSER 1
+
 using namespace std;
 
 int main()

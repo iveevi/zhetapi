@@ -205,13 +205,12 @@ namespace zhetapi {
 
 			// Nodes
 			__node_opd = (
-					__o_mcq
-					| __o_mcr
-					| __o_mcz
+					__o_cq
+					| __o_cr
+					| __o_cz
 
-					| __o_mq
-					| __o_mr
-					| __o_mz
+					| __o_q
+					| __o_r
 					
 					| __o_vcq
 					| __o_vcr
@@ -220,20 +219,133 @@ namespace zhetapi {
 					| __o_vq
 					| __o_vr
 					| __o_vz
-
-					| __o_cq
-					| __o_cr
-					| __o_cz
-
-					| __o_q
-					| __o_r
 					| __o_z
+					
+					| __o_mcq
+					| __o_mcr
+					| __o_mcz
+
+					| __o_mq
+					| __o_mr
+					| __o_mz
 				) [
 				_val = phoenix::construct <zhetapi::node> (_1,
 						std::vector <zhetapi::node> {})
 			];
 
 			__start = (__node_opd) [_val = _1];
+
+			// Naming rules
+			__start.name("start");
+			
+			__o_z.name("integer operand");
+			__o_q.name("rational operand");
+			__o_r.name("real operand");
+			__o_cz.name("complex integer operand");
+			__o_cq.name("complex rational operand");
+			__o_cr.name("complex real operand");
+			
+			__o_vz.name("vector integer operand");
+			__o_vq.name("vector rational operand");
+			__o_vr.name("vector real operand");
+			__o_vcz.name("vector complex integer operand");
+			__o_vcq.name("vector complex rational operand");
+			__o_vcr.name("vector complex real operand");
+			
+			__o_mz.name("matrix integer operand");
+			__o_mq.name("matrix rational operand");
+			__o_mr.name("matrix real operand");
+			__o_mcz.name("matrix complex integer operand");
+			__o_mcq.name("matrix complex rational operand");
+			__o_mcr.name("matrix complex real operand");
+
+			__z.name("integer");
+			__q.name("rational");
+			__r.name("real");
+			__cz.name("complex integer");
+			__cq.name("complex rational");
+			__cr.name("complex real");
+			
+			__vz.name("vector integer");
+			__vq.name("vector rational");
+			__vr.name("vector real");
+			__vcz.name("vector complex integer");
+			__vcq.name("vector complex rational");
+			__vcr.name("vector complex real");
+			
+			__mz.name("matrix integer");
+			__mq.name("matrix rational");
+			__mr.name("matrix real");
+			__mcz.name("matrix complex integer");
+			__mcq.name("matrix complex rational");
+			__mcr.name("matrix complex real");
+			
+			__vz_inter.name("intermediate vector integer");
+			__vq_inter.name("intermediate vector rational");
+			__vr_inter.name("intermediate vector real");
+			__vcz_inter.name("intermediate vector complex integer");
+			__vcq_inter.name("intermediate vector complex rational");
+			__vcr_inter.name("intermediate vector complex real");
+			
+			__mz_inter.name("intermediate matrix integer");
+			__mq_inter.name("intermediate matrix rational");
+			__mr_inter.name("intermediate matrix real");
+			__mcz_inter.name("intermediate matrix complex integer");
+			__mcq_inter.name("intermediate matrix complex rational");
+			__mcr_inter.name("intermediate matrix complex real");
+
+			__node_opd.name("node operand");
+
+			// Debug
+
+#ifdef DEBUG_PARSER
+			debug(__start);
+
+			debug(__o_z);
+			debug(__o_q);
+			debug(__o_r);
+			debug(__o_cz);
+			debug(__o_cq);
+			debug(__o_cr);
+
+			debug(__o_vz);
+			debug(__o_vq);
+			debug(__o_vr);
+			debug(__o_vcz);
+			debug(__o_vcq);
+			debug(__o_vcr);
+
+			debug(__o_mz);
+			debug(__o_mq);
+			debug(__o_mr);
+			debug(__o_mz);
+			debug(__o_mcq);
+			debug(__o_mcr);
+			
+			debug(__z);
+			debug(__q);
+			debug(__r);
+			debug(__cz);
+			debug(__cq);
+			debug(__cr);
+
+			debug(__vz);
+			debug(__vq);
+			debug(__vr);
+			debug(__vcz);
+			debug(__vcq);
+			debug(__vcr);
+
+			debug(__mz);
+			debug(__mq);
+			debug(__mr);
+			debug(__mz);
+			debug(__mcq);
+			debug(__mcr);
+
+			debug(__node_opd);
+#endif
+
 		}
 
 		qi::rule <siter, zhetapi::node ()>			__start;
@@ -263,10 +375,10 @@ namespace zhetapi {
 		// Type parsers
 		qi::rule <siter, Z ()>					__z;
 		qi::rule <siter, Q ()>					__q;
-		qi::rule <siter, R>					__r;
+		qi::rule <siter, R ()>					__r;
 		qi::rule <siter, CZ ()>					__cz;
-		qi::rule <siter, CQ>					__cq;
-		qi::rule <siter, CR>					__cr;
+		qi::rule <siter, CQ ()>					__cq;
+		qi::rule <siter, CR ()>					__cr;
 		
 		qi::rule <siter, std::vector <Z> ()>			__vz;
 		qi::rule <siter, std::vector <Q> ()>			__vq;

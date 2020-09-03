@@ -24,14 +24,24 @@ namespace zhetapi {
 		l_constant_integer,
 		l_constant_rational,
 		l_constant_real,
+
+		l_constant_complex_integer,
 		l_constant_complex_rational,
 		l_constant_complex_real,
+
+		l_constant_vector_integer,
 		l_constant_vector_rational,
 		l_constant_vector_real,
+
+		l_constant_vector_complex_integer,
 		l_constant_vector_complex_rational,
 		l_constant_vector_complex_real,
+
+		l_constant_matrix_integer,
 		l_constant_matrix_rational,
 		l_constant_matrix_real,
+
+		l_constant_matrix_complex_integer,
 		l_constant_matrix_complex_rational,
 		l_constant_matrix_complex_real,
 
@@ -78,14 +88,24 @@ namespace zhetapi {
 		"constant integer",
 		"constant rational",
 		"constant real",
+
+		"constant complex integer",
 		"constant complex rational",
 		"constant complex real",
+
+		"constant vector integer",
 		"constant vector rational",
 		"constant vector real",
+
+		"constant vector complex integer",
 		"constant vector complex rational",
 		"constant vector complex real",
+
+		"constant matrix integer",
 		"constant matrix rational",
 		"constant matrix real",
+
+		"constant matrix complex integer",
 		"constant matrix complex rational",
 		"constant matrix complex real",
 
@@ -137,12 +157,60 @@ namespace zhetapi {
 	template <class T, class U>
 	lbl constant_label(token *tptr)
 	{
+		using namespace std;
+
+		cout << "Labeling: " << tptr << ", also equals " << tptr->str() << endl;
+
+		// Complex numbers
 		if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
 			return l_constant_integer;
 		if (dynamic_cast <typename types <T, U> ::opd_q *> (tptr))
 			return l_constant_rational;
 		if (dynamic_cast <typename types <T, U> ::opd_r *> (tptr))
 			return l_constant_real;
+
+		if (dynamic_cast <typename types <T, U> ::opd_cz *> (tptr)) {
+			cout << "\tHERE!! - integer" << endl;
+			return l_constant_complex_integer;
+		}
+
+		if (dynamic_cast <typename types <T, U> ::opd_cq *> (tptr)) {
+			cout << "\tHERE!! - rational" << endl;
+			return l_constant_complex_rational;
+		}
+
+		if (dynamic_cast <typename types <T, U> ::opd_cr *> (tptr))
+			return l_constant_complex_real;
+		
+		// Vectors
+		if (dynamic_cast <typename types <T, U> ::opd_v_z *> (tptr))
+			return l_constant_vector_integer;
+		if (dynamic_cast <typename types <T, U> ::opd_v_q *> (tptr))
+			return l_constant_vector_rational;
+		if (dynamic_cast <typename types <T, U> ::opd_v_r *> (tptr))
+			return l_constant_vector_real;
+		if (dynamic_cast <typename types <T, U> ::opd_v_cz *> (tptr))
+			return l_constant_vector_complex_integer;
+		if (dynamic_cast <typename types <T, U> ::opd_v_cq *> (tptr))
+			return l_constant_vector_complex_rational;
+		if (dynamic_cast <typename types <T, U> ::opd_v_cr *> (tptr))
+			return l_constant_vector_complex_real;
+		
+		// Matrices
+		if (dynamic_cast <typename types <T, U> ::opd_m_z *> (tptr))
+			return l_constant_matrix_integer;
+		if (dynamic_cast <typename types <T, U> ::opd_m_q *> (tptr))
+			return l_constant_matrix_rational;
+		if (dynamic_cast <typename types <T, U> ::opd_m_r *> (tptr))
+			return l_constant_matrix_real;
+		if (dynamic_cast <typename types <T, U> ::opd_m_cz *> (tptr))
+			return l_constant_matrix_complex_integer;
+		if (dynamic_cast <typename types <T, U> ::opd_m_cq *> (tptr))
+			return l_constant_matrix_complex_rational;
+		if (dynamic_cast <typename types <T, U> ::opd_m_cr *> (tptr))
+			return l_constant_matrix_complex_real;
+
+		return l_none;
 	}
 
 }

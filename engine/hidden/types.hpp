@@ -37,18 +37,23 @@
 		typedef zhetapi::operand <Q> opd_q;      	\
 		typedef zhetapi::operand <R> opd_r;      	\
 								\
+		typedef zhetapi::operand <CZ> opd_cz;		\
 		typedef zhetapi::operand <CQ> opd_cq;		\
 		typedef zhetapi::operand <CR> opd_cr;		\
 								\
+		typedef zhetapi::operand <VZ> opd_v_z;		\
 		typedef zhetapi::operand <VQ> opd_v_q;		\
 		typedef zhetapi::operand <VR> opd_v_r;		\
 								\
+		typedef zhetapi::operand <VCZ> opd_v_cz;	\
 		typedef zhetapi::operand <VCQ> opd_v_cq;	\
 		typedef zhetapi::operand <VCR> opd_v_cr;	\
 								\
+		typedef zhetapi::operand <MZ> opd_m_z;		\
 		typedef zhetapi::operand <MQ> opd_m_q;		\
 		typedef zhetapi::operand <MR> opd_m_r;		\
 								\
+		typedef zhetapi::operand <MCZ> opd_m_cz;	\
 		typedef zhetapi::operand <MCQ> opd_m_cq;	\
 		typedef zhetapi::operand <MCR> opd_m_cr;
 
