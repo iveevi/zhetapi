@@ -5,17 +5,26 @@
 #include <cmath>
 
 // Engine headers
-#include <matrix.hpp>
+#include <vector.hpp>
 
 namespace ml {
 
 	template <class T>
 	class Optimizer {
 	public:
-		using ftr = T (*)(const Vector <T> &);
-	private:
-		ftr
+		Optimizer();
+
+		virtual T operator()(const Vector <T> &, const Vector <T> &) const;
 	};
+
+	template <class T>
+	Optimizer <T> ::Optimizer() {}
+
+	template <class T>
+	T Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
+	{
+		return (comp - in).norm();
+	}
 
 }
 

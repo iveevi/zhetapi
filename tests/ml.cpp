@@ -3,6 +3,7 @@
 #include <random>
 
 #include <activation.hpp>
+#include <optimizer.hpp>
 
 #include <std_activation_classes.hpp>
 
@@ -38,4 +39,8 @@ int main()
 	Tensor <int> tensor({3, 1}, 4);
 
 	cout << tensor.print() << endl;
+
+	Optimizer <double> opt;
+
+	cout << "error: " << opt({3, 1, 4}, {4, 1, 5}) << endl;
 }

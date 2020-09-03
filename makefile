@@ -21,6 +21,7 @@ debug:		tests
 	@echo "\b[DEBUGGING PROGRAM]\n"
 	gdb ./build/tests
 
+# Machine Learning
 ml:		ml_build
 	@echo "\n[RUNNING ML]\n"
 	./build/ml
@@ -35,8 +36,9 @@ ml_mem:		ml_build
 
 ml_build:	build
 	@echo "[BUILDING ML TESTER]\n"
-	g++ -I engine -I engine/hidden -I engine/std tests/ml.cpp -g -lfl -o build/ml
+	g++ -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -lfl -o build/ml
 
+# Other
 graph:		build
 	@echo "[BUILDING GRAPHER]\n"
 	nvcc web/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph
