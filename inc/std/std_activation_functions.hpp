@@ -1,5 +1,5 @@
-#ifndef STD_ACTIVATIONS_H_
-#define STD_ACTIVATIONS_H_
+#ifndef STD_ACTIVATION_FUNCTIONS_H_
+#define STD_ACTIVATION_FUNCTIONS_H_
 
 namespace ml {
 
