@@ -3,8 +3,10 @@
 #include <random>
 
 #include <activation.hpp>
+#include <optimizer.hpp>
 
 #include <std_activation_classes.hpp>
+#include <std_optimizer_classes.hpp>
 
 #include <matrix.hpp>
 #include <vector.hpp>
@@ -38,4 +40,12 @@ int main()
 	Tensor <int> tensor({3, 1}, 4);
 
 	cout << tensor.print() << endl;
+
+	Optimizer <double> opt;
+	SquaredError <double> opt_s;
+	MeanSquaredError <double> opt_ms;
+
+	cout << "error: " << opt({3, 1, 4}, {4, 1, 5}) << endl;
+	cout << "squared error: " << opt_s({3, 1, 4}, {4, 1, 5}) << endl;
+	cout << "mean squared error: " << opt_ms({3, 1, 4}, {4, 1, 5}) << endl;
 }

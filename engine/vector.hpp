@@ -31,12 +31,16 @@ public:
 	Vector(size_t, std::function <T (size_t)>);
 	Vector(size_t, std::function <T *(size_t)>);
 
-	const Vector <T> &operator=(const Matrix <T> &);
+	const Vector &operator=(const Matrix <T> &);
 
 	size_t size() const;
 
 	T &operator[](size_t);
 	const T &operator[](size_t) const;
+
+	// Arithmetic
+	void operator+=(const Vector &);
+	void operator-=(const Vector &);
 
 	// Conversion operators
 	explicit operator int() const;
@@ -61,6 +65,9 @@ public:
 	Vector normalized();
 
 	// Non-member functions
+	template <class U>
+	friend Vector <U> operator*(const Vector <U> &, const U &);
+
 	template <class U>
 	friend U inner(const Vector <U> &, const Vector <U> &);
 
@@ -166,6 +173,20 @@ Vector <T> ::operator int() const
 }
 
 template <class T>
+void Vector <T> ::operator+=(const Vector <T> &a)
+{
+	for (size_t i = 0; i < this->rows; i++)
+		this->m_array[i][0] += a[i];
+}
+
+template <class T>
+void Vector <T> ::operator-=(const Vector <T> &a)
+{
+	for (size_t i = 0; i < this->rows; i++)
+		this->m_array[i][0] -= a[i];
+}
+
+template <class T>
 Vector <T> ::operator Rational <int> () const
 {
 	return Rational <int> {(*this)[0], 1};
@@ -258,6 +279,35 @@ Vector <T> Vector <T> ::normalized()
 }
 
 // Non-member functions
+template <class T>
+Vector <T> operator+(const Vector <T> &a, const Vector <T> &b)
+{
+	Vector <T> out = a;
+
+	out += b;
+
+	return out;
+}
+
+template <class T>
+Vector <T> operator-(const Vector <T> &a, const Vector <T> &b)
+{
+	Vector <T> out = a;
+
+	out -= b;
+
+	return out;
+}
+
+template <class T>
+Vector <T> operator*(const Vector <T> &a, const T &b)
+{
+	Vector <T> out = a;
+
+	for (size_t i = 0; i < a.size(); i++)
+		a[i] *= b;
+}
+
 template <class T>
 T inner(const Vector <T> &a, const Vector <T> &b)
 {
