@@ -7,20 +7,27 @@ gpu_build:	build
 	@echo "[BUILDING GPU TESTER]\n"
 	nvcc -I engine -I engine/hidden tests/gpu.cu -g -lfl -o build/gpu
 
-mem:		tests
+# Tests
+mem:
+	@echo "[BUILDING TESTS]\n"
+	g++ -I engine -I inc/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
 
 run:
 	@echo "[BUILDING TESTS]\n"
 	g++ -I engine -I inc/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
-
 	@echo "\n[RUNNING PROGRAM]\n"
 	./build/tests < ./tests/tests.in
 
-debug:		tests
+debug:
 	@echo "\b[DEBUGGING PROGRAM]\n"
 	gdb ./build/tests
 
+tests:
+	@echo "[BUILDING TESTS]\n"
+	g++ -I engine -I inc/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
+
+# Machine learning
 ml:		ml_build
 	@echo "\n[RUNNING ML]\n"
 	./build/ml
@@ -40,10 +47,6 @@ ml_build:	build
 graph:		build
 	@echo "[BUILDING GRAPHER]\n"
 	nvcc web/graph.cpp -g -lfl -lGL -lglut -O3 -o build/graph
-
-tests:		build
-	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I engine/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
 exp:		build
 	@echo "[BUILDING TESTS]\n"
