@@ -314,79 +314,107 @@ namespace zhetapi {
 			];
 
 			// Nodes
-			__node_opd = (
-					__o_cq
 
-					| __o_cr
+			/*
+			 * __node_opd:
+			 *
+			 * Pure numerical operands, representing the 18
+			 * primitive types of computation. The exception are
+			 * rational numbers, which are excluded so that the
+			 * order of operations can be applied. This exclusion
+			 * should not cause any trouble, as integer division
+			 * will yield a rational result.
+			 */
+			__node_opd = (
+					// __o_cq
+
+					__o_cr
 					| __o_cz
 
-					| __o_q
+					// | __o_q
 					| __o_r
 					| __o_z
 					
-					| __o_vcq
+					// | __o_vcq
 					| __o_vcr
 					| __o_vcz
 
-					| __o_vq
+					// | __o_vq
 					| __o_vr
 					| __o_vz
 					
-					| __o_vcgq
+					// | __o_vcgq
 					| __o_vcgr
 
-					| __o_vgq
+					// | __o_vgq
 					| __o_vgr
 					
-					| __o_mcq
+					// | __o_mcq
 					| __o_mcr
 					| __o_mcz
 
-					| __o_mq
+					// | __o_mq
 					| __o_mr
 					| __o_mz
 					
-					| __o_mcgq
+					// | __o_mcgq
 					| __o_mcgr
 
-					| __o_mgq
+					// | __o_mgq
 					| __o_mgr
 				) [
 				_val = phoenix::construct <zhetapi::node> (_1,
 						std::vector <zhetapi::node> {})
 			];
 
-			__node_expr = (
-					(__node_opd >> __power >> __node_expr) [
+			/*
+			 * __node_term:
+			 *
+			 * Represents a term as in any mathematical expression.
+			 * Should be written without addition or subtraction
+			 * unless in parenthesis.
+			 */
+			__node_term = (
+					(__node_opd >> __power >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 
-					| (__node_opd >> __times >> __node_expr) [
+					| (__node_opd >> __times >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 					
-					| (__node_opd >> __divide >> __node_expr) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-
-					| (__node_opd >> __plus >> __node_expr) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-					
-					| (__node_opd >> __minus >> __node_expr) [
+					| (__node_opd >> __divide >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 
 					| __node_opd [_val = _1]
 				);
 
+			/*
+			 * __node_expr:
+			 *
+			 * A full expression.
+			 */
+			__node_expr = (
+					(__node_term >> __plus >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+					
+					| (__node_term >> __minus >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+
+					| __node_term [_val = _1]
+				);
+
+			// Entry point
 			__start = __node_expr;
 
 			// Naming rules
 			__start.name("start");
 
 			__node_expr.name("node expression");
-			
+			__node_term.name("node term");
 			__node_opd.name("node operand");
 
 			__plus.name("addition");
@@ -487,7 +515,7 @@ namespace zhetapi {
 			debug(__start);
 
 			debug(__node_expr);
-
+			debug(__node_term);
 			debug(__node_opd);
 
 			debug(__plus);
@@ -565,7 +593,7 @@ namespace zhetapi {
 		
 		// Nodes
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_expr;
-		
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_term;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
 
 		// Operations
