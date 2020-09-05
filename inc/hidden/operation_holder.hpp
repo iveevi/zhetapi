@@ -7,89 +7,92 @@
 // Engine headers
 #include <token.hpp>
 
-// Make this more flexible
-// to the user later on
-enum codes {
-	add,
-	sub,
-	mul,
-	dvs,
-	shr,
-	fct,
-	pwr,
-	dot	// Dot product
-};
+namespace zhetapi {
 
-std::string strcodes[] = {
-	"add",
-	"subtract",
-	"multiply",
-	"divide",
-	"shur",
-	"factorial",
-	"power",
-	"dot"
-};
+	// Make this more flexible
+	// to the user later on
+	enum codes {
+		add,
+		sub,
+		mul,
+		dvs,
+		shr,
+		fct,
+		pwr,
+		dot	// Dot product
+	};
 
-struct operation_holder : public token {
-	std::string rep;
+	std::string strcodes[] = {
+		"add",
+		"subtract",
+		"multiply",
+		"divide",
+		"shur",
+		"factorial",
+		"power",
+		"dot"
+	};
 
-	codes code;
+	struct operation_holder : public token {
+		std::string rep;
 
-	operation_holder(const std::string &);
+		codes code;
 
-	type caller() const override;
-	token *copy() const override;
-	std::string str() const override;
+		operation_holder(const std::string &);
 
-	virtual bool operator==(token *) const override;
-};
+		type caller() const override;
+		token *copy() const override;
+		std::string str() const override;
 
-operation_holder::operation_holder(const std::string &str) : rep(str)
-{
-	if (str == "+")
-		code = add;
-	else if (str == "-")
-		code = sub;
-	else if (str == "*")
-		code = mul;
-	else if (str == "/")
-		code = dvs;
-	else if (str == "shur")
-		code = shr;
-	else if (str == "!")
-		code = fct;
-	else if (str == "^")
-		code = pwr;
-	else if (str == ".")
-		code = dot;
-}
+		virtual bool operator==(token *) const override;
+	};
 
-token::type operation_holder::caller() const
-{
-	return token::OPERATION_HOLDER;
-}
+	operation_holder::operation_holder(const std::string &str) : rep(str)
+	{
+		if (str == "+")
+			code = add;
+		else if (str == "-")
+			code = sub;
+		else if (str == "*")
+			code = mul;
+		else if (str == "/")
+			code = dvs;
+		else if (str == "shur")
+			code = shr;
+		else if (str == "!")
+			code = fct;
+		else if (str == "^")
+			code = pwr;
+		else if (str == ".")
+			code = dot;
+	}
 
-token *operation_holder::copy() const
-{
-	// instead of having to re-evaluate
-	// codes, pass the code as well
-	return new operation_holder(rep);
-}
+	token::type operation_holder::caller() const
+	{
+		return token::OPERATION_HOLDER;
+	}
 
-std::string operation_holder::str() const
-{
-	return rep + " [" + strcodes[code] + "]";
-}
+	token *operation_holder::copy() const
+	{
+		// instead of having to re-evaluate
+		// codes, pass the code as well
+		return new operation_holder(rep);
+	}
 
-bool operation_holder::operator==(token *tptr) const
-{
-	operation_holder *oph = dynamic_cast <operation_holder *> (tptr);
+	std::string operation_holder::str() const
+	{
+		return rep + " [" + strcodes[code] + "]";
+	}
 
-	if (oph == nullptr)
-		return false;
+	bool operation_holder::operator==(token *tptr) const
+	{
+		operation_holder *oph = dynamic_cast <operation_holder *> (tptr);
 
-	return oph->rep == rep;
+		if (oph == nullptr)
+			return false;
+
+		return oph->rep == rep;
+	}
 }
 
 #endif

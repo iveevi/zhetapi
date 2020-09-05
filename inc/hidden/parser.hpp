@@ -19,6 +19,8 @@
 
 // Engine headers
 #include <node.hpp>
+#include <operand.hpp>
+#include <operation_holder.hpp>
 
 namespace zhetapi {
 
@@ -36,6 +38,27 @@ namespace zhetapi {
 		__TYPEDEFS__
 
 		parser() : parser::base_type(__start) {
+			// Operation parsers
+			__plus = lit("+") [
+				_val = phoenix::new_ <operation_holder> (std::string("+"))
+			];
+			
+			__minus = lit("-") [
+				_val = phoenix::new_ <operation_holder> (std::string("-"))
+			];
+			
+			__times = lit("*") [
+				_val = phoenix::new_ <operation_holder> (std::string("*"))
+			];
+			
+			__divide = lit("/") [
+				_val = phoenix::new_ <operation_holder> (std::string("/"))
+			];
+			
+			__power = lit("^") [
+				_val = phoenix::new_ <operation_holder> (std::string("^"))
+			];
+
 			// Type parsers (change dependence on int_ and double_ parsers
 			// specifically)
 
@@ -333,10 +356,44 @@ namespace zhetapi {
 						std::vector <zhetapi::node> {})
 			];
 
-			__start = (__node_opd) [_val = _1];
+			__node_expr = (
+					(__node_opd >> __power >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+
+					| (__node_opd >> __times >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+					
+					| (__node_opd >> __divide >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+
+					| (__node_opd >> __plus >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+					
+					| (__node_opd >> __minus >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+
+					| __node_opd [_val = _1]
+				);
+
+			__start = __node_expr;
 
 			// Naming rules
 			__start.name("start");
+
+			__node_expr.name("node expression");
+			
+			__node_opd.name("node operand");
+
+			__plus.name("addition");
+			__minus.name("substraction");
+			__times.name("multiplication");
+			__divide.name("division");
+			__power.name("exponentiation");
 			
 			__o_z.name("integer operand");
 			__o_q.name("rational operand");
@@ -422,23 +479,29 @@ namespace zhetapi {
 			__mcgq_inter.name("intermediate matrix complex general rational");
 			__mcgr_inter.name("intermediate matrix complex general real");
 
-			__node_opd.name("node operand");
-
 			// Debug
+
+#define DEBUG_PARSER 1
 
 #ifdef DEBUG_PARSER
 			debug(__start);
 
+			debug(__node_expr);
+
+			debug(__node_opd);
+
+			debug(__plus);
+			debug(__minus);
+			debug(__times);
+			debug(__divide);
+			debug(__power);
+
 			debug(__o_z);
 			debug(__o_q);
 			debug(__o_r);
-			debug(__o_gq);
-			debug(__o_gr);
 			debug(__o_cz);
 			debug(__o_cq);
 			debug(__o_cr);
-			debug(__o_cgq);
-			debug(__o_cgr);
 
 			debug(__o_vz);
 			debug(__o_vq);
@@ -494,13 +557,25 @@ namespace zhetapi {
 			debug(__mcr);
 			debug(__mcgq);
 			debug(__mcgr);
-
-			debug(__node_opd);
 #endif
 
 		}
 
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__start;
+		
+		// Nodes
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_expr;
+		
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
+
+		// Operations
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__plus;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__minus;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__times;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__divide;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__power;
+
+		// Operands
 
 		// Token parsers
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_z;
@@ -588,10 +663,6 @@ namespace zhetapi {
 		qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	__mcr_inter;
 		qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	__mcgq_inter;
 		qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	__mcgr_inter;
-		
-
-		// Nodes
-		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
 	};
 
 }

@@ -23,6 +23,9 @@ namespace zhetapi {
 		node();
 		node(token *, const std::vector <node> &);
 		
+		// Binary
+		node(token *, const node &, const node &);
+		
 		// Member functions
 
 		// Printing
@@ -36,7 +39,13 @@ namespace zhetapi {
 	node::node() : __tptr(nullptr), __label(l_none) {}
 	
 	node::node(token *tptr, const std::vector <node> &leaves) :
-		__leaves(leaves), __label(l_none)
+			__leaves(leaves), __label(l_none)
+	{
+		__tptr.reset(tptr);
+	}
+
+	node::node(token *tptr, const node &a, const node &b) : __leaves({a,
+			b}), __label(l_none)
 	{
 		__tptr.reset(tptr);
 	}
