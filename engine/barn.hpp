@@ -223,8 +223,19 @@ namespace zhetapi {
 		Barn();
 		~Barn();
 
+		/*
+		 * Place a variable of type A into its appropriate stack. Made
+		 * for the user.
+		 */
 		template <class A>
 		void put(Variable <A>);
+
+		/*
+		 * Retrieve a variable of type A from the appropriate stack. Has
+		 * a chance of throwing an exception. Made for the user.
+		 */
+		template <class A>
+		Variable <A> retrieve(const std::string &);
 
 		token *value(const std::string &, const std::vector <std::type_index> &,
 				const std::vector <token *> &) const;
@@ -452,6 +463,28 @@ namespace zhetapi {
 			v_stack_mr.insert(var);
 		if (typeid(A) == typeid(VQ))
 			v_stack_mq.insert(var);
+	}
+
+	template <class T, class U>
+	template <class A>
+	Variable <A> Barn <T, U> ::retrieve(const std::string &str)
+	{
+		if (typeid(A) == typeid(Z))
+			v_stack_z.get(str);
+		if (typeid(A) == typeid(R))
+			v_stack_r.get(str);
+		if (typeid(A) == typeid(Q))
+			v_stack_q.get(str);
+		
+		if (typeid(A) == typeid(CR))
+			v_stack_cr.get(str);
+		if (typeid(A) == typeid(CQ))
+			v_stack_cq.get(str);
+		
+		if (typeid(A) == typeid(VR))
+			v_stack_mr.get(str);
+		if (typeid(A) == typeid(VQ))
+			v_stack_mq.get(str);
 	}
 
 	template <class T, class U>

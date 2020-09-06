@@ -9,7 +9,7 @@ namespace zhetapi {
 
 	template <class T, class U>
 	class node_manager {
-		Barn <T, U>			__brn;
+		Barn <T, U>			__barn;
 		node				__tree;
 		std::vector <std::string>	__params;
 	public:
@@ -27,7 +27,11 @@ namespace zhetapi {
 	template <class T, class U>
 	node_manager <T, U> ::node_manager(const std::string &str)
 	{
-		zhetapi::parser <T, U> pr;
+		Variable <T> var {"e", T(2.17)};
+
+		__barn.put(var);
+
+		zhetapi::parser <T, U> pr(__barn);
 
 		siter iter = str.begin();
 		siter end = str.end();
@@ -83,7 +87,7 @@ namespace zhetapi {
 				values.push_back(tptr);
 			}
 
-			tptr = __brn.value((dynamic_cast <operation_holder *>
+			tptr = __barn.value((dynamic_cast <operation_holder *>
 						(tree.__tptr.get()))->rep, types,
 					values);
 

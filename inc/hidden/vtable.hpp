@@ -66,10 +66,10 @@ namespace zhetapi {
 		void rotate_left(node *(&));
 		void rotate_right(node *(&));
 	public:
-		// empty or null root nodes
+		// Empty or null root nodes
 		class null_tree {};
 
-		// old nfe equivalent
+		// Node not found
 		class null_entry {};
 	};
 

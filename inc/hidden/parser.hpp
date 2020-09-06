@@ -2,8 +2,8 @@
 #define PARSER_H_
 
 // C/C++ headers
-#include <string>
 #include <fstream>
+#include <string>
 
 // Boost headers
 #include <boost/config/warning_disable.hpp>
@@ -18,6 +18,7 @@
 #include <boost/spirit/include/qi.hpp>
 
 // Engine headers
+#include <barn.hpp>
 #include <node.hpp>
 #include <operand.hpp>
 #include <operation_holder.hpp>
@@ -42,7 +43,7 @@ namespace zhetapi {
 
 		__TYPEDEFS__
 
-		parser() : parser::base_type(__start) {
+		parser(const Barn <T, U> &barn) : parser::base_type(__start) {
 			// Operation parsers
 
 			__add_operation_symbol(__plus, +);
@@ -381,13 +382,34 @@ namespace zhetapi {
 			];
 
 			/*
+			 * Represents a series of parenthesized expression,
+			 * which are mutlilpied through the use of
+			 * juxtaposition.
+			 */
+			__node_prth = "(" >> __start [_val = _1] >> ")";
+			
+			__node_prep = __node_prth [_val = _1] >> *(
+					(__node_prth) [_val = phoenix::construct
+					<zhetapi::node> (phoenix::new_
+						<operation_holder>
+						(std::string("*")), _val, _1)]
+				);
+
+			/*
 			 * Represents a part of a term. For example, in the term
 			 * 3x, 3 and x are both collectibles.
 			 */
 			__node_factor = (
-					"(" >> __start [_val = _1] >> ")"
+					__node_prep [_val = _1]
 
-					| __node_opd [_val = _1]
+					| __node_opd [_val = _1] >> *(
+						(__node_prth) [_val =
+						phoenix::construct
+						<zhetapi::node> (phoenix::new_
+							<operation_holder>
+							(std::string("*")),
+							_val, _1)]
+					)
 				);
 
 			/*
@@ -401,7 +423,9 @@ namespace zhetapi {
 					]
 
 					| __node_factor [_val = _1] >> *(
-						(__t1_bin >> __node_factor) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+						(__t1_bin >> __node_factor)
+						[_val = phoenix::construct
+						<zhetapi::node> (_1, _val, _2)]
 					)
 				);
 
@@ -409,7 +433,9 @@ namespace zhetapi {
 			 * A full expression or function definition.
 			 */
 			__node_expr = __node_term [_val = _1] >> *(
-					(__t0_bin >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+					(__t0_bin >> __node_term) [_val =
+					phoenix::construct <zhetapi::node> (_1,
+						_val, _2)]
 				);
 			
 			// Entry point
@@ -600,6 +626,8 @@ namespace zhetapi {
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_expr;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_term;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_factor;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prep;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prth;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
 
 		// Operations
