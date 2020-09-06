@@ -22,7 +22,7 @@
 #include <operand.hpp>
 #include <operation_holder.hpp>
 
-#define __add_operation(name, str)						\
+#define __add_operation_symbol(name, str)						\
 	name = lit(#str) [							\
 		_val = phoenix::new_ <operation_holder> (std::string(#str))	\
 	];
@@ -44,29 +44,35 @@ namespace zhetapi {
 
 		parser() : parser::base_type(__start) {
 			// Operation parsers
-			__plus = lit("+") [
-				_val = phoenix::new_ <operation_holder> (std::string("+"))
-			];
+
+			__add_operation_symbol(__plus, +);
+			__add_operation_symbol(__minus, -);
+			__add_operation_symbol(__times, *);
+			__add_operation_symbol(__divide, /);
+			__add_operation_symbol(__power, ^);
+			__add_operation_symbol(__dot, .);
+
+			/*
+			 * Represents a binary operation of lowest priotrity.
+			 * These are used to combine terms into expressions.
+			 * Exmaples of such operations are addition,
+			 * subtraction and the dot product.
+			 */
+			__t0_bin = __plus | __minus | __dot;
+
+			/*
+			 * Represents a binary operation of second to lowest
+			 * priority. Connects factors into term. Examples are
+			 * multiplication and division.
+			 */
+			__t1_bin = __times | __divide;
 			
-			__minus = lit("-") [
-				_val = phoenix::new_ <operation_holder> (std::string("-"))
-			];
-			
-			__times = lit("*") [
-				_val = phoenix::new_ <operation_holder> (std::string("*"))
-			];
-			
-			__divide = lit("/") [
-				_val = phoenix::new_ <operation_holder> (std::string("/"))
-			];
-			
-			__power = lit("^") [
-				_val = phoenix::new_ <operation_holder> (std::string("^"))
-			];
-			
-			__dot = lit(".") [
-				_val = phoenix::new_ <operation_holder> (std::string("."))
-			];
+			/*
+			 * Represents other binary operations with precedence
+			 * higher than that of __t1_bin. Examples are the
+			 * exponentiation operation.
+			 */
+			__t2_bin = __power;
 
 			// Type parsers (change dependence on int_ and double_ parsers
 			// specifically)
@@ -325,8 +331,6 @@ namespace zhetapi {
 			// Nodes
 
 			/*
-			 * __node_opd:
-			 *
 			 * Pure numerical operands, representing the 18
 			 * primitive types of computation. The exception are
 			 * rational numbers, which are excluded so that the
@@ -377,49 +381,35 @@ namespace zhetapi {
 			];
 
 			/*
-			 * __node_coll:
-			 *
 			 * Represents a part of a term. For example, in the term
 			 * 3x, 3 and x are both collectibles.
 			 */
-			__node_coll = (
+			__node_factor = (
 					"(" >> __start [_val = _1] >> ")"
 
 					| __node_opd [_val = _1]
 				);
 
 			/*
-			 * __node_term:
-			 *
 			 * Represents a term as in any mathematical expression.
 			 * Should be written without addition or subtraction
 			 * unless in parenthesis.
 			 */
 			__node_term = (
-					(__node_coll >> __power >> __node_term) [
+					(__node_factor >> __power >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 
-					| (__node_coll >> __times >> __node_term) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-					
-					| (__node_coll >> __divide >> __node_term) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-
-					| __node_coll [_val = _1]
+					| __node_factor [_val = _1] >> *(
+						(__t1_bin >> __node_factor) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+					)
 				);
 
 			/*
-			 * __node_expr:
-			 *
 			 * A full expression or function definition.
 			 */
 			__node_expr = __node_term [_val = _1] >> *(
-					(__plus >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
-					| (__minus >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
-					| (__dot >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+					(__t0_bin >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
 				);
 			
 			// Entry point
@@ -609,10 +599,14 @@ namespace zhetapi {
 		// Nodes
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_expr;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_term;
-		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_coll;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_factor;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
 
 		// Operations
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t0_bin;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t1_bin;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t2_bin;
+
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__plus;
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__minus;
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__dot;
@@ -710,6 +704,7 @@ namespace zhetapi {
 		qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	__mcr_inter;
 		qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	__mcgq_inter;
 		qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	__mcgr_inter;
+
 	};
 
 }

@@ -275,14 +275,16 @@ namespace zhetapi {
 		__add_heterogenous_binary_operation(*, Q, CQ, CQ);
 
 		// Division
-		__add_binary_operation(/, Z, Z, Z);
 		__add_binary_operation(/, R, R, R);
 		__add_binary_operation(/, Q, Q, Q);
 		__add_binary_operation(/, CR, CR, CR);
 		__add_binary_operation(/, CQ, CQ, CQ);
+		
+		__add_binary_operation_ftr(/, Z, Z, Q, ((Q) a->get()) / ((Q) b->get()));
 
 		__add_heterogenous_binary_operation(/, R, Z, R);
-		__add_heterogenous_binary_operation(/, Z, Q, Q);
+		__add_heterogenous_binary_operation_ftr(/, Z, Q, Q, ((Q)
+					a->get()) / ((Q) b->get()));
 		__add_heterogenous_binary_operation_ftr(/, R, Q, R, a->get() * (R)
 				b->get());
 		__add_heterogenous_binary_operation(/, R, CR, CR);
