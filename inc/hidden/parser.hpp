@@ -368,6 +368,18 @@ namespace zhetapi {
 			];
 
 			/*
+			 * __node_coll:
+			 *
+			 * Represents a part of a term. For example, in the term
+			 * 3x, 3 and x are both collectibles.
+			 */
+			__node_coll = (
+					"(" >> __start [_val = _1] >> ")"
+
+					| __node_opd [_val = _1]
+				);
+
+			/*
 			 * __node_term:
 			 *
 			 * Represents a term as in any mathematical expression.
@@ -375,19 +387,19 @@ namespace zhetapi {
 			 * unless in parenthesis.
 			 */
 			__node_term = (
-					(__node_opd >> __power >> __node_term) [
+					(__node_coll >> __power >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 
-					| (__node_opd >> __times >> __node_term) [
+					| (__node_coll >> __times >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 					
-					| (__node_opd >> __divide >> __node_term) [
+					| (__node_coll >> __divide >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 
-					| __node_opd [_val = _1]
+					| __node_coll [_val = _1]
 				);
 
 			/*
@@ -519,7 +531,7 @@ namespace zhetapi {
 
 			// Debug
 
-#define DEBUG_PARSER 1
+// #define DEBUG_PARSER 1
 
 #ifdef DEBUG_PARSER
 			debug(__start);
@@ -604,6 +616,7 @@ namespace zhetapi {
 		// Nodes
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_expr;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_term;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_coll;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
 
 		// Operations
