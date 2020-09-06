@@ -157,10 +157,6 @@ namespace zhetapi {
 	template <class T, class U>
 	lbl constant_label(token *tptr)
 	{
-		using namespace std;
-
-		cout << "Labeling: " << tptr << ", also equals " << tptr->str() << endl;
-
 		// Complex numbers
 		if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
 			return l_constant_integer;
@@ -168,17 +164,10 @@ namespace zhetapi {
 			return l_constant_rational;
 		if (dynamic_cast <typename types <T, U> ::opd_r *> (tptr))
 			return l_constant_real;
-
-		if (dynamic_cast <typename types <T, U> ::opd_cz *> (tptr)) {
-			cout << "\tHERE!! - integer" << endl;
+		if (dynamic_cast <typename types <T, U> ::opd_cz *> (tptr))
 			return l_constant_complex_integer;
-		}
-
-		if (dynamic_cast <typename types <T, U> ::opd_cq *> (tptr)) {
-			cout << "\tHERE!! - rational" << endl;
+		if (dynamic_cast <typename types <T, U> ::opd_cq *> (tptr))
 			return l_constant_complex_rational;
-		}
-
 		if (dynamic_cast <typename types <T, U> ::opd_cr *> (tptr))
 			return l_constant_complex_real;
 		
@@ -211,6 +200,16 @@ namespace zhetapi {
 			return l_constant_matrix_complex_real;
 
 		return l_none;
+	}
+
+	template <class T, class U>
+	token *true_token(token *tptr)
+	{
+		typename types <T, U> ::opd_z *oz = dynamic_cast <typename types <T, U> ::opd_z *> (tptr);
+		if (oz != nullptr)
+			return oz;
+
+		return nullptr;
 	}
 
 }

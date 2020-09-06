@@ -58,7 +58,7 @@ namespace zhetapi {
 			counter--;
 		}
 
-		std::cout << "#" << num << " - " << __tptr->str() << " (" <<
+		std::cout << "#" << num << ": " << __tptr->str() << " (" <<
 			__tptr << ", " << strlabs[__label] << ") @ " << this <<
 			std::endl;
 
@@ -79,7 +79,7 @@ namespace zhetapi {
 			counter--;
 		}
 
-		oss << "#" << num << " - " << __tptr->str() << " (" << __tptr << ") @ "
+		oss << "#" << num << ": " << __tptr->str() << " (" << __tptr << ") @ "
 			<< this << std::endl;
 
 		counter = 0;

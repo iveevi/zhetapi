@@ -393,22 +393,32 @@ namespace zhetapi {
 			/*
 			 * __node_expr:
 			 *
-			 * A full expression.
+			 * A full expression or function definition.
 			 */
 			__node_expr = (
 					(__node_term >> __plus >> __node_expr) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
 					
-					| (__node_term >> __minus >> __node_expr) [
+					| (__node_term >> __minus >> __node_term) [
 						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 					]
-
+					
 					| __node_term [_val = _1]
 				);
 
 			// Entry point
-			__start = __node_expr;
+			__start = (
+					(__node_expr >> __plus >> __node_expr) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+					
+					| (__node_expr >> __minus >> __node_term) [
+						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+					]
+
+					| __node_expr [_val = _1]
+				);
 
 			// Naming rules
 			__start.name("start");
