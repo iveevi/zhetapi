@@ -22,6 +22,11 @@
 #include <operand.hpp>
 #include <operation_holder.hpp>
 
+#define __add_operation(name, str)						\
+	name = lit(#str) [							\
+		_val = phoenix::new_ <operation_holder> (std::string(#str))	\
+	];
+
 namespace zhetapi {
 
 	typedef std::string::const_iterator siter;
@@ -57,6 +62,10 @@ namespace zhetapi {
 			
 			__power = lit("^") [
 				_val = phoenix::new_ <operation_holder> (std::string("^"))
+			];
+			
+			__dot = lit(".") [
+				_val = phoenix::new_ <operation_holder> (std::string("."))
 			];
 
 			// Type parsers (change dependence on int_ and double_ parsers
@@ -407,30 +416,14 @@ namespace zhetapi {
 			 *
 			 * A full expression or function definition.
 			 */
-			__node_expr = (
-					(__node_term >> __plus >> __node_expr) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-					
-					| (__node_term >> __minus >> __node_term) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-					
-					| __node_term [_val = _1]
+			__node_expr = __node_term [_val = _1] >> *(
+					(__plus >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+					| (__minus >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
+					| (__dot >> __node_term) [_val = phoenix::construct <zhetapi::node> (_1, _val, _2)]
 				);
-
+			
 			// Entry point
-			__start = (
-					(__node_expr >> __plus >> __node_expr) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-					
-					| (__node_expr >> __minus >> __node_term) [
-						_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-					]
-
-					| __node_expr [_val = _1]
-				);
+			__start = __node_expr;
 
 			// Naming rules
 			__start.name("start");
@@ -622,8 +615,11 @@ namespace zhetapi {
 		// Operations
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__plus;
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__minus;
+		qi::rule <siter, zhetapi::token *(), qi::space_type>			__dot;
+		
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__times;
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__divide;
+		
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__power;
 
 		// Operands

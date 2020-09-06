@@ -363,17 +363,21 @@ namespace zhetapi {
 		//////////////////////////////////////////
 
 		// Addition
+		__add_binary_operation(+, VZ, VZ, VZ);
 		__add_binary_operation(+, VQ, VQ, VQ);
 		__add_binary_operation(+, VR, VR, VR);
 		
 		// Subtraction
+		__add_binary_operation(-, VZ, VZ, VZ);
 		__add_binary_operation(-, VQ, VQ, VQ);
 		__add_binary_operation(-, VR, VR, VR);
 
 		// Scalar multiplication
+		__add_binary_operation_ftr(*, Z, VZ, VZ, (a->get()) * b->get());
 		__add_binary_operation_ftr(*, Z, VQ, VQ, ((Q) a->get()) * b->get());
 		
 		// Dot product
+		__add_binary_operation_ftr(., VZ, VZ, Z, inner(a->get(), b->get()));
 		__add_binary_operation_ftr(., VQ, VQ, Q, inner(a->get(), b->get()));
 		__add_binary_operation_ftr(., VR, VR, R, inner(a->get(), b->get()));
 		
