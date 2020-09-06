@@ -1,43 +1,59 @@
 #ifndef TOKEN_H_
 #define TOKEN_H_
 
-// C++ Standard Libraries
+// C/C++ headers
 #include <string>
 
 namespace zhetapi {
 
-	/* Token Class:
-	 *
-	 * Acts as a dummy class for
+	/** 
+	 * @brief Acts as a dummy class for
 	 * use of generic pointer in
-	 * other modules */
+	 * other modules
+	 */
 	class token {
 	public:
-		/* Enumerations:
-		 * [type] - new data type to allow function
-		 * caller inspection */
+		/*
+		 * Codes used to identify the token, more on the is presented
+		 * below. Should not be used by the user.
+		 */
 		enum type {
-			OPERAND,
-			OPERATION_HOLDER,
-			OPERATION,
-			VARIABLE,
-			FUNCTOR
+			opd,
+			oph,
+			opn,
+			var,
+			ftn
 		};
 
-		/* Virtual:
-		 * [type] [caller]() - inspector function passed
-		 * on to all derived classes */
+		/*
+		 * Implicit conversion operator for cleaner notation, uses the
+		 * inspector function defined below.
+		 */
+		operator type() const;
+
+		/* 
+		 * Inspector function passed on to all derived classes, helps to
+		 * choose what to do with different tokens from other classes.
+		 */
 		virtual type caller() const = 0;
 
-		/* Virtual:
-		 * string [str]() - returns the string
-		 * representation of the token */
+		/*
+		 * Returns a representation of the token, regardless of its
+		 * type.
+		 */
 		virtual std::string str() const = 0;
 
+		// Any use?
 		virtual token *copy() const = 0;
 
+		// Any use?
 		virtual bool operator==(token *) const = 0;
 	};
+
+	token::operator type() const
+	{
+		return caller();
+	}
 	
 }
 

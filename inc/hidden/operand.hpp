@@ -235,7 +235,7 @@ namespace zhetapi {
 	template <typename data_t>
 	token::type operand <data_t> ::caller() const
 	{
-		return OPERAND;
+		return opd;
 	}
 
 	template <typename data_t>

@@ -418,7 +418,7 @@ namespace zhetapi {
 	template <typename data_t>
 	token::type Variable <data_t> ::caller() const
 	{
-		return VARIABLE;
+		return var;
 	}
 
 	template <typename data_t>
@@ -444,7 +444,7 @@ namespace zhetapi {
 	template <class T>
 	bool Variable <T> ::operator==(token *t) const
 	{
-		if (t->caller() != token::VARIABLE)
+		if (t->caller() != token::var)
 			return false;
 
 		return name == (dynamic_cast <Variable *> (t))->symbol();

@@ -70,14 +70,12 @@ namespace zhetapi {
 
 		std::vector <std::type_index> types;
 		
-		using namespace std;
-
 		token *tptr;
 
-		switch (tree.__tptr->caller()) {
-		case token::OPERAND:
+		switch (*(tree.__tptr)) {
+		case token::opd:
 			return tree.__tptr.get();
-		case token::OPERATION_HOLDER:
+		case token::oph:
 			for (node leaf : tree.__leaves) {
 				token *tptr = value(leaf);
 
@@ -99,10 +97,10 @@ namespace zhetapi {
 	void node_manager <T, U> ::label(node &ref) const
 	{
 		switch (ref.__tptr->caller()) {
-		case token::OPERAND:
+		case token::opd:
 			ref.__label = constant_label <T, U> (ref.__tptr.get());
 			break;
-		case token::OPERATION_HOLDER:
+		case token::oph:
 			ref.__label = l_operation_constant;
 
 			for (node &leaf : ref.__leaves)

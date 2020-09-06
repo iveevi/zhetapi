@@ -10,6 +10,7 @@
 #include <operand.hpp>
 
 namespace zhetapi {
+
 	/**
 	 * @brief Represent a mathematical
 	 * operation, which can base computations
@@ -31,7 +32,7 @@ namespace zhetapi {
 		 * input format of the
 		 * operation.
 		 */
-		std::string input;
+		std::string __input;
 
 		/**
 		 * @brief The expected
@@ -39,7 +40,7 @@ namespace zhetapi {
 		 * operation; includes
 		 * regex-like features.
 		 */
-		std::string output;
+		std::string __output;
 
 		/**
 		 * @brief The number of
@@ -58,7 +59,7 @@ namespace zhetapi {
 		 * to the user or some higher level
 		 * class such as config.
 		 */
-		mapper opn;
+		mapper __opn;
 	public:
 		operation();
 		operation(const operation &);
@@ -82,36 +83,36 @@ namespace zhetapi {
 		class token_mismatch {};
 	};
 
-	operation::operation() : input(""), output(""), ops(0) {}
+	operation::operation() : __input(""), __output(""), ops(0) {}
 
 	operation::operation(const operation &other)
 	{
-		input = other.input;
-		output = other.output;
+		__input = other.__input;
+		__output = other.__output;
 		ops = other.ops;
-		opn = other.opn;
+		__opn = other.__opn;
 	}
 
 	operation::operation(const std::string &in, const std::string &out, std::size_t
-			opers, mapper fopn) : input(in), output(out), ops(opers),
-			opn(fopn) {}
+			opers, mapper fopn) : __input(in), __output(out), ops(opers),
+			__opn(fopn) {}
 
 	token *operation::operator()(const std::vector <token *> &ins) const
 	{
 		if (ins.size() != ops)
 			throw count_mismatch();
-		return opn(ins);
+		return __opn(ins);
 	}
 
 	std::string operation::fmt() const
 	{
-		return input;
+		return __input;
 	}
 
 	std::string operation::str() const
 	{
-		return "[" + input + "](" + std::to_string(ops)
-			+ ") - [" + output + "]";
+		return "[" + __input + "](" + std::to_string(ops)
+			+ ") - [" + __output + "]";
 	}
 
 	std::size_t operation::inputs() const
@@ -121,7 +122,7 @@ namespace zhetapi {
 
 	token::type operation::caller() const
 	{
-		return OPERATION;
+		return opn;
 	}
 
 	token *operation::copy() const
@@ -136,9 +137,10 @@ namespace zhetapi {
 			return false;
 
 		return (ops == optr->ops)
-			&& (input == optr->input)
-			&& (output == optr->output);
+			&& (__input == optr->__input)
+			&& (__output == optr->__output);
 	}
+
 }
 
 #endif

@@ -69,7 +69,7 @@ namespace zhetapi {
 
 	token::type operation_holder::caller() const
 	{
-		return token::OPERATION_HOLDER;
+		return token::oph;
 	}
 
 	token *operation_holder::copy() const
