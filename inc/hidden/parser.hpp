@@ -18,7 +18,6 @@
 #include <boost/spirit/include/qi.hpp>
 
 // Engine headers
-#include <barn.hpp>
 #include <node.hpp>
 #include <operand.hpp>
 #include <operation_holder.hpp>
@@ -44,9 +43,12 @@ namespace zhetapi {
 
 		__TYPEDEFS__
 
-		parser(Barn <T, U> &barn) : parser::base_type(__start) {
-			// Identifiers
-			__ident = +ascii::char_;
+		parser() : parser::base_type(__start) {
+			/*
+			 * Parser for an identifier. Used to construct variable
+			 * clusters.
+			 */
+			__ident = +ascii::alpha;
 
 			// Operation parsers
 
@@ -344,47 +346,27 @@ namespace zhetapi {
 			 * will yield a rational result.
 			 */
 			__node_opd = (
-					// __o_cq
-
-					__o_cr
-					| __o_cz
-
-					// | __o_q
-					| __o_r
-					| __o_z
-					
-					// | __o_vcq
-					| __o_vcr
-					| __o_vcz
-
-					// | __o_vq
-					| __o_vr
-					| __o_vz
-					
-					// | __o_vcgq
+					__o_cr | __o_cz
+					| __o_r | __o_z
+					| __o_vcr | __o_vcz
+					| __o_vr | __o_vz
 					| __o_vcgr
-
-					// | __o_vgq
 					| __o_vgr
-					
-					// | __o_mcq
-					| __o_mcr
-					| __o_mcz
-
-					// | __o_mq
-					| __o_mr
-					| __o_mz
-					
-					// | __o_mcgq
+					| __o_mcr | __o_mcz
+					| __o_mr | __o_mz
 					| __o_mcgr
-
-					// | __o_mgq
 					| __o_mgr
 				) [
 				_val = phoenix::construct <zhetapi::node> (_1,
 						std::vector <zhetapi::node> {})
 			];
 
+			/*
+			 * A variable cluster, which is just a string of
+			 * characters. The expansion/unpakcing of this variable
+			 * cluster is done in the higher node_manager class,
+			 * where access to the barn object is present.
+			 */
 			__node_var = __ident [_val = phoenix::construct
 				<zhetapi::node> (phoenix::new_
 						<variable_cluster> (_1),
@@ -395,14 +377,22 @@ namespace zhetapi {
 			 * Represents a parenthesized expression.
 			 */
 			__node_prth = "(" >> __start [_val = _1] >> ")";
+
+			/*
+			 * Represents a repeatable factor. Examples are
+			 * variables and parenthesized expressions. The reason
+			 * is because terms like x3(5 + 3) are much more awkward
+			 * compared to 3x(5 + 3)
+			 */
+			__node_rept = __node_var | __node_prth;
 			
 			/*
 			 * Represents a series of parenthesized expression,
 			 * which are mutlilpied through the use of
 			 * juxtaposition.
 			 */
-			__node_prep = __node_prth [_val = _1] >> *(
-					(__node_prth) [_val = phoenix::construct
+			__node_prep = __node_rept [_val = _1] >> *(
+					(__node_rept) [_val = phoenix::construct
 					<zhetapi::node> (phoenix::new_
 						<operation_holder>
 						(std::string("*")), _val, _1)]
@@ -416,15 +406,13 @@ namespace zhetapi {
 					__node_prep [_val = _1]
 
 					| __node_opd [_val = _1] >> *(
-						(__node_prth) [_val =
+						(__node_rept) [_val =
 						phoenix::construct
 						<zhetapi::node> (phoenix::new_
 							<operation_holder>
 							(std::string("*")),
 							_val, _1)]
 					)
-
-					| __node_var [_val = _1]
 				);
 
 			/*
@@ -642,6 +630,7 @@ namespace zhetapi {
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_term;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_factor;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prep;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_rept;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prth;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_var;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;

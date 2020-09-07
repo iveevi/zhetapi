@@ -67,7 +67,7 @@ namespace zhetapi {
 	node_manager <T, U> ::node_manager(const std::string &str, Barn <T, U>
 			barn) : __barn(barn) 
 	{
-		zhetapi::parser <T, U> pr(__barn);
+		zhetapi::parser <T, U> pr;
 
 		siter iter = str.begin();
 		siter end = str.end();
