@@ -1,10 +1,11 @@
 #ifndef NODE_MANAGER_H_
-#define NODE_MADAGER_H_
+#define NODE_MANAGER_H_
 
 // Engine headers
-#include <parser.hpp>
 #include <barn.hpp>
+#include <parser.hpp>
 #include <types.hpp>
+#include <variable_holder.hpp>
 
 namespace zhetapi {
 
@@ -14,7 +15,10 @@ namespace zhetapi {
 		node				__tree;
 		std::vector <std::string>	__params;
 	public:
+		node_manager();
 		node_manager(const std::string &, Barn <T, U> = Barn <T, U> ());
+		node_manager(const std::string &, const std::vector
+				<std::string> &, Barn <T, U> = Barn <T, U> ());
 
 		token *value() const;
 
@@ -64,8 +68,49 @@ namespace zhetapi {
 	};
 
 	template <class T, class U>
+	node_manager <T, U> ::node_manager() {}
+
+	template <class T, class U>
 	node_manager <T, U> ::node_manager(const std::string &str, Barn <T, U>
 			barn) : __barn(barn) 
+	{
+		zhetapi::parser <T, U> pr;
+
+		siter iter = str.begin();
+		siter end = str.end();
+
+		bool r = qi::phrase_parse(iter, end, pr, qi::space, __tree);
+
+		// Unpack variable clusters
+		expand(__tree);
+
+		// Label the tree
+		label(__tree);
+	
+		std::cout << "-------------------------\nstr: " << str <<
+			std::endl;
+
+		if (r) {
+			// Status
+			std::cout << "Parsing succeeded";
+
+			if (iter != end)
+				std::cout << " (NOT FULLY PARSED)";
+
+			std::cout << std::endl;
+
+			// Node
+			std::cout << "nd:" << std::endl;
+			__tree.print();
+		} else {
+			std::cout << "Parsing failed" << std::endl;
+		}
+	}
+
+	template <class T, class U>
+	node_manager <T, U> ::node_manager(const std::string &str, const
+			std::vector <std::string> &params, Barn <T, U> barn) :
+		__params(params), __barn(barn) 
 	{
 		zhetapi::parser <T, U> pr;
 
@@ -167,6 +212,16 @@ namespace zhetapi {
 
 		for (size_t i = 0; i < str.length(); i++) {
 			tmp += str[i];
+
+			auto itr = find(__params.begin(), __params.end(), tmp);
+
+			if (itr != __params.end()) {
+				out = node(new operation_holder("*"), out,
+						node(new variable_holder(tmp),
+							{}));
+
+				tmp.clear();
+			}
 
 			token *tptr = __barn.get(tmp);
 

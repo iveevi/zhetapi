@@ -1,8 +1,9 @@
 // Engine headers
 #include <node_manager.hpp>
 #include <barn.hpp>
+#include <function.hpp>
 
-#define TEST2
+#define TEST3
 
 using namespace std;
 using namespace zhetapi;
@@ -40,6 +41,10 @@ int main()
 
 		cout << endl << "Value: " << tptr->str() << " (" << tptr << ")" << endl;
 	}
+
+#elif defined(TEST3)
+
+	Function <double, int> f = std::string("f(x, y) = x^2 + y");
 
 #endif
 

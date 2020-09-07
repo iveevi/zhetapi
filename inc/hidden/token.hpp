@@ -22,7 +22,8 @@ namespace zhetapi {
 		 * 	oph - operation (place holder)
 		 * 	opn - operation
 		 * 	var - variable
-		 * 	vcl - varialbe cluster (place holder)
+		 * 	vrh - variable (place holder)
+		 * 	vcl - variable cluster (place holder)
 		 * 	ftn - function
 		 */
 		enum type {
@@ -30,6 +31,7 @@ namespace zhetapi {
 			oph,
 			opn,
 			var,
+			vrh,
 			vcl,
 			ftn
 		};
