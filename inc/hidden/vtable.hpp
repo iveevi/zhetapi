@@ -36,6 +36,8 @@ namespace zhetapi {
 
 		var &get(const std::string &);
 		const var &find(const std::string &);
+
+		bool contains(const std::string &);
 		
 		bool insert(const var &);
 		
@@ -152,6 +154,20 @@ namespace zhetapi {
 			throw null_entry();
 
 		return tree->val;
+	}
+
+	template <class T>
+	bool vtable<T> ::contains(const std::string &key)
+	{
+		var x;
+
+		try {
+			x = get(key);
+		} catch (...) {
+			return false;
+		}
+
+		return true;
 	}
 
 	template <class T>

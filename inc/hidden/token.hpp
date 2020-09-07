@@ -16,12 +16,21 @@ namespace zhetapi {
 		/*
 		 * Codes used to identify the token, more on the is presented
 		 * below. Should not be used by the user.
+		 *
+		 * Codes:
+		 * 	opd - operand
+		 * 	oph - operation (place holder)
+		 * 	opn - operation
+		 * 	var - variable
+		 * 	vcl - varialbe cluster (place holder)
+		 * 	ftn - function
 		 */
 		enum type {
 			opd,
 			oph,
 			opn,
 			var,
+			vcl,
 			ftn
 		};
 

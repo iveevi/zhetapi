@@ -4,6 +4,7 @@
 // Engine headers
 #include <parser.hpp>
 #include <barn.hpp>
+#include <types.hpp>
 
 namespace zhetapi {
 
@@ -13,24 +14,59 @@ namespace zhetapi {
 		node				__tree;
 		std::vector <std::string>	__params;
 	public:
-		node_manager(const std::string &);
+		node_manager(const std::string &, Barn <T, U> = Barn <T, U> ());
 
 		token *value() const;
+
+		/*
+		 * Responsible for expanding varialbe clusters and truning them
+		 * into product of operands.
+		 */
+		void expand(node &);
 
 		void print() const;
 	private:
 		token *value(node) const;
 		
 		void label(node &) const;
+
+		node expand(const std::string &);
+
+		/*
+		 * Node factories; produce special nodes such as ones, zeros,
+		 * etc. to make constuction of such nodes easy.
+		 */
+		static node nf_one();
+		static node nf_zero();
+	public:
+		// General error
+		class error {
+			std::string str;
+		public:
+			error(std::string s) : str(s) {}
+
+			const std::string &what() const {
+				return str;
+			}
+		};
+
+		// Syntax error
+		class syntax_error : public error {
+		public:
+			syntax_error(std::string s) : error(s) {}
+		};
+
+		// Undefined symbol error
+		class undefined_symbol : public error {
+		public:
+			undefined_symbol(std::string s) : error(s) {}
+		};
 	};
 
 	template <class T, class U>
-	node_manager <T, U> ::node_manager(const std::string &str)
+	node_manager <T, U> ::node_manager(const std::string &str, Barn <T, U>
+			barn) : __barn(barn) 
 	{
-		Variable <T> var {"e", T(2.17)};
-
-		__barn.put(var);
-
 		zhetapi::parser <T, U> pr(__barn);
 
 		siter iter = str.begin();
@@ -38,6 +74,10 @@ namespace zhetapi {
 
 		bool r = qi::phrase_parse(iter, end, pr, qi::space, __tree);
 
+		// Unpack variable clusters
+		expand(__tree);
+
+		// Label the tree
 		label(__tree);
 	
 		std::cout << "-------------------------\nstr: " << str <<
@@ -97,6 +137,57 @@ namespace zhetapi {
 		return nullptr;
 	}
 
+	// Expansion methods
+	template <class T, class U>
+	void node_manager <T, U> ::expand(node &ref)
+	{
+		if (*(ref.__tptr) == token::vcl) {
+			/*
+			 * Excluding the parameters, the variable cluster should
+			 * always be a leaf of the tree.
+			 */
+			assert(ref.__leaves.size() == 0);
+
+			variable_cluster *vclptr = dynamic_cast
+				<variable_cluster *> (ref.__tptr.get());
+
+			ref = expand(vclptr->__cluster);
+		}
+
+		for (node &leaf : ref.__leaves)
+			expand(leaf);
+	}
+
+	template <class T, class U>
+	node node_manager <T, U> ::expand(const std::string &str)
+	{
+		node out = nf_one();
+
+		std::string tmp;
+
+		for (size_t i = 0; i < str.length(); i++) {
+			tmp += str[i];
+
+			token *tptr = __barn.get(tmp);
+
+			if (tptr != nullptr) {
+				out = node(new operation_holder("*"), out,
+						node(tptr, {}));
+
+				tmp.clear();
+			}
+		}
+
+		/*
+		 * If tmp is not empty, it implies that we could not find a
+		 * match for it, and therefore the parsing is incomplete.
+		 */
+		if (!tmp.empty())
+			throw undefined_symbol(tmp);
+
+		return out;
+	}
+
 	template <class T, class U>
 	void node_manager <T, U> ::label(node &ref) const
 	{
@@ -112,6 +203,13 @@ namespace zhetapi {
 
 			break;
 		}
+	}
+
+	// Node factories
+	template <class T, class U>
+	node node_manager <T, U> ::nf_one()
+	{
+		return node(new operand <U> (1), {});
 	}
 
 }

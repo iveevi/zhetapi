@@ -216,11 +216,11 @@ namespace zhetapi {
 		vtable <MQ> v_stack_mq;
 		vtable <MR> v_stack_mr;
 
-		// ftable <R, Z> maps;
-
 		std::vector <std::pair <ID, token *>> ops;
 	public:
 		Barn();
+		Barn(const Barn &);
+
 		~Barn();
 
 		/*
@@ -236,6 +236,8 @@ namespace zhetapi {
 		 */
 		template <class A>
 		Variable <A> retrieve(const std::string &);
+
+		token *get(const std::string &);
 
 		token *value(const std::string &, const std::vector <std::type_index> &,
 				const std::vector <token *> &) const;
@@ -437,6 +439,17 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
+	Barn <T, U> ::Barn(const Barn <T, U> &other) :
+		v_stack_r(other.v_stack_r), v_stack_q(other.v_stack_q),
+		v_stack_z(other.v_stack_z), v_stack_cq(other.v_stack_cq),
+		v_stack_cr(other.v_stack_cr), v_stack_mr(other.v_stack_mr),
+		v_stack_mq(other.v_stack_mq)
+	{
+		for (auto pr : other.ops)
+			ops.push_back({pr.first, pr.second->copy()});
+	}
+
+	template <class T, class U>
 	Barn <T, U> ::~Barn()
 	{
 		for (auto pr : ops)
@@ -485,6 +498,29 @@ namespace zhetapi {
 			v_stack_mr.get(str);
 		if (typeid(A) == typeid(VQ))
 			v_stack_mq.get(str);
+	}
+
+	template <class T, class U>
+	token *Barn <T, U> ::get(const std::string &str)
+	{
+		if (v_stack_z.contains(str))
+			return new operand <Z> (v_stack_z.get(str).get());
+		if (v_stack_r.contains(str))
+			return new operand <R> (v_stack_r.get(str).get());
+		if (v_stack_q.contains(str))
+			return new operand <Q> (v_stack_q.get(str).get());
+		
+		if (v_stack_cr.contains(str))
+			return new operand <CR> (v_stack_cr.get(str).get());
+		if (v_stack_cq.contains(str))
+			return new operand <CQ> (v_stack_cq.get(str).get());
+		
+		if (v_stack_mr.contains(str))
+			return new operand <VR> (v_stack_mr.get(str).get());
+		if (v_stack_mq.contains(str))
+			return new operand <VQ> (v_stack_mq.get(str).get());
+
+		return nullptr;
 	}
 
 	template <class T, class U>

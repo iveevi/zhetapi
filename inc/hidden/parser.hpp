@@ -22,6 +22,7 @@
 #include <node.hpp>
 #include <operand.hpp>
 #include <operation_holder.hpp>
+#include <variable_cluster.hpp>
 
 #define __add_operation_symbol(name, str)						\
 	name = lit(#str) [							\
@@ -43,7 +44,10 @@ namespace zhetapi {
 
 		__TYPEDEFS__
 
-		parser(const Barn <T, U> &barn) : parser::base_type(__start) {
+		parser(Barn <T, U> &barn) : parser::base_type(__start) {
+			// Identifiers
+			__ident = +ascii::char_;
+
 			// Operation parsers
 
 			__add_operation_symbol(__plus, +);
@@ -333,7 +337,7 @@ namespace zhetapi {
 
 			/*
 			 * Pure numerical operands, representing the 18
-			 * primitive types of computation. The exception are
+			 * primitive types of computation. The exceptions are
 			 * rational numbers, which are excluded so that the
 			 * order of operations can be applied. This exclusion
 			 * should not cause any trouble, as integer division
@@ -381,13 +385,22 @@ namespace zhetapi {
 						std::vector <zhetapi::node> {})
 			];
 
+			__node_var = __ident [_val = phoenix::construct
+				<zhetapi::node> (phoenix::new_
+						<variable_cluster> (_1),
+						std::vector <zhetapi::node>
+						{})];
+
+			/*
+			 * Represents a parenthesized expression.
+			 */
+			__node_prth = "(" >> __start [_val = _1] >> ")";
+			
 			/*
 			 * Represents a series of parenthesized expression,
 			 * which are mutlilpied through the use of
 			 * juxtaposition.
 			 */
-			__node_prth = "(" >> __start [_val = _1] >> ")";
-			
 			__node_prep = __node_prth [_val = _1] >> *(
 					(__node_prth) [_val = phoenix::construct
 					<zhetapi::node> (phoenix::new_
@@ -410,6 +423,8 @@ namespace zhetapi {
 							(std::string("*")),
 							_val, _1)]
 					)
+
+					| __node_var [_val = _1]
 				);
 
 			/*
@@ -628,7 +643,11 @@ namespace zhetapi {
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_factor;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prep;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prth;
+		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_var;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
+
+		// Identifiers
+		qi::rule <siter, std::string ()>					__ident;
 
 		// Operations
 		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t0_bin;
