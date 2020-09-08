@@ -1,6 +1,9 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+// C/C++ headers
+#include <typeindex>
+
 // Engine headers
 #include <operand.hpp>
 #include <rational.hpp>
@@ -85,8 +88,10 @@ namespace zhetapi {
 		// Token identifiers
 		/////////////////////
 		
-		static bool is_zero(token *tptr);
-		static bool is_one(token *tptr);
+		static bool is_zero(token *);
+		static bool is_one(token *);
+
+		static std::string symbol(const std::type_index &);
 	};
 
 	template <class T, class U>
@@ -129,6 +134,54 @@ namespace zhetapi {
 			return (_or->get() == 1);
 
 		return false;
+	}
+
+	template <class T, class U>
+	std::string types <T, U> ::symbol(const std::type_index &type)
+	{
+		// Complex numbers
+		if (type == typeid(operand <Z>))
+			return "Z";
+		if (type == typeid(operand <Q>))
+			return "Q";
+		if (type == typeid(operand <R>))
+			return "R";
+		if (type == typeid(operand <CZ>))
+			return "CZ";
+		if (type == typeid(operand <CQ>))
+			return "CQ";
+		if (type == typeid(operand <CR>))
+			return "CR";
+		
+		// Vectors
+		if (type == typeid(operand <VZ>))
+			return "VZ";
+		if (type == typeid(operand <VQ>))
+			return "VQ";
+		if (type == typeid(operand <VR>))
+			return "VR";
+		if (type == typeid(operand <VCZ>))
+			return "VCZ";
+		if (type == typeid(operand <VCQ>))
+			return "VCQ";
+		if (type == typeid(operand <VCR>))
+			return "VCR";
+		
+		// Matrices
+		if (type == typeid(operand <MZ>))
+			return "MZ";
+		if (type == typeid(operand <MQ>))
+			return "MQ";
+		if (type == typeid(operand <MR>))
+			return "MR";
+		if (type == typeid(operand <MCZ>))
+			return "MCZ";
+		if (type == typeid(operand <MCQ>))
+			return "MCQ";
+		if (type == typeid(operand <MCR>))
+			return "MCR";
+
+		return "?";
 	}
 
 }

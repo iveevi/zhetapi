@@ -6,7 +6,9 @@
 #include <functional>
 #include <iostream>
 #include <string>
+#include <sstream>
 #include <tuple>
+#include <type_traits>
 #include <typeindex>
 #include <typeinfo>
 
@@ -241,8 +243,22 @@ namespace zhetapi {
 
 		token *value(const std::string &, const std::vector <std::type_index> &,
 				const std::vector <token *> &) const;
+		
+		std::string overloads(const std::string &) const;
 
 		void print();
+
+		// Exceptions
+		class unknown_operation_overload_exception {
+			std::string __str;
+		public:
+			unknown_operation_overload_exception(const std::string &str) : __str(str) {}
+
+			const std::string &what() const {
+				return __str;
+			}
+		};
+
 	};
 
 	//////////////////////////////////////////
@@ -554,10 +570,41 @@ namespace zhetapi {
 			operation *optr = dynamic_cast <operation *> (tptr);
 			return (*optr)(vals);
 		} else {
-			std::cout << "Invalid Token (Not Found)" << std::endl;
+			throw unknown_operation_overload_exception(overloads(str));
 		}
 
 		return nullptr;
+	}
+
+	template <class T, class U>
+	std::string Barn <T, U> ::overloads(const std::string &str) const
+	{
+		auto it = ops.end();
+
+		std::vector <std::vector <std::type_index>> loads;
+		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
+			if (itr->first.first == str)
+				loads.push_back(itr->first.second);
+		}
+
+		std::ostringstream oss;
+
+		oss << "Available overloads for " << str << std::endl;
+
+		for (auto vc : loads) {
+			oss << "\t(";
+
+			for (size_t i = 0; i < vc.size(); i++) {
+				oss << types <T, U> ::symbol(vc[i]);
+				
+				if (i < vc.size() - 1)
+					oss << ", ";
+			}
+
+			oss << ")" << std::endl;
+		}
+
+		return oss.str();
 	}
 
 	template <class T, class U>

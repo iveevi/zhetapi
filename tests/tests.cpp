@@ -4,7 +4,7 @@
 #include <function.hpp>
 #include <engine.hpp>
 
-#define TEST4
+#define TEST2
 
 using namespace std;
 using namespace zhetapi;
@@ -38,9 +38,13 @@ int main()
 	while (getline(cin, str)) {
 		zhetapi::node_manager <double, int> tmp(str, barn);
 
-		zhetapi::token *tptr = tmp.value();
+		try {
+			zhetapi::token *tptr = tmp.value();
 
-		cout << endl << "Value: " << tptr->str() << " (" << tptr << ")" << endl;
+			cout << endl << "Value: " << tptr->str() << " (" << tptr << ")" << endl;
+		} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
+			cout << e.what() << endl;
+		}
 	}
 
 #elif defined(TEST3)
@@ -50,6 +54,12 @@ int main()
 #elif defined(TEST4)
 
 	Engine eng("src/simplifications.ztp");
+
+	std::type_index a = typeid(zhetapi::operand <int>);
+	std::type_index b = typeid(zhetapi::operand <int>);
+
+	cout << "a: " << a.name() << endl;
+	cout << "b: " << b.name() << endl; 
 
 #endif
 
