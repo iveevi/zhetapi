@@ -11,6 +11,7 @@ test_mem:	test_build
 	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
 
 test_build:	inc/hidden	\
+		build		\
 		tests
 	@echo "[BUILDING TESTS]\n"
 	g++ -I engine -I inc/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
@@ -30,6 +31,7 @@ ml_mem:		ml_build
 
 ml_build:	engine		\
 		inc/std		\
+		build		\
 		tests
 	@echo "[BUILDING ML TESTER]\n"
 	g++ -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -lfl -o build/ml
@@ -40,6 +42,11 @@ gpu:		gpu_build
 	./build/gpu
 
 gpu_build:	inc/gpu	\
+		build	\
 		tests
 	@echo "[BUILDING GPU TESTER]\n"
 	nvcc -I engine -I engine/hidden tests/gpu.cu -g -lfl -o build/gpu
+
+# Build directory
+build:
+	mkdir build
