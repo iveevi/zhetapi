@@ -9,6 +9,7 @@
 
 // Engine headers
 #include <activation.hpp>
+#include <optimizer.hpp>
 #include <vector.hpp>
 #include <matrix.hpp>
 
@@ -31,10 +32,13 @@ namespace ml {
 		std::vector <Matrix <T>>	__weights;
 		std::function <T ()>		__random;
 		std::size_t			__isize;
+		std::size_t			__osize;
 	public:
 		DeepNeuralNetwork(const std::vector <PreLayer> &, const std::function <T ()> &);
 
 		Vector <T> operator()(const Vector <T> &) const;
+
+		void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *);
 
 		void randomize();
 	};
@@ -42,7 +46,7 @@ namespace ml {
 	template <class T>
 	DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <PreLayer> &layers,
 			const std::function <T ()> &random) : __random(random),
-			__isize(layers[0].first)
+			__isize(layers[0].first), __osize(layers[layers.size() - 1].first)
 	{
 		for (auto pr : layers)
 			__layers.push_back({pr.first, std::shared_ptr <Activation <T>> (pr.second)});
@@ -70,6 +74,20 @@ namespace ml {
 		}
 		
 		return tmp;
+	}
+
+	template <class T>
+	void DeepNeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt)
+	{
+		assert(in.size() == __isize);
+		assert(out.size() == __osize);
+
+		Vector <T> tmp = (*this)(in);
+
+		using namespace std;
+
+		cout << "Tmp: " << tmp << endl;
+		cout << "Error: " << (*opt)(out, tmp) << endl;
 	}
 
 	template <class T>

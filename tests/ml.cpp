@@ -48,4 +48,6 @@ int main()
 	cout << "error: " << opt({3, 1, 4}, {4, 1, 5}) << endl;
 	cout << "squared error: " << opt_s({3, 1, 4}, {4, 1, 5}) << endl;
 	cout << "mean squared error: " << opt_ms({3, 1, 4}, {4, 1, 5}) << endl;
+
+	model.learn({1, 1, 1, 1}, {2}, &opt_ms);
 }
