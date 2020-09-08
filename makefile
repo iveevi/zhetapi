@@ -14,7 +14,7 @@ test_build:	inc/hidden	\
 		build		\
 		tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
+	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -lfl -lgmpxx -lgmp -g -o build/tests
 
 # Machine learning
 ml:		ml_build

@@ -11,7 +11,7 @@
 #include <typeinfo>
 
 // Engine headers
-#include <combinatorial.hpp>
+#include <std_combinatorial.hpp>
 #include <complex.hpp>
 #include <matrix.hpp>
 #include <operand.hpp>

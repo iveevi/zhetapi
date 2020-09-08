@@ -2,8 +2,9 @@
 #include <node_manager.hpp>
 #include <barn.hpp>
 #include <function.hpp>
+#include <engine.hpp>
 
-#define TEST3
+#define TEST4
 
 using namespace std;
 using namespace zhetapi;
@@ -45,6 +46,10 @@ int main()
 #elif defined(TEST3)
 
 	Function <double, int> f = std::string("f(x, y) = x^2 + y");
+
+#elif defined(TEST4)
+
+	Engine eng("src/simplifications.ztp");
 
 #endif
 
