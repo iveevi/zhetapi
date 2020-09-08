@@ -92,6 +92,8 @@ namespace zhetapi {
 	std::ostream &operator<<(std::ostream &os, const node &tree)
 	{
 		os << tree.display();
+
+		return os;
 	}
 
 }
