@@ -11,6 +11,17 @@ namespace ml {
 
 	// Squared error
 	template <class T>
+	T __d_squared(const Vector <T> &comp, const Vector <T> &in)
+	{
+		T sum = 0;
+
+		for (size_t i = 0; i < comp.size(); i++)
+			sum += comp[i] - in[i];
+		
+		return 2 * sum;
+	}
+
+	template <class T>
 	T __squared(const Vector <T> &comp, const Vector <T> &in)
 	{
 		T sum = 0;
@@ -22,6 +33,17 @@ namespace ml {
 	}
 
 	// Mean squared error
+	template <class T>
+	T __d_mean_squared(const Vector <T> &comp, const Vector <T> &in)
+	{
+		T sum = 0;
+
+		for (size_t i = 0; i < comp.size(); i++)
+			sum += comp[i] - in[i];
+		
+		return 2 * sum/T(comp.size());
+	}
+
 	template <class T>
 	T __mean_squared(const Vector <T> &comp, const Vector <T> &in)
 	{

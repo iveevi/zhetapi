@@ -15,6 +15,8 @@ namespace ml {
 		Optimizer();
 
 		virtual T operator()(const Vector <T> &, const Vector <T> &) const;
+
+		virtual Optimizer *derivative() const;
 	};
 
 	template <class T>
@@ -24,6 +26,12 @@ namespace ml {
 	T Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
 	{
 		return (comp - in).norm();
+	}
+
+	template <class T>
+	Optimizer <T> *Optimizer <T> ::derivative() const
+	{
+		return new Optimizer();
 	}
 
 }

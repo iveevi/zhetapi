@@ -9,19 +9,47 @@
 
 namespace ml {
 
+	// Squared error
 	template <class T>
-	class SquaredError {
+	class __DSquaredError : public Optimizer <T> {
 	public:
 		T operator()(const Vector <T> &comp, const Vector <T> &in) {
-			return __squared <T> (comp, in);
+			return __d_squared <T> (comp, in);
 		}
 	};
 
 	template <class T>
-	class MeanSquaredError {
+	class SquaredError : public Optimizer <T> {
+	public:
+		T operator()(const Vector <T> &comp, const Vector <T> &in) {
+			return __squared <T> (comp, in);
+		}
+
+		Optimizer <T> *derivative() const
+		{
+			return new __DSquaredError <T> ();
+		}
+	};
+
+	// Mean squared error
+	template <class T>
+	class __DMeanSquaredError : public Optimizer <T> {
+	public:
+		T operator()(const Vector <T> &comp, const Vector <T> &in) {
+			return __d_mean_squared <T> (comp, in);
+		}
+	};
+
+	template <class T>
+	class MeanSquaredError : public Optimizer <T> {
 	public:
 		T operator()(const Vector <T> &comp, const Vector <T> &in) {
 			return __mean_squared <T> (comp, in);
+		}
+
+		Optimizer <T> *derivative() const
+		{
+			return new __DMeanSquaredError <T> ();
 		}
 	};
 
