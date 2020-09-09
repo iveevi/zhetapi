@@ -4,7 +4,7 @@
 #include <function.hpp>
 #include <engine.hpp>
 
-#define TEST2
+#define TEST3
 
 using namespace std;
 using namespace zhetapi;
@@ -51,6 +51,12 @@ int main()
 
 	Function <double, int> f = std::string("f(x, y) = x^2 + y");
 
+	try {
+		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
+	} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
+		cout << e.what() << endl;
+	}
+
 #elif defined(TEST4)
 
 	Engine eng("src/simplifications.ztp");
@@ -59,7 +65,7 @@ int main()
 	std::type_index b = typeid(zhetapi::operand <int>);
 
 	cout << "a: " << a.name() << endl;
-	cout << "b: " << b.name() << endl; 
+	cout << "b: " << b.name() << endl;
 
 #endif
 

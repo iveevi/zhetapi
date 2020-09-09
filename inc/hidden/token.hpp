@@ -25,6 +25,7 @@ namespace zhetapi {
 		 * 	vrh - variable (place holder)
 		 * 	vcl - variable cluster (place holder)
 		 * 	ftn - function
+		 * 	ndr - node reference
 		 */
 		enum type {
 			opd,
@@ -33,7 +34,8 @@ namespace zhetapi {
 			var,
 			vrh,
 			vcl,
-			ftn
+			ftn,
+			ndr
 		};
 
 		/*
@@ -54,10 +56,16 @@ namespace zhetapi {
 		 */
 		virtual std::string str() const = 0;
 
-		// Any use?
+		/*
+		 * Returns a heap allocated copy of the token. Used in copy
+		 * constructors for nodes and barns.
+		 */
 		virtual token *copy() const = 0;
 
-		// Any use?
+		/*
+		 * Compares tokens and returns their similarity. Used for node
+		 * matching.
+		 */
 		virtual bool operator==(token *) const = 0;
 	};
 

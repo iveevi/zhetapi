@@ -225,6 +225,8 @@ namespace zhetapi {
 
 		~Barn();
 
+		Barn &operator=(const Barn &);
+
 		/*
 		 * Place a variable of type A into its appropriate stack. Made
 		 * for the user.
@@ -246,7 +248,7 @@ namespace zhetapi {
 		
 		std::string overloads(const std::string &) const;
 
-		void print();
+		void print() const;
 
 		// Exceptions
 		class unknown_operation_overload_exception {
@@ -464,6 +466,27 @@ namespace zhetapi {
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
 	}
+	
+	template <class T, class U>
+	Barn <T, U> &Barn <T, U> ::operator=(const Barn <T, U> &other)
+	{
+		v_stack_z = other.v_stack_z;
+		v_stack_q = other.v_stack_q;
+		v_stack_r = other.v_stack_r;
+		// v_stack_cz = other.v_stack_cz;
+		v_stack_cq = other.v_stack_cq;
+		v_stack_cr = other.v_stack_cr;
+		
+		// v_stack_mz = other.v_stack_mz;
+		v_stack_mq = other.v_stack_mq;
+		v_stack_mr = other.v_stack_mr;
+		// v_stack_mcz = other.v_stack_mcz;
+		// v_stack_mcq = other.v_stack_mcq;
+		// v_stack_mcr = other.v_stack_mcr;
+
+		for (auto pr : other.ops)
+			ops.push_back({pr.first, pr.second->copy()});
+	}
 
 	template <class T, class U>
 	Barn <T, U> ::~Barn()
@@ -541,18 +564,18 @@ namespace zhetapi {
 
 	template <class T, class U>
 	token *Barn <T, U> ::value(const std::string &str,
-			const std::vector <std::type_index> &types,
+			const std::vector <std::type_index> &signature,
 			const std::vector <token *> &vals) const
 	{
 		auto it = ops.end();
 
 		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
 			if (itr->first.first == str &&
-				itr->first.second.size() == types.size()) {
+				itr->first.second.size() == signature.size()) {
 				bool ps = true;
 				
-				for (size_t i = 0; i < types.size(); i++) {
-					if (types[i] != itr->first.second[i]) {
+				for (size_t i = 0; i < signature.size(); i++) {
+					if (signature[i] != itr->first.second[i]) {
 						ps = false;
 						break;
 					}
@@ -570,7 +593,21 @@ namespace zhetapi {
 			operation *optr = dynamic_cast <operation *> (tptr);
 			return (*optr)(vals);
 		} else {
-			throw unknown_operation_overload_exception(overloads(str));
+			std::ostringstream oss;
+
+			oss << "Unknown overload (";
+
+			for (size_t i = 0; i < signature.size(); i++) {
+				oss << types <T, U> ::symbol(signature[i]);
+				
+				if (i < signature.size() - 1)
+					oss << ", ";
+			}
+
+			oss << ") for operation \"" << str << "\". " <<
+				overloads(str);
+
+			throw unknown_operation_overload_exception(oss.str());
 		}
 
 		return nullptr;
@@ -589,26 +626,31 @@ namespace zhetapi {
 
 		std::ostringstream oss;
 
-		oss << "Available overloads for " << str << std::endl;
+		oss << "Available overloads for \"" << str << "\": {";
 
-		for (auto vc : loads) {
-			oss << "\t(";
+		for (size_t k = 0; k < loads.size(); k++) {
+			oss << "(";
 
-			for (size_t i = 0; i < vc.size(); i++) {
-				oss << types <T, U> ::symbol(vc[i]);
+			for (size_t i = 0; i < loads[k].size(); i++) {
+				oss << types <T, U> ::symbol(loads[k][i]);
 				
-				if (i < vc.size() - 1)
+				if (i < loads[k].size() - 1)
 					oss << ", ";
 			}
 
-			oss << ")" << std::endl;
+			oss << ")";
+
+			if (k < loads.size() - 1)
+				oss << ", ";
 		}
+
+		oss << "}";
 
 		return oss.str();
 	}
 
 	template <class T, class U>
-	void Barn <T, U> ::print()
+	void Barn <T, U> ::print() const
 	{
 		std::cout << std::string(50, '=') << std::endl;
 		std::cout << "INTEGERS:" << std::endl;
@@ -651,6 +693,11 @@ namespace zhetapi {
 		std::cout << std::string(50, '=') << std::endl;
 
 		v_stack_mr.print();
+
+		for (auto pr : ops) {
+			std::cout << "op: " << pr.second->str() << " @ " <<
+				pr.second << std::endl;
+		}
 	}
 
 }

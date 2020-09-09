@@ -22,9 +22,19 @@ namespace zhetapi {
 		Function(const char *);
 		Function(const std::string &);
 
+		template <class ... A>
+		token *operator()(A ...);
+	private:
+		template <class A>
+		void gather(std::vector <token *> &, A);
+
+		template <class A, class ... B>
+		void gather(std::vector <token *> &, A, B ...);
+	public:
 		static Barn <T, U> barn;
 	};
 
+	// Constructors
 	template <class T, class U>
 	Function <T, U> ::Function() {}
 
@@ -83,6 +93,37 @@ namespace zhetapi {
 		// Construct the tree manager
 		__manager = node_manager <T, U> (str.substr(++index), __params);
 	}
+
+	// Computational utilities
+	template <class T, class U>
+	template <class ... A>
+	token *Function <T, U> ::operator()(A ... args)
+	{
+		std::vector <token *> tokens;
+
+		gather(tokens, args...);
+
+		assert(tokens.size() == __params.size());
+
+		return __manager.substitute_and_compute(tokens);
+	}
+
+	template <class T, class U>
+	template <class A>
+	void Function <T, U> ::gather(std::vector <token *> &tokens, A in)
+	{
+		tokens.push_back(new operand <A>(in));
+	}
+	
+	template <class T, class U>
+	template <class A, class ... B>
+	void Function <T, U> ::gather(std::vector <token *> &tokens, A in, B ... args)
+	{
+		tokens.push_back(new operand <A>(in));
+
+		gather(tokens, args...);
+	}
+
 }
 
 #endif
