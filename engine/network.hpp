@@ -86,8 +86,10 @@ namespace ml {
 
 		using namespace std;
 
-		cout << "Tmp: " << tmp << endl;
-		cout << "Error: " << (*opt)(out, tmp) << endl;
+		cout << "tmp: " << tmp << endl;
+		cout << "out: " << out << endl;
+		cout << "Error: " << opt->operator()(out, tmp) << endl;
+		cout << "DError: " << opt->derivative()->operator()(out, tmp) << endl;
 	}
 
 	template <class T>
