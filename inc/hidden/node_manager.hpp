@@ -45,7 +45,7 @@ namespace zhetapi {
 
 		token *value() const;
 
-		token *substitute_and_compute(std::vector <token *>);
+		token *substitute_and_compute(std::vector <token *> &);
 
 		/*
 		 * Responsible for expanding varialbe clusters and truning them
@@ -259,11 +259,16 @@ namespace zhetapi {
 
 	template <class T, class U>
 	token *node_manager <T, U> ::substitute_and_compute(std::vector <token *>
-			toks)
+			&toks)
 	{
 		assert(__refs.size() == toks.size());
 		for (size_t i = 0; i < __refs.size(); i++) {
 			__refs[i] = node(toks[i], {});
+
+			std::cout << "TOKEN TO BE PUT: " << toks[i] << std::endl;
+			std::cout << "\tTOKEN TO BE PUT: " << toks[i]->str() << std::endl;
+			std::cout << "REF:" << std::endl;
+			__refs[i].print();
 
 			label(__refs[i]);
 		}

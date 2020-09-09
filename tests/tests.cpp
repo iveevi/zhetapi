@@ -53,6 +53,10 @@ int main()
 
 	try {
 		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
+		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
+		cout << "f(10.001, -4) = " << f(10.001, -4)->str() << std::endl;
+
+		cout << "f'(10, -4) = " << f.derivative("x", 10, -4)->str() << std::endl;
 	} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
 		cout << e.what() << endl;
 	}

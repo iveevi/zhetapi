@@ -243,6 +243,8 @@ namespace zhetapi {
 
 		token *get(const std::string &);
 
+		token *compute(const std::string &, const std::vector <token *> &) const;
+
 		token *value(const std::string &, const std::vector <std::type_index> &,
 				const std::vector <token *> &) const;
 		
@@ -470,22 +472,26 @@ namespace zhetapi {
 	template <class T, class U>
 	Barn <T, U> &Barn <T, U> ::operator=(const Barn <T, U> &other)
 	{
-		v_stack_z = other.v_stack_z;
-		v_stack_q = other.v_stack_q;
-		v_stack_r = other.v_stack_r;
-		// v_stack_cz = other.v_stack_cz;
-		v_stack_cq = other.v_stack_cq;
-		v_stack_cr = other.v_stack_cr;
-		
-		// v_stack_mz = other.v_stack_mz;
-		v_stack_mq = other.v_stack_mq;
-		v_stack_mr = other.v_stack_mr;
-		// v_stack_mcz = other.v_stack_mcz;
-		// v_stack_mcq = other.v_stack_mcq;
-		// v_stack_mcr = other.v_stack_mcr;
+		if (this != &other) {
+			v_stack_z = other.v_stack_z;
+			v_stack_q = other.v_stack_q;
+			v_stack_r = other.v_stack_r;
+			// v_stack_cz = other.v_stack_cz;
+			v_stack_cq = other.v_stack_cq;
+			v_stack_cr = other.v_stack_cr;
+			
+			// v_stack_mz = other.v_stack_mz;
+			v_stack_mq = other.v_stack_mq;
+			v_stack_mr = other.v_stack_mr;
+			// v_stack_mcz = other.v_stack_mcz;
+			// v_stack_mcq = other.v_stack_mcq;
+			// v_stack_mcr = other.v_stack_mcr;
 
-		for (auto pr : other.ops)
-			ops.push_back({pr.first, pr.second->copy()});
+			for (auto pr : other.ops)
+				ops.push_back({pr.first, pr.second->copy()});
+		}
+
+		return *this;
 	}
 
 	template <class T, class U>
@@ -560,6 +566,17 @@ namespace zhetapi {
 			return new operand <VQ> (v_stack_mq.get(str).get());
 
 		return nullptr;
+	}
+
+	template <class T, class U>
+	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
+	{
+		std::vector <std::type_index> signature;
+
+		for (token *tptr : vals)
+			signature.push_back(typeid(*tptr));
+		
+		return value(str, signature, vals);
 	}
 
 	template <class T, class U>

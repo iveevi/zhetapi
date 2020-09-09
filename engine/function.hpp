@@ -24,15 +24,29 @@ namespace zhetapi {
 
 		template <class ... A>
 		token *operator()(A ...);
+
+		template <class ... A>
+		token *derivative(const std::string &, A ...);
 	private:
 		template <class A>
 		void gather(std::vector <token *> &, A);
 
 		template <class A, class ... B>
 		void gather(std::vector <token *> &, A, B ...);
+
+		size_t index(const std::string &) const;
 	public:
 		static Barn <T, U> barn;
+
+		static T h;
 	};
+
+	// Static
+	template <class T, class U>
+	Barn <T, U> Function <T, U> ::barn = Barn <T, U> ();
+
+	template <class T, class U>
+	T Function <T, U> ::h = 0.0001;
 
 	// Constructors
 	template <class T, class U>
@@ -109,6 +123,45 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
+	template <class ... A>
+	token *Function <T, U> ::derivative(const std::string &str, A ... args)
+	{
+		std::vector <token *> tokens;
+
+		gather(tokens, args...);
+
+		assert(tokens.size() == __params.size());
+
+		size_t i = index(str);
+
+		std::cout << "i: " << i << std::endl;
+
+		assert(i != -1);
+
+		token *right = __manager.substitute_and_compute(tokens);
+
+		std::cout << "pre:" << std::endl;
+		for (auto ptr : tokens) {
+			std::cout << "\tptr: " << ptr << std::endl;
+			std::cout << "\t\tptr: " << ptr->str() << std::endl;
+		}
+		
+		std::cout << "h: " << (new operand <T> (h))->str() << std::endl;
+		std::cout << " + h: " << h + 10.0 << std::endl;
+		tokens[i] = barn.compute("+", {tokens[i], new operand <T> (h)});
+
+		std::cout << "post:" << std::endl;
+		for (auto ptr : tokens) {
+			std::cout << "\tptr: " << ptr << std::endl;
+			std::cout << "\t\tptr: " << ptr->str() << std::endl;
+		}
+		
+		right = __manager.substitute_and_compute(tokens);
+
+		return right;
+	}
+
+	template <class T, class U>
 	template <class A>
 	void Function <T, U> ::gather(std::vector <token *> &tokens, A in)
 	{
@@ -122,6 +175,17 @@ namespace zhetapi {
 		tokens.push_back(new operand <A>(in));
 
 		gather(tokens, args...);
+	}
+
+	template <class T, class U>
+	size_t Function <T, U> ::index(const std::string &str) const
+	{
+		auto itr = std::find(__params.begin(), __params.end(), str);
+
+		if (itr == __params.end())
+			return -1;
+
+		return std::distance(__params.begin(), itr);
 	}
 
 }
