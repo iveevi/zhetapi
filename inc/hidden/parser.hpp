@@ -370,7 +370,7 @@ namespace zhetapi {
 			 * where access to the barn object is present.
 			 */
 			__node_var = (
-					(__ident >> __node_pack) [_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), _2)]
+					(__ident >> '(' >> __node_pack >> ')') [_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), _2)]
 					| __ident [_val = phoenix::construct
 						<zhetapi::node> (phoenix::new_
 							<variable_cluster> (_1),

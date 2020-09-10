@@ -39,14 +39,18 @@ int main()
 	cout << endl << "Beginning Tests..." << endl;
 
 	while (getline(cin, str)) {
-		zhetapi::node_manager <double, int> tmp(str, barn);
-
 		try {
+			zhetapi::node_manager <double, int> tmp(str, barn);
+
 			zhetapi::token *tptr = tmp.value();
 
 			cout << endl << "Value: " << tptr->str() << " (" << tptr << ")" << endl;
 		} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
 			cout << e.what() << endl;
+		} catch (zhetapi::node_manager <double, int> ::error e) {
+			cout << e.what() << endl;
+		} catch (...) {
+			cout << "Another Exception" << endl;
 		}
 	}
 

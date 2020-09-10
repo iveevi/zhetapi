@@ -297,11 +297,13 @@ namespace zhetapi {
 		node out = nf_one();
 
 		std::string tmp;
+		std::string accumul;
 
 		std::cout << "symbol: " << str << std::endl;
 
 		for (size_t i = 0; i < str.length(); i++) {
 			tmp += str[i];
+			accumul += str[i];
 
 			if (__barn.present(tmp)) {
 				out = node(new operation_holder("*"), out,
@@ -345,7 +347,7 @@ namespace zhetapi {
 		 * match for it, and therefore the parsing is incomplete.
 		 */
 		if (!tmp.empty())
-			throw undefined_symbol(tmp);
+			throw undefined_symbol("Undefined symbol cluster \"" + tmp + "\"");
 
 		return out;
 	}

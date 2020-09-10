@@ -20,7 +20,12 @@ namespace zhetapi {
 		fct,
 		pwr,
 		dot,	// Dot product
-		sin
+		sin,
+		cos,
+		tan,
+		csc,
+		sec,
+		cot
 	};
 
 	std::string strcodes[] = {
@@ -32,7 +37,12 @@ namespace zhetapi {
 		"factorial",
 		"power",
 		"dot",
-		"sin"
+		"sin",
+		"cos",
+		"tan",
+		"csc",
+		"sec",
+		"cot"
 	};
 
 	struct operation_holder : public token {
@@ -67,7 +77,18 @@ namespace zhetapi {
 			code = pwr;
 		else if (str == ".")
 			code = dot;
-		code = add;
+		else if (str == "sin")
+			code = sin;
+		else if (str == "cos")
+			code = cos;
+		else if (str == "tan")
+			code = tan;
+		else if (str == "csc")
+			code = csc;
+		else if (str == "sec")
+			code = sec;
+		else if (str == "cot")
+			code = cot;
 	}
 
 	token::type operation_holder::caller() const

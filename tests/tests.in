@@ -21,3 +21,7 @@
 2e
 3pi
 sin(10)
+cos(10) + tan(10)
+csc(10) + sec(10) + cot(10)
+sinh(10) + cosh(10) + tanh(10)
+csch(10) + sech(10) + coth(10)
