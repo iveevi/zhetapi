@@ -134,31 +134,38 @@ namespace zhetapi {
 
 		size_t i = index(str);
 
-		std::cout << "i: " << i << std::endl;
-
 		assert(i != -1);
 
-		token *right = __manager.substitute_and_compute(tokens);
+		// Right
+		token *right;
 
-		std::cout << "pre:" << std::endl;
-		for (auto ptr : tokens) {
-			std::cout << "\tptr: " << ptr << std::endl;
-			std::cout << "\t\tptr: " << ptr->str() << std::endl;
-		}
-		
-		std::cout << "h: " << (new operand <T> (h))->str() << std::endl;
-		std::cout << " + h: " << h + 10.0 << std::endl;
 		tokens[i] = barn.compute("+", {tokens[i], new operand <T> (h)});
 
-		std::cout << "post:" << std::endl;
-		for (auto ptr : tokens) {
-			std::cout << "\tptr: " << ptr << std::endl;
-			std::cout << "\t\tptr: " << ptr->str() << std::endl;
+		for (size_t k = 0; k < tokens.size(); k++) {
+			if (k != i)
+				tokens[k] = tokens[k]->copy();
 		}
 		
 		right = __manager.substitute_and_compute(tokens);
+		
+		// Left
+		token *left;
 
-		return right;
+		tokens[i] = barn.compute("-", {tokens[i], new operand <T> (T(2) * h)});
+
+		for (size_t k = 0; k < tokens.size(); k++) {
+			if (k != i)
+				tokens[k] = tokens[k]->copy();
+		}
+
+		left = __manager.substitute_and_compute(tokens);
+
+		// Compute
+		token *diff = barn.compute("-", {right, left});
+
+		diff = barn.compute("/", {diff, new operand <T> (T(2) * h)});
+
+		return diff;
 	}
 
 	template <class T, class U>

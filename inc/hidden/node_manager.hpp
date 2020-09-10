@@ -265,11 +265,6 @@ namespace zhetapi {
 		for (size_t i = 0; i < __refs.size(); i++) {
 			__refs[i] = node(toks[i], {});
 
-			std::cout << "TOKEN TO BE PUT: " << toks[i] << std::endl;
-			std::cout << "\tTOKEN TO BE PUT: " << toks[i]->str() << std::endl;
-			std::cout << "REF:" << std::endl;
-			__refs[i].print();
-
 			label(__refs[i]);
 		}
 
