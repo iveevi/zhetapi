@@ -337,6 +337,8 @@ namespace zhetapi {
 
 			// Nodes
 
+			__node_pack = __start % ',';
+
 			/*
 			 * Pure numerical operands, representing the 18
 			 * primitive types of computation. The exceptions are
@@ -367,11 +369,13 @@ namespace zhetapi {
 			 * cluster is done in the higher node_manager class,
 			 * where access to the barn object is present.
 			 */
-			__node_var = __ident [_val = phoenix::construct
-				<zhetapi::node> (phoenix::new_
-						<variable_cluster> (_1),
-						std::vector <zhetapi::node>
-						{})];
+			__node_var = (
+					(__ident >> __node_pack) [_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), _2)]
+					| __ident [_val = phoenix::construct
+						<zhetapi::node> (phoenix::new_
+							<variable_cluster> (_1),
+							std::vector <zhetapi::node> {})]
+				);
 
 			/*
 			 * Represents a parenthesized expression.
@@ -634,6 +638,9 @@ namespace zhetapi {
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_prth;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_var;
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__node_opd;
+
+		// Parameter pack
+		qi::rule <siter, std::vector <zhetapi::node> (), qi::space_type>	__node_pack;
 
 		// Identifiers
 		qi::rule <siter, std::string ()>					__ident;

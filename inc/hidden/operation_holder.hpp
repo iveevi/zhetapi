@@ -19,7 +19,8 @@ namespace zhetapi {
 		shr,
 		fct,
 		pwr,
-		dot	// Dot product
+		dot,	// Dot product
+		sin
 	};
 
 	std::string strcodes[] = {
@@ -30,7 +31,8 @@ namespace zhetapi {
 		"shur",
 		"factorial",
 		"power",
-		"dot"
+		"dot",
+		"sin"
 	};
 
 	struct operation_holder : public token {
@@ -65,6 +67,7 @@ namespace zhetapi {
 			code = pwr;
 		else if (str == ".")
 			code = dot;
+		code = add;
 	}
 
 	token::type operation_holder::caller() const

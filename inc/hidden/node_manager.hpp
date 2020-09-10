@@ -61,7 +61,7 @@ namespace zhetapi {
 		
 		void rereference(node &);
 
-		node expand(const std::string &);
+		node expand(const std::string &, const std::vector <node> &);
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -280,12 +280,11 @@ namespace zhetapi {
 			 * Excluding the parameters, the variable cluster should
 			 * always be a leaf of the tree.
 			 */
-			assert(ref.__leaves.size() == 0);
 
 			variable_cluster *vclptr = dynamic_cast
 				<variable_cluster *> (ref.__tptr.get());
 
-			ref = expand(vclptr->__cluster);
+			ref = expand(vclptr->__cluster, ref.__leaves);
 		}
 
 		for (node &leaf : ref.__leaves)
@@ -293,14 +292,31 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	node node_manager <T, U> ::expand(const std::string &str)
+	node node_manager <T, U> ::expand(const std::string &str, const std::vector <node> &leaves)
 	{
 		node out = nf_one();
 
 		std::string tmp;
 
+		std::cout << "symbol: " << str << std::endl;
+
 		for (size_t i = 0; i < str.length(); i++) {
 			tmp += str[i];
+
+			if (__barn.present(tmp)) {
+				out = node(new operation_holder("*"), out,
+						node(new operation_holder(tmp), leaves));
+				
+				tmp.clear();
+			}
+		}
+
+		std::string cpy = tmp;
+
+		tmp.clear();
+
+		for (size_t i = 0; i < cpy.length(); i++) {
+			tmp += cpy[i];
 
 			auto itr = find(__params.begin(), __params.end(), tmp);
 
@@ -309,7 +325,7 @@ namespace zhetapi {
 			if (itr != __params.end()) {
 				out = node(new operation_holder("*"), out,
 						node(new node_reference(&__refs[index],
-								tmp), {}));
+								tmp), leaves));
 
 				tmp.clear();
 			}
@@ -318,7 +334,7 @@ namespace zhetapi {
 
 			if (tptr != nullptr) {
 				out = node(new operation_holder("*"), out,
-						node(tptr, {}));
+						node(tptr, leaves));
 
 				tmp.clear();
 			}

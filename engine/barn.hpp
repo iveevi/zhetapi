@@ -227,6 +227,8 @@ namespace zhetapi {
 
 		Barn &operator=(const Barn &);
 
+		bool present(const std::string &) const;
+
 		/*
 		 * Place a variable of type A into its appropriate stack. Made
 		 * for the user.
@@ -499,6 +501,16 @@ namespace zhetapi {
 	{
 		for (auto pr : ops)
 			delete pr.second;
+	}
+
+	template <class T, class U>
+	bool Barn <T, U> ::present(const std::string &str) const
+	{
+		auto itr = std::find_if(ops.begin(), ops.end(), [&](const std::pair <ID, token *> &pr) {
+			return pr.first.first == str;
+		});
+
+		return itr != ops.end();
 	}
 
 	template <class T, class U>
