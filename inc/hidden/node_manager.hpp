@@ -133,8 +133,7 @@ namespace zhetapi {
 			std::cout << "Parsing failed" << std::endl;
 		}
 		
-		std::cout << "-------------------------\nstr: " << str <<
-			std::endl;
+		std::cout << "-------------------------" << std::endl;
 	}
 
 	template <class T, class U>
@@ -294,62 +293,102 @@ namespace zhetapi {
 	template <class T, class U>
 	node node_manager <T, U> ::expand(const std::string &str, const std::vector <node> &leaves)
 	{
-		node out = nf_one();
+		typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
+			
+		ctx contexts;
 
-		std::string tmp;
-		std::string accumul;
+		contexts.push_back({{}, ""});
 
-		std::cout << "symbol: " << str << std::endl;
-
+		using namespace std;
 		for (size_t i = 0; i < str.length(); i++) {
-			tmp += str[i];
-			accumul += str[i];
+			ctx tmp;
 
-			if (__barn.present(tmp)) {
-				out = node(new operation_holder("*"), out,
-						node(new operation_holder(tmp), leaves));
-				
-				tmp.clear();
+			for (auto &pr : contexts) {
+				pr.second += str[i];
+			
+				auto itr = find(__params.begin(), __params.end(), pr.second);
+
+				size_t index = std::distance(__params.begin(), itr);
+
+				token *tptr = __barn.get(pr.second);
+
+				bool matches = true;
+
+				node t;
+				if (__barn.present(pr.second))
+					t = node(new operation_holder(pr.second), {});
+				else if (itr != __params.end())
+					t = node(new node_reference(&__refs[index], pr.second), {});
+				else if (tptr != nullptr)
+					t = node(tptr, {});
+				else
+					matches = false;
+
+				if (matches) {
+					tmp.push_back(pr);
+
+					pr.first.push_back(t);
+					pr.second.clear();
+				}
 			}
+
+			for (auto pr : tmp)
+				contexts.push_back(pr);
 		}
 
-		std::string cpy = tmp;
+		/*
+                 * Extract the optimal choice. This decision is made based on
+                 * the number of tokens read. The heurestic used chooses a
+                 * node list which has undergone complete parsing (no leftover
+                 * string), and whose size is minimal.
+                 */
+		std::vector <node> choice;
 
-		tmp.clear();
+		bool valid = false;
+		for (auto pr : contexts) {
+			if (pr.second.empty()) {
+				valid = true;
 
-		for (size_t i = 0; i < cpy.length(); i++) {
-			tmp += cpy[i];
-
-			auto itr = find(__params.begin(), __params.end(), tmp);
-
-			size_t index = std::distance(__params.begin(), itr);
-
-			if (itr != __params.end()) {
-				out = node(new operation_holder("*"), out,
-						node(new node_reference(&__refs[index],
-								tmp), leaves));
-
-				tmp.clear();
-			}
-
-			token *tptr = __barn.get(tmp);
-
-			if (tptr != nullptr) {
-				out = node(new operation_holder("*"), out,
-						node(tptr, leaves));
-
-				tmp.clear();
+				if (choice.size() == 0)
+					choice = pr.first;
+				else if (choice.size() > pr.first.size())
+					choice = pr.first;
 			}
 		}
-
+		
 		/*
 		 * If tmp is not empty, it implies that we could not find a
 		 * match for it, and therefore the parsing is incomplete.
 		 */
-		if (!tmp.empty())
-			throw undefined_symbol("Undefined symbol cluster \"" + tmp + "\"");
+		if (!valid)
+			throw undefined_symbol("Undefined symbol cluster \"" + str + "\"");
 
-		return out;
+		/*
+		 * The very last token is attributed the leaves
+		 */
+		choice[choice.size() - 1].__leaves = leaves;
+
+		/* 
+		 * Binary fusing. Advantageous to linear fusing in the way in
+		 * which it produces a tree with fewer multiplication nodes.
+		 */
+		while (choice.size() > 1) {
+			std::vector <node> tmp;
+
+			size_t n = choice.size();
+
+			for (size_t i = 0; i < n/2; i++) {
+				tmp.push_back(node(new operation_holder("*"), {choice[i], choice[i + 1]}));
+			}
+
+			if (n % 2)
+				tmp.push_back(choice[n - 1]);
+		
+			choice = tmp;
+		}
+
+
+		return choice[0];
 	}
 
 	template <class T, class U>

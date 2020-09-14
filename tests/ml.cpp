@@ -41,27 +41,27 @@ int main()
 
 	cout << tensor.print() << endl;
 
-	Optimizer <double> opt;
-	SquaredError <double> opt_s;
-	MeanSquaredError <double> opt_ms;
+	Test <double> opt;
+	// SquaredError <double> opt_s;
+	// MeanSquaredError <double> opt_ms;
 
 	cout << "--------------------------------" << endl;
 
 	cout << "error: " << opt({3, 1, 4}, {4, 1, 5}) << endl;
-	cout << "squared error: " << opt_s({3, 1, 4}, {4, 1, 5}) << endl;
-	cout << "mean squared error: " << opt_ms({3, 1, 4}, {4, 1, 5}) << endl;
+	// cout << "squared error: " << opt_s({3, 1, 4}, {4, 1, 5}) << endl;
+	// cout << "mean squared error: " << opt_ms({3, 1, 4}, {4, 1, 5}) << endl;
 
 	cout << "--------------------------------" << endl;
 
-	auto dopt = opt.derivative();
-	auto dopt_s = opt_s.derivative();
-	auto dopt_ms = opt_ms.derivative();
+	std::shared_ptr <Optimizer <double>> dopt = opt.derivative();
+	// Optimizer <double> *dopt_s = &opt_s.derivative();
+	// Optimizer <double> *dopt_ms = &opt_ms.derivative();
 
 	cout << "D error: " << dopt->operator()({3, 1, 4}, {4, 1, 5}) << endl;
-	cout << "D squared error: " << dopt_s->operator()({3, 1, 4}, {4, 1, 5}) << endl;
-	cout << "D mean squared error: " << dopt_ms->operator()({3, 1, 4}, {4, 1, 5}) << endl;
+	// cout << "D squared error: " << dopt_s->operator()({3, 1, 4}, {4, 1, 5}) << endl;
+	// cout << "D mean squared error: " << dopt_ms->operator()({3, 1, 4}, {4, 1, 5}) << endl;
 
 	cout << "--------------------------------" << endl;
 
-	model.learn({1, 1, 1, 1}, {2}, new MeanSquaredError<double> ());
+	// model.learn({1, 1, 1, 1}, {2}, new MeanSquaredError<double> ());
 }

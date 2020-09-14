@@ -21,15 +21,16 @@ namespace ml {
 
 	template <class T>
 	class SquaredError : public Optimizer <T> {
+		__DSquaredError <T> __deriv;
 	public:
 		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
 			std::cout << "SQUARED" << std::endl;
 			return __squared <T> (comp, in);
 		}
 
-		__DSquaredError <T> *derivative() const override
+		Optimizer <T> &derivative()
 		{
-			return new __DSquaredError <T> ();
+			return __deriv;
 		}
 	};
 
@@ -45,15 +46,16 @@ namespace ml {
 
 	template <class T>
 	class MeanSquaredError : public Optimizer <T> {
+		__DMeanSquaredError <T> __deriv;
 	public:
 		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
 			std::cout << "MEAN SQUARED" << std::endl;
 			return __mean_squared <T> (comp, in);
 		}
 
-		__DMeanSquaredError <T> *derivative() const
+		Optimizer <T> &derivative()
 		{
-			return new __DMeanSquaredError <T> ();
+			return __deriv;
 		}
 	};
 

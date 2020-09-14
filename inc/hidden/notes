@@ -13,6 +13,10 @@ Add Gaussian elimination.
 
 Add more general matrix/vector concatenation operations.
 
+Add special operations that take a variadic number of operations. Although
+operations can already take vectors of operands, add a type identifier (in the
+overloading sense) that is able to recognize variadic operations.
+
 ==============
 Modifications:
 ==============

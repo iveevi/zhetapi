@@ -86,6 +86,9 @@ namespace ml {
 
 		using namespace std;
 
+		cout << "type: " << typeid(*opt).name() << std::endl;
+		cout << "type: " << typeid(MeanSquaredError <double>).name() << std::endl;
+
 		cout << "tmp: " << tmp << endl;
 		cout << "out: " << out << endl;
 		cout << "Error: " << opt->operator()(out, tmp) << endl;
