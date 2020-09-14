@@ -7,7 +7,7 @@
 #include <function.hpp>
 #include <engine.hpp>
 
-#define TEST2
+#define TEST4
 
 using namespace std;
 using namespace zhetapi;
@@ -68,13 +68,7 @@ int main()
 
 #elif defined(TEST4)
 
-	Engine eng("src/simplifications.ztp");
-
-	std::type_index a = typeid(zhetapi::operand <int>);
-	std::type_index b = typeid(zhetapi::operand <int>);
-
-	cout << "a: " << a.name() << endl;
-	cout << "b: " << b.name() << endl;
+	Engine <double, int> eng("src/std_simplifications.ztp");
 
 #endif
 

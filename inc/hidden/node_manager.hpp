@@ -157,32 +157,6 @@ namespace zhetapi {
 
 		// Label the tree
 		label(__tree);
-	
-		std::cout << "-------------------------\nstr: " << str <<
-			std::endl;
-
-		if (r) {
-			// Status
-			std::cout << "Parsing succeeded";
-
-			if (iter != end)
-				std::cout << " (NOT FULLY PARSED)";
-
-			std::cout << std::endl;
-
-			// Node
-			std::cout << "nd:" << std::endl;
-			__tree.print();
-
-			std::cout << "refs:" << std::endl;
-			for (auto &ref : __refs)
-				ref.print();
-		} else {
-			std::cout << "Parsing failed" << std::endl;
-		}
-		
-		std::cout << "-------------------------\nstr: " << str <<
-			std::endl;
 	}
 
 	// Copy constructor and operator
@@ -391,6 +365,21 @@ namespace zhetapi {
 		return choice[0];
 	}
 
+	// Printing utilities
+	template <class T, class U>
+	void node_manager <T, U> ::print() const
+	{
+		std::cout << "Tree:" << std::endl;
+		__tree.print();
+
+		if (__refs.size()) {
+			std::cout << "Refs [" << __refs.size() << "]" << std::endl;
+			for (auto &ref : __refs)
+				ref.print();
+		}
+	}
+
+	// Labeling utilities
 	template <class T, class U>
 	void node_manager <T, U> ::label(node &ref) const
 	{
