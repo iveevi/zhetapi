@@ -27,6 +27,8 @@ namespace zhetapi {
 
 		template <class ... A>
 		token *derivative(const std::string &, A ...);
+
+		void print() const;
 	private:
 		template <class A>
 		void gather(std::vector <token *> &, A);
@@ -168,6 +170,14 @@ namespace zhetapi {
 		return diff;
 	}
 
+	// Printing utilities
+	template <class T, class U>
+	void Function <T, U> ::print() const
+	{
+		__manager.print();
+	}
+
+	// Gathering facilities
 	template <class T, class U>
 	template <class A>
 	void Function <T, U> ::gather(std::vector <token *> &tokens, A in)

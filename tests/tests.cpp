@@ -70,6 +70,12 @@ int main()
 
 	Engine <double, int> eng("src/std_simplifications.ztp");
 
+	node_manager<double, int> mg("x^2 * 1", {"x"});
+
+	mg.print();
+
+	mg.simplify(eng);
+
 #endif
 
 	return 0;

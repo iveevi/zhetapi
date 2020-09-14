@@ -11,6 +11,9 @@
 namespace zhetapi {
 
 	template <class T, class U>
+	class Engine;
+
+	template <class T, class U>
 	class node_manager {
 		/*
 		 * Internal (common between nodes) barn class used to make
@@ -53,6 +56,8 @@ namespace zhetapi {
 		 */
 		void expand(node &);
 
+		void simplify(Engine <T, U> &);
+
 		void print() const;
 	private:
 		token *value(node) const;
@@ -62,6 +67,8 @@ namespace zhetapi {
 		void rereference(node &);
 
 		node expand(const std::string &, const std::vector <node> &);
+
+		void simplify(node &, Engine <T, U> &);
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -363,6 +370,31 @@ namespace zhetapi {
 
 
 		return choice[0];
+	}
+
+	// Simplication methods
+	template <class T, class U>
+	void node_manager <T, U> ::simplify(Engine <T, U> &eng)
+	{
+		using namespace std;
+
+		cout << "Simplifying..." << endl;
+
+		for (auto itr = eng.begin(); itr != eng.end(); itr++) {
+			itr->first.print();
+
+			cout << "Should be" << endl;
+
+			itr->second.print();
+		}
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::simplify(node &tree, Engine <T, U> &eng)
+	{
+		using namespace std;
+
+		cout << "Simplifying..." << endl;
 	}
 
 	// Printing utilities

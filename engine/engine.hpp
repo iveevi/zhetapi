@@ -13,10 +13,13 @@
 #include <node_manager.hpp>
 
 namespace zhetapi {
+	
+	template <class T, class U>
+	using rule = std::vector <std::pair <node_manager <T, U>, node_manager<T, U>>>;
 
 	template <class T, class U>
 	class Engine {
-		std::vector <std::pair <node_manager <T, U>, node_manager<T, U>>> __std;
+		rule <T, U> __std;
 	public:
 		// Load resources
 		Engine(const std::string &);
@@ -24,7 +27,18 @@ namespace zhetapi {
 		// Save resources
 		~Engine();
 
+		// Iterators to rules
+		typename rule <T, U> ::iterator begin();
+		typename rule <T, U> ::iterator end();
+
+		const typename rule <T, U> ::const_iterator &begin() const;
+		const typename rule <T, U> ::const_iterator &end() const;
+
+		// Statics
 		static std::vector <std::string > variables;
+
+		// Friends
+		friend class node_manager <T, U>;
 	};
 
 	template <class T, class U>
@@ -47,19 +61,40 @@ namespace zhetapi {
 			first = line.substr(0, itr);
 			second = line.substr(itr + 1);
 
-			cout << "----------------------------------------------" << endl;
-			cout << "line: " << line << endl;
-
 			node_manager <T, U> f = node_manager <T, U> (first, variables);
 			node_manager <T, U> s = node_manager <T, U> (second, variables);
 
-			f.print();
-			s.print();
+			__std.push_back({f, s});
 		}
 	}
 
 	template <class T, class U>
 	Engine <T, U> ::~Engine() {}
+
+	// Iterators
+	template <class T, class U>
+	typename rule <T, U> ::iterator Engine <T, U> ::begin()
+	{
+		return __std.begin();
+	}
+
+	template <class T, class U>
+	typename rule <T, U> ::iterator Engine <T, U> ::end()
+	{
+		return __std.end();
+	}
+
+	template <class T, class U>
+	const typename rule <T, U> ::const_iterator &Engine <T, U> ::begin() const
+	{
+		return __std.begin();
+	}
+
+	template <class T, class U>
+	const typename rule <T, U> ::const_iterator &Engine <T, U> ::end() const
+	{
+		return __std.end();
+	}
 
 }
 
