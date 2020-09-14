@@ -394,6 +394,27 @@ namespace zhetapi {
 		__add_unary_operation_ftr(coth, Z, R, 1/tanh(in->get()));
 		__add_unary_operation_ftr(coth, Q, R, 1/tanh(R (in->get())));
 		__add_unary_operation_ftr(coth, R, R, 1/tanh(in->get()));
+
+		// Logarithms
+		__add_unary_operation_ftr(ln, Z, R, log(R (in->get())));
+		__add_unary_operation_ftr(ln, Q, R, log(R (in->get())));
+		__add_unary_operation_ftr(ln, R, R, log(R (in->get())));
+		
+		__add_unary_operation_ftr(log, Z, R, log10(R (in->get())));
+		__add_unary_operation_ftr(log, Q, R, log10(R (in->get())));
+		__add_unary_operation_ftr(log, R, R, log10(R (in->get())));
+		
+		__add_binary_operation_ftr(log, Z, Z, R, log(R (b->get()))/log(R (a->get())));
+		__add_binary_operation_ftr(log, Q, Q, R, log(R (b->get()))/log(R (a->get())));
+		__add_binary_operation_ftr(log, R, R, R, log(R (b->get()))/log(R (a->get())));
+
+		__add_heterogenous_binary_operation_ftr(log, Z, R, R, log(R (b->get()))/log(R (a->get())));
+		__add_heterogenous_binary_operation_ftr(log, Z, Q, R, log(R (b->get()))/log(R (a->get())));
+		__add_heterogenous_binary_operation_ftr(log, Q, R, R, log(R (b->get()))/log(R (a->get())));
+		
+		__add_unary_operation_ftr(lg, Z, R, log(R (in->get()))/log(2));
+		__add_unary_operation_ftr(lg, Q, R, log(R (in->get()))/log(2));
+		__add_unary_operation_ftr(lg, R, R, log(R (in->get()))/log(2));
 		
 		//////////////////////////////////////////
 		// Vector operations

@@ -31,7 +31,10 @@ namespace zhetapi {
 		tnh,
 		cch,
 		sch,
-		cth
+		cth,
+		lxg,
+		xln,
+		xlg
 	};
 
 	std::string strcodes[] = {
@@ -54,7 +57,10 @@ namespace zhetapi {
 		"tanh",
 		"csch",
 		"sech",
-		"coth"
+		"coth",
+		"log",
+		"ln",
+		"lg"
 	};
 
 	struct operation_holder : public token {
@@ -113,6 +119,13 @@ namespace zhetapi {
 			code = sch;
 		else if (str == "coth")
 			code = cth;
+		else if (str == "log")
+			code = lxg;
+		else if (str == "ln")
+			code = xln;
+		else if (str == "lg")
+			code = xlg;
+
 	}
 
 	token::type operation_holder::caller() const
