@@ -3,7 +3,7 @@
 
 // Engine headers
 #include <barn.hpp>
-#include <node_reference.hpp>
+#include <variable_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
 #include <variable_holder.hpp>
@@ -120,27 +120,6 @@ namespace zhetapi {
 
 		// Label the tree
 		label(__tree);
-	
-		std::cout << "-------------------------\nstr: " << str <<
-			std::endl;
-
-		if (r) {
-			// Status
-			std::cout << "Parsing succeeded";
-
-			if (iter != end)
-				std::cout << " (NOT FULLY PARSED)";
-
-			std::cout << std::endl;
-
-			// Node
-			std::cout << "nd:" << std::endl;
-			__tree.print();
-		} else {
-			std::cout << "Parsing failed" << std::endl;
-		}
-		
-		std::cout << "-------------------------" << std::endl;
 	}
 
 	template <class T, class U>
@@ -225,6 +204,7 @@ namespace zhetapi {
 
 			return tptr;
 		case token::ndr:
+		case token::vbr:
 			t = (dynamic_cast <node_reference *>
 					(tree.__tptr.get()));
 
@@ -299,7 +279,7 @@ namespace zhetapi {
 				if (__barn.present(pr.second))
 					t = node(new operation_holder(pr.second), {});
 				else if (itr != __params.end())
-					t = node(new node_reference(&__refs[index], pr.second), {});
+					t = node(new variable_reference(&__refs[index], pr.second), {});
 				else if (tptr != nullptr)
 					t = node(tptr, {});
 				else
@@ -425,6 +405,12 @@ namespace zhetapi {
 			for (node &leaf : ref.__leaves)
 				label(leaf);
 
+			break;
+		case token::vbr:
+			ref.__label = l_variable_reference;
+			break;
+		case token::ndr:
+			ref.__label = l_node_reference;
 			break;
 		}
 	}

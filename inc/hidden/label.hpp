@@ -45,6 +45,10 @@ namespace zhetapi {
 		l_constant_matrix_complex_rational,
 		l_constant_matrix_complex_real,
 
+		// References
+		l_variable_reference,
+		l_node_reference,
+
 		// Operations
 		l_dot,
 
@@ -108,6 +112,10 @@ namespace zhetapi {
 		"constant matrix complex integer",
 		"constant matrix complex rational",
 		"constant matrix complex real",
+		
+		// References
+		"variable reference",
+		"node reference",
 
 		// Operations
 		"dot",
