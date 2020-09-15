@@ -18,6 +18,12 @@ namespace ml {
 	/*
 	 * Deep Nerual Network
 	 *
+	 * Note that layers contain pointers to activations. These are not
+	 * allocated and are simply COPIES of what the USER allocates. The user
+	 * can expect that the resources they allocated will not be destroyed
+	 * within this class, and that they can use the resources afterwards. In
+	 * other words, pointer data is READ ONLY.
+	 *
 	 * @tparam T is the type with which calculations are performed
 	 * @tparam U is the type of activation parameter scheme, ie. unary or
 	 * binary
@@ -25,8 +31,7 @@ namespace ml {
 	template <class T>
 	class DeepNeuralNetwork {
 	public:
-		typedef std::pair <std::size_t, std::shared_ptr <Activation<T>>> Layer;
-		typedef std::pair <std::size_t, Activation<T> *> PreLayer;
+		typedef std::pair <std::size_t, Activation<T> *> Layer;
 	private:
 		std::vector <Layer>		__layers;
 		std::vector <Matrix <T>>	__weights;
@@ -34,7 +39,7 @@ namespace ml {
 		std::size_t			__isize;
 		std::size_t			__osize;
 	public:
-		DeepNeuralNetwork(const std::vector <PreLayer> &, const std::function <T ()> &);
+		DeepNeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
 		Vector <T> operator()(const Vector <T> &) const;
 
@@ -44,13 +49,11 @@ namespace ml {
 	};
 
 	template <class T>
-	DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <PreLayer> &layers,
+	DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <Layer> &layers,
 			const std::function <T ()> &random) : __random(random),
-			__isize(layers[0].first), __osize(layers[layers.size() - 1].first)
+			__isize(layers[0].first), __osize(layers[layers.size() - 1].first),
+			__layers(layers)
 	{
-		for (auto pr : layers)
-			__layers.push_back({pr.first, std::shared_ptr <Activation <T>> (pr.second)});
-
 		size_t size = __layers.size();
 
 		for (size_t i = 0; i < size - 1; i++) {
@@ -66,12 +69,10 @@ namespace ml {
 	{
 		assert(in.size() == __isize);
 
-		Vector <T> tmp = in.activate(__layers[0].second.get());
+		Vector <T> tmp = (*__layers[0].second)(in);
 
-		for (size_t i = 0; i < __weights.size(); i++) {
-			tmp = (__weights[i] * tmp.append_above(T (1))) \
-			      .activate(__layers[i + 1].second.get());
-		}
+		for (size_t i = 0; i < __weights.size(); i++)
+			tmp = (*__layers[i + 1].second)(__weights[i] * tmp.append_above(T (1)));
 		
 		return tmp;
 	}
@@ -86,13 +87,10 @@ namespace ml {
 
 		using namespace std;
 
-		cout << "type: " << typeid(*opt).name() << std::endl;
-		cout << "type: " << typeid(MeanSquaredError <double>).name() << std::endl;
-
 		cout << "tmp: " << tmp << endl;
 		cout << "out: " << out << endl;
-		cout << "Error: " << opt->operator()(out, tmp) << endl;
-		cout << "DError: " << opt->derivative()->operator()(out, tmp) << endl;
+		cout << "Error: " << (*opt)(out, tmp) << endl;
+		cout << "DError: " << (*(opt->derivative()))(out, tmp) << endl;
 	}
 
 	template <class T>

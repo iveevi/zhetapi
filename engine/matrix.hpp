@@ -8,8 +8,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <activation.hpp>
-
 #ifdef minor
 
 #undef minor
@@ -95,9 +93,6 @@ public:
 
 	// Miscellanious opertions
 	void randomize(const std::function <T ()> &);
-
-	// Machine learning
-	Matrix <T> activate(ml::Activation <T> *) const;
 
 	// Values
 	T determinant() const;
@@ -363,10 +358,10 @@ Matrix <T> ::Matrix(size_t rs, size_t cs,
 template <class T>
 Matrix <T> ::~Matrix()
 {
-	for (size_t i = 0; i < rows; i++)
+	/* for (size_t i = 0; i < rows; i++)
 		delete m_array[i];
 
-	delete[] m_array;
+	delete[] m_array; */
 }
 
 template <class T>
@@ -643,15 +638,6 @@ void Matrix <T> ::randomize(const std::function<T ()> &ftr)
 		for (size_t j = 0; j < cols; j++)
 			m_array[i][j] = ftr();
 	}
-}
-
-// Machine learning
-template <class T>
-Matrix <T> Matrix <T> ::activate(ml::Activation <T> *act) const
-{
-	return Matrix(this->rows, this->cols, [&](size_t i, size_t j) {
-			return (*act)(this->m_array[i][j]);
-		});
 }
 
 template <class T>

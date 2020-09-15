@@ -26,8 +26,8 @@ namespace ml {
 	public:
 		__DLinear(const T &alpha = T(1)) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __d_leaky_relu(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), __alpha);
 		}
 	};
 	
@@ -37,8 +37,9 @@ namespace ml {
 	public:
 		Linear(const T &alpha = T(1)) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __leaky_relu(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return x[i]
+					* __alpha;});
 		}
 
 		Activation <T> *derivative() const {
@@ -50,16 +51,18 @@ namespace ml {
 	template <class T>
 	class __DReLU : public Activation <T> {
 	public:
-		T operator()(const T &x) const {
-			return __d_relu(x);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__d_relu(x[i]);});
 		}
 	};
 
 	template <class T>
 	class ReLU : public Activation <T> {
 	public:
-		T operator()(const T &x) const {
-			return __relu(x);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__relu(x[i]);});
 		}
 
 		Activation <T> *derivative() const {
@@ -74,8 +77,9 @@ namespace ml {
 	public:
 		__DLeakyReLU(const T &alpha) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __d_leaky_relu(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__d_leaky_relu(x[i], __alpha);});
 		}
 	};
 	
@@ -85,8 +89,9 @@ namespace ml {
 	public:
 		LeakyReLU(const T &alpha) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __leaky_relu(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__leaky_relu(x[i], __alpha);});
 		}
 
 		Activation <T> *derivative() const {
@@ -98,16 +103,18 @@ namespace ml {
 	template <class T>
 	class __DSigmoid : public Activation <T> {
 	public:
-		T operator()(const T &x) const {
-			return __d_sigmoid(x);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__d_sigmoid(x[i]);});
 		}
 	};
 
 	template <class T>
 	class Sigmoid : public Activation <T> {
 	public:
-		T operator()(const T &x) const {
-			return __sigmoid(x);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__sigmoid(x[i]);});
 		}
 
 		Activation <T> *derivative() const {
@@ -122,8 +129,9 @@ namespace ml {
 	public:
 		__DScaledSigmoid(const T &alpha) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __d_scaled_sigmoid(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__d_scaled_sigmoid(x[i], __alpha);});
 		}
 	};
 	
@@ -133,8 +141,9 @@ namespace ml {
 	public:
 		ScaledSigmoid(const T &alpha) : __alpha(alpha) {}
 
-		T operator()(const T &x) const {
-			return __scaled_sigmoid(x, __alpha);
+		Vector <T> operator()(const Vector <T> &x) const {
+			return Vector <T> (x.size(), [&](size_t i) {return
+					__scaled_sigmoid(x[i], __alpha);});
 		}
 
 		Activation <T> *derivative() const {

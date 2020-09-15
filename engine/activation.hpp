@@ -1,9 +1,12 @@
 #ifndef ACTIVATIONS_H_
 #define ACTIVATIONS_H_
 
-// Engine headers
+// C/C++ headers
 #include <algorithm>
 #include <functional>
+
+// Engine headers
+#include <vector.hpp>
 
 namespace ml {
 
@@ -17,7 +20,7 @@ namespace ml {
 	public:
 		Activation();
 
-		virtual T operator()(const T &) const;
+		virtual Vector <T> operator()(const Vector <T> &) const;
 
 		virtual Activation *derivative() const;
 	};
@@ -26,9 +29,9 @@ namespace ml {
 	Activation <T> ::Activation() {}
 
 	template <class T>
-	T Activation <T> ::operator()(const T &x) const
+	Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
 	{
-		return T (0);
+		return x;
 	}
 
 	template <class T>
