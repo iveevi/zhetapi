@@ -68,7 +68,7 @@ int main()
 
 #elif defined(TEST4)
 
-	Engine <double, int> eng("src/std_simplifications.ztp");
+	Engine <double, int> eng("src/default_simplifications.ztp");
 
 	node_manager<double, int> mg("x^2 * 1", {"x"});
 

@@ -213,10 +213,20 @@ Below are the currently usable classes.
 
 | Class Name | Description | Engine Header
 
-| `Vector` | A vector in linear algebra | `vector.h`
-| `Matrix` | A matrix in linear algebra | `matrix.h`
-| `Polynomial` | A polynomial in algebra | `polynomial.h`
-| `Complex` | A complex number in mathematics | `complex.h`
+| `Activation` | An activation in the standard machine learning context | `activations.hpp`
+| `Barn` | A class which contains settings for other classes like functions | `rational.hpp`
+| `Complex` | A complex number in mathematics | `complex.hpp`
+| `Engine` | A class which contains information on legal simplification and
+differentiations | `complex.hpp`
+| `Function` | A mathematical function | `function.hpp`
+| `Matrix` | A matrix in linear algebra | `matrix.hpp`
+| `Network` | A deep neural network in machine learning | `network.hpp`
+| `Optimizer` | A class which computes costs, in the standard machine learning
+context | `optimizer.hpp`
+| `Polynomial` | A polynomial in algebra | `polynomial.hpp`
+| `Rational` | A rational number in algebra | `rational.hpp`
+| `Tensor` | Represents a tensor in algebra | `tensor.hpp`
+| `Vector` | A vector in linear algebra | `vector.hpp`
 
 |===
 
@@ -236,6 +246,13 @@ from the command line -- it will essentially be a calculator app like `octave`.
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
 
+| inc | Contains the source used in library template headers, and which are
+optional to include. Includes code that is not meant to be seen by the users.
+
+| src | Contains standard configurations for zhetapi classes, such as
+simplifications for expression trees and derivative rules for function
+differentiation.
+
 | tests | Code to test library features.
 
 | texifier | Code to convert plain text math to Latex. Used on the website to
@@ -249,8 +266,8 @@ capabilities. This is still in early developement.
 
 ## Usage
 
-The prerequisites for using the library are `bison` and `flex`, which are used
-to parse inputs.
+The prerequisite for using the library is Boost, specifically the Spirit,
+Phoenix and Fusion libraries.
 
 Apart from this, the user only needs to clone the repository and are run `make
 parsers` in the repository directory. After this, one simply include the files
