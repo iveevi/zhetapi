@@ -8,29 +8,32 @@
 #include <std_optimizer_functions.hpp>
 
 namespace ml {
+	
+	/*
+	 * All optimizer classes have inlined member functions for the same
+	 * reason that the activation classes are inlined. Obscure naming is
+	 * also done for the same reason.
+	 */
 
 	// Squared error
 	template <class T>
 	class __DSquaredError : public Optimizer <T> {
 	public:
-		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
-			std::cout << "D/DX SQUARED" << std::endl;
+		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 			return __d_squared <T> (comp, in);
 		}
 	};
 
 	template <class T>
 	class SquaredError : public Optimizer <T> {
-		__DSquaredError <T> __deriv;
 	public:
-		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
-			std::cout << "SQUARED" << std::endl;
+		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 			return __squared <T> (comp, in);
 		}
 
-		Optimizer <T> &derivative()
+		Optimizer <T> *derivative() const
 		{
-			return __deriv;
+			return new __DSquaredError <T> ();
 		}
 	};
 
@@ -38,24 +41,21 @@ namespace ml {
 	template <class T>
 	class __DMeanSquaredError : public Optimizer <T> {
 	public:
-		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
-			std::cout << "D/DX MEAN SQUARED" << std::endl;
+		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 			return __d_mean_squared <T> (comp, in);
 		}
 	};
 
 	template <class T>
 	class MeanSquaredError : public Optimizer <T> {
-		__DMeanSquaredError <T> __deriv;
 	public:
-		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) {
-			std::cout << "MEAN SQUARED" << std::endl;
+		Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 			return __mean_squared <T> (comp, in);
 		}
 
-		Optimizer <T> &derivative()
+		Optimizer <T> *derivative() const
 		{
-			return __deriv;
+			return new __DMeanSquaredError <T> ();
 		}
 	};
 
