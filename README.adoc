@@ -249,7 +249,7 @@ present in this module. It will later contain API functions.
 | inc | Contains the source used in library template headers, and which are
 optional to include. Includes code that is not meant to be seen by the users.
 
-| src | Contains standard configurations for zhetapi classes, such as
+| zhp | Contains standard configurations for zhetapi classes, such as
 simplifications for expression trees and derivative rules for function
 differentiation.
 
