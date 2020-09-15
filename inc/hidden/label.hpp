@@ -49,6 +49,9 @@ namespace zhetapi {
 		l_variable_reference,
 		l_node_reference,
 
+		// Miscellaneious
+		l_wildcard,
+
 		// Operations
 		l_dot,
 
@@ -116,6 +119,9 @@ namespace zhetapi {
 		// References
 		"variable reference",
 		"node reference",
+
+		// Miscellaneious
+		"wildcard",
 
 		// Operations
 		"dot",

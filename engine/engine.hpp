@@ -64,6 +64,8 @@ namespace zhetapi {
 			node_manager <T, U> f = node_manager <T, U> (first, variables);
 			node_manager <T, U> s = node_manager <T, U> (second, variables);
 
+			f.refactor_reference("u", new wildcard());
+
 			__std.push_back({f, s});
 		}
 	}

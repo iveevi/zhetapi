@@ -27,6 +27,7 @@ namespace zhetapi {
 		 * 	ftn - function
 		 * 	ndr - node reference
 		 * 	vbr - variable reference
+		 * 	wld - wildcard
 		 */
 		enum type {
 			opd,
@@ -37,7 +38,8 @@ namespace zhetapi {
 			vcl,
 			ftn,
 			ndr,
-			vbr
+			vbr,
+			wld
 		};
 
 		/*

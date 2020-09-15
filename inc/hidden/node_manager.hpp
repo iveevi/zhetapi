@@ -7,6 +7,7 @@
 #include <parser.hpp>
 #include <types.hpp>
 #include <variable_holder.hpp>
+#include <wildcard.hpp>
 
 namespace zhetapi {
 
@@ -58,6 +59,8 @@ namespace zhetapi {
 
 		void simplify(Engine <T, U> &);
 
+		void refactor_reference(const std::string &, token *);
+
 		void print() const;
 	private:
 		token *value(node) const;
@@ -69,6 +72,8 @@ namespace zhetapi {
 		node expand(const std::string &, const std::vector <node> &);
 
 		void simplify(node &, Engine <T, U> &);
+		
+		void refactor_reference(node &, const std::string &, token *);
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -375,6 +380,26 @@ namespace zhetapi {
 		using namespace std;
 
 		cout << "Simplifying..." << endl;
+	}
+
+	// Refactoring methods
+	template <class T, class U>
+	void node_manager <T, U> ::refactor_reference(const std::string &str, token *tptr)
+	{
+		refactor_reference(__tree, str, tptr);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::refactor_reference(node &ref, const
+			std::string &str, token *tptr)
+	{
+		node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
+		
+		if (ndr && ndr->symbol() == str)
+			ref.__tptr.reset(tptr);
+
+		for (node &leaf : ref.__leaves)
+			refactor_reference(leaf, str, tptr);
 	}
 
 	// Printing utilities
