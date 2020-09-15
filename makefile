@@ -54,7 +54,7 @@ ml_build:	engine		\
 		build		\
 		tests
 	@echo "[BUILDING ML TESTER]\n"
-	g++ -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -lfl -o build/ml
+	g++ -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -o build/ml
 
 # GPU testing
 gpu:		gpu_build
@@ -65,7 +65,17 @@ gpu_build:	inc/gpu	\
 		build	\
 		tests
 	@echo "[BUILDING GPU TESTER]\n"
-	nvcc -I engine -I engine/hidden tests/gpu.cu -g -lfl -o build/gpu
+	nvcc -I engine -I engine/hidden tests/gpu.cu -g -o build/gpu
+
+# Manager testing
+manager:	manager_build
+	@echo "\n[RUNNING MANAGER]\n"
+	./build/manager
+
+manager_build:	mgr	\
+		build
+	@echo "[BUILDING MANAGER TESTER]\n"
+	g++ mgr/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
 
 # Build directory
 build:
