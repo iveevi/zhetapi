@@ -18,28 +18,38 @@ using namespace ml;
 
 int main()
 {
+	// Randomize seed
 	srand(clock());
 
+	// Initialize the model
 	DeepNeuralNetwork <double> model({
-		{2, new Linear <double> ()},
-		{2, new Linear <double> ()}
+		{2, new Sigmoid <double> ()},
+		{2, new Sigmoid <double> ()}
 	}, []() {return 0.5 - rand()/(double) RAND_MAX;});
 
-	cout << "1:\t" << model({1, -1}) << endl;
-
 	model.randomize();
 
-	cout << "2:\t" << model({1, 1}) << endl;
+	// Initialize globals
+	Optimizer <double> *opt = new MeanSquaredError <double> ();
 
-	model.randomize();
+	auto input = Vector <double> {1, 1};
+	auto target = Vector <double> {0.65, 0.43};
 
-	cout << "3:\t" << model({1, 1}) << endl;
+	// Perform learning
+	for (size_t i = 0; i < 1000; i++) {
+		cout << "\nRound #" << i + 1 << endl;
 
-	model.print();
+		auto result = model({1, 1});
 
-	for (size_t i = 0; i < 400; i++) {
-		model.learn({1, 1}, {-1, 2}, new MeanSquaredError <double> ());
+		cout << "\n\t(1, 1) = " << result << endl;
+		cout << "\tError = " << (*opt)(target, result)[0] << endl;
+		cout << "\tError = " << 100 * (target - result).norm()/result.norm() << "%" << endl;
+
+		model.learn(input, target, opt);
 		
-		model.print();
+		// model.print();
 	}
+
+	// Free resources
+	delete opt;
 }
