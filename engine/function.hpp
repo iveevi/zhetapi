@@ -38,6 +38,10 @@ namespace zhetapi {
 
 		size_t index(const std::string &) const;
 	public:
+		// Exception classes
+		class invalid_definition {};
+
+		// Static variables
 		static Barn <T, U> barn;
 
 		static T h;
@@ -69,24 +73,44 @@ namespace zhetapi {
 		size_t end;
 		size_t i;
 
+		bool valid;
+		bool sb;
+		bool eb;
+
+		valid = false;
+		sb = false;
+		eb = false;
+
 		// Split string into expression and symbols
 		for (i = 0; i < str.length(); i++) {
 			if (str[i] == '=') {
+				valid = true;
 				index = i;
 				break;
 			}
 		}
+
+		if (!valid)
+			throw invalid_definition();
 
 		__symbol = str.substr(0, index);
 
 
 		// Determine parameters' symbols
 		for (start = -1, i = 0; i < __symbol.length(); i++) {
-			if (str[i] == '(' && start == -1)
+			if (str[i] == '(' && start == -1) {
 				start = i;
-			if (str[i] == ')')
+				sb = true;
+			}
+
+			if (str[i] == ')') {
 				end = i;
+				eb = true;
+			}
 		}
+
+		if (!sb || !eb)
+			throw invalid_definition();
 
 		pack = __symbol.substr(start + 1, end - start - 1);
 
