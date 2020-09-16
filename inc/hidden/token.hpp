@@ -26,7 +26,6 @@ namespace zhetapi {
 		 * 	vcl - variable cluster (place holder)
 		 * 	ftn - function
 		 * 	ndr - node reference
-		 * 	vbr - variable reference
 		 * 	wld - wildcard
 		 */
 		enum type {
@@ -38,7 +37,6 @@ namespace zhetapi {
 			vcl,
 			ftn,
 			ndr,
-			vbr,
 			wld
 		};
 

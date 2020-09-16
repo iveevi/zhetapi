@@ -10,15 +10,19 @@
 namespace zhetapi {
 
 	class node_reference : public token {
+	protected:
 		node *		__ref;
 		std::string	__symbol;
+		bool		__var;
 	public:
-		node_reference(node *, const std::string &);
+		node_reference(node *, const std::string &, bool = false);
 
 		node *get();
 		const node &get() const;
 
 		const std::string &symbol() const;
+
+		bool is_variable() const;
 
 		type caller() const override;
 		token *copy() const override;
@@ -27,8 +31,8 @@ namespace zhetapi {
 		virtual bool operator==(token *) const override;
 	};
 
-	node_reference::node_reference(node *ref, const std::string &str) :
-		__ref(ref), __symbol(str) {}
+	node_reference::node_reference(node *ref, const std::string &str, bool
+			var) : __ref(ref), __symbol(str), __var(var) {}
 
 	node *node_reference::get()
 	{
@@ -43,6 +47,11 @@ namespace zhetapi {
 	const std::string &node_reference::symbol() const
 	{
 		return __symbol;
+	}
+
+	bool node_reference::is_variable() const
+	{
+		return __var;
 	}
 
 	token::type node_reference::caller() const

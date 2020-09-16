@@ -10,8 +10,6 @@
 namespace zhetapi {
 
 	class variable_reference : public node_reference {
-		node *		__ref;
-		std::string	__symbol;
 	public:
 		variable_reference(node *, const std::string &);
 

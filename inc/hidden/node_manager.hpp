@@ -3,7 +3,7 @@
 
 // Engine headers
 #include <barn.hpp>
-#include <variable_reference.hpp>
+#include <node_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
 #include <variable_holder.hpp>
@@ -191,8 +191,7 @@ namespace zhetapi {
 		node *unrefd;
 		
 		token *tptr;
-		node_reference *t;
-
+		
 		switch (*(tree.__tptr)) {
 		case token::opd:
 			return tree.__tptr.get();
@@ -209,10 +208,6 @@ namespace zhetapi {
 
 			return tptr;
 		case token::ndr:
-		case token::vbr:
-			t = (dynamic_cast <node_reference *>
-					(tree.__tptr.get()));
-
 			unrefd = (dynamic_cast <node_reference *>
 					(tree.__tptr.get()))->get();
 
@@ -284,7 +279,7 @@ namespace zhetapi {
 				if (__barn.present(pr.second))
 					t = node(new operation_holder(pr.second), {});
 				else if (itr != __params.end())
-					t = node(new variable_reference(&__refs[index], pr.second), {});
+					t = node(new node_reference(&__refs[index], pr.second, true), {});
 				else if (tptr != nullptr)
 					t = node(tptr, {});
 				else
@@ -411,6 +406,7 @@ namespace zhetapi {
 
 		if (__refs.size()) {
 			std::cout << "Refs [" << __refs.size() << "]" << std::endl;
+			
 			for (auto &ref : __refs)
 				ref.print();
 		}
@@ -431,11 +427,12 @@ namespace zhetapi {
 				label(leaf);
 
 			break;
-		case token::vbr:
-			ref.__label = l_variable_reference;
-			break;
 		case token::ndr:
-			ref.__label = l_node_reference;
+			if ((dynamic_cast <node_reference *>
+					(ref.__tptr.get()))->is_variable())
+				ref.__label = l_variable_reference;
+			else
+				ref.__label = l_node_reference;
 			break;
 		}
 	}
@@ -450,7 +447,7 @@ namespace zhetapi {
 
 			size_t index = std::distance(__params.begin(), itr);
 
-			ref.__tptr.reset(new node_reference(&__refs[index], tmp));
+			ref.__tptr.reset(new node_reference(&__refs[index], tmp, true));
 		}
 
 		for (node &leaf : ref.__leaves)

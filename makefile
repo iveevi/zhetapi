@@ -72,10 +72,18 @@ manager:	manager_build
 	@echo "\n[RUNNING MANAGER]\n"
 	./build/manager
 
-manager_build:	mgr	\
-		build
+manager_build:	build
 	@echo "[BUILDING MANAGER TESTER]\n"
-	g++ mgr/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
+	g++ cfg/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
+
+# CLI testing
+cli:		cli_build
+	@echo "\n[RUNNING CLI]\n"
+	./build/cli
+
+cli_build:	build
+	@echo "[BUILDING CLI TESTER]\n"
+	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -o build/cli
 
 # Build directory
 build:

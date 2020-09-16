@@ -6,8 +6,9 @@
 #include <barn.hpp>
 #include <function.hpp>
 #include <engine.hpp>
+#include <expression.hpp>
 
-#define TEST4
+#define TEST3
 
 using namespace std;
 using namespace zhetapi;
@@ -58,6 +59,8 @@ int main()
 
 	Function <double, int> f = std::string("f(x, y) = x^2 + y");
 
+	f.print();
+
 	try {
 		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
 
@@ -65,6 +68,8 @@ int main()
 	} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
 		cout << e.what() << endl;
 	}
+
+	Function <double, int> g = std::string("g(x,y)");
 
 #elif defined(TEST4)
 
@@ -75,6 +80,14 @@ int main()
 	mg.print();
 
 	mg.simplify(eng);
+
+#elif defined(TEST5)
+
+	cout << "1: " << zhetapi::expr_str <double, int> ("2 * 4") << endl;
+
+	int x = zhetapi::expr <int> ("3 * 6");
+
+	cout << "x: " << x << endl;
 
 #endif
 
