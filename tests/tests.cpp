@@ -59,8 +59,6 @@ int main()
 
 	Function <double, int> f = std::string("f(x, y) = x^2 + y");
 
-	f.print();
-
 	try {
 		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
 
@@ -69,7 +67,7 @@ int main()
 		cout << e.what() << endl;
 	}
 
-	Function <double, int> g = std::string("g(x,y)");
+	Function <double, int> g = std::string("g(x, y) = x^2 + y = 54");
 
 #elif defined(TEST4)
 

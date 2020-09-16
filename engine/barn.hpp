@@ -237,6 +237,12 @@ namespace zhetapi {
 		void put(Variable <A>);
 
 		/*
+		 * Switch to this overload once variables are out.
+		 */
+		template <class A>
+		void put(const std::string &, A);
+
+		/*
 		 * Retrieve a variable of type A from the appropriate stack. Has
 		 * a chance of throwing an exception. Made for the user.
 		 */
@@ -554,6 +560,35 @@ namespace zhetapi {
 			v_stack_mr.insert(var);
 		if (typeid(A) == typeid(VQ))
 			v_stack_mq.insert(var);
+	}
+	
+	/* template <class T, class U>
+	template <class A>
+	void Barn <T, U> ::put(Function <A> var)
+	{
+		if (typeid(A) == typeid(Z))
+			v_stack_z.insert(var);
+		if (typeid(A) == typeid(R))
+			v_stack_r.insert(var);
+		if (typeid(A) == typeid(Q))
+			v_stack_q.insert(var);
+		
+		if (typeid(A) == typeid(CR))
+			v_stack_cr.insert(var);
+		if (typeid(A) == typeid(CQ))
+			v_stack_cq.insert(var);
+		
+		if (typeid(A) == typeid(VR))
+			v_stack_mr.insert(var);
+		if (typeid(A) == typeid(VQ))
+			v_stack_mq.insert(var);
+	} */
+
+	template <class T, class U>
+	template <class A>
+	void Barn <T, U> ::put(const std::string &str, A x)
+	{
+		put(Variable <A> {str, x});
 	}
 
 	template <class T, class U>

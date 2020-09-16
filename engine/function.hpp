@@ -68,6 +68,7 @@ namespace zhetapi {
 		std::string pack;
 		std::string tmp;
 
+		size_t count;
 		size_t index;
 		size_t start;
 		size_t end;
@@ -76,6 +77,8 @@ namespace zhetapi {
 		bool valid;
 		bool sb;
 		bool eb;
+
+		count = 0;
 
 		valid = false;
 		sb = false;
@@ -86,11 +89,12 @@ namespace zhetapi {
 			if (str[i] == '=') {
 				valid = true;
 				index = i;
-				break;
+
+				++count;
 			}
 		}
 
-		if (!valid)
+		if (!valid || count != 1)
 			throw invalid_definition();
 
 		__symbol = str.substr(0, index);
