@@ -127,6 +127,7 @@ const Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 
 		// Rehabitate
 		this->rows = other.get_rows();
+		this->cols = 1;
 
 		// Allocate
 		this->m_array = new T *[this->rows];

@@ -35,17 +35,21 @@ namespace ml {
 	private:
 		std::vector <Layer>		__layers;
 		std::vector <Matrix <T>>	__weights;
+		std::vector <Vector <T>>	__cache;
 		std::function <T ()>		__random;
 		std::size_t			__isize;
 		std::size_t			__osize;
 	public:
 		DeepNeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
-		Vector <T> operator()(const Vector <T> &) const;
+		Vector <T> operator()(const Vector <T> &);
 
 		void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *);
 
 		void randomize();
+
+		// Printing weights
+		void print() const;
 	};
 
 	template <class T>
@@ -65,14 +69,18 @@ namespace ml {
 	}
 
 	template <class T>
-	Vector <T> DeepNeuralNetwork <T> ::operator()(const Vector <T> &in) const
+	Vector <T> DeepNeuralNetwork <T> ::operator()(const Vector <T> &in)
 	{
 		assert(in.size() == __isize);
 
 		Vector <T> tmp = (*__layers[0].second)(in);
 
-		for (size_t i = 0; i < __weights.size(); i++)
+		__cache.clear();
+		for (size_t i = 0; i < __weights.size(); i++) {
+			__cache.push_back(tmp.append_above(T (1)));
+			std::cout << "\ttmp:\t" << tmp << std::endl;
 			tmp = (*__layers[i + 1].second)(__weights[i] * tmp.append_above(T (1)));
+		}
 		
 		return tmp;
 	}
@@ -85,12 +93,26 @@ namespace ml {
 
 		Vector <T> tmp = (*this)(in);
 
+		T alpha = 0.01;
+
 		using namespace std;
 
-		cout << "tmp: " << tmp << endl;
-		cout << "out: " << out << endl;
-		cout << "Error: " << (*opt)(out, tmp) << endl;
-		cout << "DError: " << (*(opt->derivative()))(out, tmp) << endl;
+		auto dO = (*(opt->derivative()))(out, tmp);
+
+		cout << "tmp:\t" << tmp << endl;
+		cout << "out:\t" << out << endl;
+		cout << "Error:\t" << (*opt)(out, tmp) << endl;
+		cout << "DError:\t" << dO << endl;
+		cout << "\trows: " << dO.get_rows() << endl;
+		cout << "\tcols: " << dO.get_cols() << endl;
+		cout << "Cache:\t" << __cache[0] << endl;
+		cout << "\trows: " << __cache[0].get_rows() << endl;
+		cout << "\tcols: " << __cache[0].get_cols() << endl;
+
+		auto gradient = dO * __cache[0].transpose();
+		cout << "Gradient:\t" << gradient << endl;
+
+		__weights[0] -= alpha * gradient;
 	}
 
 	template <class T>
@@ -98,6 +120,20 @@ namespace ml {
 	{
 		for (auto &mat : __weights)
 			mat.randomize(__random);
+	}
+
+	template <class T>
+	void DeepNeuralNetwork <T> ::print() const
+	{
+		std::cout << "================================" << std::endl;
+		
+		std::cout << "Weights:" << std::endl;
+
+		size_t n = 0;
+		for (auto mat : __weights)
+			std::cout << "[" << ++n << "]\t" << mat << std::endl;
+		
+		std::cout << "================================" << std::endl;
 	}
 
 }
