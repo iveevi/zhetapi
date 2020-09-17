@@ -23,8 +23,8 @@ int main()
 
 	// Initialize the model
 	DeepNeuralNetwork <double> model({
-		{2, new Sigmoid <double> ()},
-		{2, new Sigmoid <double> ()}
+		{5, new Sigmoid <double> ()},
+		{3, new Sigmoid <double> ()}
 	}, []() {return 0.5 - rand()/(double) RAND_MAX;});
 
 	model.randomize();
@@ -32,14 +32,16 @@ int main()
 	// Initialize globals
 	Optimizer <double> *opt = new MeanSquaredError <double> ();
 
-	auto input = Vector <double> {1, 1};
-	auto target = Vector <double> {0.65, 0.43};
+	auto input = Vector <double> {1, 1, 1, 1, 1};
+	auto target = Vector <double> {0.65, 0.43, 0.29};
+
+	size_t rounds = 1000;
 
 	// Perform learning
-	for (size_t i = 0; i < 1000; i++) {
+	for (size_t i = 0; i < rounds; i++) {
 		cout << "\nRound #" << i + 1 << endl;
 
-		auto result = model({1, 1});
+		auto result = model(input);
 
 		cout << "\n\t(1, 1) = " << result << endl;
 		cout << "\tError = " << (*opt)(target, result)[0] << endl;
