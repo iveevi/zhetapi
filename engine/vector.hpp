@@ -73,6 +73,10 @@ public:
 
 	template <class U>
 	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
+
+	// Static methods
+	static Vector one(size_t);
+	static Vector rarg(double, double);
 };
 
 template <class T>
@@ -331,6 +335,19 @@ T cross(const Vector <T> &a, const Vector <T> &b)
 		a[2] * b[0] - a[0] * b[2],
 		a[0] * b[1] - a[1] * b[0]
 	};
+}
+
+// Static methods
+template <class T>
+Vector <T> Vector <T> ::one(size_t size)
+{
+	return Vector <T> (size, T(1));
+}
+
+template <class T>
+Vector <T> Vector <T> ::rarg(double r, double theta)
+{
+	return Vector <T> {r * cos(theta), r * sin(theta)};
 }
 
 #endif

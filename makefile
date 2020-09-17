@@ -94,6 +94,15 @@ cli_build_debug:	\
 	@echo "[BUILDING CLI TESTER]\n"
 	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -g -lboost_system -lboost_filesystem -o build/cli
 
+# Physics engine testing
+physics:	physics_build
+	@echo "\n[RUNNING CLI]\n"
+	./build/physics
+
+physics_build:	build
+	@echo "\n[RUNNING CLI]\n"
+	g++ -I engine physics/main.cpp -lglut -lGL -o build/physics
+
 # Build directory
 build:
 	mkdir build
