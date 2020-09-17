@@ -1,79 +1,159 @@
 #ifndef TENSOR_H_
 #define TENSOR_H_
 
+// C/C++ headers
+#include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <vector>
+#include <cassert>
 
-template <class T>
-class Tensor {
-	size_t *	__dim;
-	T *		__array;
+namespace zhetapi {
 
-	size_t		__dims;
-public:
-	Tensor();
-	Tensor(const std::vector <std::size_t> &, const T & = T());
+	template <class T>
+	class Tensor {
+		size_t *	__dim;
+		T *		__array;
 
-	~Tensor();
+		size_t		__dims;
+		size_t		__size;
+	public:
+		Tensor();
+		Tensor(const std::vector <std::size_t> &, const T & = T());
+		Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
+
+		~Tensor();
+
+		// Indexing
+		T &operator[](const std::vector <size_t> &);
+		const T &operator[](const std::vector <size_t> &) const;
+
+		// Printing functions
+		std::string print() const;
+
+		template <class U>
+		friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
+	};
+
+	// Constructors and destructors
+	template <class T>
+	Tensor <T> ::Tensor() : __dim(nullptr), __array(nullptr) {}
+
+	template <class T>
+	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
+			: __dims(dim.size())
+	{
+		__dim = new size_t[__dims];
+
+		size_t prod = 1;
+		for (size_t i = 0; i < __dims; i++) {
+			prod *= dim[i];
+
+			__dim[i] = dim[i];
+		}
+
+		__size = prod;
+
+		__array = new T[prod];
+
+		for (size_t i = 0; i < prod; i++)
+			__array[i] = def;
+	}
+
+	template <class T>
+	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
+			: __dims(dim.size())
+	{
+		__dim = new size_t[__dims];
+
+		size_t prod = 1;
+		for (size_t i = 0; i < __dims; i++) {
+			prod *= dim[i];
+
+			__dim[i] = dim[i];
+		}
+
+		__size = prod;
+
+		assert(arr.size() == __size);
+
+		__array = new T[prod];
+
+		for (size_t i = 0; i < prod; i++)
+			__array[i] = arr[i];
+	}
+
+	template <class T>
+	Tensor <T> ::~Tensor()
+	{
+		delete[] __dim;
+		delete[] __array;
+	}
+
+	// Index
+	template <class T>
+	T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
+	{
+		size_t full = 0;
+
+		assert(indices.size() == __dims);
+		for (size_t i = 0; i < __dims; i++)
+			full += indices[i] * __dim[__dims - (i + 1)];
+		
+		return __array[full];
+	}
+
+	template <class T>
+	const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
+	{
+		size_t full = 0;
+
+		assert(indices.size() == __dims);
+		for (size_t i = 0; i < __dims; i++)
+			full += indices[i] * __dim[__dims - (i + 1)];
+		
+		return __array[full];
+	}
 
 	// Printing functions
-	std::string print() const;
-};
+	template <class T>
+	std::string Tensor <T> ::print() const
+	{
+		if (__dims == 0)
+			return std::to_string(__array[0]);
+		
+		std::string out = "[";
 
-template <class T>
-Tensor <T> ::Tensor() : __dim(nullptr), __array(nullptr) {}
+		std::vector <size_t> cropped;
+		for (int i = 0; i < ((int) __dims) - 1; i++)
+			cropped.push_back(__dim[i + 1]);
 
-template <class T>
-Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
-		: __dims(dim.size())
-{
-	__dim = new size_t[__dims];
+		size_t left = __size/__dim[0];
+		for (size_t i = 0; i < __dim[0]; i++) {
+			std::vector <T> elems;
 
-	size_t prod = 1;
-	for (size_t i = 0; i < __dims; i++) {
-		prod *= dim[i];
+			for (size_t k = 0; k < left; k++)
+				elems.push_back(__array[left * i + k]);
+			
+			Tensor tmp(cropped, elems);
 
-		__dim[i] = dim[i];
+			out += tmp.print();
+
+			if (i < __dim[0] - 1)
+				out += ", ";
+		}
+
+		return out + "]";
 	}
 
-	__array = new T[prod];
+	template <class T>
+	std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
+	{
+		os << ts.print();
 
-	for (size_t i = 0; i < prod; i++)
-		__array[i] = def;
-}
-
-template <class T>
-Tensor <T> ::~Tensor()
-{
-	delete[] __dim;
-	delete[] __array;
-}
-
-template <class T>
-std::string Tensor <T> ::print() const
-{
-	if (__dims == 0)
-		return std::to_string(__array[0]);
-	
-	std::string out = "[";
-
-	std::vector <size_t> cropped;
-
-	using namespace std;
-	for (int i = 0; i < ((int) __dims) - 1; i++)
-		cropped.push_back(__dim[i + 1]);
-	
-	for (size_t i = 0; i < __dim[0]; i++) {
-		Tensor tmp(cropped, __array[0]);
-
-		out += tmp.print();
-
-		if (i < __dim[0] - 1)
-			out += ",";
+		return os;
 	}
 
-	return out + "]";
 }
 
 #endif

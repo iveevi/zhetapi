@@ -7,8 +7,9 @@
 #include <function.hpp>
 #include <engine.hpp>
 #include <expression.hpp>
+#include <tensor.hpp>
 
-#define TEST3
+#define TEST6
 
 using namespace std;
 using namespace zhetapi;
@@ -86,6 +87,24 @@ int main()
 	int x = zhetapi::expr <int> ("3 * 6");
 
 	cout << "x: " << x << endl;
+
+#elif defined(TEST6)
+
+	zhetapi::Tensor <double> tensor({4, 5, 3}, 4);
+
+	cout << tensor << endl;
+
+	tensor[{0, 0, 0}] = 45;
+
+	cout << tensor << endl;
+
+	zhetapi::Tensor <double> vector({3, 2}, {1, 2, 3, 4, 5, 6});
+
+	cout << vector << endl;
+
+	vector[{0, 1}] = 25;
+
+	cout << vector << endl;
 
 #endif
 
