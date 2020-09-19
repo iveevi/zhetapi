@@ -59,6 +59,8 @@ public:
 
 	T norm() const;
 
+	T arg() const;
+
 	// Normalization
 	void normalize();
 
@@ -67,6 +69,9 @@ public:
 	// Non-member functions
 	template <class U>
 	friend Vector <U> operator*(const Vector <U> &, const U &);
+	
+	template <class U>
+	friend Vector <U> operator/(const Vector <U> &, const U &);
 
 	template <class U>
 	friend U inner(const Vector <U> &, const Vector <U> &);
@@ -262,6 +267,12 @@ T Vector <T> ::norm() const
 }
 
 template <class T>
+T Vector <T> ::arg() const
+{
+	return atan2((*this)[1], (*this)[0]);
+}
+
+template <class T>
 void Vector <T> ::normalize()
 {
 	T dt = norm();
@@ -310,7 +321,20 @@ Vector <T> operator*(const Vector <T> &a, const T &b)
 	Vector <T> out = a;
 
 	for (size_t i = 0; i < a.size(); i++)
-		a[i] *= b;
+		out[i] *= b;
+
+	return out;
+}
+
+template <class T>
+Vector <T> operator/(const Vector <T> &a, const T &b)
+{
+	Vector <T> out = a;
+
+	for (size_t i = 0; i < a.size(); i++)
+		out[i] /= b;
+
+	return out;
 }
 
 template <class T>
