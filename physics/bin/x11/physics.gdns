@@ -1,0 +1,9 @@
+[gd_resource type="NativeScript" load_steps=2 format=2]
+
+[ext_resource path="res://bin/x11/physics.gdnlib" type="GDNativeLibrary" id=1]
+
+[resource]
+
+resource_name = "physics"
+class_name = "Body"
+library = ExtResource( 1 )
