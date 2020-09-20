@@ -101,7 +101,24 @@ physics:	physics_build
 
 physics_build:	build
 	@echo "\n[RUNNING CLI]\n"
-	g++ -I engine physics/main.cpp -lglut -lGL -o build/physics
+	g++ -I engine physics/line.cpp -lglut -lGL -lGLEW -lglfw -o build/physics
+
+# Opengl testing
+opengl:		opengl_build
+	@echo "\n[RUNNING CLI]\n"
+	./build/opengl
+
+opengl_build:	build
+	@echo "\n[RUNNING CLI]\n"
+	g++ -I engine -I physics physics/main.cpp physics/shader.cpp physics/texture.cpp -lglut -lGL -lGLEW -lglfw -o build/opengl
+
+opengl_debug:	opengl_build_debug
+	@echo "\n[RUNNING CLI]\n"
+	gdb ./build/opengl_debug
+
+opengl_build_debug:	build
+	@echo "\n[RUNNING CLI]\n"
+	g++ -I engine -I physics -g physics/main.cpp -lglm -lglut -lGL -lGLEW -lglfw -o build/opengl_debug
 
 # Build directory
 build:
