@@ -14,6 +14,9 @@ test:		test_build
 	@echo "\n[RUNNING PROGRAM]\n"
 	./build/tests < ./tests/input
 
+test_raw:
+	./build/tests < ./tests/input
+
 test_profile:	test_build_profile
 	@echo "\n[RUNNING PROGRAM]\n"
 	./build/tests < ./tests/input

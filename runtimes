@@ -1,0 +1,33 @@
+./build/tests < ./tests/input
+Running with zhetapi::Function:
+	Time: 0.251497 seconds
+Running with general function:
+	Time: 0.188746 seconds
+Running with inlined general function:
+	Time: 0.170848 seconds
+Running with specific function:
+	Time: 0.00024 seconds
+Running with inlined specific function:
+	Time: 0.000192 seconds
+./build/tests < ./tests/input
+Running with zhetapi::Function:
+	Time: 0.262253 seconds
+Running with general function:
+	Time: 0.161075 seconds
+Running with inlined general function:
+	Time: 0.157866 seconds
+Running with specific function:
+	Time: 0.0002 seconds
+Running with inlined specific function:
+	Time: 0.000192 seconds
+./build/tests < ./tests/input
+Running with zhetapi::Function:
+	Time: 0.264223 seconds
+Running with general function:
+	Time: 0.181062 seconds
+Running with inlined general function:
+	Time: 0.174513 seconds
+Running with specific function:
+	Time: 0.00022 seconds
+Running with inlined specific function:
+	Time: 0.000229 seconds

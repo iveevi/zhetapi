@@ -34,6 +34,17 @@ using namespace std;
 		return barn.compute("+", {int1, int2});
 	}
 
+	inline zhetapi::token *__fx_general_inline(double x)
+	{
+		// Variables
+		zhetapi::token *i1 = new zhetapi::operand <double> (x);
+
+		// Constants
+		zhetapi::token *c1 = new zhetapi::operand <double> (54);
+
+		return barn.compute("+", {barn.compute("*", {i1, c1}), barn.compute("ln", {i1})});
+	}
+
 	double __fx_in_R_out_R(double x)
 	{
 		return 54.0 * x + log(x);
@@ -72,6 +83,18 @@ int main()
 
 	for (size_t i = 0; i < rounds; i++)
 		__fx_general(10);
+
+	endt = clock();
+
+	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
+
+	/////////////////////////////////////////////////////////////
+	cout << "Running with inlined general function:" << endl;
+
+	startt = clock();
+
+	for (size_t i = 0; i < rounds; i++)
+		__fx_general_inline(10);
 
 	endt = clock();
 
