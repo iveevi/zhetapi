@@ -61,7 +61,7 @@ namespace zhetapi {
 
 		void refactor_reference(const std::string &, token *);
 
-		void print() const;
+		void print(bool = false) const;
 	private:
 		token *value(node) const;
 		
@@ -399,16 +399,26 @@ namespace zhetapi {
 
 	// Printing utilities
 	template <class T, class U>
-	void node_manager <T, U> ::print() const
+	void node_manager <T, U> ::print(bool address) const
 	{
 		std::cout << "Tree:" << std::endl;
-		__tree.print();
+
+		node_reference::address = address;
+
+		if (address)
+			__tree.print();
+		else	
+			__tree.print_no_address();
 
 		if (__refs.size()) {
 			std::cout << "Refs [" << __refs.size() << "]" << std::endl;
 			
-			for (auto &ref : __refs)
-				ref.print();
+			for (auto &ref : __refs) {
+				if (address)
+					ref.print();
+				else
+					ref.print_no_address();
+			}
 		}
 	}
 

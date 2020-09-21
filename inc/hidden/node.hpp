@@ -30,6 +30,7 @@ namespace zhetapi {
 
 		// Printing
 		void print(int = 1, int = 0) const;
+		void print_no_address(int = 1, int = 0) const;
 
 		std::string display(int = 1, int = 0) const;
 
@@ -65,6 +66,22 @@ namespace zhetapi {
 		counter = 0;
 		for (node itr : __leaves)
 			itr.print(++counter, lev + 1);
+	}
+
+	void node::print_no_address(int num, int lev) const
+	{
+		int counter = lev;
+		while (counter > 0) {
+			std::cout << "\t";
+			counter--;
+		}
+
+		std::cout << "#" << num << ": " << __tptr->str() << " (" <<
+			strlabs[__label] << ")" << std::endl;
+
+		counter = 0;
+		for (node itr : __leaves)
+			itr.print_no_address(++counter, lev + 1);
 	}
 	
 	std::string node::display(int num, int lev) const

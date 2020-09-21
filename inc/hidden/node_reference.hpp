@@ -29,7 +29,11 @@ namespace zhetapi {
 		std::string str() const override;
 
 		virtual bool operator==(token *) const override;
+
+		static bool address;
 	};
+
+	bool node_reference::address = true;
 
 	node_reference::node_reference(node *ref, const std::string &str, bool
 			var) : __ref(ref), __symbol(str), __var(var) {}
@@ -68,7 +72,10 @@ namespace zhetapi {
 	{
 		std::ostringstream oss;
 
-		oss << "\"" << __symbol << "\" points to " << __ref;
+		if (address)
+			oss << "\"" << __symbol << "\" points to " << __ref;
+		else
+			oss << "\"" << __symbol << "\"";
 
 		return oss.str();
 	}
