@@ -11,6 +11,7 @@
 #include <type_traits>
 #include <typeindex>
 #include <typeinfo>
+#include <unordered_map>
 
 // Engine headers
 #include <std_combinatorial.hpp>
@@ -207,6 +208,8 @@ namespace zhetapi {
 		__TYPEDEFS__
 		
 		using ID = std::pair <std::string, std::vector <std::type_index>>;
+
+		using signature = std::vector <std::type_index>;
 	private:
 		vtable <R> v_stack_r;
 		vtable <Q> v_stack_q;
@@ -219,6 +222,8 @@ namespace zhetapi {
 		vtable <MR> v_stack_mr;
 
 		std::vector <std::pair <ID, token *>> ops;
+
+		std::unordered_map <std::string, std::vector <std::pair <signature, token *>>> table;
 	public:
 		Barn();
 		Barn(const Barn &);
@@ -485,6 +490,19 @@ namespace zhetapi {
 		//////////////////////////////////////////
 		// API functions
 		//////////////////////////////////////////
+
+		//////////////////////////////////////////
+		// Transfer into table
+		//////////////////////////////////////////
+
+		for (auto pr : ops) {
+			operation *opn = dynamic_cast <operation *> (pr.second);
+
+			if (table.count(pr.first.first))
+				table[pr.first.first].push_back({pr.first.second, pr.second});
+			else
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+		}
 	}
 
 	template <class T, class U>
