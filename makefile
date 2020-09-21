@@ -1,11 +1,22 @@
+# Portability
+port:		port_build
+	./build/port < tests/input > output.log
+	-diff --color -w tests/output output.log
+	rm output.log
+
+port_build:	inc/hidden	\
+		build		\
+		tests
+	g++ -I engine -I inc/hidden -I inc/std -I build tests/portability.cpp -o build/port
+
 # Tests
 test:		test_build
 	@echo "\n[RUNNING PROGRAM]\n"
-	./build/tests < ./tests/tests.in
+	./build/tests < ./tests/input
 
 test_profile:	test_build_profile
 	@echo "\n[RUNNING PROGRAM]\n"
-	./build/tests < ./tests/tests.in
+	./build/tests < ./tests/input
 
 test_debug_exc:
 	@echo "\b[DEBUGGING PROGRAM]\n"

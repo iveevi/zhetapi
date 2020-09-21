@@ -458,7 +458,13 @@ namespace zhetapi {
 	template <class A>
 	Variable <T> ::operator Variable <A> ()
 	{
-		return Variable <A> {name, param, (A) val};
+		/*
+		 * No need to actually retrieve the value of the value and cast
+		 * it. This is simlply a dummy method which will make
+		 * conversions legal.
+		 */
+
+		return Variable <A> {name, param, A()};
 	}
 
 }

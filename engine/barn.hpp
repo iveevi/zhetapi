@@ -596,21 +596,21 @@ namespace zhetapi {
 	Variable <A> Barn <T, U> ::retrieve(const std::string &str)
 	{
 		if (typeid(A) == typeid(Z))
-			v_stack_z.get(str);
+			return v_stack_z.get(str);
 		if (typeid(A) == typeid(R))
-			v_stack_r.get(str);
+			return v_stack_r.get(str);
 		if (typeid(A) == typeid(Q))
-			v_stack_q.get(str);
+			return v_stack_q.get(str);
 		
 		if (typeid(A) == typeid(CR))
-			v_stack_cr.get(str);
+			return v_stack_cr.get(str);
 		if (typeid(A) == typeid(CQ))
-			v_stack_cq.get(str);
+			return v_stack_cq.get(str);
 		
 		if (typeid(A) == typeid(VR))
-			v_stack_mr.get(str);
+			return v_stack_mr.get(str);
 		if (typeid(A) == typeid(VQ))
-			v_stack_mq.get(str);
+			return v_stack_mq.get(str);
 	}
 
 	template <class T, class U>
