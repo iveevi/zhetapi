@@ -163,6 +163,15 @@ namespace zhetapi {
 		return false;
 	}
 
+	bool is_constant_operand(lbl type)
+	{
+		if ((type >= l_constant_integer)
+				&& (type <= l_constant_matrix_complex_real))
+			return true;
+
+		return false;
+	}
+
 	bool is_variable(lbl type)
 	{
 		return !is_constant(type);

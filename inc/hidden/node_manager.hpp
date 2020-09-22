@@ -1,9 +1,12 @@
 #ifndef NODE_MANAGER_H_
 #define NODE_MANAGER_H_
 
+// C/C++ headers
+#include <fstream>
+#include <stack>
+
 // Engine headers
 #include <barn.hpp>
-#include <fstream>
 #include <node_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
@@ -80,6 +83,8 @@ namespace zhetapi {
 		void simplify(node &, Engine <T, U> &);
 		
 		void refactor_reference(node &, const std::string &, token *);
+
+		void generate(node, std::ofstream &, size_t &) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -412,20 +417,48 @@ namespace zhetapi {
 		fout << "#include \"token.h\"\n";
 		fout << "#include \"barn.h\"\n";
 		fout << "\n";
-		fout << "Barn <double, int> barn;\n";
+
+		// Make more robust to T and U
+		fout << "zhetapi::Barn <double, int> barn;\n";
+
 		fout << "\n";
 		fout << "token *" << name << "(";
 
 		for (size_t i = 0; i < __refs.size(); i++) {
-			fout << "token *in" << (i + 1);
+			fout << "zhetapi::token *in" << (i + 1);
 
 			if (i < __refs.size() - 1)
 				fout << ", ";
 		}
 
+		print();
+
 		fout << ")\n";
 		fout << "{\n";
+
+		// Counters
+		size_t const_count = 1;
+
+		// Inside the function
+		generate(__tree, fout, const_count);
+
 		fout << "}";
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::generate(node ref, std::ofstream &fout, size_t &const_count) const
+	{
+		for (auto leaf : ref.__leaves)
+			generate(leaf, fout, const_count);
+		
+		if (is_constant_operand(ref.__label)) {
+			fout << "\tzhetapi::token *c" << const_count << " = ";
+			fout << "new zhetapi::operand <"
+				<< types <T, U> ::proper_symbol(typeid(*(ref.__tptr.get())))
+				<< "> (" << ref.__tptr->str() << ");\n";
+
+			const_count++;
+		}
 	}
 
 	// Printing utilities

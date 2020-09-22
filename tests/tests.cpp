@@ -210,7 +210,7 @@ int main()
 
 #elif defined(TEST3)
 
-	zhetapi::Function <double, int> fx = "f(x) = 34x + x^2";
+	zhetapi::Function <double, int> fx = "f(x, y) = 34x + y^2";
 
 	fx.print();
 

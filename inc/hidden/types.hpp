@@ -92,6 +92,7 @@ namespace zhetapi {
 		static bool is_one(token *);
 
 		static std::string symbol(const std::type_index &);
+		static std::string proper_symbol(const std::type_index &);
 	};
 
 	template <class T, class U>
@@ -180,6 +181,59 @@ namespace zhetapi {
 			return "MCQ";
 		if (type == typeid(operand <MCR>))
 			return "MCR";
+
+		return "?";
+	}
+
+	template <class T, class U>
+	std::string types <T, U> ::proper_symbol(const std::type_index &type)
+	{
+		// Complex numbers
+
+		// Stick to <double, int> for testing
+		if (type == typeid(operand <Z>))
+			return "int";
+		if (type == typeid(operand <Q>))
+			return "Rational <int>";
+		if (type == typeid(operand <R>))
+			return "double";
+		if (type == typeid(operand <CZ>))
+			return "Complex <int>";
+		if (type == typeid(operand <CQ>))
+			return "Complex <Rational <int>>";
+		if (type == typeid(operand <CR>))
+			return "Complex <double>";
+		
+		// Vectors
+		if (type == typeid(operand <VZ>))
+			return "Vector <int>";
+		if (type == typeid(operand <VQ>))
+			return "Vector <Rational <int>>";
+		if (type == typeid(operand <VR>))
+			return "Vector <double>";
+		if (type == typeid(operand <VCZ>))
+			return "Vector <Complex <int>>";
+		if (type == typeid(operand <VCQ>))
+			return "Vector <Complex <Rational <int>>>";
+		if (type == typeid(operand <VCR>))
+			return "Vector <Complex <Rational <int>>>";
+		
+		// Matrices
+		if (type == typeid(operand <MZ>))
+			return "Matrix <int>";
+		if (type == typeid(operand <MQ>))
+			return "Matrix <Rational <int>>";
+		if (type == typeid(operand <MR>))
+			return "Matrix <double>";
+		if (type == typeid(operand <MCZ>))
+			return "Matrix <Complex <int>>";
+		if (type == typeid(operand <MCQ>))
+			return "Matrix <Complex <Rational <int>>>";
+		if (type == typeid(operand <MCR>))
+			return "Matrix <Complex <double>>";
+		
+		std::cout << "TYPE: " << type.name() << std::endl;
+		std::cout << "int: " << typeid(operand <Z>).name() << std::endl;
 
 		return "?";
 	}
