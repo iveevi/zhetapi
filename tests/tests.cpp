@@ -15,7 +15,7 @@ using namespace std;
 
 #if defined(TEST1)
 
-	const size_t rounds = 10000;
+	const size_t rounds = 1000000;
 
 	time_t startt;
 	time_t endt;
@@ -33,6 +33,18 @@ using namespace std;
 
 		return barn.compute("+", {int1, int2});
 	}
+	
+	zhetapi::token *__fx_general_optimized(double x)
+	{
+		zhetapi::token *i1 = new zhetapi::operand <double> (x);
+
+		zhetapi::token *c1 = new zhetapi::operand <double> (54);
+
+		zhetapi::token *int1 = barn.compute_optimized("*", {i1, c1});
+		zhetapi::token *int2 = barn.compute_optimized("ln", {i1});
+
+		return barn.compute_optimized("+", {int1, int2});
+	}
 
 	inline zhetapi::token *__fx_general_inline(double x)
 	{
@@ -43,6 +55,17 @@ using namespace std;
 		zhetapi::token *c1 = new zhetapi::operand <double> (54);
 
 		return barn.compute("+", {barn.compute("*", {i1, c1}), barn.compute("ln", {i1})});
+	}
+	
+	inline zhetapi::token *__fx_general_inline_optimized(double x)
+	{
+		// Variables
+		zhetapi::token *i1 = new zhetapi::operand <double> (x);
+
+		// Constants
+		zhetapi::token *c1 = new zhetapi::operand <double> (54);
+
+		return barn.compute_optimized("+", {barn.compute_optimized("*", {i1, c1}), barn.compute_optimized("ln", {i1})});
 	}
 
 	double __fx_in_R_out_R(double x)
@@ -95,6 +118,30 @@ int main()
 
 	for (size_t i = 0; i < rounds; i++)
 		__fx_general_inline(10);
+
+	endt = clock();
+
+	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
+	
+	/////////////////////////////////////////////////////////////
+	cout << "Running with optimized general function:" << endl;
+
+	startt = clock();
+
+	for (size_t i = 0; i < rounds; i++)
+		__fx_general_optimized(10);
+
+	endt = clock();
+
+	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
+
+	/////////////////////////////////////////////////////////////
+	cout << "Running with optimized inlined general function:" << endl;
+
+	startt = clock();
+
+	for (size_t i = 0; i < rounds; i++)
+		__fx_general_inline_optimized(10);
 
 	endt = clock();
 

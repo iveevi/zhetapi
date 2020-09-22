@@ -223,7 +223,7 @@ namespace zhetapi {
 
 		std::vector <std::pair <ID, token *>> ops;
 
-		std::unordered_map <std::string, std::vector <std::pair <signature, token *>>> table;
+		mutable std::unordered_map <std::string, std::vector <std::pair <signature, token *>>> table;
 	public:
 		Barn();
 		Barn(const Barn &);
@@ -257,6 +257,7 @@ namespace zhetapi {
 		token *get(const std::string &);
 
 		token *compute(const std::string &, const std::vector <token *> &) const;
+		token *compute_optimized(const std::string &, const std::vector <token *> &) const;
 
 		token *value(const std::string &, const std::vector <std::type_index> &,
 				const std::vector <token *> &) const;
@@ -657,12 +658,70 @@ namespace zhetapi {
 	template <class T, class U>
 	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
 	{
-		std::vector <std::type_index> signature;
+		std::vector <std::type_index> sig;
 
 		for (token *tptr : vals)
-			signature.push_back(typeid(*tptr));
+			sig.push_back(typeid(*tptr));
 		
-		return value(str, signature, vals);
+		return value(str, sig, vals);
+	}
+	
+	template <class T, class U>
+	token *Barn <T, U> ::compute_optimized(const std::string &str, const std::vector <token *> &vals) const
+	{
+		std::vector <std::type_index> sig;
+
+		for (token *tptr : vals)
+			sig.push_back(typeid(*tptr));
+
+		token *tptr = nullptr;
+
+		std::vector <std::pair <signature, token *>> siglist = table[str];
+
+		size_t sz = sig.size();
+		for (auto &pr : siglist) {
+			if (pr.first.size() == sz) {
+				bool ps = true;
+				
+				for (size_t i = 0; i < sz; i++) {
+					if (sig[i] != pr.first[i]) {
+						ps = false;
+
+						break;
+					}
+				}
+
+				if (ps) {
+					tptr = pr.second;
+					
+					break;
+				}
+			}
+		}
+		
+		if (tptr) {
+			operation *optr = dynamic_cast <operation *> (tptr);
+
+			return (*optr)(vals);
+		} else {
+			std::ostringstream oss;
+
+			oss << "Unknown overload (";
+
+			for (size_t i = 0; i < sig.size(); i++) {
+				oss << types <T, U> ::symbol(sig[i]);
+				
+				if (i < sig.size() - 1)
+					oss << ", ";
+			}
+
+			oss << ") for operation \"" << str << "\". " <<
+				overloads(str);
+
+			throw unknown_operation_overload_exception(oss.str());
+		}
+
+		return nullptr;
 	}
 
 	template <class T, class U>
