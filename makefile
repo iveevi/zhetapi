@@ -18,8 +18,9 @@ test_raw:
 	./build/tests < ./tests/input
 
 test_profile:	test_build_profile
-	@echo "\n[RUNNING PROGRAM]\n"
+	@echo "\n[PROFILING TEST PROGRAM]\n"
 	./build/tests < ./tests/input
+	gprof ./build/tests > prof.out
 
 test_debug_exc:
 	@echo "\b[DEBUGGING PROGRAM]\n"
