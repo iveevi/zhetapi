@@ -28,6 +28,8 @@ namespace zhetapi {
 		template <class ... A>
 		token *derivative(const std::string &, A ...);
 
+		void *generate_general() const;
+
 		void print() const;
 	private:
 		template <class A>
@@ -196,6 +198,24 @@ namespace zhetapi {
 		diff = barn.compute("/", {diff, new operand <T> (T(2) * h)});
 
 		return diff;
+	}
+
+	template <class T, class U>
+	void *Function <T, U> ::generate_general() const
+	{
+		using namespace std;
+
+		cout << endl << "Generating" << endl;
+
+		std::string file;
+
+		file = "__gen_" + __symbol;
+
+		cout << "\tname: " << file << endl;
+
+		__manager.generate(file);
+
+		return nullptr;
 	}
 
 	// Printing utilities

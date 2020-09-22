@@ -8,10 +8,9 @@
 // Engine headers
 #include <function.hpp>
 
-#define TEST1
+#define TEST3
 
 using namespace std;
-
 
 #if defined(TEST1)
 
@@ -208,6 +207,14 @@ int main()
 	cout << (*f)(24) << endl;
 
 	dlclose(handle);
+
+#elif defined(TEST3)
+
+	zhetapi::Function <double, int> fx = "f(x) = 34x + x^2";
+
+	fx.print();
+
+	fx.generate_general();
 
 #endif
 

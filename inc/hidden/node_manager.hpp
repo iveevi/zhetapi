@@ -3,6 +3,7 @@
 
 // Engine headers
 #include <barn.hpp>
+#include <fstream>
 #include <node_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
@@ -60,6 +61,11 @@ namespace zhetapi {
 		void simplify(Engine <T, U> &);
 
 		void refactor_reference(const std::string &, token *);
+
+		/*
+		 * Code generator. Requires the specification of an output file.
+		 */
+		void generate(std::string &) const;
 
 		void print(bool = false) const;
 	private:
@@ -395,6 +401,31 @@ namespace zhetapi {
 
 		for (node &leaf : ref.__leaves)
 			refactor_reference(leaf, str, tptr);
+	}
+
+	// Generation methods
+	template <class T, class U>
+	void node_manager <T, U> ::generate(std::string &name) const
+	{
+		std::ofstream fout(name + ".cpp");
+
+		fout << "#include \"token.h\"\n";
+		fout << "#include \"barn.h\"\n";
+		fout << "\n";
+		fout << "Barn <double, int> barn;\n";
+		fout << "\n";
+		fout << "token *" << name << "(";
+
+		for (size_t i = 0; i < __refs.size(); i++) {
+			fout << "token *in" << (i + 1);
+
+			if (i < __refs.size() - 1)
+				fout << ", ";
+		}
+
+		fout << ")\n";
+		fout << "{\n";
+		fout << "}";
 	}
 
 	// Printing utilities
