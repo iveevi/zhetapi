@@ -15,7 +15,7 @@ using namespace std;
 
 #if defined(TEST1)
 
-	const size_t rounds = 10000;
+	const size_t rounds = 1000000;
 
 	time_t startt;
 	time_t endt;
@@ -85,13 +85,7 @@ int main()
 
 #if defined(TEST1)
 
-	barn.gen_t_sig = 0;
-	barn.opt_t_sig = 0;
-
-	barn.gen_t_search = 0;
-	barn.opt_t_search = 0;
-
-	/* zhetapi::Function <double, int> fx = "f(x) = x * 54 + ln(x)";
+	zhetapi::Function <double, int> fx = "f(x) = x * 54 + ln(x)";
 
 	/////////////////////////////////////////////////////////////
 	cout << "Running with zhetapi::Function:" << endl;
@@ -105,7 +99,7 @@ int main()
 
 	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
 
-	///////////////////////////////////////////////////////////// */
+	/////////////////////////////////////////////////////////////
 	cout << "Running with general function:" << endl;
 
 	startt = clock();
@@ -118,11 +112,8 @@ int main()
 	double gen = (endt - startt)/((double) CLOCKS_PER_SEC);
 
 	cout << "\tTime: " << gen << " seconds" << endl;
-	cout << "\tSignature time: " << barn.gen_t_sig << endl;
-	cout << "\tSearch time: " << barn.gen_t_search << endl;
-	cout << "\tMisc time: " << gen - (barn.gen_t_sig + barn.gen_t_search) << endl;
 
-	/* /////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////
 	cout << "Running with inlined general function:" << endl;
 
 	startt = clock();
@@ -132,7 +123,7 @@ int main()
 
 	endt = clock();
 
-	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl; */
+	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
 	
 	/////////////////////////////////////////////////////////////
 	cout << "Running with optimized general function:" << endl;
@@ -147,11 +138,8 @@ int main()
 	double opt = (endt - startt)/((double) CLOCKS_PER_SEC);
 
 	cout << "\tTime: " << opt << " seconds" << endl;
-	cout << "\tSignature time: " << barn.opt_t_sig << endl;
-	cout << "\tSearch time: " << barn.opt_t_search << endl;
-	cout << "\tMisc time: " << opt - (barn.opt_t_sig + barn.opt_t_search) << endl;
 
-	/* /////////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////////
 	cout << "Running with optimized inlined general function:" << endl;
 
 	startt = clock();
@@ -185,7 +173,7 @@ int main()
 
 	endt = clock();
 
-	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl; */
+	cout << "\tTime: " << (endt - startt)/((double) CLOCKS_PER_SEC) << " seconds" << endl;
 
 #elif defined(TEST2)
 

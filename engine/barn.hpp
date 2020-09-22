@@ -277,12 +277,6 @@ namespace zhetapi {
 				return __str;
 			}
 		};
-
-		mutable double opt_t_sig;
-		mutable double gen_t_sig;
-
-		mutable double opt_t_search;
-		mutable double gen_t_search;
 	};
 
 	//////////////////////////////////////////
@@ -664,19 +658,10 @@ namespace zhetapi {
 	template <class T, class U>
 	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
 	{
-		clock_t start_t;
-		clock_t end_t;
-
-		start_t = clock();
 		std::vector <std::type_index> sig;
 
 		for (token *tptr : vals)
 			sig.push_back(typeid(*tptr));
-		end_t = clock();
-
-		using namespace std;
-
-		gen_t_sig += (end_t - start_t)/((double) CLOCKS_PER_SEC);
 		
 		return value(str, sig, vals);
 	}
@@ -684,21 +669,11 @@ namespace zhetapi {
 	template <class T, class U>
 	token *Barn <T, U> ::compute_optimized(const std::string &str, const std::vector <token *> &vals) const
 	{
-		clock_t start_t;
-		clock_t end_t;
-
-		start_t = clock();
-
 		std::vector <std::type_index> sig;
 
 		for (token *tptr : vals)
 			sig.push_back(typeid(*tptr));
-		
-		end_t = clock();
-		
-		opt_t_sig += (end_t - start_t)/((double) CLOCKS_PER_SEC);
 
-		start_t = clock();
 		token *tptr = nullptr;
 
 		std::vector <std::pair <signature, token *>> *siglist = &table[str];
@@ -723,30 +698,6 @@ namespace zhetapi {
 				}
 			}
 		}
-		
-		/* for (auto &pr : siglist) {
-			if (pr.first.size() == sz) {
-				bool ps = true;
-				
-				for (size_t i = 0; i < sz; i++) {
-					if (sig[i] != pr.first[i]) {
-						ps = false;
-
-						break;
-					}
-				}
-
-				if (ps) {
-					tptr = pr.second;
-					
-					break;
-				}
-			}
-		} */
-
-		end_t = clock();
-
-		opt_t_search += (end_t - start_t)/((double) CLOCKS_PER_SEC);
 		
 		if (tptr) {
 			operation *optr = dynamic_cast <operation *> (tptr);
@@ -778,11 +729,6 @@ namespace zhetapi {
 			const std::vector <std::type_index> &signature,
 			const std::vector <token *> &vals) const
 	{
-		clock_t start_t;
-		clock_t end_t;
-
-		start_t = clock();
-
 		auto it = ops.end();
 
 		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
@@ -803,10 +749,6 @@ namespace zhetapi {
 				}
 			}
 		}
-
-		end_t = clock();
-
-		gen_t_search += (end_t - start_t)/((double) CLOCKS_PER_SEC);
 
 		if (it != ops.end()) {
 			token *tptr = it->second;
