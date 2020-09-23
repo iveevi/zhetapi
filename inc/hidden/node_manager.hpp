@@ -84,7 +84,7 @@ namespace zhetapi {
 		
 		void refactor_reference(node &, const std::string &, token *);
 
-		void generate(node, std::ofstream &, size_t &) const;
+		std::string generate(node, std::ofstream &, size_t &, size_t &) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -438,26 +438,50 @@ namespace zhetapi {
 
 		// Counters
 		size_t const_count = 1;
+		size_t inter_count = 1;
 
 		// Inside the function
-		generate(__tree, fout, const_count);
+		std::string ret = generate(__tree, fout, const_count, inter_count);
 
-		fout << "}";
+		fout << "\treturn " << ret << ";\n";
+		fout << "}" << std::endl;
 	}
 
 	template <class T, class U>
-	void node_manager <T, U> ::generate(node ref, std::ofstream &fout, size_t &const_count) const
+	std::string node_manager <T, U> ::generate(node ref, std::ofstream &fout, size_t &const_count, size_t &inter_count) const
 	{
+		std::vector <std::string> idents;
+
 		for (auto leaf : ref.__leaves)
-			generate(leaf, fout, const_count);
+			idents.push_back(generate(leaf, fout, const_count, inter_count));
 		
 		if (is_constant_operand(ref.__label)) {
-			fout << "\tzhetapi::token *c" << const_count << " = ";
+			fout << "\tzhetapi::token *c" << const_count++ << " = ";
 			fout << "new zhetapi::operand <"
 				<< types <T, U> ::proper_symbol(typeid(*(ref.__tptr.get())))
 				<< "> (" << ref.__tptr->str() << ");\n";
 
-			const_count++;
+			return "c" + std::to_string(const_count - 1);
+		} else if (ref.__tptr->caller() == token::ndr) {
+			node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
+
+			return "in" + std::to_string(ndr->index());
+		} else {
+			// Assuming we have an operation
+			operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+
+			fout << "\ttoken *inter" << inter_count++ << " = barn.compute(\"" << ophtr->rep << "\", {";
+
+			for (size_t i = 0; i < idents.size(); i++) {
+				fout << idents[i];
+
+				if (i < idents.size() - 1)
+					fout << ", ";
+			}
+
+			fout << "});\n";
+
+			return "inter" + std::to_string(inter_count - 1);
 		}
 	}
 

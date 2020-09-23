@@ -210,11 +210,23 @@ int main()
 
 #elif defined(TEST3)
 
-	zhetapi::Function <double, int> fx = "f(x, y) = 34x + y^2";
+	zhetapi::Function <double, int> fx1 = "fone(x, y) = 34x + y^2";
 
-	fx.print();
+	fx1.print();
 
-	fx.generate_general();
+	fx1.generate_general();
+	
+	zhetapi::Function <double, int> fx2 = "ftwo(x, y) = 34x - 54y + 65x";
+
+	fx2.print();
+
+	fx2.generate_general();
+	
+	zhetapi::Function <double, int> fx3 = "ftre(x, y) = 34 * sin(x) + 54354 - + y * 45i";
+
+	fx3.print();
+
+	fx3.generate_general();
 
 #endif
 

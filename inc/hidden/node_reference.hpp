@@ -13,12 +13,15 @@ namespace zhetapi {
 	protected:
 		node *		__ref;
 		std::string	__symbol;
+		size_t		__index;
 		bool		__var;
 	public:
-		node_reference(node *, const std::string &, bool = false);
+		node_reference(node *, const std::string &, size_t, bool = false);
 
 		node *get();
 		const node &get() const;
+
+		size_t index() const;
 
 		const std::string &symbol() const;
 
@@ -35,8 +38,9 @@ namespace zhetapi {
 
 	bool node_reference::address = true;
 
-	node_reference::node_reference(node *ref, const std::string &str, bool
-			var) : __ref(ref), __symbol(str), __var(var) {}
+	node_reference::node_reference(node *ref, const std::string &str, size_t
+			idx, bool var) : __ref(ref), __symbol(str),
+		__index(idx), __var(var) {}
 
 	node *node_reference::get()
 	{
@@ -46,6 +50,11 @@ namespace zhetapi {
 	const node &node_reference::get() const
 	{
 		return *__ref;
+	}
+
+	size_t node_reference::index() const
+	{
+		return __index;
 	}
 
 	const std::string &node_reference::symbol() const
@@ -65,7 +74,7 @@ namespace zhetapi {
 
 	token *node_reference::copy() const
 	{
-		return new node_reference(__ref, __symbol);
+		return new node_reference(__ref, __symbol, __index, __var);
 	}
 
 	std::string node_reference::str() const

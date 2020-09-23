@@ -1,5 +1,6 @@
 *.out
 *.so
+__gen*
 
 *.log
 *.swp
