@@ -176,7 +176,7 @@ int main()
 
 #elif defined(TEST2)
 
-	const char file[] = "tests/fctn.so";
+	const char file[] = "./__gen_fone.so";
 
 	cout << 24 << endl;
 
@@ -184,17 +184,29 @@ int main()
 
 	void *handle = dlopen(file, RTLD_NOW);
 
-	typedef double (*fctn)(double);
+	cout << "handle: " << handle << endl;
 
-	fctn f = (fctn) dlsym(handle, "F");
+	const char *dlsym_error = dlerror();
 
-	void *ptr = dlsym(handle, "F");
+	if (dlsym_error) {
+		cerr << "Err: " << dlsym_error << '\n';
+		
+		dlclose(handle);
+		
+		return 1;
+	}
+
+	typedef token (*fctn)(token *, token *);
+
+	fctn f = (fctn) dlsym(handle, "__gen_fone");
+
+	void *ptr = dlsym(handle, "__gen_fone");
 
 	cout << "ptr: " << ptr << endl;
 
 	cout << "f: " << f << endl;
 
-	const char *dlsym_error = dlerror();
+	dlsym_error = dlerror();
 	
 	if (dlsym_error) {
 		cerr << "Cannot load symbol 'F': " << dlsym_error << '\n';
@@ -204,29 +216,47 @@ int main()
 		return 1;
 	}
 
-	cout << (*f)(24) << endl;
+	cout << f(new zhetapi::operand <int> (34), new zhetapi::operand <int> (5)) << endl;
 
 	dlclose(handle);
 
 #elif defined(TEST3)
 
+	// Problems with complex numbers
 	zhetapi::Function <double, int> fx1 = "fone(x, y) = 34x + y^2";
-
-	fx1.print();
-
-	fx1.generate_general();
-	
 	zhetapi::Function <double, int> fx2 = "ftwo(x, y) = 34x - 54y + 65x";
+	zhetapi::Function <double, int> fx3 = "ftre(x, y) = 34 * sin(x) + 54354 - y";
 
-	fx2.print();
+	// fx1.print();
+	// fx2.print();
+	// fx3.print();
 
-	fx2.generate_general();
-	
-	zhetapi::Function <double, int> fx3 = "ftre(x, y) = 34 * sin(x) + 54354 - + y * 45i";
+	void *ptr1 = fx1.compile_general();
+	void *ptr2 = fx2.compile_general();
+	void *ptr3 = fx3.compile_general();
 
-	fx3.print();
+	cout << "Address of fx1 general: " << ptr1 << endl;
+	cout << "Address of fx2 general: " << ptr2 << endl;
+	cout << "Address of fx3 general: " << ptr3 << endl;
 
-	fx3.generate_general();
+	typedef zhetapi::token *(*ftr)(zhetapi::token *, zhetapi::token *);
+
+	ftr f1 = (ftr) ptr1;
+	ftr f2 = (ftr) ptr2;
+	ftr f3 = (ftr) ptr3;
+
+	cout << "Address of fx1 general (cast): " << f1 << endl;
+	cout << "Address of fx2 general (cast): " << f2 << endl;
+	cout << "Address of fx3 general (cast): " << f3 << endl;
+
+	cout << "f1: " << f1(new zhetapi::operand <int> (3), new zhetapi::operand <int> (4))->str() << endl;
+	cout << "fx1: " << fx1(3, 4)->str() << endl;
+
+	cout << "f2: " << f2(new zhetapi::operand <int> (3), new zhetapi::operand <int> (4))->str() << endl;
+	cout << "fx2: " << fx2(3, 4)->str() << endl;
+
+	cout << "f3: " << f3(new zhetapi::operand <int> (3), new zhetapi::operand <int> (4))->str() << endl;
+	cout << "fx3: " << fx3(3, 4)->str() << endl;
 
 #endif
 

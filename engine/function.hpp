@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <string>
+#include <dlfcn.h>
 
 // Engine headers
 #include <node_manager.hpp>
@@ -28,7 +29,9 @@ namespace zhetapi {
 		template <class ... A>
 		token *derivative(const std::string &, A ...);
 
-		void *generate_general() const;
+		std::string generate_general() const;
+
+		void *compile_general() const;
 
 		void print() const;
 	private:
@@ -201,21 +204,54 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void *Function <T, U> ::generate_general() const
+	std::string Function <T, U> ::generate_general() const
 	{
 		using namespace std;
 
-		cout << endl << "Generating" << endl;
+		// cout << endl << "Generating" << endl;
 
 		std::string file;
 
 		file = "__gen_" + __symbol;
 
-		cout << "\tname: " << file << endl;
+		// cout << "\tname: " << file << endl;
 
 		__manager.generate(file);
 
-		return nullptr;
+		return file;
+	}
+
+	template <class T, class U>
+	void *Function <T, U> ::compile_general() const
+	{
+		std::string file = generate_general();
+
+		// Linux
+		std::string compile = "g++ -I engine -I inc/hidden -I inc/std " + file + ".cpp -o " + file + ".so -shared -fPIC";
+
+		// std::cout << compile << std::endl;
+
+		system(compile.c_str());
+
+		void *handle = dlopen(("./" + file + ".so").c_str(), RTLD_NOW);
+
+		std::cout << "handle @ " << file << ": " << handle << std::endl;
+
+		void *ptr = dlsym(handle, file.c_str());
+
+		const char *dlsym_error = dlerror();
+	
+		if (dlsym_error) {
+			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+			
+			dlclose(handle);
+			
+			return nullptr;
+		}
+
+		dlclose(handle);
+
+		return ptr;
 	}
 
 	// Printing utilities

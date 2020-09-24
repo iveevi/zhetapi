@@ -43,7 +43,7 @@ test_build_debug:	inc/hidden	\
 			build		\
 			tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -g -o build/tests
+	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -ldl -g -o build/tests
 
 test_build_profile:	inc/hidden	\
 			build		\

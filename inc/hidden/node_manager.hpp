@@ -84,7 +84,7 @@ namespace zhetapi {
 		
 		void refactor_reference(node &, const std::string &, token *);
 
-		std::string generate(node, std::ofstream &, size_t &, size_t &) const;
+		std::string generate(std::string, node, std::ofstream &, size_t &, size_t &) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -290,7 +290,7 @@ namespace zhetapi {
 				if (__barn.present(pr.second))
 					t = node(new operation_holder(pr.second), {});
 				else if (itr != __params.end())
-					t = node(new node_reference(&__refs[index], pr.second, true), {});
+					t = node(new node_reference(&__refs[index], pr.second, index, true), {});
 				else if (tptr != nullptr)
 					t = node(tptr, {});
 				else
@@ -414,15 +414,16 @@ namespace zhetapi {
 	{
 		std::ofstream fout(name + ".cpp");
 
-		fout << "#include \"token.h\"\n";
-		fout << "#include \"barn.h\"\n";
+		fout << "#include <token.hpp>\n";
+		fout << "#include <barn.hpp>\n";
 		fout << "\n";
 
+		fout << "extern \"C\" {\n";
 		// Make more robust to T and U
-		fout << "zhetapi::Barn <double, int> barn;\n";
+		fout << "\tzhetapi::Barn <double, int> " << name << "_barn;\n";
 
 		fout << "\n";
-		fout << "token *" << name << "(";
+		fout << "\tzhetapi::token *" << name << "(";
 
 		for (size_t i = 0; i < __refs.size(); i++) {
 			fout << "zhetapi::token *in" << (i + 1);
@@ -431,32 +432,33 @@ namespace zhetapi {
 				fout << ", ";
 		}
 
-		print();
+		// print();
 
 		fout << ")\n";
-		fout << "{\n";
+		fout << "\t{\n";
 
 		// Counters
 		size_t const_count = 1;
 		size_t inter_count = 1;
 
 		// Inside the function
-		std::string ret = generate(__tree, fout, const_count, inter_count);
+		std::string ret = generate(name, __tree, fout, const_count, inter_count);
 
-		fout << "\treturn " << ret << ";\n";
+		fout << "\t\treturn " << ret << ";\n";
+		fout << "\t}\n";
 		fout << "}" << std::endl;
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::generate(node ref, std::ofstream &fout, size_t &const_count, size_t &inter_count) const
+	std::string node_manager <T, U> ::generate(std::string name, node ref, std::ofstream &fout, size_t &const_count, size_t &inter_count) const
 	{
 		std::vector <std::string> idents;
 
 		for (auto leaf : ref.__leaves)
-			idents.push_back(generate(leaf, fout, const_count, inter_count));
+			idents.push_back(generate(name, leaf, fout, const_count, inter_count));
 		
 		if (is_constant_operand(ref.__label)) {
-			fout << "\tzhetapi::token *c" << const_count++ << " = ";
+			fout << "\t\tzhetapi::token *c" << const_count++ << " = ";
 			fout << "new zhetapi::operand <"
 				<< types <T, U> ::proper_symbol(typeid(*(ref.__tptr.get())))
 				<< "> (" << ref.__tptr->str() << ");\n";
@@ -465,12 +467,12 @@ namespace zhetapi {
 		} else if (ref.__tptr->caller() == token::ndr) {
 			node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
 
-			return "in" + std::to_string(ndr->index());
+			return "in" + std::to_string(ndr->index() + 1);
 		} else {
 			// Assuming we have an operation
 			operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 
-			fout << "\ttoken *inter" << inter_count++ << " = barn.compute(\"" << ophtr->rep << "\", {";
+			fout << "\t\tzhetapi::token *inter" << inter_count++ << " = " << name << "_barn.compute(\"" << ophtr->rep << "\", {";
 
 			for (size_t i = 0; i < idents.size(); i++) {
 				fout << idents[i];
@@ -545,7 +547,7 @@ namespace zhetapi {
 
 			size_t index = std::distance(__params.begin(), itr);
 
-			ref.__tptr.reset(new node_reference(&__refs[index], tmp, true));
+			ref.__tptr.reset(new node_reference(&__refs[index], tmp, index, true));
 		}
 
 		for (node &leaf : ref.__leaves)
