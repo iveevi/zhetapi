@@ -180,7 +180,7 @@ int main()
 
 	cout << 24 << endl;
 
-	system("g++ tests/fctn.cpp -o tests/fctn.so -shared -fPIC");
+	system("g++ -I engine -I inc/hidden -I inc/std __gen_fone.cpp -rdynamic -shared -fPIC -o __gen_fone.so");
 
 	void *handle = dlopen(file, RTLD_NOW);
 
@@ -196,7 +196,7 @@ int main()
 		return 1;
 	}
 
-	typedef token (*fctn)(token *, token *);
+	typedef zhetapi::token *(*fctn)(zhetapi::token *, zhetapi::token *);
 
 	fctn f = (fctn) dlsym(handle, "__gen_fone");
 

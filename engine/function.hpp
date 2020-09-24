@@ -227,17 +227,15 @@ namespace zhetapi {
 		std::string file = generate_general();
 
 		// Linux
-		std::string compile = "g++ -I engine -I inc/hidden -I inc/std " + file + ".cpp -o " + file + ".so -shared -fPIC";
+		std::string compile = "g++ -I engine -I inc/hidden -I inc/std -rdynamic -fPIC -shared " + file  + ".cpp -o " + file + ".so";
 
-		// std::cout << compile << std::endl;
+		std::cout << compile << std::endl;
 
 		system(compile.c_str());
 
 		void *handle = dlopen(("./" + file + ".so").c_str(), RTLD_NOW);
 
 		std::cout << "handle @ " << file << ": " << handle << std::endl;
-
-		void *ptr = dlsym(handle, file.c_str());
 
 		const char *dlsym_error = dlerror();
 	
@@ -249,7 +247,32 @@ namespace zhetapi {
 			return nullptr;
 		}
 
+		void *ptr = dlsym(handle, file.c_str());
+
+		std::cout << "\tptr: " << ptr << std::endl;
+		std::cout << "\tfile: " << file << std::endl;
+
+		dlsym_error = dlerror();
+	
+		if (dlsym_error) {
+			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+			
+			dlclose(handle);
+			
+			return nullptr;
+		}
+
 		dlclose(handle);
+
+		dlsym_error = dlerror();
+
+		if (dlsym_error) {
+			std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
+			
+			dlclose(handle);
+			
+			return nullptr;
+		}
 
 		return ptr;
 	}
