@@ -258,10 +258,6 @@ namespace zhetapi {
 		token *get(const std::string &);
 
 		token *compute(const std::string &, const std::vector <token *> &) const;
-		token *compute_optimized(const std::string &, const std::vector <token *> &) const;
-
-		token *value(const std::string &, const std::vector <std::type_index> &,
-				const std::vector <token *> &) const;
 		
 		std::string overloads(const std::string &) const;
 
@@ -654,20 +650,9 @@ namespace zhetapi {
 
 		return nullptr;
 	}
-
-	template <class T, class U>
-	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
-	{
-		std::vector <std::type_index> sig;
-
-		for (token *tptr : vals)
-			sig.push_back(typeid(*tptr));
-		
-		return value(str, sig, vals);
-	}
 	
 	template <class T, class U>
-	token *Barn <T, U> ::compute_optimized(const std::string &str, const std::vector <token *> &vals) const
+	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
 	{
 		std::vector <std::type_index> sig;
 
@@ -712,57 +697,6 @@ namespace zhetapi {
 				oss << types <T, U> ::symbol(sig[i]);
 				
 				if (i < sig.size() - 1)
-					oss << ", ";
-			}
-
-			oss << ") for operation \"" << str << "\". " <<
-				overloads(str);
-
-			throw unknown_operation_overload_exception(oss.str());
-		}
-
-		return nullptr;
-	}
-
-	template <class T, class U>
-	token *Barn <T, U> ::value(const std::string &str,
-			const std::vector <std::type_index> &signature,
-			const std::vector <token *> &vals) const
-	{
-		auto it = ops.end();
-
-		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
-			if (itr->first.first == str &&
-				itr->first.second.size() == signature.size()) {
-				bool ps = true;
-				
-				for (size_t i = 0; i < signature.size(); i++) {
-					if (signature[i] != itr->first.second[i]) {
-						ps = false;
-						break;
-					}
-				}
-
-				if (ps) {
-					it = itr;
-					break;
-				}
-			}
-		}
-
-		if (it != ops.end()) {
-			token *tptr = it->second;
-			operation *optr = dynamic_cast <operation *> (tptr);
-			return (*optr)(vals);
-		} else {
-			std::ostringstream oss;
-
-			oss << "Unknown overload (";
-
-			for (size_t i = 0; i < signature.size(); i++) {
-				oss << types <T, U> ::symbol(signature[i]);
-				
-				if (i < signature.size() - 1)
 					oss << ", ";
 			}
 

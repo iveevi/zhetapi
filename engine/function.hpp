@@ -238,7 +238,7 @@ namespace zhetapi {
 
 		void *handle = dlopen(("./gen/" + file + ".so").c_str(), RTLD_NOW);
 
-		std::cout << "handle @ " << file << ": " << handle << std::endl;
+		// std::cout << "handle @ " << file << ": " << handle << std::endl;
 
 		const char *dlsym_error = dlerror();
 	
@@ -252,8 +252,8 @@ namespace zhetapi {
 
 		void *ptr = dlsym(handle, file.c_str());
 
-		std::cout << "\tptr: " << ptr << std::endl;
-		std::cout << "\tfile: " << file << std::endl;
+		// std::cout << "\tptr: " << ptr << std::endl;
+		// std::cout << "\tfile: " << file << std::endl;
 
 		// dlsym_error = dlerror();
 	

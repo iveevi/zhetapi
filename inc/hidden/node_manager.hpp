@@ -197,8 +197,6 @@ namespace zhetapi {
 	{
 		std::vector <token *> values;
 
-		std::vector <std::type_index> types;
-
 		node *unrefd;
 		
 		token *tptr;
@@ -207,15 +205,11 @@ namespace zhetapi {
 		case token::opd:
 			return tree.__tptr.get();
 		case token::oph:
-			for (node leaf : tree.__leaves) {
-				token *tptr = value(leaf);
-				types.push_back(typeid(*tptr));
-				values.push_back(tptr);
-			}
+			for (node leaf : tree.__leaves)
+				values.push_back(value(leaf));
 
-			tptr = __barn.value((dynamic_cast <operation_holder *>
-						(tree.__tptr.get()))->rep, types,
-					values);
+			tptr = __barn.compute((dynamic_cast <operation_holder *>
+						(tree.__tptr.get()))->rep, values);
 
 			return tptr;
 		case token::ndr:
@@ -350,7 +344,9 @@ namespace zhetapi {
 			size_t n = choice.size();
 
 			for (size_t i = 0; i < n/2; i++) {
-				tmp.push_back(node(new operation_holder("*"), {choice[i], choice[i + 1]}));
+				tmp.push_back(node(new operation_holder("*"),
+							{choice[i], choice[i +
+							1]}));
 			}
 
 			if (n % 2)
@@ -450,7 +446,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::generate(std::string name, node ref, std::ofstream &fout, size_t &const_count, size_t &inter_count) const
+	std::string node_manager <T, U> ::generate(std::string name, node ref,
+			std::ofstream &fout, size_t &const_count, size_t
+			&inter_count) const
 	{
 		std::vector <std::string> idents;
 
@@ -472,7 +470,9 @@ namespace zhetapi {
 			// Assuming we have an operation
 			operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 
-			fout << "\t\tzhetapi::token *inter" << inter_count++ << " = " << name << "_barn.compute(\"" << ophtr->rep << "\", {";
+			fout << "\t\tzhetapi::token *inter" << inter_count++ <<
+				" = " << name << "_barn.compute(\"" <<
+				ophtr->rep << "\", {";
 
 			for (size_t i = 0; i < idents.size(); i++) {
 				fout << idents[i];

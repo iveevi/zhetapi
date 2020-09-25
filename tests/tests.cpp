@@ -8,7 +8,7 @@
 // Engine headers
 #include <function.hpp>
 
-#define TEST3
+#define TEST4
 
 using namespace std;
 
@@ -259,6 +259,62 @@ int main()
 
 	cout << "f3: " << f3(new zhetapi::operand <int> (3), new zhetapi::operand <int> (4))->str() << endl;
 	cout << "fx3: " << fx3(3, 4)->str() << endl;
+
+#elif defined(TEST4)
+
+	size_t rounds = 100000;
+
+	clock_t startt;
+	clock_t endt;
+
+	zhetapi::Function <double, int> fx = "f(x) = x * 54 + ln(x)";
+
+	/////////////////////////////////////////////////////////////
+	cout << "Running with zhetapi::Function:" << endl;
+
+	startt = clock();
+
+	for (size_t i = 0; i < rounds; i++)
+		fx(10);
+
+	endt = clock();
+
+	double gen = (endt - startt)/((double) CLOCKS_PER_SEC);
+
+	cout << "\tTime: " << gen << " seconds" << endl;
+
+	/////////////////////////////////////////////////////////////
+
+	cout << "\nCompiling general function:" << endl;
+
+	startt = clock();
+
+	typedef zhetapi::token *(*ftr)(zhetapi::token *);
+	
+	ftr gfx = (ftr) fx.compile_general();
+
+	endt = clock();
+
+	gen = (endt - startt)/((double) CLOCKS_PER_SEC);
+
+	cout << "\tTime: " << gen << " seconds" << endl;
+
+	/////////////////////////////////////////////////////////////
+	
+	cout << "\nRunning with general function:" << endl;
+
+	zhetapi::token *opd = new zhetapi::operand <int> (10);
+
+	startt = clock();
+
+	for (size_t i = 0; i < rounds; i++)
+		gfx(opd);
+
+	endt = clock();
+
+	gen = (endt - startt)/((double) CLOCKS_PER_SEC);
+
+	cout << "\tTime: " << gen << " seconds" << endl;
 
 #endif
 
