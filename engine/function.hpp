@@ -226,7 +226,7 @@ namespace zhetapi {
 	{
 		std::string file = generate_general();
 
-		// Linux
+#ifdef __linux__
 		system("mkdir -p gen");
 
 		system(("g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std \
@@ -278,6 +278,13 @@ namespace zhetapi {
 		}
 
 		return ptr;
+#else
+
+#warning No support for Function::compile_general
+
+		return nullptr;
+#endif
+
 	}
 
 	// Printing utilities
