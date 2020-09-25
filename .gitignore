@@ -1,6 +1,5 @@
 *.out
 *.so
-__gen*
 
 *.log
 *.swp
@@ -8,6 +7,9 @@ __gen*
 
 __pycache__
 
+__gen*
+
+gen
 build
 data
 exp

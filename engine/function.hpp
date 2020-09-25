@@ -227,13 +227,16 @@ namespace zhetapi {
 		std::string file = generate_general();
 
 		// Linux
-		std::string compile = "g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std -rdynamic -fPIC -shared " + file  + ".cpp -o " + file + ".so";
+		system("mkdir -p gen");
 
-		std::cout << compile << std::endl;
+		system(("g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std \
+					-rdynamic -fPIC -shared " + file  +
+					".cpp -o gen/" + file +
+					".so").c_str());
+		
+		system(("rm -rf " + file + ".cpp").c_str());
 
-		system(compile.c_str());
-
-		void *handle = dlopen(("./" + file + ".so").c_str(), RTLD_NOW);
+		void *handle = dlopen(("./gen/" + file + ".so").c_str(), RTLD_NOW);
 
 		std::cout << "handle @ " << file << ": " << handle << std::endl;
 
