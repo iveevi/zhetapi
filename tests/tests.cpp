@@ -180,7 +180,7 @@ int main()
 
 	cout << 24 << endl;
 
-	system("g++ -I engine -I inc/hidden -I inc/std __gen_fone.cpp -rdynamic -shared -fPIC -o __gen_fone.so");
+	system("g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std __gen_fone.cpp -rdynamic -shared -fPIC -o __gen_fone.so");
 
 	void *handle = dlopen(file, RTLD_NOW);
 
@@ -215,10 +215,12 @@ int main()
 		
 		return 1;
 	}
+	
+	// dlclose(handle);
 
-	cout << f(new zhetapi::operand <int> (34), new zhetapi::operand <int> (5)) << endl;
+	cout << f(new zhetapi::operand <int> (34), new zhetapi::operand <int> (5))->str() << endl;
 
-	dlclose(handle);
+	system("readelf -Ws __gen_fone.so | grep UNIQUE");
 
 #elif defined(TEST3)
 

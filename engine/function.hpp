@@ -227,7 +227,7 @@ namespace zhetapi {
 		std::string file = generate_general();
 
 		// Linux
-		std::string compile = "g++ -I engine -I inc/hidden -I inc/std -rdynamic -fPIC -shared " + file  + ".cpp -o " + file + ".so";
+		std::string compile = "g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std -rdynamic -fPIC -shared " + file  + ".cpp -o " + file + ".so";
 
 		std::cout << compile << std::endl;
 
@@ -242,7 +242,7 @@ namespace zhetapi {
 		if (dlsym_error) {
 			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 			
-			dlclose(handle);
+			// dlclose(handle);
 			
 			return nullptr;
 		}
@@ -252,24 +252,24 @@ namespace zhetapi {
 		std::cout << "\tptr: " << ptr << std::endl;
 		std::cout << "\tfile: " << file << std::endl;
 
-		dlsym_error = dlerror();
+		// dlsym_error = dlerror();
 	
 		if (dlsym_error) {
 			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 			
-			dlclose(handle);
+			// dlclose(handle);
 			
 			return nullptr;
 		}
 
-		dlclose(handle);
+		// dlclose(handle);
 
 		dlsym_error = dlerror();
 
 		if (dlsym_error) {
 			std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
 			
-			dlclose(handle);
+			// dlclose(handle);
 			
 			return nullptr;
 		}
