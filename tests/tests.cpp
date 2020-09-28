@@ -8,7 +8,7 @@
 // Engine headers
 #include <function.hpp>
 
-#define TEST4
+#define TEST5
 
 using namespace std;
 
@@ -315,6 +315,22 @@ int main()
 	gen = (endt - startt)/((double) CLOCKS_PER_SEC);
 
 	cout << "\tTime: " << gen << " seconds" << endl;
+
+#elif defined(TEST5)
+
+	cout << "Compiled..." << endl;
+
+	zhetapi::Barn <double, int> barn;
+
+	barn.put("x", 1);
+	barn.put("y", 5.65);
+	barn.put("z", -34.43);
+
+	zhetapi::Function <double, int> f = "f(x) = x^2";
+
+	barn.put(f);
+	
+	barn.print();
 
 #endif
 

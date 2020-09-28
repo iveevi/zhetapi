@@ -1,470 +1,450 @@
-#ifndef TABLE_H_
-#define TABLE_H_
+#ifndef FUNCTION_TABLE_H_
+#define FUNCTION_TABLE_H_
 
-#include "node.h"
-#include "Function.h"
-#include "Variable.h"
+// C/C++ headers
+#include <vector>
+#include <string>
+#include <iostream>
 
-template <class T, class U>
-class Function;
+namespace zhetapi {
 
-template <class T, class U>
-class ftable {
-public:
-	using ftr = Function <T, U>;
+	template <class T, class U>
+	class Function;
 
-	struct node {
-		ftr val;
-		node *left;
-		node *right;
+	template <class T, class U>
+	class ftable {
+	public:
+		struct node {
+			Function <T, U>	__val;
+			node *		__left;
+			node *		__right;
+		};
+	private:
+		node *		__tree;
+		std::size_t	__size;
+	public:
+		ftable();
+		ftable(const ftable &);
+
+		ftable(const std::vector <Function <T, U>> &);
+
+		template <class ... A>
+		ftable(A ...);
+
+		const ftable &operator=(const ftable &);
+
+		~ftable();
+		
+		Function <T, U> &get(const std::string &);
+		const Function <T, U> &find(const std::string &);
+
+		bool insert(const Function <T, U> &);
+
+		bool remove(const Function <T, U> &);
+		bool remove(const std::string &);
+
+		bool empty() const;
+
+		std::size_t size() const;
+
+		void clear();
+
+		void print() const;
+	private:
+		void gather(std::vector <Function <T, U>> &, Function <T, U>) const;
+		
+		template <class ... A>
+		void gather(std::vector <Function <T, U>> &, Function <T, U>, A ...) const;
+
+		node *clone(node *);
+
+		void clear(node *(&));
+
+		void print(node *, int, int) const;
+
+		void splay(node *(&), const std::string &);
+		
+		void rotate_left(node *(&));
+		void rotate_right(node *(&));
+	public:
+		// empty or null root nodes
+		class null_tree {};
+
+		// old nfe equivalent
+		class null_entry {};
 	};
-private:
-	node *tree;
 
-	std::size_t size;
-public:
-	ftable();
-	ftable(const ftable &);
+	/* Constructors, destructors,
+	* major/significant operators */
+	template <class T, class U>
+	ftable <T, U> ::ftable() : __tree(nullptr), __size(0) {}
 
-	ftable(const std::vector <var> &, const std::vector <ftr> &);
-	ftable(const std::pair <std::vector <var>, std::vector <ftr>> &);
+	template <class T, class U>
+	ftable <T, U> ::ftable(const ftable &other) : __tree(nullptr), __size(0)
+	{
+		*this = other;
+	}
 
-	template <class ... U>
-	ftable(U ...);
+	template <class T, class U>
+	ftable <T, U> ::ftable(const std::vector <Function <T, U>> &fs)
+		: ftable()
+	{
+		for (auto ft : fs)
+			insert(ft);
+	}
 
-	const ftable &operator=(const ftable &);
+	template <class T, class U>
+	template <class ... A>
+	ftable <T, U> ::ftable(A ... args) : ftable()
+	{
+		std::vector <Function <T, U>> pr;
+		gather(pr, args...);
+		
+		for (auto ft : pr)
+			insert(ft);
+	}
 
-	~ftable();
-	
-	ftr &get(const std::string &);
-	const ftr &find(const std::string &);
+	template <class T, class U>
+	const ftable <T, U> &ftable <T, U> ::operator=(const ftable &other)
+	{
+		if (this != &other) {
+			clear();
 
-	bool insert(const ftr &);
+			__tree = clone_var(other.__tree);
+			__size = other.__size;
+		}
 
-	bool remove(const ftr &);
-	bool remove(const std::string &);
+		return *this;
+	}
 
-	bool empty() const;
-
-	std::size_t size() const;
-
-	void clear();
-
-	void print() const;
-private:
-	void gather(std::vector <ftr> &, ftr) const;
-	
-	template <class ... U>
-	void gather(std::vector <ftr> &, ftr, U ...) const;
-
-	node *clone(node *);
-
-	void clear(node *(&));
-
-	void print(node *, int, int) const;
-
-	void splay(node *(&), const std::string &);
-	
-	void rotate_left(node *(&));
-	void rotate_right(node *(&));
-public:
-	// empty or null root nodes
-	class null_tree {};
-
-	// old nfe equivalent
-	class null_entry {};
-};
-
-/* Constructors, destructors,
- * major/significant operators */
-template <class T, class U>
-ftable <T> ::ftable() : tree(nullptr), size(0) {}
-
-template <class T, class U>
-ftable <T> ::ftable(const ftable &other) : tree(nullptr), size(0)
-{
-	*this = other;
-}
-
-template <class T, class U>
-ftable <T> ::ftable(const std::vector <ftr> &fs)
-	: ftable()
-{
-	for (auto ft : fs)
-		insert(ft);
-}
-
-template <class T, class U>
-template <class ... U>
-ftable <T> ::ftable(U ... args) : ftable()
-{
-	std::vector <ftr> pr;
-	gather(pr, args...);
-	
-	for (auto ft : pr)
-		insert(ft);
-}
-
-template <class T, class U>
-const ftable <T> &ftable <T> ::operator=(const ftable &other)
-{
-	if (this != &other) {
+	template <class T, class U>
+	ftable <T, U> ::~ftable()
+	{
 		clear();
-		vtree = clone_var(other.vtree);
-		tree = clone(other.tree);
-		vtree_size = other.vtree_size;
-		size = other.size;
 	}
 
-	// cout << string(50, '_') << endl;
-	// cout << "ASSIGNMENT OPERATOR:" << endl;
-	// print();
+	/* Public interface of ftable;
+	* find methods, clear, print, etc. */
+	template <class T, class U>
+	Function <T, U> &ftable <T, U> ::get(const std::string &key)
+	{
+		if (!__tree)
+			throw null_tree();
 
-	return *this;
-}
+		splay(__tree, key);
 
-template <class T, class U>
-ftable <T> ::~ftable()
-{
-	clear();
-}
+		if (__tree->__val.symbol() != key)
+			throw null_entry();
 
-/* Public interface of ftable;
- * find methods, clear, print, etc. */
-template <class T, class U>
-typename ftable <T> ::ftr &ftable <T> ::get(const std::string &key)
-{
-	if (!tree)
-		throw null_tree();
-
-	splay(tree, key);
-
-	if (tree->val.symbol() != key)
-		throw null_entry();
-
-	return tree->val;
-}
-
-template <class T, class U>
-const typename ftable <T> ::ftr &ftable <T> ::find(const std::string &key)
-{
-	if (!tree)
-		throw null_tree();
-
-	splay(tree, key);
-
-	if (tree->val.symbol() != key)
-		throw null_entry();
-
-	return tree->val;
-}
-
-template <class T, class U>
-bool ftable <T> ::insert(const ftr &x)
-{
-	if (tree == nullptr) {
-		tree = new node {x, nullptr, nullptr};
-		size++;
-		return true;
+		return __tree->__val;
 	}
 
-	splay(tree, x.symbol());
+	template <class T, class U>
+	const Function <T, U> &ftable <T, U> ::find(const std::string &key)
+	{
+		if (!__tree)
+			throw null_tree();
 
-	node *temp = new node {x, nullptr, nullptr};
+		splay(__tree, key);
 
-	if (x < tree->val) {
-		temp->left = tree->left;
-		temp->right = tree;
+		if (__tree->__val.symbol() != key)
+			throw null_entry();
 
-		temp->right->left = nullptr;
-		tree = temp;
-		size++;
-
-		return true;
+		return __tree->__val;
 	}
 
-	if (x > tree->val) {
-		temp->left = tree;
-		temp->right = tree->right;
+	template <class T, class U>
+	bool ftable <T, U> ::insert(const Function <T, U> &x)
+	{
+		if (__tree == nullptr) {
+			__tree = new node {x, nullptr, nullptr};
+			__size++;
+			return true;
+		}
 
-		temp->left->right = nullptr;
-		tree = temp;
-		size++;
+		splay(__tree, x.symbol());
 
-		return true;
-	}
+		node *temp = new node {x, nullptr, nullptr};
 
-	return false;
-}
+		if (x < __tree->__val) {
+			temp->__left = __tree->__left;
+			temp->__right = __tree;
 
-template <class T, class U>
-bool ftable <T> ::remove(const ftr &x)
-{
-	if (!size)
+			temp->__right->__left = nullptr;
+			__tree = temp;
+			__size++;
+
+			return true;
+		}
+
+		if (x > __tree->__val) {
+			temp->__left = __tree;
+			temp->__right = __tree->__right;
+
+			temp->__left->__right = nullptr;
+			__tree = temp;
+			__size++;
+
+			return true;
+		}
+
 		return false;
-
-	splay(tree, x.symbol());
-
-	if (x.symbol() != tree->val.symbol())
-		return false;
-
-	node *nnd;
-	if (tree->left == nullptr) {
-		nnd = tree->left;
-	} else {
-		nnd = tree->left;
-		splay(nnd, x.symbol());
-
-		nnd->right = tree->right;
 	}
 
-	delete tree;
+	template <class T, class U>
+	bool ftable <T, U> ::remove(const Function <T, U> &x)
+	{
+		if (!__size)
+			return false;
 
-	tree = nnd;
-	size--;
+		splay(__tree, x.symbol());
 
-	return true;
-}
+		if (x.symbol() != __tree->__val.symbol())
+			return false;
 
-template <class T, class U>
-bool ftable <T> ::remove(const std::string &str)
-{
-	if (!size)
-		return false;
-
-	splay(tree, str);
-
-	if (str != tree->val.symbol())
-		return false;
-
-	node *nnd;
-	if (tree->left == nullptr) {
-		nnd = tree->left;
-	} else {
-		nnd = tree->left;
-		splay(nnd, str);
-
-		nnd->right = tree->right;
-	}
-
-	delete tree;
-
-	tree = nnd;
-	size--;
-
-	return true;
-}
-
-template <class T, class U>
-bool ftable <T> ::empty() const
-{
-	return !size;
-}
-
-template <class T, class U>
-std::size_t ftable <T> ::size() const
-{
-	return size;
-}
-
-template <class T, class U>
-void ftable <T> ::clear()
-{
-	if (tree != nullptr)
-		clear(tree);
-}
-
-template <class T, class U>
-void ftable <T> ::print() const
-{
-	print(tree);
-}
-
-/* Protected methods (helpers methods);
- * splay, rotate left/right, clone, ect. */
-template <class T, class U>
-void ftable <T> ::gather(std::vector <ftr> &pr, ftr ft) const
-{
-	pr.push_back(ft);
-}
-
-template <class T, class U>
-template <class ... U>
-void ftable <T> ::gather(std::vector <ftr> &pr, ftr ft, U ... args) const
-{
-	pr.push_back(ft);
-	gather(pr, args...);
-}
-
-template <class T, class U>
-typename ftable <T> ::node *ftable <T> ::clone(node *fnd)
-{
-	node *nnode;
-
-	if (fnd == nullptr)
-		return nullptr;
-
-	nnode = new node {fnd->val, clone(fnd->left),
-		clone(fnd->right)};
-
-	return nnode;
-}
-
-template <class T, class U>
-void ftable <T> ::clear(node *(&fnd))
-{
-	if (fnd == nullptr)
-		return;
-
-	clear(fnd->left);
-	clear(fnd->right);
-
-	delete fnd;
-	
-	// maybe remove later
-	fnd = nullptr;
-	size--;
-}
-
-template <class T, class U>
-void ftable <T> ::print(node *fnd, int lev, int dir) const
-{
-	if (fnd == nullptr)
-		return;
-
-	for (int i = 0; i < lev; i++)
-		std::cout << "\t";
-
-	switch (dir) {
-	case 0:
-		std::cout << "Level #" << lev << " -- Root: ";
-
-		if (fnd == nullptr)
-			std::cout << "NULL";
-		else
-			std::cout << fnd->val;
-		std::cout << " [@" << fnd << "]" << std::endl;
-		break;
-	case 1:
-		std::cout << "Level #" << lev << " -- Left: ";
-		
-		if (fnd == nullptr)
-			std::cout << "NULL";
-		else
-			std::cout << fnd->val;
-		std::cout << " [@" << fnd << "]" << std::endl;
-		break;
-	case -1:
-		std::cout << "Level #" << lev << " -- Right: ";
-		
-		if (fnd == nullptr)
-			std::cout << "NULL";
-		else
-			std::cout << fnd->val;
-		std::cout << " [@" << fnd << "]" << std::endl;
-		break;
-	}
-	
-	if (fnd == nullptr)
-		return;
-
-	print(fnd->left, lev + 1, 1);
-	print(fnd->right, lev + 1, -1);
-}
-
-template <class T, class U>
-void ftable <T> ::splay(node *(&fnd), const std::string &id)
-{
-	node *rt = nullptr;
-	node *lt = nullptr;
-	node *rtm = nullptr;
-	node *ltm = nullptr;
-	
-	while (fnd != nullptr) {
-		if (id < fnd->val.symbol()) {
-			if (fnd->left == nullptr)
-				break;
-			
-			if (id < fnd->left->val.symbol()) {
-				rotate_left(fnd);
-
-				if (fnd->left == nullptr)
-					break;
-			}
-
-			if (rt == nullptr)
-				rt = new node {ftr(), nullptr, nullptr};
-		
-
-			if (rtm == nullptr) {
-				rt->left = fnd;
-				rtm = rt;
-			} else {
-				rtm->left = fnd;
-			}
-
-			rtm = rtm->left;
-			
-			fnd = rtm->left;
-			rtm->left = nullptr;
-		} else if (id > fnd->val.symbol()) {
-			if (fnd->right == nullptr)
-				break;
-			
-			if (id > fnd->right->val.symbol()) {
-				rotate_right(fnd);
-				if (fnd->right == nullptr)
-					break;
-			}
-
-			if (lt == nullptr)
-				lt = new node {ftr(), nullptr, nullptr};
-
-			if (ltm == nullptr) {
-				lt->right = fnd;
-				ltm = lt;
-			} else {
-				ltm->right = fnd;
-			}
-
-			ltm = ltm->right;
-
-			fnd = ltm->right;
-			ltm->right = nullptr;
+		node *nnd;
+		if (__tree->__left == nullptr) {
+			nnd = __tree->__left;
 		} else {
-			break;
+			nnd = __tree->__left;
+			splay(nnd, x.symbol());
+
+			nnd->__right = __tree->__right;
+		}
+
+		delete __tree;
+
+		__tree = nnd;
+		__size--;
+
+		return true;
+	}
+
+	template <class T, class U>
+	bool ftable <T, U> ::remove(const std::string &str)
+	{
+		if (!__size)
+			return false;
+
+		splay(__tree, str);
+
+		if (str != __tree->__val.symbol())
+			return false;
+
+		node *nnd;
+		if (__tree->__left == nullptr) {
+			nnd = __tree->__left;
+		} else {
+			nnd = __tree->__left;
+			splay(nnd, str);
+
+			nnd->__right = __tree->__right;
+		}
+
+		delete __tree;
+
+		__tree = nnd;
+		__size--;
+
+		return true;
+	}
+
+	template <class T, class U>
+	bool ftable <T, U> ::empty() const
+	{
+		return !__size;
+	}
+
+	template <class T, class U>
+	std::size_t ftable <T, U> ::size() const
+	{
+		return size;
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::clear()
+	{
+		if (__tree != nullptr)
+			clear(__tree);
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::print() const
+	{
+		print(__tree, 1, 0);
+	}
+
+	/* Protected methods (helpers methods);
+	* splay, rotate left/right, clone, ect. */
+	template <class T, class U>
+	void ftable <T, U> ::gather(std::vector <Function <T, U>> &pr, Function <T, U> ft) const
+	{
+		pr.push_back(ft);
+	}
+
+	template <class T, class U>
+	template <class ... A>
+	void ftable <T, U> ::gather(std::vector <Function <T, U>> &pr, Function <T, U> ft, A ... args) const
+	{
+		pr.push_back(ft);
+		gather(pr, args...);
+	}
+
+	template <class T, class U>
+	typename ftable <T, U> ::node *ftable <T, U> ::clone(node *fnd)
+	{
+		node *nnode;
+
+		if (fnd == nullptr)
+			return nullptr;
+
+		nnode = new node {fnd->__val, clone(fnd->__left),
+			clone(fnd->__right)};
+
+		return nnode;
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::clear(node *(&fnd))
+	{
+		if (fnd == nullptr)
+			return;
+
+		clear(fnd->__left);
+		clear(fnd->__right);
+
+		delete fnd;
+		
+		// maybe remove later
+		fnd = nullptr;
+		__size--;
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::print(node *fnd, int lev, int dir) const
+	{
+		if (fnd == nullptr)
+			return;
+
+		for (int i = 0; i < lev; i++)
+			std::cout << "\t";
+
+		if (!dir)
+			std::cout << "Level #" << lev << " -- Root: ";
+		else if (dir == 1)
+			std::cout << "Level #" << lev << " -- Left: ";
+		else
+			std::cout << "Level #" << lev << " -- Right: ";
+
+		if (fnd == nullptr)
+			std::cout << "NULL";
+		else
+			std::cout << fnd->__val;
+		
+		std::cout << std::endl;
+		
+		if (fnd == nullptr)
+			return;
+
+		print(fnd->__left, lev + 1, 1);
+		print(fnd->__right, lev + 1, -1);
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::splay(node *(&fnd), const std::string &id)
+	{
+		node *rt = nullptr;
+		node *lt = nullptr;
+		node *rtm = nullptr;
+		node *ltm = nullptr;
+		
+		while (fnd != nullptr) {
+			if (id < fnd->__val.symbol()) {
+				if (fnd->__left == nullptr)
+					break;
+				
+				if (id < fnd->__left->__val.symbol()) {
+					rotate_left(fnd);
+
+					if (fnd->__left == nullptr)
+						break;
+				}
+
+				if (rt == nullptr)
+					rt = new node {Function <T, U>(), nullptr, nullptr};
+			
+
+				if (rtm == nullptr) {
+					rt->__left = fnd;
+					rtm = rt;
+				} else {
+					rtm->__left = fnd;
+				}
+
+				rtm = rtm->__left;
+				
+				fnd = rtm->__left;
+				rtm->__left = nullptr;
+			} else if (id > fnd->__val.symbol()) {
+				if (fnd->__right == nullptr)
+					break;
+				
+				if (id > fnd->__right->__val.symbol()) {
+					rotate_right(fnd);
+					if (fnd->__right == nullptr)
+						break;
+				}
+
+				if (lt == nullptr)
+					lt = new node {Function <T, U>(), nullptr, nullptr};
+
+				if (ltm == nullptr) {
+					lt->__right = fnd;
+					ltm = lt;
+				} else {
+					ltm->__right = fnd;
+				}
+
+				ltm = ltm->__right;
+
+				fnd = ltm->__right;
+				ltm->__right = nullptr;
+			} else {
+				break;
+			}
+		}
+		
+		if (lt != nullptr) {
+			ltm->__right = fnd->__left;
+			fnd->__left = lt->__right;
+		}
+
+		if (rt != nullptr) {
+			rtm->__left = fnd->__right;
+			fnd->__right = rt->__left;
 		}
 	}
-	
-	if (lt != nullptr) {
-		ltm->right = fnd->left;
-		fnd->left = lt->right;
+
+	template <class T, class U>
+	void ftable <T, U> ::rotate_left(node *(&fnd))
+	{
+		node *rt = fnd->__left;
+
+		fnd->__left = rt->__right;
+		rt->__right = fnd;
+		fnd = rt;
 	}
 
-	if (rt != nullptr) {
-		rtm->left = fnd->right;
-		fnd->right = rt->left;
+	template <class T, class U>
+	void ftable <T, U> ::rotate_right(typename ftable <T, U> ::node *(&fnd))
+	{
+		node *rt = fnd->__right;
+
+		fnd->__right = rt->__left;
+		rt->__left = fnd;
+		fnd = rt;
 	}
-}
 
-template <class T, class U>
-void ftable <T> ::rotate_left(node *(&fnd))
-{
-	node *rt = fnd->left;
-
-	fnd->left = rt->right;
-	rt->right = fnd;
-	fnd = rt;
-}
-
-template <class T, class U>
-void ftable <T> ::rotate_right(node *(&fnd))
-{
-	node *rt = fnd->right;
-
-	fnd->right = rt->left;
-	rt->left = fnd;
-	fnd = rt;
 }
 
 #endif

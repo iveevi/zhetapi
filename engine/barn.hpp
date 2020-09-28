@@ -25,7 +25,9 @@
 #include <types.hpp>
 #include <vector.hpp>
 #include <vtable.hpp>
+#include <ftable.hpp>
 #include <variable.hpp>
+// #include <function.hpp>
 
 namespace zhetapi {
 
@@ -193,6 +195,9 @@ namespace zhetapi {
 			}									\
 	});
 
+	template <class T, class U>
+	class Function;
+
 	/**
 	 * @brief Represents the working space of a [zhetapi] function or
 	 * application; the sets of integer, real, complex, rational, vector and
@@ -222,6 +227,8 @@ namespace zhetapi {
 		vtable <MQ> v_stack_mq;
 		vtable <MR> v_stack_mr;
 
+		ftable <T, U> fstack;
+
 		std::vector <std::pair <ID, token *>> ops;
 
 		mutable std::unordered_map <std::string, std::vector <std::pair <signature, token *>>> table;
@@ -242,6 +249,8 @@ namespace zhetapi {
 		template <class A>
 		void put(Variable <A>);
 
+		void put(Function <T, U>);
+
 		/*
 		 * Switch to this overload once variables are out.
 		 */
@@ -261,7 +270,7 @@ namespace zhetapi {
 		
 		std::string overloads(const std::string &) const;
 
-		void print() const;
+		void print(bool = false) const;
 
 		// Exceptions
 		class unknown_operation_overload_exception {
@@ -746,7 +755,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void Barn <T, U> ::print() const
+	void Barn <T, U> ::print(bool show_ops) const
 	{
 		std::cout << std::string(50, '=') << std::endl;
 		std::cout << "INTEGERS:" << std::endl;
@@ -788,11 +797,19 @@ namespace zhetapi {
 		std::cout << "REAL MATRICES:" << std::endl;
 		std::cout << std::string(50, '=') << std::endl;
 
+		std::cout << std::string(50, '=') << std::endl;
+		std::cout << "FUNCTIONS:" << std::endl;
+		std::cout << std::string(50, '=') << std::endl;
+
+		fstack.print();
+
 		v_stack_mr.print();
 
-		for (auto pr : ops) {
-			std::cout << "op: " << pr.second->str() << " @ " <<
-				pr.second << std::endl;
+		if (show_ops) {
+			for (auto pr : ops) {
+				std::cout << "op: " << pr.second->str() << " @ " <<
+					pr.second << std::endl;
+			}
 		}
 	}
 

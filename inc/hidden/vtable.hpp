@@ -354,7 +354,6 @@ namespace zhetapi {
 				std::cout << "NULL";
 			else
 				std::cout << vnd->val;
-			std::cout << " [@" << vnd << "]" << std::endl;
 			break;
 		case 1:
 			std::cout << "Level #" << lev << " -- Left: ";
@@ -363,7 +362,6 @@ namespace zhetapi {
 				std::cout << "NULL";
 			else
 				std::cout << vnd->val;
-			std::cout << " [@" << vnd << "]" << std::endl;
 			break;
 		case -1:
 			std::cout << "Level #" << lev << " -- Right: ";
@@ -372,9 +370,10 @@ namespace zhetapi {
 				std::cout << "NULL";
 			else
 				std::cout << vnd->val;
-			std::cout << " [@" << vnd << "]" << std::endl;
 			break;
 		}
+
+		std::cout << std::endl;
 		
 		if (vnd == nullptr)
 			return;

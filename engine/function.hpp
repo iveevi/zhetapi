@@ -2,7 +2,9 @@
 #define FUNCTOR_H_
 
 // C/C++ headers
+#include <ostream>
 #include <string>
+
 #include <dlfcn.h>
 
 // Engine headers
@@ -23,17 +25,30 @@ namespace zhetapi {
 		Function(const char *);
 		Function(const std::string &);
 
+		std::string &symbol();
+		const std::string symbol() const;
+
 		template <class ... A>
 		token *operator()(A ...);
 
 		template <class ... A>
 		token *derivative(const std::string &, A ...);
 
+		template <class A, class B>
+		friend bool operator<(const Function <A, B> &, const Function <A, B> &);
+
+		template <class A, class B>
+		friend bool operator>(const Function <A, B> &, const Function <A, B> &);
+
 		std::string generate_general() const;
 
 		void *compile_general() const;
 
+		// Printing
 		void print() const;
+
+		template <class A, class B>
+		friend std::ostream &operator<<(std::ostream &, const Function <A, B> &);
 	private:
 		template <class A>
 		void gather(std::vector <token *> &, A);
@@ -141,6 +156,19 @@ namespace zhetapi {
 
 		// Construct the tree manager
 		__manager = node_manager <T, U> (str.substr(++index), __params);
+	}
+
+	// Getters
+	template <class T, class U>
+	std::string &Function <T, U> ::symbol()
+	{
+		return __symbol;
+	}
+
+	template <class T, class U>
+	const std::string Function <T, U> ::symbol() const
+	{
+		return __symbol;
 	}
 
 	// Computational utilities
@@ -294,6 +322,26 @@ namespace zhetapi {
 		__manager.print();
 	}
 
+	template <class T, class U>
+	std::ostream &operator<<(std::ostream &os, const Function <T, U> &ftr)
+	{
+		os << "?";
+		return os;
+	}
+
+	// Comparing
+	template <class T, class U>
+	bool operator<(const Function <T, U> &a, const Function <T, U> &b)
+	{
+		return a.symbol() < b.symbol();
+	}
+
+	template <class T, class U>
+	bool operator>(const Function <T, U> &a, const Function <T, U> &b)
+	{
+		return a.symbol() > b.symbol();
+	}
+
 	// Gathering facilities
 	template <class T, class U>
 	template <class A>
@@ -320,6 +368,14 @@ namespace zhetapi {
 			return -1;
 
 		return std::distance(__params.begin(), itr);
+	}
+
+	//
+
+	template <class T, class U>
+	void Barn <T, U> ::put(Function <T, U> ftr)
+	{
+		fstack.insert(ftr);
 	}
 
 }
