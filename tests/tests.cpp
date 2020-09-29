@@ -322,15 +322,22 @@ int main()
 
 	zhetapi::Barn <double, int> barn;
 
+	zhetapi::Function <double, int> f = "f(x) = x^2";
+	
 	barn.put("x", 1);
 	barn.put("y", 5.65);
 	barn.put("z", -34.43);
 
-	zhetapi::Function <double, int> f = "f(x) = x^2";
-
 	barn.put(f);
-	
-	barn.print();
+
+	zhetapi::token *tptr = barn.get("f");
+
+	zhetapi::Function <double, int> *ftr;
+
+	ftr = dynamic_cast <zhetapi::Function <double, int> *> (tptr);
+
+	cout << "stack\tf(1):\t" << f(1)->str() << endl;
+	cout << "barn\tf(1):\t" << (*ftr)(1)->str() << endl;
 
 #endif
 

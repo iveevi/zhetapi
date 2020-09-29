@@ -38,6 +38,8 @@ namespace zhetapi {
 		Function <T, U> &get(const std::string &);
 		const Function <T, U> &find(const std::string &);
 
+		bool contains(const std::string &);
+
 		bool insert(const Function <T, U> &);
 
 		bool remove(const Function <T, U> &);
@@ -151,6 +153,20 @@ namespace zhetapi {
 			throw null_entry();
 
 		return __tree->__val;
+	}
+
+	template <class T, class U>
+	bool ftable <T, U> ::contains(const std::string &key)
+	{
+		Function <T, U> x;
+
+		try {
+			x = get(key);
+		} catch (...) {
+			return false;
+		}
+
+		return true;
 	}
 
 	template <class T, class U>

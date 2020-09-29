@@ -520,6 +520,15 @@ namespace zhetapi {
 	{
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
+		
+		for (auto pr : ops) {
+			operation *opn = dynamic_cast <operation *> (pr.second);
+
+			if (table.count(pr.first.first))
+				table[pr.first.first].push_back({pr.first.second, pr.second});
+			else
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+		}
 	}
 	
 	template <class T, class U>
@@ -542,6 +551,15 @@ namespace zhetapi {
 
 			for (auto pr : other.ops)
 				ops.push_back({pr.first, pr.second->copy()});
+			
+			for (auto pr : ops) {
+				operation *opn = dynamic_cast <operation *> (pr.second);
+
+				if (table.count(pr.first.first))
+					table[pr.first.first].push_back({pr.first.second, pr.second});
+				else
+					table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+			}
 		}
 
 		return *this;
@@ -656,6 +674,9 @@ namespace zhetapi {
 			return new operand <VR> (v_stack_mr.get(str).get());
 		if (v_stack_mq.contains(str))
 			return new operand <VQ> (v_stack_mq.get(str).get());
+		
+		if (fstack.contains(str))
+			return (fstack.get(str)).copy();
 
 		return nullptr;
 	}
@@ -677,7 +698,7 @@ namespace zhetapi {
 			if (itr->first.size() == sz) {
 				bool ps = true;
 				
-				for (size_t i = 0; i < sz; i++) {
+				for (size_t i = 0; i < sz; i++) {					
 					if (sig[i] != itr->first[i]) {
 						ps = false;
 
@@ -809,6 +830,15 @@ namespace zhetapi {
 			for (auto pr : ops) {
 				std::cout << "op: " << pr.second->str() << " @ " <<
 					pr.second << std::endl;
+			}
+
+			std::cout << "######################################################" << std::endl;
+
+			for (auto itr : table) {
+				std::cout << "Str: " << itr.first << " @ Size: " << itr.second.size() << " @ 2nd Size: " << table[itr.first].size() << std::endl;
+
+				for (auto pr : itr.second)
+					std::cout << "\t" << pr.second->str() << std::endl;
 			}
 		}
 	}

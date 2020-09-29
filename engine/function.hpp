@@ -16,7 +16,7 @@ namespace zhetapi {
 	 * Represents a mathematical function.
 	 */
 	template <class T, class U>
-	class Function {
+	class Function : public token {
 		std::string			__symbol;
 		std::vector <std::string>	__params;
 		node_manager <T, U>		__manager;
@@ -24,6 +24,8 @@ namespace zhetapi {
 		Function();
 		Function(const char *);
 		Function(const std::string &);
+
+		Function(const Function &);
 
 		std::string &symbol();
 		const std::string symbol() const;
@@ -43,6 +45,12 @@ namespace zhetapi {
 		std::string generate_general() const;
 
 		void *compile_general() const;
+
+		// Virtual overloads
+		token::type caller() const override;
+		std::string str() const override;
+		token *copy() const override;
+		bool operator==(token *) const override;
 
 		// Printing
 		void print() const;
@@ -157,6 +165,11 @@ namespace zhetapi {
 		// Construct the tree manager
 		__manager = node_manager <T, U> (str.substr(++index), __params);
 	}
+
+	template <class T, class U>
+	Function <T, U> ::Function(const Function <T, U> &other) :
+		__symbol(other.__symbol), __params(other.__params),
+		__manager(other.__manager) {}
 
 	// Getters
 	template <class T, class U>
@@ -313,6 +326,36 @@ namespace zhetapi {
 		return nullptr;
 #endif
 
+	}
+
+	// Virtual functions
+	template <class T, class U>
+	token::type Function <T, U> ::caller() const
+	{
+		return token::ftn;
+	}
+
+	template <class T, class U>
+	std::string Function <T, U> ::str() const
+	{
+		return __symbol;
+	}
+
+	template <class T, class U>
+	token *Function <T, U> ::copy() const
+	{
+		return new Function <T, U> (*this);
+	}
+
+	template <class T, class U>
+	bool Function <T, U> ::operator==(token *tptr) const
+	{
+		Function <T, U> *ftn = dynamic_cast <Function <T, U> *> (tptr);
+
+		if (!ftn)
+			return false;
+		
+		return ftn->__symbol == __symbol;
 	}
 
 	// Printing utilities
