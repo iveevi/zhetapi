@@ -96,13 +96,16 @@ cli:		cli_build
 	@echo "\n[RUNNING CLI]\n"
 	./build/cli
 
+cli_raw:
+	./build/cli
+
 cli_debug:		cli_build_debug
 	@echo "\n[RUNNING CLI]\n"
 	gdb ./build/cli
 
 cli_build:	build
 	@echo "[BUILDING CLI TESTER]\n"
-	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -o build/cli
+	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -lncurses -o build/cli
 
 cli_build_debug:	\
 		build

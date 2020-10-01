@@ -3,6 +3,8 @@
 #include <string>
 #include <sstream>
 
+#include <ncurses.h>
+
 // Engine headers
 #include <function.hpp>
 #include <expression.hpp>
@@ -87,10 +89,23 @@ void parse(const string &str)
 	}
 }
 
+void command(std::string cmd)
+{
+	cout << "cmd: " << cmd << endl;
+
+	if (cmd == "q" || cmd == "quit")
+		exit(0);
+	
+	if (cmd == "save")
+		barn.print();
+}
+
 int main()
 {
 	barn.put("e", exp(1));
 	barn.put("pi", acos(-1));
+
+	char c;
 
 	string line;
 	while (true) {
@@ -98,10 +113,10 @@ int main()
 
 		getline(cin, line);
 
-		if (line == "q" || line == "quit")
-			return 0;
-
-		parse(line);
+		if (!line.empty() && line[0] == '#')
+			command(line.substr(1));
+		else if (!line.empty())
+			parse(line);
 
 		zhetapi::Function <double, int> ::barn = barn;
 	}
