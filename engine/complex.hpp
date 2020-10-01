@@ -19,13 +19,18 @@ public:
 	Complex(const T &, const T &);
 
 	Complex(const std::complex <T> &);
+	
+	// Fake constructors for conversion
+	Complex(int, bool);
 
 	// Getters
 	T magnitude() const;
 
 	bool is_real() const;
 
+	// Operators
 	operator double() const;
+	operator int() const;
 
 	// Functional Methods
 	Complex normalize() const;
@@ -55,6 +60,13 @@ Complex <T> ::Complex(const std::complex <T> &z)
 	: std::complex <T> (z) {}
 
 //////////////////////////////////////////
+// Fake Constructors
+//////////////////////////////////////////
+
+template <class T>
+Complex <T> ::Complex(int a, bool b) {}
+
+//////////////////////////////////////////
 // Getters
 //////////////////////////////////////////
 
@@ -75,6 +87,13 @@ Complex <T> ::operator double() const
 {
 	// std::cout << "Zcompex conv: Here" << std::endl;
 	return (double) this->real();
+}
+
+template <class T>
+Complex <T> ::operator int() const
+{
+	// std::cout << "Zcompex conv: Here" << std::endl;
+	return (int) this->real();
 }
 
 //////////////////////////////////////////

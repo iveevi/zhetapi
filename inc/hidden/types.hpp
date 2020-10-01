@@ -82,7 +82,10 @@ namespace zhetapi {
 		// Token factories
 		/////////////////////
 
-		static token *one(); 
+		static token *one();
+
+		template <class A>
+		static token *convert(A);
 		
 		/////////////////////
 		// Token identifiers
@@ -95,12 +98,60 @@ namespace zhetapi {
 		static std::string proper_symbol(const std::type_index &);
 	};
 
+	// Factories
 	template <class T, class U>
 	token *types <T, U> ::one()
 	{
 		return new opd_z(U (ONE));
 	}
 
+	template <class T, class U>
+	template <class A>
+	token *types <T, U> ::convert(A x)
+	{
+		if (typeid(A) == typeid(Z))
+			return new opd_z((Z) x);
+		if (typeid(A) == typeid(Q))
+			return new opd_q((Q) x);
+		if (typeid(A) == typeid(R))
+			return new opd_r((R) x);
+		if (typeid(A) == typeid(CZ))
+			return new opd_cz(CZ(x, true));
+		if (typeid(A) == typeid(CQ))
+			return new opd_cq((CQ) x);
+		if (typeid(A) == typeid(CR))
+			return new opd_cr((CR) x);
+		
+		if (typeid(A) == typeid(VZ))
+			return new opd_v_z((VZ) x);
+		if (typeid(A) == typeid(VQ))
+			return new opd_v_q((VQ) x);
+		if (typeid(A) == typeid(VR))
+			return new opd_v_r((VR) x);
+		if (typeid(A) == typeid(VCZ))
+			return new opd_v_cz((VCZ) x);
+		if (typeid(A) == typeid(VCQ))
+			return new opd_v_cq((VCQ) x);
+		if (typeid(A) == typeid(VCR))
+			return new opd_v_cr((VCR) x);
+		
+		if (typeid(A) == typeid(MZ))
+			return new opd_m_z((MZ) x);
+		if (typeid(A) == typeid(MQ))
+			return new opd_m_q((MQ) x);
+		if (typeid(A) == typeid(MR))
+			return new opd_m_r((MR) x);
+		if (typeid(A) == typeid(MCZ))
+			return new opd_m_cz((MCZ) x);
+		if (typeid(A) == typeid(MCQ))
+			return new opd_m_cq((MCQ) (CQ(x, true)));
+		if (typeid(A) == typeid(MCR))
+			return new opd_m_cr((MCR) x);
+
+		return nullptr;
+	}
+
+	// Identifiers
 	template <class T, class U>
 	bool types <T, U> ::is_zero(token *tptr)
 	{

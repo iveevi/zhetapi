@@ -12,8 +12,8 @@ namespace zhetapi {
 
 	template <class T>
 	class Tensor {
-		size_t *	__dim;
-		T *		__array;
+		size_t		*__dim;
+		T		*__array;
 
 		size_t		__dims;
 		size_t		__size;
