@@ -273,9 +273,6 @@ namespace zhetapi {
 			
 		ctx contexts;
 
-		std::cout << "BARN:" << std::endl;
-		__barn.print();
-
 		contexts.push_back({{}, ""});
 
 		using namespace std;
@@ -290,8 +287,6 @@ namespace zhetapi {
 				size_t index = std::distance(__params.begin(), itr);
 
 				token *tptr = __barn.get(pr.second);
-
-				std::cout << "str: " << pr.second << " -> " << tptr << std::endl;
 
 				bool matches = true;
 

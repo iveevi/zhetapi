@@ -1,9 +1,10 @@
 // C/C++ headers
 #include <iostream>
 #include <string>
+#include <sstream>
 
 // Engine headers
-#include <barn.hpp>
+#include <function.hpp>
 #include <expression.hpp>
 
 using namespace std;
@@ -59,13 +60,19 @@ void parse(const string &str)
 	}
 	
 	if (count == 0) {
-		cout << "\t" << zhetapi::expr_str <double, int> (str, barn) << endl;
+		try {
+			cout << "\t" << zhetapi::expr_str <double, int> (str, barn) << endl;
+		} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
+			cout << "\t" << e.what() << endl;
+		}
 	} else if (count == 1) {
-		/* try {
-			Function <double, int> tmp = std::string(str);
+		try {
+			zhetapi::Function <double, int> tmp = std::string(str);
 
-		} catch(...) {
-		} */
+			barn.put(tmp);
+
+			return;
+		} catch(...) {}
 
 		string var = str.substr(0, index);
 		string expr = str.substr(index + 1);
@@ -95,5 +102,7 @@ int main()
 			return 0;
 
 		parse(line);
+
+		zhetapi::Function <double, int> ::barn = barn;
 	}
 }
