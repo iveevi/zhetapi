@@ -30,6 +30,8 @@ namespace zhetapi {
 		std::string &symbol();
 		const std::string symbol() const;
 
+		token *operator()(std::vector <token *>);
+
 		template <class ... A>
 		token *operator()(A ...);
 
@@ -163,7 +165,7 @@ namespace zhetapi {
 		__symbol = __symbol.substr(0, start);
 
 		// Construct the tree manager
-		__manager = node_manager <T, U> (str.substr(++index), __params);
+		__manager = node_manager <T, U> (str.substr(++index), __params, barn);
 	}
 
 	template <class T, class U>
@@ -185,6 +187,14 @@ namespace zhetapi {
 	}
 
 	// Computational utilities
+	template <class T, class U>
+	token *Function <T, U> ::operator()(std::vector <token *> toks)
+	{
+		assert(toks.size() == __params.size());
+
+		return __manager.substitute_and_compute(toks);
+	}
+
 	template <class T, class U>
 	template <class ... A>
 	token *Function <T, U> ::operator()(A ... args)

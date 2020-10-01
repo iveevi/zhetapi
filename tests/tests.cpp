@@ -339,6 +339,25 @@ int main()
 	cout << "stack\tf(1):\t" << f(1)->str() << endl;
 	cout << "barn\tf(1):\t" << (*ftr)(1)->str() << endl;
 
+	try {
+		// barn.print();
+		
+		zhetapi::Function <double, int> ::barn = barn;
+
+		// zhetapi::Function <double, int> ::barn.put(f);
+		// cout << "BARN-GLOBAL" << endl;
+		// zhetapi::Function <double, int> ::barn.print();
+
+		zhetapi::Function <double, int> g = "g(x) = x + f(x)";
+
+		g.print();
+
+		cout << "g(1):\t" << g(1)->str() << endl;
+	} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
+		cout << e.what() << endl;
+	}
+
+
 #endif
 
 }

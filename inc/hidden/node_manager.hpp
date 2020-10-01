@@ -19,6 +19,9 @@ namespace zhetapi {
 	class Engine;
 
 	template <class T, class U>
+	class Function;
+
+	template <class T, class U>
 	class node_manager {
 		/*
 		 * Internal (common between nodes) barn class used to make
@@ -212,6 +215,13 @@ namespace zhetapi {
 						(tree.__tptr.get()))->rep, values);
 
 			return tptr;
+		case token::ftn:
+			for (node leaf : tree.__leaves)
+				values.push_back(value(leaf));
+
+			tptr = (*(dynamic_cast <Function <T, U> *> (tree.__tptr.get())))(values);
+
+			return tptr;
 		case token::ndr:
 			unrefd = (dynamic_cast <node_reference *>
 					(tree.__tptr.get()))->get();
@@ -263,6 +273,9 @@ namespace zhetapi {
 			
 		ctx contexts;
 
+		std::cout << "BARN:" << std::endl;
+		__barn.print();
+
 		contexts.push_back({{}, ""});
 
 		using namespace std;
@@ -277,6 +290,8 @@ namespace zhetapi {
 				size_t index = std::distance(__params.begin(), itr);
 
 				token *tptr = __barn.get(pr.second);
+
+				std::cout << "str: " << pr.second << " -> " << tptr << std::endl;
 
 				bool matches = true;
 
@@ -522,6 +537,16 @@ namespace zhetapi {
 			break;
 		case token::oph:
 			ref.__label = l_operation_constant;
+
+			for (node &leaf : ref.__leaves)
+				label(leaf);
+
+			break;
+		case token::ftn:
+			/* Also add a different labeling if it is constant,
+			 * probably needs to be callde an operation constant
+			 */
+			ref.__label = l_function;
 
 			for (node &leaf : ref.__leaves)
 				label(leaf);

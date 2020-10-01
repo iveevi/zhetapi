@@ -112,7 +112,7 @@ namespace zhetapi {
 		if (this != &other) {
 			clear();
 
-			__tree = clone_var(other.__tree);
+			__tree = clone(other.__tree);
 			__size = other.__size;
 		}
 

@@ -290,7 +290,7 @@ namespace zhetapi {
 
 	template <class T, class U>
 	Barn <T, U> ::Barn() : v_stack_z(), v_stack_r(), v_stack_q(), v_stack_cq(),
-		v_stack_cr(), v_stack_mq(), v_stack_mr()
+		v_stack_cr(), v_stack_mq(), v_stack_mr(), fstack()
 	{
 		//////////////////////////////////////////
 		// Real Scalar Arithemtic
@@ -516,7 +516,7 @@ namespace zhetapi {
 		v_stack_r(other.v_stack_r), v_stack_q(other.v_stack_q),
 		v_stack_z(other.v_stack_z), v_stack_cq(other.v_stack_cq),
 		v_stack_cr(other.v_stack_cr), v_stack_mr(other.v_stack_mr),
-		v_stack_mq(other.v_stack_mq)
+		v_stack_mq(other.v_stack_mq), fstack(other.fstack)
 	{
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
@@ -548,6 +548,7 @@ namespace zhetapi {
 			// v_stack_mcz = other.v_stack_mcz;
 			// v_stack_mcq = other.v_stack_mcq;
 			// v_stack_mcr = other.v_stack_mcr;
+			fstack = other.fstack;
 
 			for (auto pr : other.ops)
 				ops.push_back({pr.first, pr.second->copy()});
