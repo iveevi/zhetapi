@@ -1,12 +1,16 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+// C/C++ headers
 #include <cassert>
 #include <functional>
 #include <utility>
 #include <vector>
 #include <iostream>
 #include <sstream>
+
+// Engine headers
+#include <rational.hpp>
 
 #ifdef minor
 
@@ -34,7 +38,9 @@ public:
 	Matrix();
 	Matrix(const Matrix <T> &);
 
-	Matrix(T);
+	template <class A>
+	Matrix(A);
+
 	Matrix(T **);
 	Matrix(const std::vector <T> &);
 	Matrix(const std::vector <std::vector <T>> &);
@@ -178,7 +184,12 @@ Matrix <T> ::Matrix(const Matrix <T> &other) : rows(other.rows),
  * class.
  */
 template <class T>
-Matrix <T> ::Matrix(T x) : Matrix({{x}}) {}
+template <class A>
+Matrix <T> ::Matrix(A x)
+{
+	if (typeid(A) == typeid(T))
+		*this = Matrix(1, 1, (T) x);
+}
 
 template <class T>
 Matrix <T> ::Matrix(T **ref)

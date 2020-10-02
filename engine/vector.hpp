@@ -25,8 +25,8 @@ public:
 	Vector(const std::vector <T> &);
 	Vector(const std::initializer_list <T> &);
 
+	Vector(size_t, T);
 	Vector(size_t, T *);
-	Vector(size_t = 0, T = T());
 	
 	Vector(size_t, std::function <T (size_t)>);
 	Vector(size_t, std::function <T *(size_t)>);

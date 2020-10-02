@@ -27,7 +27,6 @@
 #include <vtable.hpp>
 #include <ftable.hpp>
 #include <variable.hpp>
-// #include <function.hpp>
 
 namespace zhetapi {
 
@@ -217,16 +216,7 @@ namespace zhetapi {
 
 		using signature = std::vector <std::type_index>;
 	private:
-		vtable <R> v_stack_r;
-		vtable <Q> v_stack_q;
-		vtable <Z> v_stack_z;
-
-		vtable <CQ> v_stack_cq;
-		vtable <CR> v_stack_cr;
-
-		vtable <MQ> v_stack_mq;
-		vtable <MR> v_stack_mr;
-
+		vtable <T, U> vstack;
 		ftable <T, U> fstack;
 
 		std::vector <std::pair <ID, token *>> ops;
@@ -242,27 +232,14 @@ namespace zhetapi {
 
 		bool present(const std::string &) const;
 
-		/*
-		 * Place a variable of type A into its appropriate stack. Made
-		 * for the user.
-		 */
-		template <class A>
-		void put(Variable <A>);
-
+		void put(Variable <T, U>);
 		void put(Function <T, U>);
 
-		/*
-		 * Switch to this overload once variables are out.
-		 */
 		template <class A>
 		void put(const std::string &, A);
 
-		/*
-		 * Retrieve a variable of type A from the appropriate stack. Has
-		 * a chance of throwing an exception. Made for the user.
-		 */
-		template <class A>
-		Variable <A> retrieve(const std::string &);
+		Variable <T, U> retrieve_variable(const std::string &);
+		Function <T, U> retrieve_function(const std::string &);
 
 		token *get(const std::string &);
 
@@ -289,8 +266,7 @@ namespace zhetapi {
 	//////////////////////////////////////////
 
 	template <class T, class U>
-	Barn <T, U> ::Barn() : v_stack_z(), v_stack_r(), v_stack_q(), v_stack_cq(),
-		v_stack_cr(), v_stack_mq(), v_stack_mr(), fstack()
+	Barn <T, U> ::Barn() : vstack(), fstack()
 	{
 		//////////////////////////////////////////
 		// Real Scalar Arithemtic
@@ -512,11 +488,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Barn <T, U> ::Barn(const Barn <T, U> &other) :
-		v_stack_r(other.v_stack_r), v_stack_q(other.v_stack_q),
-		v_stack_z(other.v_stack_z), v_stack_cq(other.v_stack_cq),
-		v_stack_cr(other.v_stack_cr), v_stack_mr(other.v_stack_mr),
-		v_stack_mq(other.v_stack_mq), fstack(other.fstack)
+	Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack), fstack(other.fstack)
 	{
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
@@ -535,19 +507,7 @@ namespace zhetapi {
 	Barn <T, U> &Barn <T, U> ::operator=(const Barn <T, U> &other)
 	{
 		if (this != &other) {
-			v_stack_z = other.v_stack_z;
-			v_stack_q = other.v_stack_q;
-			v_stack_r = other.v_stack_r;
-			// v_stack_cz = other.v_stack_cz;
-			v_stack_cq = other.v_stack_cq;
-			v_stack_cr = other.v_stack_cr;
-			
-			// v_stack_mz = other.v_stack_mz;
-			v_stack_mq = other.v_stack_mq;
-			v_stack_mr = other.v_stack_mr;
-			// v_stack_mcz = other.v_stack_mcz;
-			// v_stack_mcq = other.v_stack_mcq;
-			// v_stack_mcr = other.v_stack_mcr;
+			vstack = other.vstack;
 			fstack = other.fstack;
 
 			for (auto pr : other.ops)
@@ -584,97 +544,29 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	template <class A>
-	void Barn <T, U> ::put(Variable <A> var)
+	void Barn <T, U> ::put(Variable <T, U> var)
 	{
-		if (typeid(A) == typeid(Z))
-			v_stack_z.insert(var);
-		if (typeid(A) == typeid(R))
-			v_stack_r.insert(var);
-		if (typeid(A) == typeid(Q))
-			v_stack_q.insert(var);
-		
-		if (typeid(A) == typeid(CR))
-			v_stack_cr.insert(var);
-		if (typeid(A) == typeid(CQ))
-			v_stack_cq.insert(var);
-		
-		if (typeid(A) == typeid(VR))
-			v_stack_mr.insert(var);
-		if (typeid(A) == typeid(VQ))
-			v_stack_mq.insert(var);
+		vstack.insert(var);
 	}
-	
-	/* template <class T, class U>
-	template <class A>
-	void Barn <T, U> ::put(Function <A> var)
-	{
-		if (typeid(A) == typeid(Z))
-			v_stack_z.insert(var);
-		if (typeid(A) == typeid(R))
-			v_stack_r.insert(var);
-		if (typeid(A) == typeid(Q))
-			v_stack_q.insert(var);
-		
-		if (typeid(A) == typeid(CR))
-			v_stack_cr.insert(var);
-		if (typeid(A) == typeid(CQ))
-			v_stack_cq.insert(var);
-		
-		if (typeid(A) == typeid(VR))
-			v_stack_mr.insert(var);
-		if (typeid(A) == typeid(VQ))
-			v_stack_mq.insert(var);
-	} */
 
 	template <class T, class U>
 	template <class A>
 	void Barn <T, U> ::put(const std::string &str, A x)
 	{
-		put(Variable <A> {str, x});
+		put(Variable <T, U> {str, x});
 	}
 
 	template <class T, class U>
-	template <class A>
-	Variable <A> Barn <T, U> ::retrieve(const std::string &str)
+	Variable <T, U> Barn <T, U> ::retrieve_variable(const std::string &str)
 	{
-		if (typeid(A) == typeid(Z))
-			return v_stack_z.get(str);
-		if (typeid(A) == typeid(R))
-			return v_stack_r.get(str);
-		if (typeid(A) == typeid(Q))
-			return v_stack_q.get(str);
-		
-		if (typeid(A) == typeid(CR))
-			return v_stack_cr.get(str);
-		if (typeid(A) == typeid(CQ))
-			return v_stack_cq.get(str);
-		
-		if (typeid(A) == typeid(VR))
-			return v_stack_mr.get(str);
-		if (typeid(A) == typeid(VQ))
-			return v_stack_mq.get(str);
+		return vstack.get(str);
 	}
 
 	template <class T, class U>
 	token *Barn <T, U> ::get(const std::string &str)
 	{
-		if (v_stack_z.contains(str))
-			return new operand <Z> (v_stack_z.get(str).get());
-		if (v_stack_r.contains(str))
-			return new operand <R> (v_stack_r.get(str).get());
-		if (v_stack_q.contains(str))
-			return new operand <Q> (v_stack_q.get(str).get());
-		
-		if (v_stack_cr.contains(str))
-			return new operand <CR> (v_stack_cr.get(str).get());
-		if (v_stack_cq.contains(str))
-			return new operand <CQ> (v_stack_cq.get(str).get());
-		
-		if (v_stack_mr.contains(str))
-			return new operand <VR> (v_stack_mr.get(str).get());
-		if (v_stack_mq.contains(str))
-			return new operand <VQ> (v_stack_mq.get(str).get());
+		if (vstack.contains(str))
+			return (vstack.get(str)).copy();
 		
 		if (fstack.contains(str))
 			return (fstack.get(str)).copy();
@@ -780,52 +672,16 @@ namespace zhetapi {
 	void Barn <T, U> ::print(bool show_ops) const
 	{
 		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "INTEGERS:" << std::endl;
+		std::cout << "VARIABLES" << std::endl;
 		std::cout << std::string(50, '=') << std::endl;
 
-		v_stack_z.print();
-
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "REALS:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
-
-		v_stack_r.print();
-		
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "RATIONALS:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
-
-		v_stack_q.print();
-
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "RATIONAL COMPLEX:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
-
-		v_stack_cq.print();
-		
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "REAL COMPLEX:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
-
-		v_stack_cr.print();
-		
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "RATIONAL MATRICES:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
-
-		v_stack_mq.print();
-		
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "REAL MATRICES:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
+		vstack.print();
 
 		std::cout << std::string(50, '=') << std::endl;
 		std::cout << "FUNCTIONS:" << std::endl;
 		std::cout << std::string(50, '=') << std::endl;
 
 		fstack.print();
-
-		v_stack_mr.print();
 
 		if (show_ops) {
 			for (auto pr : ops) {

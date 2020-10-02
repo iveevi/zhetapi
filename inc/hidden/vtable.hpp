@@ -1,47 +1,50 @@
 #ifndef VTABLE_H_
 #define VTABLE_H_
 
+// C/C++ headers
+#include <iostream>
+#include <cstdlib>
+#include <vector>
+#include <string>
+
 namespace zhetapi {
 
-	template <class T>
+	template <class T, class U>
 	class Variable;
 
-	template <class T>
+	template <class T, class U>
 	class vtable {
 	public:
-		using var = Variable <T>;
-		
 		struct node {
-			var val;
-			node *left;
-			node *right;
+			Variable <T, U>	__val;
+			node		*__left;
+			node		*__right;
 		};
 
 	private:
-		node *tree;
-
-		std::size_t sz;
+		node		*__tree;
+		std::size_t	__size;
 	public:
 		vtable();
 		vtable(const vtable &);
 
-		vtable(const std::vector <var> &);
+		vtable(const std::vector <Variable <T, U>> &);
 
-		template <class ... U>
-		vtable(U ...);
+		template <class ... A>
+		vtable(A ...);
 
 		const vtable &operator=(const vtable &);
 
 		~vtable();
 
-		var &get(const std::string &);
-		const var &find(const std::string &);
+		Variable <T, U> &get(const std::string &);
+		const Variable <T, U> &find(const std::string &);
 
 		bool contains(const std::string &);
 		
-		bool insert(const var &);
+		bool insert(const Variable <T, U>&);
 		
-		bool remove(const var &);
+		bool remove(const Variable <T, U>&);
 		bool remove(const std::string &);
 
 		bool empty() const;
@@ -52,10 +55,10 @@ namespace zhetapi {
 
 		void print() const;
 	private:
-		void gather(std::vector <var> &, var) const;
+		void gather(std::vector <Variable <T, U>> &, Variable <T, U>) const;
 		
-		template <class ... U>
-		void gather(std::vector <var> &, var, U ...) const;
+		template <class ... A>
+		void gather(std::vector <Variable <T, U>> &, Variable <T, U>, A ...) const;
 
 		node *clone(node *);
 
@@ -77,89 +80,84 @@ namespace zhetapi {
 
 	/* Constructors, destructors,
 	 * major/significant operators */
-	template <class T>
-	vtable <T> ::vtable() : tree(nullptr), sz(0) {}
+	template <class T, class U>
+	vtable <T, U> ::vtable() : __tree(nullptr), __size(0) {}
 
-	template <class T>
-	vtable <T> ::vtable(const vtable &other) : tree(nullptr), sz(0)
+	template <class T, class U>
+	vtable <T, U> ::vtable(const vtable &other) : __tree(nullptr), __size(0)
 	{
 		*this = other;
 	}
 
-	template <class T>
-	vtable <T> ::vtable(const std::vector <var> &vs) : vtable()
+	template <class T, class U>
+	vtable <T, U> ::vtable(const std::vector <Variable <T, U>> &vs) : vtable()
 	{
 		for (auto vr : vs)
 			insert(vr);
 	}
 
-	template <class T>
-	template <class ... U>
-	vtable <T> ::vtable(U ... args) : vtable()
+	template <class T, class U>
+	template <class ... A>
+	vtable <T, U> ::vtable(A ... args) : vtable()
 	{
-		std::vector <var> pr;
+		std::vector <Variable <T, U>> pr;
+
 		gather(pr, args...);
 
 		for (auto vr : pr.first)
 			insert(vr);
 	}
 
-	template <class T>
-	const vtable <T> &vtable <T> ::operator=(const vtable &other)
+	template <class T, class U>
+	const vtable <T, U> &vtable <T, U> ::operator=(const vtable &other)
 	{
 		if (this != &other) {
 			clear();
-			tree = clone(other.tree);
-			sz = other.sz;
+			__tree = clone(other.__tree);
+			__size = other.__size;
 		}
-
-		// cout << string(50, '_') << endl;
-		// cout << "ASSIGNMENT OPERATOR:" << endl;
-		// print();
 
 		return *this;
 	}
 
-	template <class T>
-	vtable <T> ::~vtable()
+	template <class T, class U>
+	vtable <T, U> ::~vtable()
 	{
 		clear();
 	}
 
-	/* Public interface of vtable;
-	 * find methods, clear, print, etc. */
-	template <class T>
-	typename vtable <T> ::var &vtable <T> ::get(const std::string &key)
+	template <class T, class U>
+	Variable <T, U> &vtable <T, U> ::get(const std::string &key)
 	{
-		if (!tree)
+		if (!__tree)
 			throw null_tree();
 
-		splay(tree, key);
+		splay(__tree, key);
 
-		if (tree->val.symbol() != key)
+		if (__tree->__val.symbol() != key)
 			throw null_entry();
 
-		return tree->val;
+		return __tree->__val;
 	}
 
-	template <class T>
-	const typename vtable <T> ::var &vtable <T> ::find(const std::string &key)
+	template <class T, class U>
+	const Variable <T, U> &vtable <T, U> ::find(const std::string &key)
 	{
-		if (!tree)
+		if (!__tree)
 			throw null_tree();
 
-		splay(tree, key);
+		splay(__tree, key);
 
-		if (tree->val.symbol() != key)
+		if (__tree->__val.symbol() != key)
 			throw null_entry();
 
-		return tree->val;
+		return __tree->__val;
 	}
 
-	template <class T>
-	bool vtable<T> ::contains(const std::string &key)
+	template <class T, class U>
+	bool vtable <T, U> ::contains(const std::string &key)
 	{
-		var x;
+		Variable <T, U> x;
 
 		try {
 			x = get(key);
@@ -170,37 +168,37 @@ namespace zhetapi {
 		return true;
 	}
 
-	template <class T>
-	bool vtable <T> ::insert(const var &x)
+	template <class T, class U>
+	bool vtable <T, U> ::insert(const Variable <T, U>&x)
 	{
-		if (tree == nullptr) {
-			tree = new node {x, nullptr, nullptr};
-			sz++;
+		if (__tree == nullptr) {
+			__tree = new node {x, nullptr, nullptr};
+			__size++;
 			return true;
 		}
 
-		splay(tree, x.symbol());
+		splay(__tree, x.symbol());
 
 		node *temp = new node {x, nullptr, nullptr};
 
-		if (x < tree->val) {
-			temp->left = tree->left;
-			temp->right = tree;
+		if (x < __tree->__val) {
+			temp->__left = __tree->__left;
+			temp->__right = __tree;
 
-			temp->right->left = nullptr;
-			tree = temp;
-			sz++;
+			temp->__right->__left = nullptr;
+			__tree = temp;
+			__size++;
 
 			return true;
 		}
 
-		if (x > tree->val) {
-			temp->left = tree;
-			temp->right = tree->right;
+		if (x > __tree->__val) {
+			temp->__left = __tree;
+			temp->__right = __tree->__right;
 
-			temp->left->right = nullptr;
-			tree = temp;
-			sz++;
+			temp->__left->__right = nullptr;
+			__tree = temp;
+			__size++;
 
 			return true;
 		}
@@ -208,137 +206,140 @@ namespace zhetapi {
 		return false;
 	}
 
-	template <class T>
-	bool vtable <T> ::remove(const var &x)
+	template <class T, class U>
+	bool vtable <T, U> ::remove(const Variable <T, U>&x)
 	{
-		if (!sz)
+		if (!__size)
 			return false;
 
-		splay(tree, x.symbol());
+		splay(__tree, x.symbol());
 
-		if (x != tree->val)
+		if (x != __tree->__val)
 			return false;
 
 		node *nnd;
-		if (tree->left == nullptr) {
-			nnd = tree->left;
+		if (__tree->__left == nullptr) {
+			nnd = __tree->__left;
 		} else {
-			nnd = tree->left;
+			nnd = __tree->__left;
 			splay(nnd, x.symbol());
 
-			nnd->right = tree->right;
+			nnd->__right = __tree->__right;
 		}
 
-		delete tree;
+		delete __tree;
 
-		tree = nnd;
-		sz--;
+		__tree = nnd;
+		__size--;
 
 		return true;
 	}
 
-	template <class T>
-	bool vtable <T> ::remove(const std::string &str)
+	template <class T, class U>
+	bool vtable <T, U> ::remove(const std::string &str)
 	{
-		if (!sz)
+		if (!__size)
 			return false;
 
-		splay(tree, str);
+		splay(__tree, str);
 
-		if (str != tree->val.symbol())
+		if (str != __tree->__val.symbol())
 			return false;
 
 		node *nnd;
-		if (tree->left == nullptr) {
-			nnd = tree->left;
+		if (__tree->__left == nullptr) {
+			nnd = __tree->__left;
 		} else {
-			nnd = tree->left;
+			nnd = __tree->__left;
+
 			splay(nnd, str);
 
-			nnd->right = tree->right;
+			nnd->__right = __tree->__right;
 		}
 
-		delete tree;
+		delete __tree;
 
-		tree = nnd;
-		sz--;
+		__tree = nnd;
+		__size--;
 
 		return true;
 	}
 
-	template <class T>
-	bool vtable <T> ::empty() const
+	template <class T, class U>
+	bool vtable <T, U> ::empty() const
 	{
-		return !sz;
+		return !__size;
 	}
 
-	template <class T>
-	std::size_t vtable <T> ::size() const
+	template <class T, class U>
+	std::size_t vtable <T, U> ::size() const
 	{
-		return sz;
+		return __size;
 	}
 
-	template <class T>
-	void vtable <T> ::clear()
+	template <class T, class U>
+	void vtable <T, U> ::clear()
 	{
-		if (tree != nullptr)
-			clear(tree);
+		if (__tree != nullptr)
+			clear(__tree);
 	}
 
-	template <class T>
-	void vtable <T> ::print() const
+	template <class T, class U>
+	void vtable <T, U> ::print() const
 	{
-		print(tree, 1, 0);
+		print(__tree, 1, 0);
 	}
 
 	/* Protected methods (helpers methods);
 	 * splay, rotate left/right, clone, ect. */
-	template <class T>
-	void vtable <T> ::gather(std::vector <var> &pr, var vs) const
+	template <class T, class U>
+	void vtable <T, U> ::gather(std::vector <Variable <T, U>> &pr, Variable <T, U>vs) const
 	{
 		pr.push_back(vs);
 	}
 
-	template <class T>
-	template <class ... U>
-	void vtable <T> ::gather(std::vector <var> &pr, var vs, U ... args) const
+	template <class T, class U>
+	template <class ... A>
+	void vtable <T, U> ::gather(std::vector <Variable <T, U>> &pr, Variable <T, U> vs, A ... args) const
 	{
 		pr.push_back(vs);
+
 		gather(pr, args...);
 	}
 
-	template <class T>
-	typename vtable <T> ::node *vtable <T> ::clone(node *vnd)
+	template <class T, class U>
+	typename vtable <T, U> ::node *vtable <T, U> ::clone(node *vnd)
 	{
 		node *nnode;
 
 		if (vnd == nullptr)
 			return nullptr;
 
-		nnode = new node {vnd->val, clone(vnd->left),
-			clone(vnd->right)};
+		nnode = new node {vnd->__val, clone(vnd->__left),
+			clone(vnd->__right)};
 
 		return nnode;
 	}
 
-	template <class T>
-	void vtable <T> ::clear(node *(&vnd))
+	template <class T, class U>
+	void vtable <T, U> ::clear(node *(&vnd))
 	{
 		if (vnd == nullptr)
 			return;
 
-		clear(vnd->left);
-		clear(vnd->right);
+		clear(vnd->__left);
+		clear(vnd->__right);
 
 		delete vnd;
 		
 		// maybe remove later
 		vnd = nullptr;
-		sz--;
+
+		__size--;
 	}
 
-	template <class T>
-	void vtable <T> ::print(node *vnd, int lev, int dir) const
+	template <class T, class U>
+	void vtable <T, U> ::print(node *vnd, int lev, int dir) const
 	{
 		if (vnd == nullptr)
 			return;
@@ -346,44 +347,29 @@ namespace zhetapi {
 		for (int i = 0; i < lev; i++)
 			std::cout << "\t";
 
-		switch (dir) {
-		case 0:
+		if (!dir)
 			std::cout << "Level #" << lev << " -- Root: ";
-
-			if (vnd == nullptr)
-				std::cout << "NULL";
-			else
-				std::cout << vnd->val;
-			break;
-		case 1:
+		else if (dir == 1)
 			std::cout << "Level #" << lev << " -- Left: ";
-			
-			if (vnd == nullptr)
-				std::cout << "NULL";
-			else
-				std::cout << vnd->val;
-			break;
-		case -1:
+		else
 			std::cout << "Level #" << lev << " -- Right: ";
-			
-			if (vnd == nullptr)
-				std::cout << "NULL";
-			else
-				std::cout << vnd->val;
-			break;
-		}
+
+		if (vnd == nullptr)
+			std::cout << "NULL";
+		else
+			std::cout << vnd->__val;
 
 		std::cout << std::endl;
 		
 		if (vnd == nullptr)
 			return;
 
-		print(vnd->left, lev + 1, 1);
-		print(vnd->right, lev + 1, -1);
+		print(vnd->__left, lev + 1, 1);
+		print(vnd->__right, lev + 1, -1);
 	}
 
-	template <class T>
-	void vtable <T> ::splay(node *(&vnd), const std::string &id)
+	template <class T, class U>
+	void vtable <T, U> ::splay(node *(&vnd), const std::string &id)
 	{
 		node *rt = nullptr;
 		node *lt = nullptr;
@@ -391,89 +377,89 @@ namespace zhetapi {
 		node *ltm = nullptr;
 		
 		while (vnd != nullptr) {
-			if (id < vnd->val.symbol()) {
-				if (vnd->left == nullptr)
+			if (id < vnd->__val.symbol()) {
+				if (vnd->__left == nullptr)
 					break;
 				
-				if (id < vnd->left->val.symbol()) {
+				if (id < vnd->__left->__val.symbol()) {
 					rotate_left(vnd);
 
-					if (vnd->left == nullptr)
+					if (vnd->__left == nullptr)
 						break;
 				}
 
 				if (rt == nullptr)
-					rt = new node {var(), nullptr, nullptr};
+					rt = new node {Variable <T, U> (), nullptr, nullptr};
 			
 
 				if (rtm == nullptr) {
-					rt->left = vnd;
+					rt->__left = vnd;
 					rtm = rt;
 				} else {
-					rtm->left = vnd;
+					rtm->__left = vnd;
 				}
 
-				rtm = rtm->left;
+				rtm = rtm->__left;
 				
-				vnd = rtm->left;
-				rtm->left = nullptr;
-			} else if (id > vnd->val.symbol()) {
-				if (vnd->right == nullptr)
+				vnd = rtm->__left;
+				rtm->__left = nullptr;
+			} else if (id > vnd->__val.symbol()) {
+				if (vnd->__right == nullptr)
 					break;
 				
-				if (id > vnd->right->val.symbol()) {
+				if (id > vnd->__right->__val.symbol()) {
 					rotate_right(vnd);
-					if (vnd->right == nullptr)
+					if (vnd->__right == nullptr)
 						break;
 				}
 
 				if (lt == nullptr)
-					lt = new node {var(), nullptr, nullptr};
+					lt = new node {Variable <T, U> (), nullptr, nullptr};
 
 				if (ltm == nullptr) {
-					lt->right = vnd;
+					lt->__right = vnd;
 					ltm = lt;
 				} else {
-					ltm->right = vnd;
+					ltm->__right = vnd;
 				}
 
-				ltm = ltm->right;
+				ltm = ltm->__right;
 
-				vnd = ltm->right;
-				ltm->right = nullptr;
+				vnd = ltm->__right;
+				ltm->__right = nullptr;
 			} else {
 				break;
 			}
 		}
 		
 		if (lt != nullptr) {
-			ltm->right = vnd->left;
-			vnd->left = lt->right;
+			ltm->__right = vnd->__left;
+			vnd->__left = lt->__right;
 		}
 
 		if (rt != nullptr) {
-			rtm->left = vnd->right;
-			vnd->right = rt->left;
+			rtm->__left = vnd->__right;
+			vnd->__right = rt->__left;
 		}
 	}
 
-	template <class T>
-	void vtable <T> ::rotate_left(node *(&vnd))
+	template <class T, class U>
+	void vtable <T, U> ::rotate_left(node *(&vnd))
 	{
-		node *rt = vnd->left;
+		node *rt = vnd->__left;
 
-		vnd->left = rt->right;
-		rt->right = vnd;
+		vnd->__left = rt->__right;
+		rt->__right = vnd;
 		vnd = rt;
 	}
 
-	template <class T>
-	void vtable <T> ::rotate_right(node *(&vnd))
+	template <class T, class U>
+	void vtable <T, U> ::rotate_right(node *(&vnd))
 	{
-		node *rt = vnd->right;
+		node *rt = vnd->__right;
 
-		vnd->right = rt->left;
-		rt->left = vnd;
+		vnd->__right = rt->__left;
+		rt->__left = vnd;
 		vnd = rt;
 	}
 

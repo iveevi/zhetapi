@@ -15,13 +15,17 @@ template <class T>
 class Complex : public std::complex <T> {
 public:
 	// Constructor
-	Complex(const T & = 0);
+	Complex();
+
+	template <class A>
+	Complex(A);
+
 	Complex(const T &, const T &);
 
 	Complex(const std::complex <T> &);
 	
 	// Fake constructors for conversion
-	Complex(int, bool);
+	Complex(int, bool, bool);
 
 	// Getters
 	T magnitude() const;
@@ -46,10 +50,16 @@ public:
 //////////////////////////////////////////
 // Constructors
 //////////////////////////////////////////
+template <class T>
+Complex <T> ::Complex() {}
 
 template <class T>
-Complex <T> ::Complex(const T &re)
-	: std::complex <T> (re) {}
+template <class A>
+Complex <T> ::Complex(A a)
+{
+	if (typeid(T) == typeid(A))
+		this->real((T) a);
+}
 
 template <class T>
 Complex <T> ::Complex(const T &re, const T &im)
@@ -64,7 +74,7 @@ Complex <T> ::Complex(const std::complex <T> &z)
 //////////////////////////////////////////
 
 template <class T>
-Complex <T> ::Complex(int a, bool b) {}
+Complex <T> ::Complex(int a, bool b, bool c) {}
 
 //////////////////////////////////////////
 // Getters

@@ -9,7 +9,8 @@ using namespace zhetapi;
 
 int main()
 {
-	Variable <double, int> x(13);
+	Variable <double, int> x("x", 13);
 
 	cout << "x: " << x.get()->str() << endl;
+	cout << "x: " << x.symbol() << endl;
 }
