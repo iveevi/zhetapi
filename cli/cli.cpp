@@ -102,7 +102,7 @@ void command(std::string cmd)
 	if (cmds.find(cmd) != cmds.end())
 		(cmds[cmd].second)();
 	else
-		cout << "\n\tUnknown command \"" << cmd << "\"\n";
+		cout << "\n\tUnknown command \"" << cmd << "\"\n\n";
 }
 
 namespace cmd {
@@ -125,6 +125,13 @@ namespace cmd {
 		cout << "\n";
 	}
 
+	void symbols()
+	{
+		cout << "\n";
+		barn.list();
+		cout << "\n";
+	}
+
 }
 
 int main()
@@ -137,6 +144,7 @@ int main()
 	cmds["q"] = {"Quit the CLI", cmd::quit};
 	cmds["quit"] = {"Quit the CLI", cmd::quit};
 	cmds["list"] = {"Lists all available commands", cmd::list};
+	cmds["symbols"] = {"Lists all current symbols", cmd::symbols};
 
 	// Input
 	string line;

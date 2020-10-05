@@ -247,6 +247,7 @@ namespace zhetapi {
 		
 		std::string overloads(const std::string &) const;
 
+		void list() const;
 		void print(bool = false) const;
 
 		// Exceptions
@@ -669,6 +670,26 @@ namespace zhetapi {
 		oss << "}";
 
 		return oss.str();
+	}
+
+	template <class T, class U>
+	void Barn <T, U> ::list() const
+	{
+		std::vector <Variable <T, U>> v = vstack.list();
+
+		if (v.size()) {
+			std::cout << "\tVariables:" << std::endl;
+			for (auto var : v)
+				std::cout << "\t\t" << var << std::endl;
+		}
+
+		std::vector <Function <T, U>> f = fstack.list();
+		
+		if (f.size()) {
+			std::cout << "\tFunctions:" << std::endl;
+			for (auto ftn : f)
+				std::cout << "\t\t" << ftn << std::endl;
+		}
 	}
 
 	template <class T, class U>

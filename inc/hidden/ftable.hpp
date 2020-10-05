@@ -38,6 +38,8 @@ namespace zhetapi {
 		Function <T, U> &get(const std::string &);
 		const Function <T, U> &find(const std::string &);
 
+		std::vector <Function <T, U>> list() const;
+
 		bool contains(const std::string &);
 
 		bool insert(const Function <T, U> &);
@@ -61,6 +63,8 @@ namespace zhetapi {
 		node *clone(node *);
 
 		void clear(node *(&));
+
+		void list(node *, std::vector <Function <T, U>> &) const;
 
 		void print(node *, int, int) const;
 
@@ -167,6 +171,17 @@ namespace zhetapi {
 		}
 
 		return true;
+	}
+
+	template <class T, class U>
+	std::vector <Function <T, U>> ftable <T, U> ::list() const
+	{
+		std::vector <Function <T, U>> f;
+
+		if (__tree)
+			list(__tree, f);
+
+		return f;
 	}
 
 	template <class T, class U>
@@ -334,6 +349,18 @@ namespace zhetapi {
 		// maybe remove later
 		fnd = nullptr;
 		__size--;
+	}
+
+	template <class T, class U>
+	void ftable <T, U> ::list(node *ref, std::vector <Function <T, U>> &f) const
+	{
+		f.push_back(ref->__val);
+
+		if (ref->__left)
+			list(ref->__left, f);
+		
+		if (ref->__right)
+			list(ref->__right, f);
 	}
 
 	template <class T, class U>

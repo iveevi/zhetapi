@@ -40,6 +40,8 @@ namespace zhetapi {
 		Variable <T, U> &get(const std::string &);
 		const Variable <T, U> &find(const std::string &);
 
+		std::vector <Variable <T, U>> list() const;
+
 		bool contains(const std::string &);
 		
 		bool insert(const Variable <T, U>&);
@@ -63,6 +65,8 @@ namespace zhetapi {
 		node *clone(node *);
 
 		void clear(node *(&));
+
+		void list(node *, std::vector <Variable <T, U>> &) const;
 
 		void print(node *, int, int) const;
 
@@ -152,6 +156,17 @@ namespace zhetapi {
 			throw null_entry();
 
 		return __tree->__val;
+	}
+
+	template <class T, class U>
+	std::vector <Variable <T, U>> vtable <T, U> ::list() const
+	{
+		std::vector <Variable <T, U>> v;
+
+		if (__tree)
+			list(__tree, v);
+
+		return v;
 	}
 
 	template <class T, class U>
@@ -336,6 +351,18 @@ namespace zhetapi {
 		vnd = nullptr;
 
 		__size--;
+	}
+
+	template <class T, class U>
+	void vtable <T, U> ::list(node *ref, std::vector <Variable <T, U>> &v) const
+	{
+		v.push_back(ref->__val);
+
+		if (ref->__left)
+			list(ref->__left, v);
+		
+		if (ref->__right)
+			list(ref->__right, v);
 	}
 
 	template <class T, class U>
