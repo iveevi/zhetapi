@@ -546,7 +546,10 @@ namespace zhetapi {
 	template <class T, class U>
 	void Barn <T, U> ::put(Variable <T, U> var)
 	{
-		vstack.insert(var);
+		if (vstack.contains(var.symbol()))
+			vstack.get(var.symbol()) = var;
+		else
+			vstack.insert(var);
 	}
 
 	template <class T, class U>
@@ -566,7 +569,7 @@ namespace zhetapi {
 	token *Barn <T, U> ::get(const std::string &str)
 	{
 		if (vstack.contains(str))
-			return (vstack.get(str)).copy();
+			return (vstack.get(str).get())->copy();
 		
 		if (fstack.contains(str))
 			return (fstack.get(str)).copy();

@@ -169,7 +169,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool vtable <T, U> ::insert(const Variable <T, U>&x)
+	bool vtable <T, U> ::insert(const Variable <T, U> &x)
 	{
 		if (__tree == nullptr) {
 			__tree = new node {x, nullptr, nullptr};
@@ -192,7 +192,7 @@ namespace zhetapi {
 			return true;
 		}
 
-		if (x > __tree->__val) {
+		if (x > __tree->__val) {			
 			temp->__left = __tree;
 			temp->__right = __tree->__right;
 

@@ -23,11 +23,17 @@ namespace zhetapi {
 		template <class A>
 		Variable(const std::string &, const A &);
 
+		Variable(const Variable &);
+
 		// Destructor
 		~Variable();
 
+		// Copy
+		Variable &operator=(const Variable &);
+
 		// Reference
 		const token *get() const;
+		token *ref();
 
 		const std::string &symbol() const;
 		
@@ -36,6 +42,13 @@ namespace zhetapi {
 		std::string str() const override;
 		token *copy() const;
 		bool operator==(token *) const;
+
+		// Comparing functions
+		template <class A, class B>
+		friend bool operator<(const Variable <A, B> &, const Variable <A, B> &);
+
+		template <class A, class B>
+		friend bool operator>(const Variable <A, B> &, const Variable <A, B> &);
 
 		// Printing functions
 		template <class A, class B>
@@ -59,6 +72,13 @@ namespace zhetapi {
 			throw illegal_type();
 	}
 
+	template <class T, class U>
+	Variable <T, U> ::Variable(const Variable <T, U> &other)
+	{
+		__tptr = other.__tptr->copy();
+		__symbol = other.__symbol;
+	}
+
 	// Destructors
 	template <class T, class U>
 	Variable <T, U> ::~Variable()
@@ -66,9 +86,27 @@ namespace zhetapi {
 		delete __tptr;
 	}
 
+	// Copy
+	template <class T, class U>
+	Variable <T, U> &Variable <T, U>::operator=(const Variable <T, U> &other)
+	{
+		if (this != &other) {
+			__tptr = other.__tptr->copy();
+			__symbol = other.__symbol;
+		}
+
+		return *this;
+	}
+
 	// Reference
 	template <class T, class U>
 	const token *Variable <T, U> ::get() const
+	{
+		return __tptr;
+	}
+
+	template <class T, class U>
+	token *Variable <T, U> ::ref()
 	{
 		return __tptr;
 	}
@@ -89,7 +127,7 @@ namespace zhetapi {
 	template <class T, class U>
 	std::string Variable <T, U> ::str() const
 	{
-		return __symbol + __tptr->str();
+		return __symbol + " [" + __tptr->str() + "]";
 	}
 
 	template <class T, class U>
@@ -107,6 +145,19 @@ namespace zhetapi {
 			return true;
 		
 		return (__symbol == var->__symbol) && (__tptr == var->__tptr);
+	}
+
+	// Comparison functions
+	template <class T, class U>
+	bool operator<(const Variable <T, U> &a, const Variable <T, U> &b)
+	{
+		return a.symbol() < b.symbol();
+	}
+
+	template <class T, class U>
+	bool operator>(const Variable <T, U> &a, const Variable <T, U> &b)
+	{
+		return a.symbol() > b.symbol();
 	}
 
 	// Printing
