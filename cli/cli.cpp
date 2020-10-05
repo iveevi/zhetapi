@@ -2,6 +2,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <map>
+#include <functional>
 
 #include <ncurses.h>
 
@@ -11,14 +13,18 @@
 
 using namespace std;
 
+// Typedefs
 typedef zhetapi::operand <int> z;
 typedef zhetapi::operand <Rational <int>> q;
 typedef zhetapi::operand <double> r;
 
-// Global variables
+// Barn for variables and functions
 zhetapi::Barn <double, int> barn;
 
-// Inserting variables into the barn
+// List of commands
+map <string, pair <string, function <void ()>>> cmds;
+
+// Inserting variables into barn
 void insert(const string &name, const string &expr)
 {
 	zhetapi::node_manager <double, int> mgr(expr, barn);
@@ -28,25 +34,26 @@ void insert(const string &name, const string &expr)
 	z *o_z = dynamic_cast <z *> (tptr);
 	if (o_z) {
 		barn.put(name, o_z->get());
-		cout << "\t" << tptr->str() << endl;
+		cout << "\n\t" << tptr->str() << "\n\n";
 		return;
 	}
 	
 	q *o_q = dynamic_cast <q *> (tptr);
 	if (o_q) {
 		barn.put(name, o_q->get());
-		cout << "\t" << tptr->str() << endl;
+		cout << "\n\t" << tptr->str() << "\n\n";
 		return;
 	}
 	
 	r *o_r = dynamic_cast <r *> (tptr);
 	if (o_r) {
 		barn.put(name, o_r->get());
-		cout << "\t" << tptr->str() << endl;
+		cout << "\n\t" << tptr->str() << "\n\n";
 		return;
 	}
 }
 
+// Parsing
 void parse(const string &str)
 {
 	size_t count;
@@ -63,9 +70,9 @@ void parse(const string &str)
 	
 	if (count == 0) {
 		try {
-			cout << "\t" << zhetapi::expr_str <double, int> (str, barn) << endl;
+			cout << "\n\t" << zhetapi::expr_str <double, int> (str, barn) << "\n\n";
 		} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
-			cout << "\t" << e.what() << endl;
+			cout << "\t" << e.what() << "\n\n";
 		}
 	} else if (count == 1) {
 		try {
@@ -89,24 +96,49 @@ void parse(const string &str)
 	}
 }
 
+// Commands
 void command(std::string cmd)
 {
-	cout << "cmd: " << cmd << endl;
+	if (cmds.find(cmd) != cmds.end())
+		(cmds[cmd].second)();
+	else
+		cout << "\n\tUnknown command \"" << cmd << "\"\n";
+}
 
-	if (cmd == "q" || cmd == "quit")
+namespace cmd {
+
+	void quit()
+	{
 		exit(0);
-	
-	if (cmd == "save")
+	}
+
+	void save()
+	{
 		barn.print();
+	}
+
+	void list()
+	{
+		cout << "\n\tCommand summary:\n";
+		for (auto pr : cmds)
+			cout << "\t\t" << pr.first << "\t" << pr.second.first << endl;
+		cout << "\n";
+	}
+
 }
 
 int main()
 {
+	// Filling out barn
 	barn.put("e", exp(1));
 	barn.put("pi", acos(-1));
 
-	char c;
+	// Commands
+	cmds["q"] = {"Quit the CLI", cmd::quit};
+	cmds["quit"] = {"Quit the CLI", cmd::quit};
+	cmds["list"] = {"Lists all available commands", cmd::list};
 
+	// Input
 	string line;
 	while (true) {
 		cout << "(zhetapi-cli) ";

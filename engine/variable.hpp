@@ -127,7 +127,7 @@ namespace zhetapi {
 	template <class T, class U>
 	std::string Variable <T, U> ::str() const
 	{
-		return __symbol + " [" + __tptr->str() + "]";
+		return __symbol + "\t[" + __tptr->str() + "]";
 	}
 
 	template <class T, class U>
