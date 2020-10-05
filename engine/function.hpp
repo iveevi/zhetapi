@@ -423,12 +423,15 @@ namespace zhetapi {
 		return std::distance(__params.begin(), itr);
 	}
 
-	//
+	// External classes
 
 	template <class T, class U>
 	void Barn <T, U> ::put(Function <T, U> ftr)
 	{
-		fstack.insert(ftr);
+		if (fstack.contains(ftr.symbol()))
+			fstack.get(ftr.symbol()) = ftr;
+		else
+			fstack.insert(ftr);
 	}
 
 	template <class T, class U>
