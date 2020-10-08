@@ -238,8 +238,10 @@ namespace zhetapi {
 		template <class A>
 		void put(const std::string &, A);
 
-		Variable <T, U> retrieve_variable(const std::string &);
-		Function <T, U> retrieve_function(const std::string &);
+		void put(token *, const std::string &);
+
+		Variable <T, U> &retrieve_variable(const std::string &);
+		Function <T, U> &retrieve_function(const std::string &);
 
 		token *get(const std::string &);
 
@@ -561,7 +563,13 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Variable <T, U> Barn <T, U> ::retrieve_variable(const std::string &str)
+	void Barn <T, U> ::put(token *tptr, const std::string &str)
+	{
+		put(Variable <T, U> {tptr, str});
+	}
+
+	template <class T, class U>
+	Variable <T, U> &Barn <T, U> ::retrieve_variable(const std::string &str)
 	{
 		return vstack.get(str);
 	}
@@ -570,7 +578,7 @@ namespace zhetapi {
 	token *Barn <T, U> ::get(const std::string &str)
 	{
 		if (vstack.contains(str))
-			return (vstack.get(str).get())->copy();
+			return (vstack.get(str)).copy();
 		
 		if (fstack.contains(str))
 			return (fstack.get(str)).copy();

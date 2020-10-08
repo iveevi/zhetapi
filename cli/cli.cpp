@@ -21,6 +21,9 @@ typedef zhetapi::operand <double> r;
 // Barn for variables and functions
 zhetapi::Barn <double, int> barn;
 
+// Answer variable
+zhetapi::Variable <double, int> ans(new z(0), "$");
+
 // List of commands
 map <string, pair <string, function <void ()>>> cmds;
 
@@ -70,7 +73,16 @@ void parse(const string &str)
 	
 	if (count == 0) {
 		try {
-			cout << "\n\t" << zhetapi::expr_str <double, int> (str, barn) << "\n\n";
+			zhetapi::node_manager <double, int> *mgr = new zhetapi::node_manager <double, int> (str, barn);
+
+			zhetapi::token *tptr = mgr->value();
+
+
+			cout << "\n\t" << tptr->str() << "\n\n";
+			
+			barn.put(tptr, "$");
+			
+			delete mgr;
 		} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
 			cout << "\t" << e.what() << "\n\n";
 		}
@@ -139,6 +151,9 @@ int main()
 	// Filling out barn
 	barn.put("e", exp(1));
 	barn.put("pi", acos(-1));
+
+	// Ans
+	barn.put(ans);
 
 	// Commands
 	cmds["q"] = {"Quit the CLI", cmd::quit};

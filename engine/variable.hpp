@@ -5,6 +5,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <memory>
 
 // Engine headers
 #include <token.hpp>
@@ -14,26 +15,23 @@ namespace zhetapi {
 
 	template <class T, class U>
 	class Variable : public token {
-		std::string	__symbol;
-		token		*__tptr;
+		std::string			__symbol;
+		std::shared_ptr <token>	__tptr;
 	public:
 		// Constructor
-		Variable(const std::string & = "", token * = nullptr);
+		Variable(token * = nullptr, const std::string & = "");
 
 		template <class A>
 		Variable(const std::string &, const A &);
 
 		Variable(const Variable &);
 
-		// Destructor
-		~Variable();
-
 		// Copy
 		Variable &operator=(const Variable &);
 
 		// Reference
-		const token *get() const;
-		token *ref();
+		const std::shared_ptr <token> &get() const;
+		std::shared_ptr <token> &get();
 
 		const std::string &symbol() const;
 		
@@ -60,13 +58,16 @@ namespace zhetapi {
 
 	// Constructors
 	template <class T, class U>
-	Variable <T, U> ::Variable(const std::string &str, token *tptr) : __symbol(str), __tptr(tptr) {}
+	Variable <T, U> ::Variable(token *tptr, const std::string &str) : __symbol(str)
+	{
+		__tptr.reset(tptr);
+	}
 
 	template <class T, class U>
 	template <class A>
 	Variable <T, U> ::Variable(const std::string &str, const A &x) : __symbol(str)
 	{
-		__tptr = types <T, U> ::convert(x);
+		__tptr.reset(types <T, U> ::convert(x));
 
 		if (!__tptr)
 			throw illegal_type();
@@ -75,15 +76,8 @@ namespace zhetapi {
 	template <class T, class U>
 	Variable <T, U> ::Variable(const Variable <T, U> &other)
 	{
-		__tptr = other.__tptr->copy();
+		__tptr = other.__tptr;
 		__symbol = other.__symbol;
-	}
-
-	// Destructors
-	template <class T, class U>
-	Variable <T, U> ::~Variable()
-	{
-		delete __tptr;
 	}
 
 	// Copy
@@ -91,7 +85,7 @@ namespace zhetapi {
 	Variable <T, U> &Variable <T, U>::operator=(const Variable <T, U> &other)
 	{
 		if (this != &other) {
-			__tptr = other.__tptr->copy();
+			__tptr = other.__tptr;
 			__symbol = other.__symbol;
 		}
 
@@ -100,13 +94,13 @@ namespace zhetapi {
 
 	// Reference
 	template <class T, class U>
-	const token *Variable <T, U> ::get() const
+	const std::shared_ptr <token> &Variable <T, U> ::get() const
 	{
 		return __tptr;
 	}
 
 	template <class T, class U>
-	token *Variable <T, U> ::ref()
+	std::shared_ptr <token> &Variable <T, U> ::get()
 	{
 		return __tptr;
 	}
@@ -127,13 +121,16 @@ namespace zhetapi {
 	template <class T, class U>
 	std::string Variable <T, U> ::str() const
 	{
-		return __symbol + "\t[" + __tptr->str() + "]";
+		if (__tptr)
+			return __symbol + "\t[" + __tptr->str() + "]";
+		
+		return __symbol + "\t[nullptr]";
 	}
 
 	template <class T, class U>
 	token *Variable <T, U> ::copy() const
 	{
-		return new Variable(__symbol, __tptr);
+		return new Variable(__tptr->copy(), __symbol);
 	}
 
 	template <class T, class U>

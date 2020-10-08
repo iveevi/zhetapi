@@ -48,7 +48,7 @@ namespace zhetapi {
 			 * Parser for an identifier. Used to construct variable
 			 * clusters.
 			 */
-			__ident = +ascii::alpha;
+			__ident = +qi::char_("a-zA-Z$");
 
 			// Operation parsers
 

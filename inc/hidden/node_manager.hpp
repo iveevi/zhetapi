@@ -73,6 +73,8 @@ namespace zhetapi {
 		 */
 		void generate(std::string &) const;
 
+		std::string display() const;
+
 		void print(bool = false) const;
 	private:
 		token *value(node) const;
@@ -88,6 +90,8 @@ namespace zhetapi {
 		void refactor_reference(node &, const std::string &, token *);
 
 		std::string generate(std::string, node, std::ofstream &, size_t &, size_t &) const;
+
+		std::string display(node *) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -213,6 +217,10 @@ namespace zhetapi {
 
 			tptr = __barn.compute((dynamic_cast <operation_holder *>
 						(tree.__tptr.get()))->rep, values);
+
+			return tptr;
+		case token::var:
+			tptr = (dynamic_cast <Variable <T, U> *> (tree.__tptr.get()))->get().get();
 
 			return tptr;
 		case token::ftn:

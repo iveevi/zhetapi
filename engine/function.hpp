@@ -435,7 +435,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Function <T, U> Barn <T, U> ::retrieve_function(const std::string &str)
+	Function <T, U> &Barn <T, U> ::retrieve_function(const std::string &str)
 	{
 		return fstack.get(str);
 	}
