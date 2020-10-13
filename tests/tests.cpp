@@ -2,15 +2,16 @@
 #include <iostream>
 
 // Engine headers
-#include <variable.hpp>
+#include <function.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	Variable <double, int> x("x", 13);
+	Function <double, int> f = "f(x) = x^2 + sin(x) + 4 * 6";
 
-	cout << "x: " << x.get()->str() << endl;
-	cout << "x: " << x.symbol() << endl;
+	cout << "f: " << f.display() << endl;
+
+	f.print();
 }

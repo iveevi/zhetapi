@@ -10,7 +10,6 @@
 #include <node_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
-#include <variable_holder.hpp>
 #include <wildcard.hpp>
 
 namespace zhetapi {
@@ -59,7 +58,7 @@ namespace zhetapi {
 		token *substitute_and_compute(std::vector <token *> &);
 
 		/*
-		 * Responsible for expanding varialbe clusters and truning them
+		 * Responsible for expanding variable clusters and truning them
 		 * into product of operands.
 		 */
 		void expand(node &);
@@ -79,7 +78,8 @@ namespace zhetapi {
 	private:
 		token *value(node) const;
 		
-		void label(node &) const;
+		void label(node &);
+		void label_operation(node &);
 		
 		void rereference(node &);
 
@@ -91,7 +91,9 @@ namespace zhetapi {
 
 		std::string generate(std::string, node, std::ofstream &, size_t &, size_t &) const;
 
-		std::string display(node *) const;
+		std::string display(node) const;
+		std::string display_operation(node) const;
+		std::string display_pemdas(node, node) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -505,6 +507,81 @@ namespace zhetapi {
 		}
 	}
 
+	// Displaying utilities
+	template <class T, class U>
+	std::string node_manager <T, U> ::display() const
+	{
+		return display(__tree);
+	}
+
+	template <class T, class U>
+	std::string node_manager <T, U> ::display(node ref) const
+	{
+		switch (ref.__tptr->caller()) {
+		case token::opd:
+			return ref.__tptr->str();
+		case token::oph:
+			return display_operation(ref);
+		case token::ndr:
+			if (ref.__label == l_variable_reference)
+				return (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
+		}
+
+		return "?";
+	}
+
+	template <class T, class U>
+	std::string node_manager <T, U> ::display_operation(node ref) const
+	{
+		std::string str = (dynamic_cast <operation_holder *> (ref.__tptr.get()))->rep;
+		
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+
+		switch (ophptr->code) {
+		case add:
+		case sub:
+		case mul:
+		case dvs:
+			return display_pemdas(ref, ref.__leaves[0]) + " "
+				+ str + " " + display_pemdas(ref, ref.__leaves[1]);
+		case pwr:
+			return display_pemdas(ref, ref.__leaves[0]) + str
+				+ display_pemdas(ref, ref.__leaves[1]);
+		case sin:
+		case cos:
+		case tan:
+			return str + "(" + display_pemdas(ref, ref.__leaves[0]) + ")";
+		}
+
+		return str;
+	}
+
+	template <class T, class U>
+	std::string node_manager <T, U> ::display_pemdas(node ref, node child) const
+	{
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (child.__tptr.get());
+
+		if (!ophptr)
+			return display(child);
+
+		switch (ophptr->code) {
+		case mul:
+		case dvs:
+			if ((ophptr->code == add) || (ophptr->code == sub))
+				return display(child);
+			
+			return display(child);
+		case pwr:
+			if ((ophptr->code == add) || (ophptr->code == sub)
+				|| (ophptr->code == mul) || (ophptr->code == dvs))
+				return "(" + display(child) + ")";
+			
+			return display(child);
+		}
+		
+		return display(child);
+	}
+
 	// Printing utilities
 	template <class T, class U>
 	void node_manager <T, U> ::print(bool address) const
@@ -532,14 +609,14 @@ namespace zhetapi {
 
 	// Labeling utilities
 	template <class T, class U>
-	void node_manager <T, U> ::label(node &ref) const
+	void node_manager <T, U> ::label(node &ref)
 	{
 		switch (ref.__tptr->caller()) {
 		case token::opd:
 			ref.__label = constant_label <T, U> (ref.__tptr.get());
 			break;
 		case token::oph:
-			ref.__label = l_operation_constant;
+			label_operation(ref);
 
 			for (node &leaf : ref.__leaves)
 				label(leaf);
@@ -562,6 +639,21 @@ namespace zhetapi {
 			else
 				ref.__label = l_node_reference;
 			break;
+		}
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::label_operation(node &ref)
+	{
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+
+		switch (ophptr->code) {
+		case add:
+			__tree.__label = l_addition;
+			return;
+		case sub:
+			__tree.__label = l_subtraction;
+			return;
 		}
 	}
 	

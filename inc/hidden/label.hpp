@@ -54,9 +54,10 @@ namespace zhetapi {
 
 		// Operations
 		l_dot,
+		l_addition,
+		l_subtraction,
 
 		// off
-
 		l_matrix_uncoded,	// leave martix as nodes (with Variables)
 		l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
 
@@ -67,7 +68,6 @@ namespace zhetapi {
 		l_function,
 		l_exp,
 		l_polynomial,
-		l_separable,
 		l_multiplied,
 		l_exponential,
 		l_logarithmic,
@@ -125,6 +125,8 @@ namespace zhetapi {
 
 		// Operations
 		"dot",
+		"addition",
+		"subtraction",
 
 		// off
 		"vector uncoded",
@@ -138,7 +140,6 @@ namespace zhetapi {
 		"function",
 		"exponent",
 		"polynomic",
-		"separable",
 		"multiplied",
 		"exponential",
 		"logarithmic",

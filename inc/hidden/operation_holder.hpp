@@ -17,7 +17,7 @@ namespace zhetapi {
 		mul,
 		dvs,
 		shr,
-		fct,
+		fct,	// Factorial
 		pwr,
 		dot,	// Dot product
 		sin,
@@ -32,9 +32,9 @@ namespace zhetapi {
 		cch,
 		sch,
 		cth,
-		lxg,
-		xln,
-		xlg
+		lxg,	// Log base 10
+		xln,	// Natural log
+		xlg	// Log base 2
 	};
 
 	std::string strcodes[] = {

@@ -57,6 +57,8 @@ namespace zhetapi {
 		// Printing
 		void print() const;
 
+		std::string display() const;
+
 		template <class A, class B>
 		friend std::ostream &operator<<(std::ostream &, const Function <A, B> &);
 	private:
@@ -376,9 +378,27 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
+	std::string Function <T, U> ::display() const
+	{
+		std::string str = __symbol + "(";
+
+		size_t n = __params.size();
+		for (size_t i = 0; i < n; i++) {
+			str += __params[i];
+			
+			if (i < n - 1)
+				str += ", ";
+		}
+
+		str += ") = " + __manager.display();
+
+		return str;
+	}
+
+	template <class T, class U>
 	std::ostream &operator<<(std::ostream &os, const Function <T, U> &ftr)
 	{
-		os << "?";
+		os << ftr.display();
 		return os;
 	}
 
