@@ -2,16 +2,20 @@
 #include <iostream>
 
 // Engine headers
-#include <function.hpp>
+#include <matrix.hpp>
+#include <vector.hpp>
+#include <tensor.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> f = "f(x) = x^2 + sin(x) + 4 * 6";
+	Tensor <double> t({3, 4, 2}, 5);
 
-	cout << "f: " << f.display() << endl;
+	cout << t << endl;
 
-	f.print();
+	t[{0, 0, 0}] = 56;
+
+	cout << t << endl;
 }

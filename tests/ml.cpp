@@ -24,7 +24,6 @@ int main()
 	// Initialize the model
 	DeepNeuralNetwork <double> model({
 		{5, new Sigmoid <double> ()},
-		{3, new Sigmoid <double> ()}
 	}, []() {return 0.5 - rand()/(double) RAND_MAX;});
 
 	model.randomize();
@@ -33,7 +32,7 @@ int main()
 	Optimizer <double> *opt = new MeanSquaredError <double> ();
 
 	auto input = Vector <double> {1, 1, 1, 1, 1};
-	auto target = Vector <double> {0.65, 0.43, 0.29};
+	auto target = Vector <double> {0.65, 0.43, 0.29, 0.25, 0.87};
 
 	size_t rounds = 1000;
 

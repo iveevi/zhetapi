@@ -31,7 +31,7 @@ test_debug:	test_build_debug
 	gdb ./build/tests
 
 test_mem:	test_build
-	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/tests.in 
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes build/tests < tests/input 
 
 test_build:	inc/hidden	\
 		build		\

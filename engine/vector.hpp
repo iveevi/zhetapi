@@ -90,7 +90,21 @@ Vector <T> ::Vector(T *ref)
 }
 
 template <class T>
-Vector <T> ::Vector(const Vector &other) : Matrix <T> (other) {}
+Vector <T> ::Vector(const Vector &other)
+{
+	// Rehabitate
+	this->rows = other.get_rows();
+	this->cols = 1;
+
+	// Allocate
+	this->m_array = new T *[this->rows];
+
+	for (size_t i = 0; i < this->rows; i++) {
+		this->m_array[i] = new T[1];
+
+		this->m_array[i][0] = other.m_array[i][0];
+	}
+}
 
 template <class T>
 Vector <T> ::Vector(const Matrix <T> &other)

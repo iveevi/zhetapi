@@ -107,6 +107,9 @@ namespace ml {
 
 		auto dO = (*(opt->derivative()))(out, tmp);
 
+		cout << "dO: " << dO << endl;
+		cout << "__cache_dacts[0] " << __cache_dacts[0] << endl;
+
 		/* cout << "tmp:\t" << tmp << endl;
 		cout << "out:\t" << out << endl;
 		cout << "Error:\t" << (*opt)(out, tmp) << endl;
