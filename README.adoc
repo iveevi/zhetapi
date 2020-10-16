@@ -1,6 +1,7 @@
-image::zhetapi-logo.png[]
+= Zhetapi ℤHΠ
+:toc2:
 
-# Zhetapi ℤHΠ
+# Introduction
 
 Zhetapi (ℤHΠ) is a C++ computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
@@ -9,9 +10,9 @@ users.
 This project is a work in progress.
 It is being developed in Linux and has only been tested for it.
 
-## Features
+# Features
 
-### Evaluation of Complex Expressions
+## Evaluation of Complex Expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
@@ -36,7 +37,7 @@ cout << expr("1 + 2!/2.0") << endl;
 cout << exprf("%d + %d!/2.0", 1, 2) << endl;
 ```
 
-### Customization of Operations
+## Customization of Operations
 
 As mentioned above, the engine is sensitive to overloads of certain operations.
 On top of this, users can create their own set of operations and corresponding
@@ -89,7 +90,7 @@ operands. Below is a table of all supported operand types.
 As of right now, however, due to how the engine parses expressions,
 one cannot add new symbols for operations.
 
-### Usage and Declaration of Variables
+## Usage and Declaration of Variables
 
 The library provides constructs that allow the user to store variables and
 retrieve them in the scope of the `Barn` class. Users can then refer to these
@@ -109,7 +110,7 @@ cout << brn.get("x") << endl;
 cout << brn.get("y") << endl;
 ```
 
-### User Defined Functions
+## User Defined Functions
 
 Users can create mathematical functions, which can then be used as any other C++
 functor object.
@@ -127,7 +128,7 @@ cout << f(Rational <int> {3, 4}) << endl;
 cout << f(5.0) << endl;
 ```
 
-### Calculus
+## Calculus
 
 An object of class `Function` can be differentiated in terms of any of its
 variables, to get its gradients and such. This process is symbolic, which has
@@ -147,7 +148,7 @@ cout << f << endl;
 cout << df << endl;
 ```
 
-### Linear Algebra
+## Linear Algebra
 
 The library also provides ways in which the user can do linear algebra. The
 classes `Vector` and `Matrix` come with a variety of methods on their own, which
@@ -156,7 +157,7 @@ include performing computation as well as manipulation of their representations.
 In addition to these classes, the library provides standard algorithms such as Gram
 Schmidt and LU Factorization (see below).
 
-### Standard Algorithms
+## Standard Algorithms
 
 |===
 
@@ -231,7 +232,7 @@ context | `optimizer.hpp`
 |===
 
 
-## Modules
+# Modules
 
 A description of each directory is presented below:
 
@@ -264,7 +265,7 @@ capabilities. This is still in early developement.
 
 |===
 
-## Usage
+# Usage
 
 The prerequisite for using the library is Boost, specifically the Spirit,
 Phoenix and Fusion libraries.
@@ -273,9 +274,9 @@ Apart from this, the user only needs to clone the repository and are run `make
 parsers` in the repository directory. After this, one simply include the files
 in `engine` whenever necessary.
 
-## What Next?
+# What Next?
 
-### Simplification of Functions
+## Simplification of Functions
 
 Currently, objects of the `Function` class lack the complete ability to simplify
 their representations. Some of this functionality does already exist, such as
@@ -286,7 +287,7 @@ As an example which is not yet featuerd, it is not yet possible to have the
 object recognize that `3xy + 5yx` is the same as `8xy`. This feature would also
 help reduce the complexity of derivates of these objects.
 
-### Integration and Differentiation
+## Integration and Differentiation
 
 Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
@@ -294,7 +295,7 @@ placed.  In addition, we would like to add other kinds of differentiation and
 integration, such as automatic differentiation, and different types of numerical
 integration (quadrature, etc.).
 
-### Exact Forms of Numbers
+## Exact Forms of Numbers
 
 One recognizes, simply by looking at the first few digits, that the number
 `3.141592` is most nearly pi, and that the number `2.7182817` is most nearly
@@ -302,24 +303,24 @@ Euler's number. The hope is that at some point, the library will be able to
 reach similar conclusions, through the help of integer relations algorithms such
 as PSLQ.
 
-### More Algorithms in Linear Algebra
+## More Algorithms in Linear Algebra
 
 Although there are a few standard linear algebra algorithms, the hope is that
 more will be added. These include QR factorization, SVD, diagonalization, etc.
 
-### Machine Learning
+## Machine Learning
 
 A solid foundation for linear algebra is already present in the library. The
 next move would be to implement machine learning utilities, such as Deep Neural
 Networks.
 
-### Improve Semantics
+## Improve Semantics
 
 The aim of the library is to allow the user to perform mathematical tasks with
 ease. Thus, notational convenience of library features is important and is a
 task that remains to be seen through.
 
-## References
+# References
 
 Below is a list of resources used in the making of this project.
 
