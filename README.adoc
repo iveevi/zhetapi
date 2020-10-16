@@ -1,4 +1,5 @@
 = Zhetapi ℤHΠ
+:sectnums:
 :toc2:
 
 # Introduction
