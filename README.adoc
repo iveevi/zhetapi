@@ -3,6 +3,7 @@
 :toc2:
 
 # Introduction
+image::zhetapi-logo.png[]
 
 Zhetapi (ℤHΠ) is a C++ computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
