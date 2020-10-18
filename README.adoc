@@ -9,8 +9,8 @@ Zhetapi (ℤHΠ) is a C++ computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
 users.
 
-This project is a work in progress.
-It is being developed in Linux and has only been tested for it.
+This project is being developed on a Linux environment and has only been tested
+for it. It is a work in progress.
 
 # Features
 
@@ -242,9 +242,13 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| cli | Code for the Command Line Interface (CLI) application of Zhetapi. The
+| cfg |	Source for the Zhetapi manager, which allows users to change and add
+rules for processes like simplification and differentiation of functions and
+expressions.
+
+| cli |	Code for the Command Line Interface (CLI) application of Zhetapi. The
 CLI will allow the user to directly compute expressions and declare functions
-from the command line -- it will essentially be a calculator app like `octave`.
+from the command line -- it is essentially a calculator application like `octave`.
 
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
@@ -252,18 +256,21 @@ present in this module. It will later contain API functions.
 | inc | Contains the source used in library template headers, and which are
 optional to include. Includes code that is not meant to be seen by the users.
 
-| zhp | Contains standard configurations for zhetapi classes, such as
-simplifications for expression trees and derivative rules for function
-differentiation.
+| physics | Side project involving the creation of a physics simulator.
+Developed on Godot Engine.
 
-| tests | Code to test library features.
+| tests | Resources used to test library features.
 
 | texifier | Code to convert plain text math to Latex. Used on the website to
-turn results in Latex form.
+turn results from plain text into Latex.
 
 | web | Code to run the webserver for the Zhetapi website. This website
 supports the computation of mathematical expressions and it also provides graphing
 capabilities. This is still in early developement.
+
+| zhp | Contains standard configurations for zhetapi classes, such as
+simplifications for expression trees and derivative rules for function
+differentiation.
 
 |===
 
