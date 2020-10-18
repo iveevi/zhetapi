@@ -276,12 +276,17 @@ differentiation.
 
 # Usage
 
-The prerequisite for using the library is Boost, specifically the Spirit,
-Phoenix and Fusion libraries.
+The only prerequisite for using the library headers is Boost (preferably version
+1.65.1, which is used in development), specifically the Spirit, Phoenix and
+Fusion libraries.
 
-Apart from this, the user only needs to clone the repository and are run `make
-parsers` in the repository directory. After this, one simply include the files
-in `engine` whenever necessary.
+## Zhetapi CLI
+
+The Zhetapi CLI is a command line calculator application, similar to `octave`.
+One can simply enter expressions to be calculated or define functions and
+variables and then use them in later computations. The user can also enter
+commands, by using a `#` before specifying the command name (ie. the `#list`
+command lists all available commands).
 
 # What Next?
 
