@@ -9,7 +9,7 @@ Zhetapi (ℤHΠ) is a C++ (14) computation library that was built in the hopes o
 making mathematical computation and algorithmic research more convenient to the
 users.
 
-This project is being developed on a Linux environment and has only been tested
+This project is being developed in a Linux environment and has only been tested
 for it. It is a work in progress.
 
 # Features
@@ -22,9 +22,9 @@ matrices.
 
 Through the RTTI mechanism of C++, the framework of the library allows the
 evaluation to be sensitive to certain types of operands and their corresponding
-operations. For example, multiplication of two integers yields an integers, the
+operations. For example, multiplication of two integers yields an integer, the
 division of two rational numbers stays rational, and the product of a matrix,
-whose components are integers, with a rational scalar yields a matrix with
+whose components are integers, with a rational scalar, yields a matrix with
 rational components.
 
 The `expression.h` header contains `expr()` and `exprf()`, which return
@@ -68,7 +68,7 @@ The supported macros for operation creation are listed below.
 
 |===
 
-| Macro | Arguments | Desciption
+| Macro | Arguments | Description
 
 | `__add_binary_operation` | str, A, B, O | Creates a binary operation `str`
 whose input types and A and B (in that order), and whose output type is O. The
@@ -86,7 +86,7 @@ and `b->get()` to retrieve the value of the operand with type B.
 
 | `__add_heterogenous_binary_operation_ftr` | str, A, B, O, ftr | Equivalent to
 two calls of `__add_binary_operation_ftr`, one in which the order of the
-operands is `A str B` and the other in which the order is `B str A`.
+operands are `A str B` and the other in which the order is `B str A`.
 
 | `__add_binary_operation_set` | str | Adds the binary operation `str` between
 all complex types (Z, Q, R, CZ, CQ, CR). For example, by the default the engine
@@ -204,7 +204,7 @@ cout << "df/dx(2) = " << df(2) << endl;
 
 ## Code Generation and Dynamically Optimizing Functions
 
-In addition to being able to defined and use functions, the user can generate
+In addition to being able to define and use functions, the user can generate
 source code for the function using the `Function::generate_general` method.
 The user should that the code generated still uses the Zhetapi API.
 
@@ -267,7 +267,7 @@ The method returns a pointer to the compiled and linked function, which the user
 should then cast to use. Note that because of the usage of the Zhetapi API in
 the generated source code, the user must pass pointers to tokens as operands of
 the casted function. It is guaranteed, however, that the pointers passed to the
-generated functions are not modified in any way. Thus, the user it responsible
+generated functions are not modified in any way. Thus, the user is responsible
 for freeing the memory allocated for performed the computations.
 
 The advantage of using the generated function is that it carries less overhead
@@ -387,9 +387,9 @@ Developed on Godot Engine.
 | texifier | Code to convert plain text math to Latex. Used on the website to
 turn results from plain text into Latex.
 
-| web | Code to run the webserver for the Zhetapi website. This website
+| web | Code to run the web server for the Zhetapi website. This website
 supports the computation of mathematical expressions and it also provides graphing
-capabilities. This is still in early developement.
+capabilities. This is still in early development.
 
 | zhp | Contains standard configurations for zhetapi classes, such as
 simplifications for expression trees and derivative rules for function
@@ -405,7 +405,7 @@ Fusion libraries.
 
 ## Zhetapi CLI
 
-The Zhetapi CLI is a command line calculator application, similar to `octave`.
+The Zhetapi CLI is a command-line calculator application, similar to `octave`.
 One can simply enter expressions to be calculated or define functions and
 variables and then use them in later computations. The user can also enter
 commands, by using a `#` before specifying the command name (ie. the `#list`
@@ -420,7 +420,7 @@ their representations. Some of this functionality does already exist, such as
 the fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
 actions.
 
-As an example which is not yet featuerd, it is not yet possible to have the
+As an example that is not yet featured, it is not yet possible to have the
 object recognize that `3xy + 5yx` is the same as `8xy`. This feature would also
 help reduce the complexity of derivates of these objects.
 
@@ -428,7 +428,7 @@ help reduce the complexity of derivates of these objects.
 
 Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
-placed.  In addition, we would like to add other kinds of differentiation and
+placed.  Also, we would like to add other kinds of differentiation and
 integration, such as automatic differentiation, and different types of numerical
 integration (quadrature, etc.).
 
@@ -453,22 +453,22 @@ Networks.
 
 ## Native Code Generation
 
-The library already has the ability to generate, compile and link `Function`
+The library already can generate, compile and link `Function`
 objects in runtime. However, as mentioned, the source generated uses the Zhetapi
-API. This is disadvantegous in that it takes much longer to compile than native
+API. This is disadvantageous in that it takes much longer to compile than native
 programs, and the user also has the added responsibility of managing the
 resources for the computation of the generated function.
 
 The next step is to generate source code natively, using only native types that
 the user specifies. The only library functions that should be used are those in
-any of the headers in the `inc/std` directory (for exmaple, if the function uses
+any of the headers in the `inc/std` directory (for example, if the function uses
 the binomial coefficient, then the source would include the
 `std_combinatorial.hpp` header).
 
 ## Improve Semantics
 
-The aim of the library is to allow the user to perform mathematical tasks with
-ease. Thus, notational convenience of library features is important and is a
+The library aims to allow the user to perform mathematical tasks with
+ease. Thus, the notational convenience of library features is important and is a
 task that remains to be seen through.
 
 # References
