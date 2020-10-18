@@ -2,20 +2,24 @@
 #include <iostream>
 
 // Engine headers
-#include <matrix.hpp>
-#include <vector.hpp>
-#include <tensor.hpp>
+#include <function.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	Tensor <double> t({3, 4, 2}, 5);
+	Function <double, int> fx = "f(x) = x^2 + x * ln(x)";
 
-	cout << t << endl;
+	cout << fx(10)->str() << endl;
 
-	t[{0, 0, 0}] = 56;
+	typedef zhetapi::token *(*ftr)(zhetapi::token *);
 
-	cout << t << endl;
+	ftr gfx = (ftr) fx.compile_general();
+
+	zhetapi::token *opd = new operand <int> (10);
+
+	cout << gfx(opd)->str() << endl;
+
+	delete opd;
 }

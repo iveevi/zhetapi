@@ -20,7 +20,7 @@ The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
 matrices.
 
-Through the RTTI mechanism of C++ , the framework of the library allows the
+Through the RTTI mechanism of C++, the framework of the library allows the
 evaluation to be sensitive to certain types of operands and their corresponding
 operations. For example, multiplication of two integers yields an integers, the
 division of two rational numbers stays rational, and the product of a matrix,
@@ -189,14 +189,89 @@ disadvantage that it could be very complicated.
 Function <double, int> f = "f(x) = x^2";
 
 // Compute df/dx
-Function <double, int> df = f.differentiate(0);
+Function <double, int> df = f.derivative();
 
 // Prints "f(x) = x^2"
 cout << f << endl;
 
 // Prints "df/dx(x) = 2x"
 cout << df << endl;
+
+// Prints "df/dx(2) = 4" twice
+cout << "df/dx(2) = " << f.differentiate(2) << endl;
+cout << "df/dx(2) = " << df(2) << endl;
 ```
+
+## Code Generation and Dynamically Optimizing Functions
+
+In addition to being able to defined and use functions, the user can generate
+source code for the function using the `Function::generate_general` method.
+The user should that the code generated still uses the Zhetapi API.
+
+```{cpp}
+Function <double, int> f = "f(x) = x^2 + x * ln(x)";
+
+// Generates the source code for
+// f in the file __gen_f.cpp
+f.generate_general();
+```
+
+For the example function above, the source code generated would look like the
+following:
+
+```{cpp}
+#include <token.hpp>
+#include <function.hpp>
+
+extern "C" {
+	zhetapi::Barn <double, int> __gen_f_barn;
+
+	zhetapi::token *__gen_f(zhetapi::token *in1)
+	{
+		zhetapi::token *c1 = new zhetapi::operand <int> (2);
+		zhetapi::token *inter1 = __gen_f_barn.compute("^", {in1, c1});
+		zhetapi::token *inter2 = __gen_f_barn.compute("ln", {in1});
+		zhetapi::token *inter3 = __gen_f_barn.compute("*", {in1, inter2});
+		zhetapi::token *inter4 = __gen_f_barn.compute("+", {inter1, inter3});
+		return inter4;
+	}
+}
+```
+
+The user can also dynamically compile these generated files using the
+`Function::compile_general` method:
+
+```{cpp}
+// Initialize the Function object
+Function <double, int> fx = "f(x) = x^2 + x * ln(x)";
+
+// Prints "123.026"
+cout << fx(10)->str() << endl;
+
+// Cast the generated function
+typedef token *(*ftr)(token *);
+
+ftr gfx = (ftr) fx.compile_general();
+
+// Allocate the operands
+token *opd = new operand <int> (10);
+
+// Also prints "123.026"
+cout << gfx(opd)->str() << endl;
+
+// Free resources
+delete opd;
+```
+
+The method returns a pointer to the compiled and linked function, which the user
+should then cast to use. Note that because of the usage of the Zhetapi API in
+the generated source code, the user must pass pointers to tokens as operands of
+the casted function. It is guaranteed, however, that the pointers passed to the
+generated functions are not modified in any way. Thus, the user it responsible
+for freeing the memory allocated for performed the computations.
+
+The advantage of using the generated function is that it carries less overhead
+in computations when compared to objects of the `Function` class.
 
 ## Linear Algebra
 
@@ -256,7 +331,7 @@ rational number.
 
 |===
 
-## Overview of Usable Classes
+# Overview of Usable Classes
 
 Below are the currently usable classes.
 
@@ -375,6 +450,20 @@ more will be added. These include QR factorization, SVD, diagonalization, etc.
 A solid foundation for linear algebra is already present in the library. The
 next move would be to implement machine learning utilities, such as Deep Neural
 Networks.
+
+## Native Code Generation
+
+The library already has the ability to generate, compile and link `Function`
+objects in runtime. However, as mentioned, the source generated uses the Zhetapi
+API. This is disadvantegous in that it takes much longer to compile than native
+programs, and the user also has the added responsibility of managing the
+resources for the computation of the generated function.
+
+The next step is to generate source code natively, using only native types that
+the user specifies. The only library functions that should be used are those in
+any of the headers in the `inc/std` directory (for exmaple, if the function uses
+the binomial coefficient, then the source would include the
+`std_combinatorial.hpp` header).
 
 ## Improve Semantics
 

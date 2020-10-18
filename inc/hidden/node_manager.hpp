@@ -431,7 +431,7 @@ namespace zhetapi {
 		std::ofstream fout(name + ".cpp");
 
 		fout << "#include <token.hpp>\n";
-		fout << "#include <barn.hpp>\n";
+		fout << "#include <function.hpp>\n";
 		fout << "\n";
 
 		fout << "extern \"C\" {\n";

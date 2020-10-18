@@ -262,6 +262,8 @@ namespace zhetapi {
 		using namespace std;
 
 		// cout << endl << "Generating" << endl;
+		
+
 
 		std::string file;
 
