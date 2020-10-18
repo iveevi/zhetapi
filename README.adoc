@@ -71,7 +71,7 @@ The supported macros for operation creation are listed below.
 | Macro | Arguments | Description
 
 | `__add_binary_operation` | str, A, B, O | Creates a binary operation `str`
-whose input types and A and B (in that order), and whose output type is O. The
+whose inputs are `a` (type A) and `b` (type B), and whose output type is O. The
 output of the operation is `a str b`, where `str` is treated as a native binary
 operation.
 
@@ -94,7 +94,8 @@ uses `__add_binary_operation_set(+)` to establish the addition operations
 between the complex types.
 
 | `__add_unary_operation` | str, I, O | Adds the unary operation `str` whose
-input type is I and output type is O. The result of this operation is `str(I)`.
+input is `in` (type I) and output type is O. The result of this operation is
+`str(in)`.
 
 | `__add_unary_operation_ftr` | str, I, O, ftr | Similar to
 `__add_unary_operation_ftr`, but now the result of the operation can be
@@ -206,7 +207,7 @@ cout << "df/dx(2) = " << df(2) << endl;
 
 In addition to being able to define and use functions, the user can generate
 source code for the function using the `Function::generate_general` method.
-The user should that the code generated still uses the Zhetapi API.
+The user should note that the code generated still uses the Zhetapi API.
 
 ```{cpp}
 Function <double, int> f = "f(x) = x^2 + x * ln(x)";
@@ -425,9 +426,9 @@ help reduce the complexity of derivates of these objects.
 
 Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
-placed.  Also, we would like to add other kinds of differentiation and
-integration, such as automatic differentiation, and different types of numerical
-integration (quadrature, etc.).
+placed. The addition of other kinds of differentiation and integration, such as
+automatic differentiation, and different types of numerical integration
+(quadrature, etc.), is also something to look forward to.
 
 ## Exact Forms of Numbers
 
