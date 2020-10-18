@@ -379,9 +379,6 @@ present in this module. It will later contain API functions.
 | inc | Contains the source used in library template headers, and which are
 optional to include. Includes code that is not meant to be seen by the users.
 
-| physics | Side project involving the creation of a physics simulator.
-Developed on Godot Engine.
-
 | tests | Resources used to test library features.
 
 | texifier | Code to convert plain text math to Latex. Used on the website to
