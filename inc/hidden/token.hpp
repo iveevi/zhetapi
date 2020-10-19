@@ -46,6 +46,8 @@ namespace zhetapi {
 		 */
 		operator type() const;
 
+		bool operator!=(token *) const;
+
 		/* 
 		 * Inspector function passed on to all derived classes, helps to
 		 * choose what to do with different tokens from other classes.
@@ -74,6 +76,11 @@ namespace zhetapi {
 	token::operator type() const
 	{
 		return caller();
+	}
+
+	bool token::operator!=(token *tptr) const
+	{
+		return !(*this == tptr); 
 	}
 	
 }

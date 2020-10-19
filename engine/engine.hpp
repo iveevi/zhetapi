@@ -19,8 +19,11 @@ namespace zhetapi {
 
 	template <class T, class U>
 	class Engine {
-		rule <T, U> __std;
+		rule <T, U> __std_differentiations;
 	public:
+		// Default rules
+		Engine();
+		
 		// Load resources
 		Engine(const std::string &);
 
@@ -42,7 +45,33 @@ namespace zhetapi {
 	};
 
 	template <class T, class U>
-	std::vector <std::string> Engine <T, U> ::variables = {"u"};
+	std::vector <std::string> Engine <T, U> ::variables = {"a", "b"};
+
+	template <class T, class U>
+	Engine <T, U> ::Engine()
+	{
+		std::vector <std::string> lines = {
+			"sin(a) : cos(a)",
+			"cos(a) : -sin(a)"
+		};
+
+		for (std::string line : lines) {
+			// Extract parts of the line
+			auto itr = line.find(":");
+
+			std::string first, second;
+
+			first = line.substr(0, itr);
+			second = line.substr(itr + 1);
+
+			node_manager <T, U> f = node_manager <T, U> (first, variables);
+			node_manager <T, U> s = node_manager <T, U> (second, variables);
+
+			f.refactor_reference("u", new wildcard());
+
+			__std_differentiations.push_back({f, s});
+		}
+	}
 
 	template <class T, class U>
 	Engine <T, U> ::Engine(const std::string &path)
@@ -66,7 +95,7 @@ namespace zhetapi {
 
 			f.refactor_reference("u", new wildcard());
 
-			__std.push_back({f, s});
+			__std_differentiations.push_back({f, s});
 		}
 	}
 
@@ -83,19 +112,19 @@ namespace zhetapi {
 	template <class T, class U>
 	typename rule <T, U> ::iterator Engine <T, U> ::end()
 	{
-		return __std.end();
+		return __std_differentiations.end();
 	}
 
 	template <class T, class U>
 	const typename rule <T, U> ::const_iterator &Engine <T, U> ::begin() const
 	{
-		return __std.begin();
+		return __std_differentiations.begin();
 	}
 
 	template <class T, class U>
 	const typename rule <T, U> ::const_iterator &Engine <T, U> ::end() const
 	{
-		return __std.end();
+		return __std_differentiations.end();
 	}
 
 }

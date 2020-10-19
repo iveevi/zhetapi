@@ -65,6 +65,8 @@ namespace zhetapi {
 
 		void simplify(Engine <T, U> &);
 
+		void differentiate(const std::string &);
+
 		void refactor_reference(const std::string &, token *);
 
 		/*
@@ -75,6 +77,9 @@ namespace zhetapi {
 		std::string display() const;
 
 		void print(bool = false) const;
+
+		// Static methods
+		static bool loose_match(const node_manager <T, U> &, const node_manager <T, U> &);
 	private:
 		token *value(node) const;
 		
@@ -86,6 +91,8 @@ namespace zhetapi {
 		node expand(const std::string &, const std::vector <node> &);
 
 		void simplify(node &, Engine <T, U> &);
+
+		void differentiate(node &);
 		
 		void refactor_reference(node &, const std::string &, token *);
 
@@ -404,6 +411,49 @@ namespace zhetapi {
 		cout << "Simplifying..." << endl;
 	}
 
+	// Differentiation
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate(const std::string &str)
+	{
+		for (size_t i = 0; i < __refs.size(); i++) {
+			if (__params[i] == str)
+				__refs[i].__label = l_variable;
+			else
+				__refs[i].__label = l_variable_constant;
+		}
+
+		label(__tree);
+
+		print();
+
+		std::cout << "\n---------------\n" << std::endl;
+
+		differentiate(__tree);
+
+		print();
+	}
+
+	// Post-label usage
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate(node &ref)
+	{
+		if (is_constant(ref.__label)) {
+			ref.transfer(nf_zero());
+
+			return;
+		}
+
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+
+		switch (ophptr->code) {
+		case add:
+		case sub:
+			differentiate(ref.__leaves[0]);
+			differentiate(ref.__leaves[1]);
+			break;
+		}
+	}
+
 	// Refactoring methods
 	template <class T, class U>
 	void node_manager <T, U> ::refactor_reference(const std::string &str, token *tptr)
@@ -523,8 +573,10 @@ namespace zhetapi {
 		case token::oph:
 			return display_operation(ref);
 		case token::ndr:
-			if (ref.__label == l_variable_reference)
+			if ((dynamic_cast <node_reference *> (ref.__tptr.get()))->is_variable())
 				return (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
+			
+			return display(*(dynamic_cast <node_reference *> (ref.__tptr.get())->get()));
 		}
 
 		return "?";
@@ -550,6 +602,9 @@ namespace zhetapi {
 		case sin:
 		case cos:
 		case tan:
+
+		case xln:
+		case xlg:
 			return str + "(" + display_pemdas(ref, ref.__leaves[0]) + ")";
 		}
 
@@ -616,10 +671,10 @@ namespace zhetapi {
 			ref.__label = constant_label <T, U> (ref.__tptr.get());
 			break;
 		case token::oph:
-			label_operation(ref);
-
 			for (node &leaf : ref.__leaves)
 				label(leaf);
+
+			label_operation(ref);
 
 			break;
 		case token::ftn:
@@ -633,11 +688,9 @@ namespace zhetapi {
 
 			break;
 		case token::ndr:
-			if ((dynamic_cast <node_reference *>
-					(ref.__tptr.get()))->is_variable())
-				ref.__label = l_variable_reference;
-			else
-				ref.__label = l_node_reference;
+			// Transfer labels, makes things easier
+			ref.__label = (dynamic_cast <node_reference *>
+					(ref.__tptr.get()))->get()->__label;
 			break;
 		}
 	}
@@ -647,12 +700,25 @@ namespace zhetapi {
 	{
 		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 
+		bool constant = true;
+		for (auto child : ref.__leaves) {
+			if (!is_constant(child.__label)) {
+				constant = false;
+				break;
+			}
+		}
+
+		if (constant) {
+			ref.__label = l_operation_constant;
+			return;
+		}
+
 		switch (ophptr->code) {
 		case add:
-			__tree.__label = l_addition;
+			ref.__label = l_addition;
 			return;
 		case sub:
-			__tree.__label = l_subtraction;
+			ref.__label = l_subtraction;
 			return;
 		}
 	}
@@ -672,6 +738,13 @@ namespace zhetapi {
 
 		for (node &leaf : ref.__leaves)
 			rereference(leaf);
+	}
+	
+	// Static methods
+	template <class T, class U>
+	bool node_manager <T, U> ::loose_match(const node_manager <T, U> &a, const node_manager <T, U> &b)
+	{
+		return node::loose_match(a.__tree, b.__tree);
 	}
 
 	// Node factories

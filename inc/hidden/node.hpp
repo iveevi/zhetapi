@@ -27,12 +27,16 @@ namespace zhetapi {
 		node(token *, const node &, const node &);
 		
 		// Member functions
+		void transfer(const node &);
 
 		// Printing
 		void print(int = 1, int = 0) const;
 		void print_no_address(int = 1, int = 0) const;
 
 		std::string display(int = 1, int = 0) const;
+
+		// Static methods
+		static bool loose_match(const node &, const node &);
 
 		friend std::ostream &operator<<(std::ostream &, const node &);
 	};
@@ -49,6 +53,14 @@ namespace zhetapi {
 			b}), __label(l_none)
 	{
 		__tptr.reset(tptr);
+	}
+
+	void node::transfer(const node &ref)
+	{
+		__tptr = ref.__tptr;
+		__label = ref.__label;
+		__class = ref.__class;
+		__leaves = ref.__leaves;
 	}
 
 	void node::print(int num, int lev) const
@@ -104,6 +116,24 @@ namespace zhetapi {
 			oss << itr.display(++counter, lev + 1);
 
 		return oss.str();
+	}
+
+	bool node::loose_match(const node &a, const node &b)
+	{
+		// Check the token
+		if (*(a.__tptr.get()) != b.__tptr.get())
+			return false;
+		
+		// Check the leaves
+		if (a.__leaves.size() != b.__leaves.size())
+			return false;
+
+		for (size_t i = 0; i < a.__leaves.size(); i++) {
+			if (!loose_match(a.__leaves[i], b.__leaves[i]))
+				return false;
+		}
+
+		return true;
 	}
 	
 	std::ostream &operator<<(std::ostream &os, const node &tree)

@@ -57,14 +57,17 @@ namespace zhetapi {
 		l_addition,
 		l_subtraction,
 
+		// Variables
+		l_variable,		// Regular variable
+		l_variable_constant,	// Variable as a constant (differentiation)
+
 		// off
-		l_matrix_uncoded,	// leave martix as nodes (with Variables)
-		l_vector_uncoded,	// leave vector as nodes, then decode once substituion is performed
+		l_matrix_uncoded,	// Leave martix as nodes (with Variables)
+		l_vector_uncoded,	// Leave vector as nodes, then decode once substituion is performed
 
 		l_constant,		// keep to prevent errors
 		l_power,
 		l_divided,
-		l_variable,
 		l_function,
 		l_exp,
 		l_polynomial,
@@ -128,6 +131,10 @@ namespace zhetapi {
 		"addition",
 		"subtraction",
 
+		// Variable
+		"variable",
+		"variable constant",
+
 		// off
 		"vector uncoded",
 		"matrix uncoded",
@@ -136,7 +143,6 @@ namespace zhetapi {
 		
 		"power",
 		"divided",
-		"variable",
 		"function",
 		"exponent",
 		"polynomic",
@@ -158,7 +164,8 @@ namespace zhetapi {
 	{
 		if ((type >= l_constant_integer)
 				&& (type <= l_constant_matrix_complex_real)
-				|| (type == l_operation_constant))
+				|| (type == l_operation_constant)
+				|| (type == l_variable_constant))
 			return true;
 
 		return false;

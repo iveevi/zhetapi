@@ -25,6 +25,9 @@ namespace zhetapi {
 		Function(const char *);
 		Function(const std::string &);
 
+		Function(const std::string &, const std::vector <std::string>
+				&, const node_manager <T, U> &);
+
 		Function(const Function &);
 
 		std::string &symbol();
@@ -37,6 +40,8 @@ namespace zhetapi {
 
 		template <class ... A>
 		token *derivative(const std::string &, A ...);
+
+		Function <T, U> differentiate(const std::string &) const;
 
 		template <class A, class B>
 		friend bool operator<(const Function <A, B> &, const Function <A, B> &);
@@ -170,6 +175,13 @@ namespace zhetapi {
 		__manager = node_manager <T, U> (str.substr(++index), __params, barn);
 	}
 
+	// Member-wise construction
+	template <class T, class U>
+	Function <T, U> ::Function(const std::string &symbol, const std::vector
+			<std::string> &params, const node_manager <T, U>
+			&manager) : __symbol(symbol), __params(params),
+			__manager(manager) {}
+
 	template <class T, class U>
 	Function <T, U> ::Function(const Function <T, U> &other) :
 		__symbol(other.__symbol), __params(other.__params),
@@ -254,6 +266,21 @@ namespace zhetapi {
 		diff = barn.compute("/", {diff, new operand <T> (T(2) * h)});
 
 		return diff;
+	}
+
+	template <class T, class U>
+	Function <T, U> Function <T, U> ::differentiate(const std::string &str) const
+	{
+		// Improve naming later
+		std::string name = "d" + __symbol + "/d" + str;
+
+		node_manager <T, U> dm = __manager;
+
+		dm.differentiate(str);
+
+		Function <T, U> df = Function <T, U> (name, __params, dm);
+
+		return df;
 	}
 
 	template <class T, class U>

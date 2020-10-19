@@ -96,7 +96,7 @@ namespace zhetapi {
 		if (ndr == nullptr)
 			return false;
 
-		return ndr->__ref == __ref;
+		return ndr->__symbol == __symbol;
 	}
 
 }

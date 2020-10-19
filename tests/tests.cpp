@@ -1,4 +1,5 @@
 // C/C++ headers
+#include <ios>
 #include <iostream>
 
 // Engine headers
@@ -9,17 +10,17 @@ using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> fx = "f(x) = x^2 + x * ln(x)";
+	Function <double, int> f = "f(x, y) = x^2 + xyln(x) + y^2";
+	Function <double, int> df = f.differentiate("x");
 
-	cout << fx(10)->str() << endl;
+	cout << f << endl;
+	cout << df << endl;
 
-	typedef zhetapi::token *(*ftr)(zhetapi::token *);
+	node_manager <double, int> A("x^2 + x + y", {"x", "y"});
+	node_manager <double, int> B("x^2 + x + y", {"x", "y"});
 
-	ftr gfx = (ftr) fx.compile_general();
+	cout << "\nA: " << A.display() << endl;
+	cout << "B: " << B.display() << endl;
 
-	zhetapi::token *opd = new operand <int> (10);
-
-	cout << gfx(opd)->str() << endl;
-
-	delete opd;
+	cout << "\nMatches: " << std::boolalpha << node_manager <double, int> ::loose_match(A, B) << endl;
 }
