@@ -173,6 +173,8 @@ namespace zhetapi {
 
 		// Construct the tree manager
 		__manager = node_manager <T, U> (str.substr(++index), __params, barn);
+
+		__manager.simplify();
 	}
 
 	// Member-wise construction

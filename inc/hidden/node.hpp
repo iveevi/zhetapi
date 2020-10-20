@@ -4,6 +4,7 @@
 // C/C++ headers
 #include <vector>
 #include <memory>
+#include <iostream>
 
 // Engine headers
 #include <token.hpp>
@@ -19,9 +20,10 @@ namespace zhetapi {
 		cls			__class;
 		std::vector <node>	__leaves;
 
-		// Constructors and deconstructors
+		// Constructors
 		node();
 		node(token *, const std::vector <node> &);
+		node(token *, lbl, const std::vector <node> &);
 		
 		// Binary
 		node(token *, const node &, const node &);
@@ -45,6 +47,12 @@ namespace zhetapi {
 	
 	node::node(token *tptr, const std::vector <node> &leaves) :
 			__leaves(leaves), __label(l_none)
+	{
+		__tptr.reset(tptr);
+	}
+
+	node::node(token *tptr, lbl label, const std::vector <node> &leaves) :
+		__leaves(leaves), __label(label)
 	{
 		__tptr.reset(tptr);
 	}

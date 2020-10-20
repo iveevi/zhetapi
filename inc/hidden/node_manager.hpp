@@ -10,7 +10,6 @@
 #include <node_reference.hpp>
 #include <parser.hpp>
 #include <types.hpp>
-#include <wildcard.hpp>
 
 namespace zhetapi {
 
@@ -63,7 +62,7 @@ namespace zhetapi {
 		 */
 		void expand(node &);
 
-		void simplify(Engine <T, U> &);
+		void simplify();
 
 		void differentiate(const std::string &);
 
@@ -90,7 +89,8 @@ namespace zhetapi {
 
 		node expand(const std::string &, const std::vector <node> &);
 
-		void simplify(node &, Engine <T, U> &);
+		void simplify(node &);
+		void simplify_separable(node &);
 
 		void differentiate(node &);
 		
@@ -361,7 +361,7 @@ namespace zhetapi {
 		 */
 		choice[choice.size() - 1].__leaves = leaves;
 
-		/* 
+		/*
 		 * Binary fusing. Advantageous to linear fusing in the way in
 		 * which it produces a tree with fewer multiplication nodes.
 		 */
@@ -388,27 +388,38 @@ namespace zhetapi {
 
 	// Simplication methods
 	template <class T, class U>
-	void node_manager <T, U> ::simplify(Engine <T, U> &eng)
+	void node_manager <T, U> ::simplify()
 	{
-		using namespace std;
-
-		cout << "Simplifying..." << endl;
-
-		for (auto itr = eng.begin(); itr != eng.end(); itr++) {
-			itr->first.print();
-
-			cout << "Should be" << endl;
-
-			itr->second.print();
-		}
+		simplify(__tree);
 	}
 
 	template <class T, class U>
-	void node_manager <T, U> ::simplify(node &tree, Engine <T, U> &eng)
+	void node_manager <T, U> ::simplify(node &ref)
 	{
-		using namespace std;
+		if (ref.__label == l_operation_constant) {
+			ref.transfer(node(value(ref), l_constant, {}));
 
-		cout << "Simplifying..." << endl;
+			return;
+		}
+
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+
+		if (ophptr && (ophptr->code == add || ophptr->code == sub))
+			simplify_separable(ref);
+
+		for (auto &child : ref.__leaves)
+			simplify(child);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::simplify_separable(node &ref)
+	{
+		token *opd = new operand <U> (0);
+
+		std::vector <node> sums;
+
+		std::cout << "PRINT" << std::endl;
+		ref.print();
 	}
 
 	// Differentiation
@@ -424,13 +435,9 @@ namespace zhetapi {
 
 		label(__tree);
 
-		print();
-
-		std::cout << "\n---------------\n" << std::endl;
-
 		differentiate(__tree);
 
-		print();
+		simplify();
 	}
 
 	// Post-label usage
@@ -497,8 +504,6 @@ namespace zhetapi {
 			if (i < __refs.size() - 1)
 				fout << ", ";
 		}
-
-		// print();
 
 		fout << ")\n";
 		fout << "\t{\n";
