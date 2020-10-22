@@ -91,6 +91,16 @@ manager_build:	build
 	@echo "[BUILDING MANAGER TESTER]\n"
 	g++ cfg/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
 
+# Interpreter
+
+zhp:		zhp_build
+	@echo "\n[RUNNING CLI]\n"
+	./build/zhp < samples/simple.zhp
+
+zhp_build:	build
+	@echo "[BUILDING CLI TESTER]\n"
+	g++ -I engine -I inc/std -I inc/hidden zhp/zhp.cpp -o build/zhp
+
 # CLI testing
 cli:		cli_build
 	@echo "\n[RUNNING CLI]\n"

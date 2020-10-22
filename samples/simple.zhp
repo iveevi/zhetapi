@@ -1,0 +1,10 @@
+a = 0
+
+alg main(a, b)
+{
+	return a + b
+}
+
+print(a)
+
+print(main(1, 3))
