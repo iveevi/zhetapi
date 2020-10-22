@@ -40,107 +40,6 @@ cout << expr("1 + 2!/2.0") << endl;
 cout << exprf("%d + %d!/2.0", 1, 2) << endl;
 ```
 
-## Customization of Operations
-
-As mentioned above, the engine is sensitive to overloads of certain operations.
-On top of this, users can create their own set of operations and corresponding
-overloads or add more overloads. This is possible through the `Barn` class and
-macros provided by the library.
-
-```{cpp}
-// Define the operation
-// &: (Z, Z) to Z,
-// &(a, b) = a(a + b)
-__add_binary_operation_ftr(&, Z, Z, Z, (a->get() + b->get()) * a->get());
-
-// Define the operation
-// &: (R, Q) to R,
-// &(a, b) = a(a + b)
-__add_heterogenous_binary_operation_ftr(&, R, Q, R, (a->get() + b->get()) * a->get());
-
-// Define the operation
-// pop: Z to Z
-// pop(a) = a(a + 1)
-__add_unary_operation_ftr(pop, Z, Z, (a->get() + 1) * a->get());
-```
-
-The supported macros for operation creation are listed below.
-
-|===
-
-| Macro | Arguments | Description
-
-| `__add_binary_operation` | str, A, B, O | Creates a binary operation `str`
-whose inputs are `a` (type A) and `b` (type B), and whose output type is O. The
-output of the operation is `a str b`, where `str` is treated as a native binary
-operation.
-
-| `__add_heterogenous_binary_operation` | str, A, B, O | Equivalent to
-`__add_binary_operation`, but adds `str` as a binary operation between A and B
-and B and A. The output type remains O for all operations added with this macro.
-
-| `__add_binary_operation_ftr` | str, A, B, O, ftr | Equivalent to
-`__add_binary_operation`, but the last argument specifies how the operation is
-actually performed. Used `a->get()` to retrieve the value of operand with type A
-and `b->get()` to retrieve the value of the operand with type B.
-
-| `__add_heterogenous_binary_operation_ftr` | str, A, B, O, ftr | Equivalent to
-two calls of `__add_binary_operation_ftr`, one in which the order of the
-operands are `A str B` and the other in which the order is `B str A`.
-
-| `__add_binary_operation_set` | str | Adds the binary operation `str` between
-all complex types (Z, Q, R, CZ, CQ, CR). For example, by the default the engine
-uses `__add_binary_operation_set(+)` to establish the addition operations
-between the complex types.
-
-| `__add_unary_operation` | str, I, O | Adds the unary operation `str` whose
-input is `in` (type I) and output type is O. The result of this operation is
-`str(in)`.
-
-| `__add_unary_operation_ftr` | str, I, O, ftr | Similar to
-`__add_unary_operation_ftr`, but now the result of the operation can be
-specified as the third argument. Use `in->get()` to retrieve the value of the
-input.
-
-|===
-
-The `typedef` s `Z`, `Q`, and `R` in the example refer to integer, rational and
-real operands. Below is a table of all supported operand types.
-
-|===
-
-| `typedef` | Operand type
-
-| `Z` | Integers, Z
-| `Q` | Rationals, Q
-| `R` | Reals, R
-
-| `CZ` | Gaussian integer, Z[i]
-| `CQ` | Complex number with rational parts, Q[i]
-| `CR` | Complex numbers, C
-
-| `VZ` | Vector with integral components
-| `VQ` | Vector with rational components
-| `VR` | Vector with real components
-
-| `VCZ` | Vector with components in Z[i]
-| `VCQ` | Vector with components in Q[i]
-| `VCR` | Vector with complex components
-
-| `MZ` | Matrix with integral components
-| `MQ` | Matrix with rational components
-| `MR` | Matrix with real components
-
-| `MCZ` | Matrix with components in Z[i]
-| `MCQ` | Matrix with components in Q[i]
-| `MCR` | Matrix with complex components
-
-|===
-
-As of right now, however, due to how the engine parses identifiers, the
-only characters available for operation creation are alphabetic characters (a-z
-and A-Z).
-
 ## Usage and Declaration of Variables
 
 The library provides constructs that allow the user to store variables and
@@ -343,8 +242,6 @@ Below are the currently usable classes.
 | `Activation` | An activation in the standard machine learning context | `activations.hpp`
 | `Barn` | A class which contains settings for other classes like functions | `rational.hpp`
 | `Complex` | A complex number in mathematics | `complex.hpp`
-| `Engine` | A class which contains information on legal simplification and
-differentiations | `complex.hpp`
 | `Function` | A mathematical function | `function.hpp`
 | `Matrix` | A matrix in linear algebra | `matrix.hpp`
 | `Network` | A deep neural network in machine learning | `network.hpp`
@@ -366,10 +263,6 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| cfg |	Source for the Zhetapi manager, which allows users to change and add
-rules for processes like simplification and differentiation of functions and
-expressions.
-
 | cli |	Code for the Command Line Interface (CLI) application of Zhetapi. The
 CLI will allow the user to directly compute expressions and declare functions
 from the command line -- it is essentially a calculator application like `octave`.
@@ -388,10 +281,6 @@ turn results from plain text into Latex.
 | web | Code to run the web server for the Zhetapi website. This website
 supports the computation of mathematical expressions and it also provides graphing
 capabilities. This is still in early development.
-
-| zhp | Contains standard configurations for zhetapi classes, such as
-simplifications for expression trees and derivative rules for function
-differentiation.
 
 |===
 
