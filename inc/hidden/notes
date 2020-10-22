@@ -31,6 +31,9 @@ number.
 Make operations and classes more efficient, i.e. computation of complex numbers
 or polynomials, etc. Test the speedup through benchmark tests.
 
+Refactor tokens to "Variant" and operand to "Operand", and move both to the engine
+header, as they will be usable classes.
+
 =====
 Bugs:
 =====

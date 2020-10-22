@@ -10,11 +10,11 @@ using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> f = "f(x, y) = x^2 + xyln(x) + y^(2 + 5) + 4 * 5";
+	Function <double, int> f = "f(x, y) = x^2 + xyln(x) - y^(2 + 5) + 4 * 5";
 
 	cout << f << endl;
 
-	Function <double, int> df = f.differentiate("x");
+	// Function <double, int> df = f.differentiate("x");
 
-	cout << df << endl;
+	// cout << df << endl;
 }

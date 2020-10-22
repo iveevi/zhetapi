@@ -416,10 +416,58 @@ namespace zhetapi {
 	{
 		token *opd = new operand <U> (0);
 
-		std::vector <node> sums;
+		std::stack <node> process;
 
-		std::cout << "PRINT" << std::endl;
-		ref.print();
+		std::vector <node> sums;
+		
+		process.push(ref);
+
+		node top;
+		while (!process.empty()) {
+			top = process.top();
+
+			process.pop();
+
+			operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr.get());
+
+			if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
+				process.push(top.__leaves[0]);
+				process.push(top.__leaves[1]);
+			} else {
+				sums.push_back(top);
+			}
+		}
+
+		// Make copies, not address copies
+		std::vector <node> rest;
+		for (auto sep : sums) {
+			// Includes variable_constant; remove this exception
+			if (is_constant(sep.__label))
+				opd = __barn.compute("+", {opd, value(sep)});
+			else
+				rest.push_back(sep);
+		}
+
+		if (!types <T, U> ::is_zero(opd))
+			rest.push_back(node(opd, {}));
+
+		while (rest.size() > 1) {
+			std::vector <node> tmp;
+
+			size_t n = rest.size();
+
+			for (size_t i = 0; i < n - 1; i += 2) {
+				tmp.push_back(node(new operation_holder("+"),
+							{rest[i], rest[i + 1]}));
+			}
+
+			if (n % 2)
+				tmp.push_back(rest[n - 1]);
+		
+			rest = tmp;
+		}
+
+		ref.transfer(rest[0]);
 	}
 
 	// Differentiation
@@ -619,21 +667,22 @@ namespace zhetapi {
 	template <class T, class U>
 	std::string node_manager <T, U> ::display_pemdas(node ref, node child) const
 	{
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (child.__tptr.get());
+		operation_holder *rophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+		operation_holder *cophptr = dynamic_cast <operation_holder *> (child.__tptr.get());
 
-		if (!ophptr)
+		if (!cophptr)
 			return display(child);
 
-		switch (ophptr->code) {
+		switch (rophptr->code) {
 		case mul:
 		case dvs:
-			if ((ophptr->code == add) || (ophptr->code == sub))
+			if ((cophptr->code == add) || (cophptr->code == sub))
 				return display(child);
 			
 			return display(child);
 		case pwr:
-			if ((ophptr->code == add) || (ophptr->code == sub)
-				|| (ophptr->code == mul) || (ophptr->code == dvs))
+			if ((cophptr->code == add) || (cophptr->code == sub)
+				|| (cophptr->code == mul) || (cophptr->code == dvs))
 				return "(" + display(child) + ")";
 			
 			return display(child);

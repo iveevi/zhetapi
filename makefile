@@ -22,7 +22,7 @@ test_profile:	test_build_profile
 	./build/tests < ./tests/input
 	gprof ./build/tests > prof.out
 
-test_debug_exc:
+test_debug_raw:
 	@echo "\b[DEBUGGING PROGRAM]\n"
 	gdb ./build/tests
 
