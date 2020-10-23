@@ -73,17 +73,17 @@ void parse(const string &str)
 	
 	if (count == 0) {
 		try {
-			zhetapi::node_manager <double, int> *mgr = new zhetapi::node_manager <double, int> (str, barn);
+			zhetapi::node_manager <double, int> mgr(str, barn);
 
-			zhetapi::token *tptr = mgr->value();
+			zhetapi::token *tptr = mgr.value();
 
 			cout << "\n\t" << tptr->str() << "\n\n";
 			
 			barn.put(tptr, "$");
 			
-			delete mgr;
+			delete tptr;
 		} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
-			cout << "\t" << e.what() << "\n\n";
+			cout << "\n\t" << e.what() << "\n\n";
 		}
 	} else if (count == 1) {
 		try {
