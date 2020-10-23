@@ -565,7 +565,8 @@ namespace zhetapi {
 	template <class T, class U>
 	void Barn <T, U> ::put(token *tptr, const std::string &str)
 	{
-		put(Variable <T, U> {tptr, str});
+		// Leave the passed pointer alone, and copy it instead
+		put(Variable <T, U> {tptr->copy(), str});
 	}
 
 	template <class T, class U>

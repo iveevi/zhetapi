@@ -97,9 +97,27 @@ zhp:		zhp_build
 	@echo "\n[RUNNING CLI]\n"
 	./build/zhp < samples/simple.zhp
 
+zhp_raw:
+	@echo "\n[RUNNING CLI]\n"
+	./build/zhp < samples/simple.zhp
+
+zhp_debug_raw:
+	@echo "\b[DEBUGGING PROGRAM]\n"
+	gdb ./build/zhp
+
+zhp_debug:	zhp_build_debug
+	@echo "\b[DEBUGGING PROGRAM]\n"
+	gdb ./build/zhp
+
 zhp_build:	build
 	@echo "[BUILDING CLI TESTER]\n"
 	g++ -I engine -I inc/std -I inc/hidden zhp/zhp.cpp -o build/zhp
+
+zhp_build_debug:	inc/hidden	\
+			build		\
+			tests
+	@echo "[BUILDING TESTS]\n"
+	g++ -I engine -I inc/hidden -I inc/std -I build zhp/zhp.cpp -ldl -g -o build/zhp
 
 # CLI testing
 cli:		cli_build

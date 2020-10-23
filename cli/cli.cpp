@@ -77,7 +77,6 @@ void parse(const string &str)
 
 			zhetapi::token *tptr = mgr->value();
 
-
 			cout << "\n\t" << tptr->str() << "\n\n";
 			
 			barn.put(tptr, "$");

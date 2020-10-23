@@ -219,7 +219,7 @@ namespace zhetapi {
 		
 		switch (*(tree.__tptr)) {
 		case token::opd:
-			return tree.__tptr.get();
+			return tree.__tptr.get()->copy();
 		case token::oph:
 			for (node leaf : tree.__leaves)
 				values.push_back(value(leaf));
@@ -227,23 +227,23 @@ namespace zhetapi {
 			tptr = __barn.compute((dynamic_cast <operation_holder *>
 						(tree.__tptr.get()))->rep, values);
 
-			return tptr;
+			return tptr->copy();
 		case token::var:
 			tptr = (dynamic_cast <Variable <T, U> *> (tree.__tptr.get()))->get().get();
 
-			return tptr;
+			return tptr->copy();
 		case token::ftn:
 			for (node leaf : tree.__leaves)
 				values.push_back(value(leaf));
 
 			tptr = (*(dynamic_cast <Function <T, U> *> (tree.__tptr.get())))(values);
 
-			return tptr;
+			return tptr->copy();
 		case token::ndr:
 			unrefd = (dynamic_cast <node_reference *>
 					(tree.__tptr.get()))->get();
 
-			return unrefd->__tptr.get();
+			return unrefd->__tptr.get()->copy();
 		}
 
 		return nullptr;
