@@ -14,18 +14,18 @@ namespace zhetapi {
 	/**
 	 * @brief Represent a mathematical
 	 * operation, which can base computations
-	 * not only of operands, but also Variables,
-	 * Functions, and other tokens. Type checking
+	 * not only of Operands, but also Variables,
+	 * Functions, and other Tokens. Type checking
 	 * for appropriate template argument is left
 	 * of the user, as mentioned later.
 	 */
-	class operation : public token {
+	class operation : public Token {
 	public:
 		// Aliases
-		using mapper = std::function <token *(const std::vector <token *> &)>;
+		using mapper = std::function <Token *(const std::vector <Token *> &)>;
 	private:
 		/* Member instance of the
-		 * operation token class. */
+		 * operation Token class. */
 
 		/**
 		 * @brief The expected
@@ -44,7 +44,7 @@ namespace zhetapi {
 
 		/**
 		 * @brief The number of
-		 * operands expected by
+		 * Operands expected by
 		 * the operation. Used to
 		 * check input of computation.
 		 */
@@ -52,7 +52,7 @@ namespace zhetapi {
 
 		/**
 		 * @brief The actual operation;
-		 * takes a list of tokens and ouputs
+		 * takes a list of Tokens and ouputs
 		 * a single value. Type checking
 		 * the arguments for appropriate
 		 * template argument is left
@@ -66,7 +66,7 @@ namespace zhetapi {
 		operation(const std::string &, const std::string &,
 				std::size_t,  mapper);
 
-		token *operator()(const std::vector <token *> &) const;
+		Token *operator()(const std::vector <Token *> &) const;
 
 		std::string fmt() const;
 		std::string str() const override;
@@ -75,12 +75,12 @@ namespace zhetapi {
 
 		type caller() const override;
 
-		token *copy() const override;
+		Token *copy() const override;
 
-		bool operator==(token *) const override;
+		bool operator==(Token *) const override;
 
 		class count_mismatch {};
-		class token_mismatch {};
+		class Token_mismatch {};
 	};
 
 	operation::operation() : __input(""), __output(""), ops(0) {}
@@ -97,7 +97,7 @@ namespace zhetapi {
 			opers, mapper fopn) : __input(in), __output(out), ops(opers),
 			__opn(fopn) {}
 
-	token *operation::operator()(const std::vector <token *> &ins) const
+	Token *operation::operator()(const std::vector <Token *> &ins) const
 	{
 		if (ins.size() != ops)
 			throw count_mismatch();
@@ -120,17 +120,17 @@ namespace zhetapi {
 		return ops;
 	}
 
-	token::type operation::caller() const
+	Token::type operation::caller() const
 	{
 		return opn;
 	}
 
-	token *operation::copy() const
+	Token *operation::copy() const
 	{
 		return new operation(*this);
 	}
 
-	bool operation::operator==(token *t) const
+	bool operation::operator==(Token *t) const
 	{
 		operation *optr = dynamic_cast <operation *> (t);
 		if (optr == nullptr)

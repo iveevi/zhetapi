@@ -36,29 +36,29 @@
 		typedef Matrix <CQ> MCQ;			\
 		typedef Matrix <CR> MCR;			\
 								\
-		typedef zhetapi::operand <Z> opd_z;      	\
-		typedef zhetapi::operand <Q> opd_q;      	\
-		typedef zhetapi::operand <R> opd_r;      	\
+		typedef zhetapi::Operand <Z> opd_z;      	\
+		typedef zhetapi::Operand <Q> opd_q;      	\
+		typedef zhetapi::Operand <R> opd_r;      	\
 								\
-		typedef zhetapi::operand <CZ> opd_cz;		\
-		typedef zhetapi::operand <CQ> opd_cq;		\
-		typedef zhetapi::operand <CR> opd_cr;		\
+		typedef zhetapi::Operand <CZ> opd_cz;		\
+		typedef zhetapi::Operand <CQ> opd_cq;		\
+		typedef zhetapi::Operand <CR> opd_cr;		\
 								\
-		typedef zhetapi::operand <VZ> opd_v_z;		\
-		typedef zhetapi::operand <VQ> opd_v_q;		\
-		typedef zhetapi::operand <VR> opd_v_r;		\
+		typedef zhetapi::Operand <VZ> opd_v_z;		\
+		typedef zhetapi::Operand <VQ> opd_v_q;		\
+		typedef zhetapi::Operand <VR> opd_v_r;		\
 								\
-		typedef zhetapi::operand <VCZ> opd_v_cz;	\
-		typedef zhetapi::operand <VCQ> opd_v_cq;	\
-		typedef zhetapi::operand <VCR> opd_v_cr;	\
+		typedef zhetapi::Operand <VCZ> opd_v_cz;	\
+		typedef zhetapi::Operand <VCQ> opd_v_cq;	\
+		typedef zhetapi::Operand <VCR> opd_v_cr;	\
 								\
-		typedef zhetapi::operand <MZ> opd_m_z;		\
-		typedef zhetapi::operand <MQ> opd_m_q;		\
-		typedef zhetapi::operand <MR> opd_m_r;		\
+		typedef zhetapi::Operand <MZ> opd_m_z;		\
+		typedef zhetapi::Operand <MQ> opd_m_q;		\
+		typedef zhetapi::Operand <MR> opd_m_r;		\
 								\
-		typedef zhetapi::operand <MCZ> opd_m_cz;	\
-		typedef zhetapi::operand <MCQ> opd_m_cq;	\
-		typedef zhetapi::operand <MCR> opd_m_cr;
+		typedef zhetapi::Operand <MCZ> opd_m_cz;	\
+		typedef zhetapi::Operand <MCQ> opd_m_cq;	\
+		typedef zhetapi::Operand <MCR> opd_m_cr;
 
 #define	ONE	1
 
@@ -82,17 +82,17 @@ namespace zhetapi {
 		// Token factories
 		/////////////////////
 
-		static token *one();
+		static Token *one();
 
 		template <class A>
-		static token *convert(A);
+		static Token *convert(A);
 		
 		/////////////////////
 		// Token identifiers
 		/////////////////////
 		
-		static bool is_zero(token *);
-		static bool is_one(token *);
+		static bool is_zero(Token *);
+		static bool is_one(Token *);
 
 		static std::string symbol(const std::type_index &);
 		static std::string proper_symbol(const std::type_index &);
@@ -100,14 +100,14 @@ namespace zhetapi {
 
 	// Factories
 	template <class T, class U>
-	token *types <T, U> ::one()
+	Token *types <T, U> ::one()
 	{
 		return new opd_z(U (ONE));
 	}
 
 	template <class T, class U>
 	template <class A>
-	token *types <T, U> ::convert(A x)
+	Token *types <T, U> ::convert(A x)
 	{
 		if (typeid(A) == typeid(Z))
 			return new opd_z((Z) x);
@@ -153,7 +153,7 @@ namespace zhetapi {
 
 	// Identifiers
 	template <class T, class U>
-	bool types <T, U> ::is_zero(token *tptr)
+	bool types <T, U> ::is_zero(Token *tptr)
 	{
 		opd_z *_oz = dynamic_cast <opd_z *> (tptr);
 		if (_oz != nullptr)
@@ -171,7 +171,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool types <T, U> ::is_one(token *tptr)
+	bool types <T, U> ::is_one(Token *tptr)
 	{
 		opd_z *_oz = dynamic_cast <opd_z *> (tptr);
 		if (_oz != nullptr)
@@ -192,45 +192,45 @@ namespace zhetapi {
 	std::string types <T, U> ::symbol(const std::type_index &type)
 	{
 		// Complex numbers
-		if (type == typeid(operand <Z>))
+		if (type == typeid(Operand <Z>))
 			return "Z";
-		if (type == typeid(operand <Q>))
+		if (type == typeid(Operand <Q>))
 			return "Q";
-		if (type == typeid(operand <R>))
+		if (type == typeid(Operand <R>))
 			return "R";
-		if (type == typeid(operand <CZ>))
+		if (type == typeid(Operand <CZ>))
 			return "CZ";
-		if (type == typeid(operand <CQ>))
+		if (type == typeid(Operand <CQ>))
 			return "CQ";
-		if (type == typeid(operand <CR>))
+		if (type == typeid(Operand <CR>))
 			return "CR";
 		
 		// Vectors
-		if (type == typeid(operand <VZ>))
+		if (type == typeid(Operand <VZ>))
 			return "VZ";
-		if (type == typeid(operand <VQ>))
+		if (type == typeid(Operand <VQ>))
 			return "VQ";
-		if (type == typeid(operand <VR>))
+		if (type == typeid(Operand <VR>))
 			return "VR";
-		if (type == typeid(operand <VCZ>))
+		if (type == typeid(Operand <VCZ>))
 			return "VCZ";
-		if (type == typeid(operand <VCQ>))
+		if (type == typeid(Operand <VCQ>))
 			return "VCQ";
-		if (type == typeid(operand <VCR>))
+		if (type == typeid(Operand <VCR>))
 			return "VCR";
 		
 		// Matrices
-		if (type == typeid(operand <MZ>))
+		if (type == typeid(Operand <MZ>))
 			return "MZ";
-		if (type == typeid(operand <MQ>))
+		if (type == typeid(Operand <MQ>))
 			return "MQ";
-		if (type == typeid(operand <MR>))
+		if (type == typeid(Operand <MR>))
 			return "MR";
-		if (type == typeid(operand <MCZ>))
+		if (type == typeid(Operand <MCZ>))
 			return "MCZ";
-		if (type == typeid(operand <MCQ>))
+		if (type == typeid(Operand <MCQ>))
 			return "MCQ";
-		if (type == typeid(operand <MCR>))
+		if (type == typeid(Operand <MCR>))
 			return "MCR";
 
 		return "?";
@@ -242,49 +242,49 @@ namespace zhetapi {
 		// Complex numbers
 
 		// Stick to <double, int> for testing
-		if (type == typeid(operand <Z>))
+		if (type == typeid(Operand <Z>))
 			return "int";
-		if (type == typeid(operand <Q>))
+		if (type == typeid(Operand <Q>))
 			return "Rational <int>";
-		if (type == typeid(operand <R>))
+		if (type == typeid(Operand <R>))
 			return "double";
-		if (type == typeid(operand <CZ>))
+		if (type == typeid(Operand <CZ>))
 			return "Complex <int>";
-		if (type == typeid(operand <CQ>))
+		if (type == typeid(Operand <CQ>))
 			return "Complex <Rational <int>>";
-		if (type == typeid(operand <CR>))
+		if (type == typeid(Operand <CR>))
 			return "Complex <double>";
 		
 		// Vectors
-		if (type == typeid(operand <VZ>))
+		if (type == typeid(Operand <VZ>))
 			return "Vector <int>";
-		if (type == typeid(operand <VQ>))
+		if (type == typeid(Operand <VQ>))
 			return "Vector <Rational <int>>";
-		if (type == typeid(operand <VR>))
+		if (type == typeid(Operand <VR>))
 			return "Vector <double>";
-		if (type == typeid(operand <VCZ>))
+		if (type == typeid(Operand <VCZ>))
 			return "Vector <Complex <int>>";
-		if (type == typeid(operand <VCQ>))
+		if (type == typeid(Operand <VCQ>))
 			return "Vector <Complex <Rational <int>>>";
-		if (type == typeid(operand <VCR>))
+		if (type == typeid(Operand <VCR>))
 			return "Vector <Complex <Rational <int>>>";
 		
 		// Matrices
-		if (type == typeid(operand <MZ>))
+		if (type == typeid(Operand <MZ>))
 			return "Matrix <int>";
-		if (type == typeid(operand <MQ>))
+		if (type == typeid(Operand <MQ>))
 			return "Matrix <Rational <int>>";
-		if (type == typeid(operand <MR>))
+		if (type == typeid(Operand <MR>))
 			return "Matrix <double>";
-		if (type == typeid(operand <MCZ>))
+		if (type == typeid(Operand <MCZ>))
 			return "Matrix <Complex <int>>";
-		if (type == typeid(operand <MCQ>))
+		if (type == typeid(Operand <MCQ>))
 			return "Matrix <Complex <Rational <int>>>";
-		if (type == typeid(operand <MCR>))
+		if (type == typeid(Operand <MCR>))
 			return "Matrix <Complex <double>>";
 		
 		std::cout << "TYPE: " << type.name() << std::endl;
-		std::cout << "int: " << typeid(operand <Z>).name() << std::endl;
+		std::cout << "int: " << typeid(Operand <Z>).name() << std::endl;
 
 		return "?";
 	}

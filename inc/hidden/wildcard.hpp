@@ -6,27 +6,27 @@
 
 namespace zhetapi {
 
-	class wildcard : public token {
+	class wildcard : public Token {
 		node *		__ref;
 		std::string	__symbol;
 	public:
 		wildcard();
 
 		type caller() const override;
-		token *copy() const override;
+		Token *copy() const override;
 		std::string str() const override;
 
-		virtual bool operator==(token *) const override;
+		virtual bool operator==(Token *) const override;
 	};
 
 	wildcard::wildcard() {}
 
-	token::type wildcard::caller() const
+	Token::type wildcard::caller() const
 	{
-		return token::wld;
+		return Token::wld;
 	}
 
-	token *wildcard::copy() const
+	Token *wildcard::copy() const
 	{
 		return new wildcard();
 	}
@@ -36,7 +36,7 @@ namespace zhetapi {
 		return "wildcard";
 	}
 
-	bool wildcard::operator==(token *tptr) const
+	bool wildcard::operator==(Token *tptr) const
 	{
 		wildcard *wld = dynamic_cast <wildcard *> (tptr);
 

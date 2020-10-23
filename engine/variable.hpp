@@ -14,12 +14,12 @@
 namespace zhetapi {
 
 	template <class T, class U>
-	class Variable : public token {
+	class Variable : public Token {
 		std::string			__symbol;
-		std::shared_ptr <token>	__tptr;
+		std::shared_ptr <Token>	__tptr;
 	public:
 		// Constructor
-		Variable(token * = nullptr, const std::string & = "");
+		Variable(Token * = nullptr, const std::string & = "");
 
 		template <class A>
 		Variable(const std::string &, const A &);
@@ -30,16 +30,16 @@ namespace zhetapi {
 		Variable &operator=(const Variable &);
 
 		// Reference
-		const std::shared_ptr <token> &get() const;
-		std::shared_ptr <token> &get();
+		const std::shared_ptr <Token> &get() const;
+		std::shared_ptr <Token> &get();
 
 		const std::string &symbol() const;
 		
 		// Virtual functions
-		token::type caller() const override;
+		Token::type caller() const override;
 		std::string str() const override;
-		token *copy() const;
-		bool operator==(token *) const;
+		Token *copy() const;
+		bool operator==(Token *) const;
 
 		// Comparing functions
 		template <class A, class B>
@@ -58,7 +58,7 @@ namespace zhetapi {
 
 	// Constructors
 	template <class T, class U>
-	Variable <T, U> ::Variable(token *tptr, const std::string &str) : __symbol(str)
+	Variable <T, U> ::Variable(Token *tptr, const std::string &str) : __symbol(str)
 	{
 		__tptr.reset(tptr);
 	}
@@ -94,13 +94,13 @@ namespace zhetapi {
 
 	// Reference
 	template <class T, class U>
-	const std::shared_ptr <token> &Variable <T, U> ::get() const
+	const std::shared_ptr <Token> &Variable <T, U> ::get() const
 	{
 		return __tptr;
 	}
 
 	template <class T, class U>
-	std::shared_ptr <token> &Variable <T, U> ::get()
+	std::shared_ptr <Token> &Variable <T, U> ::get()
 	{
 		return __tptr;
 	}
@@ -113,7 +113,7 @@ namespace zhetapi {
 
 	// Virtual functions
 	template <class T, class U>
-	token::type Variable <T, U> ::caller() const
+	Token::type Variable <T, U> ::caller() const
 	{
 		return var;
 	}
@@ -128,13 +128,13 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	token *Variable <T, U> ::copy() const
+	Token *Variable <T, U> ::copy() const
 	{
 		return new Variable(__tptr->copy(), __symbol);
 	}
 
 	template <class T, class U>
-	bool Variable <T, U> ::operator==(token *tptr) const
+	bool Variable <T, U> ::operator==(Token *tptr) const
 	{
 		Variable *var = dynamic_cast <Variable *> (tptr);
 

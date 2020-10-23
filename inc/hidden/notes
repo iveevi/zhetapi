@@ -14,14 +14,14 @@ Add Gaussian elimination.
 Add more general matrix/vector concatenation operations.
 
 Add special operations that take a variadic number of operations. Although
-operations can already take vectors of operands, add a type identifier (in the
+operations can already take vectors of Operands, add a type identifier (in the
 overloading sense) that is able to recognize variadic operations.
 
 ==============
 Modifications:
 ==============
 
-Remove the inheritance connection between the operations and the general token
+Remove the inheritance connection between the operations and the general Token
 class. (Replace instead with operation_holder)
 
 Later remove the immediate transition from i to the imaginary number; if indeed
@@ -31,7 +31,7 @@ number.
 Make operations and classes more efficient, i.e. computation of complex numbers
 or polynomials, etc. Test the speedup through benchmark tests.
 
-Refactor tokens to "Variant" and operand to "Operand", and move both to the engine
+Refactor Tokens to "Variant" and Operand to "Operand", and move both to the engine
 header, as they will be usable classes.
 
 =====

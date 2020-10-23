@@ -30,9 +30,9 @@ namespace zhetapi {
 
 		node_manager <T, U> out(str, barn);
 
-		token *tptr = out.value();
+		Token *tptr = out.value();
 		
-		operand <O> *optr = dynamic_cast <operand <O> *> (tptr);
+		Operand <O> *optr = dynamic_cast <Operand <O> *> (tptr);
 
 		if (optr == nullptr)
 			throw type_mismatch();
@@ -49,7 +49,7 @@ namespace zhetapi {
 
 		node_manager <T, U> out(str, barn);
 
-		token *tptr = out.value();
+		Token *tptr = out.value();
 
 		return tptr->str();
 	}

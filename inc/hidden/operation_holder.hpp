@@ -63,7 +63,7 @@ namespace zhetapi {
 		"lg"
 	};
 
-	struct operation_holder : public token {
+	struct operation_holder : public Token {
 		std::string rep;
 
 		codes code;
@@ -71,10 +71,10 @@ namespace zhetapi {
 		operation_holder(const std::string &);
 
 		type caller() const override;
-		token *copy() const override;
+		Token *copy() const override;
 		std::string str() const override;
 
-		virtual bool operator==(token *) const override;
+		virtual bool operator==(Token *) const override;
 	};
 
 	operation_holder::operation_holder(const std::string &str) : rep(str)
@@ -128,12 +128,12 @@ namespace zhetapi {
 
 	}
 
-	token::type operation_holder::caller() const
+	Token::type operation_holder::caller() const
 	{
-		return token::oph;
+		return Token::oph;
 	}
 
-	token *operation_holder::copy() const
+	Token *operation_holder::copy() const
 	{
 		// instead of having to re-evaluate
 		// codes, pass the code as well
@@ -145,7 +145,7 @@ namespace zhetapi {
 		return rep + " [" + strcodes[code] + "]";
 	}
 
-	bool operation_holder::operator==(token *tptr) const
+	bool operation_holder::operator==(Token *tptr) const
 	{
 		operation_holder *oph = dynamic_cast <operation_holder *> (tptr);
 

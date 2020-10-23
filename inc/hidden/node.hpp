@@ -15,18 +15,18 @@ namespace zhetapi {
 
 	struct node {
 		// Members
-		std::shared_ptr <token>	__tptr;
+		std::shared_ptr <Token>	__tptr;
 		lbl			__label;
 		cls			__class;
 		std::vector <node>	__leaves;
 
 		// Constructors
 		node();
-		node(token *, const std::vector <node> &);
-		node(token *, lbl, const std::vector <node> &);
+		node(Token *, const std::vector <node> &);
+		node(Token *, lbl, const std::vector <node> &);
 		
 		// Binary
-		node(token *, const node &, const node &);
+		node(Token *, const node &, const node &);
 		
 		// Member functions
 		void transfer(const node &);
@@ -45,19 +45,19 @@ namespace zhetapi {
 
 	node::node() : __tptr(nullptr), __label(l_none) {}
 	
-	node::node(token *tptr, const std::vector <node> &leaves) :
+	node::node(Token *tptr, const std::vector <node> &leaves) :
 			__leaves(leaves), __label(l_none)
 	{
 		__tptr.reset(tptr);
 	}
 
-	node::node(token *tptr, lbl label, const std::vector <node> &leaves) :
+	node::node(Token *tptr, lbl label, const std::vector <node> &leaves) :
 		__leaves(leaves), __label(label)
 	{
 		__tptr.reset(tptr);
 	}
 
-	node::node(token *tptr, const node &a, const node &b) : __leaves({a,
+	node::node(Token *tptr, const node &a, const node &b) : __leaves({a,
 			b}), __label(l_none)
 	{
 		__tptr.reset(tptr);
@@ -128,7 +128,7 @@ namespace zhetapi {
 
 	bool node::loose_match(const node &a, const node &b)
 	{
-		// Check the token
+		// Check the Token
 		if (*(a.__tptr.get()) != b.__tptr.get())
 			return false;
 		

@@ -35,8 +35,8 @@ namespace zhetapi {
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {					\
-					typeid(operand <A>),					\
-					typeid(operand <B>)					\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
@@ -45,11 +45,11 @@ namespace zhetapi {
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <A> *a = dynamic_cast <operand <A> *> (ins[0]);	\
-					operand <B> *b = dynamic_cast <operand <B> *> (ins[1]);	\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
-					return new operand <O> (a->get() str b->get());		\
+					return new Operand <O> (a->get() str b->get());		\
 				}								\
 			}									\
 	});
@@ -63,8 +63,8 @@ namespace zhetapi {
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {					\
-					typeid(operand <A>),					\
-					typeid(operand <B>)					\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
@@ -73,11 +73,11 @@ namespace zhetapi {
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <A> *a = dynamic_cast <operand <A> *> (ins[0]);	\
-					operand <B> *b = dynamic_cast <operand <B> *> (ins[1]);	\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
-					return new operand <O> (ftr);				\
+					return new Operand <O> (ftr);				\
 				}								\
 			}									\
 	});
@@ -87,8 +87,8 @@ namespace zhetapi {
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {					\
-					typeid(operand <A>),					\
-					typeid(operand <B>)					\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
@@ -97,11 +97,11 @@ namespace zhetapi {
 				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <A> *a = dynamic_cast <operand <A> *> (ins[0]);	\
-					operand <B> *b = dynamic_cast <operand <B> *> (ins[1]);	\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
-					return new operand <O> (ftr);				\
+					return new Operand <O> (ftr);				\
 				}								\
 			}									\
 	});											\
@@ -110,8 +110,8 @@ namespace zhetapi {
 			{									\
 				std::string(#str),						\
 				std::vector <std::type_index> {					\
-					typeid(operand <B>),					\
-					typeid(operand <A>)					\
+					typeid(Operand <B>),					\
+					typeid(Operand <A>)					\
 				}								\
 			},									\
 												\
@@ -120,11 +120,11 @@ namespace zhetapi {
 				"$1 (" + std::string(#B) + ") " + std::string(#str)		\
 					+ " $2 (" + std::string(#A) + ")",			\
 				2,								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <A> *a = dynamic_cast <operand <A> *> (ins[1]);	\
-					operand <B> *b = dynamic_cast <operand <B> *> (ins[0]);	\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[1]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[0]);	\
 												\
-					return new operand <O> (ftr);				\
+					return new Operand <O> (ftr);				\
 				}								\
 			}									\
 	});
@@ -158,18 +158,18 @@ namespace zhetapi {
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
-				std::vector <std::type_index> {typeid(operand <I>)}		\
+				std::vector <std::type_index> {typeid(Operand <I>)}		\
 			},									\
 												\
 			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#I) + ")",					\
 				1, 								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <I> *in = dynamic_cast				\
-						<operand <I> *> (ins[0]);			\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <I> *in = dynamic_cast				\
+						<Operand <I> *> (ins[0]);			\
 												\
-					return new operand <O> (str(in->get()));		\
+					return new Operand <O> (str(in->get()));		\
 				}								\
 			}									\
 	});
@@ -178,18 +178,18 @@ namespace zhetapi {
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
-				std::vector <std::type_index> {typeid(operand <I>)}		\
+				std::vector <std::type_index> {typeid(Operand <I>)}		\
 			},									\
 												\
 			new operation {								\
 				std::string(#str),						\
 				"$1 (" + std::string(#I) + ")",					\
 				1, 								\
-				[&](const std::vector <token *> &ins) {				\
-					operand <I> *in = dynamic_cast				\
-						<operand <I> *> (ins[0]);			\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <I> *in = dynamic_cast				\
+						<Operand <I> *> (ins[0]);			\
 												\
-					return new operand <O> (ftr);				\
+					return new Operand <O> (ftr);				\
 				}								\
 			}									\
 	});
@@ -219,9 +219,9 @@ namespace zhetapi {
 		vtable <T, U> vstack;
 		ftable <T, U> fstack;
 
-		std::vector <std::pair <ID, token *>> ops;
+		std::vector <std::pair <ID, Token *>> ops;
 
-		mutable std::unordered_map <std::string, std::vector <std::pair <signature, token *>>> table;
+		mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;
 	public:
 		Barn();
 		Barn(const Barn &);
@@ -238,14 +238,14 @@ namespace zhetapi {
 		template <class A>
 		void put(const std::string &, A);
 
-		void put(token *, const std::string &);
+		void put(Token *, const std::string &);
 
 		Variable <T, U> &retrieve_variable(const std::string &);
 		Function <T, U> &retrieve_function(const std::string &);
 
-		token *get(const std::string &);
+		Token *get(const std::string &);
 
-		token *compute(const std::string &, const std::vector <token *> &) const;
+		Token *compute(const std::string &, const std::vector <Token *> &) const;
 		
 		std::string overloads(const std::string &) const;
 
@@ -486,7 +486,7 @@ namespace zhetapi {
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 		}
 	}
 
@@ -502,7 +502,7 @@ namespace zhetapi {
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 		}
 	}
 	
@@ -522,7 +522,7 @@ namespace zhetapi {
 				if (table.count(pr.first.first))
 					table[pr.first.first].push_back({pr.first.second, pr.second});
 				else
-					table.insert(std::pair <std::string, std::vector <std::pair <signature, token *>>> {pr.first.first, std::vector <std::pair <signature, token *>> {{pr.first.second, pr.second}}});
+					table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 			}
 		}
 
@@ -539,7 +539,7 @@ namespace zhetapi {
 	template <class T, class U>
 	bool Barn <T, U> ::present(const std::string &str) const
 	{
-		auto itr = std::find_if(ops.begin(), ops.end(), [&](const std::pair <ID, token *> &pr) {
+		auto itr = std::find_if(ops.begin(), ops.end(), [&](const std::pair <ID, Token *> &pr) {
 			return pr.first.first == str;
 		});
 
@@ -563,7 +563,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void Barn <T, U> ::put(token *tptr, const std::string &str)
+	void Barn <T, U> ::put(Token *tptr, const std::string &str)
 	{
 		// Leave the passed pointer alone, and copy it instead
 		put(Variable <T, U> {tptr->copy(), str});
@@ -576,7 +576,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	token *Barn <T, U> ::get(const std::string &str)
+	Token *Barn <T, U> ::get(const std::string &str)
 	{
 		if (vstack.contains(str))
 			return (vstack.get(str)).copy();
@@ -588,16 +588,16 @@ namespace zhetapi {
 	}
 	
 	template <class T, class U>
-	token *Barn <T, U> ::compute(const std::string &str, const std::vector <token *> &vals) const
+	Token *Barn <T, U> ::compute(const std::string &str, const std::vector <Token *> &vals) const
 	{
 		std::vector <std::type_index> sig;
 
-		for (token *tptr : vals)
+		for (Token *tptr : vals)
 			sig.push_back(typeid(*tptr));
 
-		token *tptr = nullptr;
+		Token *tptr = nullptr;
 
-		std::vector <std::pair <signature, token *>> *siglist = &table[str];
+		std::vector <std::pair <signature, Token *>> *siglist = &table[str];
 
 		size_t sz = sig.size();
 		for (auto itr = siglist->begin(); itr != siglist->end(); itr++) {

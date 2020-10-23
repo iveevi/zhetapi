@@ -171,7 +171,7 @@ namespace zhetapi {
 		return false;
 	}
 
-	bool is_constant_operand(lbl type)
+	bool is_constant_Operand(lbl type)
 	{
 		if ((type >= l_constant_integer)
 				&& (type <= l_constant_matrix_complex_real))
@@ -186,7 +186,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	lbl constant_label(token *tptr)
+	lbl constant_label(Token *tptr)
 	{
 		// Complex numbers
 		if (dynamic_cast <typename types <T, U> ::opd_z *> (tptr))
@@ -234,7 +234,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	token *true_token(token *tptr)
+	Token *true_Token(Token *tptr)
 	{
 		typename types <T, U> ::opd_z *oz = dynamic_cast <typename types <T, U> ::opd_z *> (tptr);
 		if (oz != nullptr)

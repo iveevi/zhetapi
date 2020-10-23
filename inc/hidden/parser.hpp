@@ -229,110 +229,110 @@ namespace zhetapi {
 
 			// Reals
 			__o_z = __z [
-				_val = phoenix::new_ <zhetapi::operand <Z>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <Z>> (_1)
 			];
 			
 			__o_q = __q [
-				_val = phoenix::new_ <zhetapi::operand <Q>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <Q>> (_1)
 			];
 
 			__o_r = __r [
-				_val = phoenix::new_ <zhetapi::operand <R>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <R>> (_1)
 			];
 			
 			// Complex
 			__o_cz = __cz [
-				_val = phoenix::new_ <zhetapi::operand <CZ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <CZ>> (_1)
 			];
 			
 			__o_cq = __cq [
-				_val = phoenix::new_ <zhetapi::operand <CQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <CQ>> (_1)
 			];
 
 			__o_cr = __cr [
-				_val = phoenix::new_ <zhetapi::operand <CR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <CR>> (_1)
 			];
 
 			// Vector
 			__o_vz = __vz [
-				_val = phoenix::new_ <zhetapi::operand <VZ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VZ>> (_1)
 			];
 			
 			__o_vq = __vq [
-				_val = phoenix::new_ <zhetapi::operand <VQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VQ>> (_1)
 			];
 			
 			__o_vr = __vr [
-				_val = phoenix::new_ <zhetapi::operand <VR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VR>> (_1)
 			];
 			
 			__o_vgq = __vgq [
-				_val = phoenix::new_ <zhetapi::operand <VQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VQ>> (_1)
 			];
 			
 			__o_vgr = __vgr [
-				_val = phoenix::new_ <zhetapi::operand <VR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VR>> (_1)
 			];
 			
 			__o_vcz = __vcz [
-				_val = phoenix::new_ <zhetapi::operand <VCZ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VCZ>> (_1)
 			];
 			
 			__o_vcq = __vcq [
-				_val = phoenix::new_ <zhetapi::operand <VCQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VCQ>> (_1)
 			];
 			
 			__o_vcr = __vcr [
-				_val = phoenix::new_ <zhetapi::operand <VCR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VCR>> (_1)
 			];
 			
 			__o_vcgq = __vcgq [
-				_val = phoenix::new_ <zhetapi::operand <VCQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VCQ>> (_1)
 			];
 			
 			__o_vcgr = __vcgr [
-				_val = phoenix::new_ <zhetapi::operand <VCR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <VCR>> (_1)
 			];
 
 			// Matrix
 			__o_mz = __mz [
-				_val = phoenix::new_ <zhetapi::operand <MZ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MZ>> (_1)
 			];
 			
 			__o_mq = __mq [
-				_val = phoenix::new_ <zhetapi::operand <MQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MQ>> (_1)
 			];
 			
 			__o_mr = __mr [
-				_val = phoenix::new_ <zhetapi::operand <MR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MR>> (_1)
 			];
 			
 			__o_mgq = __mgq [
-				_val = phoenix::new_ <zhetapi::operand <MQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MQ>> (_1)
 			];
 			
 			__o_mgr = __mgr [
-				_val = phoenix::new_ <zhetapi::operand <MR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MR>> (_1)
 			];
 			
 			__o_mcz = __mcz [
-				_val = phoenix::new_ <zhetapi::operand <MCZ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MCZ>> (_1)
 			];
 			
 			__o_mcq = __mcq [
-				_val = phoenix::new_ <zhetapi::operand <MCQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MCQ>> (_1)
 			];
 			
 			__o_mcr = __mcr [
-				_val = phoenix::new_ <zhetapi::operand <MCR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MCR>> (_1)
 			];
 			
 			__o_mcgq = __mcgq [
-				_val = phoenix::new_ <zhetapi::operand <MCQ>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MCQ>> (_1)
 			];
 			
 			__o_mcgr = __mcgr [
-				_val = phoenix::new_ <zhetapi::operand <MCR>> (_1)
+				_val = phoenix::new_ <zhetapi::Operand <MCR>> (_1)
 			];
 
 			// Nodes
@@ -340,7 +340,7 @@ namespace zhetapi {
 			__node_pack = __start % ',';
 
 			/*
-			 * Pure numerical operands, representing the 18
+			 * Pure numerical Operands, representing the 18
 			 * primitive types of computation. The exceptions are
 			 * rational numbers, which are excluded so that the
 			 * order of operations can be applied. This exclusion
@@ -453,7 +453,7 @@ namespace zhetapi {
 
 			__node_expr.name("node expression");
 			__node_term.name("node term");
-			__node_opd.name("node operand");
+			__node_opd.name("node Operand");
 
 			__plus.name("addition");
 			__minus.name("substraction");
@@ -461,34 +461,34 @@ namespace zhetapi {
 			__divide.name("division");
 			__power.name("exponentiation");
 			
-			__o_z.name("integer operand");
-			__o_q.name("rational operand");
-			__o_r.name("real operand");
-			__o_cz.name("complex integer operand");
-			__o_cq.name("complex rational operand");
-			__o_cr.name("complex real operand");
+			__o_z.name("integer Operand");
+			__o_q.name("rational Operand");
+			__o_r.name("real Operand");
+			__o_cz.name("complex integer Operand");
+			__o_cq.name("complex rational Operand");
+			__o_cr.name("complex real Operand");
 			
-			__o_vz.name("vector integer operand");
-			__o_vq.name("vector rational operand");
-			__o_vr.name("vector real operand");
-			__o_vgq.name("vector general rational operand");
-			__o_vgr.name("vector general real operand");
-			__o_vcz.name("vector complex integer operand");
-			__o_vcq.name("vector complex rational operand");
-			__o_vcr.name("vector complex real operand");
-			__o_vcgq.name("vector complex general rational operand");
-			__o_vcgr.name("vector complex general real operand");
+			__o_vz.name("vector integer Operand");
+			__o_vq.name("vector rational Operand");
+			__o_vr.name("vector real Operand");
+			__o_vgq.name("vector general rational Operand");
+			__o_vgr.name("vector general real Operand");
+			__o_vcz.name("vector complex integer Operand");
+			__o_vcq.name("vector complex rational Operand");
+			__o_vcr.name("vector complex real Operand");
+			__o_vcgq.name("vector complex general rational Operand");
+			__o_vcgr.name("vector complex general real Operand");
 			
-			__o_mz.name("matrix integer operand");
-			__o_mq.name("matrix rational operand");
-			__o_mr.name("matrix real operand");
-			__o_mgq.name("matrix general rational operand");
-			__o_mgr.name("matrix general real operand");
-			__o_mcz.name("matrix complex integer operand");
-			__o_mcq.name("matrix complex rational operand");
-			__o_mcr.name("matrix complex real operand");
-			__o_mcgq.name("matrix complex general rational operand");
-			__o_mcgr.name("matrix complex general real operand");
+			__o_mz.name("matrix integer Operand");
+			__o_mq.name("matrix rational Operand");
+			__o_mr.name("matrix real Operand");
+			__o_mgq.name("matrix general rational Operand");
+			__o_mgr.name("matrix general real Operand");
+			__o_mcz.name("matrix complex integer Operand");
+			__o_mcq.name("matrix complex rational Operand");
+			__o_mcr.name("matrix complex real Operand");
+			__o_mcgq.name("matrix complex general rational Operand");
+			__o_mcgr.name("matrix complex general real Operand");
 
 			__z.name("integer");
 			__q.name("rational");
@@ -646,50 +646,50 @@ namespace zhetapi {
 		qi::rule <siter, std::string ()>					__ident;
 
 		// Operations
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t0_bin;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t1_bin;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__t2_bin;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t0_bin;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t1_bin;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t2_bin;
 
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__plus;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__minus;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__dot;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__plus;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__minus;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__dot;
 		
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__times;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__divide;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__times;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__divide;
 		
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__power;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__power;
 
 		// Operands
 
 		// Token parsers
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_z;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_q;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_r;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_cz;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_cq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_cr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_z;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_q;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_r;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_cz;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_cq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_cr;
 		
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vz;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vgq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vgr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vcz;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vcq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vcr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vcgq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_vcgr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vz;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vgq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vgr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vcz;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vcq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vcr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vcgq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_vcgr;
 		
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mz;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mgr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mgq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mcz;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mcq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mcr;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mcgq;
-		qi::rule <siter, zhetapi::token *(), qi::space_type>			__o_mcgr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mz;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mgr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mgq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcz;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcr;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcgq;
+		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcgr;
 		
 		// Type parsers
 		qi::rule <siter, Z (), qi::space_type>					__z;

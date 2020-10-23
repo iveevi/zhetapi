@@ -14,9 +14,9 @@
 using namespace std;
 
 // Typedefs
-typedef zhetapi::operand <int> z;
-typedef zhetapi::operand <Rational <int>> q;
-typedef zhetapi::operand <double> r;
+typedef zhetapi::Operand <int> z;
+typedef zhetapi::Operand <Rational <int>> q;
+typedef zhetapi::Operand <double> r;
 
 // Barn for variables and functions
 zhetapi::Barn <double, int> barn;
@@ -32,7 +32,7 @@ void insert(const string &name, const string &expr)
 {
 	zhetapi::node_manager <double, int> mgr(expr, barn);
 
-	zhetapi::token *tptr = mgr.value();
+	zhetapi::Token *tptr = mgr.value();
 
 	z *o_z = dynamic_cast <z *> (tptr);
 	if (o_z) {
@@ -75,7 +75,7 @@ void parse(const string &str)
 		try {
 			zhetapi::node_manager <double, int> mgr(str, barn);
 
-			zhetapi::token *tptr = mgr.value();
+			zhetapi::Token *tptr = mgr.value();
 
 			cout << "\n\t" << tptr->str() << "\n\n";
 			

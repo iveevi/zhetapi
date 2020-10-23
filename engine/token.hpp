@@ -11,14 +11,14 @@ namespace zhetapi {
 	 * use of generic pointer in
 	 * other modules
 	 */
-	class token {
+	class Token {
 	public:
 		/*
-		 * Codes used to identify the token, more on the is presented
+		 * Codes used to identify the Token, more on the is presented
 		 * below. Should not be used by the user.
 		 *
 		 * Codes:
-		 * 	opd - operand
+		 * 	opd - Operand
 		 * 	oph - operation (place holder)
 		 * 	opn - operation
 		 * 	var - variable
@@ -46,39 +46,39 @@ namespace zhetapi {
 		 */
 		operator type() const;
 
-		bool operator!=(token *) const;
+		bool operator!=(Token *) const;
 
 		/* 
 		 * Inspector function passed on to all derived classes, helps to
-		 * choose what to do with different tokens from other classes.
+		 * choose what to do with different Tokens from other classes.
 		 */
 		virtual type caller() const = 0;
 
 		/*
-		 * Returns a representation of the token, regardless of its
+		 * Returns a representation of the Token, regardless of its
 		 * type.
 		 */
 		virtual std::string str() const = 0;
 
 		/*
-		 * Returns a heap allocated copy of the token. Used in copy
+		 * Returns a heap allocated copy of the Token. Used in copy
 		 * constructors for nodes and barns.
 		 */
-		virtual token *copy() const = 0;
+		virtual Token *copy() const = 0;
 
 		/*
-		 * Compares tokens and returns their similarity. Used for node
+		 * Compares Tokens and returns their similarity. Used for node
 		 * matching.
 		 */
-		virtual bool operator==(token *) const = 0;
+		virtual bool operator==(Token *) const = 0;
 	};
 
-	token::operator type() const
+	Token::operator type() const
 	{
 		return caller();
 	}
 
-	bool token::operator!=(token *tptr) const
+	bool Token::operator!=(Token *tptr) const
 	{
 		return !(*this == tptr); 
 	}

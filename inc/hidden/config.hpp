@@ -52,7 +52,7 @@ class Function;
 template <class T>
 class config {
 public:
-	using opd = operand <T>;
+	using opd = Operand <T>;
 	using opn = operation;
 	using var = Variable <T>;
 	using ftr = Function <T, int>;
@@ -61,7 +61,7 @@ public:
 		std::string in;
 		std::string out;
 		std::size_t ops;
-		std::function <T (const std::vector <token *> &)> opn;
+		std::function <T (const std::vector <Token *> &)> opn;
 
 		opcode ocode;
 	};
@@ -81,7 +81,7 @@ public:
 	opn *alloc_opn(opcode) const;
 	opn *alloc_opn(const std::string &) const;
 	
-	static tcode code(token *);
+	static tcode code(Token *);
 
 	static T read(const std::string &);
 
@@ -93,76 +93,76 @@ using namespace std;
 
 template <class T>
 config <T> ::config() : config({
-		{"+", "$1 + $2", 2, [](const std::vector <token *> &ins) {
+		{"+", "$1 + $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return (dynamic_cast <opd *> (ins[0]))->get()
 				+ (dynamic_cast <opd *> (ins[1]))->get();
 		}, op_add},
-		{"-", "$1 - $2", 2, [](const std::vector <token *> &ins) {
+		{"-", "$1 - $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return (dynamic_cast <opd *> (ins[0]))->get()
 				- (dynamic_cast <opd *> (ins[1]))->get();
 		}, op_sub},
-		{"*", "$1 * $2", 2, [](const std::vector <token *> &ins) {
+		{"*", "$1 * $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return (dynamic_cast <opd *> (ins[0]))->get()
 				* (dynamic_cast <opd *> (ins[1]))->get();
 		}, op_mul},
-		{"/", "$1 / $2", 2, [](const std::vector <token *> &ins) {
+		{"/", "$1 / $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return (dynamic_cast <opd *> (ins[0]))->get()
 				/ (dynamic_cast <opd *> (ins[1]))->get();
 		}, op_div},
-		{"^", "$1 ^ $2", 2, [](const std::vector <token *> &ins) {
+		{"^", "$1 ^ $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return pow((dynamic_cast <opd *> (ins[0]))->get(),
 				(dynamic_cast <opd *> (ins[1]))->get());
 		}, op_exp},
-		{"sin", "sin $1", 1, [](const std::vector <token *> &ins) {
+		{"sin", "sin $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return sin((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_sin},
-		{"cos", "cos $1", 1, [](const std::vector <token *> &ins) {
+		{"cos", "cos $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return cos((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_cos},
-		{"tan", "tan $1", 1, [](const std::vector <token *> &ins) {
+		{"tan", "tan $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return tan((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_tan},
-		{"csc", "csc $1", 1, [](const std::vector <token *> &ins) {
+		{"csc", "csc $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return T(1) / sin((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_csc},
-		{"sec", "sec $1", 1, [](const std::vector <token *> &ins) {
+		{"sec", "sec $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return T(1) / cos((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_sec},
-		{"cot", "cot $1", 1, [](const std::vector <token *> &ins) {
+		{"cot", "cot $1", 1, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return T(1) / tan((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_cot},
-		{"log", "log_$1 $2", 2, [](const std::vector <token *> &ins) {
+		{"log", "log_$1 $2", 2, [](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd && code(ins[1]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 			return log((dynamic_cast <opd *> (ins[1]))->get())
 				/ log((dynamic_cast <opd *> (ins[0]))->get());
 		}, op_log},
-		{"sum", "sum^{$3}_{$1 = $2} $4", 4, [&](const std::vector <token *> &ins) {
+		{"sum", "sum^{$3}_{$1 = $2} $4", 4, [&](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_var || code(ins[1]) != t_opd ||
 				code(ins[2]) != t_opd || code(ins[3]) != t_ftr)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 
 			opd *start = dynamic_cast <opd *> (ins[1]);
 			opd *end = dynamic_cast <opd *> (ins[2]);
@@ -176,9 +176,9 @@ config <T> ::config() : config({
 			
 			return value;
 		}, op_sum},
-		{"!", "$1!", 1, [&](const std::vector <token *> &ins) {
+		{"!", "$1!", 1, [&](const std::vector <Token *> &ins) {
 			if (code(ins[0]) != t_opd)
-				throw typename opn::token_mismatch();
+				throw typename opn::Token_mismatch();
 
 			opd *start = dynamic_cast <opd *> (ins[0]);
 
@@ -248,7 +248,7 @@ typename config <T> ::opn *config <T> ::alloc_opn(const std::string &str) const
 }
 
 template <class T>
-tcode config <T> ::code(token *t)
+tcode config <T> ::code(Token *t)
 {
 	if (dynamic_cast <opd *> (t))
 		return t_opd;

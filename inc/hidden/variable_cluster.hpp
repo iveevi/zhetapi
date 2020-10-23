@@ -6,28 +6,28 @@
 
 namespace zhetapi {
 
-	struct variable_cluster : public token {
+	struct variable_cluster : public Token {
 
 		std::string __cluster;
 
 		variable_cluster(const std::string & = "");
 
 		type caller() const override;
-		token *copy() const override;
+		Token *copy() const override;
 		std::string str() const override;
 
-		virtual bool operator==(token *) const override;
+		virtual bool operator==(Token *) const override;
 	};
 
 	variable_cluster::variable_cluster(const std::string &str) :
 		__cluster(str) {}
 
-	token::type variable_cluster::caller() const
+	Token::type variable_cluster::caller() const
 	{
-		return token::vcl;
+		return Token::vcl;
 	}
 
-	token *variable_cluster::copy() const
+	Token *variable_cluster::copy() const
 	{
 		return new variable_cluster(__cluster);
 	}
@@ -37,7 +37,7 @@ namespace zhetapi {
 		return "\"" + __cluster + "\"";
 	}
 
-	bool variable_cluster::operator==(token *tptr) const
+	bool variable_cluster::operator==(Token *tptr) const
 	{
 		variable_cluster *vcl = dynamic_cast <variable_cluster *> (tptr);
 

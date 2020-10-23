@@ -14,25 +14,25 @@ namespace zhetapi {
 		variable_reference(node *, const std::string &);
 
 		type caller() const override;
-		token *copy() const override;
+		Token *copy() const override;
 		
-		virtual bool operator==(token *) const override;
+		virtual bool operator==(Token *) const override;
 	};
 
 	variable_reference::variable_reference(node *ref, const std::string
 			&str) : node_reference(ref, str) {}
 
-	token::type variable_reference::caller() const
+	Token::type variable_reference::caller() const
 	{
-		return token::vbr;
+		return Token::vbr;
 	}
 
-	token *variable_reference::copy() const
+	Token *variable_reference::copy() const
 	{
 		return new variable_reference(__ref, __symbol);
 	}
 
-	bool variable_reference::operator==(token *tptr) const
+	bool variable_reference::operator==(Token *tptr) const
 	{
 		variable_reference *vbr = dynamic_cast <variable_reference *> (tptr);
 

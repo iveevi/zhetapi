@@ -217,7 +217,7 @@ namespace utility {
 				new node <T> {new Variable <T> {"y", true}, {}, cptr},
 				new node <T> {new Function <T> {ftr}, lvs, cptr}
 			}, cptr},
-			new node <T> {new operand <T> (2), {}, cptr},
+			new node <T> {new Operand <T> (2), {}, cptr},
 		}, cptr};
 
 		pk->reparametrize(pars);

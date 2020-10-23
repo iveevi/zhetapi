@@ -16,7 +16,7 @@ namespace zhetapi {
 	 * Represents a mathematical function.
 	 */
 	template <class T, class U>
-	class Function : public token {
+	class Function : public Token {
 		std::string			__symbol;
 		std::vector <std::string>	__params;
 		node_manager <T, U>		__manager;
@@ -33,13 +33,13 @@ namespace zhetapi {
 		std::string &symbol();
 		const std::string symbol() const;
 
-		token *operator()(std::vector <token *>);
+		Token *operator()(std::vector <Token *>);
 
 		template <class ... A>
-		token *operator()(A ...);
+		Token *operator()(A ...);
 
 		template <class ... A>
-		token *derivative(const std::string &, A ...);
+		Token *derivative(const std::string &, A ...);
 
 		Function <T, U> differentiate(const std::string &) const;
 
@@ -54,10 +54,10 @@ namespace zhetapi {
 		void *compile_general() const;
 
 		// Virtual overloads
-		token::type caller() const override;
+		Token::type caller() const override;
 		std::string str() const override;
-		token *copy() const override;
-		bool operator==(token *) const override;
+		Token *copy() const override;
+		bool operator==(Token *) const override;
 
 		// Printing
 		void print() const;
@@ -68,10 +68,10 @@ namespace zhetapi {
 		friend std::ostream &operator<<(std::ostream &, const Function <A, B> &);
 	private:
 		template <class A>
-		void gather(std::vector <token *> &, A);
+		void gather(std::vector <Token *> &, A);
 
 		template <class A, class ... B>
-		void gather(std::vector <token *> &, A, B ...);
+		void gather(std::vector <Token *> &, A, B ...);
 
 		size_t index(const std::string &) const;
 	public:
@@ -204,7 +204,7 @@ namespace zhetapi {
 
 	// Computational utilities
 	template <class T, class U>
-	token *Function <T, U> ::operator()(std::vector <token *> toks)
+	Token *Function <T, U> ::operator()(std::vector <Token *> toks)
 	{
 		assert(toks.size() == __params.size());
 
@@ -213,59 +213,59 @@ namespace zhetapi {
 
 	template <class T, class U>
 	template <class ... A>
-	token *Function <T, U> ::operator()(A ... args)
+	Token *Function <T, U> ::operator()(A ... args)
 	{
-		std::vector <token *> tokens;
+		std::vector <Token *> Tokens;
 
-		gather(tokens, args...);
+		gather(Tokens, args...);
 
-		assert(tokens.size() == __params.size());
+		assert(Tokens.size() == __params.size());
 
-		return __manager.substitute_and_compute(tokens);
+		return __manager.substitute_and_compute(Tokens);
 	}
 
 	template <class T, class U>
 	template <class ... A>
-	token *Function <T, U> ::derivative(const std::string &str, A ... args)
+	Token *Function <T, U> ::derivative(const std::string &str, A ... args)
 	{
-		std::vector <token *> tokens;
+		std::vector <Token *> Tokens;
 
-		gather(tokens, args...);
+		gather(Tokens, args...);
 
-		assert(tokens.size() == __params.size());
+		assert(Tokens.size() == __params.size());
 
 		size_t i = index(str);
 
 		assert(i != -1);
 
 		// Right
-		token *right;
+		Token *right;
 
-		tokens[i] = barn.compute("+", {tokens[i], new operand <T> (h)});
+		Tokens[i] = barn.compute("+", {Tokens[i], new Operand <T> (h)});
 
-		for (size_t k = 0; k < tokens.size(); k++) {
+		for (size_t k = 0; k < Tokens.size(); k++) {
 			if (k != i)
-				tokens[k] = tokens[k]->copy();
+				Tokens[k] = Tokens[k]->copy();
 		}
 		
-		right = __manager.substitute_and_compute(tokens);
+		right = __manager.substitute_and_compute(Tokens);
 		
 		// Left
-		token *left;
+		Token *left;
 
-		tokens[i] = barn.compute("-", {tokens[i], new operand <T> (T(2) * h)});
+		Tokens[i] = barn.compute("-", {Tokens[i], new Operand <T> (T(2) * h)});
 
-		for (size_t k = 0; k < tokens.size(); k++) {
+		for (size_t k = 0; k < Tokens.size(); k++) {
 			if (k != i)
-				tokens[k] = tokens[k]->copy();
+				Tokens[k] = Tokens[k]->copy();
 		}
 
-		left = __manager.substitute_and_compute(tokens);
+		left = __manager.substitute_and_compute(Tokens);
 
 		// Compute
-		token *diff = barn.compute("-", {right, left});
+		Token *diff = barn.compute("-", {right, left});
 
-		diff = barn.compute("/", {diff, new operand <T> (T(2) * h)});
+		diff = barn.compute("/", {diff, new Operand <T> (T(2) * h)});
 
 		return diff;
 	}
@@ -373,9 +373,9 @@ namespace zhetapi {
 
 	// Virtual functions
 	template <class T, class U>
-	token::type Function <T, U> ::caller() const
+	Token::type Function <T, U> ::caller() const
 	{
-		return token::ftn;
+		return Token::ftn;
 	}
 
 	template <class T, class U>
@@ -385,13 +385,13 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	token *Function <T, U> ::copy() const
+	Token *Function <T, U> ::copy() const
 	{
 		return new Function <T, U> (*this);
 	}
 
 	template <class T, class U>
-	bool Function <T, U> ::operator==(token *tptr) const
+	bool Function <T, U> ::operator==(Token *tptr) const
 	{
 		Function <T, U> *ftn = dynamic_cast <Function <T, U> *> (tptr);
 
@@ -449,18 +449,18 @@ namespace zhetapi {
 	// Gathering facilities
 	template <class T, class U>
 	template <class A>
-	void Function <T, U> ::gather(std::vector <token *> &tokens, A in)
+	void Function <T, U> ::gather(std::vector <Token *> &Tokens, A in)
 	{
-		tokens.push_back(new operand <A>(in));
+		Tokens.push_back(new Operand <A>(in));
 	}
 	
 	template <class T, class U>
 	template <class A, class ... B>
-	void Function <T, U> ::gather(std::vector <token *> &tokens, A in, B ... args)
+	void Function <T, U> ::gather(std::vector <Token *> &Tokens, A in, B ... args)
 	{
-		tokens.push_back(new operand <A>(in));
+		Tokens.push_back(new Operand <A>(in));
 
-		gather(tokens, args...);
+		gather(Tokens, args...);
 	}
 
 	template <class T, class U>

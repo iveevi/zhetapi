@@ -1,5 +1,5 @@
-#ifndef OPERAND_H_
-#define OPERAND_H_
+#ifndef Operand_H_
+#define Operand_H_
 
 // C/C++ headers
 #include <sstream>
@@ -11,24 +11,24 @@ namespace zhetapi {
 
 	/* Operand Class:
 	 * 
-	 * Represents an operand in mathematics
+	 * Represents an Operand in mathematics
 	 * by using data_t as the numerical data
 	 * type or value */
 	template <typename data_t>
-	class operand : public token {
-		/* data_t [val] - the only member of operand
+	class Operand : public Token {
+		/* data_t [val] - the only member of Operand
 		 * which represents its value */
 		data_t val;
 	public:
 		/* Constructors:
-		 * operand() - sets the private member Variable
+		 * Operand() - sets the private member Variable
 		 *   [val] to the default value of data_t
-		 * operand(data_t) - sets the private member Variable
+		 * Operand(data_t) - sets the private member Variable
 		 *   [val] to whatever value is passed */
-		operand();
-		// operand(data_t);
-		operand(const data_t &);
-		operand(const operand &);
+		Operand();
+		// Operand(data_t);
+		Operand(const data_t &);
+		Operand(const Operand &);
 
 		/* Virtualized Member Functions:
 		 * void [set](data_t) - sets the private member Variable
@@ -58,52 +58,52 @@ namespace zhetapi {
 		}
 
 		// Add descriptors later
-		operand &operator=(const operand &);
+		Operand &operator=(const Operand &);
 
 		type caller() const override;
 		std::string str() const override;
-		token *copy() const override;
+		Token *copy() const override;
 
-		bool operator==(token *) const override;
+		bool operator==(Token *) const override;
 
 		/* Friends:
-		 * std::ostream &operator<<(std::ostream &, const operand
+		 * std::ostream &operator<<(std::ostream &, const Operand
 		 *   <data_t> &) - outputs the value of val onto the stream
 		 *   pointed to by the passed ostream object
-		 * std::istream &operator>>(std::istream &, operand &) - reads
+		 * std::istream &operator>>(std::istream &, Operand &) - reads
 		 *   input from the stream passed in and sets the value
-		 *   of the val in the passed operand object to the read data_t
+		 *   of the val in the passed Operand object to the read data_t
 		 *   value */
 		template <typename type>
 		friend std::ostream &operator<<(std::ostream &, const
-			operand <data_t> &);
+			Operand <data_t> &);
 
 		template <typename type>
-		friend std::istream &operator>>(std::istream &, operand
+		friend std::istream &operator>>(std::istream &, Operand
 			<data_t> &);
 
 		/* Comparison Operators: */
 		template <typename type>
-		friend bool &operator==(const operand &, const operand &);
+		friend bool &operator==(const Operand &, const Operand &);
 		
 		template <typename type>
-		friend bool &operator!=(const operand &, const operand &);
+		friend bool &operator!=(const Operand &, const Operand &);
 		
 		template <typename type>
-		friend bool &operator>(const operand &, const operand &);
+		friend bool &operator>(const Operand &, const Operand &);
 		
 		template <typename type>
-		friend bool &operator<(const operand &, const operand &);
+		friend bool &operator<(const Operand &, const Operand &);
 		
 		template <typename type>
-		friend bool &operator>=(const operand &, const operand &);
+		friend bool &operator>=(const Operand &, const Operand &);
 		
 		template <typename type>
-		friend bool &operator<=(const operand &, const operand &);
+		friend bool &operator<=(const Operand &, const Operand &);
 
 		// on
 		template <class A>
-		operator operand <A> ();
+		operator Operand <A> ();
 	};
 
 	/* Operand Class Member Functions
@@ -113,57 +113,57 @@ namespace zhetapi {
 	 *
 	 * Constructors: */
 	template <typename data_t>
-	operand <data_t> ::operand () : val(data_t()) {}
+	Operand <data_t> ::Operand () : val(data_t()) {}
 
 	//template <typename data_t>
-	//operand <data_t> ::operand(data_t data) : val(data) {}
+	//Operand <data_t> ::Operand(data_t data) : val(data) {}
 	
 	template <typename data_t>
-	operand <data_t> ::operand(const data_t &data) : val(data) {}
+	Operand <data_t> ::Operand(const data_t &data) : val(data) {}
 
 	template <typename data_t>
-	operand <data_t> ::operand(const operand &other) : val(other.val) {}
+	Operand <data_t> ::Operand(const Operand &other) : val(other.val) {}
 
 	/* Virtualized member functions:
 	 * setters, getter and operators */
 	template <typename data_t>
-	void operand <data_t> ::set(data_t data)
+	void Operand <data_t> ::set(data_t data)
 	{
 		val = data;
 	}
 
 	template <typename data_t>
-	void operand <data_t> ::operator[](data_t data)
+	void Operand <data_t> ::operator[](data_t data)
 	{
 		val = data;
 	}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::get()
+	data_t &Operand <data_t> ::get()
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::get() const
+	const data_t &Operand <data_t> ::get() const
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	data_t &operand <data_t> ::operator*()
+	data_t &Operand <data_t> ::operator*()
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	const data_t &operand <data_t> ::operator*() const
+	const data_t &Operand <data_t> ::operator*() const
 	{
 		return val;
 	}
 
 	template <typename data_t>
-	operand <data_t> &operand <data_t> ::operator=(const operand &other)
+	Operand <data_t> &Operand <data_t> ::operator=(const Operand &other)
 	{
 		val = other.val;
 		return *this;
@@ -172,7 +172,7 @@ namespace zhetapi {
 	/* Friend functions: istream and
 	 * ostream utilities */
 	template <typename data_t>
-	std::ostream &operator<< (std::ostream &os, const operand <data_t>
+	std::ostream &operator<< (std::ostream &os, const Operand <data_t>
 		&right)
 	{
 		os << right.get();
@@ -180,7 +180,7 @@ namespace zhetapi {
 	}
 
 	template <typename data_t>
-	std::istream &operator>> (std::istream &is, operand <data_t> &right)
+	std::istream &operator>> (std::istream &is, Operand <data_t> &right)
 	{
 		data_t temp;
 		is >> temp;
@@ -190,42 +190,42 @@ namespace zhetapi {
 
 	/* Comparison functions: */
 	template <typename data_t>
-	bool operator==(const operand <data_t> &right, const operand
+	bool operator==(const Operand <data_t> &right, const Operand
 		<data_t> &left)
 	{
 		return *right == *left;
 	}
 
 	template <typename data_t>
-	bool operator!=(const operand <data_t> &right, const operand
+	bool operator!=(const Operand <data_t> &right, const Operand
 		<data_t> &left)
 	{
 		return right != left;
 	}
 
 	template <typename data_t>
-	bool operator>(const operand <data_t> &right, const operand <data_t>
+	bool operator>(const Operand <data_t> &right, const Operand <data_t>
 		&left)
 	{
 		return right.val > left.val;
 	}
 
 	template <typename data_t>
-	bool operator<(const operand <data_t> &right, const operand <data_t>
+	bool operator<(const Operand <data_t> &right, const Operand <data_t>
 	&left)
 	{
 		return right.val < left.val;
 	}
 
 	template <typename data_t>
-	bool operator>=(const operand <data_t> &right, const operand <data_t>
+	bool operator>=(const Operand <data_t> &right, const Operand <data_t>
 	&left)
 	{
 		return right.val >= left.val;
 
 	}
 	template <typename data_t>
-	bool operator<=(const operand <data_t> &right, const operand <data_t>
+	bool operator<=(const Operand <data_t> &right, const Operand <data_t>
 	&left)
 	{
 		return right.val <= left.val;
@@ -233,13 +233,13 @@ namespace zhetapi {
 
 	/* Token class derived functions: */
 	template <typename data_t>
-	token::type operand <data_t> ::caller() const
+	Token::type Operand <data_t> ::caller() const
 	{
 		return opd;
 	}
 
 	template <typename data_t>
-	std::string operand <data_t> ::str() const
+	std::string Operand <data_t> ::str() const
 	{
 		std::ostringstream oss;
 
@@ -249,25 +249,25 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	token *operand <T> ::copy() const
+	Token *Operand <T> ::copy() const
 	{
-		return new operand(*this);
+		return new Operand(*this);
 	}
 
 	template <class T>
-	bool operand <T> ::operator==(token *t) const
+	bool Operand <T> ::operator==(Token *t) const
 	{
-		if (dynamic_cast <operand <T> *> (t) == nullptr)
+		if (dynamic_cast <Operand <T> *> (t) == nullptr)
 			return false;
 
-		return val == (dynamic_cast <operand *> (t))->get();
+		return val == (dynamic_cast <Operand *> (t))->get();
 	}
 
 	template <class T>
 	template <class A>
-	operand <T> ::operator operand <A> ()
+	Operand <T> ::operator Operand <A> ()
 	{
-		return operand <A> {(A) val};
+		return Operand <A> {(A) val};
 	}
 
 }
