@@ -14,7 +14,11 @@ int main()
 
 	cout << f << endl;
 
-	// Function <double, int> df = f.differentiate("x");
+	f.print();
 
-	// cout << df << endl;
+	Function <double, int> df = f.differentiate("x");
+
+	cout << df << endl;
+
+	df.print();
 }

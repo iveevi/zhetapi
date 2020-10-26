@@ -404,8 +404,8 @@ namespace zhetapi {
 
 		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 
-		if (ophptr && (ophptr->code == add || ophptr->code == sub))
-			simplify_separable(ref);
+		// if (ophptr && (ophptr->code == add || ophptr->code == sub))
+		//	simplify_separable(ref);
 
 		for (auto &child : ref.__leaves)
 			simplify(child);
