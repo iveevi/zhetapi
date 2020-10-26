@@ -4,7 +4,6 @@
 // Engine headers
 #include <barn.hpp>
 #include <function.hpp>
-#include <engine.hpp>
 #include <expression.hpp>
 #include <tensor.hpp>
 
@@ -22,12 +21,12 @@ int main()
 
 	Barn <double, int> b;
 
-	Variable <double> var {"e", 2.17};
+	Variable <double, int> var {"e", 2.17};
 
 	b.put(var);
 
 	cout << "var: " << var << endl;
-	cout << "barn-var: " << b.retrieve <double> ("e") << endl;
+	cout << "barn-var: " << b.retrieve_variable("e") << endl;
 	cout << "barn-var: " << b.get("e")->str() << endl;
 
 	//////////////////////////////////////////////////////////////
@@ -37,8 +36,8 @@ int main()
 
 	Barn <double, int> barn;
 
-	barn.put(Variable <double> {"e", exp(1)});
-	barn.put(Variable <double> {"pi", acos(-1)});
+	barn.put(Variable <double, int> {"e", exp(1)});
+	barn.put(Variable <double, int> {"pi", acos(-1)});
 
 	std::string str;
 
@@ -46,7 +45,7 @@ int main()
 		try {
 			zhetapi::node_manager <double, int> tmp(str, barn);
 
-			zhetapi::token *tptr = tmp.value();
+			zhetapi::Token *tptr = tmp.value();
 
 			cout << "Value: " << tptr->str() << endl;
 		} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
@@ -78,19 +77,6 @@ int main()
 	} catch (Function <double, int> ::invalid_definition e) {
 		cout << "Exception caught succesfully" << endl;
 	}
-
-	//////////////////////////////////////////////////////////////
-
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Node simplification...\n" << endl;
-
-	Engine <double, int> eng("src/default_simplifications.ztp");
-
-	node_manager<double, int> mg("x^2 * 1", {"x"});
-
-	mg.print();
-
-	mg.simplify(eng);
 
 	//////////////////////////////////////////////////////////////
 

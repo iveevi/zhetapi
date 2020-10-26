@@ -1,13 +1,13 @@
 # Portability
 port:		port_build
 	./build/port < tests/input > output.log
-	-diff --color -w tests/output output.log
+	-diff -w tests/output output.log
 	rm output.log
 
 port_build:	inc/hidden	\
 		build		\
 		tests
-	g++ -I engine -I inc/hidden -I inc/std -I build tests/portability.cpp -o build/port
+	g++-8 -I engine -I inc/hidden -I inc/std -I build tests/portability.cpp -o build/port
 
 # Tests
 test:		test_build
@@ -37,19 +37,19 @@ test_build:	inc/hidden	\
 		build		\
 		tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -ldl -o build/tests
+	g++-8 -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -ldl -o build/tests
 
 test_build_debug:	inc/hidden	\
 			build		\
 			tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -ldl -g -o build/tests
+	g++-8 -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -ldl -g -o build/tests
 
 test_build_profile:	inc/hidden	\
 			build		\
 			tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -g -pg -o build/tests
+	g++-8 -I engine -I inc/hidden -I inc/std -I build tests/tests.cpp -g -pg -o build/tests
 
 # Machine learning
 ml:		ml_build
@@ -69,7 +69,7 @@ ml_build:	engine		\
 		build		\
 		tests
 	@echo "[BUILDING ML TESTER]\n"
-	g++ -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -o build/ml
+	g++-8 -I engine -I inc/hidden -I inc/std tests/ml.cpp -g -o build/ml
 
 # GPU testing
 gpu:		gpu_build
@@ -89,7 +89,7 @@ manager:	manager_build
 
 manager_build:	build
 	@echo "[BUILDING MANAGER TESTER]\n"
-	g++ cfg/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
+	g++-8 cfg/config_manager.cpp -lboost_system -lboost_filesystem -o build/manager
 
 # Interpreter
 
@@ -111,13 +111,13 @@ zhp_debug:	zhp_build_debug
 
 zhp_build:	build
 	@echo "[BUILDING CLI TESTER]\n"
-	g++ -I engine -I inc/std -I inc/hidden zhp/zhp.cpp -o build/zhp
+	g++-8 -I engine -I inc/std -I inc/hidden zhp/zhp.cpp -o build/zhp
 
 zhp_build_debug:	inc/hidden	\
 			build		\
 			tests
 	@echo "[BUILDING TESTS]\n"
-	g++ -I engine -I inc/hidden -I inc/std -I build zhp/zhp.cpp -ldl -g -o build/zhp
+	g++-8 -I engine -I inc/hidden -I inc/std -I build zhp/zhp.cpp -ldl -g -o build/zhp
 
 # CLI testing
 cli:		cli_build
@@ -133,12 +133,12 @@ cli_debug:		cli_build_debug
 
 cli_build:	build
 	@echo "[BUILDING CLI TESTER]\n"
-	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -lncurses -o build/zhetapi
+	g++-8 -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -lncurses -o build/zhetapi
 
 cli_build_debug:	\
 		build
 	@echo "[BUILDING CLI TESTER]\n"
-	g++ -I engine -I inc/std -I inc/hidden cli/cli.cpp -g -lboost_system -lboost_filesystem -o build/cli
+	g++-8 -I engine -I inc/std -I inc/hidden cli/cli.cpp -g -lboost_system -lboost_filesystem -o build/cli
 
 # Physics engine testing
 physics:	physics_build
@@ -147,7 +147,7 @@ physics:	physics_build
 
 physics_build:	build
 	@echo "\n[RUNNING CLI]\n"
-	g++ -I engine physics/line.cpp -lglut -lGL -lGLEW -lglfw -o build/physics
+	g++-8 -I engine physics/line.cpp -lglut -lGL -lGLEW -lglfw -o build/physics
 
 # Opengl testing
 opengl:		opengl_build
@@ -156,7 +156,7 @@ opengl:		opengl_build
 
 opengl_build:	build
 	@echo "\n[RUNNING CLI]\n"
-	g++ -I engine -I physics physics/main.cpp physics/shader.cpp physics/texture.cpp -lglut -lGL -lGLEW -lglfw -o build/opengl
+	g++-8 -I engine -I physics physics/main.cpp physics/shader.cpp physics/texture.cpp -lglut -lGL -lGLEW -lglfw -o build/opengl
 
 opengl_debug:	opengl_build_debug
 	@echo "\n[RUNNING CLI]\n"
@@ -164,7 +164,7 @@ opengl_debug:	opengl_build_debug
 
 opengl_build_debug:	build
 	@echo "\n[RUNNING CLI]\n"
-	g++ -I engine -I physics -g physics/main.cpp -lglm -lglut -lGL -lGLEW -lglfw -o build/opengl_debug
+	g++-8 -I engine -I physics -g physics/main.cpp -lglm -lglut -lGL -lGLEW -lglfw -o build/opengl_debug
 
 # Build directory
 build:
