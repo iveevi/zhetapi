@@ -10,7 +10,7 @@ using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> f = "f(x, y) = x^2 + xyln(x) - y^(2 + 5) + 4 * 5";
+	Function <double, int> f = "f(x) = x^2 + xln(x) - x";
 
 	cout << f << endl;
 

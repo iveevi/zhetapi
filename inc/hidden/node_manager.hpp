@@ -93,6 +93,7 @@ namespace zhetapi {
 		void simplify_separable(node &);
 
 		void differentiate(node &);
+		void differentiate_operation(node &);
 		
 		void refactor_reference(node &, const std::string &, Token *);
 
@@ -167,8 +168,14 @@ namespace zhetapi {
 		bool r = qi::phrase_parse(iter, end, pr, qi::space, __tree);
 
 		// Fill references
-		for (std::string str : params)
-			__refs.push_back(nf_zero());
+		node tmp;
+		for (std::string str : params) {
+			tmp = nf_zero();
+
+			tmp.__label = l_variable;
+
+			__refs.push_back(tmp);
+		}
 
 		// Unpack variable clusters
 		expand(__tree);
@@ -498,11 +505,8 @@ namespace zhetapi {
 			return;
 		}
 
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
-
-		switch (ophptr->code) {
-		case add:
-		case sub:
+		switch (ref.__label) {
+		case l_separable:
 			differentiate(ref.__leaves[0]);
 			differentiate(ref.__leaves[1]);
 			break;
@@ -578,7 +582,7 @@ namespace zhetapi {
 		for (auto leaf : ref.__leaves)
 			idents.push_back(generate(name, leaf, fout, const_count, inter_count));
 		
-		if (is_constant_Operand(ref.__label)) {
+		if (is_constant_operand(ref.__label)) {
 			fout << "\t\tzhetapi::Token *c" << const_count++ << " = ";
 			fout << "new zhetapi::Operand <"
 				<< types <T, U> ::proper_symbol(typeid(*(ref.__tptr.get())))
@@ -769,11 +773,26 @@ namespace zhetapi {
 
 		switch (ophptr->code) {
 		case add:
-			ref.__label = l_addition;
-			return;
 		case sub:
-			ref.__label = l_subtraction;
-			return;
+			ref.__label = l_separable;
+			break;
+		case mul:
+			ref.__label = l_multiplied;
+			break;
+		case dvs:
+			ref.__label = l_divided;
+			break;
+		case pwr:
+			if ((ref.__leaves[0].__label == l_variable)
+				&& (is_constant(ref.__leaves[1].__label)))
+				ref.__label = l_power;
+			break;
+		case xln:
+			ref.__label = l_nat_log;
+			break;
+		case xlg:
+			ref.__label = l_bin_log;
+			break;
 		}
 	}
 	

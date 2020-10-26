@@ -54,8 +54,12 @@ namespace zhetapi {
 
 		// Operations
 		l_dot,
-		l_addition,
-		l_subtraction,
+		l_separable,
+		l_multiplied,
+		l_divided,
+		l_power,
+		l_nat_log,
+		l_bin_log,
 
 		// Variables
 		l_variable,		// Regular variable
@@ -66,12 +70,9 @@ namespace zhetapi {
 		l_vector_uncoded,	// Leave vector as nodes, then decode once substituion is performed
 
 		l_constant,		// keep to prevent errors
-		l_power,
-		l_divided,
 		l_function,
 		l_exp,
 		l_polynomial,
-		l_multiplied,
 		l_exponential,
 		l_logarithmic,
 		l_trigonometric,
@@ -128,8 +129,12 @@ namespace zhetapi {
 
 		// Operations
 		"dot",
-		"addition",
-		"subtraction",
+		"separable",
+		"multiplied",
+		"divided",
+		"power",
+		"natural logarithm",
+		"binary logarithm",
 
 		// Variable
 		"variable",
@@ -141,12 +146,9 @@ namespace zhetapi {
 
 		"constant",
 		
-		"power",
-		"divided",
 		"function",
 		"exponent",
 		"polynomic",
-		"multiplied",
 		"exponential",
 		"logarithmic",
 		"trigonometric",
@@ -171,7 +173,7 @@ namespace zhetapi {
 		return false;
 	}
 
-	bool is_constant_Operand(lbl type)
+	bool is_constant_operand(lbl type)
 	{
 		if ((type >= l_constant_integer)
 				&& (type <= l_constant_matrix_complex_real))
