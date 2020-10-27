@@ -1,7 +1,7 @@
+SHELL := /bin/bash
+
 # Installation
 install: cli_build
-	@echo "PATH=\$PATH:~/zhetapi/build" >> ~/.bash_profile
-	@source ~/.bash_profile
 	@echo "Installed CLI."
 
 # Portability
