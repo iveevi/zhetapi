@@ -9,8 +9,36 @@ Zhetapi (ℤHΠ) is a C++ (14) computation library that was built in the hopes o
 making mathematical computation and algorithmic research more convenient to the
 users.
 
-This project is being developed in a Linux environment and has only been tested
-for it. It is a work in progress.
+This project is being developed on Unix environments and has only been tested
+for them. It is a work in progress.
+
+# Usage and Installation
+
+All applications headers use the `g++-8` compiler and Boost 1.65.1 (Spirit, Phoenix and
+Fusion).
+
+*macOS (High Sierra and later)*
+
+Installing the compiler:
+
+```
+$ brew install gcc@8
+$ g++-8 --version
+```
+
+Installing Boost:
+
+```
+$ brew install boost
+```
+
+## Zhetapi CLI
+
+The Zhetapi CLI is a command-line calculator application, similar to GNU Octave, with additional abilities to store variables and define functions. The user can also enter special commands, by using a `#` before specifying the command name (ie. the `#list` command lists all available commands).
+
+To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./install.sh` (run `chmod +x install.sh` if necessary). The command will build the CLI and make the command globally available.
+
+To exit the CLI, simply enter `#q` or `#quit` from the CLi or terminate the program with `Ctrl-C`.
 
 # Features
 
@@ -283,19 +311,6 @@ supports the computation of mathematical expressions and it also provides graphi
 capabilities. This is still in early development.
 
 |===
-
-# Usage
-
-All applications headers use the `g++-8` compiler and Boost 1.65.1 (Spirit, Phoenix and
-Fusion).
-
-## Zhetapi CLI
-
-The Zhetapi CLI is a command-line calculator application, similar to GNU Octave, with additional abilities to store variables and define functions. The user can also enter special commands, by using a `#` before specifying the command name (ie. the `#list` command lists all available commands).
-
-To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./install.sh` (run `chmod +x install.sh` if necessary). The command will build the CLI and make the command globally available.
-
-To exit the CLI, simply enter `#q` or `#quit` from the CLi or terminate the program with `Ctrl-C`.
 
 # What Next?
 
