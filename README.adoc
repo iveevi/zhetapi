@@ -14,8 +14,8 @@ for them. It is a work in progress.
 
 # Usage and Installation
 
-All applications headers use the `g++-8` compiler and Boost 1.65.1 (Spirit, Phoenix and
-Fusion).
+All applications headers use the `g++-8` compiler and Boost 1.65.1 or later
+(for Spirit, Phoenix and Fusion).
 
 *macOS (High Sierra and later)*
 
