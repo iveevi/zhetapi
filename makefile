@@ -1,3 +1,9 @@
+# Installation
+install: cli_build
+	@echo "PATH=\$PATH:~/zhetapi/build" >> ~/.bash_profile
+	@source ~/.bash_profile
+	@echo "Installed CLI."
+
 # Portability
 port:		port_build
 	./build/port < tests/input > output.log
@@ -132,8 +138,8 @@ cli_debug:		cli_build_debug
 	gdb ./build/zhetapi
 
 cli_build:	build
-	@echo "[BUILDING CLI TESTER]\n"
-	g++-8 -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -lncurses -o build/zhetapi
+	@echo "Building CLI..."
+	@g++-8 -w -I engine -I inc/std -I inc/hidden cli/cli.cpp -lboost_system -lboost_filesystem -lncurses -o build/zhetapi
 
 cli_build_debug:	\
 		build
@@ -168,4 +174,4 @@ opengl_build_debug:	build
 
 # Build directory
 build:
-	mkdir build
+	@mkdir build
