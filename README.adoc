@@ -286,17 +286,16 @@ capabilities. This is still in early development.
 
 # Usage
 
-The only prerequisite for using the library headers is Boost (preferably version
-1.65.1, which is used in development), specifically the Spirit, Phoenix and
-Fusion libraries.
+All applications headers use the `g++-8` compiler and Boost 1.65.1 (Spirit, Phoenix and
+Fusion).
 
 ## Zhetapi CLI
 
-The Zhetapi CLI is a command-line calculator application, similar to `octave`.
-One can simply enter expressions to be calculated or define functions and
-variables and then use them in later computations. The user can also enter
-commands, by using a `#` before specifying the command name (ie. the `#list`
-command lists all available commands).
+The Zhetapi CLI is a command-line calculator application, similar to GNU Octave, with additional abilities to store variables and define functions. The user can also enter special commands, by using a `#` before specifying the command name (ie. the `#list` command lists all available commands).
+
+To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./install.sh` (run `chmod +x install.sh` if necessary). The command will build the CLI and make the command globally available.
+
+To exit the CLI, simply enter `#q` or `#quit` from the CLi or terminate the program with `Ctrl-C`.
 
 # What Next?
 
