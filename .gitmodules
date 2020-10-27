@@ -1,3 +1,0 @@
-[submodule "physics/godot-cpp"]
-	path = physics/godot-cpp
-	url = https://github.com/GodotNativeTools/godot-cpp

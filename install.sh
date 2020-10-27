@@ -1,6 +1,10 @@
 #!/bin/sh
-echo "PATH=${PATH}:$(PWD)/build" >> .env
+echo "PATH=${PATH}:$(PWD)/apps" >> .env
 
 source .env
 
-make install
+cmake .
+make
+
+mkdir -p apps
+mv zhetapi apps/
