@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "PATH=${PATH}:$(PWD)/apps" >> .env
+echo "PATH=${PATH}:$(pwd)/apps" >> .env
 
 source .env
 
