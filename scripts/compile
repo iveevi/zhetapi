@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Organize headers
+if [ -d zhetapi-headers ]; then
+	rm -rf zhetapi-headers;
+fi
+
+mkdir zhetapi-headers
+
+cp engine/* zhetapi-headers
+cp -r inc/* zhetapi-headers
+
+# Compile and move apps
+cmake .
+make
+
+mkdir -p release
+mv zhetapi release/
+
+mkdir -p debug
+mv exp debug/
+mv portability debug/

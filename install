@@ -6,4 +6,4 @@ echo "PATH=${PATH}:$(pwd)/release" >> .env
 source .env
 
 # Build apps
-./scripts/build
+./scripts/compile
