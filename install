@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Register apps directory
+echo "PATH=${PATH}:$(pwd)/release" >> .env
+
+source .env
+
+# Build apps
+./scripts/build.sh

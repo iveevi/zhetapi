@@ -6,8 +6,8 @@
 #include <ctime>
 #include <functional>
 #include <iostream>
-#include <string>
 #include <sstream>
+#include <string>
 #include <tuple>
 #include <type_traits>
 #include <typeindex>
@@ -15,18 +15,18 @@
 #include <unordered_map>
 
 // Engine headers
-#include <std_combinatorial.hpp>
 #include <complex.hpp>
+#include <ftable.hpp>
 #include <matrix.hpp>
 #include <operand.hpp>
 #include <operation.hpp>
 #include <rational.hpp>
+#include <std/combinatorial.hpp>
 #include <token.hpp>
 #include <types.hpp>
+#include <variable.hpp>
 #include <vector.hpp>
 #include <vtable.hpp>
-#include <ftable.hpp>
-#include <variable.hpp>
 
 namespace zhetapi {
 
