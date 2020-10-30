@@ -26,9 +26,18 @@ int main()
 
 	vector <Token *> tmp {
 		new Operand <int> (35),
-		new Operand <double> (35),
+		new Operand <double> (432423),
 		new Operand <string> ("fdfs"),
 	};
 
-	auto tpl = zhetapi_cast <Operand <int> *, Operand <double> *, Operand <string> *> (tmp);
+	Operand <int> *tptr1;
+	Operand <double> *tptr2;
+	Operand <string> *tptr3;
+	Operand <long int> *fake;
+
+	zhetapi_cast(tmp, tptr1, tptr2, tptr3, fake);
+
+	cout << tptr1->str() << endl;
+	cout << tptr2->str() << endl;
+	cout << tptr3->str() << endl;
 }
