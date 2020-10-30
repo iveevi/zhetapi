@@ -1,5 +1,13 @@
 #!/bin/sh
 
-./install
+# Compile the program
+cmake .
+make $1
 
+# Create appropriate directories and move the program
+mkdir -p debug
+
+mv $1 debug/
+
+# Run the program
 ./debug/$1
