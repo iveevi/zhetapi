@@ -1,5 +1,5 @@
-#ifndef API_H_
-#define API_H_
+#ifndef REGISTRATION_H_
+#define REGISTRATION_H_
 
 // C/C++ headers
 #include <tuple>
@@ -9,9 +9,12 @@
 #include <token.hpp>
 
 /**
- * ===========================
- * SUMARY OF API FUNCTIONALITY
- * ===========================
+ * This file contains functions that aid the creation of Barn-registrable
+ * functions.
+ *
+ * ======================
+ * SUMARY OF REGISTRATION
+ * ======================
  *
  * Any function that is to be registered in a barn must have the signature
  * 
