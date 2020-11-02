@@ -93,7 +93,9 @@ namespace zhetapi {
 		void simplify_separable(node &);
 
 		void differentiate(node &);
-		void differentiate_operation(node &);
+		void differentiate_multiplied(node &);
+		void differentiate_power(node &);
+		void differentiate_nat_log(node &);
 		
 		void refactor_reference(node &, const std::string &, Token *);
 
@@ -510,7 +512,79 @@ namespace zhetapi {
 			differentiate(ref.__leaves[0]);
 			differentiate(ref.__leaves[1]);
 			break;
+		case l_multiplied:
+			differentiate_multiplied(ref);
+			break;
+		case l_power:
+			differentiate_power(ref);
+			break;
+		case l_nat_log:
+			differentiate_nat_log(ref);
+			break;
+		case l_variable:
+			ref.transfer(nf_one());
+			break;
 		}
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_multiplied(node &ref)
+	{
+		node ldif(ref.__leaves[0]);
+		differentiate(ldif);
+
+		node rdif(ref.__leaves[1]);
+		differentiate(rdif);
+
+		node tmp(new operation_holder("*"), l_multiplied, {
+			node(new operation_holder("*"), l_multiplied, {
+				ldif,
+				node(ref.__leaves[1])
+			}),
+			node(new operation_holder("*"), l_multiplied, {
+				node(ref.__leaves[0]),
+				rdif
+			})
+		});
+
+		ref.transfer(tmp);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_power(node &ref)
+	{
+		Token *mul = ref.__leaves[1].__tptr->copy();
+		Token *exp = __barn.compute("-", {mul, new Operand <U> (1)});
+
+		node diffed(ref.__leaves[0]);
+		differentiate(diffed);
+
+		node tmp(new operation_holder("*"), l_multiplied, {
+			node(new operation_holder("*"), l_multiplied, {
+				node(mul, l_none, {}),
+				node(new operation_holder("^"), l_power, {
+					node(ref.__leaves[0]),
+					node(exp, l_power, {})
+				})
+			}),
+			diffed
+		});
+
+		ref.transfer(tmp);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_nat_log(node &ref)
+	{
+		node diffed(ref.__leaves[0]);
+		differentiate(diffed);
+
+		node tmp(new operation_holder("/"), l_divided, {
+			diffed,
+			node(ref.__leaves[0])
+		});
+
+		ref.transfer(tmp);
 	}
 
 	// Refactoring methods
