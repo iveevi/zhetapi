@@ -30,7 +30,7 @@ namespace zhetapi {
          * that matrices in mathematics do.
          */
         template <class T>
-        class Matrix : Tensor <T> {
+        class Matrix : public Tensor <T> {
         protected:
                 size_t  __rows;
                 size_t  __cols;
@@ -45,7 +45,6 @@ namespace zhetapi {
                 Matrix(const std::initializer_list <std::initializer_list <T>> &);
 
                 Matrix(size_t, size_t, T = T());
-                Matrix(size_t, size_t, T, T **);
 
                 Matrix(size_t, size_t, std::function <T (size_t)>);
                 Matrix(size_t, size_t, std::function <T *(size_t)>);
@@ -56,7 +55,7 @@ namespace zhetapi {
                 template <class A>
                 Matrix(A);
 
-                std::pair <size_t, size_t> get_dimensions() const;
+                /* std::pair <size_t, size_t> get_dimensions() const;
 
                 size_t get_rows() const;
                 size_t get_cols() const;
@@ -142,106 +141,100 @@ namespace zhetapi {
                 friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 
                 // Special matrix generation
-                static Matrix identity(size_t);
+                static Matrix identity(size_t); */
         protected:
-                T determinant(const Matrix &) const;
+                // T determinant(const Matrix &) const;
         };
 
         template <class T>
-        Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> (nullptr) {}
+        Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
 
         template <class T>
-        Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.rows), __cols(other.cols), Tensor <T> ({__rows,
-                        __cols}, T())
+        Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
+                                                       ({other.__rows, other.__cols}, T())
         {
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = other[i][j];
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = other.__array[__rows * i + j];
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(T **ref)
+        Matrix <T> ::Matrix(T **ref) : Tensor <T> ({sizeof(ref)/sizeof(T), sizeof(ref[0])/sizeof(T)}, T())
         {
-                rows = sizeof(ref)/sizeof(T);
+                __rows = sizeof(ref)/sizeof(T);
 
-                assert(rows > 0);
+                assert(__rows > 0);
 
-                cols = sizeof(ref[0])/sizeof(T);
+                __cols = sizeof(ref[0])/sizeof(T);
 
-                assert(cols > 0);
+                assert(__cols > 0);
 
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = ref[i][j];
+                // Allocate and fill
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = ref[i][j];
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::vector <T> &ref)
+        Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
         {
-                rows = ref.size();
+                __rows = ref.size();
 
-                assert(rows > 0);
+                assert(__rows > 0);
 
-                cols = 1;
+                __cols = 1;
                 
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++)
-                        m_array[i] = new T {ref[i]};
+                this->__array = new T[__rows];
+                for (int i = 0; i < __rows; i++)
+                        this->__array[i] = new T {ref[i]};
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref)
+        Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref) : Tensor <T> ({ref.size(), ref[0].size()}, T())
         {
-                rows = ref.size();
+                __rows = ref.size();
 
-                assert(rows > 0);
+                assert(__rows > 0);
 
-                cols = ref[0].size();
+                __cols = ref[0].size();
 
-                assert(cols > 0);
+                assert(__cols > 0);
                 
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-
-                        for (int j = 0; j < cols; j++) {
-                                assert(i < rows && j < ref[i].size());
-                                m_array[i][j] = ref[i][j];
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++) {
+                                assert(i < __rows && j < ref[i].size());
+                                
+                                this->__array[__rows * i + j] = ref[i][j];
                         }
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
+        Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq) : Tensor <T> ({sq.size(), sq.begin()->size()}, T())
         {
-                rows = sq.size();
+                __rows = sq.size();
 
-                assert(rows > 0);
+                assert(__rows > 0);
 
-                cols = sq.begin()->size();
+                __cols = sq.begin()->size();
 
-                assert(cols > 0);
+                assert(__cols > 0);
                 
-                m_array = new T *[rows];
+                this->__array = new T[__rows * __cols];
 
                 size_t i = 0;
                 for (auto lt : sq) {
-                        m_array[i] = new T[cols];
 
                         size_t j = 0;
                         for (auto t : lt) {
-                                assert(i < rows && j < lt.size());
-                                m_array[i][j++] = t;
+                                assert(i < __rows && j < lt.size());
+
+                                this->__array[__rows * i + (j++)] = t;
                         }
 
                         i++;
@@ -249,101 +242,73 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
+        Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> ({rs, cs}, T())
         {
-                rows = rs;
-                cols = cs;
-
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-                        
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = val;
+                __rows = rs;
+                __cols = cs;
+                
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = val;
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rows, size_t cols, T val, T **ref)
+        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
-        }
-
-        template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs,
-                        std::function <T (size_t)> gen)
-        {
-                rows = rs;
-                cols = cs;
-
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-                        
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = gen(i);
+                __rows = rs;
+                __cols = cs;
+                
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = gen(i);
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs,
-                        std::function <T *(size_t)> gen)
+        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
-                rows = rs;
-                cols = cs;
-
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-                        
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = *gen(i);
+                __rows = rs;
+                __cols = cs;
+                
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = *gen(i);
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs,
-                        std::function <T (size_t, size_t)> gen)
+        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
-                rows = rs;
-                cols = cs;
+                __rows = rs;
+                __cols = cs;
 
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-                        
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = gen(i, j);
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = gen(i, j);
                 }
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs,
-                        std::function <T *(size_t, size_t)> gen)
+        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
-                rows = rs;
-                cols = cs;
+                __rows = rs;
+                __cols = cs;
 
-                m_array = new T *[rows];
-
-                for (int i = 0; i < rows; i++) {
-                        m_array[i] = new T[cols];
-                        
-                        for (int j = 0; j < cols; j++)
-                                m_array[i][j] = *gen(i, j);
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__rows * i + j] = *gen(i, j);
                 }
         }
 
-        /*
-         * Acts as a conversion from T to Matrix <T>, which is necessary in the Barn
-         * class.
-         */
         template <class T>
         template <class A>
-        Matrix <T> ::Matrix(A x)
+        Matrix <T> ::Matrix(A x) : Tensor <T> ({1, 1}, T())
         {
                 if (typeid(A) == typeid(T))
                         *this = Matrix(1, 1, (T) x);
@@ -383,7 +348,7 @@ namespace zhetapi {
                  * Vector passed *
                 Matrix <T> *out = new Matrix <T> (end.first - start.first + 1,
                                 end.second - start.second + 1, [&](size_t i, size_t j) {
-                                return m_array[i + start.first][j + start.second];
+                                return __array[i + start.first][j + start.second];
                 });
 
                 return *out;

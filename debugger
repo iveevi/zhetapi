@@ -1,0 +1,5 @@
+#!/bin/sh
+
+g++-8 -I engine/ -I inc/ -I inc/std/ -g tests/$1.cpp -o debug/$1-gdb
+
+sudo gdb ./debug/$1-gdb

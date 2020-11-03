@@ -2,17 +2,18 @@
 #define TENSOR_H_
 
 // C/C++ headers
+#include <cassert>
 #include <cstddef>
 #include <cstdlib>
+#include <cstring>
 #include <string>
 #include <vector>
-#include <cassert>
-#include <cstring>
 
 namespace zhetapi {
 
 	template <class T>
 	class Tensor {
+        protected:
 		size_t		*__dim;
 		T		*__array;
 
