@@ -4,22 +4,31 @@
 #include <vector>
 
 // Engine headers
-#include <function.hpp>
+// #include <matrix.hpp>
+#include <tensor.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> f = "f(x) = x^2 + xln(x) - x";
+        /* Matrix <double> m {{3, 4}, {4, 6}};
 
-	cout << f << endl;
+        cout << m << endl;
 
-	f.print();
+        Matrix <double> mp = m;
 
-	Function <double, int> df = f.differentiate("x");
+        cout << mp << endl; */
 
-	cout << df << endl;
+        Tensor <double> t1({2, 2}, {3, 4, 5, 6});
 
-	df.print();
+        cout << t1 << endl;
+
+        Tensor <double> t2 = t1;
+
+        cout << t2 << endl;
+        
+        Tensor <double> t3(t1);
+
+        cout << t3 << endl;
 }

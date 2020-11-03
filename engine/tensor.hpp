@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <cassert>
+#include <cstring>
 
 namespace zhetapi {
 
@@ -18,11 +19,15 @@ namespace zhetapi {
 		size_t		__dims;
 		size_t		__size;
 	public:
+                // Construction and memory
 		Tensor();
+                Tensor(const Tensor &);
 		Tensor(const std::vector <std::size_t> &, const T & = T());
 		Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
 
 		~Tensor();
+
+                Tensor &operator=(const Tensor &);
 
 		// Indexing
 		T &operator[](const std::vector <size_t> &);
@@ -33,11 +38,26 @@ namespace zhetapi {
 
 		template <class U>
 		friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
+
+                // Dimension mismatch exception
+                class dimension_mismatch {};
 	};
 
-	// Constructors and destructors
+	// Constructors and memory relevant functions
 	template <class T>
 	Tensor <T> ::Tensor() : __dim(nullptr), __array(nullptr) {}
+
+        template <class T>
+        Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)
+        {
+                __dim = new size_t[__dims];
+                for (size_t i = 0; i < __dims; i++)
+                        __dim[i] = other.__dim[i];
+
+                __array = new T[__size];
+                for (size_t i = 0; i < __size; i++)
+                        __array[i] = other.__array[i];
+        }
 
 	template <class T>
 	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
@@ -75,7 +95,8 @@ namespace zhetapi {
 
 		__size = prod;
 
-		assert(arr.size() == __size);
+		if (arr.size() != __size)
+                        throw dimension_mismatch();
 
 		__array = new T[prod];
 
@@ -89,6 +110,25 @@ namespace zhetapi {
 		delete[] __dim;
 		delete[] __array;
 	}
+
+        template <class T>
+        Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+        {
+                if (this != &other) {
+                        __dims = other.__dims;
+                        __size = other.__size;
+                
+                        __dim = new size_t[__dims];
+                        for (size_t i = 0; i < __dims; i++)
+                                __dim[i] = other.__dim[i];
+
+                        __array = new T[__size];
+                        for (size_t i = 0; i < __size; i++)
+                                __array[i] = other.__array[i];
+                }
+
+                return *this;
+        }
 
 	// Index
 	template <class T>
