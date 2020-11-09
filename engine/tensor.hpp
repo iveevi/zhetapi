@@ -23,6 +23,7 @@ namespace zhetapi {
                 // Construction and memory
 		Tensor();
                 Tensor(const Tensor &);
+		Tensor(const std::vector <T> &);
 		Tensor(const std::vector <std::size_t> &, const T & = T());
 		Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
 
@@ -59,6 +60,19 @@ namespace zhetapi {
                 for (size_t i = 0; i < __size; i++)
                         __array[i] = other.__array[i];
         }
+
+	template <class T>
+	Tensor <T> ::Tensor(const std::vector <T> &arr) : __dims(1), __size(arr.size())
+	{
+		__dim = new size_t[1];
+
+		__dim[0] = __size;
+
+		__array = new T[__size];
+
+		for (size_t i = 0; i < __size; i++)
+			__array[i] = arr[i];
+	}
 
 	template <class T>
 	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)

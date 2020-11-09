@@ -114,7 +114,6 @@ namespace zhetapi {
                 bool symmetric() const;
 
                 std::string display() const;
-                std::string display_nice() const;
 
                 template <class U>
                 friend const Matrix <U> &operator+(const Matrix <U> &, const Matrix <U> &);
@@ -153,7 +152,6 @@ namespace zhetapi {
         Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
                                                        ({other.__rows, other.__cols}, T())
         {
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = other.__array[__rows * i + j];
@@ -172,7 +170,6 @@ namespace zhetapi {
                 assert(__cols > 0);
 
                 // Allocate and fill
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = ref[i][j];
@@ -188,7 +185,6 @@ namespace zhetapi {
 
                 __cols = 1;
                 
-                this->__array = new T[__rows];
                 for (int i = 0; i < __rows; i++)
                         this->__array[i] = new T {ref[i]};
         }
@@ -204,7 +200,6 @@ namespace zhetapi {
 
                 assert(__cols > 0);
                 
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++) {
                                 assert(i < __rows && j < ref[i].size());
@@ -225,8 +220,6 @@ namespace zhetapi {
 
                 assert(__cols > 0);
                 
-                this->__array = new T[__rows * __cols];
-
                 size_t i = 0;
                 for (auto lt : sq) {
 
@@ -247,7 +240,6 @@ namespace zhetapi {
                 __rows = rs;
                 __cols = cs;
                 
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = val;
@@ -260,7 +252,6 @@ namespace zhetapi {
                 __rows = rs;
                 __cols = cs;
                 
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = gen(i);
@@ -273,7 +264,6 @@ namespace zhetapi {
                 __rows = rs;
                 __cols = cs;
                 
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = *gen(i);
@@ -286,7 +276,6 @@ namespace zhetapi {
                 __rows = rs;
                 __cols = cs;
 
-                this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__rows * i + j] = gen(i, j);
@@ -739,28 +728,6 @@ namespace zhetapi {
                 }
 
                 oss << "]";
-
-                return oss.str();
-        }
-
-        template <class T>
-        std::string Matrix <T> ::display_nice() const
-        {
-                std::ostringstream oss;
-                for (int i = 0; i < __rows; i++) {
-                        oss << '|';
-
-                        for (int j = 0; j < __cols; j++) {
-                                oss << this->__array[i][j];
-                                if (j != __cols - 1)
-                                        oss << "\t";
-                        }
-
-                        oss << '|';
-
-                        if (i < __rows - 1)
-                                oss << "\n";
-                }
 
                 return oss.str();
         }
