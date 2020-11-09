@@ -55,7 +55,7 @@ namespace zhetapi {
                 template <class A>
                 Matrix(A);
 
-                /* std::pair <size_t, size_t> get_dimensions() const;
+                std::pair <size_t, size_t> get_dimensions() const;
 
                 size_t get_rows() const;
                 size_t get_cols() const;
@@ -141,9 +141,9 @@ namespace zhetapi {
                 friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 
                 // Special matrix generation
-                static Matrix identity(size_t); */
+                static Matrix identity(size_t);
         protected:
-                // T determinant(const Matrix &) const;
+                T determinant(const Matrix &) const;
         };
 
         template <class T>
@@ -314,42 +314,47 @@ namespace zhetapi {
                         *this = Matrix(1, 1, (T) x);
         }
 
-        /* template <class T>
+        template <class T>
         std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
         {
-                return {rows, cols};
+                return {__rows, __cols};
         }
 
         template <class T>
         size_t Matrix <T> ::get_rows() const
         {
-                return rows;
+                return __rows;
         }
 
         template <class T>
         size_t Matrix <T> ::get_cols() const
         {
-                return cols;
+                return __cols;
         }
 
         template <class T>
         const Matrix <T> &Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
                         const std::pair <size_t, size_t> &end) const
         {
-                * The following asserts make sure the pairs
+                /* The following asserts make sure the pairs
                  * are in bounds of the Matrix and that they
-                 * are in order *
+                 * are in order.
+                 */
                 assert(start.first <= end.first && start.second <= end.second);
 
-                assert(start.first < rows && start.second < cols);
-                assert(end.first < rows && end.second < cols);
-
-               * Slicing is inclusive of the last
-                 * Vector passed *
-                Matrix <T> *out = new Matrix <T> (end.first - start.first + 1,
-                                end.second - start.second + 1, [&](size_t i, size_t j) {
-                                return __array[i + start.first][j + start.second];
-                });
+                assert(start.first < __rows && start.second < __cols);
+                assert(end.first < __rows && end.second < __cols);
+                
+                /* Slicing is inclusive of the last
+                 * Vector passed.
+                 */
+                Matrix <T> *out = new Matrix <T> (
+                        end.first - start.first + 1,
+                        end.second - start.second + 1,
+                        [&](size_t i, size_t j) {
+                                return this->__array[i + start.first][j + start.second];
+                        }
+                );
 
                 return *out;
         }
@@ -358,20 +363,25 @@ namespace zhetapi {
         Matrix <T> Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
                         const std::pair <size_t, size_t> &end)
         {
-                * The following asserts make sure the pairs
+                /* The following asserts make sure the pairs
                  * are in bounds of the Matrix and that they
-                 * are in order *
+                 * are in order.
+                 */
                 assert(start.first <= end.first && start.second <= end.second);
 
-                assert(start.first < rows && start.second < cols);
-                assert(end.first < rows && end.second < cols);
+                assert(start.first < __rows && start.second < __cols);
+                assert(end.first < __rows && end.second < __cols);
 
-                * Slicing is inclusive of the last
-                 * Vector passed *
-                Matrix <T> *out = new Matrix <T> (end.first - start.first + 1,
-                                end.second - start.second + 1, [&](size_t i, size_t j) {
-                                return m_array[i + start.first][j + start.second];
-                });
+                /* Slicing is inclusive of the last
+                 * Vector passed.
+                 */
+                Matrix <T> *out = new Matrix <T> (
+                        end.first - start.first + 1,
+                        end.second - start.second + 1,
+                        [&](size_t i, size_t j) {
+                                return this->__array[i + start.first][j + start.second];
+                        }
+                );
 
                 return *out;
         }
@@ -379,42 +389,42 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::set(size_t row, size_t col, T val)
         {
-                m_array[row][col] = val;
+                this->__array[row][col] = val;
         }
 
         template <class T>
         const T &Matrix <T> ::get(size_t row, size_t col) const
         {
-                return m_array[row][col];
+                return this->__array[row][col];
         }
 
         template <class T>
         Vector <T> Matrix <T> ::get_column(size_t n) const
         {
-                return Vector <T> (rows, [&](size_t i) {
-                        return m_array[i][n];
+                return Vector <T> (__rows, [&](size_t i) {
+                        return this->__array[i][n];
                 });
         }
 
         template <class T>
         T *Matrix <T> ::operator[](size_t i)
         {
-                return m_array[i];
+                return this->__array[i];
         }
 
         template <class T>
         const T *Matrix <T> ::operator[](size_t i) const
         {
-                return m_array[i];
+                return this->__array[i];
         }
 
         template <class T>
         Matrix <T> Matrix <T> ::append_above(const Matrix &m)
         {
-                assert(cols == m.cols);
+                assert(__cols == m.cols);
 
-                size_t t_rows = rows;
-                size_t m_rows = m.rows;
+                size_t t_rows = __rows;
+                size_t m_rows = m.__rows;
 
                 std::vector <std::vector <T>> row;
 
@@ -423,7 +433,7 @@ namespace zhetapi {
                 for (size_t i = 0; i < m_rows; i++) {
                         total.clear();
 
-                        for (size_t j = 0; j < cols; j++)
+                        for (size_t j = 0; j < __cols; j++)
                                 total.push_back(m[i][j]);
 
                         row.push_back(total);
@@ -432,8 +442,8 @@ namespace zhetapi {
                 for (size_t i = 0; i < t_rows; i++) {
                         total.clear();
 
-                        for (size_t j = 0; j < cols; j++)
-                                total.push_back(m_array[i][j]);
+                        for (size_t j = 0; j < __cols; j++)
+                                total.push_back(this->__array[i][j]);
 
                         row.push_back(total);
                 }
@@ -444,9 +454,9 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_below(const Matrix &m)
         {
-                assert(cols == m.cols);
+                assert(__cols == m.cols);
 
-                size_t t_rows = rows;
+                size_t t_rows = __rows;
                 size_t m_rows = m.rows;
 
                 std::vector <std::vector <T>> row;
@@ -456,8 +466,8 @@ namespace zhetapi {
                 for (size_t i = 0; i < t_rows; i++) {
                         total.clear();
 
-                        for (size_t j = 0; j < cols; j++)
-                                total.push_back(m_array[i][j]);
+                        for (size_t j = 0; j < __cols; j++)
+                                total.push_back(this->__array[i][j]);
 
                         row.push_back(total);
                 }
@@ -465,7 +475,7 @@ namespace zhetapi {
                 for (size_t i = 0; i < m_rows; i++) {
                         total.clear();
 
-                        for (size_t j = 0; j < cols; j++)
+                        for (size_t j = 0; j < __cols; j++)
                                 total.push_back(m[i][j]);
 
                         row.push_back(total);
@@ -477,16 +487,16 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_left(const Matrix &m)
         {
-                assert(rows == m.rows);
+                assert(__rows == m.rows);
 
-                size_t t_cols = cols;
+                size_t t_cols = __cols;
                 size_t m_cols = m.cols;
 
                 std::vector <std::vector <T>> row;
 
                 std::vector <T> total;
 
-                for (size_t i = 0; i < rows; i++) {
+                for (size_t i = 0; i < __rows; i++) {
                         total.clear();
 
                         for (size_t j = 0; j < m_cols; j++)
@@ -495,9 +505,9 @@ namespace zhetapi {
                         row.push_back(total);
                 }
 
-                for (size_t i = 0; i < rows; i++) {
+                for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < t_cols; j++)
-                                row[i].push_back(m_array[i][j]);
+                                row[i].push_back(this->__array[i][j]);
                 }
 
                 return Matrix(row);
@@ -506,25 +516,25 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_right(const Matrix &m)
         {
-                assert(rows == m.rows);
+                assert(__rows == m.rows);
 
-                size_t t_cols = cols;
+                size_t t_cols = __cols;
                 size_t m_cols = m.cols;
 
                 std::vector <std::vector <T>> row;
 
                 std::vector <T> total;
 
-                for (size_t i = 0; i < rows; i++) {
+                for (size_t i = 0; i < __rows; i++) {
                         total.clear();
 
                         for (size_t j = 0; j < t_cols; j++)
-                                total.push_back(m_array[i][j]);
+                                total.push_back(this->__array[i][j]);
 
                         row.push_back(total);
                 }
 
-                for (size_t i = 0; i < rows; i++) {
+                for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < m_cols; j++)
                                 row[i].push_back(m[i][j]);
                 }
@@ -535,22 +545,22 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::operator+=(const Matrix <T> &other)
         {
-                assert(rows == other.rows && cols == other.cols);
+                assert(__rows == other.rows && __cols == other.cols);
 
-                for (size_t i = 0; i < rows; i++) {
-                        for (size_t j = 0; j < cols; j++)
-                                m_array[i][j] += other.m_array[i][j];
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i][j] += other->__array[i][j];
                 }
         }
 
         template <class T>
         void Matrix <T> ::operator-=(const Matrix <T> &other)
         {
-                assert(rows == other.rows && cols == other.cols);
+                assert(__rows == other.rows && __cols == other.cols);
 
-                for (size_t i = 0; i < rows; i++) {
-                        for (size_t j = 0; j < cols; j++)
-                                m_array[i][j] -= other.m_array[i][j];
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i][j] -= other->__array[i][j];
                 }
         }
 
@@ -564,29 +574,29 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::add_rows(size_t a, size_t b, T k)
         {
-                for (size_t i = 0; i < cols; i++)
-                        m_array[a][i] += k * m_array[b][i];
+                for (size_t i = 0; i < __cols; i++)
+                        this->__array[a][i] += k * this->__array[b][i];
         }
 
         template <class T>
         void Matrix <T> ::swap_rows(size_t a, size_t b)
         {
-                std::swap(m_array[a], m_array[b]);
+                std::swap(this->__array[a], this->__array[b]);
         }
 
         template <class T>
         void Matrix <T> ::multiply_row(size_t a, T k)
         {
-                for (size_t i = 0; i < cols; i++)
-                        m_array[a][i] *= k;
+                for (size_t i = 0; i < __cols; i++)
+                        this->__array[a][i] *= k;
         }
 
         template <class T>
         void Matrix <T> ::randomize(const std::function<T ()> &ftr)
         {
-                for (size_t i = 0; i < rows; i++) {
-                        for (size_t j = 0; j < cols; j++)
-                                m_array[i][j] = ftr();
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i][j] = ftr();
                 }
         }
 
@@ -599,22 +609,22 @@ namespace zhetapi {
         template <class T>
         T Matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
         {
-                Matrix <T> *out = new Matrix <T> (rows - 1, cols - 1);
+                Matrix <T> *out = new Matrix <T> (__rows - 1, __cols - 1);
 
                 size_t a;
                 size_t b;
 
                 a = 0;
-                for (size_t i = 0; i < rows; i++) {
+                for (size_t i = 0; i < __rows; i++) {
                         b = 0;
                         if (i == pr.first)
                                 continue;
 
-                        for (size_t j = 0; j < cols; j++) {
+                        for (size_t j = 0; j < __cols; j++) {
                                 if (j == pr.second)
                                         continue;
 
-                                (*out)[a][b++] = m_array[i][j];
+                                (*out)[a][b++] = this->__array[i][j];
                         }
 
                         a++;
@@ -660,7 +670,7 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &Matrix <T> ::cofactor() const
         {
-                Matrix <T> *out = new Matrix(rows, cols, [&](size_t i, size_t j) {
+                Matrix <T> *out = new Matrix(__rows, __cols, [&](size_t i, size_t j) {
                         return cofactor(i, j);
                 });
 
@@ -670,8 +680,8 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &Matrix <T> ::transpose() const
         {
-                Matrix <T> *out = new Matrix <T> (cols, rows, [&](size_t i, size_t j) {
-                        return m_array[j][i];
+                Matrix <T> *out = new Matrix <T> (__cols, __rows, [&](size_t i, size_t j) {
+                        return this->__array[j][i];
                 });
 
                 return *out;
@@ -692,9 +702,9 @@ namespace zhetapi {
         template <class T>
         bool Matrix <T> ::symmetric() const
         {
-                for (size_t i = 0; i < rows; i++) {
-                        for (size_t j = 0; j < cols; j++) {
-                                if (m_array[i][j] != m_array[j][i])
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++) {
+                                if (this->__array[i][j] != this->__array[j][i])
                                         return false;
                         }
                 }
@@ -709,22 +719,22 @@ namespace zhetapi {
 
                 oss << "[";
 
-                for (int i = 0; i < rows; i++) {
-                        if (cols > 1) {
+                for (int i = 0; i < __rows; i++) {
+                        if (__cols > 1) {
                                 oss << '[';
 
-                                for (int j = 0; j < cols; j++) {
-                                        oss << m_array[i][j];
-                                        if (j != cols - 1)
+                                for (int j = 0; j < __cols; j++) {
+                                        oss << this->__array[i][j];
+                                        if (j != __cols - 1)
                                                 oss << ", ";
                                 }
 
                                 oss << ']';
                         } else {
-                                oss << m_array[i][0];
+                                oss << this->__array[i][0];
                         }
 
-                        if (i < rows - 1)
+                        if (i < __rows - 1)
                                 oss << ", ";
                 }
 
@@ -737,18 +747,18 @@ namespace zhetapi {
         std::string Matrix <T> ::display_nice() const
         {
                 std::ostringstream oss;
-                for (int i = 0; i < rows; i++) {
+                for (int i = 0; i < __rows; i++) {
                         oss << '|';
 
-                        for (int j = 0; j < cols; j++) {
-                                oss << m_array[i][j];
-                                if (j != cols - 1)
+                        for (int j = 0; j < __cols; j++) {
+                                oss << this->__array[i][j];
+                                if (j != __cols - 1)
                                         oss << "\t";
                         }
 
                         oss << '|';
 
-                        if (i < rows - 1)
+                        if (i < __rows - 1)
                                 oss << "\n";
                 }
 
@@ -858,10 +868,11 @@ namespace zhetapi {
         template <class T>
         T Matrix <T> ::determinant(const Matrix <T> &a) const
         {
-                The determinant of an abitrary
+                /* The determinant of an abitrary
                  * Matrix is defined only if it
-                 * is a square Matrix *
-                assert(a.rows == a.cols && a.rows > 0);
+                 * is a square Matrix.
+                 */
+                assert(a.__rows == a.__cols && a.__rows > 0);
 
                 size_t n;
                 size_t t;
@@ -895,7 +906,7 @@ namespace zhetapi {
                 }
 
                 return det;
-        } */
+        }
 
 }
 
