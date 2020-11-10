@@ -4,36 +4,36 @@
 #include <vector>
 
 // Engine headers
-#include <vector.hpp>
-#include <matrix.hpp>
-#include <tensor.hpp>
+#include <function.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-        Matrix <double> m1 {{3, 4}, {4, 6}};
+	Function <double, int> f, df;
 
-        cout << m1 << endl;
+	cout << "======================================" << endl;
 
-        Matrix <double> m2 = m1;
+        f = "f(x) = 43x + x^2 + sin(x)/x + cos(x^2)";
 
-        cout << m2 << endl;
+	cout << endl << f << endl;
+	f.print();
 
-	Matrix <double> m3(m2);
+	df = f.differentiate("x");
 
-        cout << m3 << endl;
+	cout << endl << df << endl;
+	df.print();
 
-	Vector <double> v1 {1, 2, 3};
+	cout << "======================================" << endl;
 
-	cout << v1 << endl;
+        f = "f(x) = lg(x) + log(2, x)";
 
-        Vector <double> v2 = v1;
+	cout << endl << f << endl;
+	f.print();
 
-        cout << v2 << endl;
+	df = f.differentiate("x");
 
-	Vector <double> v3(v2);
-
-        cout << v3 << endl;
+	cout << endl << df << endl;
+	df.print();
 }

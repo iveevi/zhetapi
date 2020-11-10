@@ -8,31 +8,35 @@
 // Engine headers
 #include <vector.hpp>
 
-namespace ml {
+namespace zhetapi {
+		
+	namespace ml {
 
-	template <class T>
-	class Optimizer {
-	public:
-		Optimizer();
+		template <class T>
+		class Optimizer {
+		public:
+			Optimizer();
 
-		virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
+			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
-		virtual Optimizer *derivative() const;
-	};
+			virtual Optimizer *derivative() const;
+		};
 
-	template <class T>
-	Optimizer <T> ::Optimizer() {}
+		template <class T>
+		Optimizer <T> ::Optimizer() {}
 
-	template <class T>
-	Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
-	{
-		return {(comp - in).norm()};
-	}
+		template <class T>
+		Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
+		{
+			return {(comp - in).norm()};
+		}
 
-	template <class T>
-	Optimizer <T> *Optimizer <T> ::derivative() const
-	{
-		return new Optimizer();
+		template <class T>
+		Optimizer <T> *Optimizer <T> ::derivative() const
+		{
+			return new Optimizer();
+		}
+
 	}
 
 }

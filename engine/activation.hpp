@@ -8,36 +8,40 @@
 // Engine headers
 #include <vector.hpp>
 
-namespace ml {
+namespace zhetapi {
 
-	/*
-	 * Scalar activation
-	 *
-	 * @tparam T the input and output type of the activation
-	 */
-	template <class T>
-	class Activation {
-	public:
-		Activation();
+	namespace ml {
 
-		virtual Vector <T> operator()(const Vector <T> &) const;
+		/*
+		* Scalar activation
+		*
+		* @tparam T the input and output type of the activation
+		*/
+		template <class T>
+		class Activation {
+		public:
+			Activation();
 
-		virtual Activation *derivative() const;
-	};
+			virtual Vector <T> operator()(const Vector <T> &) const;
 
-	template <class T>
-	Activation <T> ::Activation() {}
+			virtual Activation *derivative() const;
+		};
 
-	template <class T>
-	Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
-	{
-		return x;
-	}
+		template <class T>
+		Activation <T> ::Activation() {}
 
-	template <class T>
-	Activation <T> *Activation <T> ::derivative() const
-	{
-		return new Activation();
+		template <class T>
+		Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
+		{
+			return x;
+		}
+
+		template <class T>
+		Activation <T> *Activation <T> ::derivative() const
+		{
+			return new Activation();
+		}
+
 	}
 
 }

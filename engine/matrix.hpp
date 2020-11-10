@@ -595,7 +595,7 @@ namespace zhetapi {
         {
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
-                                this->__array[i][j] = ftr();
+                                this->__array[i * __cols + j] = ftr();
                 }
         }
 

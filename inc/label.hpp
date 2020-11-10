@@ -1,6 +1,10 @@
 #ifndef LABEL_H_
 #define LABEL_H_
 
+// C/C++ headers
+#include <string>
+
+// Engine headers
 #include <types.hpp>
 
 namespace zhetapi {
@@ -50,7 +54,9 @@ namespace zhetapi {
 		l_node_reference,
 
 		// Miscellaneious
-		l_wildcard,
+		l_constant,
+		l_function,
+		l_operation_constant,
 
 		// Operations
 		l_dot,
@@ -58,32 +64,15 @@ namespace zhetapi {
 		l_multiplied,
 		l_divided,
 		l_power,
-		l_nat_log,
-		l_bin_log,
+		l_trigonometric,
+		l_natural_log,
+		l_binary_log,
+		l_constant_base_log,
+		l_variable_base_log,
 
 		// Variables
 		l_variable,		// Regular variable
 		l_variable_constant,	// Variable as a constant (differentiation)
-
-		// off
-		l_matrix_uncoded,	// Leave martix as nodes (with Variables)
-		l_vector_uncoded,	// Leave vector as nodes, then decode once substituion is performed
-
-		l_constant,		// keep to prevent errors
-		l_function,
-		l_exp,
-		l_polynomial,
-		l_exponential,
-		l_logarithmic,
-		l_trigonometric,
-		l_power_uncertain,
-		l_function_constant,
-		l_operation_constant,
-		l_constant_logarithmic,
-		l_summation,
-		l_summation_Variable,
-		l_summation_function,
-		l_factorial
 	};
 
 	/**
@@ -125,7 +114,9 @@ namespace zhetapi {
 		"node reference",
 
 		// Miscellaneious
-		"wildcard",
+		"constant",
+		"function",
+		"operation constant",
 
 		// Operations
 		"dot",
@@ -133,33 +124,15 @@ namespace zhetapi {
 		"multiplied",
 		"divided",
 		"power",
+		"trigonometric",
 		"natural logarithm",
 		"binary logarithm",
+		"constant base logarithm",
+		"variable base logarithm",
 
 		// Variable
 		"variable",
 		"variable constant",
-
-		// off
-		"vector uncoded",
-		"matrix uncoded",
-
-		"constant",
-		
-		"function",
-		"exponent",
-		"polynomic",
-		"exponential",
-		"logarithmic",
-		"trigonometric",
-		"power uncertain",
-		"function constant",
-		"operation constant",
-		"constant logarithmic",
-		"summation",
-		"summation variable",
-		"summation function",
-		"factorial"
 	};
 
 	bool is_constant(lbl type)

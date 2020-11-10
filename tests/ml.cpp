@@ -5,8 +5,8 @@
 #include <activation.hpp>
 #include <optimizer.hpp>
 
-#include <std_activation_classes.hpp>
-#include <std_optimizer_classes.hpp>
+#include <std/activation_classes.hpp>
+#include <std/optimizer_classes.hpp>
 
 #include <matrix.hpp>
 #include <vector.hpp>
@@ -14,7 +14,9 @@
 #include <tensor.hpp>
 
 using namespace std;
-using namespace ml;
+
+using namespace zhetapi;
+using namespace zhetapi::ml;
 
 int main()
 {

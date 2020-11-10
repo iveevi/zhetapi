@@ -1,13 +1,7 @@
 #!/bin/sh
 
-# Compile the program
-cmake .
-make $1
-
-# Create appropriate directories and move the program
 mkdir -p debug
 
-mv $1 debug/
+g++-8 -I engine -I inc tests/$1.cpp -o debug/$1-run
 
-# Run the program
-./debug/$1
+./debug/$1-run

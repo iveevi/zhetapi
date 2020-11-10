@@ -2,6 +2,7 @@
 #define NODE_MANAGER_H_
 
 // C/C++ headers
+#include "label.hpp"
 #include <fstream>
 #include <stack>
 
@@ -93,9 +94,12 @@ namespace zhetapi {
 		void simplify_separable(node &);
 
 		void differentiate(node &);
-		void differentiate_multiplied(node &);
-		void differentiate_power(node &);
-		void differentiate_nat_log(node &);
+		void differentiate_mul(node &);
+		void differentiate_pow(node &);
+		void differentiate_ln(node &);
+		void differentiate_lg(node &);
+		void differentiate_const_log(node &);
+		void differentiate_trig(node &);
 		
 		void refactor_reference(node &, const std::string &, Token *);
 
@@ -513,13 +517,19 @@ namespace zhetapi {
 			differentiate(ref.__leaves[1]);
 			break;
 		case l_multiplied:
-			differentiate_multiplied(ref);
+			differentiate_mul(ref);
 			break;
 		case l_power:
-			differentiate_power(ref);
+			differentiate_pow(ref);
 			break;
-		case l_nat_log:
-			differentiate_nat_log(ref);
+		case l_natural_log:
+			differentiate_ln(ref);
+			break;
+		case l_binary_log:
+			differentiate_lg(ref);
+			break;
+		case l_constant_base_log:
+			differentiate_const_log(ref);
 			break;
 		case l_variable:
 			ref.transfer(nf_one());
@@ -528,7 +538,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void node_manager <T, U> ::differentiate_multiplied(node &ref)
+	void node_manager <T, U> ::differentiate_mul(node &ref)
 	{
 		node ldif(ref.__leaves[0]);
 		differentiate(ldif);
@@ -536,7 +546,7 @@ namespace zhetapi {
 		node rdif(ref.__leaves[1]);
 		differentiate(rdif);
 
-		node tmp(new operation_holder("*"), l_multiplied, {
+		node tmp(new operation_holder("+"), l_multiplied, {
 			node(new operation_holder("*"), l_multiplied, {
 				ldif,
 				node(ref.__leaves[1])
@@ -551,7 +561,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void node_manager <T, U> ::differentiate_power(node &ref)
+	void node_manager <T, U> ::differentiate_pow(node &ref)
 	{
 		Token *mul = ref.__leaves[1].__tptr->copy();
 		Token *exp = __barn.compute("-", {mul, new Operand <U> (1)});
@@ -574,7 +584,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void node_manager <T, U> ::differentiate_nat_log(node &ref)
+	void node_manager <T, U> ::differentiate_ln(node &ref)
 	{
 		node diffed(ref.__leaves[0]);
 		differentiate(diffed);
@@ -582,6 +592,40 @@ namespace zhetapi {
 		node tmp(new operation_holder("/"), l_divided, {
 			diffed,
 			node(ref.__leaves[0])
+		});
+
+		ref.transfer(tmp);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_lg(node &ref)
+	{
+		node diffed(ref.__leaves[0]);
+		differentiate(diffed);
+
+		node tmp(new operation_holder("/"), l_divided, {
+			diffed,
+			node(new operation_holder("*"), l_multiplied, {
+				node(__barn.compute("ln", {new Operand <U> (2)}), l_none, {}),
+				node(ref.__leaves[0])
+			})
+		});
+
+		ref.transfer(tmp);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_const_log(node &ref)
+	{
+		node diffed(ref.__leaves[1]);
+		differentiate(diffed);
+
+		node tmp(new operation_holder("/"), l_divided, {
+			diffed,
+			node(new operation_holder("*"), l_multiplied, {
+				node(__barn.compute("ln", {value(ref.__leaves[0])}), l_none, {}),
+				node(ref.__leaves[1])
+			})
 		});
 
 		ref.transfer(tmp);
@@ -724,9 +768,11 @@ namespace zhetapi {
 		case add:
 		case sub:
 		case mul:
-		case dvs:
 			return display_pemdas(ref, ref.__leaves[0]) + " "
 				+ str + " " + display_pemdas(ref, ref.__leaves[1]);
+		case dvs:
+			return display_pemdas(ref, ref.__leaves[0])
+				+ str + display_pemdas(ref, ref.__leaves[1]);
 		case pwr:
 			return display_pemdas(ref, ref.__leaves[0]) + str
 				+ display_pemdas(ref, ref.__leaves[1]);
@@ -737,6 +783,9 @@ namespace zhetapi {
 		case xln:
 		case xlg:
 			return str + "(" + display_pemdas(ref, ref.__leaves[0]) + ")";
+		case lxg:
+			return str + "(" + display_pemdas(ref, ref.__leaves[0])
+				+ ", " + display_pemdas(ref, ref.__leaves[1]) + ")";
 		}
 
 		return str;
@@ -753,11 +802,12 @@ namespace zhetapi {
 
 		switch (rophptr->code) {
 		case mul:
-		case dvs:
 			if ((cophptr->code == add) || (cophptr->code == sub))
 				return display(child);
 			
 			return display(child);
+		case dvs:
+			return "(" + display(child) + ")";
 		case pwr:
 			if ((cophptr->code == add) || (cophptr->code == sub)
 				|| (cophptr->code == mul) || (cophptr->code == dvs))
@@ -811,7 +861,7 @@ namespace zhetapi {
 			break;
 		case Token::ftn:
 			/* Also add a different labeling if it is constant,
-			 * probably needs to be callde an operation constant
+			 * probably needs to be called an operation constant
 			 */
 			ref.__label = l_function;
 
@@ -862,10 +912,15 @@ namespace zhetapi {
 				ref.__label = l_power;
 			break;
 		case xln:
-			ref.__label = l_nat_log;
+			ref.__label = l_natural_log;
 			break;
 		case xlg:
-			ref.__label = l_bin_log;
+			ref.__label = l_binary_log;
+			break;
+		case lxg:
+			if (is_constant(ref.__leaves[0].__label) &&
+				!is_constant(ref.__leaves[1].__label))
+				ref.__label = l_constant_base_log;
 			break;
 		}
 	}
