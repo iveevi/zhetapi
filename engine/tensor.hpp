@@ -35,6 +35,10 @@ namespace zhetapi {
 		T &operator[](const std::vector <size_t> &);
 		const T &operator[](const std::vector <size_t> &) const;
 
+		// Comparison
+		template <class U>
+		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
+
 		// Printing functions
 		std::string print() const;
 
@@ -168,6 +172,21 @@ namespace zhetapi {
 			full += indices[i] * __dim[__dims - (i + 1)];
 		
 		return __array[full];
+	}
+
+	// Comparison
+	template <class T>
+	bool operator==(const Tensor <T> &a, const Tensor <T> &b)
+	{
+		if (a.__size != b.__size)
+			return false;
+
+		for (size_t i = 0; i < a.__size; i++) {
+			if (a.__array[i] != b.__array[i])
+				return false;
+		}
+
+		return true;
 	}
 
 	// Printing functions

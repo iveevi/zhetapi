@@ -115,6 +115,7 @@ namespace zhetapi {
 
                 std::string display() const;
 
+		// Matrix operator Matrix
                 template <class U>
                 friend const Matrix <U> &operator+(const Matrix <U> &, const Matrix <U> &);
                 
@@ -124,6 +125,14 @@ namespace zhetapi {
                 template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
+		// Matrix * Vector
+		template <class U>
+                friend Vector <U> operator*(const Matrix <U> &, const Vector <U> &);
+
+		template <class U>
+                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &);
+
+		// Matrix operator T
                 template <class U>
                 friend const Matrix <U> &operator*(const Matrix <U> &, const U &);
                 
@@ -136,6 +145,7 @@ namespace zhetapi {
                 template <class U>
                 friend const Matrix <U> &operator/(const U &, const Matrix <U> &);
 
+		// Matrix == Matrix
                 template <class U>
                 friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 
@@ -299,8 +309,8 @@ namespace zhetapi {
         template <class A>
         Matrix <T> ::Matrix(A x) : Tensor <T> ({1, 1}, T())
         {
-                if (typeid(A) == typeid(T))
-                        *this = Matrix(1, 1, (T) x);
+                // if (typeid(A) == typeid(T))
+                //        *this = Matrix(1, 1, (T) x);
         }
 
         template <class T>
@@ -398,19 +408,19 @@ namespace zhetapi {
         template <class T>
         T *Matrix <T> ::operator[](size_t i)
         {
-                return this->__array[i];
+                return (this->__array + i * __cols);
         }
 
         template <class T>
         const T *Matrix <T> ::operator[](size_t i) const
         {
-                return this->__array[i];
+                return (this->__array + i * __cols);
         }
 
         template <class T>
         Matrix <T> Matrix <T> ::append_above(const Matrix &m)
         {
-                assert(__cols == m.cols);
+                assert(__cols == m.__cols);
 
                 size_t t_rows = __rows;
                 size_t m_rows = m.__rows;
@@ -443,10 +453,10 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_below(const Matrix &m)
         {
-                assert(__cols == m.cols);
+                assert(__cols == m.__cols);
 
                 size_t t_rows = __rows;
-                size_t m_rows = m.rows;
+                size_t m_rows = m.__rows;
 
                 std::vector <std::vector <T>> row;
 
@@ -476,10 +486,10 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_left(const Matrix &m)
         {
-                assert(__rows == m.rows);
+                assert(__rows == m.__rows);
 
                 size_t t_cols = __cols;
-                size_t m_cols = m.cols;
+                size_t m_cols = m.__cols;
 
                 std::vector <std::vector <T>> row;
 
@@ -505,10 +515,10 @@ namespace zhetapi {
         template <class T>
         Matrix <T> Matrix <T> ::append_right(const Matrix &m)
         {
-                assert(__rows == m.rows);
+                assert(__rows == m.__rows);
 
                 size_t t_cols = __cols;
-                size_t m_cols = m.cols;
+                size_t m_cols = m.__cols;
 
                 std::vector <std::vector <T>> row;
 
@@ -534,7 +544,7 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::operator+=(const Matrix <T> &other)
         {
-                assert(__rows == other.rows && __cols == other.cols);
+                assert(__rows == other.__rows && __cols == other.__cols);
 
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
@@ -545,7 +555,7 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::operator-=(const Matrix <T> &other)
         {
-                assert(__rows == other.rows && __cols == other.cols);
+                assert(__rows == other.__rows && __cols == other.__cols);
 
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
@@ -670,7 +680,7 @@ namespace zhetapi {
         const Matrix <T> &Matrix <T> ::transpose() const
         {
                 Matrix <T> *out = new Matrix <T> (__cols, __rows, [&](size_t i, size_t j) {
-                        return this->__array[j][i];
+                        return this->__array[j * __cols + i];
                 });
 
                 return *out;
@@ -735,9 +745,9 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &operator+(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.rows == b.rows && a.cols == b.cols);
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
                 
-                Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
                         return a[i][j] + b[i][j];
                 });
 
@@ -747,9 +757,9 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &operator-(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.rows == b.rows && a.cols == b.cols);
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
 
-                Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
                         return a[i][j] - b[i][j];
                 });
 
@@ -759,12 +769,12 @@ namespace zhetapi {
         template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.cols == b.rows);
+                assert(a.__cols == b.__rows);
 
-                return Matrix <T> (a.rows, b.cols, [&](size_t i, size_t j) {
+                return Matrix <T> (a.__rows, b.__cols, [&](size_t i, size_t j) {
                         T acc = 0;
 
-                        for (size_t k = 0; k < a.cols; k++) {
+                        for (size_t k = 0; k < a.__cols; k++) {
                                 acc += a[i][k] * b[k][j];
                         }
 
@@ -775,7 +785,7 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &operator*(const Matrix <T> &a, const T &scalar)
         {
-                Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
                         return a[i][j] * scalar;
                 });
 
@@ -791,7 +801,7 @@ namespace zhetapi {
         template <class T>
         const Matrix <T> &operator/(const Matrix <T> &a, const T &scalar)
         {
-                Matrix <T> *out = new Matrix <T> (a.rows, a.cols, [&](size_t i, size_t j) {
+                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
                         return a[i][j] / scalar;
                 });
 
@@ -844,7 +854,7 @@ namespace zhetapi {
                 size_t n;
                 size_t t;
                 
-                n = a.rows;
+                n = a.__rows;
 
                 if (n == 1)
                         return a[0][0];

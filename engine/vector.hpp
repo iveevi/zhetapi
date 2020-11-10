@@ -7,6 +7,7 @@
 
 // Engine headers
 #include <tensor.hpp>
+#include <matrix.hpp>
 
 namespace zhetapi {
 		
@@ -34,6 +35,8 @@ namespace zhetapi {
 		Vector(size_t, std::function <T (size_t)>);
 		Vector(size_t, std::function <T *(size_t)>);
 
+		template <class A>
+		Vector(A);
 		// const Vector &operator=(const Matrix <T> &);
 
 		size_t size() const;
@@ -67,15 +70,30 @@ namespace zhetapi {
 		// Normalization
 		void normalize();
 
-		Vector normalized();
+		Vector normalized() const;
+		Vector transpose() const;
 
 		// Non-member functions
 		template <class U>
 		friend Vector <U> operator*(const Vector <U> &, const U &);
+
+		template <class U>
+		friend Vector <U> operator*(const U &, const Vector <U> &);
 		
 		template <class U>
 		friend Vector <U> operator/(const Vector <U> &, const U &);
 
+		template <class U>
+		friend Vector <U> operator/(const U &, const Vector <U> &);
+
+		// Matrix * Vector
+		template <class U>
+                friend Vector <U> operator*(const Matrix <U> &, const Vector <U> &);
+
+		template <class U>
+                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &);
+
+		// Vector operations
 		template <class U>
 		friend U inner(const Vector <U> &, const Vector <U> &);
 
@@ -132,6 +150,12 @@ namespace zhetapi {
 	{
 		for (size_t i = 0; i < this->__size; i++)
 			this->__array[i] = *(gen(i));
+	}
+
+	template <class T>
+	template <class A>
+	Vector <T> ::Vector(A x)
+	{
 	}
 
 
@@ -198,15 +222,15 @@ namespace zhetapi {
 	template <class T>
 	void Vector <T> ::operator+=(const Vector <T> &a)
 	{
-		for (size_t i = 0; i < this->rows; i++)
-			this->m_array[i][0] += a[i];
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] += a.__array[i];
 	}
 
 	template <class T>
 	void Vector <T> ::operator-=(const Vector <T> &a)
 	{
-		for (size_t i = 0; i < this->rows; i++)
-			this->m_array[i][0] -= a[i];
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] -= a.__array[i];
 	}
 
 
@@ -296,7 +320,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	Vector <T> Vector <T> ::normalized()
+	Vector <T> Vector <T> ::normalized() const
 	{
 		std::vector <T> out;
 
@@ -308,7 +332,17 @@ namespace zhetapi {
 		return Vector(out);
 	}
 
-	// Non-member functions
+
+
+	template <class T>
+        Vector <T> Vector <T> ::transpose() const
+        {
+                return Vector <T> (this->__size, [&](size_t i) {
+                        return this->__array[i];
+                });
+        }
+
+	// Non-member operators
 	template <class T>
 	Vector <T> operator+(const Vector <T> &a, const Vector <T> &b)
 	{
@@ -341,6 +375,17 @@ namespace zhetapi {
 	}
 
 	template <class T>
+	Vector <T> operator*(const T &b, const Vector <T> &a)
+	{
+		Vector <T> out = a;
+
+		for (size_t i = 0; i < a.size(); i++)
+			out[i] *= b;
+
+		return out;
+	}
+
+	template <class T>
 	Vector <T> operator/(const Vector <T> &a, const T &b)
 	{
 		Vector <T> out = a;
@@ -352,12 +397,55 @@ namespace zhetapi {
 	}
 
 	template <class T>
+	Vector <T> operator/(const T &b, const Vector <T> &a)
+	{
+		Vector <T> out = a;
+
+		for (size_t i = 0; i < a.size(); i++)
+			out[i] /= b;
+
+		return out;
+	}
+
+	// Matrix * Vector
+	template <class T>
+	Vector <T> operator*(const Matrix <T> &m, const Vector <T> &v)
+	{
+		assert(m.__cols == v.size());
+
+                return Vector <T> (m.__rows, [&](size_t i) {
+                        T acc = 0;
+
+                        for (size_t k = 0; k < m.__cols; k++)
+                                acc += m.__array[i * m.__rows + k] * v.__array[k];
+
+                        return acc;
+                });
+	}
+
+	template <class T>
+        Vector <T> operator*(const Vector <T> &v, const Matrix <T> &m)
+	{
+		assert(m.__cols == v.size());
+
+                return Vector <T> (m.__rows, [&](size_t i) {
+                        T acc = 0;
+
+                        for (size_t k = 0; k < m.__cols; k++)
+                                acc += m.__array[i * m.__rows + k] * v.__array[k];
+
+                        return acc;
+                });
+	}
+
+	// Non-member functions
+	template <class T>
 	T inner(const Vector <T> &a, const Vector <T> &b)
 	{
 		T acc = 0;
 
 		assert(a.size() == b.size());
-		for (size_t i = 0; i < a.rows; i++)
+		for (size_t i = 0; i < a.__size; i++)
 			acc += a[i] * b[i];
 
 		return acc;
@@ -366,7 +454,7 @@ namespace zhetapi {
 	template <class T>
 	T cross(const Vector <T> &a, const Vector <T> &b)
 	{
-		assert(a.size() == b.size() == 3);
+		assert(a.__size == b.size() == 3);
 
 		return {
 			a[1] * b[2] - a[2] * b[1],
@@ -374,6 +462,18 @@ namespace zhetapi {
 			a[0] * b[1] - a[1] * b[0]
 		};
 	}
+
+	template <class T>
+        const Vector <T> &shur(const Vector <T> &a, const Vector <T> &b)
+        {
+                assert(a.size() == b.size());
+
+                Vector <T> *out = new Vector <T> (a.size(), [&](size_t i) {
+                        return a[i] * b[i];
+                });
+
+                return *out;
+        }
 
 	// Static methods
 	template <class T>
