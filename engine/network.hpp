@@ -66,11 +66,13 @@ namespace zhetapi {
 
 			for (size_t i = 0; i < size - 1; i++) {
 				// Add extra column for constants (biases)
-				std::cout << "Before" << std::endl;
+				// std::cout << "Before" << std::endl;
 
 				Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
 
-				std::cout << "mat: " << mat << std::endl;
+				/* std::cout << "mat: " << mat << std::endl;
+				std::cout << "\trows: " << mat.get_rows() << std::endl;
+				std::cout << "\tcols: " << mat.get_cols() << std::endl; */
 
 				__weights.push_back(mat);
 			}
@@ -86,11 +88,20 @@ namespace zhetapi {
 
 			__xs.clear();
 			__dxs.clear();
+
+			using namespace std;
 			for (size_t i = 0; i < __weights.size(); i++) {
 				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
 
-				prv = __weights[i] * tmp.append_above(T (1));
+				cout << "tmp : " << tmp << endl;
+				cout << "appended : " << Matrix <T> (tmp.append_above(T (1))) << endl;
+				cout << "prv: " << prv << endl;
+
+				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 				tmp = (*__layers[i + 1].second)(prv);
+
+				cout << "POST tmp : " << tmp << endl;
+				cout << "POST prv: " << prv << endl;
 				
 				__dxs.insert(__dxs.begin(), (*__layers[i].second->derivative())(prv));
 			}
@@ -125,8 +136,16 @@ namespace zhetapi {
 			delta = shur(delta, __dxs[0]);
 
 			cout << "delta: " << delta << endl;
+			cout << "\trows: " << delta.get_rows() << endl;
+			cout << "\tcols: " << delta.get_cols() << endl;
 
-			cout << "xi^T: " << __xs[1].transpose() << endl;
+			auto xt = __xs[1].transpose();
+
+			cout << "x1^T: " << xt << endl;
+			cout << "\trows: " << xt.get_rows() << endl;
+			cout << "\tcols: " << xt.get_cols() << endl;
+
+			cout << "delta * x1^T: " << delta * xt << endl;
 		}
 
 		template <class T>

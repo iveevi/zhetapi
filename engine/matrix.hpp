@@ -37,6 +37,7 @@ namespace zhetapi {
         public:
                 Matrix();
                 Matrix(const Matrix <T> &);
+		Matrix(const Vector <T> &);
 
                 Matrix(T **);
                 Matrix(const std::vector <T> &);
@@ -125,12 +126,12 @@ namespace zhetapi {
                 template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
-		// Matrix * Vector
+		/* Matrix * Vector
 		template <class U>
                 friend Vector <U> operator*(const Matrix <U> &, const Vector <U> &);
 
 		template <class U>
-                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &);
+                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &); */
 
 		// Matrix operator T
                 template <class U>
@@ -166,6 +167,14 @@ namespace zhetapi {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__cols * i + j] = other.__array[__rows * i + j];
                 }
+        }
+
+	template <class T>
+        Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), Tensor <T>
+                                                       ({other.__rows, 1}, T())
+        {
+                for (int i = 0; i < __rows; i++)
+		        this->__array[i] = other.__array[i];
         }
 
         template <class T>
@@ -769,6 +778,15 @@ namespace zhetapi {
         template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
+		using namespace std;
+		cout << "========================" << endl;
+		cout << "a: " << a << endl;
+		cout << "\trows: " << a.get_rows() << endl;
+		cout << "\tcols: " << a.get_cols() << endl;
+		cout << "b: " << b << endl;
+		cout << "\trows: " << b.get_rows() << endl;
+		cout << "\tcols: " << b.get_cols() << endl;
+
                 assert(a.__cols == b.__rows);
 
                 return Matrix <T> (a.__rows, b.__cols, [&](size_t i, size_t j) {

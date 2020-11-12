@@ -24,7 +24,9 @@ namespace zhetapi {
 	class Vector : public Matrix <T> {
 	public:
 		Vector(const Vector &);
-		// Vector(const Matrix <T> &);
+
+		Vector &operator=(const Vector &);
+		Vector &operator=(const Matrix <T> &);
 
 		Vector(const std::vector <T> &);
 		Vector(const std::initializer_list <T> &);
@@ -87,12 +89,12 @@ namespace zhetapi {
 		template <class U>
 		friend Vector <U> operator/(const U &, const Vector <U> &);
 
-		// Matrix * Vector
+		/* Matrix * Vector
 		template <class U>
                 friend Vector <U> operator*(const Matrix <U> &, const Vector <U> &);
 
 		template <class U>
-                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &);
+                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &); */
 
 		// Vector operations
 		template <class U>
@@ -113,6 +115,35 @@ namespace zhetapi {
 			this->__array[i] = other.__array[i];
 	}
 
+	template <class T>
+	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
+	{
+		if (this != &other) {
+			delete this->__array;
+
+			this->__array = new T[other.__size];
+
+			for (size_t i = 0; i < this->__size; i++)
+				this->__array[i] = other.__array[i];
+		}
+
+		return *this;
+	}
+
+	template <class T>
+	Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
+	{
+		if (this != &other) {
+			delete this->__array;
+
+			this->__array = new T[other.get_rows()];
+
+			for (size_t i = 0; i < this->__size; i++)
+				this->__array[i] = other[i][0];
+		}
+
+		return *this;
+	}
 
 	/* template <class T>
 	Vector <T> ::Vector(const Matrix <T> &other)
@@ -410,7 +441,7 @@ namespace zhetapi {
 	}
 
 	// Matrix * Vector
-	template <class T>
+	/* template <class T>
 	Vector <T> operator*(const Matrix <T> &m, const Vector <T> &v)
 	{
 		assert(m.__cols == v.size());
@@ -438,7 +469,7 @@ namespace zhetapi {
 
                         return acc;
                 });
-	}
+	} */
 
 	// Non-member functions
 	template <class T>
