@@ -164,7 +164,7 @@ namespace zhetapi {
         {
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = other.__array[__rows * i + j];
+                                this->__array[__cols * i + j] = other.__array[__rows * i + j];
                 }
         }
 
@@ -182,7 +182,7 @@ namespace zhetapi {
                 // Allocate and fill
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = ref[i][j];
+                                this->__array[__cols * i + j] = ref[i][j];
                 }
         }
 
@@ -196,7 +196,7 @@ namespace zhetapi {
                 __cols = 1;
                 
                 for (int i = 0; i < __rows; i++)
-                        this->__array[i] = new T {ref[i]};
+                        this->__array[i] = ref[i];
         }
 
         template <class T>
@@ -214,7 +214,7 @@ namespace zhetapi {
                         for (int j = 0; j < __cols; j++) {
                                 assert(i < __rows && j < ref[i].size());
                                 
-                                this->__array[__rows * i + j] = ref[i][j];
+                                this->__array[__cols * i + j] = ref[i][j];
                         }
                 }
         }
@@ -237,7 +237,7 @@ namespace zhetapi {
                         for (auto t : lt) {
                                 assert(i < __rows && j < lt.size());
 
-                                this->__array[__rows * i + (j++)] = t;
+                                this->__array[__cols * i + (j++)] = t;
                         }
 
                         i++;
@@ -252,7 +252,7 @@ namespace zhetapi {
                 
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = val;
+                                this->__array[__cols * i + j] = val;
                 }
         }
 
@@ -264,7 +264,7 @@ namespace zhetapi {
                 
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = gen(i);
+                                this->__array[__cols * i + j] = gen(i);
                 }
         }
 
@@ -276,7 +276,7 @@ namespace zhetapi {
                 
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = *gen(i);
+                                this->__array[__cols * i + j] = *gen(i);
                 }
         }
 
@@ -288,7 +288,7 @@ namespace zhetapi {
 
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = gen(i, j);
+                                this->__array[__cols * i + j] = gen(i, j);
                 }
         }
 
@@ -301,7 +301,7 @@ namespace zhetapi {
                 this->__array = new T[__rows * __cols];
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__rows * i + j] = *gen(i, j);
+                                this->__array[__cols * i + j] = *gen(i, j);
                 }
         }
 

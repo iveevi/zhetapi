@@ -21,7 +21,7 @@ namespace zhetapi {
 	* corresponding row vectors.
 	*/
 	template <class T>
-	class Vector : public Tensor <T> {
+	class Vector : public Matrix <T> {
 	public:
 		Vector(const Vector &);
 		// Vector(const Matrix <T> &);
@@ -71,7 +71,8 @@ namespace zhetapi {
 		void normalize();
 
 		Vector normalized() const;
-		Vector transpose() const;
+
+		Matrix <T> transpose() const;
 
 		// Non-member functions
 		template <class U>
@@ -106,7 +107,7 @@ namespace zhetapi {
 	};
 
 	template <class T>
-	Vector <T> ::Vector(const Vector &other) : Tensor <T> ({other.size()}, T())
+	Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())
 	{
 		for (size_t i = 0; i < this->__size; i++)
 			this->__array[i] = other.__array[i];
@@ -120,12 +121,13 @@ namespace zhetapi {
 	}*/
 
 	template <class T>
-	Vector <T> ::Vector(const std::vector <T> &ref) : Tensor <T> (ref) {}
+	Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
 
 	template <class T>
 	Vector <T> ::Vector(const std::initializer_list <T> &ref)
 		: Vector(std::vector <T> (ref)) {}
 
+	// FIXME: Delegate Matrix constructor
 	template <class T>
 	Vector <T> ::Vector(size_t rs, T *ref)
 	{
@@ -134,22 +136,22 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	Vector <T> ::Vector(size_t rs, T def) : Tensor <T> ({rs}, def) {}
+	Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
 
 	template <class T>
 	Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
-		: Tensor <T> ({rs}, T())
+		: Matrix <T> (rs, 1, gen)
 	{
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = gen(i);
+		// for (size_t i = 0; i < this->__size; i++)
+		//	this->__array[i] = gen(i);
 	}
 
 	template <class T>
 	Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
-		: Tensor <T> ({rs}, T())
+		: Matrix <T> (rs, 1, gen)
 	{
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = *(gen(i));
+		// for (size_t i = 0; i < this->__size; i++)
+		//	this->__array[i] = *(gen(i));
 	}
 
 	template <class T>
@@ -335,10 +337,10 @@ namespace zhetapi {
 
 
 	template <class T>
-        Vector <T> Vector <T> ::transpose() const
+        Matrix <T> Vector <T> ::transpose() const
         {
-                return Vector <T> (this->__size, [&](size_t i) {
-                        return this->__array[i];
+                return Matrix <T> (1, this->__size, [&](size_t i, size_t j) {
+                        return this->__array[j];
                 });
         }
 
