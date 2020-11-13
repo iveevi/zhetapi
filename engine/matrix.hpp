@@ -557,7 +557,7 @@ namespace zhetapi {
 
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
-                                this->__array[i][j] += other->__array[i][j];
+                                this->__array[i][j] += other.__array[i][j];
                 }
         }
 
@@ -568,7 +568,7 @@ namespace zhetapi {
 
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
-                                this->__array[i][j] -= other->__array[i][j];
+                                this->__array[i * __cols + j] -= other.__array[i * __cols + j];
                 }
         }
 
@@ -778,15 +778,6 @@ namespace zhetapi {
         template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
-		using namespace std;
-		cout << "========================" << endl;
-		cout << "a: " << a << endl;
-		cout << "\trows: " << a.get_rows() << endl;
-		cout << "\tcols: " << a.get_cols() << endl;
-		cout << "b: " << b << endl;
-		cout << "\trows: " << b.get_rows() << endl;
-		cout << "\tcols: " << b.get_cols() << endl;
-
                 assert(a.__cols == b.__rows);
 
                 return Matrix <T> (a.__rows, b.__cols, [&](size_t i, size_t j) {

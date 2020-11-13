@@ -27,6 +27,8 @@ int main()
 	DeepNeuralNetwork <double> model({
 		{5, new Sigmoid <double> ()},
 		{7, new Sigmoid <double> ()},
+		{9, new ReLU <double> ()},
+		{9, new ReLU <double> ()},
 		{7, new Sigmoid <double> ()},
 		{5, new Sigmoid <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
@@ -39,7 +41,7 @@ int main()
 	auto input = Vector <double> {1, 1, 1, 1, 1};
 	auto target = Vector <double> {0.65, 0.43, 0.29, 0.25, 0.87};
 
-	size_t rounds = 10;
+	size_t rounds = 100000;
 
 	// Perform learning
 	for (size_t i = 0; i < rounds; i++) {
@@ -51,7 +53,7 @@ int main()
 		cout << "\tError = " << (*opt)(target, result)[0] << endl;
 		cout << "\tError = " << 100 * (target - result).norm()/result.norm() << "%" << endl;
 
-		model.learn(input, target, opt);
+		model.learn(input, target, opt, 0.0001);
 	}
 
 	// Free resources

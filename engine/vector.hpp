@@ -24,6 +24,7 @@ namespace zhetapi {
 	class Vector : public Matrix <T> {
 	public:
 		Vector(const Vector &);
+		Vector(const Matrix <T> &);
 
 		Vector &operator=(const Vector &);
 		Vector &operator=(const Matrix <T> &);
@@ -64,6 +65,9 @@ namespace zhetapi {
 		// Concatenating vectors
 		Vector append_above(const T &);
 		Vector append_below(const T &);
+
+		Vector remove_top();
+		Vector remove_bottom();
 
 		T norm() const;
 
@@ -116,13 +120,23 @@ namespace zhetapi {
 	}
 
 	template <class T>
+	Vector <T> ::Vector(const Matrix <T> &other) : Matrix <T> (other.get_rows(), 1, T())
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] = other[0][i];
+	}
+
+	template <class T>
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
 		if (this != &other) {
 			delete this->__array;
 
 			this->__array = new T[other.__size];
+			this->__rows = other.__rows;
+			this->__cols = other.__cols;
 
+			this->__size = other.__size;
 			for (size_t i = 0; i < this->__size; i++)
 				this->__array[i] = other.__array[i];
 		}
@@ -134,12 +148,10 @@ namespace zhetapi {
 	Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	{
 		if (this != &other) {
-			delete this->__array;
-
-			this->__array = new T[other.get_rows()];
+			*this = Vector(other.get_rows(), T());
 
 			for (size_t i = 0; i < this->__size; i++)
-				this->__array[i] = other[i][0];
+				this->__array[i] = other[0][i];
 		}
 
 		return *this;
@@ -327,6 +339,30 @@ namespace zhetapi {
 			total.push_back((*this)[i]);
 
 		total.push_back(x);
+
+		return Vector(total);
+	}
+
+	template <class T>
+	Vector <T> Vector <T> ::remove_top()
+	{
+		size_t t_sz = size();
+
+		std::vector <T> total;
+		for (size_t i = 1; i < t_sz; i++)
+			total.push_back((*this)[i]);
+
+		return Vector(total);
+	}
+
+	template <class T>
+	Vector <T> Vector <T> ::remove_bottom()
+	{
+		size_t t_sz = size();
+
+		std::vector <T> total;
+		for (size_t i = 0; i < t_sz - 1; i++)
+			total.push_back((*this)[i]);
 
 		return Vector(total);
 	}

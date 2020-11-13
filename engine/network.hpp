@@ -48,7 +48,7 @@ namespace zhetapi {
 
 			Vector <T> operator()(const Vector <T> &);
 
-			void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *);
+			void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *, T);
 
 			void randomize();
 
@@ -89,19 +89,11 @@ namespace zhetapi {
 			__xs.clear();
 			__dxs.clear();
 
-			using namespace std;
 			for (size_t i = 0; i < __weights.size(); i++) {
 				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
 
-				cout << "tmp : " << tmp << endl;
-				cout << "appended : " << Matrix <T> (tmp.append_above(T (1))) << endl;
-				cout << "prv: " << prv << endl;
-
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 				tmp = (*__layers[i + 1].second)(prv);
-
-				cout << "POST tmp : " << tmp << endl;
-				cout << "POST prv: " << prv << endl;
 				
 				__dxs.insert(__dxs.begin(), (*__layers[i].second->derivative())(prv));
 			}
@@ -110,9 +102,17 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void DeepNeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt)
+		void print_dims(const Matrix <T> &a)
 		{
 			using namespace std;
+			cout << "\trows: " << a.get_rows() << endl;
+			cout << "\tcols: " << a.get_cols() << endl;
+		}
+
+		template <class T>
+		void DeepNeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt, T alpha)
+		{
+			/* using namespace std;
 
 			cout << "================================" << endl;
 			
@@ -122,30 +122,79 @@ namespace zhetapi {
 			
 			cout << "Dxs:" << endl;
 			for (auto elem : __dxs)
-				cout << "Dx:\t" << elem << endl;
+				cout << "Dx:\t" << elem << endl; */
 			
 			assert(in.size() == __isize);
 			assert(out.size() == __osize);
 			
 			Vector <T> actual = (*this)(in);
-			
+
 			Vector <T> delta = (*(opt->derivative()))(out, actual);
 
-			cout << "delta: " << delta << endl;
-			
-			delta = shur(delta, __dxs[0]);
+			std::vector <Matrix <T>> changes;
 
-			cout << "delta: " << delta << endl;
-			cout << "\trows: " << delta.get_rows() << endl;
-			cout << "\tcols: " << delta.get_cols() << endl;
+			int n = __weights.size();
+			for (int i = n - 1; i >= 0; i--) {
+				/* cout << "=========================" << endl;
 
-			auto xt = __xs[1].transpose();
+				cout << "weight[" << i << "]" << endl;
+				print_dims(__weights[i]); */
 
-			cout << "x1^T: " << xt << endl;
-			cout << "\trows: " << xt.get_rows() << endl;
-			cout << "\tcols: " << xt.get_cols() << endl;
+				if (i != n - 1) {
+					/* cout << "weight^T:" << endl;
+					print_dims(__weights[i + 1].transpose()); */
 
-			cout << "delta * x1^T: " << delta * xt << endl;
+					delta = __weights[i + 1].transpose() * delta;
+
+					delta = delta.remove_top();
+
+					/* cout << "delta: " << endl;
+					print_dims(delta);
+
+					Vector <T> tmp(__weights[i + 1].transpose() * delta);
+
+					cout << "tmp alias:" << endl;
+					print_dims(__weights[i + 1].transpose() * delta);
+					
+					cout << "pre tmp: " << endl;
+					print_dims(tmp);
+
+					tmp = tmp.remove_top();
+
+					cout << "post tmp: " << endl;
+					print_dims(tmp); */
+					// delta = __weights[i + 1].transpose() * delta;
+				}
+
+				/* cout << "delta: " << endl;
+				print_dims(delta);
+
+				cout << "__dxs[(n - 1) - i]: " << endl;
+				print_dims(__dxs[(n - 1) - i]); */
+
+				delta = shur(delta, __dxs[(n - 1) - i]);
+
+				Matrix <T> xt = __xs[n - i - 1].transpose();
+
+				/* cout << "xt: " << endl;
+				print_dims(xt);
+
+				cout << "delta * xt:" << endl;
+				print_dims(delta * xt); */
+
+				changes.push_back(delta * xt);
+			}
+
+			// cout << "===P2: APPLY===" << endl;
+			for (size_t i = 0; i < n; i++) {
+				/* cout << "weights: " << endl;
+				print_dims(__weights[n - (i + 1)]);
+
+				cout << "changes: " << endl;
+				print_dims(changes[i]); */
+
+				__weights[n - (i + 1)] -= alpha * changes[i];
+			}
 		}
 
 		template <class T>
