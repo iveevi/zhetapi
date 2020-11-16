@@ -33,7 +33,7 @@ $ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
 
 The Zhetapi CLI is a command-line calculator application, similar to GNU Octave, with additional abilities to store variables and define functions. The user can also enter special commands, by using a `#` before specifying the command name (ie. the `#list` command lists all available commands).
 
-To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./install` (run `chmod +x install` if necessary). The command will build the CLI and make the `zhetapi` command globally available.
+To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./run install` (run `chmod +x install` if necessary). The command will build the CLI and make the `zhetapi` command globally available.
 
 To exit the CLI, simply enter `#q` or `#quit` from the CLi or terminate the program with `Ctrl-C`.
 
@@ -288,24 +288,14 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| cli |	Code for the Command Line Interface (CLI) application of Zhetapi. The
-CLI will allow the user to directly compute expressions and declare functions
-from the command line -- it is essentially a calculator application like `octave`.
+| source | Contains source code for the CLI, tests and upcoming features of
+this library.
 
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
 
 | inc | Contains the source used in library template headers, and which are
 optional to include. Includes code that is not meant to be seen by the users.
-
-| tests | Resources used to test library features.
-
-| texifier | Code to convert plain text math to Latex. Used on the website to
-turn results from plain text into Latex.
-
-| web | Code to run the web server for the Zhetapi website. This website
-supports the computation of mathematical expressions and it also provides graphing
-capabilities. This is still in early development.
 
 |===
 
