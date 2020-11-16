@@ -1,11 +1,31 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ "$#" -eq 0 ]; then
 	echo "Expected at least one argument"
 elif [ $1 = "install" ]; then
 	echo "Installing..."
 
-	./scripts/install
+	# Register apps directory
+	echo "PATH=${PATH}:$(pwd)/release" >> .env
+
+	source .env
+
+	# Compile and move apps
+	cmake .
+	make zhetapi
+
+	mkdir -p release
+	mv zhetapi release/
+
+	# Organize headers
+	if [ -d zhetapi-headers ]; then
+		rm -rf zhetapi-headers;
+	fi
+
+	mkdir zhetapi-headers
+
+	cp engine/* zhetapi-headers
+	cp -r inc/* zhetapi-headers
 elif [ $1 = "gdb" ]; then
 	echo "Running tests/$2.cpp on gdb"
 

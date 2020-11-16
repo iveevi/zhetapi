@@ -1,8 +1,0 @@
-#!/bin/sh
-
-# Compile and move apps
-cmake .
-make zhetapi
-
-mkdir -p release
-mv zhetapi release/
