@@ -26,11 +26,7 @@ int main()
 	// Initialize the model
 	DeepNeuralNetwork <double> model({
 		{5, new Sigmoid <double> ()},
-		{7, new Sigmoid <double> ()},
-		{9, new ReLU <double> ()},
-		{9, new ReLU <double> ()},
-		{7, new Sigmoid <double> ()},
-		{5, new Sigmoid <double> ()}
+		{5, new ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
 	model.randomize();
@@ -41,7 +37,15 @@ int main()
 	auto input = Vector <double> {1, 1, 1, 1, 1};
 	auto target = Vector <double> {0.65, 0.43, 0.29, 0.25, 0.87};
 
-	size_t rounds = 100000;
+	size_t rounds = 100;
+
+	bool init = true;
+
+	double err_i = 0;
+	double err_f = 0;
+
+	Vector <double> out_i {1, 1};
+	Vector <double> out_f {1, 1};
 
 	// Perform learning
 	for (size_t i = 0; i < rounds; i++) {
@@ -51,10 +55,30 @@ int main()
 
 		cout << "\n\t(1, 1) = " << result << endl;
 		cout << "\tError = " << (*opt)(target, result)[0] << endl;
-		cout << "\tError = " << 100 * (target - result).norm()/result.norm() << "%" << endl;
 
-		model.learn(input, target, opt, 0.0001);
+		err_f = 100 * (target - result).norm()/result.norm();
+		out_f = result;
+
+		if (init) {
+			err_i = err_f;
+			out_i = result;
+
+			init = false;
+		}
+
+		cout << "\tError = " << err_f << "%" << endl;
+
+		model.learn(input, target, opt, 0.01);
 	}
+
+	cout << endl << "================================" << endl;
+	cout << "Summary:" << endl;
+	cout << "\tInitial:" << endl;
+	cout << "\t\tValue: " << out_i << endl;
+	cout << "\t\tError: " << err_i << "%" << endl;
+	cout << "\tFinal: " << endl;
+	cout << "\t\tValue: " << out_f << endl;
+	cout << "\t\tError: " << err_f << "%" << endl;
 
 	// Free resources
 	delete opt;

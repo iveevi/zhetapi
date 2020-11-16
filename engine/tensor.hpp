@@ -47,6 +47,7 @@ namespace zhetapi {
 
                 // Dimension mismatch exception
                 class dimension_mismatch {};
+		class bad_dimensions {};
 	};
 
 	// Constructors and memory relevant functions
@@ -72,6 +73,9 @@ namespace zhetapi {
 
 		__dim[0] = __size;
 
+		if (!__size)
+			throw bad_dimensions();
+
 		__array = new T[__size];
 
 		for (size_t i = 0; i < __size; i++)
@@ -93,6 +97,9 @@ namespace zhetapi {
 
 		__size = prod;
 
+		if (!__size)
+			throw bad_dimensions();
+
 		__array = new T[prod];
 
 		for (size_t i = 0; i < prod; i++)
@@ -113,6 +120,9 @@ namespace zhetapi {
 		}
 
 		__size = prod;
+
+		if (!__size)
+			throw bad_dimensions();
 
 		if (arr.size() != __size)
                         throw dimension_mismatch();
@@ -195,6 +205,9 @@ namespace zhetapi {
 	{
 		if (__dims == 0)
 			return std::to_string(__array[0]);
+
+		if (!__dim)
+			return "[]";
 		
 		std::string out = "[";
 

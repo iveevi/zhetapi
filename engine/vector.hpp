@@ -23,6 +23,7 @@ namespace zhetapi {
 	template <class T>
 	class Vector : public Matrix <T> {
 	public:
+		Vector();
 		Vector(const Vector &);
 		Vector(const Matrix <T> &);
 
@@ -111,6 +112,9 @@ namespace zhetapi {
 		static Vector one(size_t);
 		static Vector rarg(double, double);
 	};
+
+	template <class T>
+	Vector <T> ::Vector() : Matrix <T> () {}
 
 	template <class T>
 	Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())

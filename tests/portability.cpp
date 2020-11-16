@@ -1,112 +1,118 @@
 // C/C++ headers
 #include <iostream>
+#include <vector>
 
 // Engine headers
-#include <barn.hpp>
-#include <function.hpp>
-#include <expression.hpp>
+#include <vector.hpp>
+#include <matrix.hpp>
 #include <tensor.hpp>
 
 using namespace std;
-using namespace zhetapi;
 
+// Tests
+bool vector_construction_and_memory()
+{
+	using namespace zhetapi;
+
+	Vector <double> def_double;
+	Vector <float> def_float;
+	Vector <int> def_int;
+
+	try {
+		cout << "def_double: " << def_double << endl;
+		cout << "def_float: " << def_float << endl;
+		cout << "def_int: " << def_int << endl;
+	} catch (Tensor <double> ::bad_dimensions e) {
+		cout << endl << "Caught bad dimensions error..." << endl;
+		return false;
+	}
+
+	Vector <double> tmp {1, 1, 1, 4, 6};
+
+	cout << "Initializer list constructor: " << tmp << endl;
+
+	vector <double> nums {1, 6, 3, 8, 1};
+
+	tmp = Vector <double> (nums);
+
+	cout << "Vector construction and assignment operator: " << tmp << endl;
+
+	tmp = Vector <double> (4, 6);
+
+	cout << "Size and default value constructor: " << tmp << endl;
+
+	double *arr = new double[10];
+	for (size_t i = 0; i < 10; i++)
+		arr[i] = pow(i, 3.14);
+
+	tmp = Vector <double> (10, arr);
+
+	cout << "Size and pointer constructor: " << tmp << endl;
+	
+	tmp = Vector <double> (5, arr);
+	
+	cout << "Cropped size and pointer constructor: " << tmp << endl;
+
+	delete arr;
+
+	return true;
+}
+
+bool matrix_construction_and_memory()
+{
+	using namespace zhetapi;
+
+	Matrix <double> def_double;
+	Matrix <float> def_float;
+	Matrix <int> def_int;
+
+	try {
+		cout << "def_double: " << def_double << endl;
+		cout << "def_float: " << def_float << endl;
+		cout << "def_int: " << def_int << endl;
+	} catch (Tensor <double> ::bad_dimensions e) {
+		cout << endl << "Caught bad dimensions error..." << endl;
+		return false;
+	}
+
+	return true;
+}
+
+// Testing rig
+vector <pair <string, bool(*)()>> rig {
+	{"vector construction and memory safety", &vector_construction_and_memory},
+	{"matrix construction and memory safety", &matrix_construction_and_memory}
+};
+
+// Main program
 int main()
 {
-	cout << "Running portability tests..." << endl;
+	// Run tests in the test rig
+	bool first = true;
 
-	//////////////////////////////////////////////////////////////
+	int count = 0;
+	for (auto pr : rig) {
+		if (first)
+			first = false;
+		else
+			cout << endl;
 
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Placement into Barns...\n" << endl;
+		cout << "==============================" << endl;
+		cout << "Running \"" << pr.first << "\" test:" << endl;
 
-	Barn <double, int> b;
+		cout << endl << "--------------------" << endl;
+		bool tmp = pr.second();
+		cout << "--------------------" << endl;
 
-	Variable <double, int> var {"e", 2.17};
-
-	b.put(var);
-
-	cout << "var: " << var << endl;
-	cout << "barn-var: " << b.retrieve_variable("e") << endl;
-	cout << "barn-var: " << b.get("e")->str() << endl;
-
-	//////////////////////////////////////////////////////////////
-
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Expression computation...\n" << endl;
-
-	Barn <double, int> barn;
-
-	barn.put(Variable <double, int> {"e", exp(1)});
-	barn.put(Variable <double, int> {"pi", acos(-1)});
-
-	std::string str;
-
-	while (getline(cin, str)) {
-		try {
-			zhetapi::node_manager <double, int> tmp(str, barn);
-
-			zhetapi::Token *tptr = tmp.value();
-
-			cout << "Value: " << tptr->str() << endl;
-		} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
-			cout << e.what() << endl;
-		} catch (zhetapi::node_manager <double, int> ::error e) {
-			cout << e.what() << endl;
-		} catch (...) {
-			cout << "Another Exception" << endl;
+		if (tmp) {
+			cout << endl << "\"" << pr.first << "\" test PASSED." << endl;
+			count++;
+		} else {
+			cout << endl << "\"" << pr.first << "\" test FAILED." << endl;
 		}
+
+		cout << "==============================" << endl;
 	}
 
-	//////////////////////////////////////////////////////////////
-
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Function computation and differentiation...\n" << endl;
-
-	Function <double, int> f = std::string("f(x, y) = x^2 + y");
-
-	try {
-		cout << "f(10, -4) = " << f(10, -4)->str() << std::endl;
-
-		cout << "df/dx (10, -4) = " << f.derivative("x", 10, -4)->str() << std::endl;
-	} catch (Barn <double, int> ::unknown_operation_overload_exception e) {
-		cout << e.what() << endl;
-	}
-
-	try {
-		Function <double, int> g = std::string("g(x, y) = x^2 + y = 54");
-	} catch (Function <double, int> ::invalid_definition e) {
-		cout << "Exception caught succesfully" << endl;
-	}
-
-	//////////////////////////////////////////////////////////////
-
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Expression functions...\n" << endl;
-
-	cout << "1: " << zhetapi::expr_str <double, int> ("2 * 4") << endl;
-
-	int x = zhetapi::expr <int> ("3 * 6");
-
-	cout << "x: " << x << endl;
-
-	//////////////////////////////////////////////////////////////
-
-	cout << endl << "==========================================================" << endl;
-	cout << endl << "Tensor and indexing...\n" << endl;
-
-	zhetapi::Tensor <double> tensor({4, 5, 3}, 4);
-
-	cout << tensor << endl;
-
-	tensor[{0, 0, 0}] = 45;
-
-	cout << tensor << endl;
-
-	zhetapi::Tensor <double> vector({3, 2}, {1, 2, 3, 4, 5, 6});
-
-	cout << vector << endl;
-
-	vector[{0, 1}] = 25;
-
-	cout << vector << endl;
+	cout << endl << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;
 }
