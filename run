@@ -27,35 +27,35 @@ elif [ $1 = "install" ]; then
 	cp engine/* zhetapi-headers
 	cp -r inc/* zhetapi-headers
 elif [ $1 = "gdb" ]; then
-	echo "Running tests/$2.cpp on gdb"
+	echo "Running source/$2.cpp on gdb"
 
 	mkdir -p debug
 
-	g++-8 -g -I engine -I inc tests/$2.cpp -o debug/$2-debug
+	g++-8 -g -I engine -I inc source/$2.cpp -o debug/$2-debug
 
 	gdb ./debug/$2-debug
 elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
-	echo "Running tests/$2.cpp on valgrind"
+	echo "Running source/$2.cpp on valgrind"
 
 	mkdir -p debug
 
-	g++-8 -g -I engine -I inc tests/$2.cpp -o debug/$2-debug
+	g++-8 -g -I engine -I inc source/$2.cpp -o debug/$2-debug
 
 	valgrind ./debug/$2-debug
 elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
-	echo "Running tests/$2.cpp with optimization"
+	echo "Running source/$2.cpp with optimization"
 
 	mkdir -p debug
 
-	g++-8 -O3 -I engine -I inc tests/$2.cpp -o debug/$2-opt
+	g++-8 -O3 -I engine -I inc source/$2.cpp -o debug/$2-opt
 
 	./debug/$2-opt
 else
-	echo "Running tests tests/$1"
+	echo "Running source/$1.cpp"
 
 	mkdir -p debug
 
-	g++-8 -I engine -I inc tests/$2.cpp -o debug/$2-run
+	g++-8 -I engine -I inc source/$1.cpp -o debug/$1-run
 
-	./debug/$2-run
+	./debug/$1-run
 fi
