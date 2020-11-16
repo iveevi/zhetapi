@@ -288,14 +288,11 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| source | Contains source code for the CLI, tests and upcoming features of
-this library.
+| source | Contains source code for the headers, CLI, tests and upcoming
+features of this library.
 
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
-
-| inc | Contains the source used in library template headers, and which are
-optional to include. Includes code that is not meant to be seen by the users.
 
 |===
 
