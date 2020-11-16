@@ -1,7 +1,0 @@
-#!/bin/sh
-
-mkdir -p debug/
-
-g++-8 -g -I engine -I inc -I inc/std tests/$1.cpp -o debug/$1-debug
-
-valgrind --leak-check=full ./debug/$1-debug
