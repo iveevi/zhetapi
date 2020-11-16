@@ -6,8 +6,7 @@
 #include <functional>
 
 // Engine headers
-#include <tensor.hpp>
-#include <matrix.hpp>
+#include "matrix.hpp"
 
 namespace zhetapi {
 		

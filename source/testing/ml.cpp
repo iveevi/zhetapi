@@ -2,16 +2,16 @@
 #include <iostream>
 #include <random>
 
-#include <activation.hpp>
-#include <optimizer.hpp>
+#include "../../engine/activation.hpp"
+#include "../../engine/optimizer.hpp"
 
-#include <std/activation_classes.hpp>
-#include <std/optimizer_classes.hpp>
+#include "../../engine/std/activation_classes.hpp"
+#include "../../engine/std/optimizer_classes.hpp"
 
-#include <matrix.hpp>
-#include <vector.hpp>
-#include <network.hpp>
-#include <tensor.hpp>
+#include "../../engine/matrix.hpp"
+#include "../../engine/vector.hpp"
+#include "../../engine/network.hpp"
+#include "../../engine/tensor.hpp"
 
 using namespace std;
 

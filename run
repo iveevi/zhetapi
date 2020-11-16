@@ -31,7 +31,7 @@ elif [ $1 = "gdb" ]; then
 
 	mkdir -p debug
 
-	g++-8 -g -I engine -I inc source/$2.cpp -o debug/$2-debug
+	g++-8 -g source/testing/$2.cpp -o debug/$2-debug
 
 	gdb ./debug/$2-debug
 elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
@@ -39,7 +39,7 @@ elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
 
 	mkdir -p debug
 
-	g++-8 -g -I engine -I inc source/$2.cpp -o debug/$2-debug
+	g++-8 -g source/testing/$2.cpp -o debug/$2-debug
 
 	valgrind ./debug/$2-debug
 elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
@@ -47,7 +47,7 @@ elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
 
 	mkdir -p debug
 
-	g++-8 -O3 -I engine -I inc source/$2.cpp -o debug/$2-opt
+	g++-8 -O3 source/testing/$2.cpp -o debug/$2-opt
 
 	./debug/$2-opt
 else
@@ -55,7 +55,7 @@ else
 
 	mkdir -p debug
 
-	g++-8 -I engine -I inc source/$1.cpp -o debug/$1-run
+	g++-8 source/testing/$1.cpp -o debug/$1-run
 
 	./debug/$1-run
 fi

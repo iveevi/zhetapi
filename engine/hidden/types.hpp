@@ -5,11 +5,10 @@
 #include <typeindex>
 
 // Engine headers
-#include <operand.hpp>
-#include <rational.hpp>
-#include <complex.hpp>
-#include <vector.hpp>
-#include <matrix.hpp>
+#include "../engine/operand.hpp"
+#include "../engine/rational.hpp"
+#include "../engine/complex.hpp"
+#include "../engine/matrix.hpp"
 
 #define __TYPEDEFS__						\
 		typedef U Z;					\

@@ -13,20 +13,23 @@
 #include <typeindex>
 #include <typeinfo>
 #include <unordered_map>
+#include <vector>
 
 // Engine headers
-#include <complex.hpp>
-#include <ftable.hpp>
-#include <matrix.hpp>
-#include <operand.hpp>
-#include <operation.hpp>
-#include <rational.hpp>
-#include <std/combinatorial.hpp>
-#include <token.hpp>
-#include <types.hpp>
-#include <variable.hpp>
-#include <vector.hpp>
-#include <vtable.hpp>
+#include "complex.hpp"
+#include "matrix.hpp"
+#include "operand.hpp"
+#include "rational.hpp"
+#include "token.hpp"
+#include "vector.hpp"
+#include "variable.hpp"
+
+#include "../inc/types.hpp"
+#include "../inc/ftable.hpp"
+#include "../inc/operation.hpp"
+#include "../inc/vtable.hpp"
+
+#include "../inc/std/combinatorial.hpp"
 
 namespace zhetapi {
 

@@ -5,11 +5,13 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <sstream>
 
 // Engine headers
-#include <token.hpp>
-#include <label.hpp>
-#include <class.hpp>
+#include "../token.hpp"
+
+#include "label.hpp"
+#include "class.hpp"
 
 namespace zhetapi {
 

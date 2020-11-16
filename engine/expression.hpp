@@ -16,7 +16,7 @@
 
 namespace zhetapi {
 
-#define BUF_SIZE	1024
+#define BUF_SIZE 1024
 
 	// Exception classes
 	class type_mismatch {};

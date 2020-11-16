@@ -8,8 +8,9 @@
 #include <memory>
 
 // Engine headers
-#include <token.hpp>
-#include <types.hpp>
+#include "token.hpp"
+
+#include "hidden/types.hpp"
 
 namespace zhetapi {
 

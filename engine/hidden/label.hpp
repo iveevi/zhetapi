@@ -5,7 +5,9 @@
 #include <string>
 
 // Engine headers
-#include <types.hpp>
+#include "../token.hpp"
+
+#include "types.hpp"
 
 namespace zhetapi {
 
@@ -80,86 +82,14 @@ namespace zhetapi {
 	 * of the corresponding labels
 	 * in the label enumeration.
 	 */
-	std::string strlabs[] = {
-		// Default
-		"none",
+	extern std::string strlabs[];
 
-		// Constants
-		"constant integer",
-		"constant rational",
-		"constant real",
+	// Forward declarations
+	bool is_constant(lbl);
+	bool is_constant_operand(lbl);
+	bool is_variable(lbl);
 
-		"constant complex integer",
-		"constant complex rational",
-		"constant complex real",
-
-		"constant vector integer",
-		"constant vector rational",
-		"constant vector real",
-
-		"constant vector complex integer",
-		"constant vector complex rational",
-		"constant vector complex real",
-
-		"constant matrix integer",
-		"constant matrix rational",
-		"constant matrix real",
-
-		"constant matrix complex integer",
-		"constant matrix complex rational",
-		"constant matrix complex real",
-		
-		// References
-		"variable reference",
-		"node reference",
-
-		// Miscellaneious
-		"constant",
-		"function",
-		"operation constant",
-
-		// Operations
-		"dot",
-		"separable",
-		"multiplied",
-		"divided",
-		"power",
-		"trigonometric",
-		"natural logarithm",
-		"binary logarithm",
-		"constant base logarithm",
-		"variable base logarithm",
-
-		// Variable
-		"variable",
-		"variable constant",
-	};
-
-	bool is_constant(lbl type)
-	{
-		if ((type >= l_constant_integer)
-				&& (type <= l_constant_matrix_complex_real)
-				|| (type == l_operation_constant)
-				|| (type == l_variable_constant))
-			return true;
-
-		return false;
-	}
-
-	bool is_constant_operand(lbl type)
-	{
-		if ((type >= l_constant_integer)
-				&& (type <= l_constant_matrix_complex_real))
-			return true;
-
-		return false;
-	}
-
-	bool is_variable(lbl type)
-	{
-		return !is_constant(type);
-	}
-
+	// Template functions
 	template <class T, class U>
 	lbl constant_label(Token *tptr)
 	{
@@ -209,7 +139,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Token *true_Token(Token *tptr)
+	Token *true_token(Token *tptr)
 	{
 		typename types <T, U> ::opd_z *oz = dynamic_cast <typename types <T, U> ::opd_z *> (tptr);
 		if (oz != nullptr)

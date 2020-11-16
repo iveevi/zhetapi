@@ -10,7 +10,7 @@
 #include <sstream>
 
 // Engine headers
-#include <tensor.hpp>
+#include "tensor.hpp"
 
 #ifdef minor
 
