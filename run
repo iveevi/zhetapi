@@ -1,7 +1,41 @@
 #!/bin/sh
 
-mkdir -p debug
+if [ "$#" -eq 0 ]; then
+	echo "Expected at least one argument"
+elif [ $1 = "install" ]; then
+	echo "Installing..."
 
-g++-8 -I engine -I inc tests/$1.cpp -o debug/$1-run
+	./scripts/install
+elif [ $1 = "gdb" ]; then
+	echo "Running tests/$2.cpp on gdb"
 
-./debug/$1-run
+	mkdir -p debug
+
+	g++-8 -g -I engine -I inc tests/$2.cpp -o debug/$2-debug
+
+	gdb ./debug/$2-debug
+elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
+	echo "Running tests/$2.cpp on valgrind"
+
+	mkdir -p debug
+
+	g++-8 -g -I engine -I inc tests/$2.cpp -o debug/$2-debug
+
+	valgrind ./debug/$2-debug
+elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
+	echo "Running tests/$2.cpp with optimization"
+
+	mkdir -p debug
+
+	g++-8 -O3 -I engine -I inc tests/$2.cpp -o debug/$2-opt
+
+	./debug/$2-opt
+else
+	echo "Running tests tests/$1"
+
+	mkdir -p debug
+
+	g++-8 -I engine -I inc tests/$2.cpp -o debug/$2-run
+
+	./debug/$2-run
+fi

@@ -3,6 +3,7 @@
 #include <vector>
 
 // Engine headers
+#include <function.hpp>
 #include <vector.hpp>
 #include <matrix.hpp>
 #include <tensor.hpp>
@@ -14,20 +15,11 @@ bool vector_construction_and_memory()
 {
 	using namespace zhetapi;
 
-	Vector <double> def_double;
-	Vector <float> def_float;
-	Vector <int> def_int;
+	Vector <double> tmp;
 
-	try {
-		cout << "def_double: " << def_double << endl;
-		cout << "def_float: " << def_float << endl;
-		cout << "def_int: " << def_int << endl;
-	} catch (Tensor <double> ::bad_dimensions e) {
-		cout << endl << "Caught bad dimensions error..." << endl;
-		return false;
-	}
+	cout << "Default constructor: " << tmp << endl;
 
-	Vector <double> tmp {1, 1, 1, 4, 6};
+	tmp = Vector <double> {1, 1, 1, 4, 6};
 
 	cout << "Initializer list constructor: " << tmp << endl;
 
@@ -62,18 +54,20 @@ bool matrix_construction_and_memory()
 {
 	using namespace zhetapi;
 
-	Matrix <double> def_double;
-	Matrix <float> def_float;
-	Matrix <int> def_int;
+	Matrix <double> tmp;
 
-	try {
-		cout << "def_double: " << def_double << endl;
-		cout << "def_float: " << def_float << endl;
-		cout << "def_int: " << def_int << endl;
-	} catch (Tensor <double> ::bad_dimensions e) {
-		cout << endl << "Caught bad dimensions error..." << endl;
-		return false;
-	}
+	cout << "Default constructor: " << tmp << endl;
+
+	return true;
+}
+
+bool tensor_construction_and_memory()
+{
+	using namespace zhetapi;
+
+	Tensor <double> tmp;
+
+	cout << "Default: " << tmp << endl;
 
 	return true;
 }
@@ -81,7 +75,8 @@ bool matrix_construction_and_memory()
 // Testing rig
 vector <pair <string, bool(*)()>> rig {
 	{"vector construction and memory safety", &vector_construction_and_memory},
-	{"matrix construction and memory safety", &matrix_construction_and_memory}
+	{"matrix construction and memory safety", &matrix_construction_and_memory},
+	{"tensor construction and memory safety", &tensor_construction_and_memory}
 };
 
 // Main program

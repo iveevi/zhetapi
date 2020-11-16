@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Register apps directory
 echo "PATH=${PATH}:$(pwd)/release" >> .env

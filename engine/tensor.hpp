@@ -203,11 +203,11 @@ namespace zhetapi {
 	template <class T>
 	std::string Tensor <T> ::print() const
 	{
-		if (__dims == 0)
-			return std::to_string(__array[0]);
-
 		if (!__dim)
 			return "[]";
+
+		if (__dims == 0)
+			return std::to_string(__array[0]);
 		
 		std::string out = "[";
 
