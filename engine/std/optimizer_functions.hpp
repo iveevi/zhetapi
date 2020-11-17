@@ -6,7 +6,7 @@
 #include <vector>
 
 // Engine headers
-#include "../vector.hpp"
+#include <vector.hpp>
 
 namespace zhetapi {
 		
@@ -45,7 +45,7 @@ namespace zhetapi {
 			for (size_t i = 0; i < comp.size(); i++)
 				sum += (comp[i] - in[i]) * (comp[i] - in[i]);
 					
-			return std::vector <T> {sum/T(comp.size())};
+			return ::std::vector <T> {sum/T(comp.size())};
 		}
 
 	}

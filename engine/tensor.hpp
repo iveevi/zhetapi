@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <cstring>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -23,27 +24,27 @@ namespace zhetapi {
                 // Construction and memory
 		Tensor();
                 Tensor(const Tensor &);
-		Tensor(const std::vector <T> &);
-		Tensor(const std::vector <std::size_t> &, const T & = T());
-		Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
+		Tensor(const ::std::vector <T> &);
+		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 
 		~Tensor();
 
                 Tensor &operator=(const Tensor &);
 
 		// Indexing
-		T &operator[](const std::vector <size_t> &);
-		const T &operator[](const std::vector <size_t> &) const;
+		T &operator[](const ::std::vector <size_t> &);
+		const T &operator[](const ::std::vector <size_t> &) const;
 
 		// Comparison
 		template <class U>
 		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
 
 		// Printing functions
-		std::string print() const;
+		::std::string print() const;
 
 		template <class U>
-		friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
+		friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
 
                 // Dimension mismatch exception
                 class dimension_mismatch {};
@@ -67,7 +68,7 @@ namespace zhetapi {
         }
 
 	template <class T>
-	Tensor <T> ::Tensor(const std::vector <T> &arr) : __dims(1), __size(arr.size())
+	Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size())
 	{
 		__dim = new size_t[1];
 
@@ -83,7 +84,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
+	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
 			: __dims(dim.size())
 	{
 		__dim = new size_t[__dims];
@@ -107,7 +108,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
+	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
 			: __dims(dim.size())
 	{
 		__dim = new size_t[__dims];
@@ -161,7 +162,7 @@ namespace zhetapi {
 
 	// Index
 	template <class T>
-	T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
+	T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices)
 	{
 		size_t full = 0;
 
@@ -173,7 +174,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
+	const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
 	{
 		size_t full = 0;
 
@@ -201,23 +202,28 @@ namespace zhetapi {
 
 	// Printing functions
 	template <class T>
-	std::string Tensor <T> ::print() const
+	::std::string Tensor <T> ::print() const
 	{
 		if (!__dim)
 			return "[]";
-
-		if (__dims == 0)
-			return std::to_string(__array[0]);
 		
-		std::string out = "[";
+		if (__dims == 0) {
+			::std::ostringstream oss;
 
-		std::vector <size_t> cropped;
+			oss << __array[0];
+
+			return oss.str();
+		}
+		
+		::std::string out = "[";
+
+		::std::vector <size_t> cropped;
 		for (int i = 0; i < ((int) __dims) - 1; i++)
 			cropped.push_back(__dim[i + 1]);
 
 		size_t left = __size/__dim[0];
 		for (size_t i = 0; i < __dim[0]; i++) {
-			std::vector <T> elems;
+			::std::vector <T> elems;
 
 			for (size_t k = 0; k < left; k++)
 				elems.push_back(__array[left * i + k]);
@@ -234,7 +240,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
+	::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
 	{
 		os << ts.print();
 

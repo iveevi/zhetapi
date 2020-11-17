@@ -5,31 +5,31 @@
 #include <sstream>
 
 // Engine headers
-#include "node.hpp"
+#include <hidden/node.hpp>
 
 namespace zhetapi {
 
 	class node_reference : public Token {
 	protected:
 		node *		__ref;
-		std::string	__symbol;
+		::std::string	__symbol;
 		size_t		__index;
 		bool		__var;
 	public:
-		node_reference(node *, const std::string &, size_t, bool = false);
+		node_reference(node *, const ::std::string &, size_t, bool = false);
 
 		node *get();
 		const node &get() const;
 
 		size_t index() const;
 
-		const std::string &symbol() const;
+		const ::std::string &symbol() const;
 
 		bool is_variable() const;
 
 		type caller() const override;
 		Token *copy() const override;
-		std::string str() const override;
+		::std::string str() const override;
 
 		virtual bool operator==(Token *) const override;
 

@@ -8,22 +8,22 @@
 #include <memory>
 
 // Engine headers
-#include "token.hpp"
+#include <token.hpp>
 
-#include "hidden/types.hpp"
+#include <hidden/types.hpp>
 
 namespace zhetapi {
 
 	template <class T, class U>
 	class Variable : public Token {
-		std::string			__symbol;
-		std::shared_ptr <Token>	__tptr;
+		::std::string			__symbol;
+		::std::shared_ptr <Token>	__tptr;
 	public:
 		// Constructor
-		Variable(Token * = nullptr, const std::string & = "");
+		Variable(Token * = nullptr, const ::std::string & = "");
 
 		template <class A>
-		Variable(const std::string &, const A &);
+		Variable(const ::std::string &, const A &);
 
 		Variable(const Variable &);
 
@@ -31,14 +31,14 @@ namespace zhetapi {
 		Variable &operator=(const Variable &);
 
 		// Reference
-		const std::shared_ptr <Token> &get() const;
-		std::shared_ptr <Token> &get();
+		const ::std::shared_ptr <Token> &get() const;
+		::std::shared_ptr <Token> &get();
 
-		const std::string &symbol() const;
+		const ::std::string &symbol() const;
 		
 		// Virtual functions
 		Token::type caller() const override;
-		std::string str() const override;
+		::std::string str() const override;
 		Token *copy() const;
 		bool operator==(Token *) const;
 
@@ -51,7 +51,7 @@ namespace zhetapi {
 
 		// Printing functions
 		template <class A, class B>
-		friend std::ostream &operator<<(std::ostream &, const Variable <A, B> &);
+		friend ::std::ostream &operator<<(::std::ostream &, const Variable <A, B> &);
 
 		// Exceptions
 		class illegal_type {};
@@ -59,14 +59,14 @@ namespace zhetapi {
 
 	// Constructors
 	template <class T, class U>
-	Variable <T, U> ::Variable(Token *tptr, const std::string &str) : __symbol(str)
+	Variable <T, U> ::Variable(Token *tptr, const ::std::string &str) : __symbol(str)
 	{
 		__tptr.reset(tptr);
 	}
 
 	template <class T, class U>
 	template <class A>
-	Variable <T, U> ::Variable(const std::string &str, const A &x) : __symbol(str)
+	Variable <T, U> ::Variable(const ::std::string &str, const A &x) : __symbol(str)
 	{
 		__tptr.reset(types <T, U> ::convert(x));
 
@@ -95,19 +95,19 @@ namespace zhetapi {
 
 	// Reference
 	template <class T, class U>
-	const std::shared_ptr <Token> &Variable <T, U> ::get() const
+	const ::std::shared_ptr <Token> &Variable <T, U> ::get() const
 	{
 		return __tptr;
 	}
 
 	template <class T, class U>
-	std::shared_ptr <Token> &Variable <T, U> ::get()
+	::std::shared_ptr <Token> &Variable <T, U> ::get()
 	{
 		return __tptr;
 	}
 
 	template <class T, class U>
-	const std::string &Variable <T, U> ::symbol() const
+	const ::std::string &Variable <T, U> ::symbol() const
 	{
 		return __symbol;
 	}
@@ -120,7 +120,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string Variable <T, U> ::str() const
+	::std::string Variable <T, U> ::str() const
 	{
 		if (__tptr)
 			return __symbol + "\t[" + __tptr->str() + "]";
@@ -160,7 +160,7 @@ namespace zhetapi {
 
 	// Printing
 	template <class T, class U>
-	std::ostream &operator<<(std::ostream &os, const Variable <T, U> &var)
+	::std::ostream &operator<<(::std::ostream &os, const Variable <T, U> &var)
 	{
 		os << var.str();
 

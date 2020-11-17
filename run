@@ -6,26 +6,26 @@ elif [ $1 = "install" ]; then
 	echo "Installing..."
 
 	# Register apps directory
-	echo "PATH=${PATH}:$(pwd)/release" >> .env
+	echo "PATH=${PATH}:$(pwd)/bin" >> .env
 
 	source .env
 
-	# Compile and move apps
+	# Run cmake
 	cmake .
+	
+	mkdir -p bin
+
+	# Compile and move shared library
+	make zhp
+
+	if [ -f "libzhp.so" ]; then
+		mv libzhp.so bin/
+	fi
+	
+	# Compile and move apps
 	make zhetapi
 
-	mkdir -p release
-	mv zhetapi release/
-
-	# Organize headers
-	if [ -d zhetapi-headers ]; then
-		rm -rf zhetapi-headers;
-	fi
-
-	mkdir zhetapi-headers
-
-	cp engine/* zhetapi-headers
-	cp -r inc/* zhetapi-headers
+	mv zhetapi bin/
 elif [ $1 = "gdb" ]; then
 	echo "Running source/$2.cpp on gdb"
 

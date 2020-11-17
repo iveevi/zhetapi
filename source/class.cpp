@@ -1,4 +1,4 @@
-#include "../engine/hidden/class.hpp"
+#include <hidden/class.hpp>
 
 namespace zhetapi {
 

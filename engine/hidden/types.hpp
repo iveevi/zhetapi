@@ -5,10 +5,10 @@
 #include <typeindex>
 
 // Engine headers
-#include "../engine/operand.hpp"
-#include "../engine/rational.hpp"
-#include "../engine/complex.hpp"
-#include "../engine/matrix.hpp"
+#include <operand.hpp>
+#include <rational.hpp>
+#include <complex.hpp>
+#include <matrix.hpp>
 
 #define __TYPEDEFS__						\
 		typedef U Z;					\
@@ -93,8 +93,8 @@ namespace zhetapi {
 		static bool is_zero(Token *);
 		static bool is_one(Token *);
 
-		static std::string symbol(const std::type_index &);
-		static std::string proper_symbol(const std::type_index &);
+		static ::std::string symbol(const ::std::type_index &);
+		static ::std::string proper_symbol(const ::std::type_index &);
 	};
 
 	// Factories
@@ -188,7 +188,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string types <T, U> ::symbol(const std::type_index &type)
+	::std::string types <T, U> ::symbol(const ::std::type_index &type)
 	{
 		// Complex numbers
 		if (type == typeid(Operand <Z>))
@@ -236,7 +236,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string types <T, U> ::proper_symbol(const std::type_index &type)
+	::std::string types <T, U> ::proper_symbol(const ::std::type_index &type)
 	{
 		// Complex numbers
 
@@ -282,8 +282,8 @@ namespace zhetapi {
 		if (type == typeid(Operand <MCR>))
 			return "Matrix <Complex <double>>";
 		
-		std::cout << "TYPE: " << type.name() << std::endl;
-		std::cout << "int: " << typeid(Operand <Z>).name() << std::endl;
+		::std::cout << "TYPE: " << type.name() << ::std::endl;
+		::std::cout << "int: " << typeid(Operand <Z>).name() << ::std::endl;
 
 		return "?";
 	}

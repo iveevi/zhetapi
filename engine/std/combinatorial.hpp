@@ -1,10 +1,12 @@
 #ifndef COMBINATORIAL_H_
 #define COMBINATORIAL_H_
 
+// C/C++ headers
 #include <cmath>
 #include <vector>
 
-#include "rational.hpp"
+// Engine headers
+#include <rational.hpp>
 
 namespace utility {
 
@@ -66,10 +68,10 @@ namespace utility {
 	 * function defaults to the library function
 	 * tgamma.
 	 *
-	 * @param gamma Used gamma function, defaults to std::tgamma
+	 * @param gamma Used gamma function, defaults to ::std::tgamma
 	 */
 	template <class T>
-	T binom(T n, T k, T (*gamma)(T) = std::tgamma)
+	T binom(T n, T k, T (*gamma)(T) = ::std::tgamma)
 	{
 		return falling_power(n, k) / gamma(k + 1);
 	}
@@ -96,25 +98,25 @@ namespace utility {
 	 * function.
 	 */
 	template <class T>
-	T gcd(T a, T b, T (*mod)(T, T) = std::fmod, T eps = 0)
+	T gcd(T a, T b, T (*mod)(T, T) = ::std::fmod, T eps = 0)
 	{
 		if (a == 0 || b == 0)
 			return 1;
 
-		a = std::abs(a);
-		b = std::abs(b);
+		a = ::std::abs(a);
+		b = ::std::abs(b);
 
 		if (a > b)
-			std::swap(a, b);
+			::std::swap(a, b);
 
-		while (std::abs(mod(b, a)) != 0) {
+		while (::std::abs(mod(b, a)) != 0) {
 			b = mod(b, a);
 
 			if (a > b)
-				std::swap(a, b);
+				::std::swap(a, b);
 		}
 
-		return std::min(a, b);
+		return ::std::min(a, b);
 	}
 
 	/**
@@ -124,7 +126,7 @@ namespace utility {
 	 * from the modulus function which is passed.
 	 */
 	template <class T>
-	T lcm(T a, T b, T(*mod)(T, T) = std::fmod, T eps = 0)
+	T lcm(T a, T b, T(*mod)(T, T) = ::std::fmod, T eps = 0)
 	{
 		return a * b / gcd(a, b, mod, eps);
 	}
@@ -141,20 +143,20 @@ namespace utility {
 		if (a == 0 || b == 0)
 			return 1;
 
-		a = std::abs(a);
-		b = std::abs(b);
+		a = ::std::abs(a);
+		b = ::std::abs(b);
 
 		if (a > b)
-			std::swap(a, b);
+			::std::swap(a, b);
 
 		while (b % a != 0) {
 			b %= a;
 
 			if (a > b)
-				std::swap(a, b);
+				::std::swap(a, b);
 		}
 
-		return std::min(a, b);
+		return ::std::min(a, b);
 	}
 
 	/**
@@ -174,9 +176,9 @@ namespace utility {
 	 * binomial function.
 	 */
 	template <class T>
-	std::vector <T> bernoulli_sequence_real(T n, T (*gamma)(T) = std::tgamma)
+	::std::vector <T> bernoulli_sequence_real(T n, T (*gamma)(T) = ::std::tgamma)
 	{
-		std::vector <T> ibs = {1};
+		::std::vector <T> ibs = {1};
 
 		T tmp;
 		for (T i = 1; i <= n; i++) {
@@ -187,7 +189,7 @@ namespace utility {
 				continue;
 			}
 
-			if (std::fmod(i, 2) == 1) {
+			if (::std::fmod(i, 2) == 1) {
 				ibs.push_back(0);
 				continue;
 			}
@@ -206,7 +208,7 @@ namespace utility {
 	 * using the Bernoulli sequence generator.
 	 */
 	template <class T>
-	T bernoulli_number_real(T n, T (*gamma)(T) = std::tgamma)
+	T bernoulli_number_real(T n, T (*gamma)(T) = ::std::tgamma)
 	{
 		if (n <= 0)
 			throw positive_flow_exception();
@@ -224,9 +226,9 @@ namespace utility {
 	 * small.
 	 */
 	template <class T>
-	std::vector <Rational <T>> bernoulli_sequence_rational(T n)
+	::std::vector <Rational <T>> bernoulli_sequence_rational(T n)
 	{
-		std::vector <Rational <T>> ibs = {{1, 1}};
+		::std::vector <Rational <T>> ibs = {{1, 1}};
 
 		Rational <T> tmp;
 		for (T i = 1; i <= n; i++) {
@@ -257,7 +259,7 @@ namespace utility {
 	 * generator.
 	 */
 	template <class T>
-	T bernoulli_number_rational(T n, T (*gamma)(T) = std::tgamma)
+	T bernoulli_number_rational(T n, T (*gamma)(T) = ::std::tgamma)
 	{
 		if (n <= 0)
 			throw positive_flow_exception();

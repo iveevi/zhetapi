@@ -13,7 +13,7 @@ namespace zhetapi {
 		c_exponential
 	};
 
-	extern std::string strclass[];
+	extern ::std::string strclass[];
 
 }
 

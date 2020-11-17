@@ -12,6 +12,7 @@ CMakeFiles
 Makefile
 __gen*
 __pycache__
+bin
 build
 cmake_install.cmake
 data

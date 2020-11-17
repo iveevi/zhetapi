@@ -1,0 +1,5 @@
+deploy:
+  provider: script
+  script: . ./run install
+  on:
+  branch: master

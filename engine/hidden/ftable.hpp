@@ -21,12 +21,12 @@ namespace zhetapi {
 		};
 	private:
 		node *		__tree;
-		std::size_t	__size;
+		::std::size_t	__size;
 	public:
 		ftable();
 		ftable(const ftable &);
 
-		ftable(const std::vector <Function <T, U>> &);
+		ftable(const ::std::vector <Function <T, U>> &);
 
 		template <class ... A>
 		ftable(A ...);
@@ -35,40 +35,40 @@ namespace zhetapi {
 
 		~ftable();
 		
-		Function <T, U> &get(const std::string &);
-		const Function <T, U> &find(const std::string &);
+		Function <T, U> &get(const ::std::string &);
+		const Function <T, U> &find(const ::std::string &);
 
-		std::vector <Function <T, U>> list() const;
+		::std::vector <Function <T, U>> list() const;
 
-		bool contains(const std::string &);
+		bool contains(const ::std::string &);
 
 		bool insert(const Function <T, U> &);
 
 		bool remove(const Function <T, U> &);
-		bool remove(const std::string &);
+		bool remove(const ::std::string &);
 
 		bool empty() const;
 
-		std::size_t size() const;
+		::std::size_t size() const;
 
 		void clear();
 
 		void print() const;
 	private:
-		void gather(std::vector <Function <T, U>> &, Function <T, U>) const;
+		void gather(::std::vector <Function <T, U>> &, Function <T, U>) const;
 		
 		template <class ... A>
-		void gather(std::vector <Function <T, U>> &, Function <T, U>, A ...) const;
+		void gather(::std::vector <Function <T, U>> &, Function <T, U>, A ...) const;
 
 		node *clone(node *);
 
 		void clear(node *(&));
 
-		void list(node *, std::vector <Function <T, U>> &) const;
+		void list(node *, ::std::vector <Function <T, U>> &) const;
 
 		void print(node *, int, int) const;
 
-		void splay(node *(&), const std::string &);
+		void splay(node *(&), const ::std::string &);
 		
 		void rotate_left(node *(&));
 		void rotate_right(node *(&));
@@ -92,7 +92,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	ftable <T, U> ::ftable(const std::vector <Function <T, U>> &fs)
+	ftable <T, U> ::ftable(const ::std::vector <Function <T, U>> &fs)
 		: ftable()
 	{
 		for (auto ft : fs)
@@ -103,7 +103,7 @@ namespace zhetapi {
 	template <class ... A>
 	ftable <T, U> ::ftable(A ... args) : ftable()
 	{
-		std::vector <Function <T, U>> pr;
+		::std::vector <Function <T, U>> pr;
 		gather(pr, args...);
 		
 		for (auto ft : pr)
@@ -132,7 +132,7 @@ namespace zhetapi {
 	/* Public interface of ftable;
 	* find methods, clear, print, etc. */
 	template <class T, class U>
-	Function <T, U> &ftable <T, U> ::get(const std::string &key)
+	Function <T, U> &ftable <T, U> ::get(const ::std::string &key)
 	{
 		if (!__tree)
 			throw null_tree();
@@ -146,7 +146,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	const Function <T, U> &ftable <T, U> ::find(const std::string &key)
+	const Function <T, U> &ftable <T, U> ::find(const ::std::string &key)
 	{
 		if (!__tree)
 			throw null_tree();
@@ -160,7 +160,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool ftable <T, U> ::contains(const std::string &key)
+	bool ftable <T, U> ::contains(const ::std::string &key)
 	{
 		Function <T, U> x;
 
@@ -174,9 +174,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::vector <Function <T, U>> ftable <T, U> ::list() const
+	::std::vector <Function <T, U>> ftable <T, U> ::list() const
 	{
-		std::vector <Function <T, U>> f;
+		::std::vector <Function <T, U>> f;
 
 		if (__tree)
 			list(__tree, f);
@@ -252,7 +252,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool ftable <T, U> ::remove(const std::string &str)
+	bool ftable <T, U> ::remove(const ::std::string &str)
 	{
 		if (!__size)
 			return false;
@@ -287,7 +287,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::size_t ftable <T, U> ::size() const
+	::std::size_t ftable <T, U> ::size() const
 	{
 		return size;
 	}
@@ -308,14 +308,14 @@ namespace zhetapi {
 	/* Protected methods (helpers methods);
 	* splay, rotate left/right, clone, ect. */
 	template <class T, class U>
-	void ftable <T, U> ::gather(std::vector <Function <T, U>> &pr, Function <T, U> ft) const
+	void ftable <T, U> ::gather(::std::vector <Function <T, U>> &pr, Function <T, U> ft) const
 	{
 		pr.push_back(ft);
 	}
 
 	template <class T, class U>
 	template <class ... A>
-	void ftable <T, U> ::gather(std::vector <Function <T, U>> &pr, Function <T, U> ft, A ... args) const
+	void ftable <T, U> ::gather(::std::vector <Function <T, U>> &pr, Function <T, U> ft, A ... args) const
 	{
 		pr.push_back(ft);
 		gather(pr, args...);
@@ -352,7 +352,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void ftable <T, U> ::list(node *ref, std::vector <Function <T, U>> &f) const
+	void ftable <T, U> ::list(node *ref, ::std::vector <Function <T, U>> &f) const
 	{
 		f.push_back(ref->__val);
 
@@ -370,21 +370,21 @@ namespace zhetapi {
 			return;
 
 		for (int i = 0; i < lev; i++)
-			std::cout << "\t";
+			::std::cout << "\t";
 
 		if (!dir)
-			std::cout << "Level #" << lev << " -- Root: ";
+			::std::cout << "Level #" << lev << " -- Root: ";
 		else if (dir == 1)
-			std::cout << "Level #" << lev << " -- Left: ";
+			::std::cout << "Level #" << lev << " -- Left: ";
 		else
-			std::cout << "Level #" << lev << " -- Right: ";
+			::std::cout << "Level #" << lev << " -- Right: ";
 
 		if (fnd == nullptr)
-			std::cout << "NULL";
+			::std::cout << "NULL";
 		else
-			std::cout << fnd->__val;
+			::std::cout << fnd->__val;
 		
-		std::cout << std::endl;
+		::std::cout << ::std::endl;
 		
 		if (fnd == nullptr)
 			return;
@@ -394,7 +394,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void ftable <T, U> ::splay(node *(&fnd), const std::string &id)
+	void ftable <T, U> ::splay(node *(&fnd), const ::std::string &id)
 	{
 		node *rt = nullptr;
 		node *lt = nullptr;

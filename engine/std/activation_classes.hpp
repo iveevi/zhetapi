@@ -2,10 +2,10 @@
 #define STD_ACTIVATION_CLASSES_H_
 
 // Engine headers
-#include "../activation.hpp"
+#include <activation.hpp>
 
 // Engine std module headers
-#include "activation_functions.hpp"
+#include <std/activation_functions.hpp>
 
 namespace zhetapi {
 		

@@ -10,7 +10,7 @@
 #include <sstream>
 
 // Engine headers
-#include "tensor.hpp"
+#include <tensor.hpp>
 
 #ifdef minor
 
@@ -40,32 +40,32 @@ namespace zhetapi {
 		Matrix(const Vector <T> &);
 
                 Matrix(T **);
-                Matrix(const std::vector <T> &);
-                Matrix(const std::vector <std::vector <T>> &);
+                Matrix(const ::std::vector <T> &);
+                Matrix(const ::std::vector <::std::vector <T>> &);
 
-                Matrix(const std::initializer_list <std::initializer_list <T>> &);
+                Matrix(const ::std::initializer_list <::std::initializer_list <T>> &);
 
                 Matrix(size_t, size_t, T = T());
 
-                Matrix(size_t, size_t, std::function <T (size_t)>);
-                Matrix(size_t, size_t, std::function <T *(size_t)>);
+                Matrix(size_t, size_t, ::std::function <T (size_t)>);
+                Matrix(size_t, size_t, ::std::function <T *(size_t)>);
                 
-                Matrix(size_t, size_t, std::function <T (size_t, size_t)>);
-                Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
+                Matrix(size_t, size_t, ::std::function <T (size_t, size_t)>);
+                Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);
 
                 template <class A>
                 Matrix(A);
 
-                std::pair <size_t, size_t> get_dimensions() const;
+                ::std::pair <size_t, size_t> get_dimensions() const;
 
                 size_t get_rows() const;
                 size_t get_cols() const;
 
-                const Matrix &slice(const std::pair <size_t, size_t> &,
-                                const std::pair <size_t, size_t> &) const;
+                const Matrix &slice(const ::std::pair <size_t, size_t> &,
+                                const ::std::pair <size_t, size_t> &) const;
 
-                Matrix slice(const std::pair <size_t, size_t> &,
-                                const std::pair <size_t, size_t> &);
+                Matrix slice(const ::std::pair <size_t, size_t> &,
+                                const ::std::pair <size_t, size_t> &);
 
                 void set(size_t, size_t, T);
 
@@ -96,16 +96,16 @@ namespace zhetapi {
                 void multiply_row(size_t, T);
 
                 // Miscellanious opertions
-                void randomize(const std::function <T ()> &);
+                void randomize(const ::std::function <T ()> &);
 
                 // Values
                 T determinant() const;
 
                 T minor(size_t, size_t) const;
-                T minor(const std::pair <size_t, size_t> &) const;
+                T minor(const ::std::pair <size_t, size_t> &) const;
 
                 T cofactor(size_t, size_t) const;
-                T cofactor(const std::pair <size_t, size_t> &) const;
+                T cofactor(const ::std::pair <size_t, size_t> &) const;
 
                 const Matrix &inverse() const;
                 const Matrix &adjugate() const;
@@ -114,7 +114,7 @@ namespace zhetapi {
 
                 bool symmetric() const;
 
-                std::string display() const;
+                ::std::string display() const;
 
 		// Matrix operator Matrix
                 template <class U>
@@ -196,7 +196,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
+        Matrix <T> ::Matrix(const ::std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
         {
                 __rows = ref.size();
 
@@ -209,7 +209,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref) : Tensor <T> ({ref.size(), ref[0].size()}, T())
+        Matrix <T> ::Matrix(const ::std::vector <::std::vector <T>> &ref) : Tensor <T> ({ref.size(), ref[0].size()}, T())
         {
                 __rows = ref.size();
 
@@ -229,7 +229,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq) : Tensor <T> ({sq.size(), sq.begin()->size()}, T())
+        Matrix <T> ::Matrix(const ::std::initializer_list <::std::initializer_list <T>> &sq) : Tensor <T> ({sq.size(), sq.begin()->size()}, T())
         {
                 __rows = sq.size();
 
@@ -266,7 +266,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
                 __rows = rs;
                 __cols = cs;
@@ -278,7 +278,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
                 __rows = rs;
                 __cols = cs;
@@ -290,7 +290,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
                 __rows = rs;
                 __cols = cs;
@@ -302,7 +302,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
         {
                 __rows = rs;
                 __cols = cs;
@@ -323,7 +323,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
+        ::std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
         {
                 return {__rows, __cols};
         }
@@ -341,8 +341,8 @@ namespace zhetapi {
         }
 
         template <class T>
-        const Matrix <T> &Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
-                        const std::pair <size_t, size_t> &end) const
+        const Matrix <T> &Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
+                        const ::std::pair <size_t, size_t> &end) const
         {
                 /* The following asserts make sure the pairs
                  * are in bounds of the Matrix and that they
@@ -368,8 +368,8 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
-                        const std::pair <size_t, size_t> &end)
+        Matrix <T> Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
+                        const ::std::pair <size_t, size_t> &end)
         {
                 /* The following asserts make sure the pairs
                  * are in bounds of the Matrix and that they
@@ -434,9 +434,9 @@ namespace zhetapi {
                 size_t t_rows = __rows;
                 size_t m_rows = m.__rows;
 
-                std::vector <std::vector <T>> row;
+                ::std::vector <::std::vector <T>> row;
 
-                std::vector <T> total;
+                ::std::vector <T> total;
 
                 for (size_t i = 0; i < m_rows; i++) {
                         total.clear();
@@ -467,9 +467,9 @@ namespace zhetapi {
                 size_t t_rows = __rows;
                 size_t m_rows = m.__rows;
 
-                std::vector <std::vector <T>> row;
+                ::std::vector <::std::vector <T>> row;
 
-                std::vector <T> total;
+                ::std::vector <T> total;
 
                 for (size_t i = 0; i < t_rows; i++) {
                         total.clear();
@@ -500,9 +500,9 @@ namespace zhetapi {
                 size_t t_cols = __cols;
                 size_t m_cols = m.__cols;
 
-                std::vector <std::vector <T>> row;
+                ::std::vector <::std::vector <T>> row;
 
-                std::vector <T> total;
+                ::std::vector <T> total;
 
                 for (size_t i = 0; i < __rows; i++) {
                         total.clear();
@@ -529,9 +529,9 @@ namespace zhetapi {
                 size_t t_cols = __cols;
                 size_t m_cols = m.__cols;
 
-                std::vector <std::vector <T>> row;
+                ::std::vector <::std::vector <T>> row;
 
-                std::vector <T> total;
+                ::std::vector <T> total;
 
                 for (size_t i = 0; i < __rows; i++) {
                         total.clear();
@@ -589,7 +589,7 @@ namespace zhetapi {
         template <class T>
         void Matrix <T> ::swap_rows(size_t a, size_t b)
         {
-                std::swap(this->__array[a], this->__array[b]);
+                ::std::swap(this->__array[a], this->__array[b]);
         }
 
         template <class T>
@@ -600,7 +600,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        void Matrix <T> ::randomize(const std::function<T ()> &ftr)
+        void Matrix <T> ::randomize(const ::std::function<T ()> &ftr)
         {
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
@@ -615,7 +615,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        T Matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
+        T Matrix <T> ::minor(const ::std::pair <size_t, size_t> &pr) const
         {
                 Matrix <T> *out = new Matrix <T> (__rows - 1, __cols - 1);
 
@@ -652,7 +652,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        T Matrix <T> ::cofactor(const std::pair <size_t, size_t> &pr) const
+        T Matrix <T> ::cofactor(const ::std::pair <size_t, size_t> &pr) const
         {
                 return (((pr.first + pr.second) % 2) ? -1 : 1) * minor(pr);
         }
@@ -721,9 +721,9 @@ namespace zhetapi {
         }
 
         template <class T>
-        std::string Matrix <T> ::display() const
+        ::std::string Matrix <T> ::display() const
         {
-                std::ostringstream oss;
+                ::std::ostringstream oss;
 
                 oss << "[";
 

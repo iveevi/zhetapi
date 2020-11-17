@@ -8,13 +8,13 @@ namespace zhetapi {
 
 	class wildcard : public Token {
 		node *		__ref;
-		std::string	__symbol;
+		::std::string	__symbol;
 	public:
 		wildcard();
 
 		type caller() const override;
 		Token *copy() const override;
-		std::string str() const override;
+		::std::string str() const override;
 
 		virtual bool operator==(Token *) const override;
 	};
@@ -31,7 +31,7 @@ namespace zhetapi {
 		return new wildcard();
 	}
 
-	std::string wildcard::str() const
+	::std::string wildcard::str() const
 	{
 		return "wildcard";
 	}

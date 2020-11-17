@@ -8,7 +8,7 @@
 #include <dlfcn.h>
 
 // Engine headers
-#include "../inc/node_manager.hpp"
+#include <hidden/node_manager.hpp>
 
 namespace zhetapi {
 
@@ -17,31 +17,31 @@ namespace zhetapi {
 	 */
 	template <class T, class U>
 	class Function : public Token {
-		std::string			__symbol;
-		std::vector <std::string>	__params;
+		::std::string			__symbol;
+		::std::vector <::std::string>	__params;
 		node_manager <T, U>		__manager;
 	public:
 		Function();
 		Function(const char *);
-		Function(const std::string &);
+		Function(const ::std::string &);
 
-		Function(const std::string &, const std::vector <std::string>
+		Function(const ::std::string &, const ::std::vector <::std::string>
 				&, const node_manager <T, U> &);
 
 		Function(const Function &);
 
-		std::string &symbol();
-		const std::string symbol() const;
+		::std::string &symbol();
+		const ::std::string symbol() const;
 
-		Token *operator()(std::vector <Token *>);
+		Token *operator()(::std::vector <Token *>);
 
 		template <class ... A>
 		Token *operator()(A ...);
 
 		template <class ... A>
-		Token *derivative(const std::string &, A ...);
+		Token *derivative(const ::std::string &, A ...);
 
-		Function <T, U> differentiate(const std::string &) const;
+		Function <T, U> differentiate(const ::std::string &) const;
 
 		template <class A, class B>
 		friend bool operator<(const Function <A, B> &, const Function <A, B> &);
@@ -49,31 +49,31 @@ namespace zhetapi {
 		template <class A, class B>
 		friend bool operator>(const Function <A, B> &, const Function <A, B> &);
 
-		std::string generate_general() const;
+		::std::string generate_general() const;
 
 		void *compile_general() const;
 
 		// Virtual overloads
 		Token::type caller() const override;
-		std::string str() const override;
+		::std::string str() const override;
 		Token *copy() const override;
 		bool operator==(Token *) const override;
 
 		// Printing
 		void print() const;
 
-		std::string display() const;
+		::std::string display() const;
 
 		template <class A, class B>
-		friend std::ostream &operator<<(std::ostream &, const Function <A, B> &);
+		friend ::std::ostream &operator<<(::std::ostream &, const Function <A, B> &);
 	private:
 		template <class A>
-		void gather(std::vector <Token *> &, A);
+		void gather(::std::vector <Token *> &, A);
 
 		template <class A, class ... B>
-		void gather(std::vector <Token *> &, A, B ...);
+		void gather(::std::vector <Token *> &, A, B ...);
 
-		size_t index(const std::string &) const;
+		size_t index(const ::std::string &) const;
 	public:
 		// Exception classes
 		class invalid_definition {};
@@ -96,14 +96,14 @@ namespace zhetapi {
 	Function <T, U> ::Function() {}
 
 	template <class T, class U>
-	Function <T, U> ::Function(const char *str) : Function(std::string
+	Function <T, U> ::Function(const char *str) : Function(::std::string
 			(str)) {}
 
 	template <class T, class U>
-	Function <T, U> ::Function(const std::string &str)
+	Function <T, U> ::Function(const ::std::string &str)
 	{
-		std::string pack;
-		std::string tmp;
+		::std::string pack;
+		::std::string tmp;
 
 		size_t count;
 		size_t index;
@@ -179,8 +179,8 @@ namespace zhetapi {
 
 	// Member-wise construction
 	template <class T, class U>
-	Function <T, U> ::Function(const std::string &symbol, const std::vector
-			<std::string> &params, const node_manager <T, U>
+	Function <T, U> ::Function(const ::std::string &symbol, const ::std::vector
+			<::std::string> &params, const node_manager <T, U>
 			&manager) : __symbol(symbol), __params(params),
 			__manager(manager) {}
 
@@ -191,20 +191,20 @@ namespace zhetapi {
 
 	// Getters
 	template <class T, class U>
-	std::string &Function <T, U> ::symbol()
+	::std::string &Function <T, U> ::symbol()
 	{
 		return __symbol;
 	}
 
 	template <class T, class U>
-	const std::string Function <T, U> ::symbol() const
+	const ::std::string Function <T, U> ::symbol() const
 	{
 		return __symbol;
 	}
 
 	// Computational utilities
 	template <class T, class U>
-	Token *Function <T, U> ::operator()(std::vector <Token *> toks)
+	Token *Function <T, U> ::operator()(::std::vector <Token *> toks)
 	{
 		assert(toks.size() == __params.size());
 
@@ -215,7 +215,7 @@ namespace zhetapi {
 	template <class ... A>
 	Token *Function <T, U> ::operator()(A ... args)
 	{
-		std::vector <Token *> Tokens;
+		::std::vector <Token *> Tokens;
 
 		gather(Tokens, args...);
 
@@ -226,9 +226,9 @@ namespace zhetapi {
 
 	template <class T, class U>
 	template <class ... A>
-	Token *Function <T, U> ::derivative(const std::string &str, A ... args)
+	Token *Function <T, U> ::derivative(const ::std::string &str, A ... args)
 	{
-		std::vector <Token *> Tokens;
+		::std::vector <Token *> Tokens;
 
 		gather(Tokens, args...);
 
@@ -271,10 +271,10 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Function <T, U> Function <T, U> ::differentiate(const std::string &str) const
+	Function <T, U> Function <T, U> ::differentiate(const ::std::string &str) const
 	{
 		// Improve naming later
-		std::string name = "d" + __symbol + "/d" + str;
+		::std::string name = "d" + __symbol + "/d" + str;
 
 		node_manager <T, U> dm = __manager;
 
@@ -286,7 +286,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string Function <T, U> ::generate_general() const
+	::std::string Function <T, U> ::generate_general() const
 	{
 		using namespace std;
 
@@ -294,7 +294,7 @@ namespace zhetapi {
 		
 
 
-		std::string file;
+		::std::string file;
 
 		file = "__gen_" + __symbol;
 
@@ -308,7 +308,7 @@ namespace zhetapi {
 	template <class T, class U>
 	void *Function <T, U> ::compile_general() const
 	{
-		std::string file = generate_general();
+		::std::string file = generate_general();
 
 #ifdef __linux__
 		system("mkdir -p gen");
@@ -322,12 +322,12 @@ namespace zhetapi {
 
 		void *handle = dlopen(("./gen/" + file + ".so").c_str(), RTLD_NOW);
 
-		// std::cout << "handle @ " << file << ": " << handle << std::endl;
+		// ::std::cout << "handle @ " << file << ": " << handle << ::std::endl;
 
 		const char *dlsym_error = dlerror();
 	
 		if (dlsym_error) {
-			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+			::std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 			
 			// dlclose(handle);
 			
@@ -336,13 +336,13 @@ namespace zhetapi {
 
 		void *ptr = dlsym(handle, file.c_str());
 
-		// std::cout << "\tptr: " << ptr << std::endl;
-		// std::cout << "\tfile: " << file << std::endl;
+		// ::std::cout << "\tptr: " << ptr << ::std::endl;
+		// ::std::cout << "\tfile: " << file << ::std::endl;
 
 		// dlsym_error = dlerror();
 	
 		if (dlsym_error) {
-			std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+			::std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 			
 			// dlclose(handle);
 			
@@ -354,7 +354,7 @@ namespace zhetapi {
 		dlsym_error = dlerror();
 
 		if (dlsym_error) {
-			std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
+			::std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
 			
 			// dlclose(handle);
 			
@@ -379,7 +379,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string Function <T, U> ::str() const
+	::std::string Function <T, U> ::str() const
 	{
 		return __symbol;
 	}
@@ -409,9 +409,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string Function <T, U> ::display() const
+	::std::string Function <T, U> ::display() const
 	{
-		std::string str = __symbol + "(";
+		::std::string str = __symbol + "(";
 
 		size_t n = __params.size();
 		for (size_t i = 0; i < n; i++) {
@@ -427,7 +427,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::ostream &operator<<(std::ostream &os, const Function <T, U> &ftr)
+	::std::ostream &operator<<(::std::ostream &os, const Function <T, U> &ftr)
 	{
 		os << ftr.display();
 		return os;
@@ -449,14 +449,14 @@ namespace zhetapi {
 	// Gathering facilities
 	template <class T, class U>
 	template <class A>
-	void Function <T, U> ::gather(std::vector <Token *> &Tokens, A in)
+	void Function <T, U> ::gather(::std::vector <Token *> &Tokens, A in)
 	{
 		Tokens.push_back(new Operand <A>(in));
 	}
 	
 	template <class T, class U>
 	template <class A, class ... B>
-	void Function <T, U> ::gather(std::vector <Token *> &Tokens, A in, B ... args)
+	void Function <T, U> ::gather(::std::vector <Token *> &Tokens, A in, B ... args)
 	{
 		Tokens.push_back(new Operand <A>(in));
 
@@ -464,14 +464,14 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	size_t Function <T, U> ::index(const std::string &str) const
+	size_t Function <T, U> ::index(const ::std::string &str) const
 	{
-		auto itr = std::find(__params.begin(), __params.end(), str);
+		auto itr = ::std::find(__params.begin(), __params.end(), str);
 
 		if (itr == __params.end())
 			return -1;
 
-		return std::distance(__params.begin(), itr);
+		return ::std::distance(__params.begin(), itr);
 	}
 
 	// External classes
@@ -486,7 +486,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Function <T, U> &Barn <T, U> ::retrieve_function(const std::string &str)
+	Function <T, U> &Barn <T, U> ::retrieve_function(const ::std::string &str)
 	{
 		return fstack.get(str);
 	}

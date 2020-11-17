@@ -1,11 +1,11 @@
-#ifndef Operand_H_
-#define Operand_H_
+#ifndef OPERAND_H_
+#define OPERAND_H_
 
 // C/C++ headers
 #include <sstream>
 
 // Engine headers
-#include "token.hpp"
+#include <token.hpp>
 
 namespace zhetapi {
 
@@ -52,8 +52,8 @@ namespace zhetapi {
 		virtual data_t &operator*();
 		virtual const data_t &operator*() const;
 
-		const std::string &symbol() const {
-			std::string *nout = new std::string(str());
+		const ::std::string &symbol() const {
+			::std::string *nout = new ::std::string(str());
 			return *nout;
 		}
 
@@ -61,25 +61,25 @@ namespace zhetapi {
 		Operand &operator=(const Operand &);
 
 		type caller() const override;
-		std::string str() const override;
+		::std::string str() const override;
 		Token *copy() const override;
 
 		bool operator==(Token *) const override;
 
 		/* Friends:
-		 * std::ostream &operator<<(std::ostream &, const Operand
+		 * ::std::ostream &operator<<(::std::ostream &, const Operand
 		 *   <data_t> &) - outputs the value of val onto the stream
 		 *   pointed to by the passed ostream object
-		 * std::istream &operator>>(std::istream &, Operand &) - reads
+		 * ::std::istream &operator>>(::std::istream &, Operand &) - reads
 		 *   input from the stream passed in and sets the value
 		 *   of the val in the passed Operand object to the read data_t
 		 *   value */
 		template <typename type>
-		friend std::ostream &operator<<(std::ostream &, const
+		friend ::std::ostream &operator<<(::std::ostream &, const
 			Operand <data_t> &);
 
 		template <typename type>
-		friend std::istream &operator>>(std::istream &, Operand
+		friend ::std::istream &operator>>(::std::istream &, Operand
 			<data_t> &);
 
 		/* Comparison Operators: */
@@ -172,7 +172,7 @@ namespace zhetapi {
 	/* Friend functions: istream and
 	 * ostream utilities */
 	template <typename data_t>
-	std::ostream &operator<< (std::ostream &os, const Operand <data_t>
+	::std::ostream &operator<< (::std::ostream &os, const Operand <data_t>
 		&right)
 	{
 		os << right.get();
@@ -180,7 +180,7 @@ namespace zhetapi {
 	}
 
 	template <typename data_t>
-	std::istream &operator>> (std::istream &is, Operand <data_t> &right)
+	::std::istream &operator>> (::std::istream &is, Operand <data_t> &right)
 	{
 		data_t temp;
 		is >> temp;
@@ -239,9 +239,9 @@ namespace zhetapi {
 	}
 
 	template <typename data_t>
-	std::string Operand <data_t> ::str() const
+	::std::string Operand <data_t> ::str() const
 	{
-		std::ostringstream oss;
+		::std::ostringstream oss;
 
 		oss << val;
 

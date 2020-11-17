@@ -5,9 +5,9 @@
 #include <string>
 
 // Engine headers
-#include "../token.hpp"
+#include <token.hpp>
 
-#include "types.hpp"
+#include <hidden/types.hpp>
 
 namespace zhetapi {
 
@@ -82,7 +82,7 @@ namespace zhetapi {
 	 * of the corresponding labels
 	 * in the label enumeration.
 	 */
-	extern std::string strlabs[];
+	extern ::std::string strlabs[];
 
 	// Forward declarations
 	bool is_constant(lbl);

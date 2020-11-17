@@ -1,19 +1,21 @@
 #ifndef UTILITY_H_
 #define UTILITY_H_
 
+// C/C++ headers
 #include <vector>
 #include <utility>
 
-#include <Matrix.hpp>
-#include <Vector.hpp>
+// Engine headers
+#include <matrix.hpp>
+#include <vector.hpp>
 
 namespace utility {
 
 	template <class T>
-	std::vector <Vector <T>> gram_schmidt(const std::vector <Vector <T>> &span) {
+	::std::vector <Vector <T>> gram_schmidt(const ::std::vector <Vector <T>> &span) {
 		assert(span.size());
 
-		std::vector <Vector <T>> basis = {span[0]};
+		::std::vector <Vector <T>> basis = {span[0]};
 		
 		Vector <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
@@ -32,10 +34,10 @@ namespace utility {
 	}
 	
 	template <class T>
-	std::vector <Vector <T>> gram_schmidt_normalized(const std::vector <Vector <T>> &span) {
+	::std::vector <Vector <T>> gram_schmidt_normalized(const ::std::vector <Vector <T>> &span) {
 		assert(span.size());
 
-		std::vector <Vector <T>> basis = {span[0].normalize()};
+		::std::vector <Vector <T>> basis = {span[0].normalize()};
 	
 		Vector <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
@@ -54,7 +56,7 @@ namespace utility {
 	}
 
 	template <class T>
-	const Function <T> &lagrange_interpolate(const std::vector <std::pair <T, T>> &points)
+	const Function <T> &lagrange_interpolate(const ::std::vector <::std::pair <T, T>> &points)
 	{
 		Function <T> *out = new Function <T> ("f(x) = 0");
 
@@ -79,7 +81,7 @@ namespace utility {
 
 	/* Make member */
 	template <class T>
-	std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
+	::std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
 	{
 		assert(a.get_rows() == a.get_cols());
 
@@ -121,7 +123,7 @@ namespace utility {
 	template <class T>
 	const Vector <T> &solve_linear_equation(const Matrix <T> &a, const Vector <T> &b)
 	{
-		std::pair <Matrix <T>, Matrix <T>> out = lu_factorize(a);
+		::std::pair <Matrix <T>, Matrix <T>> out = lu_factorize(a);
 
 		Matrix <T> L = out.first;
 		Matrix <T> U = out.second;
@@ -154,7 +156,7 @@ namespace utility {
 	}
 
 	template <class T>
-	const Function <T> &reduced_polynomial_fitting(const std::vector <std::pair <T, T>> &points)
+	const Function <T> &reduced_polynomial_fitting(const ::std::vector <::std::pair <T, T>> &points)
 	{
 		size_t degree = points.size();
 
@@ -168,7 +170,7 @@ namespace utility {
 		
 		Vector <T> constants = solve_linear_equation(coefficients, out);
 		
-		std::string str = "f(x) = 0";
+		::std::string str = "f(x) = 0";
 
 		for (size_t i = 0; i < degree; i++) {
 			if (constants[i] == 0)
@@ -178,7 +180,7 @@ namespace utility {
 			if (constants[i] < 0)
 				sign = " - ";
 
-			str += sign + std::to_string(abs(constants[i])) + "x^" + std::to_string(degree - (i + 1));
+			str += sign + ::std::to_string(abs(constants[i])) + "x^" + ::std::to_string(degree - (i + 1));
 		}
 
 		Function <T> *ftr = new Function <T> (str);
@@ -187,18 +189,18 @@ namespace utility {
 	}
 
 	template <class T>
-	std::pair <T, std::vector <T>> gradient_descent(std::vector <pair <T, T>> data,
-		std::vector <T> weights, Function <T> ftr, size_t in,
+	::std::pair <T, ::std::vector <T>> gradient_descent(::std::vector <pair <T, T>> data,
+		::std::vector <T> weights, Function <T> ftr, size_t in,
 		size_t reps, size_t rounds, T _gamma, T diff, T eps)
 	{
 		table <T> tbl {ftr};
 
 		config <T> *cptr = new config <T> {};
 
-		std::vector <Variable <T>> pars;
-		std::vector <Variable <T>> vars;
+		::std::vector <Variable <T>> pars;
+		::std::vector <Variable <T>> vars;
 
-		std::vector <node <T> *> lvs;
+		::std::vector <node <T> *> lvs;
 
 		for (size_t i = 0; i < ftr.ins(); i++) {
 			pars.push_back(ftr[i]);
@@ -224,7 +226,7 @@ namespace utility {
 
 		Function <T> cost {"cost", pars, pk};
 
-		std::vector <Function <T>> gradients;
+		::std::vector <Function <T>> gradients;
 
 		for (size_t i = 0; i < ftr.ins(); i++) {
 			if (i == in)
@@ -246,7 +248,7 @@ namespace utility {
 		
 		best = 0;
 		for (auto pnt : data) {
-			std::vector <T> ins = weights;
+			::std::vector <T> ins = weights;
 
 			ins.push_back(pnt.first);
 			ins.push_back(pnt.second);
@@ -254,23 +256,23 @@ namespace utility {
 			best += cost.compute(ins);
 		}
 
-		std::vector <T> bvls = weights;
+		::std::vector <T> bvls = weights;
 		for (int n = 0; n < reps; n++) {
-			std::vector <T> ws;
+			::std::vector <T> ws;
 
 			for (auto vl : weights)
 				ws.push_back(vl + diff * n);
 
 			gamma = _gamma;
 
-			std::vector <T> pvls;
+			::std::vector <T> pvls;
 
 			for (auto vl : ws)
 				pvls.push_back(vl);
 
 			old = 0;
 			for (auto pnt : data) {
-				std::vector <T> ins = pvls;
+				::std::vector <T> ins = pvls;
 
 				ins.push_back(pnt.first);
 				ins.push_back(pnt.second);
@@ -278,9 +280,9 @@ namespace utility {
 				old += cost.compute(ins);
 			}
 
-			std::vector <T> wds(ws.size(), 0.0);
+			::std::vector <T> wds(ws.size(), 0.0);
 
-			std::vector <T> cvls;
+			::std::vector <T> cvls;
 			for (int i = 0; i < rounds; i++) {
 				cvls.clear();
 
@@ -291,7 +293,7 @@ namespace utility {
 					x = pnt.first;
 					y = pnt.second;
 
-					std::vector <T> ivls = cvls;
+					::std::vector <T> ivls = cvls;
 
 					ivls.push_back(x);
 					ivls.push_back(y);
@@ -307,7 +309,7 @@ namespace utility {
 
 				value = 0;
 				for (auto pnt : data) {
-					std::vector <T> ins = ws;
+					::std::vector <T> ins = ws;
 
 					ins.push_back(pnt.first);
 					ins.push_back(pnt.second);

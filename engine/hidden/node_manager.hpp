@@ -6,11 +6,11 @@
 #include <stack>
 
 // Engine headers
-#include "node_reference.hpp"
-#include "parser.hpp"
-#include "types.hpp"
+#include <barn.hpp>
 
-#include "../engine/barn.hpp"
+#include <hidden/node_reference.hpp>
+#include <hidden/parser.hpp>
+#include <hidden/types.hpp>
 
 namespace zhetapi {
 
@@ -37,17 +37,17 @@ namespace zhetapi {
 		 * List of parameters in node form. References are made to these
 		 * nodes whenever a variable node is encoutered.
 		 */
-		std::vector <node>		__refs;
+		::std::vector <node>		__refs;
 
 		/*
 		 * List of paramaters in string form (by their symbols).
 		 */
-		std::vector <std::string>	__params;
+		::std::vector <::std::string>	__params;
 	public:
 		node_manager();
-		node_manager(const std::string &, Barn <T, U> = Barn <T, U> ());
-		node_manager(const std::string &, const std::vector
-				<std::string> &, Barn <T, U> = Barn <T, U> ());
+		node_manager(const ::std::string &, Barn <T, U> = Barn <T, U> ());
+		node_manager(const ::std::string &, const ::std::vector
+				<::std::string> &, Barn <T, U> = Barn <T, U> ());
 
 		node_manager(const node_manager &);
 
@@ -55,7 +55,7 @@ namespace zhetapi {
 
 		Token *value() const;
 
-		Token *substitute_and_compute(std::vector <Token *> &);
+		Token *substitute_and_compute(::std::vector <Token *> &);
 
 		/*
 		 * Responsible for expanding variable clusters and truning them
@@ -65,16 +65,16 @@ namespace zhetapi {
 
 		void simplify();
 
-		void differentiate(const std::string &);
+		void differentiate(const ::std::string &);
 
-		void refactor_reference(const std::string &, Token *);
+		void refactor_reference(const ::std::string &, Token *);
 
 		/*
 		 * Code generator. Requires the specification of an output file.
 		 */
-		void generate(std::string &) const;
+		void generate(::std::string &) const;
 
-		std::string display() const;
+		::std::string display() const;
 
 		void print(bool = false) const;
 
@@ -88,7 +88,7 @@ namespace zhetapi {
 		
 		void rereference(node &);
 
-		node expand(const std::string &, const std::vector <node> &);
+		node expand(const ::std::string &, const ::std::vector <node> &);
 
 		void simplify(node &);
 		void simplify_separable(node &);
@@ -101,13 +101,13 @@ namespace zhetapi {
 		void differentiate_const_log(node &);
 		void differentiate_trig(node &);
 		
-		void refactor_reference(node &, const std::string &, Token *);
+		void refactor_reference(node &, const ::std::string &, Token *);
 
-		std::string generate(std::string, node, std::ofstream &, size_t &, size_t &) const;
+		::std::string generate(::std::string, node, ::std::ofstream &, size_t &, size_t &) const;
 
-		std::string display(node) const;
-		std::string display_operation(node) const;
-		std::string display_pemdas(node, node) const;
+		::std::string display(node) const;
+		::std::string display_operation(node) const;
+		::std::string display_pemdas(node, node) const;
 
 		/*
 		 * Node factories; produce special nodes such as ones, zeros,
@@ -118,11 +118,11 @@ namespace zhetapi {
 	public:
 		// General error
 		class error {
-			std::string str;
+			::std::string str;
 		public:
-			error(std::string s) : str(s) {}
+			error(::std::string s) : str(s) {}
 
-			const std::string &what() const {
+			const ::std::string &what() const {
 				return str;
 			}
 		};
@@ -130,13 +130,13 @@ namespace zhetapi {
 		// Syntax error
 		class syntax_error : public error {
 		public:
-			syntax_error(std::string s) : error(s) {}
+			syntax_error(::std::string s) : error(s) {}
 		};
 
 		// Undefined symbol error
 		class undefined_symbol : public error {
 		public:
-			undefined_symbol(std::string s) : error(s) {}
+			undefined_symbol(::std::string s) : error(s) {}
 		};
 	};
 
@@ -144,7 +144,7 @@ namespace zhetapi {
 	node_manager <T, U> ::node_manager() {}
 
 	template <class T, class U>
-	node_manager <T, U> ::node_manager(const std::string &str, Barn <T, U>
+	node_manager <T, U> ::node_manager(const ::std::string &str, Barn <T, U>
 			barn) : __barn(barn) 
 	{
 		zhetapi::parser <T, U> pr;
@@ -162,8 +162,8 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	node_manager <T, U> ::node_manager(const std::string &str, const
-			std::vector <std::string> &params, Barn <T, U> barn) :
+	node_manager <T, U> ::node_manager(const ::std::string &str, const
+			::std::vector <::std::string> &params, Barn <T, U> barn) :
 		__params(params), __barn(barn) 
 	{
 		zhetapi::parser <T, U> pr;
@@ -175,7 +175,7 @@ namespace zhetapi {
 
 		// Fill references
 		node tmp;
-		for (std::string str : params) {
+		for (::std::string str : params) {
 			tmp = nf_zero();
 
 			tmp.__label = l_variable;
@@ -224,7 +224,7 @@ namespace zhetapi {
 	template <class T, class U>
 	Token *node_manager <T, U> ::value(node tree) const
 	{
-		std::vector <Token *> values;
+		::std::vector <Token *> values;
 
 		node *unrefd;
 		
@@ -263,7 +263,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Token *node_manager <T, U> ::substitute_and_compute(std::vector <Token *>
+	Token *node_manager <T, U> ::substitute_and_compute(::std::vector <Token *>
 			&toks)
 	{
 		assert(__refs.size() == toks.size());
@@ -297,9 +297,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	node node_manager <T, U> ::expand(const std::string &str, const std::vector <node> &leaves)
+	node node_manager <T, U> ::expand(const ::std::string &str, const ::std::vector <node> &leaves)
 	{
-		typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
+		typedef ::std::vector <::std::pair <::std::vector <node>, ::std::string>> ctx;
 			
 		ctx contexts;
 
@@ -314,7 +314,7 @@ namespace zhetapi {
 			
 				auto itr = find(__params.begin(), __params.end(), pr.second);
 
-				size_t index = std::distance(__params.begin(), itr);
+				size_t index = ::std::distance(__params.begin(), itr);
 
 				Token *tptr = __barn.get(pr.second);
 
@@ -348,7 +348,7 @@ namespace zhetapi {
                  * node list which has undergone complete parsing (no leftover
                  * string), and whose size is minimal.
                  */
-		std::vector <node> choice;
+		::std::vector <node> choice;
 
 		bool valid = false;
 		for (auto pr : contexts) {
@@ -379,7 +379,7 @@ namespace zhetapi {
 		 * which it produces a tree with fewer multiplication nodes.
 		 */
 		while (choice.size() > 1) {
-			std::vector <node> tmp;
+			::std::vector <node> tmp;
 
 			size_t n = choice.size();
 
@@ -429,9 +429,9 @@ namespace zhetapi {
 	{
 		Token *opd = new Operand <U> (0);
 
-		std::stack <node> process;
+		::std::stack <node> process;
 
-		std::vector <node> sums;
+		::std::vector <node> sums;
 		
 		process.push(ref);
 
@@ -452,7 +452,7 @@ namespace zhetapi {
 		}
 
 		// Make copies, not address copies
-		std::vector <node> rest;
+		::std::vector <node> rest;
 		for (auto sep : sums) {
 			// Includes variable_constant; remove this exception
 			if (is_constant(sep.__label))
@@ -465,7 +465,7 @@ namespace zhetapi {
 			rest.push_back(node(opd, {}));
 
 		while (rest.size() > 1) {
-			std::vector <node> tmp;
+			::std::vector <node> tmp;
 
 			size_t n = rest.size();
 
@@ -485,7 +485,7 @@ namespace zhetapi {
 
 	// Differentiation
 	template <class T, class U>
-	void node_manager <T, U> ::differentiate(const std::string &str)
+	void node_manager <T, U> ::differentiate(const ::std::string &str)
 	{
 		for (size_t i = 0; i < __refs.size(); i++) {
 			if (__params[i] == str)
@@ -539,14 +539,14 @@ namespace zhetapi {
 
 	// Refactoring methods
 	template <class T, class U>
-	void node_manager <T, U> ::refactor_reference(const std::string &str, Token *tptr)
+	void node_manager <T, U> ::refactor_reference(const ::std::string &str, Token *tptr)
 	{
 		refactor_reference(__tree, str, tptr);
 	}
 
 	template <class T, class U>
 	void node_manager <T, U> ::refactor_reference(node &ref, const
-			std::string &str, Token *tptr)
+			::std::string &str, Token *tptr)
 	{
 		node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
 		
@@ -559,9 +559,9 @@ namespace zhetapi {
 
 	// Generation methods
 	template <class T, class U>
-	void node_manager <T, U> ::generate(std::string &name) const
+	void node_manager <T, U> ::generate(::std::string &name) const
 	{
-		std::ofstream fout(name + ".cpp");
+		::std::ofstream fout(name + ".cpp");
 
 		fout << "#include <token.hpp>\n";
 		fout << "#include <function.hpp>\n";
@@ -589,19 +589,19 @@ namespace zhetapi {
 		size_t inter_count = 1;
 
 		// Inside the function
-		std::string ret = generate(name, __tree, fout, const_count, inter_count);
+		::std::string ret = generate(name, __tree, fout, const_count, inter_count);
 
 		fout << "\t\treturn " << ret << ";\n";
 		fout << "\t}\n";
-		fout << "}" << std::endl;
+		fout << "}" << ::std::endl;
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::generate(std::string name, node ref,
-			std::ofstream &fout, size_t &const_count, size_t
+	::std::string node_manager <T, U> ::generate(::std::string name, node ref,
+			::std::ofstream &fout, size_t &const_count, size_t
 			&inter_count) const
 	{
-		std::vector <std::string> idents;
+		::std::vector <::std::string> idents;
 
 		for (auto leaf : ref.__leaves)
 			idents.push_back(generate(name, leaf, fout, const_count, inter_count));
@@ -612,11 +612,11 @@ namespace zhetapi {
 				<< types <T, U> ::proper_symbol(typeid(*(ref.__tptr.get())))
 				<< "> (" << ref.__tptr->str() << ");\n";
 
-			return "c" + std::to_string(const_count - 1);
+			return "c" + ::std::to_string(const_count - 1);
 		} else if (ref.__tptr->caller() == Token::ndr) {
 			node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
 
-			return "in" + std::to_string(ndr->index() + 1);
+			return "in" + ::std::to_string(ndr->index() + 1);
 		} else {
 			// Assuming we have an operation
 			operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr.get());
@@ -634,19 +634,19 @@ namespace zhetapi {
 
 			fout << "});\n";
 
-			return "inter" + std::to_string(inter_count - 1);
+			return "inter" + ::std::to_string(inter_count - 1);
 		}
 	}
 
 	// Displaying utilities
 	template <class T, class U>
-	std::string node_manager <T, U> ::display() const
+	::std::string node_manager <T, U> ::display() const
 	{
 		return display(__tree);
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::display(node ref) const
+	::std::string node_manager <T, U> ::display(node ref) const
 	{
 		switch (ref.__tptr->caller()) {
 		case Token::opd:
@@ -664,9 +664,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::display_operation(node ref) const
+	::std::string node_manager <T, U> ::display_operation(node ref) const
 	{
-		std::string str = (dynamic_cast <operation_holder *> (ref.__tptr.get()))->rep;
+		::std::string str = (dynamic_cast <operation_holder *> (ref.__tptr.get()))->rep;
 		
 		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 
@@ -698,7 +698,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string node_manager <T, U> ::display_pemdas(node ref, node child) const
+	::std::string node_manager <T, U> ::display_pemdas(node ref, node child) const
 	{
 		operation_holder *rophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 		operation_holder *cophptr = dynamic_cast <operation_holder *> (child.__tptr.get());
@@ -729,7 +729,7 @@ namespace zhetapi {
 	template <class T, class U>
 	void node_manager <T, U> ::print(bool address) const
 	{
-		std::cout << "Tree:" << std::endl;
+		::std::cout << "Tree:" << ::std::endl;
 
 		node_reference::address = address;
 
@@ -739,7 +739,7 @@ namespace zhetapi {
 			__tree.print_no_address();
 
 		if (__refs.size()) {
-			std::cout << "Refs [" << __refs.size() << "]" << std::endl;
+			::std::cout << "Refs [" << __refs.size() << "]" << ::std::endl;
 			
 			for (auto &ref : __refs) {
 				if (address)
@@ -835,11 +835,11 @@ namespace zhetapi {
 	void node_manager <T, U> ::rereference(node &ref)
 	{
 		if (ref.__tptr->caller() == Token::ndr) {
-			std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
+			::std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
 
 			auto itr = find(__params.begin(), __params.end(), tmp);
 
-			size_t index = std::distance(__params.begin(), itr);
+			size_t index = ::std::distance(__params.begin(), itr);
 
 			ref.__tptr.reset(new node_reference(&__refs[index], tmp, index, true));
 		}

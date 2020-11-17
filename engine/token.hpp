@@ -58,7 +58,7 @@ namespace zhetapi {
 		 * Returns a representation of the Token, regardless of its
 		 * type.
 		 */
-		virtual std::string str() const = 0;
+		virtual ::std::string str() const = 0;
 
 		/*
 		 * Returns a heap allocated copy of the Token. Used in copy
@@ -72,16 +72,6 @@ namespace zhetapi {
 		 */
 		virtual bool operator==(Token *) const = 0;
 	};
-
-	Token::operator type() const
-	{
-		return caller();
-	}
-
-	bool Token::operator!=(Token *tptr) const
-	{
-		return !(*this == tptr); 
-	}
 	
 }
 

@@ -5,13 +5,13 @@
 #include <sstream>
 
 // Engine headers
-#include <node_reference.hpp>
+#include <hidden/node_reference.hpp>
 
 namespace zhetapi {
 
 	class variable_reference : public node_reference {
 	public:
-		variable_reference(node *, const std::string &);
+		variable_reference(node *, const ::std::string &);
 
 		type caller() const override;
 		Token *copy() const override;
@@ -19,7 +19,7 @@ namespace zhetapi {
 		virtual bool operator==(Token *) const override;
 	};
 
-	variable_reference::variable_reference(node *ref, const std::string
+	variable_reference::variable_reference(node *ref, const ::std::string
 			&str) : node_reference(ref, str) {}
 
 	Token::type variable_reference::caller() const

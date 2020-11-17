@@ -22,7 +22,7 @@ namespace zhetapi {
 		template <class T>
 		T __relu(T x)
 		{
-			return std::max(x, (T) 0);
+			return ::std::max(x, (T) 0);
 		}
 
 		template <class T>

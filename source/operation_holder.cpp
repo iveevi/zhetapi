@@ -1,8 +1,8 @@
-#include "../engine/hidden/operation_holder.hpp"
+#include <hidden/operation_holder.hpp>
 
 namespace zhetapi {
 
-	std::string strcodes[] = {
+	::std::string strcodes[] = {
 		"add",
 		"subtract",
 		"multiply",
@@ -28,7 +28,7 @@ namespace zhetapi {
 		"lg"
 	};
 
-	operation_holder::operation_holder(const std::string &str) : rep(str)
+	operation_holder::operation_holder(const ::std::string &str) : rep(str)
 	{
 		if (str == "+")
 			code = add;
@@ -91,7 +91,7 @@ namespace zhetapi {
 		return new operation_holder(rep);
 	}
 
-	std::string operation_holder::str() const
+	::std::string operation_holder::str() const
 	{
 		return rep + " [" + strcodes[code] + "]";
 	}

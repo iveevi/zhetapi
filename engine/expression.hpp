@@ -11,8 +11,9 @@
 #include <string>
 
 // Engine headers
-#include <node_manager.hpp>
 #include <barn.hpp>
+
+#include <hidden/node_manager.hpp>
 
 namespace zhetapi {
 
@@ -23,7 +24,7 @@ namespace zhetapi {
 	class invalid_expr {};
 
 	template <class O = int, class T = double, class U = int>
-	O expr(std::string str, Barn <T, U> barn = Barn <T, U> ())
+	O expr(::std::string str, Barn <T, U> barn = Barn <T, U> ())
 	{
 		if (str.empty())
 			throw invalid_expr();
@@ -42,7 +43,7 @@ namespace zhetapi {
 	}
 	
 	template <class T = double, class U = int>
-	std::string expr_str(std::string str, Barn <T, U> barn = Barn <T, U> ())
+	::std::string expr_str(::std::string str, Barn <T, U> barn = Barn <T, U> ())
 	{
 		if (str.empty())
 			throw invalid_expr();

@@ -2,10 +2,10 @@
 #define STD_OPTIMIZER_CLASSES_H_
 
 // Engine headers
-#include "../optimizer.hpp"
+#include <optimizer.hpp>
 
 // Engine std module headers
-#include "optimizer_functions.hpp"
+#include <std/optimizer_functions.hpp>
 
 namespace zhetapi {
 		

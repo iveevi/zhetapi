@@ -1,10 +1,10 @@
-#include "../inc/node_reference.hpp"
+#include <hidden/node_reference.hpp>
 
 namespace zhetapi {
 
 	bool node_reference::address = true;
 
-	node_reference::node_reference(node *ref, const std::string &str, size_t
+	node_reference::node_reference(node *ref, const ::std::string &str, size_t
 			idx, bool var) : __ref(ref), __symbol(str),
 		__index(idx), __var(var) {}
 
@@ -23,7 +23,7 @@ namespace zhetapi {
 		return __index;
 	}
 
-	const std::string &node_reference::symbol() const
+	const ::std::string &node_reference::symbol() const
 	{
 		return __symbol;
 	}
@@ -43,9 +43,9 @@ namespace zhetapi {
 		return new node_reference(__ref, __symbol, __index, __var);
 	}
 
-	std::string node_reference::str() const
+	::std::string node_reference::str() const
 	{
-		std::ostringstream oss;
+		::std::ostringstream oss;
 
 		if (address)
 			oss << "\"" << __symbol << "\" points to " << __ref;

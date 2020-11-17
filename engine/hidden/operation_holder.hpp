@@ -5,7 +5,7 @@
 #include <string>
 
 // Engine headers
-#include "../token.hpp"
+#include <token.hpp>
 
 namespace zhetapi {
 
@@ -37,18 +37,18 @@ namespace zhetapi {
 		xlg	// Log base 2
 	};
 
-	extern std::string strcodes[];
+	extern ::std::string strcodes[];
 
 	struct operation_holder : public Token {
-		std::string rep;
+		::std::string rep;
 
 		codes code;
 
-		operation_holder(const std::string &);
+		operation_holder(const ::std::string &);
 
 		type caller() const override;
 		Token *copy() const override;
-		std::string str() const override;
+		::std::string str() const override;
 
 		virtual bool operator==(Token *) const override;
 	};

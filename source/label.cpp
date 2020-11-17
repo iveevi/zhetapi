@@ -1,8 +1,8 @@
-#include "../inc/label.hpp"
+#include <hidden/label.hpp>
 
 namespace zhetapi {
 
-	std::string strlabs[] = {
+	::std::string strlabs[] = {
 		// Default
 		"none",
 

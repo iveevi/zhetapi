@@ -2,7 +2,7 @@
 #define NODE_DIFFERENTIATION_H_
 
 // Engine headers
-#include "node_manager.hpp"
+#include <hidden/node_manager.hpp>
 
 namespace zhetapi {
 

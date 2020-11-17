@@ -22,7 +22,7 @@ namespace zhetapi {
 	class operation : public Token {
 	public:
 		// Aliases
-		using mapper = std::function <Token *(const std::vector <Token *> &)>;
+		using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
 	private:
 		/* Member instance of the
 		 * operation Token class. */
@@ -32,7 +32,7 @@ namespace zhetapi {
 		 * input format of the
 		 * operation.
 		 */
-		std::string __input;
+		::std::string __input;
 
 		/**
 		 * @brief The expected
@@ -40,7 +40,7 @@ namespace zhetapi {
 		 * operation; includes
 		 * regex-like features.
 		 */
-		std::string __output;
+		::std::string __output;
 
 		/**
 		 * @brief The number of
@@ -48,7 +48,7 @@ namespace zhetapi {
 		 * the operation. Used to
 		 * check input of computation.
 		 */
-		std::size_t ops;
+		::std::size_t ops;
 
 		/**
 		 * @brief The actual operation;
@@ -63,15 +63,15 @@ namespace zhetapi {
 	public:
 		operation();
 		operation(const operation &);
-		operation(const std::string &, const std::string &,
-				std::size_t,  mapper);
+		operation(const ::std::string &, const ::std::string &,
+				::std::size_t,  mapper);
 
-		Token *operator()(const std::vector <Token *> &) const;
+		Token *operator()(const ::std::vector <Token *> &) const;
 
-		std::string fmt() const;
-		std::string str() const override;
+		::std::string fmt() const;
+		::std::string str() const override;
 
-		std::size_t inputs() const;
+		::std::size_t inputs() const;
 
 		type caller() const override;
 
@@ -82,64 +82,6 @@ namespace zhetapi {
 		class count_mismatch {};
 		class Token_mismatch {};
 	};
-
-	operation::operation() : __input(""), __output(""), ops(0) {}
-
-	operation::operation(const operation &other)
-	{
-		__input = other.__input;
-		__output = other.__output;
-		ops = other.ops;
-		__opn = other.__opn;
-	}
-
-	operation::operation(const std::string &in, const std::string &out, std::size_t
-			opers, mapper fopn) : __input(in), __output(out), ops(opers),
-			__opn(fopn) {}
-
-	Token *operation::operator()(const std::vector <Token *> &ins) const
-	{
-		if (ins.size() != ops)
-			throw count_mismatch();
-		return __opn(ins);
-	}
-
-	std::string operation::fmt() const
-	{
-		return __input;
-	}
-
-	std::string operation::str() const
-	{
-		return "[" + __input + "](" + std::to_string(ops)
-			+ ") - [" + __output + "]";
-	}
-
-	std::size_t operation::inputs() const
-	{
-		return ops;
-	}
-
-	Token::type operation::caller() const
-	{
-		return opn;
-	}
-
-	Token *operation::copy() const
-	{
-		return new operation(*this);
-	}
-
-	bool operation::operator==(Token *t) const
-	{
-		operation *optr = dynamic_cast <operation *> (t);
-		if (optr == nullptr)
-			return false;
-
-		return (ops == optr->ops)
-			&& (__input == optr->__input)
-			&& (__output == optr->__output);
-	}
 
 }
 

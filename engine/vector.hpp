@@ -6,7 +6,7 @@
 #include <functional>
 
 // Engine headers
-#include "matrix.hpp"
+#include <matrix.hpp>
 
 namespace zhetapi {
 		
@@ -29,14 +29,14 @@ namespace zhetapi {
 		Vector &operator=(const Vector &);
 		Vector &operator=(const Matrix <T> &);
 
-		Vector(const std::vector <T> &);
-		Vector(const std::initializer_list <T> &);
+		Vector(const ::std::vector <T> &);
+		Vector(const ::std::initializer_list <T> &);
 
 		Vector(size_t, T);
 		Vector(size_t, T *);
 		
-		Vector(size_t, std::function <T (size_t)>);
-		Vector(size_t, std::function <T *(size_t)>);
+		Vector(size_t, ::std::function <T (size_t)>);
+		Vector(size_t, ::std::function <T *(size_t)>);
 
 		template <class A>
 		Vector(A);
@@ -167,11 +167,11 @@ namespace zhetapi {
 	}*/
 
 	template <class T>
-	Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
+	Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
 
 	template <class T>
-	Vector <T> ::Vector(const std::initializer_list <T> &ref)
-		: Vector(std::vector <T> (ref)) {}
+	Vector <T> ::Vector(const ::std::initializer_list <T> &ref)
+		: Vector(::std::vector <T> (ref)) {}
 
 	// FIXME: Delegate Matrix constructor
 	template <class T>
@@ -185,7 +185,7 @@ namespace zhetapi {
 	Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
 
 	template <class T>
-	Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
+	Vector <T> ::Vector(size_t rs, ::std::function <T (size_t)> gen)
 		: Matrix <T> (rs, 1, gen)
 	{
 		// for (size_t i = 0; i < this->__size; i++)
@@ -193,7 +193,7 @@ namespace zhetapi {
 	}
 
 	template <class T>
-	Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
+	Vector <T> ::Vector(size_t rs, ::std::function <T *(size_t)> gen)
 		: Matrix <T> (rs, 1, gen)
 	{
 		// for (size_t i = 0; i < this->__size; i++)
@@ -297,7 +297,7 @@ namespace zhetapi {
 	template <class T>
 	Vector <T> ::operator Vector <double> () const
 	{
-		std::vector <double> vec;
+		::std::vector <double> vec;
 
 		for (size_t i = 0; i < size(); i++)
 			vec.push_back((*this)[i]);
@@ -308,7 +308,7 @@ namespace zhetapi {
 	template <class T>
 	Vector <T> ::operator Vector <Rational <int>> () const
 	{
-		std::vector <Rational <int>> vec;
+		::std::vector <Rational <int>> vec;
 
 		for (size_t i = 0; i < size(); i++)
 			vec.push_back((*this)[i]);
@@ -323,7 +323,7 @@ namespace zhetapi {
 	{
 		size_t t_sz = size();
 
-		std::vector <T> total {x};
+		::std::vector <T> total {x};
 
 		for (size_t i = 0; i < t_sz; i++)
 			total.push_back((*this)[i]);
@@ -336,7 +336,7 @@ namespace zhetapi {
 	{
 		size_t t_sz = size();
 
-		std::vector <T> total;
+		::std::vector <T> total;
 
 		for (size_t i = 0; i < t_sz; i++)
 			total.push_back((*this)[i]);
@@ -351,7 +351,7 @@ namespace zhetapi {
 	{
 		size_t t_sz = size();
 
-		std::vector <T> total;
+		::std::vector <T> total;
 		for (size_t i = 1; i < t_sz; i++)
 			total.push_back((*this)[i]);
 
@@ -363,7 +363,7 @@ namespace zhetapi {
 	{
 		size_t t_sz = size();
 
-		std::vector <T> total;
+		::std::vector <T> total;
 		for (size_t i = 0; i < t_sz - 1; i++)
 			total.push_back((*this)[i]);
 
@@ -394,7 +394,7 @@ namespace zhetapi {
 	template <class T>
 	Vector <T> Vector <T> ::normalized() const
 	{
-		std::vector <T> out;
+		::std::vector <T> out;
 
 		T dt = norm();
 

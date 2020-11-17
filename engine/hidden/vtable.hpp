@@ -23,12 +23,12 @@ namespace zhetapi {
 
 	private:
 		node		*__tree;
-		std::size_t	__size;
+		::std::size_t	__size;
 	public:
 		vtable();
 		vtable(const vtable &);
 
-		vtable(const std::vector <Variable <T, U>> &);
+		vtable(const ::std::vector <Variable <T, U>> &);
 
 		template <class ... A>
 		vtable(A ...);
@@ -37,40 +37,40 @@ namespace zhetapi {
 
 		~vtable();
 
-		Variable <T, U> &get(const std::string &);
-		const Variable <T, U> &find(const std::string &);
+		Variable <T, U> &get(const ::std::string &);
+		const Variable <T, U> &find(const ::std::string &);
 
-		std::vector <Variable <T, U>> list() const;
+		::std::vector <Variable <T, U>> list() const;
 
-		bool contains(const std::string &);
+		bool contains(const ::std::string &);
 		
 		bool insert(const Variable <T, U>&);
 		
 		bool remove(const Variable <T, U>&);
-		bool remove(const std::string &);
+		bool remove(const ::std::string &);
 
 		bool empty() const;
 
-		std::size_t size() const;
+		::std::size_t size() const;
 
 		void clear();
 
 		void print() const;
 	private:
-		void gather(std::vector <Variable <T, U>> &, Variable <T, U>) const;
+		void gather(::std::vector <Variable <T, U>> &, Variable <T, U>) const;
 		
 		template <class ... A>
-		void gather(std::vector <Variable <T, U>> &, Variable <T, U>, A ...) const;
+		void gather(::std::vector <Variable <T, U>> &, Variable <T, U>, A ...) const;
 
 		node *clone(node *);
 
 		void clear(node *(&));
 
-		void list(node *, std::vector <Variable <T, U>> &) const;
+		void list(node *, ::std::vector <Variable <T, U>> &) const;
 
 		void print(node *, int, int) const;
 
-		void splay(node *(&), const std::string &);
+		void splay(node *(&), const ::std::string &);
 
 		void rotate_left(node *(&));
 		void rotate_right(node *(&));
@@ -94,7 +94,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	vtable <T, U> ::vtable(const std::vector <Variable <T, U>> &vs) : vtable()
+	vtable <T, U> ::vtable(const ::std::vector <Variable <T, U>> &vs) : vtable()
 	{
 		for (auto vr : vs)
 			insert(vr);
@@ -104,7 +104,7 @@ namespace zhetapi {
 	template <class ... A>
 	vtable <T, U> ::vtable(A ... args) : vtable()
 	{
-		std::vector <Variable <T, U>> pr;
+		::std::vector <Variable <T, U>> pr;
 
 		gather(pr, args...);
 
@@ -131,7 +131,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Variable <T, U> &vtable <T, U> ::get(const std::string &key)
+	Variable <T, U> &vtable <T, U> ::get(const ::std::string &key)
 	{
 		if (!__tree)
 			throw null_tree();
@@ -145,7 +145,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	const Variable <T, U> &vtable <T, U> ::find(const std::string &key)
+	const Variable <T, U> &vtable <T, U> ::find(const ::std::string &key)
 	{
 		if (!__tree)
 			throw null_tree();
@@ -159,9 +159,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::vector <Variable <T, U>> vtable <T, U> ::list() const
+	::std::vector <Variable <T, U>> vtable <T, U> ::list() const
 	{
-		std::vector <Variable <T, U>> v;
+		::std::vector <Variable <T, U>> v;
 
 		if (__tree)
 			list(__tree, v);
@@ -170,7 +170,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool vtable <T, U> ::contains(const std::string &key)
+	bool vtable <T, U> ::contains(const ::std::string &key)
 	{
 		Variable <T, U> x;
 
@@ -251,7 +251,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool vtable <T, U> ::remove(const std::string &str)
+	bool vtable <T, U> ::remove(const ::std::string &str)
 	{
 		if (!__size)
 			return false;
@@ -287,7 +287,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::size_t vtable <T, U> ::size() const
+	::std::size_t vtable <T, U> ::size() const
 	{
 		return __size;
 	}
@@ -308,14 +308,14 @@ namespace zhetapi {
 	/* Protected methods (helpers methods);
 	 * splay, rotate left/right, clone, ect. */
 	template <class T, class U>
-	void vtable <T, U> ::gather(std::vector <Variable <T, U>> &pr, Variable <T, U>vs) const
+	void vtable <T, U> ::gather(::std::vector <Variable <T, U>> &pr, Variable <T, U>vs) const
 	{
 		pr.push_back(vs);
 	}
 
 	template <class T, class U>
 	template <class ... A>
-	void vtable <T, U> ::gather(std::vector <Variable <T, U>> &pr, Variable <T, U> vs, A ... args) const
+	void vtable <T, U> ::gather(::std::vector <Variable <T, U>> &pr, Variable <T, U> vs, A ... args) const
 	{
 		pr.push_back(vs);
 
@@ -354,7 +354,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void vtable <T, U> ::list(node *ref, std::vector <Variable <T, U>> &v) const
+	void vtable <T, U> ::list(node *ref, ::std::vector <Variable <T, U>> &v) const
 	{
 		v.push_back(ref->__val);
 
@@ -372,21 +372,21 @@ namespace zhetapi {
 			return;
 
 		for (int i = 0; i < lev; i++)
-			std::cout << "\t";
+			::std::cout << "\t";
 
 		if (!dir)
-			std::cout << "Level #" << lev << " -- Root: ";
+			::std::cout << "Level #" << lev << " -- Root: ";
 		else if (dir == 1)
-			std::cout << "Level #" << lev << " -- Left: ";
+			::std::cout << "Level #" << lev << " -- Left: ";
 		else
-			std::cout << "Level #" << lev << " -- Right: ";
+			::std::cout << "Level #" << lev << " -- Right: ";
 
 		if (vnd == nullptr)
-			std::cout << "NULL";
+			::std::cout << "NULL";
 		else
-			std::cout << vnd->__val;
+			::std::cout << vnd->__val;
 
-		std::cout << std::endl;
+		::std::cout << ::std::endl;
 		
 		if (vnd == nullptr)
 			return;
@@ -396,7 +396,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	void vtable <T, U> ::splay(node *(&vnd), const std::string &id)
+	void vtable <T, U> ::splay(node *(&vnd), const ::std::string &id)
 	{
 		node *rt = nullptr;
 		node *lt = nullptr;

@@ -16,39 +16,39 @@
 #include <vector>
 
 // Engine headers
-#include "complex.hpp"
-#include "matrix.hpp"
-#include "operand.hpp"
-#include "rational.hpp"
-#include "token.hpp"
-#include "vector.hpp"
-#include "variable.hpp"
+#include <complex.hpp>
+#include <matrix.hpp>
+#include <operand.hpp>
+#include <rational.hpp>
+#include <token.hpp>
+#include <vector.hpp>
+#include <variable.hpp>
 
-#include "../inc/types.hpp"
-#include "../inc/ftable.hpp"
-#include "../inc/operation.hpp"
-#include "../inc/vtable.hpp"
+#include <hidden/types.hpp>
+#include <hidden/ftable.hpp>
+#include <hidden/operation.hpp>
+#include <hidden/vtable.hpp>
 
-#include "../inc/std/combinatorial.hpp"
+#include <std/combinatorial.hpp>
 
 namespace zhetapi {
 
 #define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {					\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {					\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
-					+ " $2 (" + std::string(#B) + ")",			\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
@@ -64,19 +64,19 @@ namespace zhetapi {
 #define __add_binary_operation_ftr(str, A, B, O, ftr)						\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {					\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {					\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
-					+ " $2 (" + std::string(#B) + ")",			\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
@@ -88,19 +88,19 @@ namespace zhetapi {
 #define __add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)								\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {					\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {					\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
-					+ " $2 (" + std::string(#B) + ")",			\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#B) + ")",			\
 				2,								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
@@ -111,19 +111,19 @@ namespace zhetapi {
 												\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {					\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {					\
 					typeid(Operand <B>),					\
 					typeid(Operand <A>)					\
 				}								\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#B) + ") " + std::string(#str)		\
-					+ " $2 (" + std::string(#A) + ")",			\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#B) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#A) + ")",			\
 				2,								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[1]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[0]);	\
 												\
@@ -160,15 +160,15 @@ namespace zhetapi {
 #define __add_unary_operation(str, I, O)							\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {typeid(Operand <I>)}		\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {typeid(Operand <I>)}		\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#I) + ")",					\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#I) + ")",					\
 				1, 								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <I> *in = dynamic_cast				\
 						<Operand <I> *> (ins[0]);			\
 												\
@@ -180,15 +180,15 @@ namespace zhetapi {
 #define __add_unary_operation_ftr(str, I, O, ftr)						\
 	ops.push_back({										\
 			{									\
-				std::string(#str),						\
-				std::vector <std::type_index> {typeid(Operand <I>)}		\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {typeid(Operand <I>)}		\
 			},									\
 												\
 			new operation {								\
-				std::string(#str),						\
-				"$1 (" + std::string(#I) + ")",					\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#I) + ")",					\
 				1, 								\
-				[&](const std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {				\
 					Operand <I> *in = dynamic_cast				\
 						<Operand <I> *> (ins[0]);			\
 												\
@@ -215,16 +215,16 @@ namespace zhetapi {
 	public:
 		__TYPEDEFS__
 		
-		using ID = std::pair <std::string, std::vector <std::type_index>>;
+		using ID = ::std::pair <::std::string, ::std::vector <::std::type_index>>;
 
-		using signature = std::vector <std::type_index>;
+		using signature = ::std::vector <::std::type_index>;
 	private:
 		vtable <T, U> vstack;
 		ftable <T, U> fstack;
 
-		std::vector <std::pair <ID, Token *>> ops;
+		::std::vector <::std::pair <ID, Token *>> ops;
 
-		mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;
+		mutable ::std::unordered_map <::std::string, ::std::vector <::std::pair <signature, Token *>>> table;
 	public:
 		Barn();
 		Barn(const Barn &);
@@ -233,35 +233,35 @@ namespace zhetapi {
 
 		Barn &operator=(const Barn &);
 
-		bool present(const std::string &) const;
+		bool present(const ::std::string &) const;
 
 		void put(Variable <T, U>);
 		void put(Function <T, U>);
 
 		template <class A>
-		void put(const std::string &, A);
+		void put(const ::std::string &, A);
 
-		void put(Token *, const std::string &);
+		void put(Token *, const ::std::string &);
 
-		Variable <T, U> &retrieve_variable(const std::string &);
-		Function <T, U> &retrieve_function(const std::string &);
+		Variable <T, U> &retrieve_variable(const ::std::string &);
+		Function <T, U> &retrieve_function(const ::std::string &);
 
-		Token *get(const std::string &);
+		Token *get(const ::std::string &);
 
-		Token *compute(const std::string &, const std::vector <Token *> &) const;
+		Token *compute(const ::std::string &, const ::std::vector <Token *> &) const;
 		
-		std::string overloads(const std::string &) const;
+		::std::string overloads(const ::std::string &) const;
 
 		void list() const;
 		void print(bool = false) const;
 
 		// Exceptions
 		class unknown_operation_overload_exception {
-			std::string __str;
+			::std::string __str;
 		public:
-			unknown_operation_overload_exception(const std::string &str) : __str(str) {}
+			unknown_operation_overload_exception(const ::std::string &str) : __str(str) {}
 
-			const std::string &what() const {
+			const ::std::string &what() const {
 				return __str;
 			}
 		};
@@ -489,7 +489,7 @@ namespace zhetapi {
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+				table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 		}
 	}
 
@@ -505,7 +505,7 @@ namespace zhetapi {
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+				table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 		}
 	}
 	
@@ -525,7 +525,7 @@ namespace zhetapi {
 				if (table.count(pr.first.first))
 					table[pr.first.first].push_back({pr.first.second, pr.second});
 				else
-					table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+					table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 			}
 		}
 
@@ -540,9 +540,9 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	bool Barn <T, U> ::present(const std::string &str) const
+	bool Barn <T, U> ::present(const ::std::string &str) const
 	{
-		auto itr = std::find_if(ops.begin(), ops.end(), [&](const std::pair <ID, Token *> &pr) {
+		auto itr = ::std::find_if(ops.begin(), ops.end(), [&](const ::std::pair <ID, Token *> &pr) {
 			return pr.first.first == str;
 		});
 
@@ -560,26 +560,26 @@ namespace zhetapi {
 
 	template <class T, class U>
 	template <class A>
-	void Barn <T, U> ::put(const std::string &str, A x)
+	void Barn <T, U> ::put(const ::std::string &str, A x)
 	{
 		put(Variable <T, U> {str, x});
 	}
 
 	template <class T, class U>
-	void Barn <T, U> ::put(Token *tptr, const std::string &str)
+	void Barn <T, U> ::put(Token *tptr, const ::std::string &str)
 	{
 		// Leave the passed pointer alone, and copy it instead
 		put(Variable <T, U> {tptr->copy(), str});
 	}
 
 	template <class T, class U>
-	Variable <T, U> &Barn <T, U> ::retrieve_variable(const std::string &str)
+	Variable <T, U> &Barn <T, U> ::retrieve_variable(const ::std::string &str)
 	{
 		return vstack.get(str);
 	}
 
 	template <class T, class U>
-	Token *Barn <T, U> ::get(const std::string &str)
+	Token *Barn <T, U> ::get(const ::std::string &str)
 	{
 		if (vstack.contains(str))
 			return (vstack.get(str)).copy();
@@ -591,16 +591,16 @@ namespace zhetapi {
 	}
 	
 	template <class T, class U>
-	Token *Barn <T, U> ::compute(const std::string &str, const std::vector <Token *> &vals) const
+	Token *Barn <T, U> ::compute(const ::std::string &str, const ::std::vector <Token *> &vals) const
 	{
-		std::vector <std::type_index> sig;
+		::std::vector <::std::type_index> sig;
 
 		for (Token *tptr : vals)
 			sig.push_back(typeid(*tptr));
 
 		Token *tptr = nullptr;
 
-		std::vector <std::pair <signature, Token *>> *siglist = &table[str];
+		::std::vector <::std::pair <signature, Token *>> *siglist = &table[str];
 
 		size_t sz = sig.size();
 		for (auto itr = siglist->begin(); itr != siglist->end(); itr++) {
@@ -628,7 +628,7 @@ namespace zhetapi {
 
 			return (*optr)(vals);
 		} else {
-			std::ostringstream oss;
+			::std::ostringstream oss;
 
 			oss << "Unknown overload (";
 
@@ -649,17 +649,17 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	std::string Barn <T, U> ::overloads(const std::string &str) const
+	::std::string Barn <T, U> ::overloads(const ::std::string &str) const
 	{
 		auto it = ops.end();
 
-		std::vector <std::vector <std::type_index>> loads;
+		::std::vector <::std::vector <::std::type_index>> loads;
 		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
 			if (itr->first.first == str)
 				loads.push_back(itr->first.second);
 		}
 
-		std::ostringstream oss;
+		::std::ostringstream oss;
 
 		oss << "Available overloads for \"" << str << "\": {";
 
@@ -687,51 +687,51 @@ namespace zhetapi {
 	template <class T, class U>
 	void Barn <T, U> ::list() const
 	{
-		std::vector <Variable <T, U>> v = vstack.list();
+		::std::vector <Variable <T, U>> v = vstack.list();
 
 		if (v.size()) {
-			std::cout << "\tVariables:" << std::endl;
+			::std::cout << "\tVariables:" << ::std::endl;
 			for (auto var : v)
-				std::cout << "\t\t" << var << std::endl;
+				::std::cout << "\t\t" << var << ::std::endl;
 		}
 
-		std::vector <Function <T, U>> f = fstack.list();
+		::std::vector <Function <T, U>> f = fstack.list();
 		
 		if (f.size()) {
-			std::cout << "\tFunctions:" << std::endl;
+			::std::cout << "\tFunctions:" << ::std::endl;
 			for (auto ftn : f)
-				std::cout << "\t\t" << ftn << std::endl;
+				::std::cout << "\t\t" << ftn << ::std::endl;
 		}
 	}
 
 	template <class T, class U>
 	void Barn <T, U> ::print(bool show_ops) const
 	{
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "VARIABLES" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
+		::std::cout << ::std::string(50, '=') << ::std::endl;
+		::std::cout << "VARIABLES" << ::std::endl;
+		::std::cout << ::std::string(50, '=') << ::std::endl;
 
 		vstack.print();
 
-		std::cout << std::string(50, '=') << std::endl;
-		std::cout << "FUNCTIONS:" << std::endl;
-		std::cout << std::string(50, '=') << std::endl;
+		::std::cout << ::std::string(50, '=') << ::std::endl;
+		::std::cout << "FUNCTIONS:" << ::std::endl;
+		::std::cout << ::std::string(50, '=') << ::std::endl;
 
 		fstack.print();
 
 		if (show_ops) {
 			for (auto pr : ops) {
-				std::cout << "op: " << pr.second->str() << " @ " <<
-					pr.second << std::endl;
+				::std::cout << "op: " << pr.second->str() << " @ " <<
+					pr.second << ::std::endl;
 			}
 
-			std::cout << "######################################################" << std::endl;
+			::std::cout << "######################################################" << ::std::endl;
 
 			for (auto itr : table) {
-				std::cout << "Str: " << itr.first << " @ Size: " << itr.second.size() << " @ 2nd Size: " << table[itr.first].size() << std::endl;
+				::std::cout << "Str: " << itr.first << " @ Size: " << itr.second.size() << " @ 2nd Size: " << table[itr.first].size() << ::std::endl;
 
 				for (auto pr : itr.second)
-					std::cout << "\t" << pr.second->str() << std::endl;
+					::std::cout << "\t" << pr.second->str() << ::std::endl;
 			}
 		}
 	}
