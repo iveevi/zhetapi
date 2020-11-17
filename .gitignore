@@ -1,3 +1,4 @@
+*.a
 *.dSYM
 *.log
 *.out

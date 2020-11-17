@@ -19,7 +19,7 @@ elif [ $1 = "install" ]; then
 	make zhp
 
 	if [ -f "libzhp.so" ]; then
-		mv libzhp.so bin/
+		mv libzhp.* bin/
 	fi
 	
 	# Compile and move apps
