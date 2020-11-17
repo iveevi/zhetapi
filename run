@@ -26,6 +26,23 @@ elif [ $1 = "install" ]; then
 	make zhetapi
 
 	mv zhetapi bin/
+elif [ $1 = "port" ]; then
+	# Run cmake
+	cmake .
+	
+	mkdir -p debug
+
+	# Compile and move shared library
+	make zhp
+
+	if [ -f "libzhp.so" ]; then
+		mv libzhp.* debug/
+	fi
+	
+	# Compile and move apps
+	make port
+
+	mv zhetapi debug/
 elif [ $1 = "gdb" ]; then
 	echo "Running source/$2.cpp on gdb"
 
