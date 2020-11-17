@@ -214,45 +214,45 @@ Schmidt and LU Factorization (see below).
 | Function | Description | Engine Header
 
 | `gram_schmidt` | Performs the Gram Schmidt process on the given
-set of vectors.	| `algorithm.h`
+set of vectors.	| `std/algorithm.h`
 
 | `gram_schmidt_normalized` | Same as `gram_schmidt` but returns a basis of
-normalized vectors. | `algorithm.h`
+normalized vectors. | `std/algorithm.h`
 
 | `lagrange_interpolate` | Performs Lagrange interpolation on the given set of
-points. Returns the appropriate polynomial. | `algorithm.h`
+points. Returns the appropriate polynomial. | `std/algorithm.h`
 
-| `lu_factorize` | Returns the LU factorization of a matrix. | `algorithm.h`
+| `lu_factorize` | Returns the LU factorization of a matrix. | `std/algorithm.h`
 
 | `solve_linear_equation` | Solves the linear equation `Ax = b` given `A` and
-`b`. | `algorithm.h`
+`b`. | `std/algorithm.h`
 
 | `reduced_polynomial_fitting` | Returns a polynomial that goes through the
 given set of points. Differs from `lagrange_interpolate` in that it returns a
-simplified polynomial. | `algorithm.h`
+simplified polynomial. | `std/algorithm.h`
 
 | `gradient_descent` | Applies gradient descent to a given function on the given
-set of data. | `algorithm.h`
+set of data. | `std/algorithm.h`
 
 | `find_root` | Uses Newton's method to find the root of the given function. |
-`algorithm.h`
+`std/algorithm.h`
 
 | `solve_hlde_constant` | Solves the homogeneous linear differential equation
 with constant coefficients represented by the given polynomial. Returns a list
-of functions as a basis to the solution space. | `calculus.h`
+of functions as a basis to the solution space. | `std/calculus.h`
 
 | `bernoulli_sequence_real` | Generates the first `n` terms of the Bernoulli
-sequence. | `combinatorial.h`
+sequence. | `std/combinatorial.h`
 
 | `bernoulli_sequence_rational` | Generates the first `n` terms of the Bernoulli
-sequence as rational numbers. | `combinatorial.h`
+sequence as rational numbers. | `std/combinatorial.h`
 
 | `bernoulli_number_real` | Generates the `n` th Bernoulli number.
-| `combinatorial.h`
+| `std/combinatorial.h`
 
 | `bernoulli_number_rational` | Generates the `n` th Bernoulli number as a
 rational number.
-| `combinatorial.h`
+| `std/combinatorial.h`
 
 |===
 
@@ -297,6 +297,15 @@ present in this module. It will later contain API functions.
 |===
 
 # What Next?
+
+## New Language and Interpreter
+
+While C++ is great for fast programs, it also can be quite clunky to use. The
+purpose of a new interpreted language, based on the Zhetapi API, is to further
+ease the process of testing and developing numerical algorithms. This new language
+will support all of the features the API provides, in a cleaner form, and provide
+a library system which will allow users to reuse existing (and perhaps standard)
+numerical routines.
 
 ## Simplification of Functions
 
