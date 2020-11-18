@@ -1,7 +1,7 @@
 language: cpp
 
 compiler:
-	- gcc
+  - gcc
 
 install:
 	- sudo apt-get install libboost-dev
