@@ -3,12 +3,14 @@ language: cpp
 compiler:
   - gcc
 
-install:
-  - sudo apt-get install libboost-dev
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-  - sudo apt-get update
-  - sudo apt-get install gcc-8
-  - sudo apt-get install g++-8
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-8
+      - g++-8
+      - libboost-all-dev
 
 script:
   - cd ${TRAVIS_BUILD_DIR}
