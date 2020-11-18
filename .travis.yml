@@ -1,5 +1,14 @@
-deploy:
-  provider: script
-  script: . ./run install
-  on:
-  branch: master
+language: cpp
+
+compiler:
+	- gcc
+
+install:
+	- sudo apt-get install libboost-dev
+	- sudo apt-get install gcc-8
+	- sudo apt-get install g++-8
+
+script:
+	- cd ${TRAVIS_BUILD_DIR}
+	- . ./run install
+	- . ./run port
