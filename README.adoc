@@ -2,9 +2,13 @@
 :sectnums:
 :toc2:
 
-# Introduction
 image::zhetapi-logo.png[]
 
+:travis-ci: https://travis-ci.com/github/vedavamadathil/zhetapi
+
+image:https://travis-ci.com/vedavamadathil/zhetapi.svg[Build Status (Travis CI), link={travis-ci}]
+
+# Introduction
 Zhetapi (ℤHΠ) is a C++ (14) computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
 users.
