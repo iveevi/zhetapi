@@ -30,19 +30,19 @@ elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .
 	
-	mkdir -p debug
+	mkdir -p bin
 
 	# Compile and move shared library
 	make zhp
 
 	if [ -f "libzhp.so" ]; then
-		mv libzhp.* debug/
+		mv libzhp.* bin/
 	fi
 	
 	# Compile and move apps
 	make port
 
-	mv zhetapi debug/
+	mv port bin/
 elif [ $1 = "gdb" ]; then
 	echo "Running source/$2.cpp on gdb"
 
