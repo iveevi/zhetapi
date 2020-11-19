@@ -25,5 +25,5 @@ before_script:
   - cd ${TRAVIS_BUILD_DIR}
 
 script:
-  - if [ "$TARGET" = "CLI" ]; then ./script/test_cli.sh fi
-  - if [ "$TARGET" = "API (Port)" ]; then ./script/test_port.sh fi
+  - if [ "$TARGET" = "CLI" ]; then ./script/test_cli.sh; fi
+  - if [ "$TARGET" = "API (Port)" ]; then ./script/test_port.sh; fi
