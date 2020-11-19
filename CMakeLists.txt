@@ -1,6 +1,9 @@
 # Set CMake version
 cmake_minimum_required(VERSION 3.14)
 
+# Allow dynamic linking
+SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
+
 # Set compiler
 set(CMAKE_CXX_COMPILER "g++-8")
 
@@ -17,9 +20,17 @@ target_link_libraries(zhetapi PUBLIC zhp)
 # Compile portability tests
 project(port)
 
-add_executable(port source/port/port.cpp source/port/port-vector.cpp source/port/port-matrix.cpp source/port/port-tensor.cpp)
+add_library(port_vector OBJECT source/port/port-vector.cpp)
+add_library(port_matrix OBJECT source/port/port-matrix.cpp)
+add_library(port_tensor OBJECT source/port/port-tensor.cpp)
+
+add_executable(port source/port/port.cpp)
 
 target_link_libraries(port PUBLIC zhp)
+
+target_link_libraries(port PUBLIC port_vector)
+target_link_libraries(port PUBLIC port_matrix)
+target_link_libraries(port PUBLIC port_tensor)
 
 # Include directories
 include_directories(PUBLIC engine)

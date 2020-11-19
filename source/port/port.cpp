@@ -7,9 +7,28 @@ vector <pair <string, bool(*)()>> rig {
 	{"tensor construction and memory safety", &tensor_construction_and_memory}
 };
 
+// Segfault handler
+void segfault_sigaction(int signal, siginfo_t *si, void *arg)
+{
+    printf("\nCaught segfault at address %p\n", si->si_addr);
+    exit(-1);
+}
+
 // Main program
 int main()
 {
+	// Setup segfault handler
+	struct sigaction sa;
+
+	memset(&sa, 0, sizeof(struct sigaction));
+
+	sigemptyset(&sa.sa_mask);
+
+	sa.sa_sigaction = segfault_sigaction;
+	sa.sa_flags   = SA_SIGINFO;
+
+	sigaction(SIGSEGV, &sa, NULL);
+
 	// Run tests in the test rig
 	bool first = true;
 

@@ -5,6 +5,10 @@
 #include <iostream>
 #include <vector>
 
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+
 // Engine headers
 #include <function.hpp>
 #include <vector.hpp>

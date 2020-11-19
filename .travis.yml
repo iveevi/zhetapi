@@ -3,6 +3,10 @@ language: cpp
 compiler:
   - gcc
 
+env:
+  - TARGET="CLI"
+  - TARGET="API (Port)"
+
 before_install:
   - mkdir $HOME/usr
   - export PATH="$HOME/usr/bin:$PATH"
@@ -17,7 +21,9 @@ install:
   - sudo apt-get install gcc-8
   - sudo apt-get install g++-8
 
-script:
+before_script:
   - cd ${TRAVIS_BUILD_DIR}
-  - . ./run install
-  - . ./run port
+
+script:
+  - if [ "$TARGET" = "CLI" ]; then ./script/test_cli.sh fi
+  - if [ "$TARGET" = "API (Port)" ]; then ./script/test_port.sh fi
