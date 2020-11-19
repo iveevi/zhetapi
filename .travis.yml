@@ -3,9 +3,12 @@ language: cpp
 compiler:
   - gcc
 
-env:
-  - TARGET="CLI"
-  - TARGET="API (Port)"
+matrix:
+  include:
+    - os: linux
+      env: TARGET="CLI"
+    - os: linux
+      env: TARGET="API (Port)"
 
 before_install:
   - mkdir $HOME/usr
