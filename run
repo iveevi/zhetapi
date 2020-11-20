@@ -43,6 +43,8 @@ elif [ $1 = "port" ]; then
 	make port
 
 	mv port bin/
+
+	./bin/port
 elif [ $1 = "gdb" ]; then
 	echo "Running source/$2.cpp on gdb"
 

@@ -14,6 +14,12 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
     exit(-1);
 }
 
+// Timers
+chrono::high_resolution_clock clk;
+
+chrono::high_resolution_clock::time_point epoch;
+chrono::high_resolution_clock::time_point tmp;
+
 // Main program
 int main()
 {
@@ -29,6 +35,9 @@ int main()
 
 	sigaction(SIGSEGV, &sa, NULL);
 
+	// Setup times
+	epoch = clk.now();
+
 	// Run tests in the test rig
 	bool first = true;
 
@@ -40,7 +49,7 @@ int main()
 			cout << endl;
 
 		cout << "==============================" << endl;
-		cout << "Running \"" << pr.first << "\" test:" << endl;
+		cout << mark << "Running \"" << pr.first << "\" test:" << endl;
 
 		cout << endl << "--------------------" << endl;
 		bool tmp = pr.second();
@@ -56,5 +65,5 @@ int main()
 		cout << "==============================" << endl;
 	}
 
-	cout << endl << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;
+	cout << endl << mark << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;
 }

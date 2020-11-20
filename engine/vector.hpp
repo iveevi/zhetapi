@@ -132,6 +132,7 @@ namespace zhetapi {
 	template <class T>
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
+		::std::cout << "Operator =" << ::std::endl;
 		if (this != &other) {
 			delete this->__array;
 
@@ -142,6 +143,11 @@ namespace zhetapi {
 			this->__size = other.__size;
 			for (size_t i = 0; i < this->__size; i++)
 				this->__array[i] = other.__array[i];
+			
+			this->__dims = 1;
+			this->__dim = new size_t[1];
+
+			this->__dim[0] = this->__size;
 		}
 
 		return *this;
@@ -175,7 +181,7 @@ namespace zhetapi {
 
 	// FIXME: Delegate Matrix constructor
 	template <class T>
-	Vector <T> ::Vector(size_t rs, T *ref)
+	Vector <T> ::Vector(size_t rs, T *ref) : Matrix <T> (rs, 1, T())
 	{
 		for (size_t i = 0; i < this->__size; i++)
 			this->__array[i] = ref[i];

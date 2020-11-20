@@ -1,6 +1,11 @@
 # Set CMake version
 cmake_minimum_required(VERSION 3.14)
 
+# Set the right flags
+if (${CMAKE_BUILD_TYPE} MATCHES DEBUG)
+	set (CMAKE_CXX_FLAGS "-g")
+endif ()
+
 # Allow dynamic linking
 SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 
@@ -23,6 +28,7 @@ project(port)
 add_library(port_vector OBJECT source/port/port-vector.cpp)
 add_library(port_matrix OBJECT source/port/port-matrix.cpp)
 add_library(port_tensor OBJECT source/port/port-tensor.cpp)
+add_library(timer OBJECT source/port/timers.cpp)
 
 add_executable(port source/port/port.cpp)
 
@@ -31,6 +37,7 @@ target_link_libraries(port PUBLIC zhp)
 target_link_libraries(port PUBLIC port_vector)
 target_link_libraries(port PUBLIC port_matrix)
 target_link_libraries(port PUBLIC port_tensor)
+target_link_libraries(port PUBLIC timer)
 
 # Include directories
 include_directories(PUBLIC engine)
