@@ -311,6 +311,9 @@ namespace zhetapi {
 		::std::string file = generate_general();
 
 #ifdef __linux__
+
+#define ZHP_FUNCTION_COMPILE_GENERAL
+
 		system("mkdir -p gen");
 
 		system(("g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std \
@@ -364,7 +367,7 @@ namespace zhetapi {
 		return ptr;
 #else
 
-#warning No support for Function::compile_general
+#warning No support for Function::compile_general in the current operating system
 
 		return nullptr;
 #endif

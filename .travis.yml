@@ -8,7 +8,9 @@ matrix:
     - os: linux
       env: TARGET="CLI"
     - os: linux
-      env: TARGET="API (Port)"
+      env: TARGET="API (Build)"
+    - os: linux
+      env: TARGET="API (Testing)"
 
 before_install:
   - mkdir $HOME/usr
@@ -29,4 +31,6 @@ before_script:
 
 script:
   - if [ "$TARGET" = "CLI" ]; then ./scripts/test_cli.sh; fi
-  - if [ "$TARGET" = "API (Port)" ]; then ./scripts/test_port.sh; fi
+  - if [ "$TARGET" = "API (Build)" ]; then ./scripts/test_build_port.sh; fi
+  - if [ "$TARGET" = "API (Testing)" ]; then ./scripts/test_port.sh; fi
+  - ls

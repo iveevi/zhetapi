@@ -37,4 +37,6 @@ bool vector_construction_and_memory();
 bool matrix_construction_and_memory();
 bool tensor_construction_and_memory();
 
+bool function_compilation_testing();
+
 #endif
