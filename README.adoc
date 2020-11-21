@@ -7,10 +7,8 @@ image::zhetapi-logo.png[]
 :travis-ci: https://travis-ci.com/github/vedavamadathil/zhetapi
 
 |===
-
-| | CLI | API (Build) | API (Testing)
-| Linux | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/1?use_travis_com=true[Build Status (Travis CI), link={travis-ci}] | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/2?use_travis_com=true[Build Status (Travis CI), link={travis-ci}] | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/3?use_travis_com=true[Build Status (Travis CI), link={travis-ci}]
-
+| | CLI | API (Build)
+| Linux | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/1?use_travis_com=true[Build Status (Travis CI), link={travis-ci}] | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/2?use_travis_com=true[Build Status (Travis CI), link={travis-ci}]
 |===
 
 # Introduction

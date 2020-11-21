@@ -9,29 +9,17 @@ os:
 
 env:
   - TARGET="CLI"
-  - TARGET="API (Build)"
-  - TARGET="API (Testing)"
+  - TARGET="API"
 
 before_install:
-  - mkdir $HOME/usr
-  - export PATH="$HOME/usr/bin:$PATH"
-  - wget https://cmake.org/files/v3.14/cmake-3.14.2-Linux-x86_64.sh
-  - chmod +x cmake-3.14.2-Linux-x86_64.sh
-  - ./cmake-3.14.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license
+  - cd ${TRAVIS_BUILD_DIR}
+  - chmod +x scripts/*
 
 install:
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get update; fi
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then sudo apt-get install libboost-dev gcc-8 g++-8 tree; fi
-
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew update; fi
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then brew install boost gcc@8 g++@8 tree; fi
-
-before_script:
-  - cd ${TRAVIS_BUILD_DIR}
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./scripts/install_deps_linux.sh; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then ./scripts/install_deps_osx.sh; fi
 
 script:
   - if [ "$TARGET" = "CLI" ]; then ./scripts/test_cli.sh; fi
-  - if [ "$TARGET" = "API (Build)" ]; then ./scripts/test_port_build.sh; fi
-  - if [ "$TARGET" = "API (Testing)" ]; then ./scripts/test_port.sh; fi
+  - if [ "$TARGET" = "API" ]; then ./scripts/test_port.sh; fi
   - tree

@@ -15,15 +15,16 @@ elif [ $1 = "install" ]; then
 	
 	mkdir -p bin
 
-	# Compile and move shared library
-	make zhp
+	# Compile shared library
+	make -j8 zhp
+	
+	# Compile apps
+	make -j8 zhetapi
 
+	# Move executables and libraries
 	if [ -f "libzhp.so" ]; then
 		mv libzhp.* bin/
 	fi
-	
-	# Compile and move apps
-	make zhetapi
 
 	mv zhetapi bin/
 elif [ $1 = "port" ]; then
@@ -33,14 +34,14 @@ elif [ $1 = "port" ]; then
 	mkdir -p bin
 
 	# Compile and move shared library
-	make zhp
+	make -j8 zhp
 
 	if [ -f "libzhp.so" ]; then
 		mv libzhp.* bin/
 	fi
 	
 	# Compile and move apps
-	make port
+	make -j8 port
 
 	mv port bin/
 
