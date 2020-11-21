@@ -12,6 +12,13 @@ env:
   - TARGET="API"
 
 before_install:
+  - mkdir $HOME/usr
+  - export PATH="$HOME/usr/bin:$PATH"
+  - wget https://cmake.org/files/v3.14/cmake-3.14.2-Linux-x86_64.sh
+  - chmod +x cmake-3.14.2-Linux-x86_64.sh
+  
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then ./cmake-3.14.2-Linux-x86_64.sh --prefix=$HOME/usr --exclude-subdir --skip-license; fi
+  
   - cd ${TRAVIS_BUILD_DIR}
   - chmod +x scripts/*
 
