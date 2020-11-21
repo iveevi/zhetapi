@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 if [ "$1" = "gdb" ] || [ "$1" = "valgrind" ]; then
 	cmake -DCMAKE_BUILD_TYPE=DEBUG .
@@ -8,9 +9,9 @@ fi
 
 mkdir -p bin
 
-make zhp
+make -j8 zhp
 
-make port
+make -j8 port
 
 mv port bin/
 

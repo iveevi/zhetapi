@@ -1,12 +1,13 @@
 #!/bin/bash
+set -e
 
 cmake .
 
 mkdir -p bin
 
-make zhp
+make -j8 zhp
 
-make zhetapi
+make -j8 zhetapi
 
 mv zhetapi bin/
 

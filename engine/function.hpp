@@ -316,7 +316,7 @@ namespace zhetapi {
 
 		system("mkdir -p gen");
 
-		system(("g++ --no-gnu-unique -I engine -I inc/hidden -I inc/std \
+		system(("g++-8 --no-gnu-unique -I engine -I inc/hidden -I inc/std \
 					-rdynamic -fPIC -shared " + file  +
 					".cpp -o gen/" + file +
 					".so").c_str());
