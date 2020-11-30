@@ -1,0 +1,12 @@
+a = 3 + 54, b = 54^2
+
+print(a)
+print(b)
+
+c = 3424 / 6
+
+print(c)
+
+c = c * 3.14
+
+print(c)

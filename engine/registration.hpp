@@ -4,6 +4,7 @@
 // C/C++ headers
 #include <tuple>
 #include <vector>
+#include <functional>
 
 // Engine headers
 #include <token.hpp>
@@ -30,6 +31,29 @@
  */
 
 namespace zhetapi {
+
+	class Registrable : public Token {
+	public:
+		using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
+	private:
+		mapper		__ftn;
+
+		::std::string	__ident;
+	public:
+		Registrable();
+		Registrable(const Registrable &);
+		Registrable(const ::std::string &, mapper);
+
+		Token *operator()(const ::std::vector <Token *> &) const;
+
+		::std::string str() const override;
+
+		type caller() const override;
+
+		Token *copy() const override;
+
+		bool operator==(Token *) const override;
+	};
 
 	/**
 	 * ==============================
@@ -77,7 +101,7 @@ namespace zhetapi {
 	 */
 
 	template <class T>
-	void zhetapi_cast_process(const std::vector <Token *> &tokens, size_t
+	void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
 			i, T &tptr)
 	{
 		if (i >= tokens.size())
@@ -90,7 +114,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class ... A>
-	void zhetapi_cast_process(const std::vector <Token *> &tokens, size_t
+	void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
 			i, T &tptr, A &... args)
 	{
 		if (i >= tokens.size())
@@ -105,7 +129,7 @@ namespace zhetapi {
 	}
 
 	template <class ... A>
-	void zhetapi_cast(const std::vector <Token *> &tokens, A &... args)
+	void zhetapi_cast(const ::std::vector <Token *> &tokens, A &... args)
 	{
 		zhetapi_cast_process(tokens, 0, args ...);
 	}

@@ -13,7 +13,18 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 set(CMAKE_CXX_COMPILER "g++-8")
 
 # Compile shared library
-add_library(zhp SHARED source/class.cpp source/complex.cpp source/label.cpp source/node_reference.cpp source/operation_holder.cpp source/operation.cpp source/variable_cluster.cpp source/token.cpp source/node.cpp)
+add_library(zhp SHARED
+	source/class.cpp
+	source/complex.cpp
+	source/label.cpp
+	source/node_reference.cpp
+	source/operation_holder.cpp
+	source/operation.cpp
+	source/registration.cpp
+	source/variable_cluster.cpp
+	source/token.cpp
+	source/node.cpp
+)
 
 # Compile CLI application
 project(zhetapi)
@@ -28,6 +39,13 @@ project(exp)
 add_executable(exp source/exp/exp.cpp)
 
 target_link_libraries(exp PUBLIC zhp)
+
+# Compile zhp file
+project(czhp)
+
+add_executable(czhp source/czhp/czhp.cpp)
+
+target_link_libraries(czhp PUBLIC zhp)
 
 # Compile portability tests
 project(port)

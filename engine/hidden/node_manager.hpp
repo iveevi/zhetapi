@@ -261,6 +261,13 @@ namespace zhetapi {
 					(tree.__tptr.get()))->get();
 
 			return unrefd->__tptr.get()->copy();
+		case Token::reg:
+			for (node leaf : tree.__leaves)
+				values.push_back(value(leaf));
+
+			tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
+
+			return tptr->copy();
 		}
 
 		return nullptr;
@@ -749,8 +756,6 @@ namespace zhetapi {
 	template <class T, class U>
 	void node_manager <T, U> ::print(bool address) const
 	{
-		::std::cout << "Tree:" << ::std::endl;
-
 		node_reference::address = address;
 
 		if (address)

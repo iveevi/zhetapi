@@ -12,29 +12,29 @@ namespace zhetapi {
 		__opn = other.__opn;
 	}
 
-	operation::operation(const std::string &in, const std::string &out, std::size_t
+	operation::operation(const ::std::string &in, const ::std::string &out, ::std::size_t
 			opers, mapper fopn) : __input(in), __output(out), ops(opers),
 			__opn(fopn) {}
 
-	Token *operation::operator()(const std::vector <Token *> &ins) const
+	Token *operation::operator()(const ::std::vector <Token *> &ins) const
 	{
 		if (ins.size() != ops)
 			throw count_mismatch();
 		return __opn(ins);
 	}
 
-	std::string operation::fmt() const
+	::std::string operation::fmt() const
 	{
 		return __input;
 	}
 
-	std::string operation::str() const
+	::std::string operation::str() const
 	{
-		return "[" + __input + "](" + std::to_string(ops)
+		return "[" + __input + "](" + ::std::to_string(ops)
 			+ ") - [" + __output + "]";
 	}
 
-	std::size_t operation::inputs() const
+	::std::size_t operation::inputs() const
 	{
 		return ops;
 	}

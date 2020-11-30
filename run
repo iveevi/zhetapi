@@ -85,5 +85,9 @@ else
 
 	mv $1 debug/$1-run
 
-	./debug/$1-run
+	if [ "$1" == "czhp" ]; then
+		./debug/$1-run < samples/zhp/simple.zhp
+	else
+		./debug/$1-run
+	fi
 fi

@@ -23,7 +23,7 @@ namespace zhetapi {
 	public:
 		// Aliases
 		using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
-	private:
+	protected:
 		/* Member instance of the
 		 * operation Token class. */
 

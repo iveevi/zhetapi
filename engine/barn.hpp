@@ -20,6 +20,7 @@
 #include <matrix.hpp>
 #include <operand.hpp>
 #include <rational.hpp>
+#include <registration.hpp>
 #include <token.hpp>
 #include <vector.hpp>
 #include <variable.hpp>
@@ -224,6 +225,8 @@ namespace zhetapi {
 
 		::std::vector <::std::pair <ID, Token *>> ops;
 
+		::std::unordered_map <::std::string, Registrable> __reg_table;
+
 		mutable ::std::unordered_map <::std::string, ::std::vector <::std::pair <signature, Token *>>> table;
 	public:
 		Barn();
@@ -237,6 +240,7 @@ namespace zhetapi {
 
 		void put(Variable <T, U>);
 		void put(Function <T, U>);
+		void put(Registrable);
 
 		template <class A>
 		void put(const ::std::string &, A);
@@ -494,7 +498,7 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
-	Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack), fstack(other.fstack)
+	Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack), fstack(other.fstack), __reg_table(other.__reg_table)
 	{
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
@@ -559,6 +563,15 @@ namespace zhetapi {
 	}
 
 	template <class T, class U>
+	void Barn <T, U> ::put(Registrable reg)
+	{
+		if (__reg_table.find(reg.str()) != __reg_table.end())
+			__reg_table[reg.str()] = reg;
+		else
+			__reg_table.insert(::std::make_pair(reg.str(), reg));
+	}
+
+	template <class T, class U>
 	template <class A>
 	void Barn <T, U> ::put(const ::std::string &str, A x)
 	{
@@ -586,7 +599,10 @@ namespace zhetapi {
 		
 		if (fstack.contains(str))
 			return (fstack.get(str)).copy();
-
+		
+		if (__reg_table.count(str))
+			return __reg_table[str].copy();
+		
 		return nullptr;
 	}
 	
@@ -707,17 +723,24 @@ namespace zhetapi {
 	template <class T, class U>
 	void Barn <T, U> ::print(bool show_ops) const
 	{
-		::std::cout << ::std::string(50, '=') << ::std::endl;
-		::std::cout << "VARIABLES" << ::std::endl;
-		::std::cout << ::std::string(50, '=') << ::std::endl;
+		::std::cout << ::std::string(50, '-') << ::std::endl;
+		::std::cout << "Variables:" << ::std::endl;
+		::std::cout << ::std::string(50, '-') << ::std::endl;
 
 		vstack.print();
 
-		::std::cout << ::std::string(50, '=') << ::std::endl;
-		::std::cout << "FUNCTIONS:" << ::std::endl;
-		::std::cout << ::std::string(50, '=') << ::std::endl;
+		::std::cout << ::std::string(50, '-') << ::std::endl;
+		::std::cout << "Functions:" << ::std::endl;
+		::std::cout << ::std::string(50, '-') << ::std::endl;
 
 		fstack.print();
+
+		::std::cout << ::std::string(50, '-') << ::std::endl;
+		::std::cout << "Reg Table:" << ::std::endl;
+		::std::cout << ::std::string(50, '-') << ::std::endl;
+
+		for (auto spr : __reg_table)
+			::std::cout << spr.second.str() << ::std::endl;
 
 		if (show_ops) {
 			for (auto pr : ops) {

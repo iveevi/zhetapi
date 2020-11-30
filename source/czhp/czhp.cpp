@@ -79,6 +79,7 @@ vector <string> split(string str)
 // Global processing
 void process(string statement)
 {
+	cout << "================================" << endl;
 	cout << "processing [" << statement << "]" << endl;
 
 	vector <string> tmp = split(statement);
@@ -87,10 +88,15 @@ void process(string statement)
 	if (tsize > 1) {
 		zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
 
-		zhetapi::token *tptr = mg.value();
+		cout << "\ntree:" << endl;
+		mg.print();
 
+		zhetapi::Token *tptr = mg.value();
 		for (int i = tsize - 2; i >= 0; i--)
 			barn.put(tptr, tmp[i]);
+		
+		cout << "\npost-state:" << endl;
+		barn.print();
 		
 		delete tptr;
 	}
@@ -98,13 +104,28 @@ void process(string statement)
 	// All functions and algorithms are stored in barn
 	zhetapi::node_manager <double, int> mg(statement, barn);
 
+	cout << "tree: " << endl;
+	mg.print();
+
 	// "Execute" the statement
 	mg.value();
+}
+
+zhetapi::Token *print(const std::vector <zhetapi::Token *> &ins)
+{
+	for (zhetapi::Token *tptr : ins)
+		cout << tptr->str();
+	
+	return ins[0];
 }
 
 // Main
 int main()
 {
+	// Barn setup	
+	barn.put(zhetapi::Registrable("print", &print));
+
+	// Input
 	char c;
 
 	while (cin.get(c))
