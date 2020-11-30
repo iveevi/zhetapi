@@ -132,7 +132,6 @@ namespace zhetapi {
 	template <class T>
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
-		::std::cout << "Operator =" << ::std::endl;
 		if (this != &other) {
 			delete this->__array;
 

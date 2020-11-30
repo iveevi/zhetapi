@@ -22,5 +22,6 @@ exp
 gen
 makefile
 portability
+train*
 zhetapi
 zhetapi-headers
