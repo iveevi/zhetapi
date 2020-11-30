@@ -100,6 +100,7 @@ namespace zhetapi {
 		void differentiate_lg(node &);
 		void differentiate_const_log(node &);
 		void differentiate_trig(node &);
+		void differentiate_hyp(node &);
 		
 		void refactor_reference(node &, const ::std::string &, Token *);
 
@@ -196,6 +197,9 @@ namespace zhetapi {
 		__barn(other.__barn), __tree(other.__tree),
 		__refs(other.__refs), __params(other.__params)
 	{
+		::std::cout << "REREFING" << ::std::endl;
+		other.print();
+
 		rereference(__tree);
 	}
 
@@ -534,6 +538,9 @@ namespace zhetapi {
 		case l_trigonometric:
 			differentiate_trig(ref);
 			break;
+		case l_hyperbolic:
+			differentiate_hyp(ref);
+			break;
 		case l_variable:
 			ref.transfer(nf_one());
 			break;
@@ -688,6 +695,16 @@ namespace zhetapi {
 		case sin:
 		case cos:
 		case tan:
+		case sec:
+		case csc:
+		case cot:
+
+		case snh:
+		case csh:
+		case tnh:
+		case cch:
+		case sch:
+		case cth:
 
 		case xln:
 		case xlg:
@@ -838,6 +855,14 @@ namespace zhetapi {
 		case csc:
 		case cot:
 			ref.__label = l_trigonometric;
+			break;
+		case snh:
+		case csh:
+		case tnh:
+		case cch:
+		case sch:
+		case cth:
+			ref.__label = l_hyperbolic;
 			break;
 		}
 	}

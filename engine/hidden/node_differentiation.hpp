@@ -113,7 +113,7 @@ namespace zhetapi {
 			});
 			break;
 		case cos:
-			op = node(new operation_holder("*"), l_trigonometric, {
+			op = node(new operation_holder("*"), l_multiplied, {
 				node(new operation_holder("sin"), l_trigonometric, {
 					node(ref.__leaves[0])
 				}),
@@ -121,7 +121,7 @@ namespace zhetapi {
 			});
 			break;
 		case tan:
-			op = node(new operation_holder("^"), l_trigonometric, {
+			op = node(new operation_holder("^"), l_power, {
 				node(new operation_holder("sec"), l_trigonometric, {
 					node(ref.__leaves[0])
 				}),
@@ -129,7 +129,7 @@ namespace zhetapi {
 			});
 			break;
 		case sec:
-			op = node(new operation_holder("*"), l_trigonometric, {
+			op = node(new operation_holder("*"), l_multiplied, {
 				node(new operation_holder("sec"), l_trigonometric, {
 					node(ref.__leaves[0])
 				}),
@@ -139,7 +139,7 @@ namespace zhetapi {
 			});
 			break;
 		case csc:
-			op = node(new operation_holder("*"), l_trigonometric, {
+			op = node(new operation_holder("*"), l_multiplied, {
 				node(new operation_holder("*"), l_trigonometric, {
 					node(new operation_holder("csc"), l_trigonometric, {
 						node(ref.__leaves[0])
@@ -152,9 +152,86 @@ namespace zhetapi {
 			});
 			break;
 		case cot:
-			op = node(new operation_holder("*"), l_trigonometric, {
-				node(new operation_holder("^"), l_trigonometric, {
+			op = node(new operation_holder("*"), l_multiplied, {
+				node(new operation_holder("^"), l_power, {
 					node(new operation_holder("cot"), l_trigonometric, {
+						node(ref.__leaves[0])
+					}),
+					node(new Operand <U> (2), l_constant_integer, {})	
+				}),
+				node(new Operand <U> (-1), l_constant_integer, {})
+			});
+			break;
+		default:
+			break;
+		}
+
+		node tmp(new operation_holder("*"), l_multiplied, {
+			diffed,
+			op
+		});
+
+		ref.transfer(tmp);
+	}
+
+	template <class T, class U>
+	void node_manager <T, U> ::differentiate_hyp(node &ref)
+	{
+		node diffed(ref.__leaves[0]);
+		differentiate(diffed);
+
+		node op;
+
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+		switch (ophptr->code) {
+		case snh:
+			op = node(new operation_holder("cosh"), l_hyperbolic, {
+				node(ref.__leaves[0])
+			});
+			break;
+		case csh:
+			op = node(new operation_holder("*"), l_multiplied, {
+				node(new operation_holder("sinh"), l_hyperbolic, {
+					node(ref.__leaves[0])
+				}),
+				node(new Operand <U> (-1), l_constant_integer, {})
+			});
+			break;
+		case tnh:
+			op = node(new operation_holder("^"), l_power, {
+				node(new operation_holder("sech"), l_hyperbolic, {
+					node(ref.__leaves[0])
+				}),
+				node(new Operand <U> (2), l_constant_integer, {})	
+			});
+			break;
+		case sch:
+			op = node(new operation_holder("*"), l_multiplied, {
+				node(new operation_holder("sech"), l_hyperbolic, {
+					node(ref.__leaves[0])
+				}),
+				node(new operation_holder("tanh"), l_hyperbolic, {
+					node(ref.__leaves[0])
+				}),
+			});
+			break;
+		case cch:
+			op = node(new operation_holder("*"), l_multiplied, {
+				node(new operation_holder("*"), l_multiplied, {
+					node(new operation_holder("csch"), l_hyperbolic, {
+						node(ref.__leaves[0])
+					}),
+					node(new operation_holder("coth"), l_hyperbolic, {
+						node(ref.__leaves[0])
+					}),
+				}),
+				node(new Operand <U> (-1), l_constant_integer, {})
+			});
+			break;
+		case cth:
+			op = node(new operation_holder("*"), l_multiplied, {
+				node(new operation_holder("^"), l_power, {
+					node(new operation_holder("coth"), l_hyperbolic, {
 						node(ref.__leaves[0])
 					}),
 					node(new Operand <U> (2), l_constant_integer, {})	

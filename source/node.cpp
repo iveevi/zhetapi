@@ -38,9 +38,15 @@ namespace zhetapi {
 			counter--;
 		}
 
-		::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
-			__tptr << ", " << strlabs[__label] << ") @ " << this <<
-			::std::endl;
+		if (__tptr) {
+			::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
+				__tptr << ", " << strlabs[__label] << ") @ " << this <<
+				::std::endl;	
+		} else {
+			::std::cout << "#" << num << ": null (" <<
+				__tptr << ", " << strlabs[__label] << ") @ " << this <<
+				::std::endl;
+		}
 
 		counter = 0;
 		for (node itr : __leaves)
@@ -55,8 +61,13 @@ namespace zhetapi {
 			counter--;
 		}
 
-		::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
-			strlabs[__label] << ")" << ::std::endl;
+		if (__tptr) {
+			::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
+				strlabs[__label] << ")" << ::std::endl;
+		} else {
+			::std::cout << "#" << num << ": null (" <<
+				strlabs[__label] << ")" << ::std::endl;
+		}
 
 		counter = 0;
 		for (node itr : __leaves)

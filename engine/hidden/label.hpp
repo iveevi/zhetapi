@@ -67,6 +67,7 @@ namespace zhetapi {
 		l_divided,
 		l_power,
 		l_trigonometric,
+		l_hyperbolic,
 		l_natural_log,
 		l_binary_log,
 		l_constant_base_log,

@@ -47,6 +47,7 @@ namespace zhetapi {
 		"divided",
 		"power",
 		"trigonometric",
+		"hyperbolic",
 		"natural logarithm",
 		"binary logarithm",
 		"constant base logarithm",
