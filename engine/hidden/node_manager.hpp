@@ -531,6 +531,9 @@ namespace zhetapi {
 		case l_constant_base_log:
 			differentiate_const_log(ref);
 			break;
+		case l_trigonometric:
+			differentiate_trig(ref);
+			break;
 		case l_variable:
 			ref.transfer(nf_one());
 			break;
@@ -828,6 +831,14 @@ namespace zhetapi {
 				!is_constant(ref.__leaves[1].__label))
 				ref.__label = l_constant_base_log;
 			break;
+		case sin:
+		case cos:
+		case tan:
+		case sec:
+		case csc:
+		case cot:
+			ref.__label = l_trigonometric;
+			break;
 		}
 	}
 	
@@ -869,5 +880,7 @@ namespace zhetapi {
 	}
 
 }
+
+#include <hidden/node_differentiation.hpp>
 
 #endif

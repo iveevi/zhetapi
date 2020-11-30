@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set the right flags
-if (${CMAKE_BUILD_TYPE} MATCHES DEBUG)
+if (${CMAKE_BUILD_TYPE} MATCHES Debug)
 	set (CMAKE_CXX_FLAGS "-g")
 endif ()
 
@@ -21,6 +21,13 @@ project(zhetapi)
 add_executable(zhetapi source/cli/cli.cpp)
 
 target_link_libraries(zhetapi PUBLIC zhp)
+
+# Compile exp file
+project(exp)
+
+add_executable(exp source/exp/exp.cpp)
+
+target_link_libraries(exp PUBLIC zhp)
 
 # Compile portability tests
 project(port)
