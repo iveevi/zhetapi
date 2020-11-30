@@ -11,9 +11,9 @@ ifstream labels("train-labels-idx1-ubyte", ios::binary);
 
 zhetapi::ml::DeepNeuralNetwork <double> model({
 	{784, new zhetapi::ml::ReLU <double> ()},
+	{20, new zhetapi::ml::Sigmoid <double> ()},
 	{20, new zhetapi::ml::ReLU <double> ()},
-	{20, new zhetapi::ml::ReLU <double> ()},
-	{10, new zhetapi::ml::Sigmoid <double> ()}
+	{10, new zhetapi::ml::Softmax <double> ()}
 }, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
 int reverse(int i)
@@ -62,7 +62,16 @@ void read_mnist()
 		zhetapi::Vector <double> in = pixels;
 
 		cout << "==================================================" << endl;
-		cout << "Item #" << (i + 1) << " -- Supposed to be " << (int) actual << ", got " << model(in) << endl;
+
+		zhetapi::Vector <double> out = model(in);
+
+		int mi = 0;
+		for (int i = 1; i < 10; i++) {
+			if (out[mi] < out[i])
+				mi = i;
+		}
+
+		cout << "Item #" << (i + 1) << " -- Supposed to be " << (int) actual << ", got " << mi + 1 << endl;
 	}
 }
 
