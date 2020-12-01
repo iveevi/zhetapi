@@ -153,6 +153,55 @@ namespace zhetapi {
 			}
 		};
 
+		// Probability activation class
+		template <class T>
+		class __DSoftmax : public Activation <T> {
+		public:
+			Vector <T> operator()(const Vector <T> &x) const {
+				// Subtract by max for numerical stability
+				T _max = x[0];
+				for (size_t i = 1; i < x.size(); i++)
+					_max = (_max > x[i]) ? _max : x[i];
+
+				T _sum;
+				for (size_t i = 0; i < x.size(); i++)
+					_sum += exp(x[i] - _max);
+
+				return Vector <T> (x.size(),
+					[&](size_t i) {
+						return exp(x[i] - _max)
+							* (_sum - exp(x[i] - _max))
+							/ (_sum * _sum);
+					}
+				);
+			}
+		};
+
+		template <class T>
+		class Softmax : public Activation <T> {
+		public:
+			Vector <T> operator()(const Vector <T> &x) const {
+				// Subtract by max for numerical stability
+				T _max = x[0];
+				for (size_t i = 1; i < x.size(); i++)
+					_max = (_max > x[i]) ? _max : x[i];
+
+				T _sum;
+				for (size_t i = 0; i < x.size(); i++)
+					_sum += exp(x[i] - _max);
+
+				return Vector <T> (x.size(),
+					[&](size_t i) {
+						return exp(x[i] - _max)/_sum;
+					}
+				);
+			}
+
+			Activation <T> *derivative() const {
+				return new __DSoftmax <T> ();
+			}
+		};
+
 	}
 
 }
