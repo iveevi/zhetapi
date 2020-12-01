@@ -18,7 +18,6 @@ build
 cmake_install.cmake
 data
 debug
-exp
 gen
 makefile
 portability
