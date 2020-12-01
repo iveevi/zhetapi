@@ -18,7 +18,7 @@ namespace zhetapi {
 	namespace ml {
 
 		/*
-		* Deep Nerual Network
+		* Nerual Network
 		*
 		* Note that layers contain pointers to activations. These are not
 		* allocated and are simply COPIES of what the USER allocates. The user
@@ -31,7 +31,7 @@ namespace zhetapi {
 		* binary
 		*/
 		template <class T>
-		class DeepNeuralNetwork {
+		class NeuralNetwork {
 		public:
 			typedef std::pair <std::size_t, Activation <T> *> Layer;
 		private:
@@ -44,11 +44,16 @@ namespace zhetapi {
 			std::vector <Vector <T>>	__xs;
 			std::vector <Vector <T>>	__dxs;
 		public:
-			DeepNeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
+			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
+			Vector <T> compute(const Vector <T> &);
 			Vector <T> operator()(const Vector <T> &);
 
 			void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *, T);
+
+			void train(Optimizer <T> *, const std::vector <Vector <T>> &, const std::vector <Vector <T>> &, const std::function <bool (const Vector <T> , const Vector <T>)> &, bool = false);
+			void epochs(size_t, Optimizer <T> *, const std::vector <Vector <T>> &, const std::vector <Vector <T>> &, const std::function <bool (const Vector <T> , const Vector <T>)> &, bool = false);
+
 
 			void randomize();
 
@@ -57,7 +62,7 @@ namespace zhetapi {
 		};
 
 		template <class T>
-		DeepNeuralNetwork <T> ::DeepNeuralNetwork(const std::vector <Layer> &layers,
+		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer> &layers,
 				const std::function <T ()> &random) : __random(random),
 				__isize(layers[0].first), __osize(layers[layers.size() - 1].first),
 				__layers(layers)
@@ -79,7 +84,30 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		Vector <T> DeepNeuralNetwork <T> ::operator()(const Vector <T> &in)
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
+		{
+			assert(in.size() == __isize);
+
+			Vector <T> prv = in;
+			Vector <T> tmp = (*__layers[0].second)(prv);
+
+			__xs.clear();
+			__dxs.clear();
+
+			for (size_t i = 0; i < __weights.size(); i++) {
+				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
+
+				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+				tmp = (*__layers[i + 1].second)(prv);
+				
+				__dxs.insert(__dxs.begin(), (*__layers[i].second->derivative())(prv));
+			}
+			
+			return tmp;
+		}
+
+		template <class T>
+		Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
 		{
 			assert(in.size() == __isize);
 
@@ -110,7 +138,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void DeepNeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt, T alpha)
+		void NeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt, T alpha)
 		{
 			/* using namespace std;
 
@@ -198,14 +226,59 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void DeepNeuralNetwork <T> ::randomize()
+		void NeuralNetwork <T> ::train(Optimizer <T> *opt, const std::vector<Vector<T>> &ins, const std::vector<Vector<T>> &outs, const std::function <bool (const Vector<T>, const Vector<T>)> &crit, bool print)
+		{
+			using namespace std;
+
+			cout.flush();
+
+			int passed = 0;
+
+			double opt_error = 0;
+			double per_error = 0;
+
+			int size = ins.size();
+			for (int i = 0; i < size; i++) {
+				Vector <T> actual = compute(ins[i]);
+
+				if (crit(actual, outs[i]))
+					passed++;
+				
+				opt_error += (*opt)(outs[i], actual)[0];
+				per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
+			}
+
+			if (print) {
+				cout << "Summary: " << endl;
+				
+				cout << "\tCase passed:\t" << passed << "/" << size << endl;
+				cout << "\tAverage (optimizer) error:\t" << opt_error/size << endl;
+				cout << "\tAverage (percent) error:\t" << per_error/size << "%" << endl;
+			}
+		}
+
+		template <class T>
+		void NeuralNetwork <T> ::epochs(size_t runs, Optimizer<T> *opt, const std::vector<Vector<T>> &ins, const std::vector<Vector<T>> &outs, const std::function<bool (const Vector<T>, const Vector<T>)> &crit, bool print)
+		{
+			for (int i = 0; i < runs; i++) {
+				if (print) {
+					::std::cout << ::std::string(20, '-') << ::std::endl;
+					::std::cout << "Epoch #" << (i + 1) << "\n" << ::std::endl;
+				}
+
+				train(opt, ins, outs, crit, print);
+			}
+		}
+
+		template <class T>
+		void NeuralNetwork <T> ::randomize()
 		{
 			for (auto &mat : __weights)
 				mat.randomize(__random);
 		}
 
 		template <class T>
-		void DeepNeuralNetwork <T> ::print() const
+		void NeuralNetwork <T> ::print() const
 		{
 			std::cout << "================================" << std::endl;
 			

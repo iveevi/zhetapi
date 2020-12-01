@@ -16,6 +16,8 @@ cmake .
 
 make
 
+mkdir -p bin
+
 mv mnist bin/
 
 ./bin/mnist
