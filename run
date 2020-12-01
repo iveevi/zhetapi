@@ -14,19 +14,18 @@ elif [ $1 = "install" ]; then
 	cmake .
 	
 	mkdir -p bin
+	mkdir -p build
 
-	# Compile shared library
-	make -j8 zhp
-	
 	# Compile apps
-	make -j8 zhetapi
+	make -j8 all
 
 	# Move executables and libraries
 	if [ -f "libzhp.so" ]; then
 		mv libzhp.* bin/
 	fi
 
-	mv zhetapi bin/
+	mv zhetapi czhp bin/
+	mv port exp build/
 elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .

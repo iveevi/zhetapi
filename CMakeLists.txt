@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 
 # Set the right flags
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-	set (CMAKE_CXX_FLAGS "-g")
+	set(CMAKE_CXX_FLAGS "-g")
 endif ()
 
 # Allow dynamic linking
