@@ -45,13 +45,17 @@ namespace zhetapi {
 		__TYPEDEFS__
 
 		parser() : parser::base_type(__start) {
+			__esc.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
+				("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
+				("\\\'", '\'')("\\\"", '\"');
+
 			/*
 			 * Parser for an identifier. Used to construct variable
 			 * clusters.
 			 */
 			__ident = +qi::char_("a-zA-Z$");
 
-			__str = +(qi::char_ - '\"');
+			__str = +(__esc | (qi::char_ - '\"'));
 
 			// Operation parsers
 
@@ -639,6 +643,8 @@ namespace zhetapi {
 
 		}
 
+		qi::symbols <char const, char const>					__esc;
+		
 		qi::rule <siter, zhetapi::node (), qi::space_type>			__start;
 		
 		// Nodes
@@ -674,7 +680,7 @@ namespace zhetapi {
 		// Operands
 
 		// Token parsers
-		qi::rule <siter, zhetapi::Token *()>			__o_str;
+		qi::rule <siter, zhetapi::Token *()>					__o_str;
 
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_z;
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_q;

@@ -1,6 +1,7 @@
 a = 3 + 54, b = 54^2
 
-println("Hello there, this is a longer string literal")
+println("Hello there, this is a longer string literal\tfdsfds\nfdfsd")
+println("escape\tsequences\\work!")
 
 println(a)
 println(b)
