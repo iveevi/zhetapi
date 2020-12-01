@@ -14,38 +14,68 @@ vector <string> global;
 // Zhetapi API storage
 zhetapi::Barn <double, int> barn;
 
-// Parsing states
-int block = 0;
-
 // Parsing machine
 void parse(char c)
 {
 	static string tmp;
 
-	if (c == '\t')
-		return;
+	static int block = 0;
+	static int paren = 0;
 
-	if (c == '{') {
-		block++;
+	static bool quote = false;
+
+	switch (c) {
+	case '{':
 		cout << "\tBlock Enter" << endl;
-	}
+		block++;
 
-	if (!block) {
-		if (c == '\n' || c == ',') {
-			if (!tmp.empty()) {
-				global.push_back(tmp);
-
-				tmp.clear();
-			}
-		} else {
-			if (!isspace(c))
-				tmp += c;
-		}
-	}
-	
-	if (c == '}') {
-		block--;
+		break;
+	case '}':
 		cout << "\tBlock Leave" << endl;
+		block--;
+
+		break;
+	case '(':
+		tmp += c;
+
+		paren++;
+
+		break;
+	case ')':
+		tmp += c;
+
+		paren--;
+
+		break;
+	case '\"':
+		quote = !quote;
+
+		tmp += c;
+
+		break;
+	case ',':
+		if (!tmp.empty() && !paren) {
+			global.push_back(tmp);
+
+			tmp.clear();
+		} else {
+			tmp += c;
+		}
+
+		break;
+	case '\n':
+		if (!tmp.empty()) {
+			global.push_back(tmp);
+
+			tmp.clear();
+		}
+
+		break;
+	default:
+		if (quote || !isspace(c))
+			tmp += c;
+		
+		break;
 	}
 }
 
@@ -79,33 +109,21 @@ vector <string> split(string str)
 // Global processing
 void process(string statement)
 {
-	cout << "================================" << endl;
-	cout << "processing [" << statement << "]" << endl;
-
 	vector <string> tmp = split(statement);
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
 		zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
 
-		cout << "\ntree:" << endl;
-		mg.print();
-
 		zhetapi::Token *tptr = mg.value();
 		for (int i = tsize - 2; i >= 0; i--)
 			barn.put(tptr, tmp[i]);
-		
-		cout << "\npost-state:" << endl;
-		barn.print();
 		
 		delete tptr;
 	}
 
 	// All functions and algorithms are stored in barn
 	zhetapi::node_manager <double, int> mg(statement, barn);
-
-	cout << "tree: " << endl;
-	mg.print();
 
 	// "Execute" the statement
 	mg.value();
@@ -119,11 +137,22 @@ zhetapi::Token *print(const std::vector <zhetapi::Token *> &ins)
 	return ins[0];
 }
 
+zhetapi::Token *println(const std::vector <zhetapi::Token *> &ins)
+{
+	for (zhetapi::Token *tptr : ins)
+		cout << tptr->str();
+	
+	cout << "\n";
+	
+	return ins[0];
+}
+
 // Main
 int main()
 {
 	// Barn setup	
 	barn.put(zhetapi::Registrable("print", &print));
+	barn.put(zhetapi::Registrable("println", &println));
 
 	// Input
 	char c;
@@ -133,11 +162,6 @@ int main()
 	
 	// Flush parse
 	parse('\n');
-
-	cout << "global:" << endl;
-	for (string str : global)
-		cout << "\t" << str << endl;
-	
 	for (string statement : global)
 		process(statement);
 }

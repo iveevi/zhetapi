@@ -51,6 +51,8 @@ namespace zhetapi {
 			 */
 			__ident = +qi::char_("a-zA-Z$");
 
+			__str = +(qi::char_ - '\"');
+
 			// Operation parsers
 
 			__add_operation_symbol(__plus, +);
@@ -229,6 +231,10 @@ namespace zhetapi {
 			// Token parsers
 
 			// Reals
+			__o_str = qi::lit('\"') >> __str [
+				_val = phoenix::new_ <zhetapi::Operand <::std::string>> (_1)
+			] >> qi::lit('\"');
+
 			__o_z = __z [
 				_val = phoenix::new_ <zhetapi::Operand <Z>> (_1)
 			];
@@ -349,7 +355,8 @@ namespace zhetapi {
 			 * will yield a rational result.
 			 */
 			__node_opd = (
-					__o_cr | __o_cz
+					__o_str
+					| __o_cr | __o_cz
 					| __o_r | __o_z
 					| __o_vcr | __o_vcz
 					| __o_vr | __o_vz
@@ -462,23 +469,25 @@ namespace zhetapi {
 			__divide.name("division");
 			__power.name("exponentiation");
 			
-			__o_z.name("integer Operand");
-			__o_q.name("rational Operand");
-			__o_r.name("real Operand");
-			__o_cz.name("complex integer Operand");
-			__o_cq.name("complex rational Operand");
-			__o_cr.name("complex real Operand");
+			__o_str.name("literal operand");
+
+			__o_z.name("integer operand");
+			__o_q.name("rational operand");
+			__o_r.name("real operand");
+			__o_cz.name("complex integer operand");
+			__o_cq.name("complex rational operand");
+			__o_cr.name("complex real operand");
 			
-			__o_vz.name("vector integer Operand");
-			__o_vq.name("vector rational Operand");
-			__o_vr.name("vector real Operand");
-			__o_vgq.name("vector general rational Operand");
-			__o_vgr.name("vector general real Operand");
-			__o_vcz.name("vector complex integer Operand");
-			__o_vcq.name("vector complex rational Operand");
-			__o_vcr.name("vector complex real Operand");
-			__o_vcgq.name("vector complex general rational Operand");
-			__o_vcgr.name("vector complex general real Operand");
+			__o_vz.name("vector integer operand");
+			__o_vq.name("vector rational operand");
+			__o_vr.name("vector real operand");
+			__o_vgq.name("vector general rational operand");
+			__o_vgr.name("vector general real operand");
+			__o_vcz.name("vector complex integer operand");
+			__o_vcq.name("vector complex rational operand");
+			__o_vcr.name("vector complex real operand");
+			__o_vcgq.name("vector complex general rational operand");
+			__o_vcgr.name("vector complex general real operand");
 			
 			__o_mz.name("matrix integer Operand");
 			__o_mq.name("matrix rational Operand");
@@ -490,6 +499,8 @@ namespace zhetapi {
 			__o_mcr.name("matrix complex real Operand");
 			__o_mcgq.name("matrix complex general rational Operand");
 			__o_mcgr.name("matrix complex general real Operand");
+
+			__str.name("literal");
 
 			__z.name("integer");
 			__q.name("rational");
@@ -546,11 +557,7 @@ namespace zhetapi {
 			__mcgq_inter.name("intermediate matrix complex general rational");
 			__mcgr_inter.name("intermediate matrix complex general real");
 
-			// Debug
-
-// #define DEBUG_PARSER 1
-
-#ifdef DEBUG_PARSER
+#ifdef	ZHP_DEBUG
 			debug(__start);
 
 			debug(__node_expr);
@@ -562,6 +569,8 @@ namespace zhetapi {
 			debug(__times);
 			debug(__divide);
 			debug(__power);
+
+			debug(__o_str);
 
 			debug(__o_z);
 			debug(__o_q);
@@ -591,6 +600,8 @@ namespace zhetapi {
 			debug(__o_mcr);
 			debug(__o_mcgq);
 			debug(__o_mcgr);
+
+			debug(__str);
 			
 			debug(__z);
 			debug(__q);
@@ -624,7 +635,7 @@ namespace zhetapi {
 			debug(__mcr);
 			debug(__mcgq);
 			debug(__mcgr);
-#endif
+	#endif
 
 		}
 
@@ -663,6 +674,8 @@ namespace zhetapi {
 		// Operands
 
 		// Token parsers
+		qi::rule <siter, zhetapi::Token *()>			__o_str;
+
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_z;
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_q;
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_r;
@@ -693,6 +706,8 @@ namespace zhetapi {
 		qi::rule <siter, zhetapi::Token *(), qi::space_type>			__o_mcgr;
 		
 		// Type parsers
+		qi::rule <siter, ::std::string ()>					__str;
+
 		qi::rule <siter, Z (), qi::space_type>					__z;
 		qi::rule <siter, Q (), qi::space_type>					__q;
 		qi::rule <siter, R (), qi::space_type>					__r;

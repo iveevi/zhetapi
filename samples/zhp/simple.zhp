@@ -1,12 +1,18 @@
 a = 3 + 54, b = 54^2
 
-print(a)
-print(b)
+println("Hello there, this is a longer string literal")
+
+println(a)
+println(b)
 
 c = 3424 / 6
 
-print(c)
+println(c)
 
 c = c * 3.14
 
-print(c)
+println(c)
+
+println(a, b)
+
+println("a: ", a)
