@@ -52,7 +52,7 @@ elif [ $1 = "gdb" ]; then
 
 	cmake -DCMAKE_BUILD_TYPE=Debug .
 
-	make $2
+	make -j8 $2
 
 	mv $2 debug/$2-debug
 
@@ -80,7 +80,7 @@ else
 
 	cmake -DCMAKE_BUILD_TYPE=Release .
 
-	make $1
+	make -j8 $1
 
 	mv $1 debug/$1-run
 

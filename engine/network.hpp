@@ -49,11 +49,20 @@ namespace zhetapi {
 			Vector <T> compute(const Vector <T> &);
 			Vector <T> operator()(const Vector <T> &);
 
-			void learn(const Vector <T> &, const Vector <T> &, Optimizer <T> *, T);
+			std::vector <Matrix <T>> gradient(const Vector <T> &,
+					const Vector <T> &, Optimizer <T> *);
 
-			void train(Optimizer <T> *, const std::vector <Vector <T>> &, const std::vector <Vector <T>> &, const std::function <bool (const Vector <T> , const Vector <T>)> &, bool = false);
-			void epochs(size_t, Optimizer <T> *, const std::vector <Vector <T>> &, const std::vector <Vector <T>> &, const std::function <bool (const Vector <T> , const Vector <T>)> &, bool = false);
+			void learn(const Vector <T> &, const Vector <T> &,
+					Optimizer <T> *, T);
 
+			void train(Optimizer <T> *, const std::vector <Vector<T>> &,
+					const std::vector <Vector <T>> &,
+					const std::function <bool (const Vector <T> , const Vector <T>)> &,
+					bool = false);
+			void epochs(size_t, Optimizer <T> *, const std::vector <Vector <T>> &,
+					const std::vector <Vector <T>> &,
+					const std::function <bool (const Vector <T> , const Vector <T>)> &,
+					bool = false);
 
 			void randomize();
 
@@ -135,6 +144,39 @@ namespace zhetapi {
 			using namespace std;
 			cout << "\trows: " << a.get_rows() << endl;
 			cout << "\tcols: " << a.get_cols() << endl;
+		}
+		
+		template <class T>
+		std::Vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
+				const Vector <T> &out, Optimizer <T> *opt)
+		{
+			assert(in.size() == __isize);
+			assert(out.size() == __osize);
+			
+			Vector <T> actual = (*this)(in);
+
+			Vector <T> delta = (*(opt->derivative()))(out, actual);
+
+			std::vector <Matrix <T>> changes;
+
+			int n = __weights.size();
+			for (int i = n - 1; i >= 0; i--) {
+				if (i != n - 1) {
+					delta = __weights[i + 1].transpose() * delta;
+
+					delta = delta.remove_top();
+				}
+
+				delta = shur(delta, __dxs[(n - 1) - i]);
+
+				Matrix <T> xt = __xs[n - i - 1].transpose();
+
+				changes.push_back(delta * xt);
+			}
+
+			std::reverse(changes.begin(), changes.end());
+
+			return changes;
 		}
 
 		template <class T>
@@ -251,7 +293,7 @@ namespace zhetapi {
 			if (print) {
 				cout << "Summary: " << endl;
 				
-				cout << "\tCase passed:\t" << passed << "/" << size << endl;
+				cout << "\tCase passed:\t\t\t" << passed << "/" << size << endl;
 				cout << "\tAverage (optimizer) error:\t" << opt_error/size << endl;
 				cout << "\tAverage (percent) error:\t" << per_error/size << "%" << endl;
 			}

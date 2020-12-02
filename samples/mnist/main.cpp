@@ -105,23 +105,13 @@ int main()
 		return (expected[mi] == 1);
 	};
 
-	cout << boolalpha;
-
-	int size = 28 * 28;
-	for(size_t i = 0; i < 20; i++) {
-		zhetapi::Vector <double> in = read_image();
+	int size = SIZE * SIZE;
+	for(size_t i = 0; i < 1000; i++) {
+		zhetapi::Vector <double> in = read_image_print();
 
 		unsigned char actual;
 
 		labels.read((char *) &actual, sizeof(actual));
-
-		// zhetapi::Vector <double> out = model(in);
-
-		/* int mi = 0;
-		for (int i = 1; i < 10; i++) {
-			if (out[mi] < out[i])
-				mi = i;
-		} */
 
 		zhetapi::Vector <double> exp(10,
 			[&](size_t i) {
@@ -131,11 +121,6 @@ int main()
 
 		imgs.push_back(in);
 		exps.push_back(exp);
-
-		/* cout << "Item #" << (i + 1) << " -- Supposed to be " << (int) actual << ", got " << mi << endl;
-		cout << "\tactual:\t" << out << endl;
-		cout << "\texpected:\t" << exp << endl;
-		cout << "\tmatch:\t" << crit(out, exp) << endl; */
 	}
 
 	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
