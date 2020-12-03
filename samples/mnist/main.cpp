@@ -18,9 +18,8 @@ ifstream images("train-images-idx3-ubyte", ios::binary);
 ifstream labels("train-labels-idx1-ubyte", ios::binary);
 
 zhetapi::ml::NeuralNetwork <double> model({
-	{784, new zhetapi::ml::ReLU <double> ()},
-	{20, new zhetapi::ml::ReLU <double> ()},
-	{20, new zhetapi::ml::ReLU <double> ()},
+	{784, new zhetapi::ml::Linear <double> ()},
+	{30, new zhetapi::ml::Sigmoid <double> ()},
 	{10, new zhetapi::ml::Softmax <double> ()}
 }, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
@@ -80,7 +79,7 @@ vector <double> read_image_print()
 int main()
 {
 	// Initialize the model
-	srand(clock());
+	// srand(clock());
 
 	model.randomize();
 
@@ -106,7 +105,7 @@ int main()
 	};
 
 	int size = SIZE * SIZE;
-	for(size_t i = 0; i < 10000; i++) {
+	for(size_t i = 0; i < 1000; i++) {
 		zhetapi::Vector <double> in = read_image();
 
 		unsigned char actual;
@@ -125,7 +124,7 @@ int main()
 
 	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	model.epochs(10, 250, opt, imgs, exps, crit, true);
+	model.epochs(1000, 250, 0.001, 0.01, opt, imgs, exps, crit, true);
 
 	// Free resources
 	delete opt;

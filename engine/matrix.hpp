@@ -430,10 +430,10 @@ namespace zhetapi {
         }
 
         template <class T>
-        Vector <T> Matrix <T> ::get_column(size_t n) const
+        Vector <T> Matrix <T> ::get_column(size_t r) const
         {
                 return Vector <T> (__rows, [&](size_t i) {
-                        return this->__array[i][n];
+                        return this->__array[__cols * i + r];
                 });
         }
 

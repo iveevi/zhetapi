@@ -37,6 +37,7 @@ namespace zhetapi {
 		private:
 			std::vector <Layer>		__layers;
 			std::vector <Matrix <T>>	__weights;
+			std::vector <Matrix <T>>	__momentum;
 			std::function <T ()>		__random;
 			std::size_t			__isize;
 			std::size_t			__osize;
@@ -49,9 +50,11 @@ namespace zhetapi {
 			~NeuralNetwork();
 
 			Vector <T> compute(const Vector <T> &);
+			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &);
+
 			Vector <T> operator()(const Vector <T> &);
 
-			void apply_gradient(const std::vector <Matrix <T>> &, T);
+			void apply_gradient(const std::vector <Matrix <T>> &, T, T);
 
 			std::vector <Matrix <T>> gradient(const Vector <T> &,
 					const Vector <T> &, Optimizer <T> *);
@@ -59,12 +62,14 @@ namespace zhetapi {
 			void learn(const Vector <T> &, const Vector <T> &,
 					Optimizer <T> *, T);
 
-			size_t train(size_t, Optimizer <T> *,
+			std::pair <size_t, T> train(size_t, T,
+					Optimizer <T> *,
 					const std::vector <Vector<T>> &,
 					const std::vector <Vector <T>> &,
 					const std::function <bool (const Vector <T> , const Vector <T>)> &,
 					bool = false);
-			void epochs(size_t, size_t, Optimizer <T> *,
+			void epochs(size_t, size_t, T,
+					Optimizer <T> *,
 					const std::vector <Vector <T>> &,
 					const std::vector <Vector <T>> &,
 					const std::function <bool (const Vector <T> , const Vector <T>)> &,
@@ -102,6 +107,7 @@ namespace zhetapi {
 				std::cout << "\tcols: " << mat.get_cols() << std::endl; */
 
 				__weights.push_back(mat);
+				__momentum.push_back(mat);
 			}
 		}
 
@@ -140,6 +146,22 @@ namespace zhetapi {
 		}
 
 		template <class T>
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in, const std::vector <Matrix <T>> &weights)
+		{
+			assert(in.size() == __isize);
+
+			Vector <T> prv = in;
+			Vector <T> tmp = (*__layers[0].second)(prv);
+
+			for (size_t i = 0; i < __weights.size(); i++) {
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+				tmp = (*__layers[i + 1].second)(prv);				
+			}
+			
+			return tmp;
+		}
+
+		template <class T>
 		Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
 		{
 			assert(in.size() == __isize);
@@ -168,11 +190,13 @@ namespace zhetapi {
 
 		template <class T>
 		void NeuralNetwork <T> ::apply_gradient(const std::vector <Matrix <T>> &grad,
-				T alpha)
+				T alpha, T mu)
 		{
 			assert(__weights.size() == grad.size());
-			for (int i = 0; i < __weights.size(); i++)
-				__weights[i] -= alpha * grad[i];
+			for (int i = 0; i < __weights.size(); i++) {
+				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
+				__weights[i] += __momentum[i];
+			}
 		}
 		
 		template <class T>
@@ -209,6 +233,23 @@ namespace zhetapi {
 
 			// Free resources
 			delete dopt;
+
+			using namespace std;
+
+			for (auto Ji : changes) {
+				cout << "\n--------------------------" << endl;
+				cout << "Ji: " << Ji << endl;
+			}
+			
+			std::vector <Vector <T>> params;
+			for (auto weight : __weights) {
+				for (int i = 0; i < weight.get_cols(); i++)
+					params.push_back(weight.get_column(i));
+			}
+
+			cout << "Size of params: " << params.size() << endl;
+			for (auto col : params)
+				cout << "Col: " << col << endl;
 
 			return changes;
 		}
@@ -302,7 +343,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		size_t NeuralNetwork <T> ::train(size_t id,
+		std::pair <size_t, T> NeuralNetwork <T> ::train(size_t id, T alpha,
 				Optimizer <T> *opt,
 				const std::vector <Vector<T>> &ins,
 				const std::vector <Vector<T>> &outs,
@@ -358,7 +399,7 @@ namespace zhetapi {
 			for (size_t j = 0; j < grad.size(); j++)
 				grad[j] /= (double) size;
 			
-			apply_gradient(grad, 0.001);
+			apply_gradient(grad, alpha, 0.7);
 
 			if (print) {
 				cout << "]\tpassed:\t" << passed << "/" << size << " ("
@@ -367,11 +408,11 @@ namespace zhetapi {
 					<< endl;
 			}
 
-			return passed;
+			return std::make_pair(passed, opt_error);
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::epochs(size_t runs, size_t batch,
+		void NeuralNetwork <T> ::epochs(size_t runs, size_t batch, T alpha,
 				Optimizer <T> *opt,
 				const std::vector <Vector<T>> &ins,
 				const std::vector <Vector<T>> &outs, const
@@ -402,17 +443,44 @@ namespace zhetapi {
 				}
 			}
 
+			T perr = 0;
+			T lr = alpha;
+
+			T thresh = 0.1;
+
 			size_t passed;
 			for (int i = 0; i < runs; i++) {
 				if (print) {
 					::std::cout << ::std::string(20, '-') << ::std::endl;
-					::std::cout << "Epoch #" << (i + 1) << "\n" << ::std::endl;
+					::std::cout << "Epoch #" << (i + 1) << " (" << lr << ")\n" << ::std::endl;
 				}
 
-				passed = 0;
-				for (int i = 0; i < ins_batched.size(); i++)
-					passed += train(i + 1, opt, ins_batched[i], outs_batched[i], crit, print);
+				T err;
 
+				passed = 0;
+				for (int i = 0; i < ins_batched.size(); i++) {
+					auto result = train(i + 1, lr, opt, ins_batched[i], outs_batched[i], crit, print);
+
+					passed += result.first;
+
+					err += result.second;
+				}
+
+				cout << "\nTotal Error: " << err - perr << endl;
+
+				perr = err;
+
+				if (fabs(err - perr) < thresh) {
+					lr *= 0.99;
+
+					if (thresh > 0.00001)
+						thresh /= 10;
+				} else if (fabs(err - perr) > 2 * thresh) {
+					lr /= 0.93;
+
+					if (thresh < 0.001)
+						thresh *= 10;
+				}
 				
 				if (print) {
 					cout << "\nCases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;

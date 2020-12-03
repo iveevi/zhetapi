@@ -4,48 +4,42 @@
 #include <vector>
 
 // Engine headers
-#include <function.hpp>
+#include <std/activation_classes.hpp>
+#include <std/optimizer_classes.hpp>
+#include <network.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	Function <double, int> f, df;
+	vector <Vector <double>> ins = {
+		{1, 5, 4, 2},
+		{1, 6, 4, 2},
+		{1, 5, 7, 2},
+		{1, 5, 4, 3},
+	};
 
-	cout << "======================================" << endl;
+	vector <Vector <double>> outs = {
+		{1, 5, 4, 2, 6},
+		{1, 6, 4, 3, 1},
+		{1, 5, 7, 2, 6},
+		{1, 5, 4, 3, 6},
+	};
 
-        f = "f(x) = 43x + x^2 + sin(x)/x + cos(x^2)";
+	ml::NeuralNetwork <double> model ({
+		{4, new zhetapi::ml::Sigmoid <double> ()},
+		{5, new zhetapi::ml::ReLU <double> ()}
+	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
-	cout << endl << f << endl;
-	f.print();
+	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
+		return actual == expected;
+	};
 
-	df = f.differentiate("x");
+	ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	cout << endl << df << endl;
-	df.print();
+	model.epochs(5, 1, 0.1, opt, ins, outs, crit, false);
 
-	cout << "======================================" << endl;
-
-        f = "f(x) = lg(x) + log(2, x) + tan(x) + sec(x) + csc(x) + cot(x)";
-
-	cout << endl << f << endl;
-	f.print();
-
-	df = f.differentiate("x");
-
-	cout << endl << df << endl;
-	df.print();
-
-	cout << "======================================" << endl;
-
-        f = "f(x) = sinh(x) + cosh(x) + tanh(x) + sech(x) + csch(x) + coth(x)";
-
-	cout << endl << f << endl;
-	f.print();
-
-	df = f.differentiate("x");
-
-	cout << endl << df << endl;
-	df.print();
+	// Free resources
+	delete opt;
 }
