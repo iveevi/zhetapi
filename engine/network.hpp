@@ -59,11 +59,13 @@ namespace zhetapi {
 			void learn(const Vector <T> &, const Vector <T> &,
 					Optimizer <T> *, T);
 
-			void train(Optimizer <T> *, const std::vector <Vector<T>> &,
+			size_t train(size_t, Optimizer <T> *,
+					const std::vector <Vector<T>> &,
 					const std::vector <Vector <T>> &,
 					const std::function <bool (const Vector <T> , const Vector <T>)> &,
 					bool = false);
-			void epochs(size_t, Optimizer <T> *, const std::vector <Vector <T>> &,
+			void epochs(size_t, size_t, Optimizer <T> *,
+					const std::vector <Vector <T>> &,
 					const std::vector <Vector <T>> &,
 					const std::function <bool (const Vector <T> , const Vector <T>)> &,
 					bool = false);
@@ -162,14 +164,6 @@ namespace zhetapi {
 			}
 			
 			return tmp;
-		}
-
-		template <class T>
-		void print_dims(const Matrix <T> &a)
-		{
-			using namespace std;
-			cout << "\trows: " << a.get_rows() << endl;
-			cout << "\tcols: " << a.get_cols() << endl;
 		}
 
 		template <class T>
@@ -308,8 +302,15 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::train(Optimizer <T> *opt, const std::vector<Vector<T>> &ins, const std::vector<Vector<T>> &outs, const std::function <bool (const Vector<T>, const Vector<T>)> &crit, bool print)
+		size_t NeuralNetwork <T> ::train(size_t id,
+				Optimizer <T> *opt,
+				const std::vector <Vector<T>> &ins,
+				const std::vector <Vector<T>> &outs,
+				const std::function <bool (const Vector <T>, const Vector <T>)> &crit,
+				bool print)
 		{
+			assert(ins.size() == outs.size());
+
 			using namespace std;
 
 			int passed = 0;
@@ -317,7 +318,7 @@ namespace zhetapi {
 			double opt_error = 0;
 			double per_error = 0;
 
-			std::vector <Matrix <T>> grad;
+			std::vector <std::vector <Matrix <T>>> grads;
 
 			int size = ins.size();
 			for (int i = 0; i < size; i++) {
@@ -326,32 +327,81 @@ namespace zhetapi {
 				if (crit(actual, outs[i]))
 					passed++;
 
-				grad = gradient(ins[i], outs[i], opt);
-				apply_gradient(grad, 0.001);
+				grads.push_back(gradient(ins[i], outs[i], opt));
 				
 				opt_error += (*opt)(outs[i], actual)[0];
 				per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
 			}
 
-			if (print) {
-				cout << "Summary: " << endl;
+			std::vector <Matrix <T>> grad = grads[0];
+			for (size_t i = 1; i < grads.size(); i++) {
+				for (size_t j = 0; j < grad.size(); j++)
+					grad[j] += grads[i][j];
+			}
 				
-				cout << "\tCase passed:\t\t\t" << passed << "/" << size << " (" << 100 * ((double) passed)/size << "%)" << endl;
+			for (size_t j = 0; j < grad.size(); j++)
+				grad[j] /= (double) size;
+			
+			apply_gradient(grad, 0.001);
+
+			if (print) {
+				cout << "Summary for Batch #" << id << " (" << ins.size() << " samples)" << endl;
+				
+				cout << "\tCases passed:\t\t\t" << passed << "/" << size << " (" << 100 * ((double) passed)/size << "%)" << endl;
 				cout << "\tAverage (optimizer) error:\t" << opt_error/size << endl;
 				cout << "\tAverage (percent) error:\t" << per_error/size << "%" << endl;
 			}
+
+			return passed;
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::epochs(size_t runs, Optimizer<T> *opt, const std::vector<Vector<T>> &ins, const std::vector<Vector<T>> &outs, const std::function<bool (const Vector<T>, const Vector<T>)> &crit, bool print)
+		void NeuralNetwork <T> ::epochs(size_t runs, size_t batch,
+				Optimizer <T> *opt,
+				const std::vector <Vector<T>> &ins,
+				const std::vector <Vector<T>> &outs, const
+				std::function<bool (const Vector <T>, const Vector <T>)> &crit,
+				bool print)
 		{
+			assert(ins.size() == outs.size());
+
+			using namespace std;
+
+			std::vector <std::vector <Vector <T>>> ins_batched;
+			std::vector <std::vector <Vector <T>>> outs_batched;
+
+			size_t batches = 0;
+
+			std::vector <Vector <T>> in_batch;
+			std::vector <Vector <T>> out_batch;
+			for (int i = 0; i < ins.size(); i++) {
+				in_batch.push_back(ins[i]);
+				out_batch.push_back(outs[i]);
+
+				if (i % batch == batch - 1 || i == ins.size() - 1) {
+					ins_batched.push_back(in_batch);
+					outs_batched.push_back(out_batch);
+
+					in_batch.clear();
+					out_batch.clear();
+				}
+			}
+
+			size_t passed;
 			for (int i = 0; i < runs; i++) {
 				if (print) {
 					::std::cout << ::std::string(20, '-') << ::std::endl;
 					::std::cout << "Epoch #" << (i + 1) << "\n" << ::std::endl;
 				}
 
-				train(opt, ins, outs, crit, print);
+				passed = 0;
+				for (int i = 0; i < ins_batched.size(); i++)
+					passed += train(i + 1, opt, ins_batched[i], outs_batched[i], crit, print);
+
+				
+				if (print) {
+					cout << "Cases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
+				}
 			}
 		}
 

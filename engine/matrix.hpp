@@ -54,7 +54,7 @@ namespace zhetapi {
                 Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);
 
                 template <class A>
-                Matrix(A);
+                explicit Matrix(A);
 
 		const Matrix &operator=(const Matrix &);
 
@@ -89,6 +89,9 @@ namespace zhetapi {
                 void operator-=(const Matrix &);
                 void operator*=(const Matrix &);
                 void operator/=(const Matrix &);
+                
+		void operator*=(const T &);
+                void operator/=(const T &);
 
                 // Row operations
                 void add_rows(size_t, size_t, T);
@@ -596,6 +599,20 @@ namespace zhetapi {
         void Matrix <T> ::operator*=(const Matrix <T> &other)
         {
                 (*this) = (*this) * other;
+        }
+        
+	template <class T>
+        void Matrix <T> ::operator*=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] *= x;
+        }
+       
+	template <class T>
+        void Matrix <T> ::operator/=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] /= x;
         }
 
         // R(A) = R(A) + kR(B)
