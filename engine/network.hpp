@@ -310,10 +310,16 @@ namespace zhetapi {
 				bool print)
 		{
 			assert(ins.size() == outs.size());
-
+			
 			using namespace std;
 
+			const int len = 15;
+			
+			if (print)
+				cout << "Batch #" << id << " (" << ins.size() << " samples)\t[";
+
 			int passed = 0;
+			int bars = 0;
 
 			double opt_error = 0;
 			double per_error = 0;
@@ -331,6 +337,16 @@ namespace zhetapi {
 				
 				opt_error += (*opt)(outs[i], actual)[0];
 				per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
+
+				if (print) {
+					int delta = (len * (i + 1))/size;
+					for (int i = 0; i < delta - bars; i++) {
+						cout << "=";
+						cout.flush();
+					}
+
+					bars = delta;
+				}
 			}
 
 			std::vector <Matrix <T>> grad = grads[0];
@@ -345,11 +361,10 @@ namespace zhetapi {
 			apply_gradient(grad, 0.001);
 
 			if (print) {
-				cout << "Summary for Batch #" << id << " (" << ins.size() << " samples)" << endl;
-				
-				cout << "\tCases passed:\t\t\t" << passed << "/" << size << " (" << 100 * ((double) passed)/size << "%)" << endl;
-				cout << "\tAverage (optimizer) error:\t" << opt_error/size << endl;
-				cout << "\tAverage (percent) error:\t" << per_error/size << "%" << endl;
+				cout << "]\tpassed:\t" << passed << "/" << size << " ("
+					<< 100 * ((double) passed)/size << "%)\t"
+					<< "average error:\t" << per_error/size << "%"
+					<< endl;
 			}
 
 			return passed;
@@ -400,7 +415,7 @@ namespace zhetapi {
 
 				
 				if (print) {
-					cout << "Cases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
+					cout << "\nCases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
 				}
 			}
 		}
