@@ -46,8 +46,12 @@ namespace zhetapi {
 		public:
 			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
+			~NeuralNetwork();
+
 			Vector <T> compute(const Vector <T> &);
 			Vector <T> operator()(const Vector <T> &);
+
+			void apply_gradient(const std::vector <Matrix <T>> &, T);
 
 			std::vector <Matrix <T>> gradient(const Vector <T> &,
 					const Vector <T> &, Optimizer <T> *);
@@ -70,6 +74,13 @@ namespace zhetapi {
 			void print() const;
 		};
 
+		/*
+		 * NOTE: The pointers allocated and passed into this function
+		 * should be left alone. They will be deallocated once the scope
+		 * of the network object comes to its end. In other words, DO
+		 * NOT FREE ACTIVATION POINTERS, and instead let the
+		 * NeuralNetwork class do the work for you.
+		 */
 		template <class T>
 		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer> &layers,
 				const std::function <T ()> &random) : __random(random),
@@ -93,6 +104,13 @@ namespace zhetapi {
 		}
 
 		template <class T>
+		NeuralNetwork <T> ::~NeuralNetwork()
+		{
+			for (auto layer : __layers)
+				delete layer.second;
+		}
+
+		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 		{
 			assert(in.size() == __isize);
@@ -108,8 +126,12 @@ namespace zhetapi {
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i].second->derivative();
 				
-				__dxs.insert(__dxs.begin(), (*__layers[i].second->derivative())(prv));
+				__dxs.insert(__dxs.begin(), (*act)(prv));
+
+				delete act;
 			}
 			
 			return tmp;
@@ -131,8 +153,12 @@ namespace zhetapi {
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i].second->derivative();
 				
-				__dxs.insert(__dxs.begin(), (*__layers[i].second->derivative())(prv));
+				__dxs.insert(__dxs.begin(), (*act)(prv));
+
+				delete act;
 			}
 			
 			return tmp;
@@ -145,9 +171,18 @@ namespace zhetapi {
 			cout << "\trows: " << a.get_rows() << endl;
 			cout << "\tcols: " << a.get_cols() << endl;
 		}
+
+		template <class T>
+		void NeuralNetwork <T> ::apply_gradient(const std::vector <Matrix <T>> &grad,
+				T alpha)
+		{
+			assert(__weights.size() == grad.size());
+			for (int i = 0; i < __weights.size(); i++)
+				__weights[i] -= alpha * grad[i];
+		}
 		
 		template <class T>
-		std::Vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
+		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
 				const Vector <T> &out, Optimizer <T> *opt)
 		{
 			assert(in.size() == __isize);
@@ -155,7 +190,9 @@ namespace zhetapi {
 			
 			Vector <T> actual = (*this)(in);
 
-			Vector <T> delta = (*(opt->derivative()))(out, actual);
+			Optimizer <T> *dopt = opt->derivative();
+
+			Vector <T> delta = (*dopt)(out, actual);
 
 			std::vector <Matrix <T>> changes;
 
@@ -175,6 +212,9 @@ namespace zhetapi {
 			}
 
 			std::reverse(changes.begin(), changes.end());
+
+			// Free resources
+			delete dopt;
 
 			return changes;
 		}
@@ -272,12 +312,12 @@ namespace zhetapi {
 		{
 			using namespace std;
 
-			cout.flush();
-
 			int passed = 0;
 
 			double opt_error = 0;
 			double per_error = 0;
+
+			std::vector <Matrix <T>> grad;
 
 			int size = ins.size();
 			for (int i = 0; i < size; i++) {
@@ -285,6 +325,9 @@ namespace zhetapi {
 
 				if (crit(actual, outs[i]))
 					passed++;
+
+				grad = gradient(ins[i], outs[i], opt);
+				apply_gradient(grad, 0.001);
 				
 				opt_error += (*opt)(outs[i], actual)[0];
 				per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
@@ -293,7 +336,7 @@ namespace zhetapi {
 			if (print) {
 				cout << "Summary: " << endl;
 				
-				cout << "\tCase passed:\t\t\t" << passed << "/" << size << endl;
+				cout << "\tCase passed:\t\t\t" << passed << "/" << size << " (" << 100 * ((double) passed)/size << "%)" << endl;
 				cout << "\tAverage (optimizer) error:\t" << opt_error/size << endl;
 				cout << "\tAverage (percent) error:\t" << per_error/size << "%" << endl;
 			}

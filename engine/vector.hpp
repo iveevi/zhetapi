@@ -133,7 +133,8 @@ namespace zhetapi {
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
 		if (this != &other) {
-			delete this->__array;
+			delete[] this->__array;
+			delete[] this->__dim;
 
 			this->__array = new T[other.__size];
 			this->__rows = other.__rows;
@@ -541,15 +542,14 @@ namespace zhetapi {
 	}
 
 	template <class T>
-        const Vector <T> &shur(const Vector <T> &a, const Vector <T> &b)
+        Vector <T> shur(const Vector <T> &a, const Vector <T> &b)
         {
                 assert(a.size() == b.size());
-
-                Vector <T> *out = new Vector <T> (a.size(), [&](size_t i) {
-                        return a[i] * b[i];
-                });
-
-                return *out;
+                return Vector <T> (a.size(),
+			[&](size_t i) {
+                        	return a[i] * b[i];
+			}
+		);
         }
 
 	// Static methods

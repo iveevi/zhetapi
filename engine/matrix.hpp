@@ -56,6 +56,8 @@ namespace zhetapi {
                 template <class A>
                 Matrix(A);
 
+		const Matrix &operator=(const Matrix &);
+
                 ::std::pair <size_t, size_t> get_dimensions() const;
 
                 size_t get_rows() const;
@@ -110,7 +112,7 @@ namespace zhetapi {
                 const Matrix &inverse() const;
                 const Matrix &adjugate() const;
                 const Matrix &cofactor() const;
-                const Matrix &transpose() const;
+                Matrix transpose() const;
 
                 bool symmetric() const;
 
@@ -118,33 +120,26 @@ namespace zhetapi {
 
 		// Matrix operator Matrix
                 template <class U>
-                friend const Matrix <U> &operator+(const Matrix <U> &, const Matrix <U> &);
+                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
                 
                 template <class U>
-                friend const Matrix <U> &operator-(const Matrix <U> &, const Matrix <U> &);
+                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
 
                 template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
-		/* Matrix * Vector
-		template <class U>
-                friend Vector <U> operator*(const Matrix <U> &, const Vector <U> &);
-
-		template <class U>
-                friend Vector <U> operator*(const Vector <U> &, const Matrix <U> &); */
-
 		// Matrix operator T
                 template <class U>
-                friend const Matrix <U> &operator*(const Matrix <U> &, const U &);
+                friend Matrix <U> operator*(const Matrix <U> &, const U &);
                 
                 template <class U>
-                friend const Matrix <U> &operator*(const U &, const Matrix <U> &);
+                friend Matrix <U> operator*(const U &, const Matrix <U> &);
                 
                 template <class U>
-                friend const Matrix <U> &operator/(const Matrix <U> &, const U &);
+                friend Matrix <U> operator/(const Matrix <U> &, const U &);
                 
                 template <class U>
-                friend const Matrix <U> &operator/(const U &, const Matrix <U> &);
+                friend Matrix <U> operator/(const U &, const Matrix <U> &);
 
 		// Matrix == Matrix
                 template <class U>
@@ -321,6 +316,31 @@ namespace zhetapi {
                 // if (typeid(A) == typeid(T))
                 //        *this = Matrix(1, 1, (T) x);
         }
+
+	template <class T>
+	const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
+	{
+		if (this != &other) {
+			delete[] this->__array;
+			delete[] this->__dim;
+
+			this->__array = new T[other.__size];
+			this->__rows = other.__rows;
+			this->__cols = other.__cols;
+
+			this->__size = other.__size;
+			for (size_t i = 0; i < this->__size; i++)
+				this->__array[i] = other.__array[i];
+			
+			this->__dims = 2;
+			this->__dim = new size_t[2];
+
+			this->__dim[0] = this->__rows;
+			this->__dim[1] = this->__cols;
+		}
+
+		return *this;
+	}
 
         template <class T>
         ::std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
@@ -557,7 +577,7 @@ namespace zhetapi {
 
                 for (size_t i = 0; i < __rows; i++) {
                         for (size_t j = 0; j < __cols; j++)
-                                this->__array[i][j] += other.__array[i][j];
+                                this->__array[i * __cols + j] += other.__array[i * __cols + j];
                 }
         }
 
@@ -686,13 +706,12 @@ namespace zhetapi {
         }
 
         template <class T>
-        const Matrix <T> &Matrix <T> ::transpose() const
+        Matrix <T> Matrix <T> ::transpose() const
         {
-                Matrix <T> *out = new Matrix <T> (__cols, __rows, [&](size_t i, size_t j) {
-                        return this->__array[j * __cols + i];
-                });
-
-                return *out;
+                return Matrix <T> (__cols, __rows,
+			[&](size_t i, size_t j) {
+				return this->__array[j * __cols + i];
+		});
         }
 
         template <class T>
@@ -752,73 +771,71 @@ namespace zhetapi {
         }
 
         template <class T>
-        const Matrix <T> &operator+(const Matrix <T> &a, const Matrix <T> &b)
+        Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
         {
                 assert(a.__rows == b.__rows && a.__cols == b.__cols);
-                
-                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
-                        return a[i][j] + b[i][j];
-                });
-
-                return *out;
+                return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] + b[i][j];
+                	}
+		);
         }
 
         template <class T>
-        const Matrix <T> &operator-(const Matrix <T> &a, const Matrix <T> &b)
+        Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
         {
                 assert(a.__rows == b.__rows && a.__cols == b.__cols);
-
-                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
-                        return a[i][j] - b[i][j];
-                });
-
-                return *out;
+		return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] - b[i][j];
+			}
+		);
         }
 
         template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
                 assert(a.__cols == b.__rows);
+                return Matrix <T> (a.__rows, b.__cols,
+			[&](size_t i, size_t j) {
+				T acc = 0;
 
-                return Matrix <T> (a.__rows, b.__cols, [&](size_t i, size_t j) {
-                        T acc = 0;
+				for (size_t k = 0; k < a.__cols; k++)
+					acc += a[i][k] * b[k][j];
 
-                        for (size_t k = 0; k < a.__cols; k++) {
-                                acc += a[i][k] * b[k][j];
-                        }
-
-                        return acc;
-                });
+				return acc;
+			}
+		);
         }
 
         template <class T>
-        const Matrix <T> &operator*(const Matrix <T> &a, const T &scalar)
+        Matrix <T> operator*(const Matrix <T> &a, const T &scalar)
         {
-                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
-                        return a[i][j] * scalar;
-                });
-
-                return *out;
+                return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+				return a[i][j] * scalar;
+			}
+		);
         }
 
         template <class T>
-        const Matrix <T> &operator*(const T &scalar, const Matrix <T> &a)
+        Matrix <T> operator*(const T &scalar, const Matrix <T> &a)
         {
                 return a * scalar;
         }
 
         template <class T>
-        const Matrix <T> &operator/(const Matrix <T> &a, const T &scalar)
+        Matrix <T> operator/(const Matrix <T> &a, const T &scalar)
         {
-                Matrix <T> *out = new Matrix <T> (a.__rows, a.__cols, [&](size_t i, size_t j) {
-                        return a[i][j] / scalar;
-                });
-
-                return *out;
+                return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] / scalar;
+                	}
+		);
         }
 
         template <class T>
-        const Matrix <T> &operator/(const T &scalar, const Matrix <T> &a)
+        Matrix <T> operator/(const T &scalar, const Matrix <T> &a)
         {
                 return a / scalar;
         }
