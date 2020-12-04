@@ -14,23 +14,23 @@ using namespace zhetapi;
 int main()
 {
 	vector <Vector <double>> ins = {
-		{1, 6},
+		{1, 6}/*,
 		{4, 3},
 		{5, 8},
-		{3, 1},
+		{3, 1},*/
 	};
 
 	vector <Vector <double>> outs = {
-		{61},
+		{61}/*,
 		{41},
 		{65},
-		{187},
+		{187}, */
 	};
 
 	ml::NeuralNetwork <double> model ({
 		{2, new zhetapi::ml::Linear <double> ()},
-		{2, new zhetapi::ml::Sigmoid <double> ()},
-		{1, new zhetapi::ml::Linear <double> ()}
+		//{2, new zhetapi::ml::Linear <double> ()},
+		{1, new zhetapi::ml::ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
 	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
