@@ -14,22 +14,23 @@ using namespace zhetapi;
 int main()
 {
 	vector <Vector <double>> ins = {
-		{1, 5, 4, 2},
-		{1, 6, 4, 2},
-		{1, 5, 7, 2},
-		{1, 5, 4, 3},
+		{1, 6},
+		{4, 3},
+		{5, 8},
+		{3, 1},
 	};
 
 	vector <Vector <double>> outs = {
-		{1, 5, 4, 2, 6},
-		{1, 6, 4, 3, 1},
-		{1, 5, 7, 2, 6},
-		{1, 5, 4, 3, 6},
+		{61},
+		{41},
+		{65},
+		{187},
 	};
 
 	ml::NeuralNetwork <double> model ({
-		{4, new zhetapi::ml::Sigmoid <double> ()},
-		{5, new zhetapi::ml::ReLU <double> ()}
+		{2, new zhetapi::ml::Linear <double> ()},
+		{2, new zhetapi::ml::Sigmoid <double> ()},
+		{1, new zhetapi::ml::Linear <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
 	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
@@ -38,7 +39,9 @@ int main()
 
 	ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	model.epochs(5, 1, 0.1, opt, ins, outs, crit, false);
+	model.randomize();
+
+	model.epochs(1, 1, 0.001, opt, ins, outs, crit, false);
 
 	// Free resources
 	delete opt;

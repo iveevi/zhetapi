@@ -43,6 +43,8 @@ namespace zhetapi {
 		// const Vector &operator=(const Matrix <T> &);
 
 		size_t size() const;
+		size_t get_rows() const override;
+		size_t get_cols() const override;
 
 		T &operator[](size_t);
 		const T &operator[](size_t) const;
@@ -247,6 +249,19 @@ namespace zhetapi {
 	{
 		return this->__size;
 	}
+	
+	template <class T>
+	size_t Vector <T> ::get_rows() const
+	{
+		return this->__rows;
+	}
+
+	template <class T>
+	size_t Vector <T> ::get_cols() const
+	{
+		return this->__cols;
+	}
+
 
 	template <class T>
 	T &Vector <T> ::operator[](size_t i)
@@ -541,16 +556,23 @@ namespace zhetapi {
 		};
 	}
 
-	template <class T>
+	/* template <class T>
         Vector <T> shur(const Vector <T> &a, const Vector <T> &b)
         {
-                assert(a.size() == b.size());
+		::std::cout << "VSHUR: " << dims(a) << " shurred with " << dims(b) << ::std::endl;
+
+		::std::cout << ::std::boolalpha;
+
+		::std::cout << "\t" << (a.get_rows() == b.get_rows()) << ", "
+			<< (a.get_cols() == b.get_cols()) << ", "
+			<< ((a.get_rows() == b.get_rows()) && (a.get_cols() == b.get_cols()))
+			<< ::std::endl;
                 return Vector <T> (a.size(),
 			[&](size_t i) {
                         	return a[i] * b[i];
 			}
 		);
-        }
+        } */
 
 	// Static methods
 	template <class T>

@@ -60,8 +60,8 @@ namespace zhetapi {
 
                 ::std::pair <size_t, size_t> get_dimensions() const;
 
-                size_t get_rows() const;
-                size_t get_cols() const;
+                virtual size_t get_rows() const;
+                virtual size_t get_cols() const;
 
                 const Matrix &slice(const ::std::pair <size_t, size_t> &,
                                 const ::std::pair <size_t, size_t> &) const;
@@ -150,6 +150,8 @@ namespace zhetapi {
 
                 // Special matrix generation
                 static Matrix identity(size_t);
+
+		class dimension_mismatch {};
         protected:
                 T determinant(const Matrix &) const;
         };
@@ -731,16 +733,35 @@ namespace zhetapi {
 		});
         }
 
+	template <class T>
+	::std::string dims(const Matrix <T> &a)
+	{
+		return ::std::to_string(a.get_rows()) + " x " + ::std::to_string(a.get_cols());
+	}
+
+
+
         template <class T>
-        const Matrix <T> &shur(const Matrix <T> &a, const Matrix <T> &b)
+        Matrix <T> shur(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.get_rows() == b.get_rows() && a.get_cols() == b.get_cols());
+		::std::cout << "SHUR: " << dims(a) << " shurred with " << dims(b) << ::std::endl;
 
-                Matrix <T> *out = new Matrix <T> (a.get_rows(), b.get_cols(), [&](size_t i, size_t j) {
-                        return a[i][j] * b[i][j];
-                });
+		::std::cout << ::std::boolalpha;
 
-                return *out;
+		::std::cout << "\t" << (a.get_rows() == b.get_rows()) << ", "
+			<< (a.get_cols() == b.get_cols()) << ", "
+			<< ((a.get_rows() == b.get_rows()) && (a.get_cols() == b.get_cols()))
+			<< ::std::endl;
+
+                if (!((a.get_rows() == b.get_rows())
+			&& (a.get_cols() == b.get_cols())))
+			throw typename Matrix <T> ::dimension_mismatch();
+
+                return Matrix <T> (a.get_rows(), b.get_cols(),
+			[&](size_t i, size_t j) {
+                        	return a[i][j] * b[i][j];
+			}
+		);
         }
 
         template <class T>

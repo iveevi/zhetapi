@@ -44,6 +44,9 @@ namespace zhetapi {
 
 			std::vector <Vector <T>>	__xs;
 			std::vector <Vector <T>>	__dxs;
+
+			std::vector <Vector <T>>	__a;
+			std::vector <Vector <T>>	__z;
 		public:
 			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
@@ -124,15 +127,24 @@ namespace zhetapi {
 			assert(in.size() == __isize);
 
 			Vector <T> prv = in;
-			Vector <T> tmp = (*__layers[0].second)(prv);
+			// Vector <T> tmp = (*__layers[0].second)(prv);
+			Vector <T> tmp = in;
 
 			__xs.clear();
 			__dxs.clear();
 
+			__a.clear();
+			__z.clear();
+
 			for (size_t i = 0; i < __weights.size(); i++) {
 				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
 
+				__a.push_back(tmp);
+
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				__z.push_back(prv);
+
 				tmp = (*__layers[i + 1].second)(prv);
 
 				Activation <T> *act = __layers[i].second->derivative();
@@ -141,6 +153,8 @@ namespace zhetapi {
 
 				delete act;
 			}
+
+			__a.push_back(tmp);
 			
 			return tmp;
 		}
@@ -150,13 +164,28 @@ namespace zhetapi {
 		{
 			assert(in.size() == __isize);
 
+			using namespace std;
+			// cout << "--COMPUTE!!-----------------------------" << endl;
+
 			Vector <T> prv = in;
 			Vector <T> tmp = (*__layers[0].second)(prv);
+			
+			// cout << "tmp: " << tmp << endl;
 
 			for (size_t i = 0; i < __weights.size(); i++) {
-				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+				auto app = tmp.append_above(T (1));
+
+				/* cout << "app: " << app << endl;
+				cout << "weights[i]: " << weights[i] << endl; */
+
+				prv = weights[i] * Matrix <T> (app);
+
+				// cout << "prv: " << prv << endl;
+
 				tmp = (*__layers[i + 1].second)(prv);				
 			}
+
+			// cout << "tmp: " << tmp << endl;
 			
 			return tmp;
 		}
@@ -164,28 +193,7 @@ namespace zhetapi {
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
 		{
-			assert(in.size() == __isize);
-
-			Vector <T> prv = in;
-			Vector <T> tmp = (*__layers[0].second)(prv);
-
-			__xs.clear();
-			__dxs.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
-
-				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
-				tmp = (*__layers[i + 1].second)(prv);
-
-				Activation <T> *act = __layers[i].second->derivative();
-				
-				__dxs.insert(__dxs.begin(), (*act)(prv));
-
-				delete act;
-			}
-			
-			return tmp;
+			return compute(in);
 		}
 
 		template <class T>
@@ -194,11 +202,14 @@ namespace zhetapi {
 		{
 			assert(__weights.size() == grad.size());
 			for (int i = 0; i < __weights.size(); i++) {
-				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
-				__weights[i] += __momentum[i];
+				// __momentum[i] = mu * __momentum[i] - alpha * grad[i];
+				// __weights[i] += __momentum[i];
+				using namespace std;
+				// cout << "GRADIENT: " << grad[i] << endl;
+				// __weights[i] -= alpha * grad[i];
 			}
 		}
-		
+			
 		template <class T>
 		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
 				const Vector <T> &out, Optimizer <T> *opt)
@@ -206,17 +217,46 @@ namespace zhetapi {
 			assert(in.size() == __isize);
 			assert(out.size() == __osize);
 			
+			using namespace std;
+			
 			Vector <T> actual = (*this)(in);
 
 			Optimizer <T> *dopt = opt->derivative();
 
 			Vector <T> delta = (*dopt)(out, actual);
 
-			std::vector <Matrix <T>> changes;
+			cout << "AS: " << __a.size() << endl;
+			cout << "ZS: " << __z.size() << endl;
+			cout << "WEIGHTS: " << __weights.size() << endl;
+			
+			std::vector <Vector <T>> deltas {delta};
+			for (int i = __weights.size() - 1; i >= 0; i--) {
+				cout << "----Delta formation------" << endl << dims(__weights[i].transpose());
+				cout << " times " << dims(delta);
+				cout << " should match " << dims(__dxs[i]);
+				cout << endl;
 
-			int n = __weights.size();
+				Vector <T> t1 = __weights[i].transpose() * delta;
+				t1 = t1.remove_top();
+
+				delta = shur(t1, __dxs[i]);
+
+				deltas.insert(deltas.begin(), delta);
+			}
+
+			std::vector <Matrix <T>> J;
+			for (int i = 0; i < __weights.size(); i++) {
+				cout << "----J formation------" << endl << dims(deltas[i]);
+				cout << " times " << dims(__xs[i].transpose());
+				cout << " should match " << dims(__weights[i]);
+				cout << endl;
+
+				J.push_back(deltas[i] * __xs[i].transpose());
+			}
+
+			/* int n = __weights.size();
 			for (int i = n - 1; i >= 0; i--) {
-				if (i != n - 1) {
+				if (i < n - 1) {
 					delta = __weights[i + 1].transpose() * delta;
 
 					delta = delta.remove_top();
@@ -226,32 +266,58 @@ namespace zhetapi {
 
 				Matrix <T> xt = __xs[n - i - 1].transpose();
 
-				changes.push_back(delta * xt);
+				J.push_back(delta * xt);
 			}
 
-			std::reverse(changes.begin(), changes.end());
+			std::reverse(J.begin(), J.end()); */
 
 			// Free resources
 			delete dopt;
 
 			using namespace std;
 
-			for (auto Ji : changes) {
-				cout << "\n--------------------------" << endl;
-				cout << "Ji: " << Ji << endl;
-			}
-			
-			std::vector <Vector <T>> params;
-			for (auto weight : __weights) {
-				for (int i = 0; i < weight.get_cols(); i++)
-					params.push_back(weight.get_column(i));
+			/* cout << "--------------------------" << endl;
+
+			cout << "actual: " << actual << endl;
+			cout << "in: " << in << endl;
+			cout << "weight: " << __weights[0] << endl;
+
+			cout << "actual: " << actual << endl;
+			cout << "OUT: " << out << endl;*/
+
+			T epsilon = 1e-5;
+
+			std::vector <Matrix <T>> qJ = __weights;
+			for (int i = 0; i < __weights.size(); i++) {
+				for (int x = 0; x < __weights[i].get_rows(); x++) {
+					for (int y = 0; y < __weights[i].get_cols(); y++) {
+						std::vector <Matrix <T>> wplus = __weights;
+						std::vector <Matrix <T>> wminus = __weights;
+
+						wplus[i][x][y] += epsilon;
+						wminus[i][x][y] -= epsilon;
+
+						Vector <T> jplus = (*opt)(out, compute(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute(in, wminus));
+
+						/* cout << "jplus: " << jplus << endl;
+						cout << "jminus: " << jminus << endl; */
+
+						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
+
+						// cout << "\t(jp - jm): " << jplus[0] - jminus[0] << endl;
+
+						// cout << "\tqJ[i][x][y]: " << qJ[i][x][y] << endl;
+					}
+				}
+
 			}
 
-			cout << "Size of params: " << params.size() << endl;
-			for (auto col : params)
-				cout << "Col: " << col << endl;
+			for (int i = 0; i < J.size(); i++) {
+				cout << "---------------------------\nJ:\t" << J[i] << "\nqJ:\t" << qJ[i] << endl;
+			}
 
-			return changes;
+			return qJ;
 		}
 
 		template <class T>
@@ -417,7 +483,7 @@ namespace zhetapi {
 				const std::vector <Vector<T>> &ins,
 				const std::vector <Vector<T>> &outs, const
 				std::function<bool (const Vector <T>, const Vector <T>)> &crit,
-				bool print)
+				bool dprint)
 		{
 			assert(ins.size() == outs.size());
 
@@ -450,25 +516,23 @@ namespace zhetapi {
 
 			size_t passed;
 			for (int i = 0; i < runs; i++) {
-				if (print) {
+				if (dprint) {
 					::std::cout << ::std::string(20, '-') << ::std::endl;
 					::std::cout << "Epoch #" << (i + 1) << " (" << lr << ")\n" << ::std::endl;
 				}
 
-				T err;
+				T err = 0;
 
 				passed = 0;
 				for (int i = 0; i < ins_batched.size(); i++) {
-					auto result = train(i + 1, lr, opt, ins_batched[i], outs_batched[i], crit, print);
+					auto result = train(i + 1, lr, opt, ins_batched[i], outs_batched[i], crit, dprint);
 
 					passed += result.first;
 
 					err += result.second;
 				}
 
-				cout << "\nTotal Error: " << err - perr << endl;
-
-				perr = err;
+				cout << "Total Error: " << err << endl;
 
 				if (fabs(err - perr) < thresh) {
 					lr *= 0.99;
@@ -481,10 +545,14 @@ namespace zhetapi {
 					if (thresh < 0.001)
 						thresh *= 10;
 				}
+
+				perr = err;
 				
-				if (print) {
+				if (dprint) {
 					cout << "\nCases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
 				}
+
+				// print();
 			}
 		}
 
