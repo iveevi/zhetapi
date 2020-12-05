@@ -146,12 +146,13 @@ namespace zhetapi {
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
+				__dxs.push_back(prv);
+
 				tmp = (*__layers[i + 1].second)(prv);
 
 				Activation <T> *act = __layers[i + 1].second->derivative();
 
 				__z.push_back((*act)(prv));
-				__dxs.insert(__dxs.begin(), (*act)(prv));
 
 				delete act;
 			}
@@ -258,28 +259,47 @@ namespace zhetapi {
 			cout << "----------------------------" << endl;
 
 			for (int i = __weights.size() - 1; i >= 0; i--) {
-				if (i < __weights.size() - 1) {
-					delta = __weights[i].transpose() * delta;
-					delta = delta.remove_top();
-				}
-				
 				cout << "i: " << i << endl;
+				cout << "\tpre-delta: " << delta << endl;
 
-				delta = shur(delta, __z[i]);
+				if (i < __weights.size() - 1) {
+					cout << "One Here" << endl;
+					cout << "\t" << dims(__weights[i].transpose()) << " times " << dims(delta) << endl;
+					delta = __weights[i + 1].transpose() * delta;
+					delta = delta.remove_top();
+					
+					delta = shur(delta, __z[i]);
 
-				cout << "\t" << dims(delta) << " times " << dims(__a[i].transpose()) << endl;
-				cout << "\tcompare to " << dims(__weights[i]) << endl;
+					cout << "\t" << dims(delta) << " times " << dims(__a[i].transpose()) << endl;
+					cout << "\tcompare to " << dims(__weights[i]) << endl;
 
-				cout << "\tdelta: " << delta << endl;
-				cout << "\ta[i]^T: " << __a[i].transpose() << endl;
+					cout << "\tdelta: " << delta << endl;
+					cout << "\ta[i]^T: " << __a[i].transpose() << endl;
 
-				cout << "\tproduct: " << delta * __a[i].transpose() << endl;
+					cout << "\tproduct: " << delta * __a[i].transpose() << endl;
 
-				auto Ji = delta * __a[i].transpose();
+					auto Ji = delta * __a[i].transpose();
 
-				cout << "\tJi: " << Ji << endl;
-				J.insert(J.begin(), Ji);
-				cout << "\tIn J: " << J[i] << endl;
+					cout << "\tJi: " << Ji << endl;
+					J.insert(J.begin(), Ji);
+					cout << "\tIn J: " << J[0] << endl;
+				} else {
+					delta = shur(delta, __z[i]);
+
+					cout << "\t" << dims(delta) << " times " << dims(__a[i].transpose()) << endl;
+					cout << "\tcompare to " << dims(__weights[i]) << endl;
+
+					cout << "\tdelta: " << delta << endl;
+					cout << "\ta[i]^T: " << __a[i].transpose() << endl;
+
+					cout << "\tproduct: " << delta * __a[i].transpose() << endl;
+
+					auto Ji = delta * __a[i].transpose();
+
+					cout << "\tJi: " << Ji << endl;
+					J.insert(J.begin(), Ji);
+					cout << "\tIn J: " << J[0] << endl;
+				}
 			}
 
 			/* cout << "out: " << out << endl;
@@ -387,7 +407,7 @@ namespace zhetapi {
 			for (int i = 0; i < __weights.size(); i++) {
 				for (int x = 0; x < __weights[i].get_rows(); x++) {
 					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						cout << "------------------------------------" << endl;
+						// cout << "------------------------------------" << endl;
 
 						std::vector <Matrix <T>> wplus = __weights;
 
@@ -411,8 +431,8 @@ namespace zhetapi {
 						Vector <T> jplus = (*opt)(out, compute(in, wplus));
 						Vector <T> jminus = (*opt)(out, compute(in, wminus));
 
-						cout << "jplus: " << jplus << endl;
-						cout << "jminus: " << jminus << endl;
+						/* cout << "jplus: " << jplus << endl;
+						cout << "jminus: " << jminus << endl; */
 
 						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
 

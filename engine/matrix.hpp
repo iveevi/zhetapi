@@ -163,7 +163,6 @@ namespace zhetapi {
         Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
                                                        ({other.__rows, other.__cols}, T())
         {
-		::std::cout << "Copying " << other << ::std::endl;
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__cols * i + j] = other.__array[__cols * i + j];
