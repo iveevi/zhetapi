@@ -54,9 +54,6 @@ namespace zhetapi {
 		class __DReLU : public Activation <T> {
 		public:
 			Vector <T> operator()(const Vector <T> &x) const {
-				Vector <T> tmp(x.size(), [&](size_t i) {return
-						__d_relu(x[i]);});
-				std::cout << "DReLU(" << x << ") = " << tmp << std::endl;
 				return Vector <T> (x.size(), [&](size_t i) {return
 						__d_relu(x[i]);});
 			}

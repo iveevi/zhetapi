@@ -62,10 +62,7 @@ namespace zhetapi {
 			void apply_gradient(const std::vector <Matrix <T>> &, T, T);
 
 			std::vector <Matrix <T>> gradient(const Vector <T> &,
-					const Vector <T> &, Optimizer <T> *);
-
-			void learn(const Vector <T> &, const Vector <T> &,
-					Optimizer <T> *, T);
+					const Vector <T> &, Optimizer <T> *, bool = false);
 
 			std::pair <size_t, T> train(size_t, T,
 					Optimizer <T> *,
@@ -84,6 +81,9 @@ namespace zhetapi {
 
 			// Printing weights
 			void print() const;
+
+			class bad_gradient {};
+			class bad_io_dimensions {};
 		};
 
 		/*
@@ -207,223 +207,58 @@ namespace zhetapi {
 			for (int i = 0; i < __weights.size(); i++) {
 				// __momentum[i] = mu * __momentum[i] - alpha * grad[i];
 				// __weights[i] += __momentum[i];
-				using namespace std;
-				// cout << "GRADIENT: " << grad[i] << endl;
 				__weights[i] -= alpha * grad[i];
 			}
 		}
 			
 		template <class T>
 		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
-				const Vector <T> &out, Optimizer <T> *opt)
+				const Vector <T> &out, Optimizer <T> *opt, bool check)
 		{
-			assert(in.size() == __isize);
-			assert(out.size() == __osize);
-			
-			using namespace std;
-
-			cout << "================================================" << endl;
-			
-			std::vector <Matrix <T>> J;
-			
-			cout << "AS: " << __a.size() << endl;
-
-			int i = 0;
-			for (auto a : __a)
-				cout << "\ta" << (i++) << ": " << a << endl;
-			
-			cout << "ZS: " << __z.size() << endl;
-
-			i = 0;
-			for (auto z : __z)
-				cout << "\tz" << (i++) << ": " << z << endl;
-			
-			cout << "WEIGHTS: " << __weights.size() << endl;
-
-			i = 0;
-			for (auto w : __weights)
-				cout << "\tw" << (i++) << ": " << w << endl;
-			
+			// Check dimensions of input and output
+			if ((in.size() != __isize) || (out.size() != __osize))
+				throw bad_io_dimensions();
+		
+			// Compute the actual value
 			Vector <T> actual = (*this)(in);
-
-			cout << "----------------------------" << endl;
-			cout << "actual: " << actual << endl;
-			cout << "out: " << out << endl;
-			cout << "in: " << in << endl;
-
+			
+			// Get the derivative of the cost
 			Optimizer <T> *dopt = opt->derivative();
+			
+			// Construction the Jacobian using backpropogation
+			std::vector <Matrix <T>> J;
 
 			Vector <T> delta = (*dopt)(out, actual);
-
-			cout << "delta: " << delta << endl;
-			cout << "----------------------------" << endl;
-
 			for (int i = __weights.size() - 1; i >= 0; i--) {
-				cout << "i: " << i << endl;
-				cout << "\tpre-delta: " << delta << endl;
-
 				if (i < __weights.size() - 1) {
-					cout << "One Here" << endl;
-					cout << "\t" << dims(__weights[i].transpose()) << " times " << dims(delta) << endl;
 					delta = __weights[i + 1].transpose() * delta;
 					delta = delta.remove_top();
-					
-					delta = shur(delta, __z[i]);
-
-					cout << "\t" << dims(delta) << " times " << dims(__a[i].transpose()) << endl;
-					cout << "\tcompare to " << dims(__weights[i]) << endl;
-
-					cout << "\tdelta: " << delta << endl;
-					cout << "\ta[i]^T: " << __a[i].transpose() << endl;
-
-					cout << "\tproduct: " << delta * __a[i].transpose() << endl;
-
-					auto Ji = delta * __a[i].transpose();
-
-					cout << "\tJi: " << Ji << endl;
-					J.insert(J.begin(), Ji);
-					cout << "\tIn J: " << J[0] << endl;
-				} else {
-					delta = shur(delta, __z[i]);
-
-					cout << "\t" << dims(delta) << " times " << dims(__a[i].transpose()) << endl;
-					cout << "\tcompare to " << dims(__weights[i]) << endl;
-
-					cout << "\tdelta: " << delta << endl;
-					cout << "\ta[i]^T: " << __a[i].transpose() << endl;
-
-					cout << "\tproduct: " << delta * __a[i].transpose() << endl;
-
-					auto Ji = delta * __a[i].transpose();
-
-					cout << "\tJi: " << Ji << endl;
-					J.insert(J.begin(), Ji);
-					cout << "\tIn J: " << J[0] << endl;
 				}
+				
+				delta = shur(delta, __z[i]);
+
+				Matrix <T> Ji = delta * __a[i].transpose();
+
+				J.insert(J.begin(), Ji);
 			}
-
-			/* cout << "out: " << out << endl;
-			cout << "actual: " << actual << endl;
-			cout << "\tdelta: " << delta << endl; */
-
-			// cout << dims(delta) << " times " << dims(__z[0]) << " times " << dims(__a[0].transpose()) << endl;
-
-			// J.push_back(shur(delta,  __z[0]) * __a[0].transpose());
-
-			/*  Vector <T> delta = actual - out;
-
-			cout << "out: " << out << endl;
-			cout << "actual: " << actual << endl;
-			cout << "\tdelta: " << delta << endl;
-
-			cout << "AS: " << __a.size() << endl;
-
-			int i = 0;
-			for (auto a : __a)
-				cout << "\ta" << (i++) << ": " << a << endl;
-			
-			cout << "ZS: " << __z.size() << endl;
-
-			i = 0;
-			for (auto z : __z)
-				cout << "\tz" << (i++) << ": " << z << endl;
-
-			cout << "WEIGHTS: " << __weights.size() << endl;
-			
-			std::vector <Vector <T>> deltas {delta};
-			for (int i = __weights.size() - 1; i >= 1; i--) {
-				cout << "----Delta formation------[" << i << "]" << endl << dims(__weights[i].transpose());
-				cout << " times " << dims(delta);
-				cout << " should match " << dims(__z[i]);
-				cout << endl;
-
-				Vector <T> t1 = __weights[i].transpose() * delta;
-				t1 = t1.remove_top();
-
-				delta = shur(t1, __z[i]);
-
-				deltas.insert(deltas.begin(), delta);
-			}
-
-			deltas.insert(deltas.begin(), __a[0]);
-
-			cout << "Deltas:" << endl;
-
-			i = 0;
-			for (auto delta : deltas)
-				cout << "\tdelta" << (i++) << ": " << delta << endl;
-
-			std::vector <Matrix <T>> J;
-			for (int i = 0; i < __weights.size(); i++) {
-				cout << "----J formation------[" << i << "]" << endl << dims(deltas[i + 1]);
-				cout << " times " << dims(__a[i].transpose());
-				cout << " should match " << dims(__weights[i]);
-				cout << endl;
-
-				J.push_back(deltas[i + 1] * __z[i] * __a[i].transpose());
-			} */
-
-			/* int n = __weights.size();
-			for (int i = n - 1; i >= 0; i--) {
-				if (i < n - 1) {
-					delta = __weights[i + 1].transpose() * delta;
-
-					delta = delta.remove_top();
-				}
-
-				delta = shur(delta, __dxs[(n - 1) - i]);
-
-				Matrix <T> xt = __xs[n - i - 1].transpose();
-
-				J.push_back(delta * xt);
-			}
-
-			std::reverse(J.begin(), J.end()); */
 
 			// Free resources
 			delete dopt;
 
-			using namespace std;
+			// Skip gradient checking
+			if (!check)
+				return J;
 
-			/* cout << "--------------------------" << endl;
+			// Epsilon value
+			T epsilon = 1e-8;
 
-			cout << "actual: " << actual << endl;
-			cout << "in: " << in << endl;
-			cout << "weight: " << __weights[0] << endl;
-
-			cout << "actual: " << actual << endl;
-			cout << "OUT: " << out << endl;*/
-
-			T epsilon = 1e-7;
-
-			cout << "-----------------------------------------------------" << endl;
-			cout << "WEIGHTS: " << __z.size() << endl;
-
-			i = 0;
-			for (auto w : __weights)
-				cout << "\tw" << (i++) << ": " << w << endl;
-
+			// Generate individual gradients
 			std::vector <Matrix <T>> qJ = __weights;
 			for (int i = 0; i < __weights.size(); i++) {
 				for (int x = 0; x < __weights[i].get_rows(); x++) {
 					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						// cout << "------------------------------------" << endl;
-
 						std::vector <Matrix <T>> wplus = __weights;
-
-						/* cout << "Wplus: " << wplus.size() << endl;
-
-						i = 0;
-						for (auto w : wplus)
-							cout << "\tw" << (i++) << ": " << w << endl; */
-			
 						std::vector <Matrix <T>> wminus = __weights;
-
-						/* cout << "Wminus: " << wminus.size() << endl;
-
-						i = 0;
-						for (auto w : wminus)
-							cout << "\tw" << (i++) << ": " << w << endl; */
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -431,112 +266,26 @@ namespace zhetapi {
 						Vector <T> jplus = (*opt)(out, compute(in, wplus));
 						Vector <T> jminus = (*opt)(out, compute(in, wminus));
 
-						/* cout << "jplus: " << jplus << endl;
-						cout << "jminus: " << jminus << endl; */
-
 						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
 
-						// cout << "\t(jp - jm): " << jplus[0] - jminus[0] << endl;
+						// Compute the error
+						T a = J[i][x][y];
+						T b = qJ[i][x][y];
 
-						// cout << "\tqJ[i][x][y]: " << qJ[i][x][y] << endl;
+						T d = a - b;
+
+						T e = (d * d) / (a * a + b * b + epsilon);
+
+						// If the error is more than epsilon throw an error
+						if (e > epsilon)
+							throw bad_gradient();
 					}
 				}
 
 			}
 
-			for (int i = 0; i < qJ.size(); i++) {
-				cout << "---------------------------\nJ:\t" << J[i] << "\nqJ:\t" << qJ[i] << endl;
-			}
-
-			return qJ;
-		}
-
-		template <class T>
-		void NeuralNetwork <T> ::learn(const Vector <T> &in, const Vector <T> &out, Optimizer <T> *opt, T alpha)
-		{
-			/* using namespace std;
-
-			cout << "================================" << endl;
-			
-			cout << "Xs:" << endl;
-			for (auto elem : __xs)
-				cout << "X:\t" << elem << endl;
-			
-			cout << "Dxs:" << endl;
-			for (auto elem : __dxs)
-				cout << "Dx:\t" << elem << endl; */
-			
-			assert(in.size() == __isize);
-			assert(out.size() == __osize);
-			
-			Vector <T> actual = (*this)(in);
-
-			Vector <T> delta = (*(opt->derivative()))(out, actual);
-
-			std::vector <Matrix <T>> changes;
-
-			int n = __weights.size();
-			for (int i = n - 1; i >= 0; i--) {
-				/* cout << "=========================" << endl;
-
-				cout << "weight[" << i << "]" << endl;
-				print_dims(__weights[i]); */
-
-				if (i != n - 1) {
-					/* cout << "weight^T:" << endl;
-					print_dims(__weights[i + 1].transpose()); */
-
-					delta = __weights[i + 1].transpose() * delta;
-
-					delta = delta.remove_top();
-
-					/* cout << "delta: " << endl;
-					print_dims(delta);
-
-					Vector <T> tmp(__weights[i + 1].transpose() * delta);
-
-					cout << "tmp alias:" << endl;
-					print_dims(__weights[i + 1].transpose() * delta);
-					
-					cout << "pre tmp: " << endl;
-					print_dims(tmp);
-
-					tmp = tmp.remove_top();
-
-					cout << "post tmp: " << endl;
-					print_dims(tmp); */
-					// delta = __weights[i + 1].transpose() * delta;
-				}
-
-				/* cout << "delta: " << endl;
-				print_dims(delta);
-
-				cout << "__dxs[(n - 1) - i]: " << endl;
-				print_dims(__dxs[(n - 1) - i]); */
-
-				delta = shur(delta, __dxs[(n - 1) - i]);
-
-				Matrix <T> xt = __xs[n - i - 1].transpose();
-
-				/* cout << "xt: " << endl;
-				print_dims(xt);
-
-				cout << "delta * xt:" << endl;
-				print_dims(delta * xt); */
-
-				changes.push_back(delta * xt);
-			}
-
-			// cout << "===P2: APPLY===" << endl;
-			for (size_t i = 0; i < n; i++) {
-				/* cout << "weights: " << endl;
-				print_dims(__weights[n - (i + 1)]);
-
-				cout << "changes: " << endl;
-				print_dims(changes[i]); */
-
-				__weights[n - (i + 1)] -= alpha * changes[i];
-			}
+			// Return the gradient
+			return J;
 		}
 
 		template <class T>

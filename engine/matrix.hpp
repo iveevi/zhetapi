@@ -740,19 +740,9 @@ namespace zhetapi {
 	}
 
 
-
         template <class T>
         Matrix <T> shur(const Matrix <T> &a, const Matrix <T> &b)
         {
-		::std::cout << "SHUR: " << dims(a) << " shurred with " << dims(b) << ::std::endl;
-
-		::std::cout << ::std::boolalpha;
-
-		::std::cout << "\t" << (a.get_rows() == b.get_rows()) << ", "
-			<< (a.get_cols() == b.get_cols()) << ", "
-			<< ((a.get_rows() == b.get_rows()) && (a.get_cols() == b.get_cols()))
-			<< ::std::endl;
-
                 if (!((a.get_rows() == b.get_rows())
 			&& (a.get_cols() == b.get_cols())))
 			throw typename Matrix <T> ::dimension_mismatch();

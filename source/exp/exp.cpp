@@ -14,17 +14,17 @@ using namespace zhetapi;
 int main()
 {
 	vector <Vector <double>> ins = {
-		{1, 6}/*,
+		{1, 6},
 		{4, 3},
 		{5, 8},
-		{3, 1},*/
+		{3, 1}
 	};
 
 	vector <Vector <double>> outs = {
-		{61, 54}/*,
-		{41},
-		{65},
-		{187}, */
+		{61, 54},
+		{41, 0},
+		{65, 4},
+		{187, 13}
 	};
 
 	ml::NeuralNetwork <double> model ({
@@ -42,7 +42,7 @@ int main()
 
 	model.randomize();
 
-	model.epochs(1, 1, 0.001, opt, ins, outs, crit, false);
+	model.epochs(10, 1, 0.001, opt, ins, outs, crit, false);
 
 	// Free resources
 	delete opt;
