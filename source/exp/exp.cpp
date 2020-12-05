@@ -21,7 +21,7 @@ int main()
 	};
 
 	vector <Vector <double>> outs = {
-		{61}/*,
+		{61, 54}/*,
 		{41},
 		{65},
 		{187}, */
@@ -29,8 +29,9 @@ int main()
 
 	ml::NeuralNetwork <double> model ({
 		{2, new zhetapi::ml::Linear <double> ()},
-		//{2, new zhetapi::ml::Linear <double> ()},
-		{1, new zhetapi::ml::ReLU <double> ()}
+		// {2, new zhetapi::ml::Linear <double> ()},
+		// {2, new zhetapi::ml::Linear <double> ()},
+		{2, new zhetapi::ml::ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
 	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {

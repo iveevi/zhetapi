@@ -163,9 +163,10 @@ namespace zhetapi {
         Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
                                                        ({other.__rows, other.__cols}, T())
         {
+		::std::cout << "Copying " << other << ::std::endl;
                 for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = other.__array[__rows * i + j];
+                                this->__array[__cols * i + j] = other.__array[__cols * i + j];
                 }
         }
 
@@ -833,7 +834,9 @@ namespace zhetapi {
         template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.__cols == b.__rows);
+		if (a.__cols != b.__rows)
+			throw typename Matrix <T> ::dimension_mismatch();
+
                 return Matrix <T> (a.__rows, b.__cols,
 			[&](size_t i, size_t j) {
 				T acc = 0;
