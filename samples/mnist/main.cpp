@@ -79,7 +79,7 @@ vector <double> read_image_print()
 int main()
 {
 	// Initialize the model
-	// srand(clock());
+	srand(clock());
 
 	model.randomize();
 
@@ -105,7 +105,7 @@ int main()
 	};
 
 	int size = SIZE * SIZE;
-	for(size_t i = 0; i < 1000; i++) {
+	for(size_t i = 0; i < IMAGES; i++) {
 		zhetapi::Vector <double> in = read_image();
 
 		unsigned char actual;
@@ -124,7 +124,7 @@ int main()
 
 	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	model.epochs(1000, 250, 0.001, 0.01, opt, imgs, exps, crit, true);
+	model.epochs(100, 128, 0.1, opt, imgs, exps, crit, true);
 
 	// Free resources
 	delete opt;

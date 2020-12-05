@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <vector>
 #include <functional>
+#include <iomanip>
 #include <memory>
 
 // Engine headers
@@ -205,9 +206,9 @@ namespace zhetapi {
 		{
 			assert(__weights.size() == grad.size());
 			for (int i = 0; i < __weights.size(); i++) {
-				// __momentum[i] = mu * __momentum[i] - alpha * grad[i];
-				// __weights[i] += __momentum[i];
-				__weights[i] -= alpha * grad[i];
+				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
+				__weights[i] += __momentum[i];
+				// __weights[i] -= alpha * grad[i];
 			}
 		}
 			
@@ -302,8 +303,9 @@ namespace zhetapi {
 
 			const int len = 15;
 			
-			if (print)
-				cout << "Batch #" << id << " (" << ins.size() << " samples)\t[";
+			if (print) {
+				cout << "Batch #" << id << " (" << ins.size() << " samples)\t\t[";
+			}
 
 			int passed = 0;
 			int bars = 0;
@@ -348,7 +350,8 @@ namespace zhetapi {
 			apply_gradient(grad, alpha, 0.7);
 
 			if (print) {
-				cout << "]\tpassed:\t" << passed << "/" << size << " ("
+				cout << "]\tpassed:\t" << passed << "/" << size << "\t("
+					<< std::setw(10)
 					<< 100 * ((double) passed)/size << "%)\t"
 					<< "average error:\t" << per_error/size << "%"
 					<< endl;
@@ -412,8 +415,6 @@ namespace zhetapi {
 					err += result.second;
 				}
 
-				cout << "Total Error: " << err << endl;
-
 				if (fabs(err - perr) < thresh) {
 					lr *= 0.99;
 
@@ -429,6 +430,7 @@ namespace zhetapi {
 				perr = err;
 				
 				if (dprint) {
+					cout << "\nTotal Error: " << err << endl;
 					cout << "\nCases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
 				}
 

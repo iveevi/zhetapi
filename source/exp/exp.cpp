@@ -42,7 +42,7 @@ int main()
 
 	model.randomize();
 
-	model.epochs(10, 1, 0.001, opt, ins, outs, crit, false);
+	model.epochs(20, 1, 0.001, opt, ins, outs, crit, true);
 
 	// Free resources
 	delete opt;
