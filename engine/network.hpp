@@ -21,12 +21,6 @@ namespace zhetapi {
 		/*
 		* Nerual Network
 		*
-		* Note that layers contain pointers to activations. These are not
-		* allocated and are simply COPIES of what the USER allocates. The user
-		* can expect that the resources they allocated will not be destroyed
-		* within this class, and that they can use the resources afterwards. In
-		* other words, pointer data is READ ONLY.
-		*
 		* @tparam T is the type with which calculations are performed
 		* @tparam U is the type of activation parameter scheme, ie. unary or
 		* binary
@@ -43,13 +37,8 @@ namespace zhetapi {
 			std::size_t			__isize;
 			std::size_t			__osize;
 
-			std::vector <Vector <T>>	__xs;
-			std::vector <Vector <T>>	__dxs;
-
 			std::vector <Vector <T>>	__a;
 			std::vector <Vector <T>>	__z;
-
-			std::vector <Activation <T> *>	__dacts;
 		public:
 			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
@@ -62,8 +51,17 @@ namespace zhetapi {
 
 			void apply_gradient(const std::vector <Matrix <T>> &, T, T);
 
+			std::vector <Matrix <T>> adjusted(T mu);
+
 			std::vector <Matrix <T>> gradient(const Vector <T> &,
-					const Vector <T> &, Optimizer <T> *, bool = false);
+					const Vector <T> &,
+					Optimizer <T> *,
+					bool = false);
+			std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
+					const Vector <T> &,
+					const Vector <T> &,
+					Optimizer <T> *,
+					bool = false);
 
 			std::pair <size_t, T> train(size_t, T,
 					Optimizer <T> *,
@@ -104,17 +102,10 @@ namespace zhetapi {
 
 			for (size_t i = 0; i < size - 1; i++) {
 				// Add extra column for constants (biases)
-				// std::cout << "Before" << std::endl;
-
 				Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
-
-				/* std::cout << "mat: " << mat << std::endl;
-				std::cout << "\trows: " << mat.get_rows() << std::endl;
-				std::cout << "\tcols: " << mat.get_cols() << std::endl; */
 
 				__weights.push_back(mat);
 				__momentum.push_back(mat);
-				__dacts.push_back(layers[i].second->derivative());
 			}
 		}
 
@@ -128,26 +119,19 @@ namespace zhetapi {
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 		{
-			assert(in.size() == __isize);
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
 
 			Vector <T> prv = in;
-			// Vector <T> tmp = (*__layers[0].second)(prv);
 			Vector <T> tmp = in;
-
-			__xs.clear();
-			__dxs.clear();
 
 			__a.clear();
 			__z.clear();
 
 			for (size_t i = 0; i < __weights.size(); i++) {
-				__xs.insert(__xs.begin(), tmp.append_above(T (1)));
-
 				__a.push_back(tmp.append_above(T (1)));
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-				__dxs.push_back(prv);
 
 				tmp = (*__layers[i + 1].second)(prv);
 
@@ -166,30 +150,30 @@ namespace zhetapi {
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in, const std::vector <Matrix <T>> &weights)
 		{
-			assert(in.size() == __isize);
-
-			using namespace std;
-			// cout << "--COMPUTE!!-----------------------------" << endl;
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
 
 			Vector <T> prv = in;
-			Vector <T> tmp = (*__layers[0].second)(prv);
-			
-			// cout << "tmp: " << tmp << endl;
+			Vector <T> tmp = in;
+
+			__a.clear();
+			__z.clear();
 
 			for (size_t i = 0; i < __weights.size(); i++) {
-				auto app = tmp.append_above(T (1));
+				__a.push_back(tmp.append_above(T (1)));
 
-				/* cout << "app: " << app << endl;
-				cout << "weights[i]: " << weights[i] << endl; */
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
-				prv = weights[i] * Matrix <T> (app);
+				tmp = (*__layers[i + 1].second)(prv);
 
-				// cout << "prv: " << prv << endl;
+				Activation <T> *act = __layers[i + 1].second->derivative();
 
-				tmp = (*__layers[i + 1].second)(prv);				
+				__z.push_back((*act)(prv));
+
+				delete act;
 			}
 
-			// cout << "tmp: " << tmp << endl;
+			__a.push_back(tmp);
 			
 			return tmp;
 		}
@@ -202,26 +186,50 @@ namespace zhetapi {
 
 		template <class T>
 		void NeuralNetwork <T> ::apply_gradient(const std::vector <Matrix <T>> &grad,
-				T alpha, T mu)
+				T alpha,
+				T mu)
 		{
-			assert(__weights.size() == grad.size());
+			/* if (__weights.size() != grad.size());
+				throw bad_io_dimensions(); */
+
+			/* std::vector <Matrix <T>> lahead = __weights;
+			for (int i = 0; i < __weights.size(); i++)
+				__weights[i] += mu * __momentum[i];
+
+			std::vector <Matrix <T>> lgrad = 
 			for (int i = 0; i < __weights.size(); i++) {
 				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
 				__weights[i] += __momentum[i];
-				// __weights[i] -= alpha * grad[i];
+			} */
+
+			for (int i = 0; i < __weights.size(); i++) {
+				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
+				__weights[i] += __momentum[i];
 			}
+		}
+
+		template <class T>
+		std::vector <Matrix <T>> NeuralNetwork <T> ::adjusted(T mu)
+		{
+			std::vector <Matrix <T>> theta = __weights;
+			for (int i = 0; i < __weights.size(); i++)
+				theta[i] += mu * __momentum[i];
+
+			return theta;
 		}
 			
 		template <class T>
 		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
-				const Vector <T> &out, Optimizer <T> *opt, bool check)
+				const Vector <T> &out,
+				Optimizer <T> *opt,
+				bool check)
 		{
 			// Check dimensions of input and output
 			if ((in.size() != __isize) || (out.size() != __osize))
 				throw bad_io_dimensions();
 		
 			// Compute the actual value
-			Vector <T> actual = (*this)(in);
+			Vector <T> actual = compute(in);
 			
 			// Get the derivative of the cost
 			Optimizer <T> *dopt = opt->derivative();
@@ -288,6 +296,86 @@ namespace zhetapi {
 			// Return the gradient
 			return J;
 		}
+		
+		template <class T>
+		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const std::vector <Matrix <T>> &weights,
+				const Vector <T> &in,
+				const Vector <T> &out,
+				Optimizer <T> *opt,
+				bool check)
+		{
+			// Check dimensions of input and output
+			if ((in.size() != __isize) || (out.size() != __osize))
+				throw bad_io_dimensions();
+		
+			// Compute the actual value
+			Vector <T> actual = compute(in, weights);
+			
+			// Get the derivative of the cost
+			Optimizer <T> *dopt = opt->derivative();
+			
+			// Construction the Jacobian using backpropogation
+			std::vector <Matrix <T>> J;
+
+			Vector <T> delta = (*dopt)(out, actual);
+			for (int i = weights.size() - 1; i >= 0; i--) {
+				if (i < weights.size() - 1) {
+					delta = weights[i + 1].transpose() * delta;
+					delta = delta.remove_top();
+				}
+				
+				delta = shur(delta, __z[i]);
+
+				Matrix <T> Ji = delta * __a[i].transpose();
+
+				J.insert(J.begin(), Ji);
+			}
+
+			// Free resources
+			delete dopt;
+
+			// Skip gradient checking
+			if (!check)
+				return J;
+
+			// Epsilon value
+			T epsilon = 1e-8;
+
+			// Generate individual gradients
+			std::vector <Matrix <T>> qJ = __weights;
+			for (int i = 0; i < __weights.size(); i++) {
+				for (int x = 0; x < __weights[i].get_rows(); x++) {
+					for (int y = 0; y < __weights[i].get_cols(); y++) {
+						std::vector <Matrix <T>> wplus = weights;
+						std::vector <Matrix <T>> wminus = weights;
+
+						wplus[i][x][y] += epsilon;
+						wminus[i][x][y] -= epsilon;
+
+						Vector <T> jplus = (*opt)(out, compute(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute(in, wminus));
+
+						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
+
+						// Compute the error
+						T a = J[i][x][y];
+						T b = qJ[i][x][y];
+
+						T d = a - b;
+
+						T e = (d * d) / (a * a + b * b + epsilon);
+
+						// If the error is more than epsilon throw an error
+						if (e > epsilon)
+							throw bad_gradient();
+					}
+				}
+
+			}
+
+			// Return the gradient
+			return J;
+		}
 
 		template <class T>
 		std::pair <size_t, T> NeuralNetwork <T> ::train(size_t id, T alpha,
@@ -322,7 +410,7 @@ namespace zhetapi {
 				if (crit(actual, outs[i]))
 					passed++;
 
-				grads.push_back(gradient(ins[i], outs[i], opt));
+				grads.push_back(gradient(adjusted(0.7), ins[i], outs[i], opt));
 				
 				opt_error += (*opt)(outs[i], actual)[0];
 				per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
@@ -392,49 +480,33 @@ namespace zhetapi {
 				}
 			}
 
-			T perr = 0;
 			T lr = alpha;
-
-			T thresh = 0.1;
+			
+			size_t total = 0;
 
 			size_t passed;
+			T err;
 			for (int i = 0; i < runs; i++) {
 				if (dprint) {
 					::std::cout << ::std::string(20, '-') << ::std::endl;
 					::std::cout << "Epoch #" << (i + 1) << " (" << lr << ")\n" << ::std::endl;
 				}
 
-				T err = 0;
-
 				passed = 0;
+				err = 0;
 				for (int i = 0; i < ins_batched.size(); i++) {
 					auto result = train(i + 1, lr, opt, ins_batched[i], outs_batched[i], crit, dprint);
 
 					passed += result.first;
-
 					err += result.second;
+
+					lr = alpha * pow(0.1, (++total)/15000.0);
 				}
-
-				if (fabs(err - perr) < thresh) {
-					lr *= 0.99;
-
-					if (thresh > 0.00001)
-						thresh /= 10;
-				} else if (fabs(err - perr) > 2 * thresh) {
-					lr /= 0.93;
-
-					if (thresh < 0.001)
-						thresh *= 10;
-				}
-
-				perr = err;
 				
 				if (dprint) {
 					cout << "\nTotal Error: " << err << endl;
 					cout << "\nCases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
 				}
-
-				// print();
 			}
 		}
 

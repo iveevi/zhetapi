@@ -79,19 +79,19 @@ vector <double> read_image_print()
 int main()
 {
 	// Initialize the model
-	srand(clock());
+	// srand(clock());
 
 	model.randomize();
 
 	// First 16 bytes
-	images.read((char*)&tmp,sizeof(tmp));
-	images.read((char*)&tmp,sizeof(tmp));
-	images.read((char*)&tmp,sizeof(tmp));
-	images.read((char*)&tmp,sizeof(tmp));
+	images.read((char *) &tmp, sizeof(tmp));
+	images.read((char *) &tmp, sizeof(tmp));
+	images.read((char *) &tmp, sizeof(tmp));
+	images.read((char *) &tmp, sizeof(tmp));
 	
 	// First 8 bytes
-	labels.read((char*)&tmp,sizeof(tmp));
-	labels.read((char*)&tmp,sizeof(tmp));
+	labels.read((char *) &tmp, sizeof(tmp));
+	labels.read((char *) &tmp, sizeof(tmp));
 
 	// Pass critique
 	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
@@ -105,7 +105,7 @@ int main()
 	};
 
 	int size = SIZE * SIZE;
-	for(size_t i = 0; i < IMAGES; i++) {
+	for(size_t i = 0; i < 256; i++) {
 		zhetapi::Vector <double> in = read_image();
 
 		unsigned char actual;
@@ -124,7 +124,7 @@ int main()
 
 	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	model.epochs(100, 128, 0.1, opt, imgs, exps, crit, true);
+	model.epochs(10, 16, 0.1, opt, imgs, exps, crit, true);
 
 	// Free resources
 	delete opt;
