@@ -12,9 +12,10 @@
 
 // Engine headers
 #include <activation.hpp>
+#include <dataset.hpp>
+#include <matrix.hpp>
 #include <optimizer.hpp>
 #include <vector.hpp>
-#include <matrix.hpp>
 
 namespace zhetapi {
 		
@@ -30,7 +31,8 @@ namespace zhetapi {
 		template <class T>
 		class NeuralNetwork {
 		public:
-			typedef std::pair <std::size_t, Activation <T> *> Layer;
+			using Layer = std::pair <std::size_t, Activation <T> *>;
+			using Comparator = std::function <bool (const Vector <T> , const Vector <T>)>;
 			
 			// Training statistics
 			struct TrainingStatistics {
@@ -47,15 +49,27 @@ namespace zhetapi {
 			std::vector <Matrix <T>>	__weights;
 			std::vector <Matrix <T>>	__momentum;
 			std::function <T ()>		__random;
-			std::size_t			__isize;
-			std::size_t			__osize;
+			size_t				__isize;
+			size_t				__osize;
 
 			std::vector <Vector <T>>	__a;
 			std::vector <Vector <T>>	__z;
+
+			size_t				__threads;
+
+			Optimizer <T> *			__cost;
+			Comparator			__cmp;
+			
+			static Comparator __default_comparator;
 		public:
 			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
 			~NeuralNetwork();
+
+			// Setters
+			void set_threads(size_t);
+			void set_cost(Optimizer <T> *);
+			void set_comparator(Comparator);
 
 			Vector <T> compute(const Vector <T> &);
 			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &);
@@ -90,25 +104,32 @@ namespace zhetapi {
 					Optimizer <T> *,
 					bool = false);
 
-			TrainingStatistics train(size_t, size_t, T,
-					Optimizer <T> *,
-					const std::vector <Vector<T>> &,
-					const std::vector <Vector <T>> &,
-					const std::function <bool (const Vector <T> , const Vector <T>)> &,
-					bool = false);
-
-			void epochs(size_t, size_t, size_t, T,
-					Optimizer <T> *,
-					const std::vector <Vector <T>> &,
-					const std::vector <Vector <T>> &,
-					const std::function <bool (const Vector <T> , const Vector <T>)> &,
-					bool = false);
+			TrainingStatistics train(const DataSet <T> &,
+				const DataSet <T> &,
+				T, size_t = 0,
+				bool = false);
+			
+			TrainingStatistics epochs(const DataSet <T> &,
+				const DataSet <T> &,
+				size_t, size_t, T,
+				bool = false);
 
 			void randomize();
 
 			// Printing weights
 			void print() const;
 		};
+
+		// Static variables
+		template <class T>
+		bool default_comparator(Vector <T> a, Vector <T> e)
+		{
+			return a == e;
+		};
+
+		template <class T>
+		typename NeuralNetwork <T> ::Comparator
+		NeuralNetwork <T> ::__default_comparator = default_comparator <T>;
 
 		/*
 		 * NOTE: The pointers allocated and passed into this function
@@ -121,7 +142,7 @@ namespace zhetapi {
 		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer> &layers,
 				const std::function <T ()> &random) : __random(random),
 				__isize(layers[0].first), __osize(layers[layers.size() - 1].first),
-				__layers(layers)
+				__layers(layers), __threads(1), __cost(nullptr), __cmp(__default_comparator)
 		{
 			size_t size = __layers.size();
 
@@ -139,6 +160,25 @@ namespace zhetapi {
 		{
 			for (auto layer : __layers)
 				delete layer.second;
+		}
+
+		// Setters
+		template <class T>
+		void NeuralNetwork <T> ::set_threads(size_t threads)
+		{
+			__threads = threads;
+		}
+
+		template <class T>
+		void NeuralNetwork <T> ::set_cost(Optimizer<T> *opt)
+		{
+			__cost = opt;
+		}
+
+		template <class T>
+		void NeuralNetwork <T> ::set_comparator(Comparator cmp)
+		{
+			__cmp = cmp;
 		}
 
 		template <class T>
@@ -539,15 +579,12 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		typename NeuralNetwork <T> ::TrainingStatistics
-			NeuralNetwork <T> ::train(size_t id,
-				size_t threads,
+		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+			::train(const DataSet <T> &ins,
+				const DataSet <T> &outs,
 				T alpha,
-				Optimizer <T> *opt,
-				const std::vector <Vector<T>> &ins,
-				const std::vector <Vector<T>> &outs,
-				const std::function <bool (const Vector <T>, const Vector <T>)> &crit,
-				bool dprint)
+				size_t id,
+				bool printing)
 		{
 			if (ins.size() != outs.size())
 				throw bad_io_dimensions();
@@ -561,7 +598,7 @@ namespace zhetapi {
 			
 			std::chrono::high_resolution_clock clk;
 
-			if (dprint) {
+			if (printing) {
 				std::string str = "#" + std::to_string(id);
 
 				std::cout << "Batch " << std::setw(6)
@@ -580,21 +617,21 @@ namespace zhetapi {
 			int size = ins.size();
 
 			std::vector <std::vector <Matrix <T>>> grads(size);
-			if (threads == 1) {
+			if (__threads == 1) {
 				std::cout << " [";
 				
 				for (int i = 0; i < size; i++) {
 					Vector <T> actual = compute(ins[i]);
 
-					if (crit(actual, outs[i]))
+					if (__cmp(actual, outs[i]))
 						passed++;
 
-					grads[i] = gradient(adjusted(0.7), ins[i], outs[i], opt);
+					grads[i] = gradient(adjusted(0.7), ins[i], outs[i], __cost);
 					
-					opt_error += (*opt)(outs[i], actual)[0];
+					opt_error += (*__cost)(outs[i], actual)[0];
 					per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
 
-					if (dprint) {
+					if (printing) {
 						int delta = (len * (i + 1))/size;
 						for (int i = 0; i < delta - bars; i++) {
 							std::cout << "=";
@@ -609,41 +646,45 @@ namespace zhetapi {
 			} else {
 				std::vector <std::thread> army;
 				
-				double *optes = new double[threads];
-				double *peres = new double[threads];
+				double *optes = new double[__threads];
+				double *peres = new double[__threads];
 
 				auto proc = [&](size_t offset) {
 					std::vector <Vector <T>> aloc;
 					std::vector <Vector <T>> zloc;
 
-					for (int i = offset; i < size; i += threads) {
+					for (int i = offset; i < size; i += __threads) {
 						Vector <T> actual = compute(ins[i], aloc, zloc);
 
 						// TODO: Determine whether the the
 						// following if statement is
 						// hazardous.
-						if (crit(actual, outs[i]))
+						if (__cmp(actual, outs[i]))
 							passed++;
 
-						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], opt);
+						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
 						
-						optes[offset] += (*opt)(outs[i], actual)[0];
+						optes[offset] += (*__cost)(outs[i], actual)[0];
 						peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 					}
 				};
 
-				for (int i = 0; i < threads; i++) {
+				for (int i = 0; i < __threads; i++) {
 					optes[i] = peres[i] = 0;
 
 					army.push_back(std::thread(proc, i));
 				}
 
-				for (int i = 0; i < threads; i++) {
+				for (int i = 0; i < __threads; i++) {
 					opt_error += optes[i];
 					per_error += peres[i];
 
 					army[i].join();
 				}
+
+				// Free resources
+				delete[] optes;
+				delete[] peres;
 			}
 
 			end = clk.now();
@@ -667,7 +708,7 @@ namespace zhetapi {
 				<std::chrono::microseconds> (total - start).count();
 			avg_time /= size;
 
-			if (dprint) {
+			if (printing) {
 				std::cout << " passed: " << passed << "/" << size << " = "
 					<< std::fixed << std::showpoint << std::setprecision(2)
 					<< 100 * ((double) passed)/size << "%, "
@@ -683,60 +724,45 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::epochs(size_t runs, size_t batch, size_t threads,
+		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+			::epochs(const DataSet <T> &ins,
+				const DataSet <T> &outs,
+				size_t iterations,
+				size_t batch_size,
 				T alpha,
-				Optimizer <T> *opt,
-				const std::vector <Vector<T>> &ins,
-				const std::vector <Vector<T>> &outs, const
-				std::function<bool (const Vector <T>, const Vector <T>)> &crit,
-				bool dprint)
+				bool printing)
 		{
-			assert(ins.size() == outs.size());
+			if (ins.size() != outs.size())
+				throw bad_io_dimensions();
 
-			using namespace std;
-
-			std::vector <std::vector <Vector <T>>> ins_batched;
-			std::vector <std::vector <Vector <T>>> outs_batched;
-
-			size_t batches = 0;
-
-			std::vector <Vector <T>> in_batch;
-			std::vector <Vector <T>> out_batch;
-			for (int i = 0; i < ins.size(); i++) {
-				in_batch.push_back(ins[i]);
-				out_batch.push_back(outs[i]);
-
-				if (i % batch == batch - 1 || i == ins.size() - 1) {
-					ins_batched.push_back(in_batch);
-					outs_batched.push_back(out_batch);
-
-					in_batch.clear();
-					out_batch.clear();
-				}
-			}
+			std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
+			std::vector <DataSet <T>> outs_batched = split(outs, batch_size);
 
 			T lr = alpha;
+
+			T t_err = 0;
+			double t_time = 0;
+			size_t t_passed = 0;
 			
 			size_t total = 0;
-
 			size_t passed;
 			double t;
 			T err;
-			for (int i = 0; i < runs; i++) {
-				if (dprint) {
-					::std::cout << ::std::string(20, '-') << ::std::endl;
-					::std::cout << "\nEpoch #" << (i + 1) << " (" << lr << ")\n" << ::std::endl;
+			for (int i = 0; i < iterations; i++) {
+				if (printing) {
+					std::cout << std::string(20, '-')
+						<< std::endl
+						<< "\nEpoch #" << (i + 1)
+						<< " (" << lr
+						<< ")\n" << std::endl;
 				}
 
 				passed = 0;
 				err = 0;
 				t = 0;
 				for (int i = 0; i < ins_batched.size(); i++) {
-					TrainingStatistics result = train(i + 1,
-							threads, lr, opt,
-							ins_batched[i],
-							outs_batched[i], crit,
-							dprint);
+					TrainingStatistics result = train(ins_batched[i],
+						outs_batched[i], lr, i + 1, printing);
 
 					passed += result.__passed;
 					err += result.__cost;
@@ -744,13 +770,25 @@ namespace zhetapi {
 
 					lr = alpha * pow(0.1, (++total)/50000.0);
 				}
+
+				t_passed += passed;
+				t_err += err;
+				t_time += t;
 				
-				if (dprint) {
-					cout << "\nTotal cost:\t" << err << endl;
-					cout << "Total time:\t" << t/1000 << " ms" << endl;
-					cout << "Cases passed:\t" << passed << "/" << ins.size() << " (" << 100 * ((double) passed)/ins.size() << "%)" << endl;
+				if (printing) {
+					std::cout << "\nTotal cost:\t"
+						<< err << std::endl
+						<< "Total time:\t" << t/1000
+						<< " ms" << std::endl
+						<< "Cases passed:\t"
+						<< passed
+						<< "/" << ins.size() << " ("
+						<< 100 * ((double) passed)/ins.size()
+						<< "%)" << std::endl;
 				}
 			}
+
+			return {t_passed, t_err, t_time};
 		}
 
 		template <class T>

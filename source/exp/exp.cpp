@@ -8,6 +8,8 @@
 #include <std/optimizer_classes.hpp>
 #include <network.hpp>
 
+#include <dataset.hpp>
+
 using namespace std;
 using namespace zhetapi;
 
@@ -17,8 +19,9 @@ int main()
 
 	const int size = 100000;
 	
-	vector <Vector <double>> ins;
-	vector <Vector <double>> outs;
+	// vector <Vector <double>> ins;
+	DataSet <double> ins;
+	DataSet <double> outs;
 	
 	for (int i = 0; i < size; i++) {
 		ins.push_back({(i + 1)/23.0, (i - 0.5)/23.0});
@@ -40,7 +43,10 @@ int main()
 
 	model.randomize();
 
-	model.epochs(100, 25000, 4, 0.1, opt, ins, outs, crit, true);
+	model.set_threads(8);
+	model.set_cost(opt);
+	// model.set_comparator(crit);
+	model.epochs(ins, outs, 100, 25000, 0.1, true);
 
 	// Free resources
 	delete opt;
