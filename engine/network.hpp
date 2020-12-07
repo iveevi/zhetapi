@@ -96,6 +96,7 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
+			
 			std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
 					std::vector <Vector <T>> &,
 					std::vector <Vector <T>> &,
@@ -103,6 +104,16 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
+
+#define ZHP_CUDA
+			__device__ std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
+				std::vector <Vector <T>> &,
+				std::vector <Vector <T>> &,
+				const Vector <T> &,
+				const Vector <T> &,
+				Optimizer <T> *,
+				bool = false);
+#endif
 
 			TrainingStatistics train(const DataSet <T> &,
 				const DataSet <T> &,
