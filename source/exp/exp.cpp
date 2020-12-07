@@ -13,19 +13,17 @@ using namespace zhetapi;
 
 int main()
 {
-	vector <Vector <double>> ins = {
-		{1, 6},
-		{4, 3},
-		{5, 8},
-		{3, 1}
-	};
+	srand(clock());
 
-	vector <Vector <double>> outs = {
-		{61, 54},
-		{41, 0},
-		{65, 4},
-		{187, 13}
-	};
+	const int size = 100000;
+	
+	vector <Vector <double>> ins;
+	vector <Vector <double>> outs;
+	
+	for (int i = 0; i < size; i++) {
+		ins.push_back({(i + 1)/23.0, (i - 0.5)/23.0});
+		outs.push_back({rand()/(RAND_MAX * 0.1), rand()/(RAND_MAX * 0.1)});
+	}
 
 	ml::NeuralNetwork <double> model ({
 		{2, new zhetapi::ml::Linear <double> ()},
@@ -42,7 +40,7 @@ int main()
 
 	model.randomize();
 
-	model.epochs(20, 1, 0.001, opt, ins, outs, crit, true);
+	model.epochs(100, 25000, 4, 0.1, opt, ins, outs, crit, true);
 
 	// Free resources
 	delete opt;
