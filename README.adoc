@@ -4,6 +4,8 @@
 
 image::zhetapi-logo.png[]
 
+---
+
 :travis-ci: https://travis-ci.com/github/vedavamadathil/zhetapi
 
 |===
@@ -134,6 +136,58 @@ cout << df << endl;
 cout << "df/dx(2) = " << f.differentiate(2) << endl;
 cout << "df/dx(2) = " << df(2) << endl;
 ```
+
+## Machine Learning with Deep Neural Networks
+
+Along with providing many mathematical utilities, Zhetapi also provides
+machine learning capabilities. Currently, Zhetapi provides a `NeuralNetwork`
+class that user can use to train deep neural networks on data sets. An
+example of its usage is below:
+
+```{cpp}
+zhetapi::ml::NeuralNetwork <double> model ({
+	{2, new zhetapi::ml::Linear <double> ()},
+	{5, new zhetapi::ml::Sigmoid <double> ()},
+	{5, new zhetapi::ml::ReLU <double> ()},
+	{2, new zhetapi::ml::ReLU <double> ()}
+}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
+```
+
+Users can customize the model by specifying the number of neurons in each
+layer and the activation to use. With C++ operator overloading, using the
+neural network is as easy as calling it as a function:
+
+```{cpp}
+// Initialize weights randomly
+model.randomize();
+
+cout << model({3, 5}) << endl;
+cout << model({4, 5}) << endl;
+```
+
+Training is also very simple:
+
+```{cpp}
+// Create the cost function
+ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
+
+model.set_cost(opt);
+
+/* Run a training session of 10 epochs
+ * with ins as the set of inputs and outs
+ * as the set of ouputs, with batches of
+ * size 250 and an initial learning rate of 0.1.
+ *
+ * Runs with 8 threads, as specified in the template
+ * parameter.
+ */
+model.epochs <8> (ins, outs, 10, 250, 0.1, true);
+```
+
+For a more comprehensive and practical exmaple, see `samples/mnist/main.cpp`,
+in which we train a deep neural network to recognize hand written digits from
+the MNIST data set (run `./compile` in the `samples/mnist` directory to run
+the program).
 
 ## Code Generation and Dynamically Optimizing Functions
 
@@ -384,3 +438,4 @@ Below is a list of resources used in the making of this project.
  : A Foundation For Computer Science._ Reading, Mass: Addison-Wesley, 1994. Print.
  . Stroustrup, Bjarne. _The C++ Programming Language._ Upper Saddle River, NJ: Addison-Wesley, 2013. Print.
  . Press, William H., et al. _Numerical Recipes : The Art of Scientific Computing._ Cambridge, UK New York: Cambridge University Press, 2007. Print.
+ . Géron, Aurélien. Hands-on machine learning with Scikit-Learn, Keras, and TensorFlow : concepts, tools, and techniques to build intelligent systems. Sebastopol, CA: O'Reilly Media, Inc, 2019. Print.
