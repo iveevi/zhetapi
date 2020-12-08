@@ -55,19 +55,16 @@ namespace zhetapi {
 			std::vector <Vector <T>>	__a;
 			std::vector <Vector <T>>	__z;
 
-			size_t				__threads;
-
 			Optimizer <T> *			__cost;
 			Comparator			__cmp;
 			
-			static Comparator __default_comparator;
+			static Comparator		__default_comparator;
 		public:
 			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
 
 			~NeuralNetwork();
 
 			// Setters
-			void set_threads(size_t);
 			void set_cost(Optimizer <T> *);
 			void set_comparator(Comparator);
 
@@ -105,7 +102,7 @@ namespace zhetapi {
 					Optimizer <T> *,
 					bool = false);
 
-#define ZHP_CUDA
+#ifdef ZHP_CUDA
 			__device__ std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
 				std::vector <Vector <T>> &,
 				std::vector <Vector <T>> &,
@@ -115,11 +112,13 @@ namespace zhetapi {
 				bool = false);
 #endif
 
+			template <size_t = 1>
 			TrainingStatistics train(const DataSet <T> &,
 				const DataSet <T> &,
 				T, size_t = 0,
 				bool = false);
-			
+		
+			template <size_t = 1>
 			TrainingStatistics epochs(const DataSet <T> &,
 				const DataSet <T> &,
 				size_t, size_t, T,
@@ -153,7 +152,7 @@ namespace zhetapi {
 		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer> &layers,
 				const std::function <T ()> &random) : __random(random),
 				__isize(layers[0].first), __osize(layers[layers.size() - 1].first),
-				__layers(layers), __threads(1), __cost(nullptr), __cmp(__default_comparator)
+				__layers(layers), __cost(nullptr), __cmp(__default_comparator)
 		{
 			size_t size = __layers.size();
 
@@ -174,12 +173,6 @@ namespace zhetapi {
 		}
 
 		// Setters
-		template <class T>
-		void NeuralNetwork <T> ::set_threads(size_t threads)
-		{
-			__threads = threads;
-		}
-
 		template <class T>
 		void NeuralNetwork <T> ::set_cost(Optimizer<T> *opt)
 		{
@@ -590,6 +583,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
+		template <size_t threads>
 		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 			::train(const DataSet <T> &ins,
 				const DataSet <T> &outs,
@@ -628,7 +622,7 @@ namespace zhetapi {
 			int size = ins.size();
 
 			std::vector <std::vector <Matrix <T>>> grads(size);
-			if (__threads == 1) {
+			if (threads == 1) {
 				std::cout << " [";
 				
 				for (int i = 0; i < size; i++) {
@@ -657,14 +651,14 @@ namespace zhetapi {
 			} else {
 				std::vector <std::thread> army;
 				
-				double *optes = new double[__threads];
-				double *peres = new double[__threads];
+				double *optes = new double[threads];
+				double *peres = new double[threads];
 
 				auto proc = [&](size_t offset) {
 					std::vector <Vector <T>> aloc;
 					std::vector <Vector <T>> zloc;
 
-					for (int i = offset; i < size; i += __threads) {
+					for (int i = offset; i < size; i += threads) {
 						Vector <T> actual = compute(ins[i], aloc, zloc);
 
 						// TODO: Determine whether the the
@@ -680,13 +674,13 @@ namespace zhetapi {
 					}
 				};
 
-				for (int i = 0; i < __threads; i++) {
+				for (int i = 0; i < threads; i++) {
 					optes[i] = peres[i] = 0;
 
 					army.push_back(std::thread(proc, i));
 				}
 
-				for (int i = 0; i < __threads; i++) {
+				for (int i = 0; i < threads; i++) {
 					opt_error += optes[i];
 					per_error += peres[i];
 
@@ -735,6 +729,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
+		template <size_t threads>
 		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 			::epochs(const DataSet <T> &ins,
 				const DataSet <T> &outs,
@@ -772,7 +767,7 @@ namespace zhetapi {
 				err = 0;
 				t = 0;
 				for (int i = 0; i < ins_batched.size(); i++) {
-					TrainingStatistics result = train(ins_batched[i],
+					TrainingStatistics result = train <threads> (ins_batched[i],
 						outs_batched[i], lr, i + 1, printing);
 
 					passed += result.__passed;

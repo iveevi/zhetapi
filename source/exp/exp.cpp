@@ -43,10 +43,8 @@ int main()
 
 	model.randomize();
 
-	model.set_threads(8);
 	model.set_cost(opt);
-	// model.set_comparator(crit);
-	model.epochs(ins, outs, 100, 25000, 0.1, true);
+	model.epochs <8> (ins, outs, 100, 25000, 0.1, true);
 
 	// Free resources
 	delete opt;
