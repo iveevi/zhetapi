@@ -401,11 +401,12 @@ as PSLQ.
 Although there are a few standard linear algebra algorithms, the hope is that
 more will be added. These include QR factorization, SVD, diagonalization, etc.
 
-## Machine Learning
+## More Extensive Support for Machine Learning
 
-A solid foundation for linear algebra is already present in the library. The
-next move would be to implement machine learning utilities, such as Deep Neural
-Networks.
+Deep neural networks are already present in the Zhetapi library. The next steps
+would be implementing convolutional networks, recurrent networks, and other structures
+used in supervised learning. In addition, structures and algorithms used in unsupervised
+learning and other branches of AI shall also be added.
 
 ## Native Code Generation
 
