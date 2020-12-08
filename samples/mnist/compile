@@ -13,12 +13,10 @@ if [ ! -f train-images-idx3-ubyte ]; then
 fi
 
 if [ "$1" == "debug" ]; then
-	cmake -DCMAKE_BUILD_TYPE=Debug .
+	g++ -I ../../engine main.cpp -pthread -g -o mnist
 else
-	cmake -DCMAKE_BUILD_TYPE=Debug .
+	g++ -I ../../engine main.cpp -pthread -O3 -o mnist
 fi
-
-make
 
 mkdir -p bin
 

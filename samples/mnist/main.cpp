@@ -124,7 +124,9 @@ int main()
 
 	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
-	model.epochs(100, 128, 1, opt, imgs, exps, crit, true);
+	model.set_cost(opt);
+	model.set_comparator(crit);
+	model.epochs <10> (imgs, exps, 100, 128, 1, true);
 
 	// Free resources
 	delete opt;
