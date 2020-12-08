@@ -126,7 +126,7 @@ int main()
 
 	model.set_cost(opt);
 	model.set_comparator(crit);
-	model.epochs <10> (imgs, exps, 100, 128, 1, true);
+	model.epochs <10> (imgs, exps, 100, 128, 1, false);
 
 	// Free resources
 	delete opt;

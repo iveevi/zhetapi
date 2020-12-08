@@ -653,6 +653,7 @@ namespace zhetapi {
 				
 				double *optes = new double[threads];
 				double *peres = new double[threads];
+				double *pass = new double[threads];
 
 				auto proc = [&](size_t offset) {
 					std::vector <Vector <T>> aloc;
@@ -665,7 +666,7 @@ namespace zhetapi {
 						// following if statement is
 						// hazardous.
 						if (__cmp(actual, outs[i]))
-							passed++;
+							pass[offset]++;
 
 						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
 						
@@ -683,6 +684,7 @@ namespace zhetapi {
 				for (int i = 0; i < threads; i++) {
 					opt_error += optes[i];
 					per_error += peres[i];
+					passed += pass[i];
 
 					army[i].join();
 				}
@@ -690,6 +692,7 @@ namespace zhetapi {
 				// Free resources
 				delete[] optes;
 				delete[] peres;
+				delete[] pass;
 			}
 
 			end = clk.now();
@@ -755,14 +758,12 @@ namespace zhetapi {
 			double t;
 			T err;
 			for (int i = 0; i < iterations; i++) {
-				if (printing) {
-					std::cout << std::string(20, '-')
-						<< std::endl
-						<< "\nEpoch #" << (i + 1)
-						<< " (" << lr
-						<< ")\n" << std::endl;
-				}
-
+				std::cout << std::string(20, '-')
+					<< std::endl
+					<< "\nEpoch #" << (i + 1)
+					<< " (" << lr
+					<< ")\n" << std::endl;
+				
 				passed = 0;
 				err = 0;
 				t = 0;
@@ -781,17 +782,15 @@ namespace zhetapi {
 				t_err += err;
 				t_time += t;
 				
-				if (printing) {
-					std::cout << "\nTotal cost:\t"
-						<< err << std::endl
-						<< "Total time:\t" << t/1000
-						<< " ms" << std::endl
-						<< "Cases passed:\t"
-						<< passed
-						<< "/" << ins.size() << " ("
-						<< 100 * ((double) passed)/ins.size()
-						<< "%)" << std::endl;
-				}
+				std::cout << "\nTotal cost:\t"
+					<< err << std::endl
+					<< "Total time:\t" << t/1000
+					<< " ms" << std::endl
+					<< "Cases passed:\t"
+					<< passed
+					<< "/" << ins.size() << " ("
+					<< 100 * ((double) passed)/ins.size()
+					<< "%)" << std::endl;
 			}
 
 			return {t_passed, t_err, t_time};
