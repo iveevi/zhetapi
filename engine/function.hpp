@@ -384,7 +384,7 @@ namespace zhetapi {
 	template <class T, class U>
 	::std::string Function <T, U> ::str() const
 	{
-		return __symbol;
+		return display();
 	}
 
 	template <class T, class U>

@@ -197,9 +197,6 @@ namespace zhetapi {
 		__barn(other.__barn), __tree(other.__tree),
 		__refs(other.__refs), __params(other.__params)
 	{
-		::std::cout << "REREFING" << ::std::endl;
-		other.print();
-
 		rereference(__tree);
 	}
 
@@ -250,6 +247,9 @@ namespace zhetapi {
 
 			return tptr->copy();
 		case Token::ftn:
+			if (tree.__leaves.empty())
+				return tree.__tptr->copy();
+			
 			for (node leaf : tree.__leaves)
 				values.push_back(value(leaf));
 
