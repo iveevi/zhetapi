@@ -350,11 +350,16 @@ A description of each directory is presented below:
 
 | Directory | Description
 
-| source | Contains source code for the headers, CLI, tests and upcoming
-features of this library.
-
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
+
+| matplotlib-cpp | Contains source from the matplotlib-cpp repository. Used for
+graphing applications in the library.
+
+| samples | Contains examples of library usage.
+
+| source | Contains source code for the headers, CLI, tests and upcoming
+features of this library.
 
 |===
 

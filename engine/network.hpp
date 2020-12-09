@@ -103,13 +103,13 @@ namespace zhetapi {
 					bool = false);
 
 #ifdef ZHP_CUDA
-			__device__ std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
+			/* std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
 				std::vector <Vector <T>> &,
 				std::vector <Vector <T>> &,
 				const Vector <T> &,
 				const Vector <T> &,
 				Optimizer <T> *,
-				bool = false);
+				bool = false); */
 #endif
 
 			template <size_t = 1>

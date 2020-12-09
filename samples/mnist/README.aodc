@@ -1,0 +1,7 @@
+= Training an AI to Recognize Hand-Written Digits
+
+This directory contains source for training a deep neural network (in the form
+of Zhetapi's `NeuralNetwork` class) to recognize hand written digits from MNIST.
+See `main.cpp` for the source code.
+
+To run the training session, simply enter `./compile` in the command prompt.
