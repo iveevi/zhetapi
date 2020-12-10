@@ -33,6 +33,8 @@ namespace zhetapi {
 
 			cudaMalloc((void **) &act, sizeof(Activation));
 
+			*act = Activation();
+
 			return act;
 
 #endif

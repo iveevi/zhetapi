@@ -47,7 +47,7 @@ int main()
 	double *opts = new double[1];
 	double *errs = new double[1];
 	double *pass = new double[1];
-	Vector <double> *grads = new Vector <double> [1];
+	Vector <double> **grads = new Vector <double> *[1];
 	train <<<1, 1>>> (model, stat, ins, outs, grads, opts, errs, pass);
 
 	cout << "stat: " << stat << endl;

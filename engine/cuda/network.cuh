@@ -9,6 +9,7 @@
 
 // CUDA headers
 #include <cuda/activation.cuh>
+#include <cuda/optimizer.cuh>
 
 namespace zhetapi {
 
@@ -32,8 +33,8 @@ namespace zhetapi {
 			Vector <T> tmp = in;
 
 			size_t i = 0;
-			while (i < __weights.size()) {
-				a[i] = tmp.append(T (1));
+			while (i < __size - 1) {
+				a[i] = tmp.append_above(T (1));
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
@@ -92,7 +93,7 @@ namespace zhetapi {
 				typename NeuralNetwork <T> ::TrainingStatistics *ts,
 				const DataSet <T> &ins,
 				const DataSet <T> &outs,
-				Vector <T> *grads,
+				Vector <T> **grads,
 				double *optes,
 				double *peres,
 				double *pass)
@@ -101,8 +102,8 @@ namespace zhetapi {
 			int tid = threadIdx.x + blockIdx.x + blockDim.x;
 			int size = ins.size();
 
-			Vector <T> *aloc = new Vector <T> (net.__layers.size());
-			Vector <T> *zloc = new Vector <T> (net.__layers.size() - 1);
+			Vector <T> *aloc = new Vector <T> (net.__size);
+			Vector <T> *zloc = new Vector <T> (net.__size - 1);
 
 			for (int i = tid; i < size; i += threads) {
 				Vector <T> actual = net.compute(ins[i], aloc, zloc);

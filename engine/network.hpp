@@ -21,6 +21,12 @@ namespace zhetapi {
 		
 	namespace ml {
 
+		template <class T>
+		using Layer = std::pair <size_t, Activation <T> *>;
+
+		template <class T>
+		using Comparator = std::function <bool (const Vector <T> , const Vector <T>)>;
+
 		/*
 		* Nerual Network
 		*
@@ -31,9 +37,6 @@ namespace zhetapi {
 		template <class T>
 		class NeuralNetwork {
 		public:
-			using Layer = std::pair <std::size_t, Activation <T> *>;
-			using Comparator = std::function <bool (const Vector <T> , const Vector <T>)>;
-			
 			// Training statistics
 			struct TrainingStatistics {
 				size_t	__passed;
@@ -45,28 +48,29 @@ namespace zhetapi {
 			class bad_gradient {};
 			class bad_io_dimensions {};
 		private:
-			std::vector <Layer>		__layers;
-			std::vector <Matrix <T>>	__weights;
-			std::vector <Matrix <T>>	__momentum;
+			Layer <T> *			__layers;
+			Matrix <T> *			__weights;
+			Matrix <T> *			__momentum;
 			std::function <T ()>		__random;
 			size_t				__isize;
 			size_t				__osize;
+			size_t				__size;
 
 			std::vector <Vector <T>>	__a;
 			std::vector <Vector <T>>	__z;
 
 			Optimizer <T> *			__cost;
-			Comparator			__cmp;
+			Comparator <T>			__cmp;
 			
-			static Comparator		__default_comparator;
+			static Comparator <T>		__default_comparator;
 		public:
-			NeuralNetwork(const std::vector <Layer> &, const std::function <T ()> &);
+			NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
 
 			~NeuralNetwork();
 
 			// Setters
 			void set_cost(Optimizer <T> *);
-			void set_comparator(Comparator);
+			void set_comparator(const Comparator <T> &);
 
 			Vector <T> compute(const Vector <T> &) const;
 			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &) const;
@@ -75,20 +79,20 @@ namespace zhetapi {
 
 			void apply_gradient(const std::vector <Matrix <T>> &, T, T);
 
-			std::vector <Matrix <T>> adjusted(T mu);
+			Matrix <T> *adjusted(T mu);
 
-			std::vector <Matrix <T>> gradient(const Vector <T> &,
+			Matrix <T> *gradient(const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
-			std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
+			Matrix <T> *gradient(Matrix <T> *,
 					const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
-			std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &,
+			Matrix <T> *gradient(Matrix <T> *,
+					Vector <T> *,
+					Vector <T> *,
 					const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *,
@@ -140,7 +144,7 @@ namespace zhetapi {
 					typename NeuralNetwork <U> ::TrainingStatistics *,
 					const DataSet <U> &,
 					const DataSet <U> &,
-					Vector <U> *,
+					Vector <U> **,
 					double *,
 					double *,
 					double *);
@@ -157,8 +161,8 @@ namespace zhetapi {
 		};
 
 		template <class T>
-		typename NeuralNetwork <T> ::Comparator
-		NeuralNetwork <T> ::__default_comparator = default_comparator <T>;
+		Comparator <T> NeuralNetwork <T> ::__default_comparator
+			= default_comparator <T>;
 
 		/*
 		 * NOTE: The pointers allocated and passed into this function
@@ -168,27 +172,37 @@ namespace zhetapi {
 		 * NeuralNetwork class do the work for you.
 		 */
 		template <class T>
-		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer> &layers,
-				const std::function <T ()> &random) : __random(random),
-				__isize(layers[0].first), __osize(layers[layers.size() - 1].first),
-				__layers(layers), __cost(nullptr), __cmp(__default_comparator)
+		NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer <T>> &layers,
+				const std::function <T ()> &random)
+				: __random(random),
+				__size(layers.size()),
+				__isize(layers[0].first),
+				__osize(layers[layers.size() - 1].first),
+				__layers(nullptr),
+				__cost(nullptr),
+				__cmp(__default_comparator)
 		{
-			size_t size = __layers.size();
-
-			for (size_t i = 0; i < size - 1; i++) {
+			__layers = new Layer <T> [__size];
+			__weights = new Matrix <T> [__size - 1];
+			__momentum = new Matrix <T> [__size - 1];
+			for (size_t i = 0; i < __size - 1; i++) {
 				// Add extra column for constants (biases)
 				Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
 
-				__weights.push_back(mat);
-				__momentum.push_back(mat);
+				__weights[i] = mat;
+				__momentum[i] = mat;
 			}
 		}
 
 		template <class T>
 		NeuralNetwork <T> ::~NeuralNetwork()
 		{
-			for (auto layer : __layers)
-				delete layer.second;
+			for (int i = 0; i < __size; i++)
+				delete __layers[i].second;
+
+			delete[] __layers;
+			delete[] __weights;
+			delete[] __momentum;
 		}
 
 		// Setters
@@ -199,7 +213,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::set_comparator(Comparator cmp)
+		void NeuralNetwork <T> ::set_comparator(const Comparator <T> &cmp)
 		{
 			__cmp = cmp;
 		}
@@ -285,17 +299,20 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		std::vector <Matrix <T>> NeuralNetwork <T> ::adjusted(T mu)
+		Matrix <T> *NeuralNetwork <T> ::adjusted(T mu)
 		{
-			std::vector <Matrix <T>> theta = __weights;
-			for (int i = 0; i < __weights.size(); i++)
+			Matrix <T> *theta = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				theta[i] = __weights[i];
+
+			for (int i = 0; i < __size - 1; i++)
 				theta[i] += mu * __momentum[i];
 
 			return theta;
 		}
 			
 		template <class T>
-		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const Vector <T> &in,
+		Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 				const Vector <T> &out,
 				Optimizer <T> *opt,
 				bool check)
@@ -311,7 +328,7 @@ namespace zhetapi {
 			Optimizer <T> *dopt = opt->derivative();
 			
 			// Construction the Jacobian using backpropogation
-			std::vector <Matrix <T>> J;
+			Matrix <T> *J = new Matrix <T> [__size - 1];
 
 			Vector <T> delta = (*dopt)(out, actual);
 			for (int i = __weights.size() - 1; i >= 0; i--) {
@@ -324,7 +341,7 @@ namespace zhetapi {
 
 				Matrix <T> Ji = delta * __a[i].transpose();
 
-				J.insert(J.begin(), Ji);
+				J[i] = Ji;
 			}
 
 			// Free resources
@@ -374,7 +391,7 @@ namespace zhetapi {
 		}
 		
 		template <class T>
-		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const std::vector <Matrix <T>> &weights,
+		Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 				const Vector <T> &in,
 				const Vector <T> &out,
 				Optimizer <T> *opt,
@@ -391,11 +408,11 @@ namespace zhetapi {
 			Optimizer <T> *dopt = opt->derivative();
 			
 			// Construction the Jacobian using backpropogation
-			std::vector <Matrix <T>> J;
+			Matrix <T> *J = new Matrix <T> [__size - 1];
 
 			Vector <T> delta = (*dopt)(out, actual);
-			for (int i = weights.size() - 1; i >= 0; i--) {
-				if (i < weights.size() - 1) {
+			for (int i = __size - 2; i >= 0; i--) {
+				if (i < __size - 2) {
 					delta = weights[i + 1].transpose() * delta;
 					delta = delta.remove_top();
 				}
@@ -404,7 +421,7 @@ namespace zhetapi {
 
 				Matrix <T> Ji = delta * __a[i].transpose();
 
-				J.insert(J.begin(), Ji);
+				J[i] = Ji;
 			}
 
 			// Free resources
@@ -454,9 +471,9 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const std::vector <Matrix <T>> &weights,
-				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z,
+		Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
+				Vector <T> *a,
+				Vector <T> *z,
 				const Vector <T> &in,
 				const Vector <T> &out,
 				Optimizer <T> *opt,
@@ -473,11 +490,11 @@ namespace zhetapi {
 			Optimizer <T> *dopt = opt->derivative();
 			
 			// Construction the Jacobian using backpropogation
-			std::vector <Matrix <T>> J;
+			Matrix <T> *J = new Matrix <T> [__size - 1];
 
 			Vector <T> delta = (*dopt)(out, actual);
-			for (int i = weights.size() - 1; i >= 0; i--) {
-				if (i < weights.size() - 1) {
+			for (int i = __size - 2; i >= 0; i--) {
+				if (i < __size - 2) {
 					delta = weights[i + 1].transpose() * delta;
 					delta = delta.remove_top();
 				}
@@ -486,7 +503,7 @@ namespace zhetapi {
 
 				Matrix <T> Ji = delta * a[i].transpose();
 
-				J.insert(J.begin(), Ji);
+				J[i] = Ji;
 			}
 
 			// Free resources
@@ -752,8 +769,8 @@ namespace zhetapi {
 		template <class T>
 		void NeuralNetwork <T> ::randomize()
 		{
-			for (auto &mat : __weights)
-				mat.randomize(__random);
+			for (int i = 0; i < __size; i++)
+				__weights[i].randomize(__random);
 		}
 
 		template <class T>
