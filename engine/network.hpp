@@ -72,12 +72,13 @@ namespace zhetapi {
 			void set_cost(Optimizer <T> *);
 			void set_comparator(const Comparator <T> &);
 
-			Vector <T> compute(const Vector <T> &) const;
-			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &) const;
+			Vector <T> compute(const Vector <T> &);
+			Vector <T> compute(const Vector <T> &,
+					Matrix <T> *);
 
 			Vector <T> operator()(const Vector <T> &);
 
-			void apply_gradient(const std::vector <Matrix <T>> &, T, T);
+			void apply_gradient(Matrix <T> *, T, T);
 
 			Matrix <T> *adjusted(T mu);
 
@@ -118,12 +119,12 @@ namespace zhetapi {
 #ifndef ZHP_CUDA
 
 			Vector <T> compute(const Vector <T> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &) const;
+					Vector <T> *,
+					Vector <T> *) const;
 			Vector <T> compute(const Vector <T> &,
-					const std::vector <Matrix <T>> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &) const;
+					Matrix <T> *,
+					Vector <T> *,
+					Vector <T> *) const;
 
 #else
 
@@ -183,8 +184,14 @@ namespace zhetapi {
 				__cmp(__default_comparator)
 		{
 			__layers = new Layer <T> [__size];
+			for (int i = 0; i < __size; i++)
+				__layers[i] = layers[i];
+			
 			__weights = new Matrix <T> [__size - 1];
 			__momentum = new Matrix <T> [__size - 1];
+
+			__a = std::vector <Vector <T>> (__size);
+			__z = std::vector <Vector <T>> (__size - 1);
 			for (size_t i = 0; i < __size - 1; i++) {
 				// Add extra column for constants (biases)
 				Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
@@ -219,7 +226,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in) const
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -227,11 +234,9 @@ namespace zhetapi {
 			Vector <T> prv = in;
 			Vector <T> tmp = in;
 
-			__a.clear();
-			__z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				__a.push_back(tmp.append_above(T (1)));
+			size_t i = 0;
+			while (i < __size - 1) {
+				__a[i] = tmp.append_above(T (1));
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
@@ -239,19 +244,19 @@ namespace zhetapi {
 
 				Activation <T> *act = __layers[i + 1].second->derivative();
 
-				__z.push_back((*act)(prv));
+				__z[i++] = (*act)(prv);
 
 				delete act;
 			}
 
-			__a.push_back(tmp);
+			__a[i] = tmp;
 			
 			return tmp;
 		}
 
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-				const std::vector <Matrix <T>> &weights) const
+				Matrix <T> *weights)
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -259,11 +264,9 @@ namespace zhetapi {
 			Vector <T> prv = in;
 			Vector <T> tmp = in;
 
-			__a.clear();
-			__z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				__a.push_back(tmp.append_above(T (1)));
+			size_t i = 0;
+			while (i < __size - 1) {
+				__a[i] = tmp.append_above(T (1));
 
 				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
@@ -271,12 +274,12 @@ namespace zhetapi {
 
 				Activation <T> *act = __layers[i + 1].second->derivative();
 
-				__z.push_back((*act)(prv));
+				__z[i++] = (*act)(prv);
 
 				delete act;
 			}
 
-			__a.push_back(tmp);
+			__a[i] = tmp;
 			
 			return tmp;
 		}
@@ -288,11 +291,11 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		void NeuralNetwork <T> ::apply_gradient(const std::vector <Matrix <T>> &grad,
+		void NeuralNetwork <T> ::apply_gradient(Matrix <T> *grad,
 				T alpha,
 				T mu)
 		{
-			for (int i = 0; i < __weights.size(); i++) {
+			for (int i = 0; i < __size - 1; i++) {
 				__momentum[i] = mu * __momentum[i] - alpha * grad[i];
 				__weights[i] += __momentum[i];
 			}
@@ -355,12 +358,18 @@ namespace zhetapi {
 			T epsilon = 1e-8;
 
 			// Generate individual gradients
-			std::vector <Matrix <T>> qJ = __weights;
-			for (int i = 0; i < __weights.size(); i++) {
+			Matrix <T> *qJ = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				qJ[i] = __weights[i];
+			
+			for (int i = 0; i < __size - 1; i++) {
 				for (int x = 0; x < __weights[i].get_rows(); x++) {
 					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						std::vector <Matrix <T>> wplus = __weights;
-						std::vector <Matrix <T>> wminus = __weights;
+						Matrix <T> *wplus = new Matrix <T> [__size - 1];
+						Matrix <T> *wminus = new Matrix <T> [__size - 1];
+						
+						for (int i = 0; i < __size - 2; i++)
+							wplus[i] = wminus[i] = __weights[i];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -435,12 +444,18 @@ namespace zhetapi {
 			T epsilon = 1e-8;
 
 			// Generate individual gradients
-			std::vector <Matrix <T>> qJ = __weights;
-			for (int i = 0; i < __weights.size(); i++) {
-				for (int x = 0; x < __weights[i].get_rows(); x++) {
-					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						std::vector <Matrix <T>> wplus = weights;
-						std::vector <Matrix <T>> wminus = weights;
+			Matrix <T> *qJ = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				qJ[i] = weights[i];
+			
+			for (int i = 0; i < __size - 1; i++) {
+				for (int x = 0; x < weights[i].get_rows(); x++) {
+					for (int y = 0; y < weights[i].get_cols(); y++) {
+						Matrix <T> *wplus = new Matrix <T> [__size - 1];
+						Matrix <T> *wminus = new Matrix <T> [__size - 1];
+						
+						for (int i = 0; i < __size - 2; i++)
+							wplus[i] = wminus[i] = weights[i];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -517,12 +532,18 @@ namespace zhetapi {
 			T epsilon = 1e-8;
 
 			// Generate individual gradients
-			std::vector <Matrix <T>> qJ = __weights;
-			for (int i = 0; i < __weights.size(); i++) {
-				for (int x = 0; x < __weights[i].get_rows(); x++) {
-					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						std::vector <Matrix <T>> wplus = weights;
-						std::vector <Matrix <T>> wminus = weights;
+			Matrix <T> *qJ = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				qJ[i] = weights[i];
+			
+			for (int i = 0; i < __size - 1; i++) {
+				for (int x = 0; x < weights[i].get_rows(); x++) {
+					for (int y = 0; y < weights[i].get_cols(); y++) {
+						Matrix <T> *wplus = new Matrix <T> [__size - 1];
+						Matrix <T> *wminus = new Matrix <T> [__size - 1];
+						
+						for (int i = 0; i < __size - 2; i++)
+							wplus[i] = wminus[i] = weights[i];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -591,7 +612,7 @@ namespace zhetapi {
 
 			int size = ins.size();
 
-			std::vector <std::vector <Matrix <T>>> grads(size);
+			Matrix <T> **grads = new Matrix <T> *[size];
 			if (threads == 1) {
 				std::cout << " [";
 				
@@ -601,6 +622,9 @@ namespace zhetapi {
 					if (__cmp(actual, outs[i]))
 						passed++;
 
+					/* The gradient function allocates the
+					 * memory anyways, no need to allocate here.
+					  */
 					grads[i] = gradient(adjusted(0.7), ins[i], outs[i], __cost);
 					
 					opt_error += (*__cost)(outs[i], actual)[0];
@@ -626,8 +650,8 @@ namespace zhetapi {
 				double *pass = new double[threads];
 
 				auto proc = [&](size_t offset) {
-					std::vector <Vector <T>> aloc;
-					std::vector <Vector <T>> zloc;
+					Vector <T> *aloc = new Vector <T> [__size];
+					Vector <T> *zloc = new Vector <T> [__size];
 
 					for (int i = offset; i < size; i += threads) {
 						Vector <T> actual = compute(ins[i], aloc, zloc);
@@ -638,7 +662,7 @@ namespace zhetapi {
 						if (__cmp(actual, outs[i]))
 							pass[offset]++;
 
-						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
+						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost, true);
 						
 						optes[offset] += (*__cost)(outs[i], actual)[0];
 						peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
@@ -667,13 +691,16 @@ namespace zhetapi {
 
 			end = clk.now();
 
-			std::vector <Matrix <T>> grad = grads[0];
-			for (size_t i = 1; i < grads.size(); i++) {
-				for (size_t j = 0; j < grad.size(); j++)
+			Matrix <T> *grad = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				grad[i] = grads[0][i];
+			
+			for (size_t i = 1; i < size; i++) {
+				for (size_t j = 0; j < __size - 1; j++)
 					grad[j] += grads[i][j];
 			}
 				
-			for (size_t j = 0; j < grad.size(); j++)
+			for (size_t j = 0; j < __size - 1; j++)
 				grad[j] /= (double) size;
 
 			apply_gradient(grad, alpha, 0.7);
@@ -769,7 +796,7 @@ namespace zhetapi {
 		template <class T>
 		void NeuralNetwork <T> ::randomize()
 		{
-			for (int i = 0; i < __size; i++)
+			for (int i = 0; i < __size - 1; i++)			
 				__weights[i].randomize(__random);
 		}
 
@@ -791,8 +818,8 @@ namespace zhetapi {
 		
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z) const
+				Vector <T> *a,
+				Vector <T> *z) const
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -800,11 +827,9 @@ namespace zhetapi {
 			Vector <T> prv = in;
 			Vector <T> tmp = in;
 
-			a.clear();
-			z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				a.push_back(tmp.append_above(T (1)));
+			size_t i = 0;
+			while (i < __size - 1) {
+				a[i] = tmp.append_above(T (1));
 
 				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
@@ -812,21 +837,21 @@ namespace zhetapi {
 
 				Activation <T> *act = __layers[i + 1].second->derivative();
 
-				z.push_back((*act)(prv));
+				z[i++] = (*act)(prv);
 
 				delete act;
 			}
 
-			a.push_back(tmp);
+			a[i] = tmp;
 			
 			return tmp;
 		}
 
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-				const std::vector <Matrix <T>> &weights,
-				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z) const
+				Matrix <T> *weights,
+				Vector <T> *a,
+				Vector <T> *z) const
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -834,11 +859,9 @@ namespace zhetapi {
 			Vector <T> prv = in;
 			Vector <T> tmp = in;
 
-			a.clear();
-			z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				a.push_back(tmp.append_above(T (1)));
+			size_t i = 0;
+			while (i < __size - 1) {
+				a[i] = tmp.append_above(T (1));
 
 				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
 
@@ -846,12 +869,12 @@ namespace zhetapi {
 
 				Activation <T> *act = __layers[i + 1].second->derivative();
 
-				z.push_back((*act)(prv));
+				z[i++] = (*act)(prv);
 
 				delete act;
 			}
 
-			a.push_back(tmp);
+			a[i] = tmp;
 			
 			return tmp;
 		}

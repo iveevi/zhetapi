@@ -143,7 +143,7 @@ namespace zhetapi {
 			}
 
 			Activation <T> *derivative() const {
-				return new __DReLU <T> (__alpha);
+				return new __DReLU <T> ();
 			}
 
 #else
