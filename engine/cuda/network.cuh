@@ -7,97 +7,119 @@
 // Engine headers
 #include <network.hpp>
 
+// CUDA headers
+#include <cuda/activation.cuh>
+
 namespace zhetapi {
 
-	namespace cuda {
-
-		__global__ void kernel(int a, int b)
+	namespace ml {
+		
+		template <class T>
+		__host__ __device__
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+				Vector <T> *a,
+				Vector <T> *z) const
 		{
-			a = b;
+
+#ifndef __CUDA_ARCH__
+
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
+
+#endif
+
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			size_t i = 0;
+			while (i < __weights.size()) {
+				a[i] = tmp.append(T (1));
+
+				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				z[i++] = (*act)(prv);
+
+				delete act;
+			}
+
+			a[i] = tmp;
+			
+			return tmp;
 		}
 
-		/* template <class T>
-		__device__ std::vector <Matrix <T>> NeuralNetwork <T>
-			::gradient(const std::vector <Matrix <T>> &weights,
+		template <class T>
+		__host__ __device__
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+				const std::vector <Matrix <T>> &weights,
 				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z,
-				const Vector <T> &in,
-				const Vector <T> &out,
-				Optimizer <T> *opt,
-				bool check)
+				std::vector <Vector <T>> &z) const
 		{
-			// Check dimensions of input and output
-			if ((in.size() != __isize) || (out.size() != __osize))
+			if (in.size() != __isize)
 				throw bad_io_dimensions();
-		
-			// Compute the actual value
-			Vector <T> actual = compute(in, weights, a, z);
-			
-			// Get the derivative of the cost
-			Optimizer <T> *dopt = opt->derivative();
-			
-			// Construction the Jacobian using backpropogation
-			std::vector <Matrix <T>> J;
 
-			Vector <T> delta = (*dopt)(out, actual);
-			for (int i = weights.size() - 1; i >= 0; i--) {
-				if (i < weights.size() - 1) {
-					delta = weights[i + 1].transpose() * delta;
-					delta = delta.remove_top();
-				}
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			a.clear();
+			z.clear();
+
+			for (size_t i = 0; i < __weights.size(); i++) {
+				a.push_back(tmp.append_above(T (1)));
+
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				z.push_back((*act)(prv));
+
+				delete act;
+			}
+
+			a.push_back(tmp);
+			
+			return tmp;
+		}
+
+		template <class T>
+		__global__ 
+		void train(const NeuralNetwork <T> &net,
+				typename NeuralNetwork <T> ::TrainingStatistics *ts,
+				const DataSet <T> &ins,
+				const DataSet <T> &outs,
+				Vector <T> *grads,
+				double *optes,
+				double *peres,
+				double *pass)
+		{
+			int threads = gridDim.x * blockDim.x;
+			int tid = threadIdx.x + blockIdx.x + blockDim.x;
+			int size = ins.size();
+
+			Vector <T> *aloc = new Vector <T> (net.__layers.size());
+			Vector <T> *zloc = new Vector <T> (net.__layers.size() - 1);
+
+			for (int i = tid; i < size; i += threads) {
+				Vector <T> actual = net.compute(ins[i], aloc, zloc);
+
+				// TODO: Determine whether the the
+				// following if statement is
+				// hazardous.
+				if (net.__cmp(actual, outs[i]))
+					pass[tid]++;
+
+				grads[i] = net.gradient(net.adjusted(0.7), aloc,
+						zloc, ins[i], outs[i], net.__cost);
 				
-				delta = shur(delta, z[i]);
-
-				Matrix <T> Ji = delta * a[i].transpose();
-
-				J.insert(J.begin(), Ji);
+				optes[tid] += (*(net.__cost))(outs[i], actual)[0];
+				peres[tid] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 			}
-
-			// Free resources
-			delete dopt;
-
-			// Skip gradient checking
-			if (!check)
-				return J;
-
-			// Epsilon value
-			T epsilon = 1e-8;
-
-			// Generate individual gradients
-			std::vector <Matrix <T>> qJ = __weights;
-			for (int i = 0; i < __weights.size(); i++) {
-				for (int x = 0; x < __weights[i].get_rows(); x++) {
-					for (int y = 0; y < __weights[i].get_cols(); y++) {
-						std::vector <Matrix <T>> wplus = weights;
-						std::vector <Matrix <T>> wminus = weights;
-
-						wplus[i][x][y] += epsilon;
-						wminus[i][x][y] -= epsilon;
-
-						Vector <T> jplus = (*opt)(out, compute(in, wplus));
-						Vector <T> jminus = (*opt)(out, compute(in, wminus));
-
-						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
-
-						// Compute the error
-						T a = J[i][x][y];
-						T b = qJ[i][x][y];
-
-						T d = a - b;
-
-						T e = (d * d) / (a * a + b * b + epsilon);
-
-						// If the error is more than epsilon throw an error
-						if (e > epsilon)
-							throw bad_gradient();
-					}
-				}
-
-			}
-
-			// Return the gradient
-			return J;
-		} */
+		}
 
 	}
 

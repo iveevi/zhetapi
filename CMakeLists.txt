@@ -41,6 +41,13 @@ add_executable(exp source/exp/exp.cpp)
 
 target_link_libraries(exp PUBLIC zhp)
 
+# Compile cuda program
+project(cuda LANGUAGES CXX CUDA)
+
+add_executable(cuda source/cuda/main.cu)
+
+target_link_libraries(cuda PUBLIC zhp)
+
 # Compile zhp file
 project(czhp)
 

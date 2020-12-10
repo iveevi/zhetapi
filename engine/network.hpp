@@ -68,15 +68,8 @@ namespace zhetapi {
 			void set_cost(Optimizer <T> *);
 			void set_comparator(Comparator);
 
-			Vector <T> compute(const Vector <T> &);
-			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &);
-			Vector <T> compute(const Vector <T> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &);
-			Vector <T> compute(const Vector <T> &,
-					const std::vector <Matrix <T>> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &);
+			Vector <T> compute(const Vector <T> &) const;
+			Vector <T> compute(const Vector <T> &, const std::vector <Matrix <T>> &) const;
 
 			Vector <T> operator()(const Vector <T> &);
 
@@ -93,7 +86,6 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
-			
 			std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
 					std::vector <Vector <T>> &,
 					std::vector <Vector <T>> &,
@@ -101,16 +93,6 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
-
-#ifdef ZHP_CUDA
-			/* std::vector <Matrix <T>> gradient(const std::vector <Matrix <T>> &,
-				std::vector <Vector <T>> &,
-				std::vector <Vector <T>> &,
-				const Vector <T> &,
-				const Vector <T> &,
-				Optimizer <T> *,
-				bool = false); */
-#endif
 
 			template <size_t = 1>
 			TrainingStatistics train(const DataSet <T> &,
@@ -128,6 +110,43 @@ namespace zhetapi {
 
 			// Printing weights
 			void print() const;
+
+#ifndef ZHP_CUDA
+
+			Vector <T> compute(const Vector <T> &,
+					std::vector <Vector <T>> &,
+					std::vector <Vector <T>> &) const;
+			Vector <T> compute(const Vector <T> &,
+					const std::vector <Matrix <T>> &,
+					std::vector <Vector <T>> &,
+					std::vector <Vector <T>> &) const;
+
+#else
+
+			__host__ __device__
+			Vector <T> compute(const Vector <T> &,
+					Vector <T> *,
+					Vector <T> *) const;
+
+			__host__ __device__
+			Vector <T> compute(const Vector <T> &,
+					const std::vector <Matrix <T>> &,
+					std::vector <Vector <T>> &,
+					std::vector <Vector <T>> &) const;
+
+			template <class U>
+			__global__
+			friend void train(const NeuralNetwork <U> &,
+					typename NeuralNetwork <U> ::TrainingStatistics *,
+					const DataSet <U> &,
+					const DataSet <U> &,
+					Vector <U> *,
+					double *,
+					double *,
+					double *);
+
+#endif
+
 		};
 
 		// Static variables
@@ -186,7 +205,7 @@ namespace zhetapi {
 		}
 
 		template <class T>
-		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in) const
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -215,42 +234,10 @@ namespace zhetapi {
 			
 			return tmp;
 		}
-		
+
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z)
-		{
-			if (in.size() != __isize)
-				throw bad_io_dimensions();
-
-			Vector <T> prv = in;
-			Vector <T> tmp = in;
-
-			a.clear();
-			z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				a.push_back(tmp.append_above(T (1)));
-
-				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-				tmp = (*__layers[i + 1].second)(prv);
-
-				Activation <T> *act = __layers[i + 1].second->derivative();
-
-				z.push_back((*act)(prv));
-
-				delete act;
-			}
-
-			a.push_back(tmp);
-			
-			return tmp;
-		}
-
-		template <class T>
-		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in, const std::vector <Matrix <T>> &weights)
+				const std::vector <Matrix <T>> &weights) const
 		{
 			if (in.size() != __isize)
 				throw bad_io_dimensions();
@@ -280,40 +267,6 @@ namespace zhetapi {
 			return tmp;
 		}
 		
-		template <class T>
-		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-				const std::vector <Matrix <T>> &weights,
-				std::vector <Vector <T>> &a,
-				std::vector <Vector <T>> &z)
-		{
-			if (in.size() != __isize)
-				throw bad_io_dimensions();
-
-			Vector <T> prv = in;
-			Vector <T> tmp = in;
-
-			a.clear();
-			z.clear();
-
-			for (size_t i = 0; i < __weights.size(); i++) {
-				a.push_back(tmp.append_above(T (1)));
-
-				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-				tmp = (*__layers[i + 1].second)(prv);
-
-				Activation <T> *act = __layers[i + 1].second->derivative();
-
-				z.push_back((*act)(prv));
-
-				delete act;
-			}
-
-			a.push_back(tmp);
-			
-			return tmp;
-		}
-
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
 		{
@@ -499,7 +452,7 @@ namespace zhetapi {
 			// Return the gradient
 			return J;
 		}
-		
+
 		template <class T>
 		std::vector <Matrix <T>> NeuralNetwork <T> ::gradient(const std::vector <Matrix <T>> &weights,
 				std::vector <Vector <T>> &a,
@@ -816,6 +769,77 @@ namespace zhetapi {
 			
 			std::cout << "================================" << std::endl;
 		}
+		
+#ifndef ZHP_CUDA
+		
+		template <class T>
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+				std::vector <Vector <T>> &a,
+				std::vector <Vector <T>> &z) const
+		{
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
+
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			a.clear();
+			z.clear();
+
+			for (size_t i = 0; i < __weights.size(); i++) {
+				a.push_back(tmp.append_above(T (1)));
+
+				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				z.push_back((*act)(prv));
+
+				delete act;
+			}
+
+			a.push_back(tmp);
+			
+			return tmp;
+		}
+
+		template <class T>
+		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+				const std::vector <Matrix <T>> &weights,
+				std::vector <Vector <T>> &a,
+				std::vector <Vector <T>> &z) const
+		{
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
+
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			a.clear();
+			z.clear();
+
+			for (size_t i = 0; i < __weights.size(); i++) {
+				a.push_back(tmp.append_above(T (1)));
+
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				z.push_back((*act)(prv));
+
+				delete act;
+			}
+
+			a.push_back(tmp);
+			
+			return tmp;
+		}
+
+#endif
 
 	}
 

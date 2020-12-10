@@ -22,13 +22,28 @@ namespace zhetapi {
 		public:
 			Activation();
 
+#ifndef ZHP_CUDA
+
 			virtual Vector <T> operator()(const Vector <T> &) const;
 
 			virtual Activation *derivative() const;
-		};
 
+#else
+
+			__host__ __device__
+			virtual Vector <T> operator()(const Vector <T> &) const;
+
+			__host__ __device__
+			virtual Activation *derivative() const;
+
+#endif
+
+		};
+		
 		template <class T>
 		Activation <T> ::Activation() {}
+
+#ifndef ZHP_CUDA
 
 		template <class T>
 		Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
@@ -41,6 +56,8 @@ namespace zhetapi {
 		{
 			return new Activation();
 		}
+
+#endif
 
 	}
 
