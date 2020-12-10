@@ -75,6 +75,10 @@ namespace zhetapi {
 			Vector <T> compute(const Vector <T> &);
 			Vector <T> compute(const Vector <T> &,
 					Matrix <T> *);
+			
+			Vector <T> compute_no_cache(const Vector <T> &) const;
+			Vector <T> compute_no_cache(const Vector <T> &,
+					Matrix <T> *) const;
 
 			Vector <T> operator()(const Vector <T> &);
 
@@ -283,6 +287,57 @@ namespace zhetapi {
 			
 			return tmp;
 		}
+
+		template <class T>
+		Vector <T> NeuralNetwork <T> ::compute_no_cache(const Vector <T> &in) const
+		{
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
+
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			size_t i = 0;
+			while (i < __size - 1) {
+				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				delete act;
+
+				i++;
+			}
+			
+			return tmp;
+		}
+
+		template <class T>
+		Vector <T> NeuralNetwork <T> ::compute_no_cache(const Vector <T> &in,
+				Matrix <T> *weights) const
+		{
+			if (in.size() != __isize)
+				throw bad_io_dimensions();
+
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			size_t i = 0;
+			while (i < __size - 1) {
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*__layers[i + 1].second)(prv);
+
+				Activation <T> *act = __layers[i + 1].second->derivative();
+
+				delete act;
+
+				i++;
+			}
+			
+			return tmp;
+		}
 		
 		template <class T>
 		Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
@@ -334,8 +389,8 @@ namespace zhetapi {
 			Matrix <T> *J = new Matrix <T> [__size - 1];
 
 			Vector <T> delta = (*dopt)(out, actual);
-			for (int i = __weights.size() - 1; i >= 0; i--) {
-				if (i < __weights.size() - 1) {
+			for (int i = __size - 2; i >= 0; i--) {
+				if (i < __size - 2) {
 					delta = __weights[i + 1].transpose() * delta;
 					delta = delta.remove_top();
 				}
@@ -368,14 +423,14 @@ namespace zhetapi {
 						Matrix <T> *wplus = new Matrix <T> [__size - 1];
 						Matrix <T> *wminus = new Matrix <T> [__size - 1];
 						
-						for (int i = 0; i < __size - 2; i++)
+						for (int i = 0; i < __size - 1; i++)
 							wplus[i] = wminus[i] = __weights[i];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
 
-						Vector <T> jplus = (*opt)(out, compute(in, wplus));
-						Vector <T> jminus = (*opt)(out, compute(in, wminus));
+						Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
 
 						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
 
@@ -454,14 +509,14 @@ namespace zhetapi {
 						Matrix <T> *wplus = new Matrix <T> [__size - 1];
 						Matrix <T> *wminus = new Matrix <T> [__size - 1];
 						
-						for (int i = 0; i < __size - 2; i++)
-							wplus[i] = wminus[i] = weights[i];
+						for (int i = 0; i < __size - 1; i++)
+							wplus[i] = wminus[i] = __weights[i];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
 
-						Vector <T> jplus = (*opt)(out, compute(in, wplus));
-						Vector <T> jminus = (*opt)(out, compute(in, wminus));
+						Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
 
 						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
 
@@ -542,14 +597,14 @@ namespace zhetapi {
 						Matrix <T> *wplus = new Matrix <T> [__size - 1];
 						Matrix <T> *wminus = new Matrix <T> [__size - 1];
 						
-						for (int i = 0; i < __size - 2; i++)
-							wplus[i] = wminus[i] = weights[i];
+						for (int k = 0; k < __size - 2; k++)
+							wplus[k] = wminus[k] = weights[k];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
 
-						Vector <T> jplus = (*opt)(out, compute(in, wplus));
-						Vector <T> jminus = (*opt)(out, compute(in, wminus));
+						Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
 
 						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
 
@@ -662,7 +717,7 @@ namespace zhetapi {
 						if (__cmp(actual, outs[i]))
 							pass[offset]++;
 
-						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost, true);
+						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
 						
 						optes[offset] += (*__cost)(outs[i], actual)[0];
 						peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
