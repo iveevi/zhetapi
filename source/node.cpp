@@ -5,19 +5,19 @@ namespace zhetapi {
 	node::node() : __tptr(nullptr), __label(l_none) {}
 	
 	node::node(Token *tptr, const ::std::vector <node> &leaves) :
-			__leaves(leaves), __label(l_none)
+			__leaves(leaves), __label(l_none), __nodes(0)
 	{
 		__tptr.reset(tptr);
 	}
 
 	node::node(Token *tptr, lbl label, const ::std::vector <node> &leaves) :
-		__leaves(leaves), __label(label)
+		__leaves(leaves), __label(label), __nodes(0)
 	{
 		__tptr.reset(tptr);
 	}
 
 	node::node(Token *tptr, const node &a, const node &b) : __leaves({a,
-			b}), __label(l_none)
+			b}), __label(l_none), __nodes(0)
 	{
 		__tptr.reset(tptr);
 	}
@@ -63,10 +63,10 @@ namespace zhetapi {
 
 		if (__tptr) {
 			::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
-				strlabs[__label] << ")" << ::std::endl;
+				strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
 		} else {
 			::std::cout << "#" << num << ": null (" <<
-				strlabs[__label] << ")" << ::std::endl;
+				strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
 		}
 
 		counter = 0;
@@ -87,7 +87,7 @@ namespace zhetapi {
 		}
 
 		oss << "#" << num << ": " << __tptr->str() << " (" << __tptr << ") @ "
-			<< this << ::std::endl;
+			<< this << " "  << __nodes << " nodes" << ::std::endl;
 
 		counter = 0;
 		for (node itr : __leaves)

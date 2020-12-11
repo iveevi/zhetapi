@@ -20,6 +20,7 @@ namespace zhetapi {
 		::std::string			__symbol;
 		::std::vector <::std::string>	__params;
 		node_manager <T, U>		__manager;
+		size_t				__threads;
 	public:
 		Function();
 		Function(const char *);
@@ -33,9 +34,15 @@ namespace zhetapi {
 		::std::string &symbol();
 		const ::std::string symbol() const;
 
+		void set_threads(size_t);
+
+		template <size_t = 1>
 		Token *operator()(::std::vector <Token *>);
 
 		template <class ... A>
+		Token *operator()(A ...);
+
+		template <size_t, class ... A>
 		Token *operator()(A ...);
 
 		template <class ... A>
@@ -202,13 +209,19 @@ namespace zhetapi {
 		return __symbol;
 	}
 
+	template <class T, class U>
+	void Function <T, U> ::set_threads(size_t threads)
+	{
+		__threads = threads;
+	}
+
 	// Computational utilities
 	template <class T, class U>
 	Token *Function <T, U> ::operator()(::std::vector <Token *> toks)
 	{
 		assert(toks.size() == __params.size());
 
-		return __manager.substitute_and_compute(toks);
+		return __manager.substitute_and_compute(toks, threads);
 	}
 
 	template <class T, class U>
@@ -221,7 +234,7 @@ namespace zhetapi {
 
 		assert(Tokens.size() == __params.size());
 
-		return __manager.substitute_and_compute(Tokens);
+		return __manager.substitute_and_compute(Tokens, threads);
 	}
 
 	template <class T, class U>

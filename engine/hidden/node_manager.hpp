@@ -22,26 +22,9 @@ namespace zhetapi {
 
 	template <class T, class U>
 	class node_manager {
-		/*
-		 * Internal (common between nodes) barn class used to make
-		 * decisions about computation.
-		 */
 		Barn <T, U>			__barn;
-
-		/*
-		 * The internal representation of the function or expression.
-		 */
 		node				__tree;
-
-		/*
-		 * List of parameters in node form. References are made to these
-		 * nodes whenever a variable node is encoutered.
-		 */
 		::std::vector <node>		__refs;
-
-		/*
-		 * List of paramaters in string form (by their symbols).
-		 */
 		::std::vector <::std::string>	__params;
 	public:
 		node_manager();
@@ -53,9 +36,9 @@ namespace zhetapi {
 
 		node_manager &operator=(const node_manager &);
 
-		Token *value() const;
+		Token *value(size_t = 0) const;
 
-		Token *substitute_and_compute(::std::vector <Token *> &);
+		Token *substitute_and_compute(::std::vector <Token *> &, size_t = 1);
 
 		/*
 		 * Responsible for expanding variable clusters and truning them
@@ -81,7 +64,9 @@ namespace zhetapi {
 		// Static methods
 		static bool loose_match(const node_manager <T, U> &, const node_manager <T, U> &);
 	private:
-		Token *value(node) const;
+		Token *value(node, size_t = 0) const;
+
+		size_t count_up(node &);
 		
 		void label(node &);
 		void label_operation(node &);
@@ -160,6 +145,7 @@ namespace zhetapi {
 
 		// Label the tree
 		label(__tree);
+		count_up(__tree);
 	}
 
 	template <class T, class U>
@@ -189,6 +175,7 @@ namespace zhetapi {
 
 		// Label the tree
 		label(__tree);
+		count_up(__tree);
 	}
 
 	// Copy constructor and operator
@@ -217,24 +204,26 @@ namespace zhetapi {
 
 	// Value finding methods
 	template <class T, class U>
-	Token *node_manager <T, U> ::value() const
+	Token *node_manager <T, U> ::value(size_t spare_threads) const
 	{
-		return value(__tree);
+		return value(__tree, spare_threads);
 	}
 
 	template <class T, class U>
-	Token *node_manager <T, U> ::value(node tree) const
+	Token *node_manager <T, U> ::value(node tree, size_t spare_threads) const
 	{
 		::std::vector <Token *> values;
-
 		node *unrefd;
-		
 		Token *tptr;
+		int size;
+
+		::std::cout << "Spare threads: " << spare_threads << ::std::endl;
 		
 		switch (*(tree.__tptr)) {
 		case Token::opd:
 			return tree.__tptr.get()->copy();
 		case Token::oph:
+			size = tree.__leaves.size();
 			for (node leaf : tree.__leaves)
 				values.push_back(value(leaf));
 
@@ -275,7 +264,7 @@ namespace zhetapi {
 
 	template <class T, class U>
 	Token *node_manager <T, U> ::substitute_and_compute(::std::vector <Token *>
-			&toks)
+			&toks, size_t total_threads)
 	{
 		assert(__refs.size() == toks.size());
 		for (size_t i = 0; i < __refs.size(); i++) {
@@ -284,7 +273,7 @@ namespace zhetapi {
 			label(__refs[i]);
 		}
 
-		return value(__tree);
+		return value(__tree, total_threads - 1);
 	}
 
 	// Expansion methods
@@ -408,6 +397,19 @@ namespace zhetapi {
 
 
 		return choice[0];
+	}
+
+	// Counting nodes
+	template <class T, class U>
+	size_t node_manager <T, U> ::count_up(node &ref)
+	{
+		size_t total = 1;
+		for (auto &child : ref.__leaves)
+			total += count_up(child);
+		
+		ref.__nodes = total;
+
+		return total;
 	}
 
 	// Simplication methods

@@ -1,14 +1,12 @@
 #include "port.hpp"
 
-bench mark;
-
 ostream &operator<<(ostream &os, const bench &b)
 {
-	tmp = clk.now();
+	tpoint tmp = clk.now();
 
 	os << "[";
-	os << chrono::duration_cast<chrono::microseconds>(tmp - epoch).count();
-	os << "]\t";
+	os << chrono::duration_cast<chrono::microseconds>(tmp - b.epoch).count();
+	os << " µs]\t";
 
 	return os;
 }

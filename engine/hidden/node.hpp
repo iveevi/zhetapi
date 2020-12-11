@@ -21,6 +21,7 @@ namespace zhetapi {
 		lbl				__label;
 		cls				__class;
 		::std::vector <node>		__leaves;
+		size_t				__nodes;
 
 		// Constructors
 		node();

@@ -5,6 +5,7 @@ vector <pair <string, bool(*)()>> rig {
 	{"vector construction and memory safety", &vector_construction_and_memory},
 	{"matrix construction and memory safety", &matrix_construction_and_memory},
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
+	{"function compuation", &function_computation},
 	{"function general compilation", &function_compilation_testing}
 };
 
@@ -16,10 +17,7 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 }
 
 // Timers
-chrono::high_resolution_clock clk;
-
-chrono::high_resolution_clock::time_point epoch;
-chrono::high_resolution_clock::time_point tmp;
+tclk clk;
 
 // Main program
 int main()
@@ -37,7 +35,9 @@ int main()
 	sigaction(SIGSEGV, &sa, NULL);
 
 	// Setup times
-	epoch = clk.now();
+	tpoint epoch = clk.now();
+
+	bench mark(epoch);
 
 	// Run tests in the test rig
 	bool first = true;

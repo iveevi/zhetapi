@@ -19,24 +19,30 @@
 
 using namespace std;
 
-// Bench marking structures
-struct bench {};
-
-extern bench mark;
-
-ostream &operator<<(ostream &, const bench &);
+// Typedefs
+using tclk = chrono::high_resolution_clock;
+using tpoint = chrono::high_resolution_clock::time_point;
 
 // Timers
-extern chrono::high_resolution_clock clk;
+extern tclk clk;
+extern tpoint tmp;
 
-extern chrono::high_resolution_clock::time_point epoch;
-extern chrono::high_resolution_clock::time_point tmp;
+// Bench marking structures
+struct bench {
+	tpoint epoch;
+
+	bench() : epoch(clk.now()) {}
+	bench(const tpoint &t) : epoch(t) {}
+};
+
+ostream &operator<<(ostream &, const bench &);
 
 // Test functions
 bool vector_construction_and_memory();
 bool matrix_construction_and_memory();
 bool tensor_construction_and_memory();
 
+bool function_computation();
 bool function_compilation_testing();
 
 #endif

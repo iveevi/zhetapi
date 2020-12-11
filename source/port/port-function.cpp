@@ -1,10 +1,43 @@
 #include "port.hpp"
 
+bool function_computation()
+{
+	using namespace zhetapi;
+
+	bench tb;
+
+	const int iters = 1;
+
+	Function <double, int> f = "f(x, y) = x^2 + 2x + ln(x^3 * y - 36)";
+
+	tb = bench();
+	for (int i = 0; i < iters; i++)
+		f(5, 4);
+	
+	cout << "Time for regular computation: " << tb << endl;
+
+	vector <Token *> ins = {
+		new Operand <int> (5),
+		new Operand <int> (4)
+	};
+
+	tb = bench();
+	for (int i = 0; i < iters; i++)
+		f <8> (ins);
+	
+	cout << "Time for multi-threaded computation: " << tb << endl;
+
+	return true;
+}
+
 bool function_compilation_testing()
 {
 	using namespace zhetapi;
 
 #ifdef ZHP_FUNCTION_COMPILE_GENERAL
+	// Timers
+	bench tb;
+
 	// Verdict status
 	int count = 0;
 
@@ -14,7 +47,10 @@ bool function_compilation_testing()
 	// Create the typedef for the compiled function
 	typedef Token *(*ftr1)(Token *, Token *, Token *);
 
+	tb = bench();
 	ftr1 tmp1 = (ftr1) f.compile_general();
+
+	cout << "Compilation time for first: " << tb << endl;
 
 	// Allocate operands
 	Operand <double> *op1 = new Operand <double> (3.544);
@@ -40,7 +76,10 @@ bool function_compilation_testing()
 	// Create the typedef for the compiled function
 	typedef Token *(*ftr2)(Token *);
 
+	tb = bench();
 	ftr2 tmp2 = (ftr2) f.compile_general();
+
+	cout << "Compilation time for second: " << tb << endl;
 
 	// Allocate operands
 	Operand <double> *op4 = new Operand <double> (4.767);
