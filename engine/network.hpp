@@ -25,7 +25,13 @@ namespace zhetapi {
 		using Layer = std::pair <size_t, Activation <T> *>;
 
 		template <class T>
-		using Comparator = std::function <bool (const Vector <T> , const Vector <T>)>;
+		using Comparator = bool (*)(const Vector <T> &, const Vector <T> &);
+		
+		template <class T>
+		bool default_comparator(const Vector <T> &a, const Vector <T> &e)
+		{
+			return a == e;
+		};
 
 		/*
 		* Nerual Network
@@ -84,20 +90,11 @@ namespace zhetapi {
 
 			void apply_gradient(Matrix <T> *, T, T);
 
-			Matrix <T> *adjusted(T mu);
-
 			Matrix <T> *gradient(const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
 			Matrix <T> *gradient(Matrix <T> *,
-					const Vector <T> &,
-					const Vector <T> &,
-					Optimizer <T> *,
-					bool = false);
-			Matrix <T> *gradient(Matrix <T> *,
-					Vector <T> *,
-					Vector <T> *,
 					const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *,
@@ -122,6 +119,8 @@ namespace zhetapi {
 
 #ifndef ZHP_CUDA
 
+			Matrix <T> *adjusted(T mu);
+
 			Vector <T> compute(const Vector <T> &,
 					Vector <T> *,
 					Vector <T> *) const;
@@ -130,7 +129,18 @@ namespace zhetapi {
 					Vector <T> *,
 					Vector <T> *) const;
 
+			Matrix <T> *gradient(Matrix <T> *,
+					Vector <T> *,
+					Vector <T> *,
+					const Vector <T> &,
+					const Vector <T> &,
+					Optimizer <T> *,
+					bool = false);
+
 #else
+
+			__host__ __device__
+			Matrix <T> *adjusted(T mu);
 
 			__host__ __device__
 			Vector <T> compute(const Vector <T> &,
@@ -139,17 +149,27 @@ namespace zhetapi {
 
 			__host__ __device__
 			Vector <T> compute(const Vector <T> &,
-					const std::vector <Matrix <T>> &,
-					std::vector <Vector <T>> &,
-					std::vector <Vector <T>> &) const;
+					Matrix <T> *,
+					Vector <T> *,
+					Vector <T> *) const;
+			
+			__host__ __device__
+			Matrix <T> *gradient(Matrix <T> *,
+					Vector <T> *,
+					Vector <T> *,
+					const Vector <T> &,
+					const Vector <T> &,
+					Optimizer <T> *,
+					bool = false);
 
 			template <class U>
 			__global__
-			friend void train(const NeuralNetwork <U> &,
+			friend void train(NeuralNetwork <U> &,
 					typename NeuralNetwork <U> ::TrainingStatistics *,
-					const DataSet <U> &,
-					const DataSet <U> &,
-					Vector <U> **,
+					Vector <U> *,
+					Vector <U> *,
+					size_t,
+					Matrix <U> **,
 					double *,
 					double *,
 					double *);
@@ -159,12 +179,6 @@ namespace zhetapi {
 		};
 
 		// Static variables
-		template <class T>
-		bool default_comparator(Vector <T> a, Vector <T> e)
-		{
-			return a == e;
-		};
-
 		template <class T>
 		Comparator <T> NeuralNetwork <T> ::__default_comparator
 			= default_comparator <T>;
@@ -355,20 +369,7 @@ namespace zhetapi {
 				__weights[i] += __momentum[i];
 			}
 		}
-
-		template <class T>
-		Matrix <T> *NeuralNetwork <T> ::adjusted(T mu)
-		{
-			Matrix <T> *theta = new Matrix <T> [__size - 1];
-			for (int i = 0; i < __size - 1; i++)
-				theta[i] = __weights[i];
-
-			for (int i = 0; i < __size - 1; i++)
-				theta[i] += mu * __momentum[i];
-
-			return theta;
-		}
-			
+	
 		template <class T>
 		Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 				const Vector <T> &out,
@@ -511,94 +512,6 @@ namespace zhetapi {
 						
 						for (int i = 0; i < __size - 1; i++)
 							wplus[i] = wminus[i] = __weights[i];
-
-						wplus[i][x][y] += epsilon;
-						wminus[i][x][y] -= epsilon;
-
-						Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
-						Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
-
-						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
-
-						// Compute the error
-						T a = J[i][x][y];
-						T b = qJ[i][x][y];
-
-						T d = a - b;
-
-						T e = (d * d) / (a * a + b * b + epsilon);
-
-						// If the error is more than epsilon throw an error
-						if (e > epsilon)
-							throw bad_gradient();
-					}
-				}
-
-			}
-
-			// Return the gradient
-			return J;
-		}
-
-		template <class T>
-		Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
-				Vector <T> *a,
-				Vector <T> *z,
-				const Vector <T> &in,
-				const Vector <T> &out,
-				Optimizer <T> *opt,
-				bool check)
-		{
-			// Check dimensions of input and output
-			if ((in.size() != __isize) || (out.size() != __osize))
-				throw bad_io_dimensions();
-		
-			// Compute the actual value
-			Vector <T> actual = compute(in, weights, a, z);
-			
-			// Get the derivative of the cost
-			Optimizer <T> *dopt = opt->derivative();
-			
-			// Construction the Jacobian using backpropogation
-			Matrix <T> *J = new Matrix <T> [__size - 1];
-
-			Vector <T> delta = (*dopt)(out, actual);
-			for (int i = __size - 2; i >= 0; i--) {
-				if (i < __size - 2) {
-					delta = weights[i + 1].transpose() * delta;
-					delta = delta.remove_top();
-				}
-				
-				delta = shur(delta, z[i]);
-
-				Matrix <T> Ji = delta * a[i].transpose();
-
-				J[i] = Ji;
-			}
-
-			// Free resources
-			delete dopt;
-
-			// Skip gradient checking
-			if (!check)
-				return J;
-
-			// Epsilon value
-			T epsilon = 1e-8;
-
-			// Generate individual gradients
-			Matrix <T> *qJ = new Matrix <T> [__size - 1];
-			for (int i = 0; i < __size - 1; i++)
-				qJ[i] = weights[i];
-			
-			for (int i = 0; i < __size - 1; i++) {
-				for (int x = 0; x < weights[i].get_rows(); x++) {
-					for (int y = 0; y < weights[i].get_cols(); y++) {
-						Matrix <T> *wplus = new Matrix <T> [__size - 1];
-						Matrix <T> *wminus = new Matrix <T> [__size - 1];
-						
-						for (int k = 0; k < __size - 2; k++)
-							wplus[k] = wminus[k] = weights[k];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -872,6 +785,19 @@ namespace zhetapi {
 #ifndef ZHP_CUDA
 		
 		template <class T>
+		Matrix <T> *NeuralNetwork <T> ::adjusted(T mu)
+		{
+			Matrix <T> *theta = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				theta[i] = __weights[i];
+
+			for (int i = 0; i < __size - 1; i++)
+				theta[i] += mu * __momentum[i];
+
+			return theta;
+		}
+		
+		template <class T>
 		Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
 				Vector <T> *a,
 				Vector <T> *z) const
@@ -932,6 +858,94 @@ namespace zhetapi {
 			a[i] = tmp;
 			
 			return tmp;
+		}
+
+		template <class T>
+		Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
+				Vector <T> *a,
+				Vector <T> *z,
+				const Vector <T> &in,
+				const Vector <T> &out,
+				Optimizer <T> *opt,
+				bool check)
+		{
+			// Check dimensions of input and output
+			if ((in.size() != __isize) || (out.size() != __osize))
+				throw bad_io_dimensions();
+		
+			// Compute the actual value
+			Vector <T> actual = compute(in, weights, a, z);
+			
+			// Get the derivative of the cost
+			Optimizer <T> *dopt = opt->derivative();
+			
+			// Construction the Jacobian using backpropogation
+			Matrix <T> *J = new Matrix <T> [__size - 1];
+
+			Vector <T> delta = (*dopt)(out, actual);
+			for (int i = __size - 2; i >= 0; i--) {
+				if (i < __size - 2) {
+					delta = weights[i + 1].transpose() * delta;
+					delta = delta.remove_top();
+				}
+				
+				delta = shur(delta, z[i]);
+
+				Matrix <T> Ji = delta * a[i].transpose();
+
+				J[i] = Ji;
+			}
+
+			// Free resources
+			delete dopt;
+
+			// Skip gradient checking
+			if (!check)
+				return J;
+
+			// Epsilon value
+			T epsilon = 1e-8;
+
+			// Generate individual gradients
+			Matrix <T> *qJ = new Matrix <T> [__size - 1];
+			for (int i = 0; i < __size - 1; i++)
+				qJ[i] = weights[i];
+			
+			for (int i = 0; i < __size - 1; i++) {
+				for (int x = 0; x < weights[i].get_rows(); x++) {
+					for (int y = 0; y < weights[i].get_cols(); y++) {
+						Matrix <T> *wplus = new Matrix <T> [__size - 1];
+						Matrix <T> *wminus = new Matrix <T> [__size - 1];
+						
+						for (int k = 0; k < __size - 2; k++)
+							wplus[k] = wminus[k] = weights[k];
+
+						wplus[i][x][y] += epsilon;
+						wminus[i][x][y] -= epsilon;
+
+						Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
+						Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
+
+						qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
+
+						// Compute the error
+						T a = J[i][x][y];
+						T b = qJ[i][x][y];
+
+						T d = a - b;
+
+						T e = (d * d) / (a * a + b * b + epsilon);
+
+						// If the error is more than epsilon throw an error
+						if (e > epsilon)
+							throw bad_gradient();
+					}
+				}
+
+			}
+
+			// Return the gradient
+			return J;
 		}
 
 #endif

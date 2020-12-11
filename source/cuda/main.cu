@@ -47,8 +47,15 @@ int main()
 	double *opts = new double[1];
 	double *errs = new double[1];
 	double *pass = new double[1];
-	Vector <double> **grads = new Vector <double> *[1];
-	train <<<1, 1>>> (model, stat, ins, outs, grads, opts, errs, pass);
+	Matrix <double> **grads = new Matrix <double> *[1];
+
+	Vector <double> *iloc = new Vector <double> [size];
+	Vector <double> *oloc = new Vector <double> [size];
+	for (int i = 0; i < size; i++) {
+		iloc[i] = ins[i];
+		oloc[i] = outs[i];
+	}
+	train <<<1, 1>>> (model, stat, iloc, oloc, size, grads, opts, errs, pass);
 
 	cout << "stat: " << stat << endl;
 

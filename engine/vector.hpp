@@ -46,9 +46,6 @@ namespace zhetapi {
 		size_t get_rows() const override;
 		size_t get_cols() const override;
 
-		T &operator[](size_t);
-		const T &operator[](size_t) const;
-
 		// Arithmetic
 		void operator+=(const Vector &);
 		void operator-=(const Vector &);
@@ -70,8 +67,6 @@ namespace zhetapi {
 
 		Vector remove_top();
 		Vector remove_bottom();
-
-		T norm() const;
 
 		T arg() const;
 
@@ -112,6 +107,26 @@ namespace zhetapi {
 		// Static methods
 		static Vector one(size_t);
 		static Vector rarg(double, double);
+		
+#ifndef ZHP_CUDA
+
+		T &operator[](size_t);
+		const T &operator[](size_t) const;
+
+		T norm() const;
+
+#else
+		__host__ __device__
+		T &operator[](size_t);
+
+		__host__ __device__
+		const T &operator[](size_t) const;
+
+		__host__ __device__
+		T norm() const;
+
+#endif
+
 	};
 
 	template <class T>
@@ -262,19 +277,6 @@ namespace zhetapi {
 		return this->__cols;
 	}
 
-
-	template <class T>
-	T &Vector <T> ::operator[](size_t i)
-	{
-		return this->__array[i];
-	}
-
-	template <class T>
-	const T &Vector <T> ::operator[](size_t i) const
-	{
-		return this->__array[i];
-	}
-
 	/* Move these to matrix
 	template <class T>
 	Vector <T> ::operator double() const
@@ -389,12 +391,6 @@ namespace zhetapi {
 			total.push_back((*this)[i]);
 
 		return Vector(total);
-	}
-
-	template <class T>
-	T Vector <T> ::norm() const
-	{
-		return sqrt(inner(*this, *this));
 	}
 
 	template <class T>
@@ -586,6 +582,28 @@ namespace zhetapi {
 	{
 		return Vector <T> {r * cos(theta), r * sin(theta)};
 	}
+
+#ifndef ZHP_CUDA
+
+	template <class T>
+	T &Vector <T> ::operator[](size_t i)
+	{
+		return this->__array[i];
+	}
+
+	template <class T>
+	const T &Vector <T> ::operator[](size_t i) const
+	{
+		return this->__array[i];
+	}
+
+	template <class T>
+	T Vector <T> ::norm() const
+	{
+		return sqrt(inner(*this, *this));
+	}
+
+#endif
 
 }
 

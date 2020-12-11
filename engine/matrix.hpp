@@ -85,8 +85,6 @@ namespace zhetapi {
                 Matrix append_left(const Matrix &);
                 Matrix append_right(const Matrix &);
 
-                void operator+=(const Matrix &);
-                void operator-=(const Matrix &);
                 void operator*=(const Matrix &);
                 void operator/=(const Matrix &);
                 
@@ -123,12 +121,6 @@ namespace zhetapi {
 
 		// Matrix operator Matrix
                 template <class U>
-                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
-                
-                template <class U>
-                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
-
-                template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
 		// Matrix operator T
@@ -154,6 +146,36 @@ namespace zhetapi {
 		class dimension_mismatch {};
         protected:
                 T determinant(const Matrix &) const;
+	public:
+#ifndef ZHP_CUDA
+
+                void operator+=(const Matrix &);
+                void operator-=(const Matrix &);
+                
+		template <class U>
+                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
+                
+                template <class U>
+                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
+
+#else
+
+		__host__ __device__
+                void operator+=(const Matrix &);
+
+		__host__ __device__
+                void operator-=(const Matrix &);
+                
+		template <class U>
+		__host__ __device__
+                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
+                
+                template <class U>
+		__host__ __device__
+                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
+
+#endif
+
         };
 
         template <class T>
@@ -576,28 +598,6 @@ namespace zhetapi {
         }
 
         template <class T>
-        void Matrix <T> ::operator+=(const Matrix <T> &other)
-        {
-                assert(__rows == other.__rows && __cols == other.__cols);
-
-                for (size_t i = 0; i < __rows; i++) {
-                        for (size_t j = 0; j < __cols; j++)
-                                this->__array[i * __cols + j] += other.__array[i * __cols + j];
-                }
-        }
-
-        template <class T>
-        void Matrix <T> ::operator-=(const Matrix <T> &other)
-        {
-                assert(__rows == other.__rows && __cols == other.__cols);
-
-                for (size_t i = 0; i < __rows; i++) {
-                        for (size_t j = 0; j < __cols; j++)
-                                this->__array[i * __cols + j] -= other.__array[i * __cols + j];
-                }
-        }
-
-        template <class T>
         void Matrix <T> ::operator*=(const Matrix <T> &other)
         {
                 (*this) = (*this) * other;
@@ -799,28 +799,6 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
-        {
-                assert(a.__rows == b.__rows && a.__cols == b.__cols);
-                return Matrix <T> (a.__rows, a.__cols,
-			[&](size_t i, size_t j) {
-                        	return a[i][j] + b[i][j];
-                	}
-		);
-        }
-
-        template <class T>
-        Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
-        {
-                assert(a.__rows == b.__rows && a.__cols == b.__cols);
-		return Matrix <T> (a.__rows, a.__cols,
-			[&](size_t i, size_t j) {
-                        	return a[i][j] - b[i][j];
-			}
-		);
-        }
-
-        template <class T>
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
 		if (a.__cols != b.__rows)
@@ -940,6 +918,54 @@ namespace zhetapi {
 
                 return det;
         }
+
+#ifndef ZHP_CUDA
+
+        template <class T>
+        void Matrix <T> ::operator+=(const Matrix <T> &other)
+        {
+                assert(__rows == other.__rows && __cols == other.__cols);
+
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i * __cols + j] += other.__array[i * __cols + j];
+                }
+        }
+
+        template <class T>
+        void Matrix <T> ::operator-=(const Matrix <T> &other)
+        {
+                assert(__rows == other.__rows && __cols == other.__cols);
+
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i * __cols + j] -= other.__array[i * __cols + j];
+                }
+        }
+
+        template <class T>
+        Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
+        {
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
+                return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] + b[i][j];
+                	}
+		);
+        }
+
+        template <class T>
+        Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
+        {
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
+		return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] - b[i][j];
+			}
+		);
+        }
+
+#endif
 
 }
 
