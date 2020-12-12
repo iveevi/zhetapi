@@ -16,14 +16,11 @@ bool function_computation()
 	
 	cout << "Time for regular computation: " << tb << endl;
 
-	vector <Token *> ins = {
-		new Operand <int> (5),
-		new Operand <int> (4)
-	};
+	f.set_threads(8);
 
 	tb = bench();
 	for (int i = 0; i < iters; i++)
-		f <8> (ins);
+		f(5, 4);
 	
 	cout << "Time for multi-threaded computation: " << tb << endl;
 

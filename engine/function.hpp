@@ -36,7 +36,6 @@ namespace zhetapi {
 
 		void set_threads(size_t);
 
-		template <size_t = 1>
 		Token *operator()(::std::vector <Token *>);
 
 		template <class ... A>
@@ -100,14 +99,14 @@ namespace zhetapi {
 
 	// Constructors
 	template <class T, class U>
-	Function <T, U> ::Function() {}
+	Function <T, U> ::Function() : __threads(1) {}
 
 	template <class T, class U>
 	Function <T, U> ::Function(const char *str) : Function(::std::string
 			(str)) {}
 
 	template <class T, class U>
-	Function <T, U> ::Function(const ::std::string &str)
+	Function <T, U> ::Function(const ::std::string &str) : __threads(1)
 	{
 		::std::string pack;
 		::std::string tmp;
@@ -189,12 +188,12 @@ namespace zhetapi {
 	Function <T, U> ::Function(const ::std::string &symbol, const ::std::vector
 			<::std::string> &params, const node_manager <T, U>
 			&manager) : __symbol(symbol), __params(params),
-			__manager(manager) {}
+			__manager(manager), __threads(1) {}
 
 	template <class T, class U>
 	Function <T, U> ::Function(const Function <T, U> &other) :
 		__symbol(other.__symbol), __params(other.__params),
-		__manager(other.__manager) {}
+		__manager(other.__manager), __threads(1) {}
 
 	// Getters
 	template <class T, class U>
@@ -221,7 +220,7 @@ namespace zhetapi {
 	{
 		assert(toks.size() == __params.size());
 
-		return __manager.substitute_and_compute(toks, threads);
+		return __manager.substitute_and_compute(toks, __threads);
 	}
 
 	template <class T, class U>
@@ -234,7 +233,7 @@ namespace zhetapi {
 
 		assert(Tokens.size() == __params.size());
 
-		return __manager.substitute_and_compute(Tokens, threads);
+		return __manager.substitute_and_compute(Tokens, __threads);
 	}
 
 	template <class T, class U>

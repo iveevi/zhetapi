@@ -6,7 +6,15 @@
 #include <functional>
 
 // Engine headers
+#ifndef ZHP_CUDA
+
 #include <vector.hpp>
+
+#else
+
+#include <cuda/vector.cuh>
+
+#endif
 
 namespace zhetapi {
 
@@ -20,15 +28,19 @@ namespace zhetapi {
 		template <class T>
 		class Activation {
 		public:
-			Activation();
 
 #ifndef ZHP_CUDA
+			
+			Activation();
 
 			virtual Vector <T> operator()(const Vector <T> &) const;
 
 			virtual Activation *derivative() const;
 
 #else
+
+			__host__ __device__
+			Activation();
 
 			__host__ __device__
 			virtual Vector <T> operator()(const Vector <T> &) const;
@@ -39,11 +51,11 @@ namespace zhetapi {
 #endif
 
 		};
+
+#ifndef ZHP_CUDA
 		
 		template <class T>
 		Activation <T> ::Activation() {}
-
-#ifndef ZHP_CUDA
 
 		template <class T>
 		Vector <T> Activation <T> ::operator()(const Vector <T> &x) const

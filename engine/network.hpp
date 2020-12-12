@@ -11,11 +11,23 @@
 #include <vector>
 
 // Engine headers
-#include <activation.hpp>
 #include <dataset.hpp>
+
+#ifndef ZHP_CUDA
+
+#include <activation.hpp>
 #include <matrix.hpp>
 #include <optimizer.hpp>
 #include <vector.hpp>
+
+#else
+
+#include <cuda/activation.cuh>
+#include <cuda/matrix.cuh>
+#include <cuda/optimizer.cuh>
+#include <cuda/vector.cuh>
+
+#endif
 
 namespace zhetapi {
 		

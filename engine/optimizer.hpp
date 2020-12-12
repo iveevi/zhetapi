@@ -6,7 +6,15 @@
 #include <memory>
 
 // Engine headers
+#ifndef ZHP_CUDA
+
 #include <vector.hpp>
+
+#else
+
+#include <cuda/vector.cuh>
+
+#endif
 
 namespace zhetapi {
 		

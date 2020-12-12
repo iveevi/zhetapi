@@ -10,6 +10,10 @@
 namespace zhetapi {
 
 	namespace ml {
+	
+		template <class T>
+		__host__ __device__
+		Activation <T> ::Activation() {}
 
 		template <class T>
 		__host__ __device__
@@ -22,23 +26,7 @@ namespace zhetapi {
 		__host__ __device__
 		Activation <T> *Activation <T> ::derivative() const
 		{
-
-#ifndef __CUDA_ARCH__
-
 			return new Activation();
-
-#else
-
-			Activation *act;
-
-			cudaMalloc((void **) &act, sizeof(Activation));
-
-			*act = Activation();
-
-			return act;
-
-#endif
-
 		}
 
 	}

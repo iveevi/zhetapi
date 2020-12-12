@@ -15,12 +15,16 @@ namespace zhetapi {
 	template <class T>
 	class Tensor {
         protected:
-		size_t		*__dim;
 		T		*__array;
-
-		size_t		__dims;
 		size_t		__size;
+
+		// Variables for printing
+		size_t		*__dim;
+		size_t		__dims;
 	public:
+
+#ifndef ZHP_CUDA
+
                 // Construction and memory
 		Tensor();
                 Tensor(const Tensor &);
@@ -49,7 +53,42 @@ namespace zhetapi {
                 // Dimension mismatch exception
                 class dimension_mismatch {};
 		class bad_dimensions {};
+
+#else
+
+		__host__ __device__
+		Tensor();
+
+		__host__ __device__
+                Tensor(const Tensor &);
+		
+		__host__ __device__
+		Tensor(size_t, size_t, const T &);
+
+		__host__ __device__
+		Tensor(const ::std::vector <T> &);
+
+		__host__ __device__
+		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+
+		__host__ __device__
+		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
+
+		__host__ __device__
+		~Tensor();
+
+		__host__ __device__
+                Tensor &operator=(const Tensor &);
+
+		template <class U>
+		__host__ __device__
+		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
+
+#endif
+
 	};
+
+#ifndef ZHP_CUDA
 
 	// Constructors and memory relevant functions
 	template <class T>
@@ -246,6 +285,8 @@ namespace zhetapi {
 
 		return os;
 	}
+
+#endif
 
 }
 

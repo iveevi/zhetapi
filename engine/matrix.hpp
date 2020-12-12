@@ -35,10 +35,6 @@ namespace zhetapi {
                 size_t  __rows;
                 size_t  __cols;
         public:
-                Matrix();
-                Matrix(const Matrix <T> &);
-		Matrix(const Vector <T> &);
-
                 Matrix(T **);
                 Matrix(const ::std::vector <T> &);
                 Matrix(const ::std::vector <::std::vector <T>> &);
@@ -47,21 +43,10 @@ namespace zhetapi {
 
                 Matrix(size_t, size_t, T = T());
 
-                Matrix(size_t, size_t, ::std::function <T (size_t)>);
-                Matrix(size_t, size_t, ::std::function <T *(size_t)>);
-                
-                Matrix(size_t, size_t, ::std::function <T (size_t, size_t)>);
-                Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);
-
                 template <class A>
                 explicit Matrix(A);
 
-		const Matrix &operator=(const Matrix &);
-
                 ::std::pair <size_t, size_t> get_dimensions() const;
-
-                virtual size_t get_rows() const;
-                virtual size_t get_cols() const;
 
                 const Matrix &slice(const ::std::pair <size_t, size_t> &,
                                 const ::std::pair <size_t, size_t> &) const;
@@ -74,9 +59,6 @@ namespace zhetapi {
                 const T &get(size_t, size_t) const;
 
                 Vector <T> get_column(size_t) const;
-
-                T *operator[](size_t);
-                const T *operator[](size_t) const;
 
                 // Concatenating matrices
                 Matrix append_above(const Matrix &);
@@ -113,17 +95,53 @@ namespace zhetapi {
                 const Matrix &inverse() const;
                 const Matrix &adjugate() const;
                 const Matrix &cofactor() const;
-                Matrix transpose() const;
 
                 bool symmetric() const;
 
                 ::std::string display() const;
 
-		// Matrix operator Matrix
+                // Special matrix generation
+                static Matrix identity(size_t);
+
+		class dimension_mismatch {};
+        protected:
+                T determinant(const Matrix &) const;
+	public:
+
+#ifndef ZHP_CUDA
+                
+		Matrix();
+                Matrix(const Matrix <T> &);
+		Matrix(const Vector <T> &);
+
+                Matrix(size_t, size_t, ::std::function <T (size_t)>);
+                Matrix(size_t, size_t, ::std::function <T *(size_t)>);
+                
+                Matrix(size_t, size_t, ::std::function <T (size_t, size_t)>);
+                Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);
+
+		const Matrix &operator=(const Matrix &);
+
+                T *operator[](size_t);
+                const T *operator[](size_t) const;
+
+                virtual size_t get_rows() const;
+                virtual size_t get_cols() const;
+                
+		Matrix transpose() const;
+
+                void operator+=(const Matrix &);
+                void operator-=(const Matrix &);
+                
+		template <class U>
+                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
+                
+                template <class U>
+                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
+
                 template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 
-		// Matrix operator T
                 template <class U>
                 friend Matrix <U> operator*(const Matrix <U> &, const U &);
                 
@@ -136,31 +154,46 @@ namespace zhetapi {
                 template <class U>
                 friend Matrix <U> operator/(const U &, const Matrix <U> &);
 
-		// Matrix == Matrix
                 template <class U>
                 friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 
-                // Special matrix generation
-                static Matrix identity(size_t);
-
-		class dimension_mismatch {};
-        protected:
-                T determinant(const Matrix &) const;
-	public:
-#ifndef ZHP_CUDA
-
-                void operator+=(const Matrix &);
-                void operator-=(const Matrix &);
-                
 		template <class U>
-                friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
-                
-                template <class U>
-                friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
+		friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
 
 #else
 
 		__host__ __device__
+                Matrix();
+		
+		__host__ __device__
+                Matrix(const Matrix <T> &);
+		
+		__host__ __device__
+		Matrix(const Vector <T> &);
+                
+		template <class F>
+		__host__ __device__
+                Matrix(size_t, size_t, F);
+		
+		__host__ __device__
+		const Matrix &operator=(const Matrix &);
+                
+		__host__ __device__
+		T *operator[](size_t);
+
+		__host__ __device__
+                const T *operator[](size_t) const;
+
+		__host__ __device__
+                virtual size_t get_rows() const;
+
+		__host__ __device__
+                virtual size_t get_cols() const;
+               
+		__host__ __device__
+		Matrix transpose() const;
+
+		__host__ __device__
                 void operator+=(const Matrix &);
 
 		__host__ __device__
@@ -174,30 +207,36 @@ namespace zhetapi {
 		__host__ __device__
                 friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
 
+                template <class U>
+		__host__ __device__
+                friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
+
+                template <class U>
+		__host__ __device__
+                friend Matrix <U> operator*(const Matrix <U> &, const U &);
+                
+                template <class U>
+                friend Matrix <U> operator*(const U &, const Matrix <U> &);
+                
+                template <class U>
+		__host__ __device__
+                friend Matrix <U> operator/(const Matrix <U> &, const U &);
+                
+                template <class U>
+		__host__ __device__
+                friend Matrix <U> operator/(const U &, const Matrix <U> &);
+
+                template <class U>
+		__host__ __device__
+                friend bool operator==(const Matrix <U> &, const Matrix <U> &);
+
+		template <class U>
+		__host__ __device__
+		friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
+
 #endif
 
         };
-
-        template <class T>
-        Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
-
-        template <class T>
-        Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
-                                                       ({other.__rows, other.__cols}, T())
-        {
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = other.__array[__cols * i + j];
-                }
-        }
-
-	template <class T>
-        Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), Tensor <T>
-                                                       ({other.__rows, 1}, T())
-        {
-                for (int i = 0; i < __rows; i++)
-		        this->__array[i] = other.__array[i];
-        }
 
         template <class T>
         Matrix <T> ::Matrix(T **ref) : Tensor <T> ({sizeof(ref)/sizeof(T), sizeof(ref[0])/sizeof(T)}, T())
@@ -288,55 +327,6 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
-        {
-                __rows = rs;
-                __cols = cs;
-                
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = gen(i);
-                }
-        }
-
-        template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
-        {
-                __rows = rs;
-                __cols = cs;
-                
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = *gen(i);
-                }
-        }
-
-        template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
-        {
-                __rows = rs;
-                __cols = cs;
-
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = gen(i, j);
-                }
-        }
-
-        template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
-        {
-                __rows = rs;
-                __cols = cs;
-
-                this->__array = new T[__rows * __cols];
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = *gen(i, j);
-                }
-        }
-
-        template <class T>
         template <class A>
         Matrix <T> ::Matrix(A x) : Tensor <T> ({1, 1}, T())
         {
@@ -344,47 +334,10 @@ namespace zhetapi {
                 //        *this = Matrix(1, 1, (T) x);
         }
 
-	template <class T>
-	const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
-	{
-		if (this != &other) {
-			delete[] this->__array;
-			delete[] this->__dim;
-
-			this->__array = new T[other.__size];
-			this->__rows = other.__rows;
-			this->__cols = other.__cols;
-
-			this->__size = other.__size;
-			for (size_t i = 0; i < this->__size; i++)
-				this->__array[i] = other.__array[i];
-			
-			this->__dims = 2;
-			this->__dim = new size_t[2];
-
-			this->__dim[0] = this->__rows;
-			this->__dim[1] = this->__cols;
-		}
-
-		return *this;
-	}
-
         template <class T>
         ::std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
         {
                 return {__rows, __cols};
-        }
-
-        template <class T>
-        size_t Matrix <T> ::get_rows() const
-        {
-                return __rows;
-        }
-
-        template <class T>
-        size_t Matrix <T> ::get_cols() const
-        {
-                return __cols;
         }
 
         template <class T>
@@ -459,18 +412,6 @@ namespace zhetapi {
                 return Vector <T> (__rows, [&](size_t i) {
                         return this->__array[__cols * i + r];
                 });
-        }
-
-        template <class T>
-        T *Matrix <T> ::operator[](size_t i)
-        {
-                return (this->__array + i * __cols);
-        }
-
-        template <class T>
-        const T *Matrix <T> ::operator[](size_t i) const
-        {
-                return (this->__array + i * __cols);
         }
 
         template <class T>
@@ -724,35 +665,11 @@ namespace zhetapi {
                 return *out;
         }
 
-        template <class T>
-        Matrix <T> Matrix <T> ::transpose() const
-        {
-                return Matrix <T> (__cols, __rows,
-			[&](size_t i, size_t j) {
-				return this->__array[j * __cols + i];
-		});
-        }
-
 	template <class T>
 	::std::string dims(const Matrix <T> &a)
 	{
 		return ::std::to_string(a.get_rows()) + " x " + ::std::to_string(a.get_cols());
 	}
-
-
-        template <class T>
-        Matrix <T> shur(const Matrix <T> &a, const Matrix <T> &b)
-        {
-                if (!((a.get_rows() == b.get_rows())
-			&& (a.get_cols() == b.get_cols())))
-			throw typename Matrix <T> ::dimension_mismatch();
-
-                return Matrix <T> (a.get_rows(), b.get_cols(),
-			[&](size_t i, size_t j) {
-                        	return a[i][j] * b[i][j];
-			}
-		);
-        }
 
         template <class T>
         bool Matrix <T> ::symmetric() const
@@ -796,6 +713,235 @@ namespace zhetapi {
                 oss << "]";
 
                 return oss.str();
+        }
+
+        template <class T>
+        Matrix <T> Matrix <T> ::identity(size_t dim)
+        {
+                return Matrix {dim, dim, [](size_t i, size_t j) {
+                        if (i == j)
+                                return T(1);
+
+                        return T(0);
+                }};
+        }
+
+        // Private helper methods
+        template <class T>
+        T Matrix <T> ::determinant(const Matrix <T> &a) const
+        {
+                /* The determinant of an abitrary
+                 * Matrix is defined only if it
+                 * is a square Matrix.
+                 */
+                assert(a.__rows == a.__cols && a.__rows > 0);
+
+                size_t n;
+                size_t t;
+                
+                n = a.__rows;
+
+                if (n == 1)
+                        return a[0][0];
+                if (n == 2)
+                        return a[0][0] * a[1][1] - a[1][0] * a[0][1];
+
+                T det = 0;
+
+                Matrix <T> *temp;
+                for (size_t i = 0; i < n; i++) {
+                        temp = new Matrix <T> (n - 1, n - 1);
+
+                        for (size_t j = 0; j < n - 1; j++) {
+                                t = 0;
+
+                                for (size_t k = 0; k < n; k++) {
+                                        if (k == i)
+                                                continue;
+                                        (*temp)[j][t++] = a[j + 1][k];
+                                }
+                        }
+
+                        det += ((i % 2) ? -1 : 1) * a[0][i] * determinant(*temp);
+
+                        delete temp;
+                }
+
+                return det;
+        }
+
+#ifndef ZHP_CUDA
+
+        template <class T>
+        Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
+
+        template <class T>
+        Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
+                                                       ({other.__rows, other.__cols}, T())
+        {
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = other.__array[__cols * i + j];
+                }
+        }
+
+	template <class T>
+        Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), Tensor <T>
+                                                       ({other.__rows, 1}, T())
+        {
+                for (int i = 0; i < __rows; i++)
+		        this->__array[i] = other.__array[i];
+        }
+
+        template <class T>
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        {
+                __rows = rs;
+                __cols = cs;
+                
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = gen(i);
+                }
+        }
+
+        template <class T>
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        {
+                __rows = rs;
+                __cols = cs;
+                
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = *gen(i);
+                }
+        }
+
+        template <class T>
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        {
+                __rows = rs;
+                __cols = cs;
+
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = gen(i, j);
+                }
+        }
+
+        template <class T>
+        Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+        {
+                __rows = rs;
+                __cols = cs;
+
+                this->__array = new T[__rows * __cols];
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = *gen(i, j);
+                }
+        }
+
+	template <class T>
+	const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
+	{
+		if (this != &other) {
+			delete[] this->__array;
+			delete[] this->__dim;
+
+			this->__array = new T[other.__size];
+			this->__rows = other.__rows;
+			this->__cols = other.__cols;
+
+			this->__size = other.__size;
+			for (size_t i = 0; i < this->__size; i++)
+				this->__array[i] = other.__array[i];
+			
+			this->__dims = 2;
+			this->__dim = new size_t[2];
+
+			this->__dim[0] = this->__rows;
+			this->__dim[1] = this->__cols;
+		}
+
+		return *this;
+	}
+
+        template <class T>
+        T *Matrix <T> ::operator[](size_t i)
+        {
+                return (this->__array + i * __cols);
+        }
+
+        template <class T>
+        const T *Matrix <T> ::operator[](size_t i) const
+        {
+                return (this->__array + i * __cols);
+        }
+
+        template <class T>
+        size_t Matrix <T> ::get_rows() const
+        {
+                return __rows;
+        }
+
+        template <class T>
+        size_t Matrix <T> ::get_cols() const
+        {
+                return __cols;
+        }
+
+        template <class T>
+        Matrix <T> Matrix <T> ::transpose() const
+        {
+                return Matrix <T> (__cols, __rows,
+			[&](size_t i, size_t j) {
+				return this->__array[j * __cols + i];
+		});
+        }
+
+        template <class T>
+        void Matrix <T> ::operator+=(const Matrix <T> &other)
+        {
+                assert(__rows == other.__rows && __cols == other.__cols);
+
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i * __cols + j] += other.__array[i * __cols + j];
+                }
+        }
+
+        template <class T>
+        void Matrix <T> ::operator-=(const Matrix <T> &other)
+        {
+                assert(__rows == other.__rows && __cols == other.__cols);
+
+                for (size_t i = 0; i < __rows; i++) {
+                        for (size_t j = 0; j < __cols; j++)
+                                this->__array[i * __cols + j] -= other.__array[i * __cols + j];
+                }
+        }
+
+        template <class T>
+        Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
+        {
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
+                return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] + b[i][j];
+                	}
+		);
+        }
+
+        template <class T>
+        Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
+        {
+                assert(a.__rows == b.__rows && a.__cols == b.__cols);
+		return Matrix <T> (a.__rows, a.__cols,
+			[&](size_t i, size_t j) {
+                        	return a[i][j] - b[i][j];
+			}
+		);
         }
 
         template <class T>
@@ -865,102 +1011,15 @@ namespace zhetapi {
         }
 
         template <class T>
-        Matrix <T> Matrix <T> ::identity(size_t dim)
+        Matrix <T> shur(const Matrix <T> &a, const Matrix <T> &b)
         {
-                return Matrix {dim, dim, [](size_t i, size_t j) {
-                        if (i == j)
-                                return T(1);
+                if (!((a.get_rows() == b.get_rows())
+			&& (a.get_cols() == b.get_cols())))
+			throw typename Matrix <T> ::dimension_mismatch();
 
-                        return T(0);
-                }};
-        }
-
-        // Private helper methods
-        template <class T>
-        T Matrix <T> ::determinant(const Matrix <T> &a) const
-        {
-                /* The determinant of an abitrary
-                 * Matrix is defined only if it
-                 * is a square Matrix.
-                 */
-                assert(a.__rows == a.__cols && a.__rows > 0);
-
-                size_t n;
-                size_t t;
-                
-                n = a.__rows;
-
-                if (n == 1)
-                        return a[0][0];
-                if (n == 2)
-                        return a[0][0] * a[1][1] - a[1][0] * a[0][1];
-
-                T det = 0;
-
-                Matrix <T> *temp;
-                for (size_t i = 0; i < n; i++) {
-                        temp = new Matrix <T> (n - 1, n - 1);
-
-                        for (size_t j = 0; j < n - 1; j++) {
-                                t = 0;
-
-                                for (size_t k = 0; k < n; k++) {
-                                        if (k == i)
-                                                continue;
-                                        (*temp)[j][t++] = a[j + 1][k];
-                                }
-                        }
-
-                        det += ((i % 2) ? -1 : 1) * a[0][i] * determinant(*temp);
-
-                        delete temp;
-                }
-
-                return det;
-        }
-
-#ifndef ZHP_CUDA
-
-        template <class T>
-        void Matrix <T> ::operator+=(const Matrix <T> &other)
-        {
-                assert(__rows == other.__rows && __cols == other.__cols);
-
-                for (size_t i = 0; i < __rows; i++) {
-                        for (size_t j = 0; j < __cols; j++)
-                                this->__array[i * __cols + j] += other.__array[i * __cols + j];
-                }
-        }
-
-        template <class T>
-        void Matrix <T> ::operator-=(const Matrix <T> &other)
-        {
-                assert(__rows == other.__rows && __cols == other.__cols);
-
-                for (size_t i = 0; i < __rows; i++) {
-                        for (size_t j = 0; j < __cols; j++)
-                                this->__array[i * __cols + j] -= other.__array[i * __cols + j];
-                }
-        }
-
-        template <class T>
-        Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
-        {
-                assert(a.__rows == b.__rows && a.__cols == b.__cols);
-                return Matrix <T> (a.__rows, a.__cols,
+                return Matrix <T> (a.get_rows(), b.get_cols(),
 			[&](size_t i, size_t j) {
-                        	return a[i][j] + b[i][j];
-                	}
-		);
-        }
-
-        template <class T>
-        Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
-        {
-                assert(a.__rows == b.__rows && a.__cols == b.__cols);
-		return Matrix <T> (a.__rows, a.__cols,
-			[&](size_t i, size_t j) {
-                        	return a[i][j] - b[i][j];
+                        	return a[i][j] * b[i][j];
 			}
 		);
         }

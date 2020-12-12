@@ -8,6 +8,8 @@
 #include <network.hpp>
 
 // CUDA headers
+#include <cuda/matrix.cuh>
+#include <cuda/vector.cuh>
 #include <cuda/activation.cuh>
 #include <cuda/optimizer.cuh>
 
@@ -243,6 +245,9 @@ namespace zhetapi {
 						zloc, ins[i], outs[i], net.__cost);
 				
 				optes[tid] += (*(net.__cost))(outs[i], actual)[0];
+
+				Vector <T> diff = actual - outs[i];
+
 				peres[tid] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 			}
 		}

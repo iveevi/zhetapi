@@ -7,6 +7,8 @@
 // Engine headers
 #include <optimizer.hpp>
 
+#include <cuda/vector.cuh>
+
 namespace zhetapi {
 
 	namespace ml {
@@ -15,7 +17,7 @@ namespace zhetapi {
 		__host__ __device__
 		Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
 		{
-			return {(comp - in).norm()};
+			return Vector <T> (1, (comp - in).norm());
 		}
 
 		template <class T>
