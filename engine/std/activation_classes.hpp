@@ -2,9 +2,16 @@
 #define STD_ACTIVATION_CLASSES_H_
 
 // Engine headers
+#ifndef ZHP_CUDA
+
 #include <activation.hpp>
 
-// Engine std module headers
+#else
+
+#include <cuda/activation.cuh>
+
+#endif
+
 #include <std/activation_functions.hpp>
 
 namespace zhetapi {
@@ -74,7 +81,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[&](size_t i) {
+					[x, this] __device__ (size_t i) {
 						return x[i] * __alpha;
 					}
 				);
@@ -82,22 +89,7 @@ namespace zhetapi {
 
 			__host__ __device__
 			Activation <T> *derivative() const {
-
-#ifndef __CUDA_ARCH__
 				return new __DLinear <T> (__alpha);
-
-#else
-
-				Activation <T> *act;
-
-				cudaMalloc((void **) &act, sizeof(Activation <T> *));
-
-				*act = __DLinear <T> (__alpha);
-
-				return act;
-
-#endif
-
 			}
 
 #endif
@@ -112,16 +104,22 @@ namespace zhetapi {
 #ifndef ZHP_CUDA
 
 			Vector <T> operator()(const Vector <T> &x) const {
-				return Vector <T> (x.size(), [&](size_t i) {return
-						__d_relu(x[i]);});
+				return Vector <T> (x.size(),
+					[&](size_t i) 
+						return __d_relu(x[i]);
+					}
+				);
 			}
 
 #else
 
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
-				return Vector <T> (x.size(), [&](size_t i) {return
-						__d_relu(x[i]);});
+				return Vector <T> (x.size(),
+					[x] __device__ (size_t i) {
+						return (x[i] > 0) ? 1 : 0;
+					}
+				);
 			}
 
 #endif
@@ -151,7 +149,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[&](size_t i) {
+					[x] __device__ (size_t i) {
 						return (x[i] > 0) ? x[i] : 0;
 					}
 				);
@@ -159,23 +157,7 @@ namespace zhetapi {
 
 			__host__ __device__
 			Activation <T> *derivative() const {
-
-#ifndef __CUDA_ARCH__
-
 				return new __DReLU <T> ();
-
-#else
-
-				Activation <T> *act;
-
-				cudaMalloc((void **) &act, sizeof(Activation <T> *));
-
-				*act = __DReLU <T> ();
-
-				return act;
-
-#endif
-
 			}
 
 #endif
@@ -190,8 +172,11 @@ namespace zhetapi {
 			__DLeakyReLU(const T &alpha) : __alpha(alpha) {}
 
 			Vector <T> operator()(const Vector <T> &x) const {
-				return Vector <T> (x.size(), [&](size_t i) {return
-						__d_leaky_relu(x[i], __alpha);});
+				return Vector <T> (x.size(),
+					[&](size_t i) {
+						return __d_leaky_relu(x[i], __alpha);
+					}
+				);
 			}
 		};
 		
@@ -219,16 +204,24 @@ namespace zhetapi {
 #ifndef ZHP_CUDA
 
 			Vector <T> operator()(const Vector <T> &x) const {
-				return Vector <T> (x.size(), [&](size_t i) {return
-						__d_sigmoid(x[i]);});
+				return Vector <T> (x.size(),
+					[&](size_t i) {
+						return __d_sigmoid(x[i]);
+					}
+				);
 			}
 
 #else
 
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
-				return Vector <T> (x.size(), [&](size_t i) {return
-						__d_sigmoid(x[i]);});
+				return Vector <T> (x.size(),
+					[x] __device__ (size_t i) {
+						T tmp = 1/(1 + exp(-x[i]));
+
+						return tmp * (T (1) - tmp);
+					}
+				);
 			}
 
 #endif
@@ -258,7 +251,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[&](size_t i) { 
+					[x] __device__ (size_t i) { 
 						return 1/(1 + exp(-x[i]));
 					}
 				);
@@ -266,23 +259,7 @@ namespace zhetapi {
 
 			__host__ __device__
 			Activation <T> *derivative() const {
-
-#ifndef __CUDA_ARCH__
-
 				return new __DSigmoid <T> ();
-
-#else
-
-				Activation <T> *act;
-
-				cudaMalloc((void **) &act, sizeof(Activation <T> *));
-
-				*act = __DSigmoid <T> ();
-
-				return act;
-
-#endif
-
 			}
 
 #endif

@@ -30,15 +30,10 @@ namespace zhetapi {
 	template <class T>
 	class Vector : public Matrix <T> {
 	public:
-		Vector(const ::std::vector <T> &);
 		Vector(const ::std::initializer_list <T> &);
 
 		template <class A>
 		Vector(A);
-
-		// Arithmetic
-		void operator+=(const Vector &);
-		void operator-=(const Vector &);
 
 		// Conversion operators
 		explicit operator int() const;
@@ -82,9 +77,6 @@ namespace zhetapi {
 
 		// Vector operations
 		template <class U>
-		friend U inner(const Vector <U> &, const Vector <U> &);
-
-		template <class U>
 		friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
 
 		// Static methods
@@ -100,9 +92,10 @@ namespace zhetapi {
 		Vector(size_t, T);
 		Vector(size_t, T *);
 
-		
 		Vector(size_t, ::std::function <T (size_t)>);
 		Vector(size_t, ::std::function <T *(size_t)>);
+		
+		Vector(const ::std::vector <T> &);
 
 		Vector &operator=(const Vector &);
 		Vector &operator=(const Matrix <T> &);
@@ -113,6 +106,9 @@ namespace zhetapi {
 		size_t size() const;
 		// size_t get_rows() const override;
 		// size_t get_cols() const override;
+
+		void operator+=(const Vector &);
+		void operator-=(const Vector &);
 		
 		Vector append_above(const T &);
 		Vector append_below(const T &);
@@ -121,6 +117,9 @@ namespace zhetapi {
 		Vector remove_bottom();
 		
 		T norm() const;
+		
+		template <class U>
+		friend U inner(const Vector <U> &, const Vector <U> &);
 
 #else
 		
@@ -165,6 +164,12 @@ namespace zhetapi {
 		size_t get_cols() const override; */
 		
 		__host__ __device__
+		void operator+=(const Vector &);
+		
+		__host__ __device__
+		void operator-=(const Vector &);
+		
+		__host__ __device__
 		Vector append_above(const T &);
 		
 		__host__ __device__
@@ -183,6 +188,18 @@ namespace zhetapi {
 		__host__ __device__
 		friend Vector <U> operator-(const Vector <U> &, const Vector <U> &);
 
+		template <class U>
+		__host__ __device__
+		friend Vector <U> operator*(const Vector <U> &, const U &);
+
+		template <class U>
+		__host__ __device__
+		friend Vector <U> operator*(const U &, const Vector <U> &);
+		
+		template <class U>
+		__host__ __device__
+		friend U inner(const Vector <U> &, const Vector <U> &);
+
 #endif
 
 	};
@@ -194,9 +211,6 @@ namespace zhetapi {
 	}*/
 
 	template <class T>
-	Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
-
-	template <class T>
 	Vector <T> ::Vector(const ::std::initializer_list <T> &ref)
 		: Vector(::std::vector <T> (ref)) {}
 
@@ -205,7 +219,6 @@ namespace zhetapi {
 	Vector <T> ::Vector(A x)
 	{
 	}
-
 
 	/* template <class T>
 	const Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
@@ -260,21 +273,6 @@ namespace zhetapi {
 	{
 		return (int) (this->__array[0]);
 	} */
-
-	template <class T>
-	void Vector <T> ::operator+=(const Vector <T> &a)
-	{
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] += a.__array[i];
-	}
-
-	template <class T>
-	void Vector <T> ::operator-=(const Vector <T> &a)
-	{
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] -= a.__array[i];
-	}
-
 
 	/* template <class T>
 	Vector <T> ::operator Rational <int> () const
@@ -446,18 +444,6 @@ namespace zhetapi {
 
 	// Non-member functions
 	template <class T>
-	T inner(const Vector <T> &a, const Vector <T> &b)
-	{
-		T acc = 0;
-
-		assert(a.size() == b.size());
-		for (size_t i = 0; i < a.__size; i++)
-			acc += a[i] * b[i];
-
-		return acc;
-	}
-
-	template <class T>
 	T cross(const Vector <T> &a, const Vector <T> &b)
 	{
 		assert(a.__size == b.size() == 3);
@@ -547,6 +533,9 @@ namespace zhetapi {
 	}
 
 	template <class T>
+	Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
+
+	template <class T>
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
 		if (this != &other) {
@@ -593,6 +582,26 @@ namespace zhetapi {
 	const T &Vector <T> ::operator[](size_t i) const
 	{
 		return this->__array[i];
+	}
+
+	template <class T>
+	size_t Vector <T> ::size() const
+	{
+		return this->__size;
+	}
+
+	template <class T>
+	void Vector <T> ::operator+=(const Vector <T> &a)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] += a.__array[i];
+	}
+
+	template <class T>
+	void Vector <T> ::operator-=(const Vector <T> &a)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] -= a.__array[i];
 	}
 
 	template <class T>
@@ -651,6 +660,18 @@ namespace zhetapi {
 	T Vector <T> ::norm() const
 	{
 		return sqrt(inner(*this, *this));
+	}
+	
+	template <class T>
+	T inner(const Vector <T> &a, const Vector <T> &b)
+	{
+		T acc = 0;
+
+		assert(a.size() == b.size());
+		for (size_t i = 0; i < a.__size; i++)
+			acc += a[i] * b[i];
+
+		return acc;
 	}
 
 #endif

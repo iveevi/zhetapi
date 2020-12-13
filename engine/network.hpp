@@ -436,8 +436,8 @@ namespace zhetapi {
 						Matrix <T> *wplus = new Matrix <T> [__size - 1];
 						Matrix <T> *wminus = new Matrix <T> [__size - 1];
 						
-						for (int i = 0; i < __size - 1; i++)
-							wplus[i] = wminus[i] = __weights[i];
+						for (int k = 0; k < __size - 1; k++)
+							wplus[k] = wminus[k] = __weights[k];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;
@@ -522,8 +522,8 @@ namespace zhetapi {
 						Matrix <T> *wplus = new Matrix <T> [__size - 1];
 						Matrix <T> *wminus = new Matrix <T> [__size - 1];
 						
-						for (int i = 0; i < __size - 1; i++)
-							wplus[i] = wminus[i] = __weights[i];
+						for (int k = 0; k < __size - 1; k++)
+							wplus[k] = wminus[k] = __weights[k];
 
 						wplus[i][x][y] += epsilon;
 						wminus[i][x][y] -= epsilon;

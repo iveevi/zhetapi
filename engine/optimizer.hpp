@@ -23,15 +23,19 @@ namespace zhetapi {
 		template <class T>
 		class Optimizer {
 		public:
-			Optimizer();
 
 #ifndef ZHP_CUDA
+			
+			Optimizer();
 
 			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
 			virtual Optimizer *derivative() const;
 
 #else
+
+			__host__ __device__
+			Optimizer();
 
 			__host__ __device__
 			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
@@ -43,10 +47,10 @@ namespace zhetapi {
 
 		};
 
+#ifndef ZHP_CUDA
+
 		template <class T>
 		Optimizer <T> ::Optimizer() {}
-
-#ifndef ZHP_CUDA
 
 		template <class T>
 		Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const

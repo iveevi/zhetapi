@@ -3,11 +3,11 @@
 
 #define ZHP_CUDA
 
-// Engine headers
-#include <matrix.hpp>
-
 // CUDA headers
 #include <cuda/tensor.cuh>
+
+// Engine headers
+#include <matrix.hpp>
 
 namespace zhetapi {
 
@@ -33,6 +33,19 @@ namespace zhetapi {
         {
                 for (int i = 0; i < __rows; i++)
 		        this->__array[i] = other.__array[i];
+        }
+
+        template <class T>
+	__host__ __device__
+        Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> (rs, cs, T())
+        {
+                __rows = rs;
+                __cols = cs;
+                
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = val;
+                }
         }
 
         template <class T>

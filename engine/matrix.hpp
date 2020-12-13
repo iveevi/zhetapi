@@ -10,7 +10,15 @@
 #include <sstream>
 
 // Engine headers
+#ifndef ZHP_CUDA
+
 #include <tensor.hpp>
+
+#else
+
+#include <cuda/tensor.cuh>
+
+#endif
 
 #ifdef minor
 
@@ -40,8 +48,6 @@ namespace zhetapi {
                 Matrix(const ::std::vector <::std::vector <T>> &);
 
                 Matrix(const ::std::initializer_list <::std::initializer_list <T>> &);
-
-                Matrix(size_t, size_t, T = T());
 
                 template <class A>
                 explicit Matrix(A);
@@ -114,6 +120,8 @@ namespace zhetapi {
                 Matrix(const Matrix <T> &);
 		Matrix(const Vector <T> &);
 
+                Matrix(size_t, size_t, T = T());
+
                 Matrix(size_t, size_t, ::std::function <T (size_t)>);
                 Matrix(size_t, size_t, ::std::function <T *(size_t)>);
                 
@@ -170,6 +178,9 @@ namespace zhetapi {
 		
 		__host__ __device__
 		Matrix(const Vector <T> &);
+
+		__host__ __device__
+                Matrix(size_t, size_t, T = T());
                 
 		template <class F>
 		__host__ __device__
@@ -311,18 +322,6 @@ namespace zhetapi {
                         }
 
                         i++;
-                }
-        }
-
-        template <class T>
-        Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> ({rs, cs}, T())
-        {
-                __rows = rs;
-                __cols = cs;
-                
-                for (int i = 0; i < __rows; i++) {
-                        for (int j = 0; j < __cols; j++)
-                                this->__array[__cols * i + j] = val;
                 }
         }
 
@@ -791,6 +790,18 @@ namespace zhetapi {
         {
                 for (int i = 0; i < __rows; i++)
 		        this->__array[i] = other.__array[i];
+        }
+
+        template <class T>
+        Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> ({rs, cs}, T())
+        {
+                __rows = rs;
+                __cols = cs;
+                
+                for (int i = 0; i < __rows; i++) {
+                        for (int j = 0; j < __cols; j++)
+                                this->__array[__cols * i + j] = val;
+                }
         }
 
         template <class T>

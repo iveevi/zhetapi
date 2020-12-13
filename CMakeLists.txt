@@ -49,8 +49,11 @@ if (CUDA_FOUND)
 	add_executable(cuda source/cuda/main.cu)
 
 	target_link_libraries(cuda PUBLIC zhp)
-	
-	target_compile_options(cuda PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
+	target_link_libraries(cuda PUBLIC ${CUDA_LIBRARIES})
+	target_link_libraries(cuda PUBLIC cudart)
+
+	target_compile_options(cuda PRIVATE
+		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
 endif ()
 
 # Compile zhp file

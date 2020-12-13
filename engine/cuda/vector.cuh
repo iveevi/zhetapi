@@ -1,5 +1,5 @@
-#ifndef MATRIX_CUH_
-#define MATRIX_CUH_
+#ifndef VECTOR_CUH_
+#define VECTOR_CUH_
 
 #define ZHP_CUDA
 
@@ -47,7 +47,11 @@ namespace zhetapi {
 	template <class F>
 	__host__ __device__
 	Vector <T> ::Vector(size_t rs, F gen)
-		: Matrix <T> (rs, 1, gen) {}
+		: Matrix <T> (rs, 1, T())
+	{
+		for (int i = 0; i < this->__size; i++)
+			this->__array[i] = gen(i);
+	}
 
 	template <class T>
 	__host__ __device__
@@ -112,16 +116,31 @@ namespace zhetapi {
 
 	template <class T>
 	__host__ __device__
+	void Vector <T> ::operator+=(const Vector <T> &a)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] += a.__array[i];
+	}
+
+	template <class T>
+	__host__ __device__
+	void Vector <T> ::operator-=(const Vector <T> &a)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] -= a.__array[i];
+	}
+
+	template <class T>
+	__host__ __device__
 	Vector <T> Vector <T> ::append_above(const T &x)
 	{
-		size_t t_sz = size();
+		T *apped = new T[this->__size + 1];
 
-		::std::vector <T> total {x};
+		apped[0] = x;
+		for (size_t i = 1; i <= this->__size; i++)
+			apped[i] = this->__array[i - 1];
 
-		for (size_t i = 0; i < t_sz; i++)
-			total.push_back((*this)[i]);
-
-		return Vector(total);
+		return Vector(this->__size + 1, apped);
 	}
 
 	template <class T>
@@ -144,13 +163,12 @@ namespace zhetapi {
 	__host__ __device__
 	Vector <T> Vector <T> ::remove_top()
 	{
-		size_t t_sz = size();
+		T *apped = new T[this->__size - 1];
 
-		::std::vector <T> total;
-		for (size_t i = 1; i < t_sz; i++)
-			total.push_back((*this)[i]);
+		for (size_t i = 0; i < this->__size - 1; i++)
+			apped[i] = this->__array[i + 1];
 
-		return Vector(total);
+		return Vector(this->__size - 1, apped);
 	}
 
 	template <class T>
@@ -184,6 +202,19 @@ namespace zhetapi {
 			}
 		);
         } */
+	
+	template <class T>
+	__host__ __device__
+	T inner(const Vector <T> &a, const Vector <T> &b)
+	{
+		T acc = 0;
+
+		assert(a.size() == b.size());
+		for (size_t i = 0; i < a.__size; i++)
+			acc += a[i] * b[i];
+
+		return acc;
+	}
 
 }
 

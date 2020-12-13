@@ -91,23 +91,7 @@ namespace zhetapi {
 			__host__ __device__
 			Optimizer <T> *derivative() const
 			{
-
-#ifndef __CUDA_ARCH__
-
 				return new __DMeanSquaredError <T> ();
-
-#else
-
-				Optimizer <T> *opt;
-
-				cudaMalloc((void **) &opt, sizeof(Optimizer <T>));
-
-				*opt = __DMeanSquaredError <T> ();
-
-				return opt;
-
-#endif
-				
 			}
 
 #endif
