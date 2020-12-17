@@ -174,6 +174,12 @@ namespace zhetapi {
 					Optimizer <T> *,
 					bool = false);
 
+			template <size_t = 1, size_t = 1>
+			TrainingStatistics cuda_epochs(const DataSet <T> &,
+				const DataSet <T> &,
+				size_t, size_t, T,
+				bool = false);
+
 			template <class U>
 			__global__
 			friend void train(NeuralNetwork <U> &,
@@ -627,7 +633,7 @@ namespace zhetapi {
 				
 				double *optes = new double[threads];
 				double *peres = new double[threads];
-				double *pass = new double[threads];
+				int *pass = new int[threads];
 
 				auto proc = [&](size_t offset) {
 					Vector <T> *aloc = new Vector <T> [__size];
@@ -650,7 +656,7 @@ namespace zhetapi {
 				};
 
 				for (int i = 0; i < threads; i++) {
-					optes[i] = peres[i] = 0;
+					optes[i] = peres[i] = pass[i] = 0;
 
 					army.push_back(std::thread(proc, i));
 				}

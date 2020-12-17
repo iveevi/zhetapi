@@ -105,7 +105,7 @@ namespace zhetapi {
 
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[&](size_t i) 
+					[&](size_t i) { 
 						return __d_relu(x[i]);
 					}
 				);

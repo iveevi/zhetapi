@@ -13,7 +13,7 @@ int main()
 {
 	srand(clock());
 
-	const int size = 100000;
+	const int size = 10;
 	
 	// vector <Vector <double>> ins;
 	DataSet <double> ins;
@@ -40,24 +40,7 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
-
-	ml::NeuralNetwork <double> ::TrainingStatistics *stat = new ml::NeuralNetwork
-		<double> ::TrainingStatistics();
-
-	double *opts = new double[1];
-	double *errs = new double[1];
-	double *pass = new double[1];
-	Matrix <double> **grads = new Matrix <double> *[1];
-
-	Vector <double> *iloc = new Vector <double> [size];
-	Vector <double> *oloc = new Vector <double> [size];
-	for (int i = 0; i < size; i++) {
-		iloc[i] = ins[i];
-		oloc[i] = outs[i];
-	}
-	train <<<1, 1>>> (model, stat, iloc, oloc, size, grads, opts, errs, pass);
-
-	cout << "stat: " << stat << endl;
+	model.cuda_epochs <1, 1> (ins, outs, 1, 25000, 0.1, true);
 
 	// Free resources
 	delete opt;

@@ -29,7 +29,8 @@ namespace zhetapi {
 	*/
 	template <class T>
 	class Vector : public Matrix <T> {
-	public:
+	public:	
+		Vector(const ::std::vector <T> &);
 		Vector(const ::std::initializer_list <T> &);
 
 		template <class A>
@@ -94,8 +95,6 @@ namespace zhetapi {
 
 		Vector(size_t, ::std::function <T (size_t)>);
 		Vector(size_t, ::std::function <T *(size_t)>);
-		
-		Vector(const ::std::vector <T> &);
 
 		Vector &operator=(const Vector &);
 		Vector &operator=(const Matrix <T> &);
@@ -209,6 +208,9 @@ namespace zhetapi {
 	{
 		*this = other;
 	}*/
+
+	template <class T>
+	Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
 
 	template <class T>
 	Vector <T> ::Vector(const ::std::initializer_list <T> &ref)
@@ -531,9 +533,6 @@ namespace zhetapi {
 		// for (size_t i = 0; i < this->__size; i++)
 		//	this->__array[i] = *(gen(i));
 	}
-
-	template <class T>
-	Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
 
 	template <class T>
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)

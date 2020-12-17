@@ -219,37 +219,142 @@ namespace zhetapi {
 				Vector <T> *ins,
 				Vector <T> *outs,
 				size_t size,
-				Matrix <T> **grads,
-				double *optes,
-				double *peres,
-				double *pass)
+				Matrix <T> *Javg,
+				Matrix <T> *grads,
+				double *grid_opt,
+				int *grid_pass)
 		{
-			int threads = gridDim.x * blockDim.x;
-			int tid = threadIdx.x + blockIdx.x + blockDim.x;
+			// Block shared memoriy
+			__shared__ double *block_opt;
+			__shared__ int *block_pass;
 
-			Vector <T> *aloc = (Vector <T> *) malloc(net.__size *
-					sizeof(Vector <T>));
-			Vector <T> *zloc = (Vector <T> *) malloc((net.__size -
-						1) * sizeof(Vector <T>));
+			int threads = blockDim.x * gridDim.x;
+
+			int tid = threadIdx.x + blockIdx.x + blockDim.x;
+			
+			int tpb = blockDim.x;
+			if (threadIdx.x == 0) {
+				block_opt = new double[tpb];
+				block_pass = new int[tpb];
+			}
+
+			__syncthreads();
+
+			block_opt[tid] = block_pass[tid] = 0;
+
+			Vector <T> *aloc = new Vector <T> [net.__size];
+			Vector <T> *zloc = new Vector <T> [net.__size - 1];
 
 			for (int i = tid; i < size; i += threads) {
 				Vector <T> actual = net.compute(ins[i], aloc, zloc);
 
-				// TODO: Determine whether the the
-				// following if statement is
-				// hazardous.
 				if (net.__cmp(actual, outs[i]))
-					pass[tid]++;
+					block_pass[tid]++;
 
 				grads[i] = net.gradient(net.adjusted(0.7), aloc,
 						zloc, ins[i], outs[i], net.__cost);
 				
-				optes[tid] += (*(net.__cost))(outs[i], actual)[0];
-
-				Vector <T> diff = actual - outs[i];
-
-				peres[tid] += 100 * (actual - outs[i]).norm()/outs[i].norm();
+				block_opt[tid] += (*(net.__cost))(outs[i], actual)[0];
 			}
+
+			__syncthreads();
+
+			// Add together all the BLOCK statistic
+			if (threadIdx.x == 0) {
+				for (int i = 0; i < tpb; i++) {
+					grid_opt[blockIdx.x] += block_opt[i];
+					grid_pass[blockIdx.x] += block_pass[i];
+				}
+			}
+
+			// Add together all the GRID statistics 
+			if (tid == 0) {
+				ts->__passed = 0;
+				ts->__cost = 0;
+				ts->__time = 0;
+
+				for (int i = 0; i < blockDim.x; i++) {
+					ts->__passed += grid_pass[i];
+					ts->__cost += grid_opt[i];
+				}
+
+				*Javg = grads[0];
+				for (int i = 1; i < size; i++)
+					*Javg += grads[i];
+
+				*Javg /= T(size);
+			}
+		}
+
+		// Epoch training with CUDA
+		template <class T>
+		template <size_t blocks, size_t threads>
+		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+			::cuda_epochs(const DataSet <T> &ins,
+				const DataSet <T> &outs,
+				size_t iterations,
+				size_t batch_size,
+				T alpha,
+				bool printing)
+		{
+			using namespace std;
+
+			cout << "ins: " << ins.size() << endl;
+			cout << "outs: " << outs.size() << endl;
+
+			if (ins.size() != outs.size())
+				throw bad_io_dimensions();
+
+			std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
+			std::vector <DataSet <T>> outs_batched = split(outs, batch_size);
+
+			T lr = alpha;
+
+			T t_err = 0;
+			double t_time = 0;
+			size_t t_passed = 0;
+			
+			size_t total = 0;
+			size_t passed;
+			double t;
+			T err;
+			for (int i = 0; i < iterations; i++) {
+				std::cout << std::string(20, '-')
+					<< std::endl
+					<< "\nEpoch #" << (i + 1)
+					<< " (" << lr
+					<< ")\n" << std::endl;
+				
+				passed = 0;
+				err = 0;
+				t = 0;
+				for (int i = 0; i < ins_batched.size(); i++) {
+					TrainingStatistics result = train <threads> (ins_batched[i],
+						outs_batched[i], lr, i + 1, printing);
+
+					passed += result.__passed;
+					err += result.__cost;
+					t += result.__time;
+
+					lr = alpha * pow(0.1, (++total)/50000.0);
+				}
+
+				t_passed += passed;
+				t_err += err;
+				t_time += t;
+				
+				std::cout << "\nTotal cost:\t"
+					<< err << std::endl
+					<< "Total time:\t" << t/1000
+					<< " ms" << std::endl
+					<< "Cases passed:\t"
+					<< passed
+					<< "/" << ins.size() << " ("
+					<< 100 * ((double) passed)/ins.size()
+					<< "%)" << std::endl;
+			}
+
+			return {t_passed, t_err, t_time};
 		}
 
 	}

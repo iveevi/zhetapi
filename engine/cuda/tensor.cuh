@@ -100,7 +100,7 @@ namespace zhetapi {
 
 	}
 
-	template <class T>
+	/* template <class T>
 	__host__ __device__
 	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
 			: __dims(dim.size())
@@ -128,7 +128,7 @@ namespace zhetapi {
 
 		for (size_t i = 0; i < prod; i++)
 			__array[i] = arr[i];
-	}
+	} */
 
 	template <class T>
 	__host__ __device__

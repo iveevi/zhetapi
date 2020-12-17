@@ -22,6 +22,17 @@ namespace zhetapi {
 		size_t		*__dim;
 		size_t		__dims;
 	public:
+		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
+		
+		// Printing functions
+		::std::string print() const;
+
+		template <class U>
+		friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
+
+                // Dimension mismatch exception
+                class dimension_mismatch {};
+		class bad_dimensions {};
 
 #ifndef ZHP_CUDA
 
@@ -30,7 +41,6 @@ namespace zhetapi {
                 Tensor(const Tensor &);
 		Tensor(const ::std::vector <T> &);
 		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
-		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 
 		~Tensor();
 
@@ -43,16 +53,6 @@ namespace zhetapi {
 		// Comparison
 		template <class U>
 		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
-
-		// Printing functions
-		::std::string print() const;
-
-		template <class U>
-		friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
-
-                // Dimension mismatch exception
-                class dimension_mismatch {};
-		class bad_dimensions {};
 
 #else
 
@@ -71,8 +71,8 @@ namespace zhetapi {
 		__host__ __device__
 		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
 
-		__host__ __device__
-		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
+		/* __host__ __device__
+		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &); */
 
 		__host__ __device__
 		~Tensor();
@@ -87,6 +87,80 @@ namespace zhetapi {
 #endif
 
 	};
+
+	template <class T>
+	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
+			: __dims(dim.size())
+	{
+		__dim = new size_t[__dims];
+
+		size_t prod = 1;
+		for (size_t i = 0; i < __dims; i++) {
+			prod *= dim[i];
+
+			__dim[i] = dim[i];
+		}
+
+		__size = prod;
+
+		if (!__size)
+			throw bad_dimensions();
+
+		if (arr.size() != __size)
+                        throw dimension_mismatch();
+
+		__array = new T[prod];
+
+		for (size_t i = 0; i < prod; i++)
+			__array[i] = arr[i];
+	}
+
+	// Printing functions
+	template <class T>
+	::std::string Tensor <T> ::print() const
+	{
+		if (!__dim)
+			return "[]";
+		
+		if (__dims == 0) {
+			::std::ostringstream oss;
+
+			oss << __array[0];
+
+			return oss.str();
+		}
+		
+		::std::string out = "[";
+
+		::std::vector <size_t> cropped;
+		for (int i = 0; i < ((int) __dims) - 1; i++)
+			cropped.push_back(__dim[i + 1]);
+
+		size_t left = __size/__dim[0];
+		for (size_t i = 0; i < __dim[0]; i++) {
+			::std::vector <T> elems;
+
+			for (size_t k = 0; k < left; k++)
+				elems.push_back(__array[left * i + k]);
+			
+			Tensor tmp(cropped, elems);
+
+			out += tmp.print();
+
+			if (i < __dim[0] - 1)
+				out += ", ";
+		}
+
+		return out + "]";
+	}
+
+	template <class T>
+	::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
+	{
+		os << ts.print();
+
+		return os;
+	}
 
 #ifndef ZHP_CUDA
 
@@ -144,33 +218,6 @@ namespace zhetapi {
 
 		for (size_t i = 0; i < prod; i++)
 			__array[i] = def;
-	}
-
-	template <class T>
-	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
-			: __dims(dim.size())
-	{
-		__dim = new size_t[__dims];
-
-		size_t prod = 1;
-		for (size_t i = 0; i < __dims; i++) {
-			prod *= dim[i];
-
-			__dim[i] = dim[i];
-		}
-
-		__size = prod;
-
-		if (!__size)
-			throw bad_dimensions();
-
-		if (arr.size() != __size)
-                        throw dimension_mismatch();
-
-		__array = new T[prod];
-
-		for (size_t i = 0; i < prod; i++)
-			__array[i] = arr[i];
 	}
 
 	template <class T>
@@ -237,53 +284,6 @@ namespace zhetapi {
 		}
 
 		return true;
-	}
-
-	// Printing functions
-	template <class T>
-	::std::string Tensor <T> ::print() const
-	{
-		if (!__dim)
-			return "[]";
-		
-		if (__dims == 0) {
-			::std::ostringstream oss;
-
-			oss << __array[0];
-
-			return oss.str();
-		}
-		
-		::std::string out = "[";
-
-		::std::vector <size_t> cropped;
-		for (int i = 0; i < ((int) __dims) - 1; i++)
-			cropped.push_back(__dim[i + 1]);
-
-		size_t left = __size/__dim[0];
-		for (size_t i = 0; i < __dim[0]; i++) {
-			::std::vector <T> elems;
-
-			for (size_t k = 0; k < left; k++)
-				elems.push_back(__array[left * i + k]);
-			
-			Tensor tmp(cropped, elems);
-
-			out += tmp.print();
-
-			if (i < __dim[0] - 1)
-				out += ", ";
-		}
-
-		return out + "]";
-	}
-
-	template <class T>
-	::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
-	{
-		os << ts.print();
-
-		return os;
 	}
 
 #endif
