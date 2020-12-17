@@ -220,7 +220,7 @@ namespace zhetapi {
 				Vector <T> *outs,
 				size_t size,
 				Matrix <T> *Javg,
-				Matrix <T> *grads,
+				Matrix <T> **grads,
 				double *grid_opt,
 				int *grid_pass)
 		{
@@ -278,11 +278,16 @@ namespace zhetapi {
 					ts->__cost += grid_opt[i];
 				}
 
-				*Javg = grads[0];
-				for (int i = 1; i < size; i++)
-					*Javg += grads[i];
+				for (int i = 0; i < net.__size - 1; i++)
+					Javg[i] = grads[0][i];
 
-				*Javg /= T(size);
+				for (int k = 1; k < size; k++) {
+					for (int i = 0; i < net.__size - 1; i++)
+						Javg[i] += grads[k][i];
+				}
+				
+				for (int i = 0; i < net.__size - 1; i++)
+					Javg[i] /= T(size);
 			}
 		}
 
@@ -328,9 +333,97 @@ namespace zhetapi {
 				passed = 0;
 				err = 0;
 				t = 0;
-				for (int i = 0; i < ins_batched.size(); i++) {
-					TrainingStatistics result = train <threads> (ins_batched[i],
-						outs_batched[i], lr, i + 1, printing);
+				for (int j = 0; j < ins_batched.size(); j++) {
+					TrainingStatistics result;
+
+					Matrix <T> *Javg = new Matrix <T>
+						[__size - 1];
+
+					Vector <T> *ins_ptr = new Vector <T>
+						[ins_batched[j].size()];
+					Vector <T> *outs_ptr = new Vector <T>
+						[ins_batched[j].size()];
+
+					for (int k = 0; k < ins_batched[j].size();
+							k++) {
+						ins_ptr[k] = ins_batched[j][k];
+						outs_ptr[k] = outs_batched[j][k];
+					}
+					
+					TrainingStatistics *dev_result;
+					Matrix <T> *dev_Javg;
+					Matrix <T> **dev_grads;
+
+					Vector <T> *dev_ins;
+					Vector <T> *dev_outs;
+
+					double *dev_gopts;
+					int *dev_gpass;
+
+					int size = ins_batched[j].size();
+
+					cudaMalloc((void **) &dev_result,
+							sizeof(TrainingStatistics));
+					cudaMalloc((void **) &dev_Javg,
+							sizeof(Matrix <T>) *
+							(__size - 1));
+
+					cudaMalloc((void **) &dev_grads,
+							sizeof(Matrix <T> *) *
+							size);
+
+					// Inputs and outputs
+					cudaMalloc((void **) &dev_ins,
+							sizeof(Vector <T>) *
+							size);
+					cudaMalloc((void **) &dev_outs,
+							sizeof(Vector <T>) *
+							size);
+
+					cudaMemcpy(dev_ins, ins_ptr, size,
+							cudaMemcpyHostToDevice);
+					cudaMemcpy(dev_outs, outs_ptr, size,
+							cudaMemcpyHostToDevice);
+
+					// For device
+					cudaMalloc((void **) &dev_gopts,
+							sizeof(double) * size);
+					cudaMalloc((void **) &dev_gpass,
+							sizeof(int) * size);
+
+					zhetapi::ml::train <<<blocks, threads>>> (*this,
+							dev_result, dev_ins,
+							dev_outs, size,
+							dev_Javg, dev_grads,
+							dev_gopts, dev_gpass);
+
+					// Recopy values
+					cudaMemcpy(&result, dev_result,
+							sizeof(TrainingStatistics),
+							cudaMemcpyDeviceToHost);
+					
+					cudaMemcpy(&Javg, dev_Javg,
+							sizeof(Matrix <T>) *
+							(__size - 1),
+							cudaMemcpyDeviceToHost);
+
+					// Free everything
+					cudaFree(dev_result);
+					cudaFree(dev_Javg);
+					cudaFree(dev_grads);
+					cudaFree(dev_ins);
+					cudaFree(dev_outs);
+					cudaFree(dev_gopts);
+					cudaFree(dev_gpass);
+
+					// Apply gradients
+
+					// Free host pointers
+					delete[] Javg;
+					delete[] ins_ptr;
+					delete[] outs_ptr;
+
+					cout << "Batch #" << (j + 1) << " is done." << endl;
 
 					passed += result.__passed;
 					err += result.__cost;

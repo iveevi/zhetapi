@@ -187,10 +187,10 @@ namespace zhetapi {
 					Vector <U> *,
 					Vector <U> *,
 					size_t,
+					Matrix <U> *,
 					Matrix <U> **,
 					double *,
-					double *,
-					double *);
+					int *);
 
 #endif
 
@@ -750,9 +750,9 @@ namespace zhetapi {
 				passed = 0;
 				err = 0;
 				t = 0;
-				for (int i = 0; i < ins_batched.size(); i++) {
-					TrainingStatistics result = train <threads> (ins_batched[i],
-						outs_batched[i], lr, i + 1, printing);
+				for (int j = 0; j < ins_batched.size(); j++) {
+					TrainingStatistics result = train <threads> (ins_batched[j],
+						outs_batched[j], lr, j + 1, printing);
 
 					passed += result.__passed;
 					err += result.__cost;

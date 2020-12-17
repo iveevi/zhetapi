@@ -149,6 +149,22 @@ namespace zhetapi {
                                 this->__array[i * __cols + j] -= other.__array[i * __cols + j];
                 }
         }
+        
+	template <class T>
+	__host__ __device__
+        void Matrix <T> ::operator*=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] *= x;
+        }
+       
+	template <class T>
+	__host__ __device__
+        void Matrix <T> ::operator/=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] /= x;
+        }
 
 	// Matrix non-member operators
         template <class T>

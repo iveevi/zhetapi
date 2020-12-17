@@ -75,9 +75,6 @@ namespace zhetapi {
 
                 void operator*=(const Matrix &);
                 void operator/=(const Matrix &);
-                
-		void operator*=(const T &);
-                void operator/=(const T &);
 
                 // Row operations
                 void add_rows(size_t, size_t, T);
@@ -140,6 +137,9 @@ namespace zhetapi {
 
                 void operator+=(const Matrix &);
                 void operator-=(const Matrix &);
+                
+		void operator*=(const T &);
+                void operator/=(const T &);
                 
 		template <class U>
                 friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
@@ -209,6 +209,12 @@ namespace zhetapi {
 
 		__host__ __device__
                 void operator-=(const Matrix &);
+                
+		__host__ __device__
+		void operator*=(const T &);
+
+		__host__ __device__
+                void operator/=(const T &);
                 
 		template <class U>
 		__host__ __device__
@@ -541,20 +547,6 @@ namespace zhetapi {
         void Matrix <T> ::operator*=(const Matrix <T> &other)
         {
                 (*this) = (*this) * other;
-        }
-        
-	template <class T>
-        void Matrix <T> ::operator*=(const T &x)
-        {
-                for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] *= x;
-        }
-       
-	template <class T>
-        void Matrix <T> ::operator/=(const T &x)
-        {
-                for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] /= x;
         }
 
         // R(A) = R(A) + kR(B)
@@ -931,6 +923,20 @@ namespace zhetapi {
                         for (size_t j = 0; j < __cols; j++)
                                 this->__array[i * __cols + j] -= other.__array[i * __cols + j];
                 }
+        }
+        
+	template <class T>
+        void Matrix <T> ::operator*=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] *= x;
+        }
+       
+	template <class T>
+        void Matrix <T> ::operator/=(const T &x)
+        {
+                for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] /= x;
         }
 
         template <class T>
