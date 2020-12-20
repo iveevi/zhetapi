@@ -1,0 +1,6 @@
+#!debug/czhp-run
+f(x) = x^3
+
+println(f)
+
+println(f(4))

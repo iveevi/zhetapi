@@ -14,7 +14,7 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 set(CMAKE_CXX_COMPILER "g++-8")
 
 # Compile shared library
-add_library(zhp SHARED
+add_library(zhp-shared SHARED
 	source/class.cpp
 	source/complex.cpp
 	source/label.cpp
@@ -27,19 +27,38 @@ add_library(zhp SHARED
 	source/node.cpp
 )
 
+SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
+   OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
+
+add_library(zhp-static STATIC
+	source/class.cpp
+	source/complex.cpp
+	source/label.cpp
+	source/node_reference.cpp
+	source/operation_holder.cpp
+	source/operation.cpp
+	source/registration.cpp
+	source/variable_cluster.cpp
+	source/token.cpp
+	source/node.cpp
+)
+
+SET_TARGET_PROPERTIES(zhp-static PROPERTIES
+   OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
+
 # Compile CLI application
 project(zhetapi)
 
 add_executable(zhetapi source/cli/cli.cpp)
 
-target_link_libraries(zhetapi PUBLIC zhp)
+target_link_libraries(zhetapi PUBLIC zhp-shared)
 
 # Compile exp file
 project(exp)
 
 add_executable(exp source/exp/exp.cpp)
 
-target_link_libraries(exp PUBLIC zhp)
+target_link_libraries(exp PUBLIC zhp-shared)
 
 # Compile cuda program
 find_package(CUDA)
@@ -48,7 +67,7 @@ if (CUDA_FOUND)
 	
 	add_executable(cuda source/cuda/main.cu)
 
-	target_link_libraries(cuda PUBLIC zhp)
+	target_link_libraries(cuda PUBLIC zhp-shared)
 	target_link_libraries(cuda PUBLIC ${CUDA_LIBRARIES})
 	target_link_libraries(cuda PUBLIC cudart)
 
@@ -56,12 +75,12 @@ if (CUDA_FOUND)
 		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
 endif ()
 
-# Compile zhp file
+# Compile czhp file
 project(czhp)
 
 add_executable(czhp source/czhp/czhp.cpp)
 
-target_link_libraries(czhp PUBLIC zhp)
+target_link_libraries(czhp PUBLIC zhp-static)
 
 # Compile portability tests
 project(port)
@@ -74,7 +93,7 @@ add_library(timer OBJECT source/port/timers.cpp)
 
 add_executable(port source/port/port.cpp)
 
-target_link_libraries(port PUBLIC zhp)
+target_link_libraries(port PUBLIC zhp-shared)
 
 target_link_libraries(port PUBLIC port_vector)
 target_link_libraries(port PUBLIC port_matrix)
