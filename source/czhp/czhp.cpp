@@ -162,8 +162,11 @@ zhetapi::Token *println(const std::vector <zhetapi::Token *> &ins)
 }
 
 // Main
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc == 2)
+		freopen(argv[1], "r", stdin);
+	
 	// Barn setup	
 	barn.put(zhetapi::Registrable("print", &print));
 	barn.put(zhetapi::Registrable("println", &println));
