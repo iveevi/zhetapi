@@ -21,6 +21,13 @@ namespace zhetapi {
 		// Variables for printing
 		size_t		*__dim;
 		size_t		__dims;
+
+#ifdef ZHP_CUDA
+
+		bool		__on_device;
+
+#endif
+
 	public:
 		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 		
@@ -60,6 +67,9 @@ namespace zhetapi {
 		Tensor();
 
 		__host__ __device__
+		Tensor(bool);
+
+		__host__ __device__
                 Tensor(const Tensor &);
 		
 		__host__ __device__
@@ -71,14 +81,14 @@ namespace zhetapi {
 		__host__ __device__
 		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
 
-		/* __host__ __device__
-		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &); */
-
 		__host__ __device__
 		~Tensor();
 
 		__host__ __device__
                 Tensor &operator=(const Tensor &);
+
+		__host__ __device__
+		void set_device_status(bool);
 
 		template <class U>
 		__host__ __device__
@@ -92,6 +102,13 @@ namespace zhetapi {
 	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
 			: __dims(dim.size())
 	{
+
+#ifdef ZHP_CUDA
+
+		__on_device = false;
+
+#endif
+
 		__dim = new size_t[__dims];
 
 		size_t prod = 1;
@@ -166,7 +183,8 @@ namespace zhetapi {
 
 	// Constructors and memory relevant functions
 	template <class T>
-	Tensor <T> ::Tensor() : __dim(nullptr), __array(nullptr) {}
+	Tensor <T> ::Tensor() : __dim(nullptr), __dim(0), __array(nullptr),
+			__size(0) {}
 
         template <class T>
         Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)

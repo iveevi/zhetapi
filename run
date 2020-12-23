@@ -47,6 +47,18 @@ elif [ $1 = "port" ]; then
 	mv port bin/
 
 	./bin/port
+elif [ $1 = "cuda-memcheck" ]; then
+	echo "Running $2 on cuda-gdb"
+
+	mkdir -p debug
+
+	cmake -DCMAKE_BUILD_TYPE=Debug .
+
+	make -j8 $2
+
+	mv $2 debug/$2-debug
+
+	cuda-memcheck ./debug/$2-debug
 elif [ $1 = "cuda-gdb" ]; then
 	echo "Running $2 on cuda-gdb"
 

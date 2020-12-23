@@ -30,6 +30,21 @@ namespace zhetapi {
 
 			return theta;
 		}
+		
+		template <class T>
+		__host__ __device__
+		Matrix <T> *NeuralNetwork <T> ::adjusted(Matrix <T> *weights,
+				Matrix <T> *momentum, size_t size, T mu)
+		{
+			Matrix <T> *theta = new Matrix <T> [size - 1];
+			for (int i = 0; i < size - 1; i++)
+				theta[i] = weights[i];
+
+			for (int i = 0; i < size - 1; i++)
+				theta[i] += mu * momentum[i];
+
+			return theta;
+		}
 	
 		// Cuda computation functions
 		template <class T>
@@ -103,6 +118,58 @@ namespace zhetapi {
 			}
 
 			a[i] = tmp;
+			
+			return tmp;
+		}
+		
+		template <class T>
+		__host__ __device__
+		Vector <T> NeuralNetwork <T> ::compute_isolated(const Vector <T> &in,
+				Matrix <T> *weights,
+				Activation <T> **acts,
+				Vector <T> *a,
+				Vector <T> *z,
+				size_t size)
+		{
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			size_t i = 0;
+			while (i < size - 1) {
+				a[i] = tmp.append_above(T (1));
+
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*acts[i + 1])(prv);
+
+				Activation <T> *dact = acts[i + 1]->derivative();
+
+				z[i++] = (*dact)(prv);
+
+				delete dact;
+			}
+
+			a[i] = tmp;
+			
+			return tmp;
+		}
+		
+		template <class T>
+		__host__ __device__
+		Vector <T> NeuralNetwork <T> ::compute_no_cache_isolated(const Vector <T> &in,
+				Matrix <T> *weights,
+				Activation <T> **acts,
+				size_t size)
+		{
+			Vector <T> prv = in;
+			Vector <T> tmp = in;
+
+			size_t i = 0;
+			while (i < size - 1) {
+				prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+				tmp = (*acts[i + 1])(prv);
+			}
 			
 			return tmp;
 		}
@@ -209,22 +276,69 @@ namespace zhetapi {
 			// Return the gradient
 			return J;
 		}
+		
+		template <class T>
+		__host__ __device__
+		Matrix <T> *NeuralNetwork <T> ::gradient_isolated(Matrix <T> *weights,
+				Activation <T> *acts,
+				size_t size,
+				const Vector <T> &in,
+				const Vector <T> &out,
+				Optimizer <T> *opt)
+		{
+			// Allocate memory for a and z
+			Vector <T> *a = new Vector <T> [size];
+			Vector <T> *z = new Vector <T> [size - 1];
 
+			// Compute the actual value
+			Vector <T> actual = compute(in, weights, acts, a, z);
+			
+			// Get the derivative of the cost
+			Optimizer <T> *dopt = opt->derivative();
+			
+			// Construction the Jacobian using backpropogation
+			Matrix <T> *J = new Matrix <T> [size - 1];
+
+			Vector <T> delta = (*dopt)(out, actual);
+			for (int i = size - 2; i >= 0; i--) {
+				if (i < size - 2) {
+					delta = weights[i + 1].transpose() * delta;
+					delta = delta.remove_top();
+				}
+				
+				delta = shur(delta, z[i]);
+
+				Matrix <T> Ji = delta * a[i].transpose();
+
+				J[i] = Ji;
+			}
+
+			// Free resources
+			delete[] a;
+			delete[] z;
+
+			delete dopt;
+
+			// Return the gradient (skip checking)
+			return J;
+		}
 
 		// Cuda training algorithm
 		template <class T>
 		__global__ 
-		void train(NeuralNetwork <T> &net,
+		void training_kernel(Matrix <T> *weights,
+				Matrix <T> *momentum,
+				Activation <T> **acts,
+				Optimizer <T> *opt,
+				Comparator <T> cmp,
+				size_t net_size,
 				typename NeuralNetwork <T> ::TrainingStatistics *ts,
 				Vector <T> *ins,
 				Vector <T> *outs,
 				size_t size,
-				Matrix <T> *Javg,
-				Matrix <T> **grads,
-				double *grid_opt,
-				int *grid_pass)
+				Matrix <T> *Javg)
 		{
-			// Block shared memoriy
+			/* Block shared memoriy
 			__shared__ double *block_opt;
 			__shared__ int *block_pass;
 
@@ -240,21 +354,24 @@ namespace zhetapi {
 
 			__syncthreads();
 
-			block_opt[tid] = block_pass[tid] = 0;
+			block_opt[threadIdx.x] = block_pass[threadIdx.x] = 0;
 
-			Vector <T> *aloc = new Vector <T> [net.__size];
-			Vector <T> *zloc = new Vector <T> [net.__size - 1];
+			Vector <T> *aloc = new Vector <T> [net_size];
+			Vector <T> *zloc = new Vector <T> [net_size - 1];
 
 			for (int i = tid; i < size; i += threads) {
-				Vector <T> actual = net.compute(ins[i], aloc, zloc);
+				Vector <T> actual = NeuralNetwork <T>
+					::compute_isolated(ins[i], weights, aloc, zloc);
 
-				if (net.__cmp(actual, outs[i]))
+				if (cmp(actual, outs[i]))
 					block_pass[tid]++;
 
-				grads[i] = net.gradient(net.adjusted(0.7), aloc,
-						zloc, ins[i], outs[i], net.__cost);
+				grads[i] = gradient_isolated(NeuralNetwork <T>
+						::adjusted(weights, momentum,
+							net_size, 0.7), acts, size,
+						ins[i], outs[i], opt);
 				
-				block_opt[tid] += (*(net.__cost))(outs[i], actual)[0];
+				block_opt[tid] += (*(opt))(outs[i], actual)[0];
 			}
 
 			__syncthreads();
@@ -278,17 +395,174 @@ namespace zhetapi {
 					ts->__cost += grid_opt[i];
 				}
 
-				for (int i = 0; i < net.__size - 1; i++)
+				for (int i = 0; i < net_size - 1; i++)
 					Javg[i] = grads[0][i];
 
 				for (int k = 1; k < size; k++) {
-					for (int i = 0; i < net.__size - 1; i++)
+					for (int i = 0; i < net_size - 1; i++)
 						Javg[i] += grads[k][i];
 				}
 				
-				for (int i = 0; i < net.__size - 1; i++)
+				for (int i = 0; i < net_size - 1; i++)
 					Javg[i] /= T(size);
+			} */
+			printf("Here!\n");
+		}
+
+		// Training a batch with CUDA
+		template <class T>
+		template <size_t blocks, size_t threads>
+		typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+			::cuda_batch(const DataSet <T> &ins,
+				const DataSet <T> &outs,
+				T alpha,
+				T mu)
+		{
+			// Misc variables
+			size_t data_size = ins.size();
+			size_t net_size = __size;
+
+			Vector <T> *pre_ins = new Vector <T> [data_size];
+			Vector <T> *pre_outs = new Vector <T> [data_size];
+
+			for (int i = 0; i < data_size; i++) {
+				pre_ins[i].copy_to_device(ins[i]);
+				pre_outs[i].copy_to_device(outs[i]);
 			}
+
+			Matrix <T> *pre_weights = new Matrix <T> [net_size - 1];
+			Matrix <T> *pre_momentum = new Matrix <T> [net_size - 1];
+			
+			for (int i = 0; i < net_size - 1; i++) {
+				pre_weights[i].copy_to_device(__weights[i]);
+				pre_momentum[i].copy_to_device(__momentum[i]);
+			}
+
+			Activation <T> **pre_acts = new Activation <T> *[net_size];
+
+			for (int i = 0; i < net_size; i++) {
+				cudaMalloc(&pre_acts[i], sizeof(Activation <T>));
+				cudaMemcpy(pre_acts[i], &__layers[i],
+						sizeof(Activation <T>),
+						cudaMemcpyHostToDevice);
+			}
+
+			Matrix <T> *pre_Javg = new Matrix <T> [net_size - 1];
+
+			for (int i = 0; i < net_size - 1; i++)
+				pre_Javg[i].copy_to_device(__weights[i]);
+
+			// Storage for kernel results
+			TrainingStatistics result;
+
+			Matrix <T> *Javg = new Matrix <T> [net_size - 1];
+
+			// Declare all the pointers
+			Matrix <T> *dev_weights;
+			Matrix <T> *dev_momentum;
+			Activation <T> **dev_acts;
+			Optimizer <T> *dev_opt;
+			Comparator <T> *dev_cmp;
+
+			TrainingStatistics *dev_result;
+
+			Vector <T> *dev_ins;
+			Vector <T> *dev_outs;
+
+			Matrix <T> *dev_Javg;
+
+			// Allocate all the pointers
+			cudaMalloc(&dev_weights, sizeof(Matrix <T>) * (net_size - 1));
+			cudaMalloc(&dev_momentum, sizeof(Matrix <T>) * (net_size - 1));
+			cudaMalloc(&dev_acts, sizeof(Activation <T> *) * net_size);
+			cudaMalloc(&dev_opt, sizeof(Optimizer <T>));
+			cudaMalloc(&dev_cmp, sizeof(Comparator <T>));
+			
+			cudaMalloc(&dev_result, sizeof(TrainingStatistics));
+
+			cudaMalloc(&dev_ins, sizeof(Vector <T>) * data_size);
+			cudaMalloc(&dev_outs, sizeof(Vector <T>) * data_size);
+
+			cudaMalloc(&dev_Javg, sizeof(Matrix <T>) * (net_size - 1));
+
+			// Initialize the data
+			cudaMemcpy(dev_weights, pre_weights, sizeof(Matrix <T>) *
+					(net_size - 1), cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_momentum, pre_momentum, sizeof(Matrix <T>) *
+					(net_size - 1), cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_acts, pre_acts, sizeof(Activation <T> *) *
+					net_size, cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_opt, __cost, sizeof(Optimizer <T>),
+					cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_cmp, &__cmp, sizeof(Comparator <T>),
+					cudaMemcpyHostToDevice);
+
+			cudaMemcpy(dev_ins, pre_ins, sizeof(Vector <T>) *
+					data_size, cudaMemcpyHostToDevice);
+			cudaMemcpy(dev_outs, pre_outs, sizeof(Vector <T>) *
+					data_size, cudaMemcpyHostToDevice);
+			
+			cudaMemcpy(dev_Javg, pre_Javg, sizeof(Vector <T>) *
+					(net_size - 1), cudaMemcpyHostToDevice);
+
+			// Run the kernel
+			training_kernel <<<blocks, threads>>> (
+				dev_weights,
+				dev_momentum,
+				dev_acts,
+				dev_opt,
+				__cmp,
+				net_size,
+				dev_result,
+				dev_ins,
+				dev_outs,
+				data_size,
+				dev_Javg
+			);
+
+			// Copy items back to host
+			cudaMemcpy(&result, dev_result,
+					sizeof(TrainingStatistics),
+					cudaMemcpyDeviceToHost);
+
+			cudaMemcpy(pre_Javg, dev_Javg, sizeof(Matrix <T>) *
+					(net_size - 1), cudaMemcpyDeviceToHost);
+
+			// Apply the gradient
+			for (int i = 0; i < net_size - 1; i++)
+				pre_Javg[i].transfer_from_device(Javg[i]);
+
+			// apply_gradient(Javg, alpha, mu);
+
+			// Deallocate memory
+			delete[] pre_ins;
+			delete[] pre_outs;
+
+			delete[] pre_weights;
+			delete[] pre_momentum;
+
+			delete[] pre_Javg;
+			delete[] Javg;
+
+			cudaFree(dev_weights);
+			cudaFree(dev_momentum);
+			cudaFree(dev_opt);
+			cudaFree(dev_cmp);
+
+			cudaFree(dev_result);
+
+			cudaFree(dev_ins);
+			cudaFree(dev_outs);
+
+			cudaFree(dev_Javg);
+
+			for (int i = 0; i < net_size; i++)
+				cudaFree(pre_acts[i]);
+
+			delete[] pre_acts;
+
+			// Result the results
+			return result;
 		}
 
 		// Epoch training with CUDA
@@ -333,96 +607,14 @@ namespace zhetapi {
 				passed = 0;
 				err = 0;
 				t = 0;
+
 				for (int j = 0; j < ins_batched.size(); j++) {
-					TrainingStatistics result;
+					TrainingStatistics result =
+						cuda_batch(ins_batched[j],
+								outs_batched[j],
+								lr, 0.7);
 
-					Matrix <T> *Javg = new Matrix <T>
-						[__size - 1];
-
-					Vector <T> *ins_ptr = new Vector <T>
-						[ins_batched[j].size()];
-					Vector <T> *outs_ptr = new Vector <T>
-						[ins_batched[j].size()];
-
-					for (int k = 0; k < ins_batched[j].size();
-							k++) {
-						ins_ptr[k] = ins_batched[j][k];
-						outs_ptr[k] = outs_batched[j][k];
-					}
-					
-					TrainingStatistics *dev_result;
-					Matrix <T> *dev_Javg;
-					Matrix <T> **dev_grads;
-
-					Vector <T> *dev_ins;
-					Vector <T> *dev_outs;
-
-					double *dev_gopts;
-					int *dev_gpass;
-
-					int size = ins_batched[j].size();
-
-					cudaMalloc((void **) &dev_result,
-							sizeof(TrainingStatistics));
-					cudaMalloc((void **) &dev_Javg,
-							sizeof(Matrix <T>) *
-							(__size - 1));
-
-					cudaMalloc((void **) &dev_grads,
-							sizeof(Matrix <T> *) *
-							size);
-
-					// Inputs and outputs
-					cudaMalloc((void **) &dev_ins,
-							sizeof(Vector <T>) *
-							size);
-					cudaMalloc((void **) &dev_outs,
-							sizeof(Vector <T>) *
-							size);
-
-					cudaMemcpy(dev_ins, ins_ptr, size,
-							cudaMemcpyHostToDevice);
-					cudaMemcpy(dev_outs, outs_ptr, size,
-							cudaMemcpyHostToDevice);
-
-					// For device
-					cudaMalloc((void **) &dev_gopts,
-							sizeof(double) * size);
-					cudaMalloc((void **) &dev_gpass,
-							sizeof(int) * size);
-
-					zhetapi::ml::train <<<blocks, threads>>> (*this,
-							dev_result, dev_ins,
-							dev_outs, size,
-							dev_Javg, dev_grads,
-							dev_gopts, dev_gpass);
-
-					// Recopy values
-					cudaMemcpy(&result, dev_result,
-							sizeof(TrainingStatistics),
-							cudaMemcpyDeviceToHost);
-					
-					cudaMemcpy(&Javg, dev_Javg,
-							sizeof(Matrix <T>) *
-							(__size - 1),
-							cudaMemcpyDeviceToHost);
-
-					// Free everything
-					cudaFree(dev_result);
-					cudaFree(dev_Javg);
-					cudaFree(dev_grads);
-					cudaFree(dev_ins);
-					cudaFree(dev_outs);
-					cudaFree(dev_gopts);
-					cudaFree(dev_gpass);
-
-					// Apply gradients
-
-					// Free host pointers
-					delete[] Javg;
-					delete[] ins_ptr;
-					delete[] outs_ptr;
-
+					// Save results
 					cout << "Batch #" << (j + 1) << " is done." << endl;
 
 					passed += result.__passed;

@@ -155,6 +155,10 @@ namespace zhetapi {
 			Matrix <T> *adjusted(T mu);
 
 			__host__ __device__
+			static Matrix <T> *adjusted(Matrix <T> *, Matrix <T> *,
+					size_t, T mu);
+
+			__host__ __device__
 			Vector <T> compute(const Vector <T> &,
 					Vector <T> *,
 					Vector <T> *) const;
@@ -164,6 +168,20 @@ namespace zhetapi {
 					Matrix <T> *,
 					Vector <T> *,
 					Vector <T> *) const;
+
+			__host__ __device__
+			static Vector <T> compute_isolated(const Vector <T> &,
+					Matrix <T> *,
+					Activation <T> **,
+					Vector <T> *,
+					Vector <T> *,
+					size_t);
+			
+			__host__ __device__
+			static Vector <T> compute_no_cache_isolated(const Vector <T> &,
+					Matrix <T> *,
+					Activation <T> **,
+					size_t);
 			
 			__host__ __device__
 			Matrix <T> *gradient(Matrix <T> *,
@@ -173,24 +191,24 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *,
 					bool = false);
+			
+			__host__ __device__
+			static Matrix <T> *gradient_isolated(Matrix <T> *,
+					Activation <T> *,
+					size_t,
+					const Vector <T> &,
+					const Vector <T> &,
+					Optimizer <T> *);
+			
+			template <size_t = 1, size_t = 1>
+			TrainingStatistics cuda_batch(const DataSet <T> &,
+				const DataSet <T> &, T, T);
 
 			template <size_t = 1, size_t = 1>
 			TrainingStatistics cuda_epochs(const DataSet <T> &,
 				const DataSet <T> &,
 				size_t, size_t, T,
 				bool = false);
-
-			template <class U>
-			__global__
-			friend void train(NeuralNetwork <U> &,
-					typename NeuralNetwork <U> ::TrainingStatistics *,
-					Vector <U> *,
-					Vector <U> *,
-					size_t,
-					Matrix <U> *,
-					Matrix <U> **,
-					double *,
-					int *);
 
 #endif
 

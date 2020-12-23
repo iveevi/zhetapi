@@ -174,13 +174,26 @@ namespace zhetapi {
                 Matrix();
 		
 		__host__ __device__
+                Matrix(bool);
+		
+		__host__ __device__
                 Matrix(const Matrix <T> &);
 		
 		__host__ __device__
 		Matrix(const Vector <T> &);
 
+		friend __global__ void check(Matrix <double> *);
+		friend __global__ void mult(Matrix <double> *, Matrix <double> *, Matrix <double> *);
+
+		void copy_to_device(Matrix <T>);
+
+		void transfer_from_device(Matrix <T> &);
+
 		__host__ __device__
                 Matrix(size_t, size_t, T = T());
+
+		__host__ __device__
+                Matrix(size_t, size_t, T *);
                 
 		template <class F>
 		__host__ __device__
@@ -188,7 +201,10 @@ namespace zhetapi {
 		
 		__host__ __device__
 		const Matrix &operator=(const Matrix &);
-                
+
+		__host__ __device__
+		const T *whole() const;
+
 		__host__ __device__
 		T *operator[](size_t);
 

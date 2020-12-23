@@ -9,11 +9,21 @@ namespace zhetapi {
 	
 	template <class T>
 	__host__ __device__
-	Tensor <T> ::Tensor() : __dim(nullptr), __array(nullptr) {}
+	Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
+			__size(0), __on_device(false) {}
+	
+	template <class T>
+	__host__ __device__
+	Tensor <T> ::Tensor(bool dev) : __dim(nullptr), __dims(0), __array(nullptr),
+			__size(0), __on_device(dev)
+	{
+		printf("Bool constructor: %d\n", dev);
+	}
 
         template <class T>
 	__host__ __device__
-        Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)
+        Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims),
+			__size(other.__size), __on_device(false)
         {
                 __dim = new size_t[__dims];
                 for (size_t i = 0; i < __dims; i++)
@@ -26,7 +36,8 @@ namespace zhetapi {
 
 	template <class T>
 	__host__ __device__
-	Tensor <T> ::Tensor(size_t rows, size_t cols, const T &def)
+	Tensor <T> ::Tensor(size_t rows, size_t cols, const T &def) :
+			__on_device(false)
 	{
 		__dims = 2;
 		__size = rows * cols;
@@ -43,7 +54,8 @@ namespace zhetapi {
 
 	template <class T>
 	__host__ __device__
-	Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size())
+	Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1),
+		__size(arr.size()), __on_device(false)
 	{
 		__dim = new size_t[1];
 
@@ -61,7 +73,8 @@ namespace zhetapi {
 
 	template <class T>
 	__host__ __device__
-	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
+	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def) :
+			__on_device(false)
 	{
 
 #ifndef __CUDA_ARCH__
@@ -100,42 +113,39 @@ namespace zhetapi {
 
 	}
 
-	/* template <class T>
-	__host__ __device__
-	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
-			: __dims(dim.size())
-	{
-		__dim = new size_t[__dims];
+	cudaError_t e;
 
-		size_t prod = 1;
-		for (size_t i = 0; i < __dims; i++) {
-			prod *= dim[i];
-
-			__dim[i] = dim[i];
-		}
-
-		__size = prod;
-		
-		// TODO: Replace this exception handling
-		// if (!__size)
-		//	throw bad_dimensions();
-
-		// TODO: Replace this exception handling
-		// if (arr.size() != __size)
-		//	throw dimension_mismatch();
-
-		__array = new T[prod];
-
-		for (size_t i = 0; i < prod; i++)
-			__array[i] = arr[i];
-	} */
+#define cudaCheckError(addr)							\
+	e = cudaGetLastError();							\
+	if (e != cudaSuccess) {							\
+		printf("Cuda failure %s:%d: '%s' (addr = %x)\n", __FILE__,	\
+				__LINE__, cudaGetErrorString(e), addr);		\
+	}
 
 	template <class T>
 	__host__ __device__
 	Tensor <T> ::~Tensor()
 	{
+
+#ifndef __CUDA_ARCH__
+
+		if (__on_device) {
+			cudaFree(__dim);
+			cudaFree(__array);
+
+			cudaCheckError(__array);
+		} else {
+			delete[] __dim;
+			delete[] __array;
+		}
+
+#else
+
 		delete[] __dim;
 		delete[] __array;
+
+#endif
+
 	}
 
         template <class T>
@@ -157,6 +167,13 @@ namespace zhetapi {
 
                 return *this;
         }
+        
+	template <class T>
+	__host__ __device__
+        void Tensor <T> ::set_device_status(bool dev)
+	{
+		__on_device = dev;
+	}
 
 	template <class T>
 	__host__ __device__

@@ -1,3 +1,8 @@
+// C/C++ headers
+#include <ios>
+#include <iostream>
+#include <vector>
+
 // Engine headers
 #include <cuda/network.cuh>
 
@@ -13,7 +18,7 @@ int main()
 {
 	srand(clock());
 
-	const int size = 10000;
+	const int size = 10;
 	
 	// vector <Vector <double>> ins;
 	DataSet <double> ins;
@@ -40,7 +45,7 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
-	model.cuda_epochs <100, 100> (ins, outs, 100, 2500, 0.1, true);
+	model.cuda_epochs <1, 1> (ins, outs, 1, 10, 0.1, true);
 
 	// Free resources
 	delete opt;

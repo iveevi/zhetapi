@@ -53,7 +53,7 @@ if (CUDA_FOUND)
 	target_link_libraries(cuda PUBLIC cudart)
 
 	target_compile_options(cuda PRIVATE
-		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
+		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -g -G>)
 endif ()
 
 # Compile zhp file
