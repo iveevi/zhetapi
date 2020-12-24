@@ -194,7 +194,7 @@ namespace zhetapi {
 			
 			__host__ __device__
 			static Matrix <T> *gradient_isolated(Matrix <T> *,
-					Activation <T> *,
+					Activation <T> **,
 					size_t,
 					const Vector <T> &,
 					const Vector <T> &,

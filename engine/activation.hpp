@@ -29,6 +29,13 @@ namespace zhetapi {
 		class Activation {
 		public:
 
+			enum activation_type {
+				AT_Default,
+				AT_Linear,
+				AT_ReLU,
+				AT_Sigmoid
+			};
+
 #ifndef ZHP_CUDA
 			
 			Activation();
@@ -36,6 +43,8 @@ namespace zhetapi {
 			virtual Vector <T> operator()(const Vector <T> &) const;
 
 			virtual Activation *derivative() const;
+
+			int get_activation_type() const;
 
 #else
 
@@ -48,14 +57,23 @@ namespace zhetapi {
 			__host__ __device__
 			virtual Activation *derivative() const;
 
+			__host__ __device__
+			int get_activation_type() const;
+
+			template <class U>
+			__host__ __device__
+			friend Activation <U> *copy(Activation <U> *);
+
 #endif
 
+		protected:
+			activation_type kind;
 		};
 
 #ifndef ZHP_CUDA
 		
 		template <class T>
-		Activation <T> ::Activation() {}
+		Activation <T> ::Activation() : kind(AT_Default) {}
 
 		template <class T>
 		Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
@@ -67,6 +85,12 @@ namespace zhetapi {
 		Activation <T> *Activation <T> ::derivative() const
 		{
 			return new Activation();
+		}
+
+		template <class T>
+		int Activation <T> ::get_activation_type() const
+		{
+			return kind;
 		}
 
 #endif

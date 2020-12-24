@@ -39,62 +39,6 @@ namespace zhetapi {
 		        this->__array[i] = other.__array[i];
         }
 
-	// TODO: Turn this method into a virtual method with the base as Tensor
-	template <class T>
-	void Matrix <T> ::copy_to_device(Matrix <T> other)
-	{
-		this->__on_device = true;
-
-		if (this->__array)
-			delete[] this->__array;
-
-		if (this->__dim)
-			delete[] this->__dim;
-
-		cudaMalloc(&this->__array, sizeof(T) * other.__size);
-		cudaMemcpy(this->__array, other.__array, sizeof(T) *
-				other.__size, cudaMemcpyHostToDevice);
-
-		cudaMalloc(&this->__dim, 2 * sizeof(size_t));
-		cudaMemcpy(this->__dim, other.__dim, 2 * sizeof(size_t),
-				cudaMemcpyHostToDevice);
-
-		__rows = other.__rows;
-		__cols = other.__cols;
-
-		this->__size = other.__size;
-
-		this->__dims = 2;
-	}
-
-	// TODO: Turn this method into a virtual method with the base as Tensor
-	template <class T>
-	void Matrix <T> ::transfer_from_device(Matrix <T> &other)
-	{
-		if (other.__array)
-			delete[] other.__array;
-
-		if (other.__dim)
-			delete[] other.__dim;
-
-		other.__rows = 2;
-		other.__cols = 2;
-
-		other.__size = __rows * __cols;
-		
-		other.__array = new T[this->__size];
-
-		cudaMemcpy(other.__array, this->__array, sizeof(T) *
-				this->__size, cudaMemcpyDeviceToHost);
-		cudaCheckError(this->__array);
-
-		other.__dims = 2;
-
-		other.__dim = new size_t[2];
-		other.__dim[0] = __rows;
-		other.__dim[1] = __cols;
-	}
-
         template <class T>
 	__host__ __device__
         Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> (rs, cs, T())
@@ -159,11 +103,70 @@ namespace zhetapi {
 		return *this;
 	}
 
+	// TODO: Turn this method into a virtual method with the base as Tensor
+	template <class T>
+	void Matrix <T> ::copy_to_device(Matrix <T> other)
+	{
+		this->__on_device = true;
+
+		if (this->__array)
+			delete[] this->__array;
+
+		if (this->__dim)
+			delete[] this->__dim;
+
+		cudaMalloc(&this->__array, sizeof(T) * other.__size);
+		cudaMemcpy(this->__array, other.__array, sizeof(T) *
+				other.__size, cudaMemcpyHostToDevice);
+
+		cudaMalloc(&this->__dim, 2 * sizeof(size_t));
+		cudaMemcpy(this->__dim, other.__dim, 2 * sizeof(size_t),
+				cudaMemcpyHostToDevice);
+
+		__rows = other.__rows;
+		__cols = other.__cols;
+
+		this->__size = other.__size;
+
+		this->__dims = 2;
+	}
+
+	// TODO: Turn this method into a virtual method with the base as Tensor
+	template <class T>
+	void Matrix <T> ::transfer_from_device(Matrix <T> &other)
+	{
+		if (other.__array)
+			delete[] other.__array;
+
+		if (other.__dim)
+			delete[] other.__dim;
+
+		other.__rows = 2;
+		other.__cols = 2;
+
+		other.__size = __rows * __cols;
+		
+		other.__array = new T[this->__size];
+
+		cudaMemcpy(other.__array, this->__array, sizeof(T) *
+				this->__size, cudaMemcpyDeviceToHost);
+		cudaCheckError(this->__array);
+
+		other.__dims = 2;
+
+		other.__dim = new size_t[2];
+		other.__dim[0] = __rows;
+		other.__dim[1] = __cols;
+	}
+	
+	// TODO: Turn this method into a virtual method with the base as Tensor
 	template <class T>
 	__host__ __device__
-	const T *Matrix <T> ::whole() const
+	void Matrix <T> ::stable_transfer(const Matrix <T> &other)
 	{
-		return this->__array;
+		// TODO: Add error handling for when the dimensions mismatch
+		for (int i = 0; i < this->__size; i++)
+			this->__array[i] = other.__array[i];
 	}
         
 	template <class T>

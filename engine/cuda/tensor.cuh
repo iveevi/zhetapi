@@ -6,6 +6,15 @@
 #include <tensor.hpp>
 
 namespace zhetapi {
+
+	cudaError_t e;
+
+#define cudaCheckError(addr)							\
+	e = cudaGetLastError();							\
+	if (e != cudaSuccess) {							\
+		printf("Cuda failure %s:%d: '%s' (addr = %p)\n", __FILE__,	\
+				__LINE__, cudaGetErrorString(e), addr);		\
+	}
 	
 	template <class T>
 	__host__ __device__
@@ -111,15 +120,6 @@ namespace zhetapi {
 
 #endif
 
-	}
-
-	cudaError_t e;
-
-#define cudaCheckError(addr)							\
-	e = cudaGetLastError();							\
-	if (e != cudaSuccess) {							\
-		printf("Cuda failure %s:%d: '%s' (addr = %x)\n", __FILE__,	\
-				__LINE__, cudaGetErrorString(e), addr);		\
 	}
 
 	template <class T>

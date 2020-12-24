@@ -86,7 +86,7 @@ namespace zhetapi {
 			*this = Vector(other.get_rows(), T());
 
 			for (size_t i = 0; i < this->__size; i++)
-				this->__array[i] = other[0][i];
+				this->__array[i] = other[i][0];
 		}
 
 		return *this;

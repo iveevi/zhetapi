@@ -60,9 +60,12 @@ namespace zhetapi {
 		class Linear : public Activation <T> {
 			T	__alpha;
 		public:
-			Linear(const T &alpha = T(1)) : __alpha(alpha) {}
 
 #ifndef ZHP_CUDA
+
+			Linear(const T &alpha = T(1)) : __alpha(alpha) {
+				this->kind = Activation <T> ::AT_Linear;
+			}
 
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
@@ -77,6 +80,13 @@ namespace zhetapi {
 			}
 
 #else
+
+			__host__ __device__
+			Linear(const T &alpha = T(1)) : __alpha(alpha) {
+				this->kind = Activation <T> ::AT_Linear;
+				printf("Constructing linear activation...\n");
+				printf("\tkind = %d\n", this->kind);
+			}
 			
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
@@ -131,6 +141,10 @@ namespace zhetapi {
 		public:
 
 #ifndef ZHP_CUDA
+			
+			ReLU() {
+				this->kind = Activation <T> ::AT_ReLU;
+			}
 
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
@@ -145,6 +159,13 @@ namespace zhetapi {
 			}
 
 #else
+
+			__host__ __device__
+			ReLU() {
+				this->kind = Activation <T> ::AT_ReLU;
+				printf("Constructing ReLU activation...\n");
+				printf("\tkind = %d\n", this->kind);
+			}
 			
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
@@ -233,6 +254,11 @@ namespace zhetapi {
 		public:
 
 #ifndef ZHP_CUDA
+			
+			Sigmoid() {
+				this->kind = Activation <T> ::AT_Sigmoid;
+			}
+
 
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
@@ -247,6 +273,13 @@ namespace zhetapi {
 			}
 
 #else
+
+			__host__ __device__
+			Sigmoid() {
+				this->kind = Activation <T> ::AT_Sigmoid;
+				printf("Constructing Sigmoid activation...\n");
+				printf("\tkind = %d\n", this->kind);
+			}
 
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
@@ -343,6 +376,37 @@ namespace zhetapi {
 				return new __DSoftmax <T> ();
 			}
 		};
+
+#ifdef ZHP_CUDA
+
+		// Copy base activations
+		template <class T>
+		__host__ __device__
+		Activation <T> *copy(Activation <T> *act)
+		{
+			printf("Searching for appropriate label (kind = %d)\n", act->kind);
+			printf("\t(Either of %d, %d, %d or %d)\n", Activation <T>
+					::AT_Default, Activation <T>
+					::AT_Linear, Activation <T> ::AT_ReLU,
+					Activation <T> ::AT_Sigmoid);
+
+			switch (act->kind) {
+			case Activation <T> ::AT_Default:
+				return new Activation <T> ();
+			case Activation <T> ::AT_Linear:
+				// TODO: Try to transfer __alpha content
+				return new Linear <T> ();
+			case Activation <T> ::AT_ReLU:
+				return new ReLU <T> ();
+			case Activation <T> ::AT_Sigmoid:
+				return new Sigmoid <T> ();
+			}
+
+			printf("\tFound no such label...\n");
+			return nullptr;
+		}
+
+#endif
 
 	}
 

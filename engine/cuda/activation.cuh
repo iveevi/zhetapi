@@ -13,7 +13,7 @@ namespace zhetapi {
 	
 		template <class T>
 		__host__ __device__
-		Activation <T> ::Activation() {}
+		Activation <T> ::Activation() : kind(AT_Default) {}
 
 		template <class T>
 		__host__ __device__
@@ -27,6 +27,13 @@ namespace zhetapi {
 		Activation <T> *Activation <T> ::derivative() const
 		{
 			return new Activation();
+		}
+
+		template <class T>
+		__host__ __device__
+		int Activation <T> ::get_activation_type() const
+		{
+			return kind;
 		}
 
 	}
