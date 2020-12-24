@@ -31,6 +31,13 @@ namespace zhetapi {
 			return new Optimizer();
 		}
 
+		template <class T>
+		__host__ __device__
+		int Optimizer <T> ::get_optimizer_type() const
+		{
+			return kind;
+		}
+
 	}
 
 }

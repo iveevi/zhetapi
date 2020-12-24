@@ -36,7 +36,8 @@ int main()
 		{2, new zhetapi::ml::ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
-	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
+	auto crit = [] __device__ (zhetapi::Vector <double> actual,
+			zhetapi::Vector <double> expected) {
 		return actual == expected;
 	};
 
@@ -45,7 +46,12 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
-	model.cuda_epochs <1, 1> (ins, outs, 1, 10, 0.1, true);
+
+	cout << "GPU Training..." << endl;
+	model.cuda_epochs <decltype(crit), 1, 4> (ins, outs, 1, 10, 0.1, crit, true);
+
+	cout << endl << "CPU Training..." << endl;
+	model.epochs(ins, outs, 1, 10, 0.1, true);
 
 	// Free resources
 	delete opt;

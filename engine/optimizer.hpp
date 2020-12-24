@@ -23,6 +23,12 @@ namespace zhetapi {
 		template <class T>
 		class Optimizer {
 		public:
+			
+			enum optimizer_type {
+				OPT_Default,
+				OPT_SE,
+				OPT_MSE,
+			};
 
 #ifndef ZHP_CUDA
 			
@@ -31,6 +37,8 @@ namespace zhetapi {
 			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
 			virtual Optimizer *derivative() const;
+			
+			int get_optimizer_type() const;
 
 #else
 
@@ -42,15 +50,24 @@ namespace zhetapi {
 			
 			__host__ __device__
 			virtual Optimizer *derivative() const;
+		
+			__host__ __device__
+			int get_optimizer_type() const;
+
+			template <class U>
+			__host__ __device__
+			friend Optimizer <U> *copy(Optimizer <U> *);
 
 #endif
 
+		protected:
+			optimizer_type kind;
 		};
 
 #ifndef ZHP_CUDA
 
 		template <class T>
-		Optimizer <T> ::Optimizer() {}
+		Optimizer <T> ::Optimizer() : kind(OPT_Default) {}
 
 		template <class T>
 		Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
@@ -62,6 +79,12 @@ namespace zhetapi {
 		Optimizer <T> *Optimizer <T> ::derivative() const
 		{
 			return new Optimizer();
+		}
+
+		template <class T>
+		int Optimizer <T> ::get_optimizer_type() const
+		{
+			return kind;
 		}
 
 #endif

@@ -44,6 +44,17 @@ namespace zhetapi {
 		{
 			return a == e;
 		};
+		
+#ifdef ZHP_CUDA
+		
+		template <class T>
+		__device__
+		bool cuda_default_comparator(const Vector <T> &a, const Vector <T> &e)
+		{
+			return a == e;
+		};
+
+#endif
 
 		/*
 		* Nerual Network
@@ -66,21 +77,21 @@ namespace zhetapi {
 			class bad_gradient {};
 			class bad_io_dimensions {};
 		private:
-			Layer <T> *			__layers;
-			Matrix <T> *			__weights;
-			Matrix <T> *			__momentum;
-			std::function <T ()>		__random;
-			size_t				__isize;
-			size_t				__osize;
-			size_t				__size;
+			Layer <T> *				__layers;
+			Matrix <T> *				__weights;
+			Matrix <T> *				__momentum;
+			std::function <T ()>			__random;
+			size_t					__isize;
+			size_t					__osize;
+			size_t					__size;
 
-			std::vector <Vector <T>>	__a;
-			std::vector <Vector <T>>	__z;
+			std::vector <Vector <T>>		__a;
+			std::vector <Vector <T>>		__z;
 
-			Optimizer <T> *			__cost;
-			Comparator <T>			__cmp;
+			Optimizer <T> *				__cost;
 			
-			static Comparator <T>		__default_comparator;
+			Comparator <T>				__cmp;
+			static Comparator <T>			__default_comparator;
 		public:
 			NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
 
@@ -200,14 +211,15 @@ namespace zhetapi {
 					const Vector <T> &,
 					Optimizer <T> *);
 			
-			template <size_t = 1, size_t = 1>
+			template <class F, size_t = 1, size_t = 1>
 			TrainingStatistics cuda_batch(const DataSet <T> &,
-				const DataSet <T> &, T, T);
+				const DataSet <T> &, T, T, F);
 
-			template <size_t = 1, size_t = 1>
+			template <class F, size_t = 1, size_t = 1>
 			TrainingStatistics cuda_epochs(const DataSet <T> &,
 				const DataSet <T> &,
 				size_t, size_t, T,
+				F,
 				bool = false);
 
 #endif
@@ -706,7 +718,7 @@ namespace zhetapi {
 				
 			for (size_t j = 0; j < __size - 1; j++)
 				grad[j] /= (double) size;
-
+			
 			apply_gradient(grad, alpha, 0.7);
 			
 			total = clk.now();

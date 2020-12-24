@@ -84,8 +84,6 @@ namespace zhetapi {
 			__host__ __device__
 			Linear(const T &alpha = T(1)) : __alpha(alpha) {
 				this->kind = Activation <T> ::AT_Linear;
-				printf("Constructing linear activation...\n");
-				printf("\tkind = %d\n", this->kind);
 			}
 			
 			__host__ __device__
@@ -163,8 +161,6 @@ namespace zhetapi {
 			__host__ __device__
 			ReLU() {
 				this->kind = Activation <T> ::AT_ReLU;
-				printf("Constructing ReLU activation...\n");
-				printf("\tkind = %d\n", this->kind);
 			}
 			
 			__host__ __device__
@@ -277,8 +273,6 @@ namespace zhetapi {
 			__host__ __device__
 			Sigmoid() {
 				this->kind = Activation <T> ::AT_Sigmoid;
-				printf("Constructing Sigmoid activation...\n");
-				printf("\tkind = %d\n", this->kind);
 			}
 
 			__host__ __device__
@@ -384,12 +378,6 @@ namespace zhetapi {
 		__host__ __device__
 		Activation <T> *copy(Activation <T> *act)
 		{
-			printf("Searching for appropriate label (kind = %d)\n", act->kind);
-			printf("\t(Either of %d, %d, %d or %d)\n", Activation <T>
-					::AT_Default, Activation <T>
-					::AT_Linear, Activation <T> ::AT_ReLU,
-					Activation <T> ::AT_Sigmoid);
-
 			switch (act->kind) {
 			case Activation <T> ::AT_Default:
 				return new Activation <T> ();
@@ -402,7 +390,6 @@ namespace zhetapi {
 				return new Sigmoid <T> ();
 			}
 
-			printf("\tFound no such label...\n");
 			return nullptr;
 		}
 

@@ -202,9 +202,10 @@ namespace zhetapi {
         Matrix <T> Matrix <T> ::transpose() const
         {
                 return Matrix <T> (__cols, __rows,
-			[&](size_t i, size_t j) {
+			[this] __device__ (size_t i, size_t j) {
 				return this->__array[j * __cols + i];
-		});
+			}
+		);
         }
 
         template <class T>
@@ -285,7 +286,7 @@ namespace zhetapi {
 #endif
 
                 return Matrix <T> (a.__rows, b.__cols,
-			[&](size_t i, size_t j) {
+			[a, b] __device__ (size_t i, size_t j) {
 				T acc = 0;
 
 				for (size_t k = 0; k < a.__cols; k++)

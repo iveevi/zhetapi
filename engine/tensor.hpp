@@ -183,7 +183,7 @@ namespace zhetapi {
 
 	// Constructors and memory relevant functions
 	template <class T>
-	Tensor <T> ::Tensor() : __dim(nullptr), __dim(0), __array(nullptr),
+	Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
 			__size(0) {}
 
         template <class T>
