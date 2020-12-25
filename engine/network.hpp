@@ -617,7 +617,7 @@ namespace zhetapi {
 			if (printing) {
 				std::string str = "#" + std::to_string(id);
 
-				std::cout << "Batch " << std::setw(6)
+				std::cout << "\nBatch " << std::setw(6)
 					<< str << " (" << ins.size() << ")";
 			}
 
@@ -636,7 +636,8 @@ namespace zhetapi {
 
 			Matrix <T> **grads = new Matrix <T> *[size];
 			if (threads == 1) {
-				std::cout << " [";
+				if (printing)
+					std::cout << " [";
 				
 				for (int i = 0; i < size; i++) {
 					Vector <T> actual = compute(ins[i]);
@@ -663,7 +664,8 @@ namespace zhetapi {
 					}
 				}
 
-				std::cout << "]";
+				if (printing)
+					std::cout << "]";
 			} else {
 				std::vector <std::thread> army;
 				
@@ -725,11 +727,6 @@ namespace zhetapi {
 			for (size_t j = 0; j < __size - 1; j++)
 				grad[j] /= (double) size;
 
-			using namespace std;
-			printf("\n\nCPU Gradients:\n");
-			for (int i = 0; i < __size - 1; i++)
-				cout << grad[i] << endl;
-			
 			apply_gradient(grad, alpha, 0.7);
 			
 			total = clk.now();
@@ -786,7 +783,7 @@ namespace zhetapi {
 					<< std::endl
 					<< "\nEpoch #" << (i + 1)
 					<< " (" << lr
-					<< ")\n" << std::endl;
+					<< ")" << std::endl;
 				
 				passed = 0;
 				err = 0;

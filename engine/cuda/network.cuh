@@ -663,6 +663,14 @@ namespace zhetapi {
 			// Run the kernel
 			Lock lock;
 
+			cudaEvent_t start;
+			cudaEvent_t end;
+
+			cudaEventCreate(&start);
+			cudaEventCreate(&end);
+
+			cudaEventRecord(start, 0);
+
 			training_kernel <<<blocks, threads, threads *
 				sizeof(double) + threads * sizeof(int)>>> (
 				dev_weights,
@@ -685,12 +693,13 @@ namespace zhetapi {
 				dev_Javg,
 				lock
 			);
+			
+			cudaEventRecord(end, 0);
 
 			cudaDeviceSynchronize();
+			cudaEventSynchronize(end);
 
 			// Copy items back to host
-			// printf("\nFinished training on batch\n");
-
 			cudaMemcpy(&result, dev_result,
 					sizeof(TrainingStatistics),
 					cudaMemcpyDeviceToHost);
@@ -700,16 +709,17 @@ namespace zhetapi {
 					(net_size - 1), cudaMemcpyDeviceToHost);
 			cudaCheckError(dev_Javg);
 
+			float kernel_time;
+
+			cudaEventElapsedTime(&kernel_time, start, end);
+
+			result.__time = kernel_time;
+
 			// Apply the gradient
 			for (int i = 0; i < net_size - 1; i++)
 				pre_Javg[i].transfer_from_device(Javg[i]);
 
-			using namespace std;
-			printf("GPU Gradients:\n");
-			for (int i = 0; i < net_size - 1; i++)
-				cout << Javg[i] << endl;
-
-			// apply_gradient(Javg, alpha, mu);
+			apply_gradient(Javg, alpha, mu);
 
 			// Deallocate memory
 			delete[] pre_weights;
@@ -725,6 +735,9 @@ namespace zhetapi {
 
 			cudaFree(dev_result);
 			cudaFree(dev_Javg);
+
+			cudaEventDestroy(start);
+			cudaEventDestroy(end);
 
 			for (int i = 0; i < net_size; i++)
 				cudaFree(pre_acts[i]);
@@ -768,7 +781,7 @@ namespace zhetapi {
 					<< std::endl
 					<< "\nEpoch #" << (i + 1)
 					<< " (" << lr
-					<< ")\n" << std::endl;
+					<< ")" << std::endl;
 				
 				passed = 0;
 				err = 0;
