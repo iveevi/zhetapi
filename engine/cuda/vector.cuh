@@ -92,6 +92,66 @@ namespace zhetapi {
 		return *this;
 	}
 	
+	// TODO: Turn this method into a virtual method with the base as Tensor
+	template <class T>
+	void Vector <T> ::copy_to_device(const Vector <T> &other)
+	{
+		/* printf("Copying vector to device...\n");
+		printf("\tOther.size = %d ({%f, %f})\n", other.__size, other[0],
+				other[1]); */
+
+		this->__on_device = true;
+
+		if (this->__array)
+			delete[] this->__array;
+
+		if (this->__dim)
+			delete[] this->__dim;
+
+		cudaMalloc(&(this->__array), sizeof(T) * other.__size);
+		cudaMemcpy(this->__array, other.__array, sizeof(T) *
+				other.__size, cudaMemcpyHostToDevice);
+
+		this->__rows = other.__rows;
+		this->__cols = other.__cols;
+
+		this->__size = other.__size;
+
+		this->__dims = 2;
+
+		cudaMalloc(&this->__dim, 2 * sizeof(size_t));
+		cudaMemcpy(this->__dim, other.__dim, 2 * sizeof(size_t),
+				cudaMemcpyHostToDevice);
+	}
+
+	// TODO: Turn this method into a virtual method with the base as Tensor
+	template <class T>
+	void Vector <T> ::transfer_from_device(Vector <T> &other)
+	{
+		if (other.__array)
+			delete[] other.__array;
+
+		if (other.__dim)
+			delete[] other.__dim;
+
+		other.__rows = this->__rows;
+		other.__cols = this->__cols;
+
+		other.__size = this->__rows * this->__cols;
+		
+		other.__array = new T[this->__size];
+
+		cudaMemcpy(other.__array, this->__array, sizeof(T) *
+				this->__size, cudaMemcpyDeviceToHost);
+		cudaCheckError(this->__array);
+
+		other.__dims = 2;
+
+		other.__dim = new size_t[2];
+		other.__dim[0] = this->__rows;
+		other.__dim[1] = this->__cols;
+	}
+	
 	// Indexing operators
 	template <class T>
 	__host__ __device__

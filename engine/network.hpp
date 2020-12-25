@@ -169,6 +169,9 @@ namespace zhetapi {
 			static Matrix <T> *adjusted(Matrix <T> *, Matrix <T> *,
 					size_t, T mu);
 
+			template <size_t = 1, size_t = 1>
+			Vector <T> cuda_compute(const Vector <T> &);
+
 			__host__ __device__
 			Vector <T> compute(const Vector <T> &,
 					Vector <T> *,
@@ -304,7 +307,7 @@ namespace zhetapi {
 			while (i < __size - 1) {
 				__a[i] = tmp.append_above(T (1));
 
-				prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+				prv = __weights[i] * tmp.append_above(T (1));
 
 				tmp = (*__layers[i + 1].second)(prv);
 
@@ -524,6 +527,7 @@ namespace zhetapi {
 			Matrix <T> *J = new Matrix <T> [__size - 1];
 
 			Vector <T> delta = (*dopt)(out, actual);
+			
 			for (int i = __size - 2; i >= 0; i--) {
 				if (i < __size - 2) {
 					delta = weights[i + 1].transpose() * delta;
@@ -628,6 +632,8 @@ namespace zhetapi {
 
 			int size = ins.size();
 
+			using namespace std;
+
 			Matrix <T> **grads = new Matrix <T> *[size];
 			if (threads == 1) {
 				std::cout << " [";
@@ -642,7 +648,7 @@ namespace zhetapi {
 					 * memory anyways, no need to allocate here.
 					  */
 					grads[i] = gradient(adjusted(0.7), ins[i], outs[i], __cost);
-					
+
 					opt_error += (*__cost)(outs[i], actual)[0];
 					per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
 
@@ -715,9 +721,14 @@ namespace zhetapi {
 				for (size_t j = 0; j < __size - 1; j++)
 					grad[j] += grads[i][j];
 			}
-				
+
 			for (size_t j = 0; j < __size - 1; j++)
 				grad[j] /= (double) size;
+
+			using namespace std;
+			printf("\n\nCPU Gradients:\n");
+			for (int i = 0; i < __size - 1; i++)
+				cout << grad[i] << endl;
 			
 			apply_gradient(grad, alpha, 0.7);
 			
@@ -824,8 +835,8 @@ namespace zhetapi {
 			std::cout << "Weights:" << std::endl;
 
 			size_t n = 0;
-			for (auto mat : __weights)
-				std::cout << "[" << ++n << "]\t" << mat << std::endl;
+			for (int i = 0; i < __size - 1; i++)
+				std::cout << "[" << ++n << "]\t" << __weights[i] << std::endl;
 			
 			std::cout << "================================" << std::endl;
 		}

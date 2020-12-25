@@ -6,14 +6,12 @@
 #include <functional>
 
 // Engine headers
-#ifndef ZHP_CUDA
-
-#include <matrix.hpp>
-
-#else
-
+#ifdef ZHP_CUDA
 #include <cuda/matrix.cuh>
-
+#define PREFIX __host__ __device__
+#else
+#include <matrix.hpp>
+#define PREFIX
 #endif
 
 namespace zhetapi {
@@ -146,6 +144,16 @@ namespace zhetapi {
 		
 		__host__ __device__
 		Vector &operator=(const Matrix <T> &);
+		
+		// Other memory concerned operations
+		void copy_to_device(const Vector <T> &);
+
+		void transfer_from_device(Vector <T> &);
+
+		PREFIX
+		T *whole() const {
+			return this->__array;
+		}
 
 		__host__ __device__
 		T &operator[](size_t);

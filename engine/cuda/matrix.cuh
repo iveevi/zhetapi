@@ -119,16 +119,16 @@ namespace zhetapi {
 		cudaMemcpy(this->__array, other.__array, sizeof(T) *
 				other.__size, cudaMemcpyHostToDevice);
 
-		cudaMalloc(&this->__dim, 2 * sizeof(size_t));
-		cudaMemcpy(this->__dim, other.__dim, 2 * sizeof(size_t),
-				cudaMemcpyHostToDevice);
-
 		__rows = other.__rows;
 		__cols = other.__cols;
 
-		this->__size = other.__size;
+		this->__size = __rows * __cols;
 
 		this->__dims = 2;
+
+		cudaMalloc(&this->__dim, 2 * sizeof(size_t));
+		cudaMemcpy(this->__dim, other.__dim, 2 * sizeof(size_t),
+				cudaMemcpyHostToDevice);
 	}
 
 	// TODO: Turn this method into a virtual method with the base as Tensor
@@ -141,8 +141,8 @@ namespace zhetapi {
 		if (other.__dim)
 			delete[] other.__dim;
 
-		other.__rows = 2;
-		other.__cols = 2;
+		other.__rows = __cols;
+		other.__cols = __rows;
 
 		other.__size = __rows * __cols;
 		
@@ -168,6 +168,28 @@ namespace zhetapi {
 		for (int i = 0; i < this->__size; i++)
 			this->__array[i] = other.__array[i];
 	}
+	
+	template <class T>
+	__host__ __device__
+	void Matrix <T> ::show(int tid) const
+	{
+		printf("#ID = %d, ", tid);
+		printf("array = %p (", this->__array);
+
+		for (size_t i = 0; i < this->__size; i++) {
+			printf("%f", this->__array[i]);
+
+			if (i < this->__size - 1)
+				printf(", ");
+		}
+
+		printf(") dim = %p ", this->__dim);
+		printf("(%d), ", this->__dim[0]);
+		printf("rows = %d, ", __rows);
+		printf("cols = %d, ", __cols);
+		printf("size = %d, ", this->__size);
+		printf("dims = %d\n", this->__dims);
+	}
         
 	template <class T>
 	__host__ __device__
@@ -182,6 +204,14 @@ namespace zhetapi {
         {
                 return (this->__array + i * __cols);
         }
+        
+	template <class T>
+	__host__ __device__
+	void Matrix <T> ::set_all(T x)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] = x;
+	}
 
         template <class T>
 	__host__ __device__
@@ -202,7 +232,7 @@ namespace zhetapi {
         Matrix <T> Matrix <T> ::transpose() const
         {
                 return Matrix <T> (__cols, __rows,
-			[this] __device__ (size_t i, size_t j) {
+			[this] __host__ __device__ (size_t i, size_t j) {
 				return this->__array[j * __cols + i];
 			}
 		);
@@ -286,7 +316,7 @@ namespace zhetapi {
 #endif
 
                 return Matrix <T> (a.__rows, b.__cols,
-			[a, b] __device__ (size_t i, size_t j) {
+			[a, b] __host__ __device__ (size_t i, size_t j) {
 				T acc = 0;
 
 				for (size_t k = 0; k < a.__cols; k++)

@@ -89,7 +89,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[x, this] __device__ (size_t i) {
+					[x, this] __host__ __device__ (size_t i) {
 						return x[i] * __alpha;
 					}
 				);
@@ -166,7 +166,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[x] __device__ (size_t i) {
+					[x] __host__ __device__ (size_t i) {
 						return (x[i] > 0) ? x[i] : 0;
 					}
 				);
@@ -233,7 +233,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[x] __device__ (size_t i) {
+					[x] __host__ __device__ (size_t i) {
 						T tmp = 1/(1 + exp(-x[i]));
 
 						return tmp * (T (1) - tmp);
@@ -278,7 +278,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[x] __device__ (size_t i) { 
+					[x] __host__ __device__ (size_t i) { 
 						return 1/(1 + exp(-x[i]));
 					}
 				);

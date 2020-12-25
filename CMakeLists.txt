@@ -71,6 +71,8 @@ if (CUDA_FOUND)
 	target_link_libraries(cuda PUBLIC ${CUDA_LIBRARIES})
 	target_link_libraries(cuda PUBLIC cudart)
 
+	set_property(TARGET cuda PROPERTY CUDA_ARCHITECTURES 70)
+
 	target_compile_options(cuda PRIVATE
 		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -g -G>)
 endif ()

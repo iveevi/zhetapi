@@ -203,11 +203,18 @@ namespace zhetapi {
 		__host__ __device__
 		void stable_transfer(const Matrix <T> &);
 
+		// For debugging
+		__host__ __device__
+		void show(int = -1) const;
+
 		__host__ __device__
 		T *operator[](size_t);
 
 		__host__ __device__
                 const T *operator[](size_t) const;
+
+		__host__ __device__
+		void set_all(T);
 
 		__host__ __device__
                 virtual size_t get_rows() const;
@@ -701,14 +708,14 @@ namespace zhetapi {
                                 oss << '[';
 
                                 for (int j = 0; j < __cols; j++) {
-                                        oss << this->__array[i][j];
+                                        oss << this->__array[i * __cols * j];
                                         if (j != __cols - 1)
                                                 oss << ", ";
                                 }
 
                                 oss << ']';
                         } else {
-                                oss << this->__array[i][0];
+                                oss << this->__array[i * __cols];
                         }
 
                         if (i < __rows - 1)
