@@ -4,6 +4,7 @@
 #define ZHP_CUDA
 
 // CUDA headers
+#include <cuda/error.cuh>
 #include <cuda/tensor.cuh>
 
 // Engine headers

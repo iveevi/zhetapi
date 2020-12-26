@@ -617,7 +617,7 @@ namespace zhetapi {
 			if (printing) {
 				std::string str = "#" + std::to_string(id);
 
-				std::cout << "\nBatch " << std::setw(6)
+				std::cout << "Batch " << std::setw(6)
 					<< str << " (" << ins.size() << ")";
 			}
 
@@ -784,6 +784,9 @@ namespace zhetapi {
 					<< "\nEpoch #" << (i + 1)
 					<< " (" << lr
 					<< ")" << std::endl;
+
+				if (printing)
+					std::cout << std::endl;
 				
 				passed = 0;
 				err = 0;

@@ -8,10 +8,12 @@
 #include <network.hpp>
 
 // CUDA headers
-#include <cuda/matrix.cuh>
-#include <cuda/vector.cuh>
 #include <cuda/activation.cuh>
+#include <cuda/error.cuh>
+#include <cuda/lock.cuh>
+#include <cuda/matrix.cuh>
 #include <cuda/optimizer.cuh>
+#include <cuda/vector.cuh>
 
 namespace zhetapi {
 
@@ -344,30 +346,6 @@ namespace zhetapi {
 			return J;
 		}
 
-		struct Lock {
-			int *mutex;
-
-			Lock() {
-				int tmp = 0;
-
-				cudaMalloc(&mutex, sizeof(int));
-				cudaMemcpy(mutex, &tmp, sizeof(int),
-						cudaMemcpyHostToDevice);
-			}
-
-			~Lock() {
-				cudaFree(mutex);
-			}
-
-			__device__ void lock() {
-				while (atomicCAS(mutex, 0, 1) != 0);
-			}
-
-			__device__ void unlock() {
-				atomicExch(mutex, 0);
-			}
-		};
-
 		// Cuda training algorithm
 		template <class T, class F>
 		__global__ 
@@ -470,6 +448,9 @@ namespace zhetapi {
 					grad[j] += tmp[j];
 
 				block_opt[threadIdx.x] += (*dev_opt)(out, actual)[0];
+
+				delete[] adj_weights;
+				delete[] tmp;
 			}
 
 			delete[] aloc;
@@ -578,13 +559,15 @@ namespace zhetapi {
 			
 			for (int i = 0; i < net_size - 1; i++) {
 				pre_weights[i].copy_to_device(__weights[i]);
+				cudaCheckError(nullptr);
 				pre_momentum[i].copy_to_device(__momentum[i]);
+				cudaCheckError(nullptr);
 			}
 
 			Activation <T> **pre_acts = new Activation <T> *[net_size];
 
 			for (int i = 0; i < net_size; i++) {
-				cudaMalloc(&pre_acts[i], sizeof(Activation <T>));
+				cuda_device_alloc(&pre_acts[i], sizeof(Activation <T>));
 				cudaMemcpy(pre_acts[i], __layers[i].second,
 						sizeof(Activation <T>),
 						cudaMemcpyHostToDevice);
@@ -618,11 +601,16 @@ namespace zhetapi {
 			Matrix <T> *dev_Javg;
 
 			// Allocate all the pointers
-			cudaMalloc(&dev_weights, sizeof(Matrix <T>) * (net_size - 1));
+			cuda_device_alloc(&dev_weights, sizeof(Matrix <T>) * (net_size - 1));
+
 			cudaMalloc(&dev_momentum, sizeof(Matrix <T>) * (net_size - 1));
+			cudaCheckError(dev_momentum);
 			
 			cudaMalloc(&d_rows, sizeof(size_t) * (net_size - 1));
+			cudaCheckError(d_rows);
+			
 			cudaMalloc(&d_cols, sizeof(size_t) * (net_size - 1));
+			cudaCheckError(d_cols);
 
 			cudaMalloc(&dev_acts, sizeof(Activation <T> *) * net_size);
 			cudaMalloc(&dev_opt, sizeof(Optimizer <T>));
@@ -722,6 +710,12 @@ namespace zhetapi {
 			apply_gradient(Javg, alpha, mu);
 
 			// Deallocate memory
+			delete[] h_ins;
+			delete[] h_outs;
+			
+			delete[] h_rows;
+			delete[] h_cols;
+
 			delete[] pre_weights;
 			delete[] pre_momentum;
 
@@ -730,11 +724,18 @@ namespace zhetapi {
 
 			cudaFree(dev_weights);
 			cudaFree(dev_momentum);
+
+			cudaFree(d_rows);
+			cudaFree(d_cols);
+
+			cudaFree(dev_acts);
 			cudaFree(dev_opt);
 			cudaFree(dev_cmp);
 
 			cudaFree(dev_result);
 			cudaFree(dev_Javg);
+
+			cudaCheckError(nullptr);
 
 			cudaEventDestroy(start);
 			cudaEventDestroy(end);

@@ -58,7 +58,7 @@ elif [ $1 = "cuda-memcheck" ]; then
 
 	mv $2 debug/$2-debug
 
-	cuda-memcheck --show-backtrace yes --racecheck-report all ./debug/$2-debug
+	cuda-memcheck --show-backtrace yes --racecheck-report all --leak-check full ./debug/$2-debug
 elif [ $1 = "cuda-gdb" ]; then
 	echo "Running $2 on cuda-gdb"
 

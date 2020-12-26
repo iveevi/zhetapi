@@ -18,7 +18,7 @@ int main()
 {
 	srand(clock());
 
-	const int size = 10;
+	const int size = 20;
 	
 	DataSet <double> ins;
 	DataSet <double> outs;
@@ -47,11 +47,10 @@ int main()
 	model.set_cost(opt);
 
 	cout << "GPU Training..." << endl;
-
-	model.cuda_epochs <decltype(crit), 1, 10> (ins, outs, 1, 10, 0.1, crit, true);
+	model.cuda_epochs <decltype(crit), 1, 10> (ins, outs, 10, 10, 0.1, crit, true);
 
 	cout << endl << "CPU Training..." << endl;
-	model.epochs(ins, outs, 1, 10, 0.1, true);
+	model.epochs(ins, outs, 10, 10, 0.1, true);
 
 	// Free resources
 	delete opt;
