@@ -89,6 +89,19 @@ elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
 	g++-8 -g source/$2.cpp -o debug/$2-debug
 
 	valgrind ./debug/$2-debug
+elif [ $1 = "callgrind" ] || [ $1 = "vgrind" ]; then
+	mkdir -p debug
+
+	cmake -DCMAKE_BUILD_TYPE=Debug .
+
+	make -j8 $2
+
+	mv $2 debug/$2-run
+
+	valgrind --tool=callgrind --callgrind-out-file=cgrind.out ./debug/$2-run
+	kcachegrind cgrind.out
+
+	rm cgrind.out
 elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
 	echo "Running source/$2.cpp with optimization"
 

@@ -44,7 +44,10 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
-	model.epochs <8> (ins, outs, 10, 250, 0.1, true);
+	model.epochs <8> (ins, outs, 1, 250, 0.1, true);
+
+	cout << "Saving model..." << endl;
+	model.save("model.out");
 
 	// Free resources
 	delete opt;
