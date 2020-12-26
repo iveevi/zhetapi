@@ -10,10 +10,28 @@
 // Engine headers
 #include <matrix.hpp>
 
+#define inline_init_mat(mat, rs, cs)	\
+	Matrix <T> other;		\
+					\
+	other.__rows = rs;		\
+	other.__cols = cs;		\
+					\
+	other.__array = new T[rs * cs];	\
+					\
+	other.__dims = 2;		\
+					\
+	other.__dim = new size_t[2];	\
+					\
+	other.__dim[0] = rs;		\
+	other.__dim[1] = cs;
+
 namespace zhetapi {
 	
 	size_t cpu_matrix_copies = 0;
+	size_t cpu_matrix_opeq = 0;
+
 	__device__ size_t gpu_matrix_copies = 0;
+	__device__ size_t gpu_matrix_opeq = 0;
 
         template <class T>
 	__host__ __device__
@@ -108,6 +126,17 @@ namespace zhetapi {
 	__host__ __device__
 	const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 	{
+
+#ifdef __CUDA_ARCH__
+
+		gpu_matrix_opeq++;
+
+#else
+
+		cpu_matrix_opeq++;
+
+#endif
+
 		if (this != &other) {
 			delete[] this->__array;
 			delete[] this->__dim;
@@ -195,6 +224,25 @@ namespace zhetapi {
 		for (int i = 0; i < this->__size; i++)
 			this->__array[i] = other.__array[i];
 	}
+        
+	template <class T>
+	__host__ __device__
+        void Matrix <T> ::stable_shur(const Matrix <T> &other)
+        {
+
+#ifndef __CUDA_ARCH__
+                
+		// TODO: Replace with better exception handling for the device
+		if (!((other.get_rows() == __rows)
+			&& (other.get_cols() == __cols)))
+			throw typename Matrix <T> ::dimension_mismatch();
+
+#endif
+
+		// Fill out the matrix
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] *= other.__array[i];
+        }
 	
 	template <class T>
 	__host__ __device__
@@ -337,16 +385,19 @@ namespace zhetapi {
 
 #ifdef __CUDA_ARCH__
 
-		/* Matrix <T> other(a.__rows, b.__cols, T(0));
-
+		// Cache constants
 		size_t rs = a.__rows;
 		size_t cs = b.__cols;
 
 		size_t kmax = a.__cols;
 
+
+		// Fill out the matrix
+		inline_init_mat(other, rs, cs);
+
 		for (size_t i = 0; i < rs; i++) {
 			for (size_t j = 0; j < cs; j++) {
-				T acc;
+				T acc = 0;
 
 				for (size_t k = 0; k < kmax; k++)
 					acc += a[i][k] * b[k][j];
@@ -355,18 +406,7 @@ namespace zhetapi {
 			}
 		}
 
-		return other; */
-                
-		return Matrix <T> (a.__rows, b.__cols,
-			[a, b] __device__ (size_t i, size_t j) {
-				T acc = 0;
-
-				for (size_t k = 0; k < a.__cols; k++)
-					acc += a[i][k] * b[k][j];
-
-				return acc;
-			}
-		);
+		return other;
 
 #else
 
@@ -461,11 +501,18 @@ namespace zhetapi {
 
 #else
 
-                return Matrix <T> (a.__rows, a.__cols,
-			[a, b] __device__ (size_t i, size_t j) {
-                        	return a[i][j] * b[i][j];
-			}
-		);
+		// Cache constants
+		size_t rs = a.__rows;
+		size_t cs = a.__cols;
+
+		size_t sz = rs * cs;
+
+		// Fill out the matrix
+		inline_init_mat(other, rs, cs);
+		for (size_t i = 0; i < sz; i++)
+			other.__array[i] = a.__array[i] * b.__array[i];
+
+		return other;
 
 #endif
 

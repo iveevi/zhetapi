@@ -68,10 +68,10 @@ namespace zhetapi {
 		public:
 			// Training statistics
 			struct TrainingStatistics {
-				size_t	__passed;
-				T	__cost;
-				double	__kernel_time;
-				double	__full_time;
+				size_t	__passed = 0;
+				T	__cost = T(0);
+				double	__kernel_time = 0;
+				double	__full_time = 0;
 			};
 
 			// Exceptions

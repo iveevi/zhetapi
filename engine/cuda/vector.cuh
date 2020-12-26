@@ -11,7 +11,10 @@
 namespace zhetapi {
 	
 	size_t cpu_vector_copies = 0;
+	size_t cpu_vector_opeq = 0;
+	
 	__device__ size_t gpu_vector_copies = 0;
+	__device__ size_t gpu_vector_opeq = 0;
 
 	template <class T>
 	__host__ __device__
@@ -67,6 +70,17 @@ namespace zhetapi {
 	__host__ __device__
 	Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	{
+
+#ifdef __CUDA_ARCH__
+
+		gpu_vector_opeq++;
+
+#else
+
+		cpu_vector_opeq++;
+
+#endif
+
 		if (this != &other) {
 			delete[] this->__array;
 			delete[] this->__dim;

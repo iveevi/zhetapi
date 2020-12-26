@@ -11,7 +11,10 @@
 namespace zhetapi {
 
 	size_t cpu_tensor_copies = 0;
+	size_t cpu_tensor_opeq = 0;
+	
 	__device__ size_t gpu_tensor_copies = 0;
+	__device__ size_t gpu_tensor_opeq = 0;
 
 	template <class T>
 	__host__ __device__
@@ -162,6 +165,17 @@ namespace zhetapi {
 	__host__ __device__
         Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
         {
+
+#ifdef __CUDA_ARCH__
+
+		gpu_tensor_opeq++;
+
+#else
+
+		cpu_tensor_opeq++;
+
+#endif
+
                 if (this != &other) {
                         __dims = other.__dims;
                         __size = other.__size;

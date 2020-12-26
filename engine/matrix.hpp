@@ -203,6 +203,9 @@ namespace zhetapi {
 		__host__ __device__
 		void stable_transfer(const Matrix <T> &);
 
+		__host__ __device__
+		void stable_shur(const Matrix <T> &);
+
 		// For debugging
 		__host__ __device__
 		void show(int = -1) const;

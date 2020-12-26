@@ -350,7 +350,8 @@ Matrix <T> *NeuralNetwork <T> ::gradient_isolated(Matrix <T> *weights,
 template <class T>
 template <class F>
 __host__ __device__
-void NeuralNetwork <T> ::gradient_and_accumulate_isolated(Matrix <T> *weights,
+void NeuralNetwork <T> ::gradient_and_accumulate_isolated(
+		Matrix <T> *weights,
 		Activation <T> **acts,
 		size_t size,
 		const Vector <T> &in,
@@ -385,8 +386,6 @@ void NeuralNetwork <T> ::gradient_and_accumulate_isolated(Matrix <T> *weights,
 	Optimizer <T> *dev_dopt = dev_opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
-	// Matrix <T> *J = new Matrix <T> [size - 1];
-
 	Vector <T> delta = (*dev_dopt)(out, actual);
 	for (int i = size - 2; i >= 0; i--) {
 		if (i < size - 2) {
@@ -394,12 +393,9 @@ void NeuralNetwork <T> ::gradient_and_accumulate_isolated(Matrix <T> *weights,
 			delta = delta.remove_top();
 		}
 		
-		delta = shur(delta, z[i]);
+		delta.stable_shur(z[i]);
 		
-		Matrix <T> Ji = delta * a[i].transpose();
-
-		grad[i] += Ji;
-		// J[i] = Ji;
+		grad[i] += delta * a[i].transpose();
 	}
 
 	// Free resources
@@ -408,9 +404,6 @@ void NeuralNetwork <T> ::gradient_and_accumulate_isolated(Matrix <T> *weights,
 
 	delete dev_opt;
 	delete dev_dopt;
-
-	// Return the gradient (skip checking)
-	// return J;
 }
 
 // Cuda training algorithm
@@ -480,22 +473,11 @@ void training_kernel(
 
 	delete dev_opt;
 
-	// Initially fill the gradient
-	if (tid == 0) {
-		for (int i = 0; i < net_size - 1; i++)
-			Javg[i].set_all(0);
-
-		ts->__passed = 0;
-		ts->__cost = 0;
-	}
-	
-	__syncthreads();
-
 	// Combine the gradients into Javg
 	lock.lock();
 
 	for (int i = 0; i < net_size - 1; i++)
-		Javg[i] += grad[i];
+		Javg[i] += (grad[i] / T(data_size));
 
 	ts->__passed += gpass;
 	ts->__cost += gopt;
@@ -503,14 +485,6 @@ void training_kernel(
 	lock.unlock();
 
 	delete[] grad;
-
-	__syncthreads();
-
-	// Average the gradient
-	if (tid == 0) {
-		for (int i = 0; i < net_size - 1; i++)
-			Javg[i] /= T(data_size);
-	}
 }
 
 // Training a batch with CUDA
@@ -587,8 +561,13 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 	Matrix <T> *pre_Javg = new Matrix <T> [net_size - 1];
 
-	for (int i = 0; i < net_size - 1; i++)
-		pre_Javg[i].copy_to_device(__weights[i]);
+	Matrix <T> tmp;
+	for (int i = 0; i < net_size - 1; i++) {
+		tmp = __weights[i];
+		tmp.set_all(0);
+
+		pre_Javg[i].copy_to_device(tmp);
+	}
 
 	// Storage for kernel results
 	TrainingStatistics result;

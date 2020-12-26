@@ -20,6 +20,9 @@ __global__ void reset_gpu_counters()
 	gpu_tensor_copies = 0;
 	gpu_matrix_copies = 0;
 	gpu_vector_copies = 0;
+	gpu_tensor_opeq = 0;
+	gpu_matrix_opeq = 0;
+	gpu_vector_opeq = 0;
 }
 
 __global__ void print_gpu_counters()
@@ -27,6 +30,9 @@ __global__ void print_gpu_counters()
 	printf("GPU-tensor (objects)\t%lu\n", gpu_tensor_copies);
 	printf("GPU-matrix (objects)\t%lu\n", gpu_matrix_copies);
 	printf("GPU-vector (objects)\t%lu\n", gpu_vector_copies);
+	printf("GPU-tensor (opeq)\t%lu\n", gpu_tensor_opeq);
+	printf("GPU-matrix (opeq)\t%lu\n", gpu_matrix_opeq);
+	printf("GPU-vector (opeq)\t%lu\n", gpu_vector_opeq);
 }
 
 void reset_counters()
@@ -34,6 +40,9 @@ void reset_counters()
 	cpu_tensor_copies = 0;
 	cpu_matrix_copies = 0;
 	cpu_vector_copies = 0;
+	cpu_tensor_opeq = 0;
+	cpu_matrix_opeq = 0;
+	cpu_vector_opeq = 0;
 	
 	reset_gpu_counters <<<1, 1>>> ();
 
@@ -46,6 +55,9 @@ void print_counters()
 	printf("CPU-tensor (objects)\t%lu\n", cpu_tensor_copies);
 	printf("CPU-matrix (objects)\t%lu\n", cpu_matrix_copies);
 	printf("CPU-vector (objects)\t%lu\n", cpu_vector_copies);
+	printf("CPU-tensor (opeq)\t%lu\n", cpu_tensor_opeq);
+	printf("CPU-matrix (opeq)\t%lu\n", cpu_matrix_opeq);
+	printf("CPU-vector (opeq)\t%lu\n", cpu_vector_opeq);
 	
 	printf("------------------------\n");
 
@@ -88,13 +100,13 @@ int main()
 	model.set_cost(opt);
 
 	cout << "GPU Training..." << endl;
-	model.cuda_epochs <decltype(crit), 1, 10> (ins, outs, 1, 10, 0.1, crit, true);
+	model.cuda_epochs <decltype(crit), 1, 1> (ins, outs, 1, 10, 0.1, crit, true);
 
 	print_counters();
 	reset_counters();
 
 	cout << endl << "CPU Training..." << endl;
-	model.epochs <10> (ins, outs, 1, 10, 0.1, true);
+	model.epochs(ins, outs, 1, 10, 0.1, true);
 	
 	print_counters();
 	reset_counters();
