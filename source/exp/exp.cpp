@@ -17,7 +17,7 @@ int main()
 {
 	srand(clock());
 
-	const int size = 10;
+	const int size = 1000;
 	
 	// vector <Vector <double>> ins;
 	DataSet <double> ins;
@@ -44,7 +44,7 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
-	model.epochs <8> (ins, outs, 1, 10, 0.1, true);
+	model.epochs <8> (ins, outs, 10, 250, 0.1, true);
 
 	// Free resources
 	delete opt;

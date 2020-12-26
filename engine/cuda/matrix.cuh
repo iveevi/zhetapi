@@ -11,6 +11,9 @@
 #include <matrix.hpp>
 
 namespace zhetapi {
+	
+	size_t cpu_matrix_copies = 0;
+	__device__ size_t gpu_matrix_copies = 0;
 
         template <class T>
 	__host__ __device__
@@ -25,7 +28,18 @@ namespace zhetapi {
         Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
                                                        (other.__rows, other.__cols, T())
         {
-                for (int i = 0; i < __rows; i++) {
+
+#ifdef __CUDA_ARCH__
+
+		gpu_matrix_copies++;
+
+#else
+
+		cpu_matrix_copies++;
+
+#endif
+                
+		for (int i = 0; i < __rows; i++) {
                         for (int j = 0; j < __cols; j++)
                                 this->__array[__cols * i + j] = other.__array[__cols * i + j];
                 }
@@ -53,16 +67,28 @@ namespace zhetapi {
                 }
         }
 
+	// Assumes that the users knows that the memory will not be deleted
         template <class T>
 	__host__ __device__
-        Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr) : Tensor <T> (rs, cs, T())
-        {
-                __rows = rs;
-                __cols = cs;
+	Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr) // : Tensor <T> (rs, cs, T())
+	{
+		this->__size = rs * cs;
 
-                for (int i = 0; i < this->__size; i++)
-			this->__array[i] = arr[i];
-        }
+		__rows = rs;
+		__cols = cs;
+
+		this->__dim = new size_t[2];
+
+		this->__dim[0] = rs;
+		this->__dim[1] = cs;
+
+		this->__array = arr;
+
+		this->__sliced = true;
+
+		/* for (int i = 0; i < this->__size; i++)
+			this->__array[i] = arr[i]; */
+	}
 
         template <class T>
 	template <class F>
@@ -296,7 +322,7 @@ namespace zhetapi {
 	__host__ __device__
         Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
         {
-                assert(a.__rows == b.__rows && a.__cols == b.__cols);
+                // assert(a.__rows == b.__rows && a.__cols == b.__cols);
 		return Matrix <T> (a.__rows, a.__cols,
 			[&](size_t i, size_t j) {
                         	return a[i][j] - b[i][j];
@@ -309,15 +335,30 @@ namespace zhetapi {
         Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
         {
 
-#ifndef __CUDA_ARCH__
+#ifdef __CUDA_ARCH__
 
-		if (a.__cols != b.__rows)
-			throw typename Matrix <T> ::dimension_mismatch();
+		/* Matrix <T> other(a.__rows, b.__cols, T(0));
 
-#endif
+		size_t rs = a.__rows;
+		size_t cs = b.__cols;
 
-                return Matrix <T> (a.__rows, b.__cols,
-			[a, b] __host__ __device__ (size_t i, size_t j) {
+		size_t kmax = a.__cols;
+
+		for (size_t i = 0; i < rs; i++) {
+			for (size_t j = 0; j < cs; j++) {
+				T acc;
+
+				for (size_t k = 0; k < kmax; k++)
+					acc += a[i][k] * b[k][j];
+
+				other.__array[i * cs + j] = acc;
+			}
+		}
+
+		return other; */
+                
+		return Matrix <T> (a.__rows, b.__cols,
+			[a, b] __device__ (size_t i, size_t j) {
 				T acc = 0;
 
 				for (size_t k = 0; k < a.__cols; k++)
@@ -326,6 +367,25 @@ namespace zhetapi {
 				return acc;
 			}
 		);
+
+#else
+
+		if (a.__cols != b.__rows)
+			throw typename Matrix <T> ::dimension_mismatch();
+
+                return Matrix <T> (a.__rows, b.__cols,
+			[&](size_t i, size_t j) {
+				T acc = 0;
+
+				for (size_t k = 0; k < a.__cols; k++)
+					acc += a[i][k] * b[k][j];
+
+				return acc;
+			}
+		);
+
+#endif
+
         }
 
         template <class T>

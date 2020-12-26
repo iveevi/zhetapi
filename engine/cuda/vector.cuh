@@ -9,6 +9,9 @@
 #include <cuda/matrix.cuh>
 
 namespace zhetapi {
+	
+	size_t cpu_vector_copies = 0;
+	__device__ size_t gpu_vector_copies = 0;
 
 	template <class T>
 	__host__ __device__
@@ -18,6 +21,17 @@ namespace zhetapi {
 	__host__ __device__
 	Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())
 	{
+
+#ifdef __CUDA_ARCH__
+
+		gpu_vector_copies++;
+
+#else
+
+		cpu_vector_copies++;
+
+#endif
+		
 		for (size_t i = 0; i < this->__size; i++)
 			this->__array[i] = other.__array[i];
 	}
@@ -37,11 +51,7 @@ namespace zhetapi {
 	// FIXME: Delegate Matrix constructor
 	template <class T>
 	__host__ __device__
-	Vector <T> ::Vector(size_t rs, T *ref) : Matrix <T> (rs, 1, T())
-	{
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = ref[i];
-	}
+	Vector <T> ::Vector(size_t rs, T *arr) : Matrix <T> (rs, 1, arr) {}
 
 	template <class T>
 	template <class F>

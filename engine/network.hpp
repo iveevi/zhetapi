@@ -70,7 +70,8 @@ namespace zhetapi {
 			struct TrainingStatistics {
 				size_t	__passed;
 				T	__cost;
-				double	__time;
+				double	__kernel_time;
+				double	__full_time;
 			};
 
 			// Exceptions
@@ -213,6 +214,19 @@ namespace zhetapi {
 					const Vector <T> &,
 					const Vector <T> &,
 					Optimizer <T> *);
+			
+			template <class F>
+			__host__ __device__
+			static void gradient_and_accumulate_isolated(Matrix <T> *,
+					Activation <T> **,
+					size_t,
+					const Vector <T> &,
+					const Vector <T> &,
+					Optimizer <T> *,
+					F cmp,
+					Matrix <T> *,
+					double &,
+					int &);
 			
 			template <class F, size_t = 1, size_t = 1>
 			TrainingStatistics cuda_batch(const DataSet <T> &,
@@ -687,7 +701,7 @@ namespace zhetapi {
 							pass[offset]++;
 
 						grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
-						
+					
 						optes[offset] += (*__cost)(outs[i], actual)[0];
 						peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 					}
@@ -700,11 +714,11 @@ namespace zhetapi {
 				}
 
 				for (int i = 0; i < threads; i++) {
+					army[i].join();
+
 					opt_error += optes[i];
 					per_error += peres[i];
 					passed += pass[i];
-
-					army[i].join();
 				}
 
 				// Free resources
@@ -726,7 +740,12 @@ namespace zhetapi {
 
 			for (size_t j = 0; j < __size - 1; j++)
 				grad[j] /= (double) size;
-
+			
+			using namespace std;
+			cout << endl << "Javg:" << endl;
+			for (int i = 0; i < __size - 1; i++)
+				cout << "\t" << grad[i] << endl;
+			
 			apply_gradient(grad, alpha, 0.7);
 			
 			total = clk.now();
@@ -738,7 +757,7 @@ namespace zhetapi {
 			avg_time /= size;
 
 			if (printing) {
-				std::cout << " passed: " << passed << "/" << size << " = "
+				std::cout << "\n passed: " << passed << "/" << size << " = "
 					<< std::fixed << std::showpoint << std::setprecision(2)
 					<< 100 * ((double) passed)/size << "%, "
 					<< "µ-err: "
@@ -771,12 +790,13 @@ namespace zhetapi {
 			T lr = alpha;
 
 			T t_err = 0;
-			double t_time = 0;
+			double t_ktime = 0;
+			double t_ftime = 0;
 			size_t t_passed = 0;
 			
 			size_t total = 0;
 			size_t passed;
-			double t;
+			double kt;
 			T err;
 			for (int i = 0; i < iterations; i++) {
 				std::cout << std::string(20, '-')
@@ -790,25 +810,25 @@ namespace zhetapi {
 				
 				passed = 0;
 				err = 0;
-				t = 0;
+				kt = 0;
 				for (int j = 0; j < ins_batched.size(); j++) {
 					TrainingStatistics result = train <threads> (ins_batched[j],
 						outs_batched[j], lr, j + 1, printing);
 
 					passed += result.__passed;
 					err += result.__cost;
-					t += result.__time;
+					kt += result.__kernel_time;
 
 					lr = alpha * pow(0.1, (++total)/50000.0);
 				}
 
 				t_passed += passed;
 				t_err += err;
-				t_time += t;
+				t_ktime += kt;
 				
 				std::cout << "\nTotal cost:\t"
 					<< err << std::endl
-					<< "Total time:\t" << t/1000
+					<< "Total time:\t" << kt/1000
 					<< " ms" << std::endl
 					<< "Cases passed:\t"
 					<< passed
@@ -817,7 +837,7 @@ namespace zhetapi {
 					<< "%)" << std::endl;
 			}
 
-			return {t_passed, t_err, t_time};
+			return {t_passed, t_err, t_ktime, t_ftime};
 		}
 
 		template <class T>

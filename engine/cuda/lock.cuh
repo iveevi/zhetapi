@@ -31,8 +31,7 @@ Lock::Lock(const Lock &other)
 
 Lock::~Lock()
 {
-	cudaFree(mutex);
-	cudaCheckError(mutex);
+	cuda_device_free(mutex);
 }
 
 __device__

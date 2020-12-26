@@ -24,7 +24,8 @@ namespace zhetapi {
 
 #ifdef ZHP_CUDA
 
-		bool		__on_device;
+		bool		__on_device = false;
+		bool		__sliced = false;	// Flag for no deallocation
 
 #endif
 

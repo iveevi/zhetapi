@@ -9,7 +9,10 @@
 #include <cuda/error.cuh>
 
 namespace zhetapi {
-	
+
+	size_t cpu_tensor_copies = 0;
+	__device__ size_t gpu_tensor_copies = 0;
+
 	template <class T>
 	__host__ __device__
 	Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
@@ -28,6 +31,17 @@ namespace zhetapi {
         Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims),
 			__size(other.__size), __on_device(false)
         {
+
+#ifdef __CUDA_ARCH__
+
+		gpu_tensor_copies++;
+
+#else
+
+		cpu_tensor_copies++;
+
+#endif
+
                 __dim = new size_t[__dims];
                 for (size_t i = 0; i < __dims; i++)
                         __dim[i] = other.__dim[i];
@@ -120,6 +134,8 @@ namespace zhetapi {
 	__host__ __device__
 	Tensor <T> ::~Tensor()
 	{
+		if (__sliced)
+			return;
 
 #ifndef __CUDA_ARCH__
 

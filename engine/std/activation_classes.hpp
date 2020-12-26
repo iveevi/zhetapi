@@ -124,7 +124,7 @@ namespace zhetapi {
 			__host__ __device__
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
-					[x] __device__ (size_t i) {
+					[x] __host__ __device__ (size_t i) {
 						return (x[i] > 0) ? 1 : 0;
 					}
 				);

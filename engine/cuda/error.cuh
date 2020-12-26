@@ -15,6 +15,10 @@ cudaError_t e;
 	cudaMalloc(ptr, size);		\
 	cudaCheckError(ptr);
 
+#define cuda_host_to_device_memcpy(dst, src, size)		\
+	cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost);	\
+	cudaCheckError(dst);
+
 #define cuda_device_free(ptr)		\
 	cudaFree(ptr);			\
 	cudaCheckError(ptr);
