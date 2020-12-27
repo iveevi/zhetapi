@@ -11,6 +11,9 @@
 #include <thread>
 #include <vector>
 
+// JSON library
+#include <json.hpp>
+
 // Engine headers
 #include <dataset.hpp>
 
@@ -79,28 +82,29 @@ public:
 	class bad_gradient {};
 	class bad_io_dimensions {};
 private:
-	Layer <T> *				__layers;
-	Matrix <T> *				__weights;
-	Matrix <T> *				__momentum;
+	Layer <T> *				__layers = nullptr;
+	Matrix <T> *				__weights = nullptr;
+	Matrix <T> *				__momentum = nullptr;
 	std::function <T ()>			__random;
-	size_t					__isize;
-	size_t					__osize;
-	size_t					__size;
+	size_t					__isize = 0;
+	size_t					__osize = 0;
+	size_t					__size = 0;
 
-	std::vector <Vector <T>>		__a;
-	std::vector <Vector <T>>		__z;
+	std::vector <Vector <T>>		__a = {};
+	std::vector <Vector <T>>		__z = {};
 
-	Optimizer <T> *				__cost;
+	Optimizer <T> *				__cost = nullptr;
 	
-	Comparator <T>				__cmp;
-	static Comparator <T>			__default_comparator;
+	Comparator <T>				__cmp = __default_comparator;
 public:
+	NeuralNetwork();
 	NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
 
 	~NeuralNetwork();
 
-	// Saving the network
+	// Saving and loading the network
 	void save(const std::string &);
+	void load_json(const std::string &);
 
 	// Setters
 	void set_cost(Optimizer <T> *);
@@ -145,27 +149,7 @@ public:
 	// Printing weights
 	void print() const;
 
-#ifndef ZHP_CUDA
-
-	Matrix <T> *adjusted(T mu);
-
-	Vector <T> compute(const Vector <T> &,
-			Vector <T> *,
-			Vector <T> *) const;
-	Vector <T> compute(const Vector <T> &,
-			Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *) const;
-
-	Matrix <T> *gradient(Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *,
-			const Vector <T> &,
-			const Vector <T> &,
-			Optimizer <T> *,
-			bool = false);
-
-#else
+#ifdef ZHP_CUDA
 
 	__host__ __device__
 	Matrix <T> *adjusted(T mu);
@@ -242,14 +226,40 @@ public:
 		F,
 		bool = false);
 
+#else
+
+	Matrix <T> *adjusted(T mu);
+
+	Vector <T> compute(const Vector <T> &,
+			Vector <T> *,
+			Vector <T> *) const;
+	Vector <T> compute(const Vector <T> &,
+			Matrix <T> *,
+			Vector <T> *,
+			Vector <T> *) const;
+
+	Matrix <T> *gradient(Matrix <T> *,
+			Vector <T> *,
+			Vector <T> *,
+			const Vector <T> &,
+			const Vector <T> &,
+			Optimizer <T> *,
+			bool = false);
+
 #endif
+
+	static const Comparator <T>		__default_comparator;
 
 };
 
 // Static variables
 template <class T>
-Comparator <T> NeuralNetwork <T> ::__default_comparator
+const Comparator <T> NeuralNetwork <T> ::__default_comparator
 	= default_comparator <T>;
+
+// Constructors
+template <class T>
+NeuralNetwork <T> ::NeuralNetwork() {}
 
 /*
  * NOTE: The pointers allocated and passed into this function
@@ -318,6 +328,36 @@ void NeuralNetwork <T> ::save(const std::string &file)
 
 		for (int k = 0; k < r * c; k++)
 			fout.write((char *) __weights[i][k], sizeof(T));
+	}
+}
+
+template <class T>
+void NeuralNetwork <T> ::load_json(const std::string &file)
+{
+	std::ifstream fin(file);
+
+	nlohmann::json structure;
+
+	fin >> structure;
+
+	std::cout << "Parsed structure: " << std::endl << structure << std::endl;
+	std::cout << "elem0: " << structure["Layers"] << std::endl;
+
+	auto layers = structure["Layers"];
+	std::cout << "type: " << layers.type_name() << std::endl;
+	std::cout << "size: " << layers.size() << std::endl;
+
+	size_t n = layers.size();
+
+	for (int i = 0; i < n; i++) {
+		auto layer = layers[i];
+
+		std::string activation = layer["Activation"];
+		size_t neurons = layer["Neurons"];
+
+		std::cout << "layers[" << i << "]:" << std::endl;
+		std::cout << "\t" << activation << std::endl;
+		std::cout << "\t" << neurons << std::endl;
 	}
 }
 

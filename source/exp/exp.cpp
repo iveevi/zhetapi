@@ -3,9 +3,6 @@
 #include <iostream>
 #include <vector>
 
-// JSON library
-#include <json.hpp>
-
 // Engine headers
 #include <std/activation_classes.hpp>
 #include <std/optimizer_classes.hpp>
@@ -52,13 +49,9 @@ int main()
 	cout << "Saving model..." << endl;
 	model.save("model.out");
 
-	nlohmann::json j;
+	ml::NeuralNetwork <double> loaded;
 
-	ifstream fin("samples/mnist/model.json");
-
-	fin >> j;
-
-	cout << "Parsed JSON:" << endl << j << endl;
+	loaded.load_json("samples/mnist/model.json");
 
 	// Free resources
 	delete opt;
