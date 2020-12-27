@@ -2,9 +2,9 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set the right flags
-set(CMAKE_CXX_FLAGS "-pthread")
+set(CMAKE_CXX_FLAGS "-pthread -std=c++17")
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-	set(CMAKE_CXX_FLAGS "-pthread -g")
+	set(CMAKE_CXX_FLAGS "-pthread -g -std=c++17 -Wall")
 endif ()
 
 # Allow dynamic linking
@@ -107,5 +107,6 @@ target_link_libraries(port PUBLIC ${CMAKE_DL_LIBS})
 
 # Include directories
 include_directories(PUBLIC engine)
+include_directories(PUBLIC json)
 
 include_directories(PUBLIC /usr/local/include)

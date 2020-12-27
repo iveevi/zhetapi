@@ -315,11 +315,10 @@ void NeuralNetwork <T> ::save(const std::string &file)
 
 		fout.write((char *) &r, sizeof(size_t));
 		fout.write((char *) &c, sizeof(size_t));
-	}
 
-	// fout.write(reinterpret_cast<char*>(sizeof(T)), sizeof(T));
-	/* fout << "size: " << __size << std::endl;
-	fout << "sizeof: " << sizeof(T) << std::endl; */
+		for (int k = 0; k < r * c; k++)
+			fout.write((char *) __weights[i][k], sizeof(T));
+	}
 }
 
 // Setters
