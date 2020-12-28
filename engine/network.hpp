@@ -175,6 +175,7 @@ public:
 		const DataSet <T> &,
 		T **,
 		T **,
+		T **,
 		size_t *,
 		size_t *,
 		T,

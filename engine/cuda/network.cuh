@@ -112,6 +112,9 @@ Vector <T> compute_isolated_parallelized1(
 
 		prv = weights[i] * a[i];
 
+		/* cout << weights[i] << endl;
+		cout << "prv = " << prv << endl; */
+
 		ml::Activation <T> *dev_act = copy(acts[i + 1]);
 
 		tmp = (*dev_act)(prv);
@@ -123,10 +126,14 @@ Vector <T> compute_isolated_parallelized1(
 
 		delete dev_act;
 		delete dev_dact;
+		
+		printf("---------------------------------------\n");
 	}
 
 	a[i] = tmp;
 	cout << "a[i] = " << a[i] << endl;
+	
+	printf("=======================================\n");
 	
 	return tmp;
 }
@@ -135,7 +142,7 @@ template <class T>
 __global__
 void show(T *arr, size_t size)
 {
-	printf("arr = {");
+	printf("{");
 	for (size_t i = 0; i < size; i++)
 		printf("%f, ", arr[i]);
 	printf("\b \b\b}\n");
@@ -149,6 +156,20 @@ void dev_show(T *arr, size_t size)
 	for (size_t i = 0; i < size; i++)
 		printf("%f, ", arr[i]);
 	printf("\b \b\b}\n");
+}
+
+template <class T>
+__device__
+void dev_show_act(Activation <T> *act)
+{
+	printf("act is of type %d\n", act->get_activation_type());
+}
+
+template <class T>
+__device__
+void host_show_act(Activation <T> *act)
+{
+	printf("act is of type %d\n", act->get_activation_type());
 }
 
 template <class T>
@@ -180,26 +201,77 @@ void __vmv_mult(T *R, T *W, T *A, size_t rows, size_t cols)
 	}
 }
 
+// Append one (copy) kernel
+template <class T>
+__global__
+void __apt_one_cpy(T *R, T *A, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+	
+	if (tid == 0)
+		R[0] = 1;
+
+	for (size_t i = tid; i < size - 1; i += threads)
+		R[i + 1] = A[i];
+}
+
+// Apply the activation (R) and its derivative (Rext)
+// (Both copies are in place, no allocation done)
+// Runs only two threads
+template <class T>
+__global__
+void __act_dual_cpy(T *R, T *Rext, Activation <T> *act, size_t size)
+{
+	/* TODO: Make the copy globally shared or at least block shared
+	 * to reduce the number of times we have to allocate and deallocat
+	 * for it.
+	 */
+	Activation <T> *a = copy(act);
+	
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	Vector <T> t(size, R);
+
+	if (tid) {
+		// Create vectors for each array (without duplicating resources)
+		Vector <T> ts(size, Rext);
+		
+		Activation <T> *ad = a->derivative();
+
+		ts.stable_transfer((*ad)(t));
+		
+		delete ad;
+	}
+
+	// Wait for the derivative to be calculated
+	__syncthreads();
+
+	if (!tid) {
+		Vector <T> ta = (*a)(t);
+
+		t.stable_transfer((*a)(t));
+	}
+
+	delete a;
+}
+
 template <class T>
 Vector <T> compute_isolated_parallelized2(
 		const Vector <T> &in,
-		Matrix <T> *weights,
 		T *d_W,
 		size_t *h_rows,
 		size_t *h_cols,
 		ml::Activation <T> **acts,
-		Vector <T> *a,
-		Vector <T> *z,
 		T **aloc,
-		T **atloc,
+		T **atloc,		// A sort of temporary array
 		T **zloc,
 		size_t *arows,
 		size_t *zrows,
 		size_t size)
 {
 	using namespace std;
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
+	cuda_host_to_device_memcpy(atloc[0], in.arr(), sizeof(T) * (arows[0] - 1));
 
 	size_t i = 0;
 	size_t offset = 0;
@@ -207,62 +279,54 @@ Vector <T> compute_isolated_parallelized2(
 		size_t blocks = min(128L, h_rows[i]);
 		size_t threads = min(128L, h_cols[i]);
 
-		a[i] = tmp.append_above(T (1));
+		cudaDeviceSynchronize();
 
-		cout << "a[i] = " << a[i] << endl;
+		/* TODO: Instead of launching a kernel for this, do
+		 * the extra work in the multiplication kernel
+		 */
+		__apt_one_cpy <<<1, 1>>> (aloc[i], atloc[i], arows[i]);
 
-		//--------------------------------
-		cudaMemcpy(aloc[i], a[i].arr(), sizeof(T) * arows[i],
-				cudaMemcpyHostToDevice);
+		cudaDeviceSynchronize();
 
+		printf("aloc = ");
 		show <<<1, 1>>> (aloc[i], arows[i]);
 
 		cudaDeviceSynchronize();
-		//--------------------------------
-
-		prv = weights[i] * a[i];
-
-		cout << "weights[i] = " << weights[i] << endl;
-		cout << "prv = " << prv << endl;
-
-		//--------------------------------
-		T *p_arr;
-
-		cudaMalloc(&p_arr, sizeof(T) * h_cols[i]);
-
-		__vmv_mult <<<blocks, threads>>> (p_arr, (d_W + offset), aloc[i],
+		
+		__vmv_mult <<<blocks, threads>>> (atloc[i + 1], (d_W + offset), aloc[i],
 				h_rows[i], h_cols[i]);
 		
 		cudaDeviceSynchronize();
 		
-		show <<<1, 1>>> (p_arr, h_rows[i]);
-
+		// Apply activations (with only two threads)
+		__act_dual_cpy <<<1, 2>>> (atloc[i + 1], zloc[i], acts[i + 1],
+				zrows[i]);
+		
 		cudaDeviceSynchronize();
-		//--------------------------------
+		
+		printf("z[i] = ");
+		show <<<1, 1>>> (zloc[i], zrows[i]);
+		
+		cudaDeviceSynchronize();
 
-		ml::Activation <T> *dev_act = copy(acts[i + 1]);
-
-		tmp = (*dev_act)(prv);
-
-		ml::Activation <T> *dev_dact = dev_act->derivative();
-
-		z[i] = (*dev_dact)(prv);
-		cout << "z[i] = " << z[i] << endl;
-
-		delete dev_act;
-		delete dev_dact;
-
-		cout << "=======================================" << endl;
+		printf("---------------------------------------\n");
 
 		offset += h_rows[i] * h_cols[i];
-
+		
+		// Progress the loop
 		i++;
 	}
 
-	a[i] = tmp;
-	cout << "a[i] = " << a[i] << endl;
+	aloc[i] = atloc[i];
+
+	printf("aloc = ");
+	show <<<1, 1>>> (aloc[i], arows[i]);
+
+	cudaDeviceSynchronize();
 	
-	return tmp;
+	printf("=======================================\n");
+	
+	return in;
 }
 
 template <class T, class F>
@@ -331,6 +395,7 @@ void gradient_and_accumulate_isolated_parallelized2(
 		size_t *h_cols,
 		Activation <T> **acts,
 		T **aloc,
+		T **atloc,
 		T **zloc,
 		size_t *arows,
 		size_t *zrows,
@@ -352,14 +417,12 @@ void gradient_and_accumulate_isolated_parallelized2(
 	// Compute the actual value
 	Vector <T> actual = compute_isolated_parallelized2(
 			in,
-			weights,
 			d_W,
 			h_rows,
 			h_cols,
 			acts,
-			a,
-			z,
 			aloc,
+			atloc,
 			zloc,
 			arows,
 			zrows,
@@ -403,6 +466,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		T **aloc,
+		T **atloc,
 		T **zloc,
 		size_t *arows,
 		size_t *zrows,
@@ -436,8 +500,6 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	}
 	
 	Activation <T> **acts = new Activation <T> *[__size];
-	for (int i = 0; i < __size; i++)
-		acts[i] = __layers[i].second;
 
 	double gopt = 0;
 	size_t gpass = 0;
@@ -460,6 +522,14 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	T *h_A;
 	
 	if (opt) {
+		// Copy the activations onto the GPU
+		// (from which it will be copied when necessary)
+		for (int i = 0; i < __size; i++) {
+			cuda_device_alloc(&acts[i], sizeof(Activation <T>));
+			cuda_host_to_device_memcpy(acts[i], __layers[i].second,
+					sizeof(Activation <T>));
+		}
+
 		// Allocation constants
 		size_t bytes;
 		size_t elems;
@@ -531,7 +601,10 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		}
 
 		cudaMemcpy(d_A, h_A, bytes, cudaMemcpyHostToDevice);
-	} else {
+	} else {	
+		for (int i = 0; i < __size; i++)
+			acts[i] = __layers[i].second;
+
 		// Start kernel timer
 		lstart = clk.now();
 
@@ -554,6 +627,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 						h_cols,
 						acts,
 						aloc,
+						atloc,
 						zloc,
 						arows,
 						zrows,
@@ -661,17 +735,19 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		arows = new size_t[__size];
 		zrows = new size_t[__size - 1];
 
-		using namespace std;
-		cout << "__size = " << __size << endl;
+		/* using namespace std;
+		cout << "__size = " << __size << endl; */
 		
 		size_t i;
+
+		using namespace std;
 
 		i = 0;
 		while (i < __size - 1) {
 			arows[i] = __layers[i].first + 1;
 
-			cudaMalloc(&aloc[i++], sizeof(T) * (__layers[i].first + 1));
-			cudaMalloc(&atloc[i++], sizeof(T) * (__layers[i].first + 1));
+			cudaMalloc(&aloc[i], sizeof(T) * (__layers[i].first + 1));
+			cudaMalloc(&atloc[i++], sizeof(T) * (__layers[i].first));
 		}
 
 		arows[i] = __osize;
@@ -681,23 +757,23 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		i = 0;
 		while (i < __size - 2) {
-			zrows[i] = __layers[i].first;
+			zrows[i] = __layers[i + 1].first;
 
-			cudaMalloc(&zloc[i++], sizeof(T) * (__layers[i].first));
+			cudaMalloc(&zloc[i++], sizeof(T) * (__layers[i + 1].first));
 		}
 
 		zrows[i] = __osize;
 
 		cudaMalloc(&zloc[i], sizeof(T) * __osize);
 
-		using namespace std;
+		/* using namespace std;
 		cout << "a:" << endl;
 		for (int i = 0; i < __size; i++)
 			cout << "\t" << aloc[i] << endl;
 		
 		cout << "z:" << endl;
 		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << zloc[i] << endl;
+			cout << "\t" << zloc[i] << endl; */
 	}
 
 	// Split the batch
@@ -736,6 +812,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 						ins_batched[j],
 						outs_batched[j],
 						aloc,
+						atloc,
 						zloc,
 						arows,
 						zrows,
@@ -775,8 +852,10 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 	if (opt) {
 		// Deallocate aloc and zloc
-		for (int i = 0; i < __size; i++)
+		for (int i = 0; i < __size; i++) {
 			cudaFree(aloc[i]);
+			cudaFree(atloc[i]);
+		}
 		
 		for (int i = 0; i < __size - 1; i++)
 			cudaFree(zloc[i]);

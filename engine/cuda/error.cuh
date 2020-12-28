@@ -3,6 +3,7 @@
 
 cudaError_t e;
 
+// Error checking macro
 #define cudaCheckError(addr)							\
 	e = cudaGetLastError();							\
 	if (e != cudaSuccess) {							\
@@ -11,18 +12,22 @@ cudaError_t e;
 		exit(-1);							\
 	}
 
+// Allocation
 #define cuda_device_alloc(ptr, size)	\
 	cudaMalloc(ptr, size);		\
 	cudaCheckError(ptr);
 
+// Copying
 #define cuda_host_to_device_memcpy(dst, src, size)		\
-	cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost);	\
+	cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice);	\
 	cudaCheckError(dst);
 
+// Deallocation
 #define cuda_device_free(ptr)		\
 	cudaFree(ptr);			\
 	cudaCheckError(ptr);
 
+// Memory status
 void cuda_check_memory_status(const char *file, size_t line)
 {
 	size_t free_mem;

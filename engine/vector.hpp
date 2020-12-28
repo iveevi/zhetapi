@@ -131,7 +131,7 @@ namespace zhetapi {
 		Vector(size_t, T);
 		
 		__host__ __device__
-		Vector(size_t, T *);
+		Vector(size_t, T *, bool = false);
 		
 		template <class F>
 		__host__ __device__

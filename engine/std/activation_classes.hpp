@@ -234,9 +234,9 @@ namespace zhetapi {
 			Vector <T> operator()(const Vector <T> &x) const {
 				return Vector <T> (x.size(),
 					[x] __host__ __device__ (size_t i) {
-						T tmp = 1/(1 + exp(-x[i]));
+						T tmp = 1.0/(1.0 + exp(-x[i]));
 
-						return tmp * (T (1) - tmp);
+						return tmp * (T (1.0) - tmp);
 					}
 				);
 			}

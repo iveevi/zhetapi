@@ -37,7 +37,7 @@ Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
 // FIXME: Delegate Matrix constructor
 template <class T>
 __host__ __device__
-Vector <T> ::Vector(size_t rs, T *arr) : Matrix <T> (rs, 1, arr) {}
+Vector <T> ::Vector(size_t rs, T *arr, bool owns) : Matrix <T> (rs, 1, arr, owns) {}
 
 template <class T>
 template <class F>
