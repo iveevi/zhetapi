@@ -170,13 +170,25 @@ public:
 #ifdef ZHP_CUDA
 	
 	template <class F, size_t = 1, size_t = 1>
-	TrainingStatistics cuda_batch(const DataSet <T> &,
-		const DataSet <T> &, T, T, F, bool = false);
+	TrainingStatistics cuda_batch(
+		const DataSet <T> &,
+		const DataSet <T> &,
+		T **,
+		T **,
+		size_t *,
+		size_t *,
+		T,
+		T,
+		F,
+		bool = false);
 
 	template <class F, size_t = 1, size_t = 1>
-	TrainingStatistics cuda_epochs(const DataSet <T> &,
+	TrainingStatistics cuda_epochs(
 		const DataSet <T> &,
-		size_t, size_t, T,
+		const DataSet <T> &,
+		size_t,
+		size_t,
+		T,
 		F,
 		bool = false);
 
@@ -876,6 +888,9 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 				optes[offset] += (*__cost)(outs[i], actual)[0];
 				peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 			}
+
+			delete[] aloc;
+			delete[] zloc;
 		};
 
 		for (int i = 0; i < threads; i++) {

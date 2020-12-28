@@ -32,6 +32,9 @@ namespace zhetapi {
 #endif
 
 	public:
+		// TODO: Remove this method
+		T *arr() const {return __array;}
+
 		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 		
 		// Printing functions

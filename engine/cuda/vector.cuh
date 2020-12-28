@@ -189,6 +189,7 @@ void Vector <T> ::operator-=(const Vector <T> &a)
 		this->__array[i] -= a.__array[i];
 }
 
+// FIXME: POSSIBLE LEAK
 template <class T>
 __host__ __device__
 Vector <T> Vector <T> ::append_above(const T &x)
@@ -218,6 +219,7 @@ Vector <T> Vector <T> ::append_below(const T &x)
 	return Vector(total);
 }
 
+// FIXME: POSSIBLE LEAK
 template <class T>
 __host__ __device__
 Vector <T> Vector <T> ::remove_top()

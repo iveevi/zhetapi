@@ -75,8 +75,14 @@ if (CUDA_FOUND)
 
 	set_property(TARGET cuda PROPERTY CUDA_ARCHITECTURES 70)
 
-	target_compile_options(cuda PRIVATE
-		$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -g -G>)
+
+	if (${CMAKE_BUILD_TYPE} MATCHES Debug)
+		target_compile_options(cuda PRIVATE
+			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -g -G>)
+	else()
+		target_compile_options(cuda PRIVATE
+			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -O3>)
+	endif ()
 endif ()
 
 # Compile czhp file

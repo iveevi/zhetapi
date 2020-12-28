@@ -188,7 +188,7 @@ namespace zhetapi {
                 Matrix(size_t, size_t, T = T());
 
 		__host__ __device__
-                Matrix(size_t, size_t, T *);
+                Matrix(size_t, size_t, T *, bool = false);
                 
 		template <class F>
 		__host__ __device__

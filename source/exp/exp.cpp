@@ -51,7 +51,7 @@ int main()
 
 	ml::NeuralNetwork <double> loaded;
 
-	loaded.load_json("samples/mnist/model.json");
+	// loaded.load_json("samples/mnist/model.json");
 
 	// Free resources
 	delete opt;

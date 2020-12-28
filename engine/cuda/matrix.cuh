@@ -68,10 +68,10 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> (rs, cs, T())
 	}
 }
 
-// Assumes that the users knows that the memory will not be deleted
+// Owner implies that the vector object will take care of the deallocation
 template <class T>
 __host__ __device__
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr) // : Tensor <T> (rs, cs, T())
+Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool owner) // : Tensor <T> (rs, cs, T())
 {
 	this->__size = rs * cs;
 
@@ -85,7 +85,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr) // : Tensor <T> (rs, cs, T())
 
 	this->__array = arr;
 
-	this->__sliced = true;
+	this->__sliced = !owner;
 
 	/* for (int i = 0; i < this->__size; i++)
 		this->__array[i] = arr[i]; */
