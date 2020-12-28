@@ -11,83 +11,119 @@
 
 #include <dataset.hpp>
 
+// Defines
+#define BENCH
+
 using namespace std;
 using namespace zhetapi;
-
-// For profiling
-__global__ void reset_gpu_counters()
-{
-	gpu_tensor_copies = 0;
-	gpu_matrix_copies = 0;
-	gpu_vector_copies = 0;
-	gpu_tensor_opeq = 0;
-	gpu_matrix_opeq = 0;
-	gpu_vector_opeq = 0;
-}
-
-__global__ void print_gpu_counters()
-{
-	printf("GPU-tensor (objects)\t%lu\n", gpu_tensor_copies);
-	printf("GPU-matrix (objects)\t%lu\n", gpu_matrix_copies);
-	printf("GPU-vector (objects)\t%lu\n", gpu_vector_copies);
-	printf("GPU-tensor (opeq)\t%lu\n", gpu_tensor_opeq);
-	printf("GPU-matrix (opeq)\t%lu\n", gpu_matrix_opeq);
-	printf("GPU-vector (opeq)\t%lu\n", gpu_vector_opeq);
-}
-
-void reset_counters()
-{
-	cpu_tensor_copies = 0;
-	cpu_matrix_copies = 0;
-	cpu_vector_copies = 0;
-	cpu_tensor_opeq = 0;
-	cpu_matrix_opeq = 0;
-	cpu_vector_opeq = 0;
-	
-	reset_gpu_counters <<<1, 1>>> ();
-
-	cudaDeviceSynchronize();
-}
-
-void print_counters()
-{
-	printf("\n========================\n");
-	printf("CPU-tensor (objects)\t%lu\n", cpu_tensor_copies);
-	printf("CPU-matrix (objects)\t%lu\n", cpu_matrix_copies);
-	printf("CPU-vector (objects)\t%lu\n", cpu_vector_copies);
-	printf("CPU-tensor (opeq)\t%lu\n", cpu_tensor_opeq);
-	printf("CPU-matrix (opeq)\t%lu\n", cpu_matrix_opeq);
-	printf("CPU-vector (opeq)\t%lu\n", cpu_vector_opeq);
-	
-	printf("------------------------\n");
-
-	print_gpu_counters <<<1, 1>>> ();
-
-	cudaDeviceSynchronize();
-}
 
 // Main function
 int main()
 {
-	// srand(clock());
+	srand(clock());
 
-	const int size = 10;
+#ifdef BENCH
+	
+	ml::NeuralNetwork <double> ::TrainingStatistics ts1;
+	ml::NeuralNetwork <double> ::TrainingStatistics ts2;
+
+	const int size = 1;
+	const int mlen = 500;
+	const int iters = 10;
+
+	ofstream data("data/gpu-cpu-times.dat");
+
+	for (size_t len = 1; len <= mlen; len++) {
+		DataSet <double> ins;
+		DataSet <double> outs;
+		
+		for (int i = 0; i < size; i++) {
+			ins.push_back(Vector <double> (len,
+				[] __host__ __device__ (size_t i) {
+					return 2 * (rand()/((double) RAND_MAX)) - 1.0;
+				}
+			));
+			
+			outs.push_back(Vector <double> (len,
+				[] __host__ __device__ (size_t i) {
+					return 2 * (rand()/((double) RAND_MAX)) - 1.0;
+				}
+			));
+		}
+
+		ml::NeuralNetwork <double> model ({
+			{len, new zhetapi::ml::Linear <double> ()},
+			{len, new zhetapi::ml::Sigmoid <double> ()},
+			{len, new zhetapi::ml::ReLU <double> ()},
+			{len, new zhetapi::ml::ReLU <double> ()}
+		}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
+
+		auto crit = [] __device__ (zhetapi::Vector <double> actual,
+				zhetapi::Vector <double> expected) {
+			return actual == expected;
+		};
+
+		ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
+
+		model.randomize();
+
+		model.set_cost(opt);
+		
+		double gpu_ktime = 0;
+		double gpu_ftime = 0;
+		double cpu_ktime = 0;
+
+		for (int j = 0; j < iters; j++) {
+			ts1 = model.cuda_epochs(ins, outs, 1, 100, 0.1, crit, false);
+			ts2 = model.epochs(ins, outs, 1, 100, 0.1, false);
+
+			gpu_ktime += ts1.__kernel_time;
+			gpu_ftime += ts1.__full_time;
+			cpu_ktime += ts2.__kernel_time;
+		}
+
+		gpu_ktime /= ((double) iters);
+		gpu_ftime /= ((double) iters);
+		cpu_ktime /= ((double) iters);
+
+		data << len
+			<< "\t" << gpu_ktime
+			<< "\t" << gpu_ftime
+			<< "\t" << cpu_ktime << endl;
+
+		// Free resources
+		delete opt;
+	}
+
+#else
+
+	const int size = 1;
+	const int len = 2;
 	
 	DataSet <double> ins;
 	DataSet <double> outs;
 	
 	for (int i = 0; i < size; i++) {
-		ins.push_back({(i + 1)/23.0, (i - 0.5)/23.0});
-		outs.push_back({rand()/(RAND_MAX * 0.1), rand()/(RAND_MAX * 0.1)});
+		ins.push_back(Vector <double> (len,
+			[] __host__ __device__ (size_t i) {
+				return 2 * (rand()/((double) RAND_MAX)) - 1.0;
+			}
+		));
+		
+		outs.push_back(Vector <double> (len,
+			[] __host__ __device__ (size_t i) {
+				return 2 * (rand()/((double) RAND_MAX)) - 1.0;
+			}
+		));
 	}
 
 	ml::NeuralNetwork <double> model ({
-		{2, new zhetapi::ml::Linear <double> ()},
-		{5, new zhetapi::ml::Sigmoid <double> ()},
-		{5, new zhetapi::ml::ReLU <double> ()},
-		{2, new zhetapi::ml::ReLU <double> ()}
+		{len, new zhetapi::ml::Linear <double> ()},
+		{len, new zhetapi::ml::Sigmoid <double> ()},
+		{len, new zhetapi::ml::ReLU <double> ()},
+		{len, new zhetapi::ml::ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
-
+	
 	auto crit = [] __device__ (zhetapi::Vector <double> actual,
 			zhetapi::Vector <double> expected) {
 		return actual == expected;
@@ -98,19 +134,10 @@ int main()
 	model.randomize();
 
 	model.set_cost(opt);
+			
+	model.cuda_epochs(ins, outs, 1, 100, 0.1, crit, true);
+	model.epochs(ins, outs, 1, 100, 0.1, true);
 
-	cout << "GPU Training..." << endl;
-	model.cuda_epochs <decltype(crit), 1, 1> (ins, outs, 1, 10, 0.1, crit, true);
+#endif
 
-	print_counters();
-	reset_counters();
-
-	cout << endl << "CPU Training..." << endl;
-	model.epochs(ins, outs, 1, 10, 0.1, true);
-	
-	print_counters();
-	reset_counters();
-
-	// Free resources
-	delete opt;
 }

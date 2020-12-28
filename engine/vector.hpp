@@ -101,8 +101,6 @@ namespace zhetapi {
 		const T &operator[](size_t) const;
 		
 		size_t size() const;
-		// size_t get_rows() const override;
-		// size_t get_cols() const override;
 
 		void operator+=(const Vector &);
 		void operator-=(const Vector &);

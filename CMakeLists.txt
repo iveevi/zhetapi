@@ -13,6 +13,8 @@ SET_PROPERTY(GLOBAL PROPERTY TARGET_SUPPORTS_SHARED_LIBS TRUE)
 # Set compiler
 set(CMAKE_CXX_COMPILER "g++-8")
 
+set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
+
 # Compile shared library
 add_library(zhp-shared SHARED
 	source/class.cpp
@@ -110,3 +112,4 @@ include_directories(PUBLIC engine)
 include_directories(PUBLIC json)
 
 include_directories(PUBLIC /usr/local/include)
+include_directories(PUBLIC CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES)

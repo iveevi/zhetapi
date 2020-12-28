@@ -12,7 +12,7 @@
 #include <vector>
 
 // JSON library
-#include <json.hpp>
+// #include <json.hpp>
 
 // Engine headers
 #include <dataset.hpp>
@@ -104,15 +104,24 @@ public:
 
 	// Saving and loading the network
 	void save(const std::string &);
-	void load_json(const std::string &);
+	// void load_json(const std::string &);
 
 	// Setters
 	void set_cost(Optimizer <T> *);
 	void set_comparator(const Comparator <T> &);
 
+	Matrix <T> *adjusted(T mu);
+	
 	Vector <T> compute(const Vector <T> &);
 	Vector <T> compute(const Vector <T> &,
 			Matrix <T> *);
+	Vector <T> compute(const Vector <T> &,
+			Vector <T> *,
+			Vector <T> *) const;
+	Vector <T> compute(const Vector <T> &,
+			Matrix <T> *,
+			Vector <T> *,
+			Vector <T> *) const;
 	
 	Vector <T> compute_no_cache(const Vector <T> &) const;
 	Vector <T> compute_no_cache(const Vector <T> &,
@@ -127,6 +136,13 @@ public:
 			Optimizer <T> *,
 			bool = false);
 	Matrix <T> *gradient(Matrix <T> *,
+			const Vector <T> &,
+			const Vector <T> &,
+			Optimizer <T> *,
+			bool = false);
+	Matrix <T> *gradient(Matrix <T> *,
+			Vector <T> *,
+			Vector <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
 			Optimizer <T> *,
@@ -149,75 +165,13 @@ public:
 	// Printing weights
 	void print() const;
 
+	static const Comparator <T>		__default_comparator;
+
 #ifdef ZHP_CUDA
-
-	__host__ __device__
-	Matrix <T> *adjusted(T mu);
-
-	__host__ __device__
-	static Matrix <T> *adjusted(Matrix <T> *, Matrix <T> *, size_t, T mu);
-
-	template <size_t = 1, size_t = 1>
-	Vector <T> cuda_compute(const Vector <T> &);
-
-	__host__ __device__
-	Vector <T> compute(const Vector <T> &,
-			Vector <T> *,
-			Vector <T> *) const;
-
-	__host__ __device__
-	Vector <T> compute(const Vector <T> &,
-			Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *) const;
-
-	__host__ __device__
-	static Vector <T> compute_isolated(const Vector <T> &,
-			Matrix <T> *,
-			Activation <T> **,
-			Vector <T> *,
-			Vector <T> *,
-			size_t);
-	
-	__host__ __device__
-	static Vector <T> compute_no_cache_isolated(const Vector <T> &,
-			Matrix <T> *,
-			Activation <T> **,
-			size_t);
-	
-	__host__ __device__
-	Matrix <T> *gradient(Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *,
-			const Vector <T> &,
-			const Vector <T> &,
-			Optimizer <T> *,
-			bool = false);
-	
-	__host__ __device__
-	static Matrix <T> *gradient_isolated(Matrix <T> *,
-			Activation <T> **,
-			size_t,
-			const Vector <T> &,
-			const Vector <T> &,
-			Optimizer <T> *);
-	
-	template <class F>
-	__host__ __device__
-	static void gradient_and_accumulate_isolated(Matrix <T> *,
-			Activation <T> **,
-			size_t,
-			const Vector <T> &,
-			const Vector <T> &,
-			Optimizer <T> *,
-			F cmp,
-			Matrix <T> *,
-			double &,
-			int &);
 	
 	template <class F, size_t = 1, size_t = 1>
 	TrainingStatistics cuda_batch(const DataSet <T> &,
-		const DataSet <T> &, T, T, F);
+		const DataSet <T> &, T, T, F, bool = false);
 
 	template <class F, size_t = 1, size_t = 1>
 	TrainingStatistics cuda_epochs(const DataSet <T> &,
@@ -226,29 +180,7 @@ public:
 		F,
 		bool = false);
 
-#else
-
-	Matrix <T> *adjusted(T mu);
-
-	Vector <T> compute(const Vector <T> &,
-			Vector <T> *,
-			Vector <T> *) const;
-	Vector <T> compute(const Vector <T> &,
-			Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *) const;
-
-	Matrix <T> *gradient(Matrix <T> *,
-			Vector <T> *,
-			Vector <T> *,
-			const Vector <T> &,
-			const Vector <T> &,
-			Optimizer <T> *,
-			bool = false);
-
 #endif
-
-	static const Comparator <T>		__default_comparator;
 
 };
 
@@ -331,6 +263,7 @@ void NeuralNetwork <T> ::save(const std::string &file)
 	}
 }
 
+/*
 template <class T>
 void NeuralNetwork <T> ::load_json(const std::string &file)
 {
@@ -359,7 +292,7 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 		std::cout << "\t" << activation << std::endl;
 		std::cout << "\t" << neurons << std::endl;
 	}
-}
+} */
 
 // Setters
 template <class T>
@@ -372,6 +305,19 @@ template <class T>
 void NeuralNetwork <T> ::set_comparator(const Comparator <T> &cmp)
 {
 	__cmp = cmp;
+}
+
+template <class T>
+Matrix <T> *NeuralNetwork <T> ::adjusted(T mu)
+{
+	Matrix <T> *theta = new Matrix <T> [__size - 1];
+	for (int i = 0; i < __size - 1; i++)
+		theta[i] = __weights[i];
+
+	for (int i = 0; i < __size - 1; i++)
+		theta[i] += mu * __momentum[i];
+
+	return theta;
 }
 
 template <class T>
@@ -429,6 +375,69 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
 	}
 
 	__a[i] = tmp;
+	
+	return tmp;
+}
+
+template <class T>
+Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+		Vector <T> *a,
+		Vector <T> *z) const
+{
+	if (in.size() != __isize)
+		throw bad_io_dimensions();
+
+	Vector <T> prv = in;
+	Vector <T> tmp = in;
+
+	size_t i = 0;
+	while (i < __size - 1) {
+		a[i] = tmp.append_above(T (1));
+
+		prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+		tmp = (*__layers[i + 1].second)(prv);
+
+		Activation <T> *act = __layers[i + 1].second->derivative();
+
+		z[i++] = (*act)(prv);
+
+		delete act;
+	}
+
+	a[i] = tmp;
+	
+	return tmp;
+}
+
+template <class T>
+Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
+		Matrix <T> *weights,
+		Vector <T> *a,
+		Vector <T> *z) const
+{
+	if (in.size() != __isize)
+		throw bad_io_dimensions();
+
+	Vector <T> prv = in;
+	Vector <T> tmp = in;
+
+	size_t i = 0;
+	while (i < __size - 1) {
+		a[i] = tmp.append_above(T (1));
+
+		prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
+
+		tmp = (*__layers[i + 1].second)(prv);
+
+		Activation <T> *act = __layers[i + 1].second->derivative();
+
+		z[i++] = (*act)(prv);
+
+		delete act;
+	}
+
+	a[i] = tmp;
 	
 	return tmp;
 }
@@ -674,338 +683,6 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 }
 
 template <class T>
-template <size_t threads>
-typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
-	::train(const DataSet <T> &ins,
-		const DataSet <T> &outs,
-		T alpha,
-		size_t id,
-		bool printing)
-{
-	if (ins.size() != outs.size())
-		throw bad_io_dimensions();
-	
-	const int len = 15;
-	const int width = 7;
-
-	std::chrono::high_resolution_clock::time_point start;
-	std::chrono::high_resolution_clock::time_point end;
-	std::chrono::high_resolution_clock::time_point total;
-	
-	std::chrono::high_resolution_clock clk;
-
-	if (printing) {
-		std::string str = "#" + std::to_string(id);
-
-		std::cout << "Batch " << std::setw(6)
-			<< str << " (" << ins.size() << ")";
-	}
-
-	size_t passed = 0;
-
-	int bars = 0;
-
-	double opt_error = 0;
-	double per_error = 0;
-
-	start = clk.now();
-
-	int size = ins.size();
-
-	using namespace std;
-
-	Matrix <T> **grads = new Matrix <T> *[size];
-	if (threads == 1) {
-		if (printing)
-			std::cout << " [";
-		
-		for (int i = 0; i < size; i++) {
-			Vector <T> actual = compute(ins[i]);
-
-			if (__cmp(actual, outs[i]))
-				passed++;
-
-			/* The gradient function allocates the
-			 * memory anyways, no need to allocate here.
-			  */
-			grads[i] = gradient(adjusted(0.7), ins[i], outs[i], __cost);
-
-			opt_error += (*__cost)(outs[i], actual)[0];
-			per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
-
-			if (printing) {
-				int delta = (len * (i + 1))/size;
-				for (int i = 0; i < delta - bars; i++) {
-					std::cout << "=";
-					std::cout.flush();
-				}
-
-				bars = delta;
-			}
-		}
-
-		if (printing)
-			std::cout << "]";
-	} else {
-		std::vector <std::thread> army;
-		
-		double *optes = new double[threads];
-		double *peres = new double[threads];
-		int *pass = new int[threads];
-
-		auto proc = [&](size_t offset) {
-			Vector <T> *aloc = new Vector <T> [__size];
-			Vector <T> *zloc = new Vector <T> [__size];
-
-			for (int i = offset; i < size; i += threads) {
-				Vector <T> actual = compute(ins[i], aloc, zloc);
-
-				// TODO: Determine whether the the
-				// following if statement is
-				// hazardous.
-				if (__cmp(actual, outs[i]))
-					pass[offset]++;
-
-				grads[i] = gradient(adjusted(0.7), aloc, zloc, ins[i], outs[i], __cost);
-			
-				optes[offset] += (*__cost)(outs[i], actual)[0];
-				peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
-			}
-		};
-
-		for (int i = 0; i < threads; i++) {
-			optes[i] = peres[i] = pass[i] = 0;
-
-			army.push_back(std::thread(proc, i));
-		}
-
-		for (int i = 0; i < threads; i++) {
-			army[i].join();
-
-			opt_error += optes[i];
-			per_error += peres[i];
-			passed += pass[i];
-		}
-
-		// Free resources
-		delete[] optes;
-		delete[] peres;
-		delete[] pass;
-	}
-
-	end = clk.now();
-
-	Matrix <T> *grad = new Matrix <T> [__size - 1];
-	for (int i = 0; i < __size - 1; i++)
-		grad[i] = grads[0][i];
-	
-	for (size_t i = 1; i < size; i++) {
-		for (size_t j = 0; j < __size - 1; j++)
-			grad[j] += grads[i][j];
-	}
-
-	for (size_t j = 0; j < __size - 1; j++)
-		grad[j] /= (double) size;
-	
-	using namespace std;
-	cout << endl << "Javg:" << endl;
-	for (int i = 0; i < __size - 1; i++)
-		cout << "\t" << grad[i] << endl;
-	
-	apply_gradient(grad, alpha, 0.7);
-	
-	total = clk.now();
-
-	double avg_time = std::chrono::duration_cast
-		<std::chrono::microseconds> (end - start).count();
-	double tot_time = std::chrono::duration_cast
-		<std::chrono::microseconds> (total - start).count();
-	avg_time /= size;
-
-	if (printing) {
-		std::cout << "\n passed: " << passed << "/" << size << " = "
-			<< std::fixed << std::showpoint << std::setprecision(2)
-			<< 100 * ((double) passed)/size << "%, "
-			<< "µ-err: "
-			<< std::setw(width) << std::fixed
-			<< std::showpoint << std::setprecision(2)
-			<< per_error/size << "%, "
-			<< "µ-time: " << avg_time << " µs"
-			<< std::endl;
-	}
-	
-	return {passed, opt_error, tot_time};
-}
-
-template <class T>
-template <size_t threads>
-typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
-	::epochs(const DataSet <T> &ins,
-		const DataSet <T> &outs,
-		size_t iterations,
-		size_t batch_size,
-		T alpha,
-		bool printing)
-{
-	if (ins.size() != outs.size())
-		throw bad_io_dimensions();
-
-	std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
-	std::vector <DataSet <T>> outs_batched = split(outs, batch_size);
-
-	T lr = alpha;
-
-	T t_err = 0;
-	double t_ktime = 0;
-	double t_ftime = 0;
-	size_t t_passed = 0;
-	
-	size_t total = 0;
-	size_t passed;
-	double kt;
-	T err;
-	for (int i = 0; i < iterations; i++) {
-		std::cout << std::string(20, '-')
-			<< std::endl
-			<< "\nEpoch #" << (i + 1)
-			<< " (" << lr
-			<< ")" << std::endl;
-
-		if (printing)
-			std::cout << std::endl;
-		
-		passed = 0;
-		err = 0;
-		kt = 0;
-		for (int j = 0; j < ins_batched.size(); j++) {
-			TrainingStatistics result = train <threads> (ins_batched[j],
-				outs_batched[j], lr, j + 1, printing);
-
-			passed += result.__passed;
-			err += result.__cost;
-			kt += result.__kernel_time;
-
-			lr = alpha * pow(0.1, (++total)/50000.0);
-		}
-
-		t_passed += passed;
-		t_err += err;
-		t_ktime += kt;
-		
-		std::cout << "\nTotal cost:\t"
-			<< err << std::endl
-			<< "Total time:\t" << kt/1000
-			<< " ms" << std::endl
-			<< "Cases passed:\t"
-			<< passed
-			<< "/" << ins.size() << " ("
-			<< 100 * ((double) passed)/ins.size()
-			<< "%)" << std::endl;
-	}
-
-	return {t_passed, t_err, t_ktime, t_ftime};
-}
-
-template <class T>
-void NeuralNetwork <T> ::randomize()
-{
-	for (int i = 0; i < __size - 1; i++)			
-		__weights[i].randomize(__random);
-}
-
-template <class T>
-void NeuralNetwork <T> ::print() const
-{
-	std::cout << "================================" << std::endl;
-	
-	std::cout << "Weights:" << std::endl;
-
-	size_t n = 0;
-	for (int i = 0; i < __size - 1; i++)
-		std::cout << "[" << ++n << "]\t" << __weights[i] << std::endl;
-	
-	std::cout << "================================" << std::endl;
-}
-
-#ifndef ZHP_CUDA
-
-template <class T>
-Matrix <T> *NeuralNetwork <T> ::adjusted(T mu)
-{
-	Matrix <T> *theta = new Matrix <T> [__size - 1];
-	for (int i = 0; i < __size - 1; i++)
-		theta[i] = __weights[i];
-
-	for (int i = 0; i < __size - 1; i++)
-		theta[i] += mu * __momentum[i];
-
-	return theta;
-}
-
-template <class T>
-Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-		Vector <T> *a,
-		Vector <T> *z) const
-{
-	if (in.size() != __isize)
-		throw bad_io_dimensions();
-
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
-
-	size_t i = 0;
-	while (i < __size - 1) {
-		a[i] = tmp.append_above(T (1));
-
-		prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-		tmp = (*__layers[i + 1].second)(prv);
-
-		Activation <T> *act = __layers[i + 1].second->derivative();
-
-		z[i++] = (*act)(prv);
-
-		delete act;
-	}
-
-	a[i] = tmp;
-	
-	return tmp;
-}
-
-template <class T>
-Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
-		Matrix <T> *weights,
-		Vector <T> *a,
-		Vector <T> *z) const
-{
-	if (in.size() != __isize)
-		throw bad_io_dimensions();
-
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
-
-	size_t i = 0;
-	while (i < __size - 1) {
-		a[i] = tmp.append_above(T (1));
-
-		prv = weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-		tmp = (*__layers[i + 1].second)(prv);
-
-		Activation <T> *act = __layers[i + 1].second->derivative();
-
-		z[i++] = (*act)(prv);
-
-		delete act;
-	}
-
-	a[i] = tmp;
-	
-	return tmp;
-}
-
-template <class T>
 Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 		Vector <T> *a,
 		Vector <T> *z,
@@ -1093,7 +770,282 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 	return J;
 }
 
-#endif
+template <class T>
+template <size_t threads>
+typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+	::train(const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		T alpha,
+		size_t id,
+		bool printing)
+{
+	if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+	
+	const int len = 15;
+	const int width = 7;
+
+	std::chrono::high_resolution_clock::time_point start;
+	std::chrono::high_resolution_clock::time_point end;
+	std::chrono::high_resolution_clock::time_point total;
+	
+	std::chrono::high_resolution_clock clk;
+
+	if (printing) {
+		std::string str = "#" + std::to_string(id);
+
+		std::cout << "Batch " << std::setw(6)
+			<< str << " (" << ins.size() << ")";
+	}
+
+	size_t passed = 0;
+
+	int bars = 0;
+
+	double opt_error = 0;
+	double per_error = 0;
+
+	start = clk.now();
+
+	int size = ins.size();
+
+	using namespace std;
+
+	Matrix <T> **grads = new Matrix <T> *[size];
+	if (threads == 1) {
+		if (printing)
+			std::cout << " [";
+		
+		for (int i = 0; i < size; i++) {
+			Vector <T> actual = compute(ins[i]);
+
+			if (__cmp(actual, outs[i]))
+				passed++;
+
+			/* The gradient function allocates the
+			 * memory anyways, no need to allocate here.
+			  */
+			Matrix <T> *adj = adjusted(0.7);
+
+			grads[i] = gradient(adj, ins[i], outs[i], __cost);
+
+			delete[] adj;
+
+			opt_error += (*__cost)(outs[i], actual)[0];
+			per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
+
+			if (printing) {
+				int delta = (len * (i + 1))/size;
+				for (int i = 0; i < delta - bars; i++) {
+					std::cout << "=";
+					std::cout.flush();
+				}
+
+				bars = delta;
+			}
+		}
+
+		if (printing)
+			std::cout << "]";
+	} else {
+		std::vector <std::thread> army;
+		
+		double *optes = new double[threads];
+		double *peres = new double[threads];
+		int *pass = new int[threads];
+
+		auto proc = [&](size_t offset) {
+			Vector <T> *aloc = new Vector <T> [__size];
+			Vector <T> *zloc = new Vector <T> [__size];
+
+			for (int i = offset; i < size; i += threads) {
+				Vector <T> actual = compute(ins[i], aloc, zloc);
+
+				// TODO: Determine whether the the
+				// following if statement is
+				// hazardous.
+				if (__cmp(actual, outs[i]))
+					pass[offset]++;
+
+				Matrix <T> *adj = adjusted(0.7);
+
+				grads[i] = gradient(adj, aloc, zloc, ins[i], outs[i], __cost);
+
+				delete[] adj;
+			
+				optes[offset] += (*__cost)(outs[i], actual)[0];
+				peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
+			}
+		};
+
+		for (int i = 0; i < threads; i++) {
+			optes[i] = peres[i] = pass[i] = 0;
+
+			army.push_back(std::thread(proc, i));
+		}
+
+		for (int i = 0; i < threads; i++) {
+			army[i].join();
+
+			opt_error += optes[i];
+			per_error += peres[i];
+			passed += pass[i];
+		}
+
+		// Free resources
+		delete[] optes;
+		delete[] peres;
+		delete[] pass;
+	}
+
+	end = clk.now();
+
+	Matrix <T> *grad = new Matrix <T> [__size - 1];
+	for (int i = 0; i < __size - 1; i++)
+		grad[i] = grads[0][i];
+	
+	for (size_t i = 1; i < size; i++) {
+		for (size_t j = 0; j < __size - 1; j++)
+			grad[j] += grads[i][j];
+	}
+
+	for (size_t j = 0; j < __size - 1; j++)
+		grad[j] /= (double) size;
+
+	if (printing) {
+		using namespace std;	
+		cout << endl << "Javg:" << endl;
+		for (int i = 0; i < __size - 1; i++)
+			cout << "\t" << grad[i] << endl;
+	} else {	
+		apply_gradient(grad, alpha, 0.7);
+	}
+	
+	// Release memory
+	delete[] grad;
+
+	for (int i = 0; i < size; i++)
+		delete[] grads[i];
+
+	delete[] grads;
+	
+	// Stop timer
+	total = clk.now();
+
+	double avg_time = std::chrono::duration_cast
+		<std::chrono::microseconds> (end - start).count();
+	double tot_time = std::chrono::duration_cast
+		<std::chrono::microseconds> (total - start).count();
+	avg_time /= size;
+
+	if (printing) {
+		std::cout << " passed: " << passed << "/" << size << " = "
+			<< std::fixed << std::showpoint << std::setprecision(2)
+			<< 100 * ((double) passed)/size << "%, "
+			<< "µ-err: "
+			<< std::setw(width) << std::fixed
+			<< std::showpoint << std::setprecision(2)
+			<< per_error/size << "%, "
+			<< "µ-time: " << avg_time << " µs"
+			<< std::endl;
+	}
+	
+	return {passed, opt_error, tot_time};
+}
+
+template <class T>
+template <size_t threads>
+typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+	::epochs(const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		size_t iterations,
+		size_t batch_size,
+		T alpha,
+		bool printing)
+{
+	if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
+	std::vector <DataSet <T>> outs_batched = split(outs, batch_size);
+
+	T lr = alpha;
+
+	T t_err = 0;
+	double t_ktime = 0;
+	double t_ftime = 0;
+	size_t t_passed = 0;
+	
+	size_t total = 0;
+	size_t passed;
+	double kt;
+	T err;
+	for (int i = 0; i < iterations; i++) {
+		if (printing) {
+			std::cout << std::string(20, '-')
+				<< std::endl
+				<< "\nEpoch #" << (i + 1)
+				<< " (" << lr
+				<< ")" << std::endl;
+		}
+
+		if (printing)
+			std::cout << std::endl;
+		
+		passed = 0;
+		err = 0;
+		kt = 0;
+		for (int j = 0; j < ins_batched.size(); j++) {
+			TrainingStatistics result = train <threads> (ins_batched[j],
+				outs_batched[j], lr, j + 1, printing);
+
+			passed += result.__passed;
+			err += result.__cost;
+			kt += result.__kernel_time;
+
+			lr = alpha * pow(0.1, (++total)/50000.0);
+		}
+
+		t_passed += passed;
+		t_err += err;
+		t_ktime += kt;
+		
+		if (printing) {
+			std::cout << "\nTotal cost:\t"
+				<< err << std::endl
+				<< "Total time:\t" << kt/1000
+				<< " ms" << std::endl
+				<< "Cases passed:\t"
+				<< passed
+				<< "/" << ins.size() << " ("
+				<< 100 * ((double) passed)/ins.size()
+				<< "%)" << std::endl;
+		}
+	}
+
+	return {t_passed, t_err, t_ktime, t_ftime};
+}
+
+template <class T>
+void NeuralNetwork <T> ::randomize()
+{
+	for (int i = 0; i < __size - 1; i++)			
+		__weights[i].randomize(__random);
+}
+
+template <class T>
+void NeuralNetwork <T> ::print() const
+{
+	std::cout << "================================" << std::endl;
+	
+	std::cout << "Weights:" << std::endl;
+
+	size_t n = 0;
+	for (int i = 0; i < __size - 1; i++)
+		std::cout << "[" << ++n << "]\t" << __weights[i] << std::endl;
+	
+	std::cout << "================================" << std::endl;
+}
 
 }
 

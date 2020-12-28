@@ -15,18 +15,20 @@ namespace zhetapi {
 	template <class T>
 	class Tensor {
         protected:
-		T		*__array;
-		size_t		__size;
+		T	*__array = nullptr;
+		size_t	__size = 0;
 
 		// Variables for printing
-		size_t		*__dim;
-		size_t		__dims;
+		size_t	*__dim = nullptr;
+		size_t	__dims = 0;
 
 #ifdef ZHP_CUDA
 
-		bool		__on_device = false;
-		bool		__sliced = false;	// Flag for no deallocation
+		bool	__on_device = false;	// Flag for device allocation
+		bool	__sliced = false;	// Flag for no deallocation
 
+		__host__ __device__
+		void clear(int = 0);
 #endif
 
 	public:
@@ -88,9 +90,6 @@ namespace zhetapi {
 		__host__ __device__
                 Tensor &operator=(const Tensor &);
 
-		__host__ __device__
-		void set_device_status(bool);
-
 		template <class U>
 		__host__ __device__
 		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
@@ -137,7 +136,7 @@ namespace zhetapi {
 	template <class T>
 	::std::string Tensor <T> ::print() const
 	{
-		if (!__dim)
+		if (!__dim || !__dim[0])
 			return "[]";
 		
 		if (__dims == 0) {

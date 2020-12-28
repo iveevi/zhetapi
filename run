@@ -86,9 +86,13 @@ elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
 
 	mkdir -p debug
 
-	g++-8 -g source/$2.cpp -o debug/$2-debug
+	cmake -DCMAKE_BUILD_TYPE=Debug .
 
-	valgrind ./debug/$2-debug
+	make -j8 $2
+
+	mv $2 debug/$2-debug
+
+	valgrind --leak-check=full --show-leak-kinds=all ./debug/$2-debug
 elif [ $1 = "callgrind" ] || [ $1 = "vgrind" ]; then
 	mkdir -p debug
 

@@ -31,7 +31,7 @@ void cuda_check_memory_status(const char *file, size_t line)
 	cudaMemGetInfo(&free_mem, &total_mem);
 
 	printf("At [%s:%lu]: %lu bytes total, of which %lu bytes are free.\n",
-			file, line, free_mem, total_mem);
+			file, line, total_mem, free_mem);
 }
 
 #define cuda_show_mem()					\

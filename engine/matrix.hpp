@@ -31,6 +31,11 @@ namespace zhetapi {
         template <class T>
         class Vector;
 
+	namespace ml {
+		template <class T>
+		class Activation;
+	}
+        
         /**
          * @brief A general Matrix class
          * (could be a single row/col vector)
@@ -54,11 +59,8 @@ namespace zhetapi {
 
                 ::std::pair <size_t, size_t> get_dimensions() const;
 
-                const Matrix &slice(const ::std::pair <size_t, size_t> &,
-                                const ::std::pair <size_t, size_t> &) const;
-
                 Matrix slice(const ::std::pair <size_t, size_t> &,
-                                const ::std::pair <size_t, size_t> &);
+                                const ::std::pair <size_t, size_t> &) const;
 
                 void set(size_t, size_t, T);
 
@@ -130,8 +132,8 @@ namespace zhetapi {
                 T *operator[](size_t);
                 const T *operator[](size_t) const;
 
-                virtual size_t get_rows() const;
-                virtual size_t get_cols() const;
+                size_t get_rows() const;
+                size_t get_cols() const;
                 
 		Matrix transpose() const;
 
@@ -196,9 +198,9 @@ namespace zhetapi {
 		const Matrix &operator=(const Matrix &);
 
 		// Other memory concerned operations
-		void copy_to_device(Matrix <T>);
+		// void copy_to_device(Matrix <T>);
 
-		void transfer_from_device(Matrix <T> &);
+		// void transfer_from_device(Matrix <T> &);
 
 		__host__ __device__
 		void stable_transfer(const Matrix <T> &);
@@ -370,7 +372,7 @@ namespace zhetapi {
         }
 
         template <class T>
-        const Matrix <T> &Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
+        Matrix <T> Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
                         const ::std::pair <size_t, size_t> &end) const
         {
                 /* The following asserts make sure the pairs
@@ -381,46 +383,17 @@ namespace zhetapi {
 
                 assert(start.first < __rows && start.second < __cols);
                 assert(end.first < __rows && end.second < __cols);
-                
-                /* Slicing is inclusive of the last
-                 * Vector passed.
-                 */
-                Matrix <T> *out = new Matrix <T> (
-                        end.first - start.first + 1,
-                        end.second - start.second + 1,
-                        [&](size_t i, size_t j) {
-                                return this->__array[i + start.first][j + start.second];
-                        }
-                );
-
-                return *out;
-        }
-
-        template <class T>
-        Matrix <T> Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
-                        const ::std::pair <size_t, size_t> &end)
-        {
-                /* The following asserts make sure the pairs
-                 * are in bounds of the Matrix and that they
-                 * are in order.
-                 */
-                assert(start.first <= end.first && start.second <= end.second);
-
-                assert(start.first < __rows && start.second < __cols);
-                assert(end.first < __rows && end.second < __cols);
 
                 /* Slicing is inclusive of the last
                  * Vector passed.
                  */
-                Matrix <T> *out = new Matrix <T> (
+                return Matrix <T> (
                         end.first - start.first + 1,
                         end.second - start.second + 1,
                         [&](size_t i, size_t j) {
-                                return this->__array[i + start.first][j + start.second];
+                                return this->__array[__cols * (i + start.first) + j + start.second];
                         }
                 );
-
-                return *out;
         }
 
         template <class T>
