@@ -39,6 +39,101 @@ Matrix <T> *adjusted1(
 }
 
 template <class T>
+Vector <T> compute_isolated_parallelized1(
+		const Vector <T> &in,
+		Matrix <T> *weights,
+		ml::Activation <T> **acts,
+		Vector <T> *a,
+		Vector <T> *z,
+		size_t size)
+{
+	using namespace std;
+	Vector <T> prv = in;
+	Vector <T> tmp = in;
+
+	size_t i = 0;
+	while (i < size - 1) {
+		a[i] = tmp.append_above(T (1));
+
+		prv = weights[i] * a[i];
+		
+		ml::Activation <T> *dev_act = copy(acts[i + 1]);
+
+		tmp = (*dev_act)(prv);
+
+		ml::Activation <T> *dev_dact = dev_act->derivative();
+
+		z[i++] = (*dev_dact)(prv);
+
+		delete dev_act;
+		delete dev_dact;
+	}
+
+	a[i] = tmp;
+	
+	return tmp;
+}
+
+template <class T, class F>
+void gradient_and_accumulate_isolated_parallelized1(
+		Matrix <T> *weights,
+		Activation <T> **acts,
+		size_t size,
+		const Vector <T> &in,
+		const Vector <T> &out,
+		Optimizer <T> *opt,
+		F cmp,
+		Matrix <T> *grad,
+		double &gopt,
+		size_t &gpass)
+{
+	using namespace std;
+
+	// Allocate memory for a and z
+	Vector <T> *a = new Vector <T> [size];
+	Vector <T> *z = new Vector <T> [size - 1];
+	
+	// Compute the actual value
+	Vector <T> actual = compute_isolated_parallelized1(
+			in,
+			weights,
+			acts,
+			a,
+			z,
+			size);
+
+	if (cmp(actual, out))
+		gpass++;
+	
+	Optimizer <T> *dev_opt = copy(opt);
+
+	gopt += (*dev_opt)(actual, out)[0];
+	
+	// Get the derivative of the cost
+	Optimizer <T> *dev_dopt = dev_opt->derivative();
+	
+	// Construction the Jacobian using backpropogation
+	Vector <T> delta = (*dev_dopt)(out, actual);
+	for (int i = size - 2; i >= 0; i--) {
+		if (i < size - 2) {
+			delta = weights[i + 1].transpose() * delta;
+			delta = delta.remove_top();
+		}
+		
+		delta.stable_shur(z[i]);
+
+		grad[i] += delta * a[i].transpose();
+	}
+
+	// Free resources
+	delete[] a;
+	delete[] z;
+
+	delete dev_opt;
+	delete dev_dopt;
+}
+
+template <class T>
 __global__
 void __mmc_fma(T *R, T *W, T *M, T c, size_t size)
 {
@@ -93,95 +188,6 @@ Matrix <T> *adjusted2(
 }
 
 template <class T>
-Vector <T> compute_isolated_parallelized1(
-		const Vector <T> &in,
-		Matrix <T> *weights,
-		ml::Activation <T> **acts,
-		Vector <T> *a,
-		Vector <T> *z,
-		size_t size)
-{
-	using namespace std;
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
-
-	size_t i = 0;
-	while (i < size - 1) {
-		a[i] = tmp.append_above(T (1));
-		cout << "a[i] = " << a[i] << endl;
-
-		prv = weights[i] * a[i];
-
-		/* cout << weights[i] << endl;
-		cout << "prv = " << prv << endl; */
-
-		ml::Activation <T> *dev_act = copy(acts[i + 1]);
-
-		tmp = (*dev_act)(prv);
-
-		ml::Activation <T> *dev_dact = dev_act->derivative();
-
-		z[i++] = (*dev_dact)(prv);
-		cout << "z[i] = " << z[i - 1] << endl;
-
-		delete dev_act;
-		delete dev_dact;
-		
-		printf("---------------------------------------\n");
-	}
-
-	a[i] = tmp;
-	cout << "a[i] = " << a[i] << endl;
-	
-	printf("=======================================\n");
-	
-	return tmp;
-}
-
-template <class T>
-__global__
-void show(T *arr, size_t size)
-{
-	printf("{");
-	for (size_t i = 0; i < size; i++)
-		printf("%f, ", arr[i]);
-	printf("\b \b\b}\n");
-}
-
-template <class T>
-__device__
-void dev_show(T *arr, size_t size)
-{
-	printf("arr = {");
-	for (size_t i = 0; i < size; i++)
-		printf("%f, ", arr[i]);
-	printf("\b \b\b}\n");
-}
-
-template <class T>
-__device__
-void dev_show_act(Activation <T> *act)
-{
-	printf("act is of type %d\n", act->get_activation_type());
-}
-
-template <class T>
-__device__
-void host_show_act(Activation <T> *act)
-{
-	printf("act is of type %d\n", act->get_activation_type());
-}
-
-template <class T>
-void host_show(T *arr, size_t size)
-{
-	printf("arr = {");
-	for (size_t i = 0; i < size; i++)
-		printf("%f, ", arr[i]);
-	printf("\b \b\b}\n");
-}
-
-template <class T>
 __global__
 void __vmv_mult(T *R, T *W, T *A, size_t rows, size_t cols)
 {
@@ -218,59 +224,43 @@ void __apt_one_cpy(T *R, T *A, size_t size)
 
 // Apply the activation (R) and its derivative (Rext)
 // (Both copies are in place, no allocation done)
-// Runs only two threads
 template <class T>
 __global__
 void __act_dual_cpy(T *R, T *Rext, Activation <T> *act, size_t size)
 {
-	/* TODO: Make the copy globally shared or at least block shared
-	 * to reduce the number of times we have to allocate and deallocat
-	 * for it.
-	 */
 	Activation <T> *a = copy(act);
-	
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+	Activation <T> *ad = a->derivative();
 
+	// Create vectors for each array (without duplicating resources)
 	Vector <T> t(size, R);
+	Vector <T> ts(size, Rext);
 
-	if (tid) {
-		// Create vectors for each array (without duplicating resources)
-		Vector <T> ts(size, Rext);
-		
-		Activation <T> *ad = a->derivative();
+	ts.stable_transfer((*ad)(t));
 
-		ts.stable_transfer((*ad)(t));
-		
-		delete ad;
-	}
-
-	// Wait for the derivative to be calculated
 	__syncthreads();
+	
+	Vector <T> ta = (*a)(t);
 
-	if (!tid) {
-		Vector <T> ta = (*a)(t);
-
-		t.stable_transfer((*a)(t));
-	}
+	t.stable_transfer((*a)(t));
 
 	delete a;
+	delete ad;
 }
 
 template <class T>
-Vector <T> compute_isolated_parallelized2(
+void compute_isolated_parallelized2(
 		const Vector <T> &in,
 		T *d_W,
 		size_t *h_rows,
 		size_t *h_cols,
 		ml::Activation <T> **acts,
 		T **aloc,
-		T **atloc,		// A sort of temporary array
+		T **atloc,		// Temporary array
 		T **zloc,
 		size_t *arows,
 		size_t *zrows,
 		size_t size)
 {
-	using namespace std;
 	cuda_host_to_device_memcpy(atloc[0], in.arr(), sizeof(T) * (arows[0] - 1));
 
 	size_t i = 0;
@@ -288,118 +278,117 @@ Vector <T> compute_isolated_parallelized2(
 
 		cudaDeviceSynchronize();
 
-		printf("aloc = ");
-		show <<<1, 1>>> (aloc[i], arows[i]);
-
-		cudaDeviceSynchronize();
-		
 		__vmv_mult <<<blocks, threads>>> (atloc[i + 1], (d_W + offset), aloc[i],
 				h_rows[i], h_cols[i]);
 		
 		cudaDeviceSynchronize();
 		
 		// Apply activations (with only two threads)
-		__act_dual_cpy <<<1, 2>>> (atloc[i + 1], zloc[i], acts[i + 1],
+		__act_dual_cpy <<<1, 1>>> (atloc[i + 1], zloc[i], acts[i + 1],
 				zrows[i]);
 		
 		cudaDeviceSynchronize();
 		
-		printf("z[i] = ");
-		show <<<1, 1>>> (zloc[i], zrows[i]);
-		
-		cudaDeviceSynchronize();
-
-		printf("---------------------------------------\n");
-
 		offset += h_rows[i] * h_cols[i];
 		
 		// Progress the loop
 		i++;
 	}
 
+	// This is the output of the network
 	aloc[i] = atloc[i];
-
-	printf("aloc = ");
-	show <<<1, 1>>> (aloc[i], arows[i]);
-
-	cudaDeviceSynchronize();
-	
-	printf("=======================================\n");
-	
-	return in;
 }
 
+// Accumulate and apply optimizer kernel
 template <class T, class F>
-void gradient_and_accumulate_isolated_parallelized1(
-		Matrix <T> *weights,
-		Activation <T> **acts,
+__global__
+void __acc_opt(
+		T *delta,
+		T *actual,
+		T *out,
 		size_t size,
-		const Vector <T> &in,
-		const Vector <T> &out,
-		Optimizer <T> *opt,
 		F cmp,
-		Matrix <T> *grad,
-		double &gopt,
-		size_t &gpass)
+		Optimizer <T> *opt,
+		double *gopt,
+		size_t *gpass)
 {
-	using namespace std;
+	Vector <T> v_act(size, actual);
+	Vector <T> v_out(size, out);
+	Vector <T> v_delta(size, delta);
 
-	// Allocate memory for a and z
-	Vector <T> *a = new Vector <T> [size];
-	Vector <T> *z = new Vector <T> [size - 1];
+	Optimizer <T> *dopt = copy(opt);
 	
-	// Compute the actual value
-	Vector <T> actual = compute_isolated_parallelized1(
-			in,
-			weights,
-			acts,
-			a,
-			z,
-			size);
+	if (cmp(v_act, v_out))
+		(*gpass)++;
 
-	if (cmp(actual, out))
-		gpass++;
-	
-	Optimizer <T> *dev_opt = copy(opt);
+	*gopt += (*dopt)(v_act, v_out)[0];
 
-	gopt += (*dev_opt)(actual, out)[0];
-	
-	// Get the derivative of the cost
-	Optimizer <T> *dev_dopt = dev_opt->derivative();
-	
-	// Construction the Jacobian using backpropogation
-	Vector <T> delta = (*dev_dopt)(out, actual);
-	for (int i = size - 2; i >= 0; i--) {
-		if (i < size - 2) {
-			delta = weights[i + 1].transpose() * delta;
-			delta = delta.remove_top();
-		}
-		
-		delta.stable_shur(z[i]);
-		grad[i] += delta * a[i].transpose();
+	Optimizer <T> *ddopt = dopt->derivative();
+
+	v_delta.stable_transfer((*ddopt)(v_out, v_act));
+
+	delete ddopt;
+	delete dopt;
+}
+
+// Stable vector-vector shur kernel
+template <class T>
+__global__
+void __st_vv_shur(T *R, T *A, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (size_t i = tid; i < size; i += threads)
+		R[i] *= A[i];
+}
+
+// Remove top, transposed matrix times vector kernel
+template <class T>
+__global__
+void __rmt_mtv_mult(T *R, T *W, T *A, size_t rows, size_t cols)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (size_t i = tid + 1; i < cols; i += threads) {
+		T acc = 0;
+
+		for (size_t k = 0; k < rows; k++) 
+			acc += W[k * cols + i] * A[k];
+
+		R[i - 1] = acc;
 	}
+}
 
-	// Free resources
-	delete[] a;
-	delete[] z;
+// Multipy a vector and a transposed vector and add to a matrix
+template <class T>
+__global__
+void __st_mvvt_add(T *R, T *V, T *Vt, size_t rows, size_t cols)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-	delete dev_opt;
-	delete dev_dopt;
+	for (size_t i = tid; i < rows * cols; i += threads)
+		R[i] = V[i / cols] * Vt[i % cols];
 }
 
 template <class T, class F>
 void gradient_and_accumulate_isolated_parallelized2(
-		Matrix <T> *weights,
 		T *d_W,
 		size_t *h_rows,
 		size_t *h_cols,
+		size_t elems,
 		Activation <T> **acts,
 		T **aloc,
 		T **atloc,
 		T **zloc,
+		T **dloc,
 		size_t *arows,
 		size_t *zrows,
+		size_t *drows,
 		size_t size,
+		size_t osize,
 		const Vector <T> &in,
 		const Vector <T> &out,
 		Optimizer <T> *opt,
@@ -408,14 +397,8 @@ void gradient_and_accumulate_isolated_parallelized2(
 		double &gopt,
 		size_t &gpass)
 {
-	using namespace std;
-
-	// Allocate memory for a and z
-	Vector <T> *a = new Vector <T> [size];
-	Vector <T> *z = new Vector <T> [size - 1];
-	
 	// Compute the actual value
-	Vector <T> actual = compute_isolated_parallelized2(
+	compute_isolated_parallelized2(
 			in,
 			d_W,
 			h_rows,
@@ -428,34 +411,57 @@ void gradient_and_accumulate_isolated_parallelized2(
 			zrows,
 			size);
 
-	if (cmp(actual, out))
-		gpass++;
-	
-	Optimizer <T> *dev_opt = copy(opt);
+	// Create the output vector
+	T *dout;
 
-	gopt += (*dev_opt)(actual, out)[0];
+	cuda_device_alloc(&dout, sizeof(T) * osize);
+	cuda_host_to_device_memcpy(dout, out.arr(), sizeof(T) * osize);
+
+	// Allocate gopt and gpass copies
+	double *dgopt;
+	size_t *dgpass;
+
+	cuda_device_alloc(&dgopt, sizeof(double));
+	cuda_host_to_device_memcpy(dgopt, &gopt, sizeof(double));
 	
-	// Get the derivative of the cost
-	Optimizer <T> *dev_dopt = dev_opt->derivative();
+	cuda_device_alloc(&dgpass, sizeof(size_t));
+	cuda_host_to_device_memcpy(dgpass, &gpass, sizeof(size_t));
 	
+	// Run stats kernel (move resources to unified memory for this)
+	__acc_opt <<<1, 1>>> (dloc[0], aloc[size - 1], dout, osize, cmp, opt, dgopt,
+			dgpass);
+
+	cudaDeviceSynchronize();
+
 	// Construction the Jacobian using backpropogation
-	Vector <T> delta = (*dev_dopt)(out, actual);
+	size_t offset = elems - (h_rows[size - 2] * h_cols[size - 2]);
 	for (int i = size - 2; i >= 0; i--) {
+		size_t ai = size - (i + 2);
+
 		if (i < size - 2) {
-			delta = weights[i + 1].transpose() * delta;
-			delta = delta.remove_top();
+			__rmt_mtv_mult <<<1, 1>>> (dloc[ai], d_W + offset,
+					dloc[ai - 1], h_rows[i + 1], h_cols[i + 1]);
+			
+			offset -= h_rows[i] * h_cols[i];
 		}
+
+		size_t blocks = 1;
+		size_t threads = 1;
+
+		__st_vv_shur <<<blocks, threads>>>  (dloc[ai], zloc[i],
+				zrows[i]);
 		
-		delta.stable_shur(z[i]);
-		grad[i] += delta * a[i].transpose();
+		cudaDeviceSynchronize();
+		
+		__st_mvvt_add <<<1, 1>>> (grad[i].arr(), dloc[ai], aloc[i], zrows[i],
+				arows[i]);
+		
+		cudaDeviceSynchronize();
 	}
 
-	// Free resources
-	delete[] a;
-	delete[] z;
-
-	delete dev_opt;
-	delete dev_dopt;
+	// Copy stats back
+	cuda_device_to_host_memcpy(&gopt, dgopt, sizeof(double));
+	cuda_device_to_host_memcpy(&gpass, dgpass, sizeof(size_t));
 }
 
 // Training a batch with CUDA
@@ -468,8 +474,10 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		T **aloc,
 		T **atloc,
 		T **zloc,
+		T **dloc,
 		size_t *arows,
 		size_t *zrows,
+		size_t *drows,
 		T alpha,
 		T mu,
 		F cmp,
@@ -494,10 +502,6 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 	// Allocate the gradients
 	Matrix <T> *J = new Matrix <T> [net_size - 1];
-	for (int i = 0; i < net_size - 1; i++) {
-		J[i] = Matrix <T> (__weights[i].get_rows(),
-				__weights[i].get_cols(), T(0));
-	}
 	
 	Activation <T> **acts = new Activation <T> *[__size];
 
@@ -521,7 +525,15 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	T *h_M;
 	T *h_A;
 	
+	size_t elems;
+
 	if (opt) {
+		// Allocate gradient onto unified memory
+		for (int i = 0; i < net_size - 1; i++) {
+			J[i].allocate_managed(__weights[i].get_rows(),
+					__weights[i].get_cols(), T(0));
+		}
+
 		// Copy the activations onto the GPU
 		// (from which it will be copied when necessary)
 		for (int i = 0; i < __size; i++) {
@@ -532,7 +544,6 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		// Allocation constants
 		size_t bytes;
-		size_t elems;
 		
 		// Allocate dimensions to GPU
 		h_rows = new size_t[net_size - 1];
@@ -578,7 +589,9 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		cudaMemcpy(d_M, h_M, bytes, cudaMemcpyHostToDevice);
 		
 		lstart = clk.now();
-		
+	
+		// TODO: Skip from copying adj_weights to just using
+		// it (allocate from the start)
 		adj_weights = zhetapi::ml::adjusted2(
 					d_W,
 					d_M,
@@ -602,6 +615,11 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		cudaMemcpy(d_A, h_A, bytes, cudaMemcpyHostToDevice);
 	} else {	
+		for (int i = 0; i < net_size - 1; i++) {
+			J[i] = Matrix <T> (__weights[i].get_rows(),
+					__weights[i].get_cols(), T(0));
+		}
+
 		for (int i = 0; i < __size; i++)
 			acts[i] = __layers[i].second;
 
@@ -620,21 +638,29 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		Vector <T> out = outs[i];
 
 		if (opt) {
+			Optimizer <T> *dopt;
+
+			cuda_device_alloc(&dopt, sizeof(Optimizer <T>));
+			cuda_host_to_device_memcpy(dopt, __cost, sizeof(Optimizer <T>));
+
 			gradient_and_accumulate_isolated_parallelized2(
-						adj_weights,
 						d_A,
 						h_rows,
 						h_cols,
+						elems,
 						acts,
 						aloc,
 						atloc,
 						zloc,
+						dloc,
 						arows,
 						zrows,
+						drows,
 						net_size,
+						__osize,
 						in,
 						out,
-						__cost,
+						dopt,
 						cmp,
 						J,
 						gopt,
@@ -663,8 +689,11 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	if (printing) {
 		using namespace std;
 		cout << "Javg:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << J[i] << endl;
+		for (int i = 0; i < __size - 1; i++) {
+			printf("\t");
+
+			J[i].show();
+		}
 	} else {
 		apply_gradient(J, alpha, 0.7);
 	}
@@ -722,18 +751,22 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	T **aloc;
 	T **atloc;
 	T **zloc;
+	T **dloc;
 
 	size_t *arows;
 	size_t *zrows;
+	size_t *drows;
 	
 	// TODO: Remove opt everywhere once done testing
 	if (opt) {
 		aloc = new T *[__size];
 		atloc = new T *[__size];
 		zloc = new T *[__size - 1];
+		dloc = new T *[__size - 1];
 		
 		arows = new size_t[__size];
 		zrows = new size_t[__size - 1];
+		drows = new size_t[__size - 1];
 
 		/* using namespace std;
 		cout << "__size = " << __size << endl; */
@@ -742,12 +775,13 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		using namespace std;
 
+		// As
 		i = 0;
 		while (i < __size - 1) {
 			arows[i] = __layers[i].first + 1;
 
-			cudaMalloc(&aloc[i], sizeof(T) * (__layers[i].first + 1));
-			cudaMalloc(&atloc[i++], sizeof(T) * (__layers[i].first));
+			cudaMalloc(&aloc[i], sizeof(T) * arows[i]);
+			cudaMalloc(&atloc[i++], sizeof(T) * (arows[i] - 1));
 		}
 
 		arows[i] = __osize;
@@ -755,16 +789,30 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		cudaMalloc(&aloc[i], sizeof(T) * __osize);
 		cudaMalloc(&atloc[i], sizeof(T) * __osize);
 
+		// Zs
 		i = 0;
 		while (i < __size - 2) {
 			zrows[i] = __layers[i + 1].first;
 
-			cudaMalloc(&zloc[i++], sizeof(T) * (__layers[i + 1].first));
+			cudaMalloc(&zloc[i++], sizeof(T) * zrows[i]);
 		}
-
+		
 		zrows[i] = __osize;
 
 		cudaMalloc(&zloc[i], sizeof(T) * __osize);
+
+
+		// Deltas
+		i = 0;
+
+		drows[i] = __osize;
+
+		cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
+		while (i < __size - 1) {
+			drows[i] = zrows[__size - (i + 2)];
+
+			cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
+		}
 
 		/* using namespace std;
 		cout << "a:" << endl;
@@ -773,7 +821,20 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		
 		cout << "z:" << endl;
 		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << zloc[i] << endl; */
+			cout << "\t" << zloc[i] << endl;
+
+		using namespace std;
+		cout << "arows:" << endl;
+		for (int i = 0; i < __size; i++)
+			cout << "\t" << arows[i] << endl;
+		
+		cout << "zrows:" << endl;
+		for (int i = 0; i < __size - 1; i++)
+			cout << "\t" << zrows[i] << endl;
+		
+		cout << "drows:" << endl;
+		for (int i = 0; i < __size - 1; i++)
+			cout << "\t" << drows[i] << endl; */
 	}
 
 	// Split the batch
@@ -814,8 +875,10 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 						aloc,
 						atloc,
 						zloc,
+						dloc,
 						arows,
 						zrows,
+						drows,
 						lr,
 						0.7,
 						cmp,
@@ -853,6 +916,8 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	if (opt) {
 		// Deallocate aloc and zloc
 		for (int i = 0; i < __size; i++) {
+			// TODO: There is a problem in freeing the very last
+			// element (duplicated frmo compute)
 			cudaFree(aloc[i]);
 			cudaFree(atloc[i]);
 		}

@@ -55,6 +55,7 @@ Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), 
 		this->__array[i] = other.__array[i];
 }
 
+// Unified is true iff the matrix is to be allocated onto unified memroy
 template <class T>
 __host__ __device__
 Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> (rs, cs, T())
@@ -147,8 +148,10 @@ __host__ __device__
 void Matrix <T> ::stable_transfer(const Matrix <T> &other)
 {
 	// TODO: Add error handling for when the dimensions mismatch
-	for (int i = 0; i < this->__size; i++)
+	for (int i = 0; i < this->__size; i++) {
+		// printf("Copying %f\n", other.__array[i]);
 		this->__array[i] = other.__array[i];
+	}
 }
 
 template <class T>
@@ -171,11 +174,34 @@ void Matrix <T> ::stable_shur(const Matrix <T> &other)
 }
 
 template <class T>
+void Matrix <T> ::allocate_managed(size_t rs, size_t cs, T def)
+{
+	this->__on_device = true;
+
+	__rows = rs;
+	__cols = cs;
+
+	this->__size = rs * cs;
+
+	cudaMallocManaged(&this->__dim, 2 * sizeof(size_t));
+	cudaCheckError(nullptr);
+
+	this->__dim[0] = rs;
+	this->__dim[1] = cs;
+
+	cudaMallocManaged(&this->__array, sizeof(T) * this->__size);
+	cudaCheckError(nullptr);
+
+	for (size_t i = 0; i < this->__size; i++)
+		this->__array[i] = def;
+}
+
+template <class T>
 __host__ __device__
 void Matrix <T> ::show(int tid) const
 {
-	printf("#ID = %lu, ", tid);
-	printf("array = %p (", this->__array);
+	// printf("array = %p (", this->__array);
+	printf("{");
 
 	for (size_t i = 0; i < this->__size; i++) {
 		printf("%f", this->__array[i]);
@@ -184,11 +210,11 @@ void Matrix <T> ::show(int tid) const
 			printf(", ");
 	}
 
-	printf(") dim = %p ", this->__dim);
+	printf("}\n"); /* dim = %p ", this->__dim);
 	printf("rows = %lu, ", __rows);
 	printf("cols = %lu, ", __cols);
 	printf("size = %lu, ", this->__size);
-	printf("dims = %lu\n", this->__dims);
+	printf("dims = %lu\n", this->__dims); */
 }
 
 template <class T>

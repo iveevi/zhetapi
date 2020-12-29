@@ -208,6 +208,8 @@ namespace zhetapi {
 		__host__ __device__
 		void stable_shur(const Matrix <T> &);
 
+		void allocate_managed(size_t, size_t, T);
+
 		// For debugging
 		__host__ __device__
 		void show(int = -1) const;

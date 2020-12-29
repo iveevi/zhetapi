@@ -22,6 +22,10 @@ cudaError_t e;
 	cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice);	\
 	cudaCheckError(dst);
 
+#define cuda_device_to_host_memcpy(dst, src, size)		\
+	cudaMemcpy(dst, src, size, cudaMemcpyDeviceToHost);	\
+	cudaCheckError(dst);
+
 // Deallocation
 #define cuda_device_free(ptr)		\
 	cudaFree(ptr);			\

@@ -36,11 +36,10 @@ Tensor <T> ::Tensor(size_t rows, size_t cols, const T &def)
 	__size = rows * cols;
 
 	__dim = new size_t[2];
+	__array = new T[__size];
 	
 	__dim[0] = rows;
 	__dim[1] = cols;
-
-	__array = new T[__size];
 	for (size_t i = 0; i < __size; i++)
 		__array[i] = def;	
 }

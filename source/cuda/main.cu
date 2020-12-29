@@ -145,7 +145,7 @@ int main()
 	ml::NeuralNetwork <double> model ({
 		{2, new zhetapi::ml::Linear <double> ()},
 		{3, new zhetapi::ml::Sigmoid <double> ()},
-		{1, new zhetapi::ml::ReLU <double> ()},
+		{5, new zhetapi::ml::ReLU <double> ()},
 		{4, new zhetapi::ml::ReLU <double> ()}
 	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 	

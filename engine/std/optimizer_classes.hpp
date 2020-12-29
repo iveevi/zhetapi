@@ -130,8 +130,7 @@ namespace zhetapi {
 #else
 
 			__host__ __device__
-			MeanSquaredError()
-			{
+			MeanSquaredError() {
 				this->kind = Optimizer <T> ::OPT_MSE;
 			}
 
@@ -146,8 +145,7 @@ namespace zhetapi {
 			}
 
 			__host__ __device__
-			Optimizer <T> *derivative() const
-			{
+			Optimizer <T> *derivative() const {
 				return new __DMeanSquaredError <T> ();
 			}
 

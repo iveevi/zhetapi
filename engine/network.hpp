@@ -176,6 +176,8 @@ public:
 		T **,
 		T **,
 		T **,
+		T **,
+		size_t *,
 		size_t *,
 		size_t *,
 		T,

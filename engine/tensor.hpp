@@ -139,7 +139,7 @@ namespace zhetapi {
 	template <class T>
 	::std::string Tensor <T> ::print() const
 	{
-		if (!__dim || !__dim[0])
+		if (!__dim)
 			return "[]";
 		
 		if (__dims == 0) {
