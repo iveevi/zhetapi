@@ -169,6 +169,44 @@ void __st_mvvt_add(T *R, T *V, T *Vt, size_t rows, size_t cols)
 		R[i] += V[i / cols] * Vt[i % cols];
 }
 
+// Set all elements of the (gradient) matrix to 0
+template <class T>
+__global__
+void __st_m_zero_set(T *J, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (size_t i = tid; i < size; i+= threads)
+		J[i] = 0;
+}
+
+template <class T>
+__global__
+void __st_mc_div(T *J, T c, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (size_t i = tid; i < size; i+= threads)
+		J[i] /= c;
+}
+
+
+// Aplpy gradient
+template <class T>
+__global__
+void __st_mmmcc_grad(T *W, T *M, T *J, T alpha, T mu, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
+
+	for (size_t i = tid; i < size; i+= threads) {
+		M[i] = mu * M[i] - alpha * J[i];
+		W[i] += M[i];
+	}
+}
+
 }
 
 #endif

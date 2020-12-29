@@ -24,45 +24,6 @@ namespace zhetapi {
 
 namespace ml {
 
-
-// Set all elements of the (gradient) matrix to 0
-template <class T>
-__global__
-void reset(T *J, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < size; i+= threads)
-		J[i] = 0;
-}
-
-template <class T>
-__global__
-void scale_down(T *J, T c, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < size; i+= threads)
-		J[i] /= c;
-}
-
-
-// Aplpy gradient
-template <class T>
-__global__
-void apply_gradient_k(T *W, T *M, T *J, T alpha, T mu, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < size; i+= threads) {
-		M[i] = mu * M[i] - alpha * J[i];
-		W[i] += M[i];
-	}
-}
-
 template <class T>
 void adjusted(
 		T *d_A,
@@ -298,7 +259,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	blocks = min(MAX_BLOCKS, max(1L, elems/MAX_THREADS));
 	threads = min(MAX_THREADS, elems);
 
-	reset <<<blocks, threads>>> (d_J, elems);
+	__st_m_zero_set <<<blocks, threads>>> (d_J, elems);
 
 	cudaDeviceSynchronize();
 
@@ -345,7 +306,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	lend = clk.now();
 
 	// TODO: change name and blocks/threads 
-	scale_down <<<blocks, threads>>> (d_J, T(data_size), elems);
+	__st_mc_div <<<blocks, threads>>> (d_J, T(data_size), elems);
 
 	cudaDeviceSynchronize();
 
@@ -360,7 +321,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 #else
 
 	// TODO: Change name and blocks/threads
-	apply_gradient_k <<<blocks, threads>>> (d_W, d_M, d_J, alpha, 0.7, elems);
+	__st_mmmcc_grad <<<blocks, threads>>> (d_W, d_M, d_J, alpha, 0.7, elems);
 
 #endif
 	
