@@ -16,127 +16,56 @@
 #include <cuda/optimizer.cuh>
 #include <cuda/vector.cuh>
 
-// TODO: Add a #define constant for the maximum number of threads and blocks
+// Derive these from device properties later on
+#define MAX_BLOCKS	65535L
+#define MAX_THREADS	1024L
+
 namespace zhetapi {
 
 namespace ml {
 
-int opt = 0;
 
+// Set all elements of the (gradient) matrix to 0
 template <class T>
-Matrix <T> *adjusted1(
-		Matrix <T> *weights,
-		Matrix <T> *momentum,
-		size_t size,
-		T mu)
+__global__
+void reset(T *J, size_t size)
 {
-	Matrix <T> *theta = new Matrix <T> [size - 1];
-	for (int i = 0; i < size - 1; i++)
-		theta[i] = weights[i];
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-	for (int i = 0; i < size - 1; i++)
-		theta[i] += mu * momentum[i];
-
-	return theta;
+	for (size_t i = tid; i < size; i+= threads)
+		J[i] = 0;
 }
 
 template <class T>
-Vector <T> compute_isolated_parallelized1(
-		const Vector <T> &in,
-		Matrix <T> *weights,
-		ml::Activation <T> **acts,
-		Vector <T> *a,
-		Vector <T> *z,
-		size_t size)
+__global__
+void scale_down(T *J, T c, size_t size)
 {
-	using namespace std;
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-	size_t i = 0;
-	while (i < size - 1) {
-		a[i] = tmp.append_above(T (1));
+	for (size_t i = tid; i < size; i+= threads)
+		J[i] /= c;
+}
 
-		prv = weights[i] * a[i];
-		
-		ml::Activation <T> *dev_act = copy(acts[i + 1]);
 
-		tmp = (*dev_act)(prv);
+// Aplpy gradient
+template <class T>
+__global__
+void apply_gradient_k(T *W, T *M, T *J, T alpha, T mu, size_t size)
+{
+	size_t threads = blockDim.x * gridDim.x;
+	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
 
-		ml::Activation <T> *dev_dact = dev_act->derivative();
-
-		z[i++] = (*dev_dact)(prv);
-
-		delete dev_act;
-		delete dev_dact;
+	for (size_t i = tid; i < size; i+= threads) {
+		M[i] = mu * M[i] - alpha * J[i];
+		W[i] += M[i];
 	}
-
-	a[i] = tmp;
-	
-	return tmp;
-}
-
-template <class T, class F>
-void gradient_and_accumulate_isolated_parallelized1(
-		Matrix <T> *weights,
-		Activation <T> **acts,
-		size_t size,
-		const Vector <T> &in,
-		const Vector <T> &out,
-		Optimizer <T> *opt,
-		F cmp,
-		Matrix <T> *grad,
-		double &gopt,
-		size_t &gpass)
-{
-	using namespace std;
-
-	// Allocate memory for a and z
-	Vector <T> *a = new Vector <T> [size];
-	Vector <T> *z = new Vector <T> [size - 1];
-	
-	// Compute the actual value
-	Vector <T> actual = compute_isolated_parallelized1(
-			in,
-			weights,
-			acts,
-			a,
-			z,
-			size);
-
-	if (cmp(actual, out))
-		gpass++;
-	
-	Optimizer <T> *dev_opt = copy(opt);
-
-	gopt += (*dev_opt)(actual, out)[0];
-	
-	// Get the derivative of the cost
-	Optimizer <T> *dev_dopt = dev_opt->derivative();
-	
-	// Construction the Jacobian using backpropogation
-	Vector <T> delta = (*dev_dopt)(out, actual);
-	for (int i = size - 2; i >= 0; i--) {
-		if (i < size - 2) {
-			delta = weights[i + 1].transpose() * delta;
-			delta = delta.remove_top();
-		}
-		
-		delta.stable_shur(z[i]);
-
-		grad[i] += delta * a[i].transpose();
-	}
-
-	// Free resources
-	delete[] a;
-	delete[] z;
-
-	delete dev_opt;
-	delete dev_dopt;
 }
 
 template <class T>
-Matrix <T> *adjusted2(
+void adjusted(
+		T *d_A,
 		T *d_W,
 		T *d_M,
 		size_t net_size,
@@ -144,42 +73,24 @@ Matrix <T> *adjusted2(
 		size_t *h_cols,
 		T mu)
 {
-	Matrix <T> *theta = new Matrix <T> [net_size - 1];
-	T **d_As = new T *[net_size - 1];
-
+	// TODO: Stuff this all into a single kernel
 	size_t offset = 0;
 	for (int i = 0; i < net_size - 1; i++) {
-		T *d_A;
+		size_t blocks = min(MAX_BLOCKS, h_rows[i]);
+		size_t threads = min(MAX_THREADS, h_cols[i]);
 
-		cudaMalloc(&d_A, sizeof(T) * h_rows[i] * h_cols[i]);
-
-		d_As[i] = d_A;
-
-		size_t blocks = min(128L, h_rows[i]);
-		size_t threads = min(128L, h_cols[i]);
-
-		__mmc_fma <<<blocks, threads>>> (d_A, (d_W + offset), (d_M + offset), mu, h_rows[i] * h_cols[i]);
+		__mmc_fma <<<blocks, threads>>> ((d_A + offset), (d_W + offset),
+				(d_M + offset), mu, h_rows[i] * h_cols[i]);
 
 		offset += h_rows[i] * h_cols[i];
 	}
 
 	cudaDeviceSynchronize();
-	for (int i = 0; i < net_size - 1; i++) {
-		T *h_A = new T[h_rows[i] * h_cols[i]];
-
-		cudaMemcpy(h_A, d_As[i], sizeof(T) * h_rows[i] * h_cols[i],
-				cudaMemcpyDeviceToHost);
-
-		theta[i] = Matrix <T> (h_rows[i], h_cols[i], h_A, true);
-
-		cudaFree(d_As[i]);
-	}
-
-	return theta;
+	cudaCheckError(nullptr);
 }
 
 template <class T>
-void compute_isolated_parallelized2(
+void compute_isolated_parallelized(
 		const Vector <T> &in,
 		T *d_W,
 		size_t *h_rows,
@@ -197,8 +108,8 @@ void compute_isolated_parallelized2(
 	size_t i = 0;
 	size_t offset = 0;
 	while (i < size - 1) {
-		size_t blocks = min(128L, h_rows[i]);
-		size_t threads = min(128L, h_cols[i]);
+		size_t blocks = min(MAX_BLOCKS, h_rows[i]);
+		size_t threads = min(MAX_THREADS, h_cols[i]);
 
 		cudaDeviceSynchronize();
 
@@ -232,7 +143,7 @@ void compute_isolated_parallelized2(
 }
 
 template <class T, class F>
-void gradient_and_accumulate_isolated_parallelized2(
+void gradient_and_accumulate_isolated_parallelized(
 		T *d_W,
 		size_t *h_rows,
 		size_t *h_cols,
@@ -251,12 +162,12 @@ void gradient_and_accumulate_isolated_parallelized2(
 		const Vector <T> &out,
 		Optimizer <T> *opt,
 		F cmp,
-		Matrix <T> *grad,
+		T *d_J,
 		double &gopt,
 		size_t &gpass)
 {
 	// Compute the actual value
-	compute_isolated_parallelized2(
+	compute_isolated_parallelized(
 			in,
 			d_W,
 			h_rows,
@@ -294,14 +205,13 @@ void gradient_and_accumulate_isolated_parallelized2(
 	// Construction the Jacobian using backpropogation
 	size_t offset = elems - (h_rows[size - 2] * h_cols[size - 2]);
 
-
 	size_t blocks = 1;
 	size_t threads = 1;
 	for (int i = size - 2; i >= 0; i--) {
 		size_t ai = size - (i + 2);
 
 		if (i < size - 2) {
-			threads = min(128L, h_cols[i]);
+			threads = min(MAX_THREADS, h_cols[i]);
 
 			__rmt_mtv_mult <<<1, threads>>> (dloc[ai], d_W + offset,
 					dloc[ai - 1], h_rows[i + 1], h_cols[i + 1]);
@@ -309,18 +219,18 @@ void gradient_and_accumulate_isolated_parallelized2(
 			offset -= h_rows[i] * h_cols[i];
 		}
 
-		threads = min(128L, zrows[i]);
+		threads = min(MAX_THREADS, zrows[i]);
 		__st_vv_shur <<<blocks, threads>>>  (dloc[ai], zloc[i],
 				zrows[i]);
 		
 		cudaDeviceSynchronize();
 		
-		blocks = min(128L, h_rows[i]);
-		threads = min(128L, h_cols[i]);
+		blocks = min(MAX_BLOCKS, h_rows[i]);
+		threads = min(MAX_THREADS, h_cols[i]);
 
-		__st_mvvt_add <<<blocks, threads>>> (grad[i].arr(), dloc[ai], aloc[i], zrows[i],
-				arows[i]);
-		
+		__st_mvvt_add <<<blocks, threads>>> ((d_J + offset), dloc[ai], aloc[i],
+				zrows[i], arows[i]);
+
 		cudaDeviceSynchronize();
 	}
 
@@ -331,11 +241,22 @@ void gradient_and_accumulate_isolated_parallelized2(
 
 // Training a batch with CUDA
 template <class T>
-template <class F, size_t blocks, size_t threads>
+template <class F>
 typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	::cuda_batch(
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
+		Activation <T> **acts,
+		Optimizer <T> *opt,
+		T *d_W,
+		T *d_M,
+		T *d_A,
+		T *d_J,
+		size_t *d_rows,
+		size_t *d_cols,
+		size_t *h_rows,		// Remove this
+		size_t *h_cols,		// and this
+		size_t elems,
 		T **aloc,
 		T **atloc,
 		T **zloc,
@@ -366,218 +287,82 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	size_t net_size = __size;
 
 	// Allocate the gradients
-	Matrix <T> *J = new Matrix <T> [net_size - 1];
-	
-	Activation <T> **acts = new Activation <T> *[__size];
-
 	double gopt = 0;
 	size_t gpass = 0;
 
-	// GPU adjustments
-	Matrix <T> *adj_weights;
-	
-	size_t *d_rows;
-	size_t *d_cols;
-	
-	size_t *h_rows;
-	size_t *h_cols;
-	
-	T *d_W;
-	T *d_M;
-	T *d_A;
-	
-	T *h_W;
-	T *h_M;
-	T *h_A;
-	
-	size_t elems;
+	// Kernel launch variables
+	size_t blocks;
+	size_t threads;
 
-	if (opt) {
-		// Allocate gradient onto unified memory
-		for (int i = 0; i < net_size - 1; i++) {
-			J[i].allocate_managed(__weights[i].get_rows(),
-					__weights[i].get_cols(), T(0));
-		}
+	// TODO: Set appropriate blocks and threads
+	blocks = min(MAX_BLOCKS, max(1L, elems/MAX_THREADS));
+	threads = min(MAX_THREADS, elems);
 
-		// Copy the activations onto the GPU
-		// (from which it will be copied when necessary)
-		for (int i = 0; i < __size; i++) {
-			cuda_device_alloc(&acts[i], sizeof(Activation <T>));
-			cuda_host_to_device_memcpy(acts[i], __layers[i].second,
-					sizeof(Activation <T>));
-		}
+	reset <<<blocks, threads>>> (d_J, elems);
 
-		// Allocation constants
-		size_t bytes;
-		
-		// Allocate dimensions to GPU
-		h_rows = new size_t[net_size - 1];
-		h_cols = new size_t[net_size - 1];
+	cudaDeviceSynchronize();
 
-		bytes = sizeof(size_t) * (net_size - 1);
+	lstart = clk.now();
 
-		cudaMalloc(&d_rows, bytes);
-		cudaMalloc(&d_cols, bytes);
+	zhetapi::ml::adjusted(
+				d_A,
+				d_W,
+				d_M,
+				net_size,
+				h_rows,
+				h_cols,
+				0.7);
 
-		bytes = 0;
-		elems = 0;
-		for (size_t i = 0; i < net_size - 1; i++) {
-			h_rows[i] = __weights[i].get_rows();
-			h_cols[i] = __weights[i].get_cols();
-
-			elems += h_rows[i] * h_cols[i];
-		}
-
-		cudaMemcpy(d_rows, h_rows, bytes, cudaMemcpyHostToDevice);
-		cudaMemcpy(d_cols, h_cols, bytes, cudaMemcpyHostToDevice);
-
-		// Allocate matrices to GPU as flattened arrays
-		h_W = new T[elems];
-		h_M = new T[elems];
-		
-		bytes = sizeof(T) * elems;
-
-		cudaMalloc(&d_W, bytes);
-		cudaMalloc(&d_M, bytes);
-
-		size_t k = 0;
-		for (size_t i = 0; i < net_size - 1; i++) {
-			for (size_t jx = 0; jx < h_rows[i]; jx++) {
-				for (size_t jy = 0; jy < h_cols[i]; jy++) {
-					h_W[k] = __weights[i][jx][jy];
-					h_M[k++] = __momentum[i][jx][jy];
-				}
-			}
-		}
-		
-		cudaMemcpy(d_W, h_W, bytes, cudaMemcpyHostToDevice);
-		cudaMemcpy(d_M, h_M, bytes, cudaMemcpyHostToDevice);
-		
-		lstart = clk.now();
-	
-		// TODO: Skip from copying adj_weights to just using
-		// it (allocate from the start)
-		adj_weights = zhetapi::ml::adjusted2(
-					d_W,
-					d_M,
-					net_size,
-					h_rows,
-					h_cols,
-					0.7);
-		
-		// Copy the adjusted weights to the GPU
-		h_A = new T[elems];
-		
-		cudaMalloc(&d_A, bytes);
-
-		k = 0;
-		for (size_t i = 0; i < net_size - 1; i++) {
-			for (size_t jx = 0; jx < h_rows[i]; jx++) {
-				for (size_t jy = 0; jy < h_cols[i]; jy++)
-					h_A[k++] = adj_weights[i][jx][jy];
-			}
-		}
-
-		cudaMemcpy(d_A, h_A, bytes, cudaMemcpyHostToDevice);
-	} else {	
-		for (int i = 0; i < net_size - 1; i++) {
-			J[i] = Matrix <T> (__weights[i].get_rows(),
-					__weights[i].get_cols(), T(0));
-		}
-
-		for (int i = 0; i < __size; i++)
-			acts[i] = __layers[i].second;
-
-		// Start kernel timer
-		lstart = clk.now();
-
-		adj_weights = zhetapi::ml::adjusted1(
-					__weights,
-					__momentum,
-					net_size,
-					0.7);
-	}
 	for (int i = 0; i < data_size; i++) {
 		Vector <T> in = ins[i];
 		Vector <T> out = outs[i];
 
-		if (opt) {
-			Optimizer <T> *dopt;
-
-			cuda_device_alloc(&dopt, sizeof(Optimizer <T>));
-			cuda_host_to_device_memcpy(dopt, __cost, sizeof(Optimizer <T>));
-
-			gradient_and_accumulate_isolated_parallelized2(
-						d_A,
-						h_rows,
-						h_cols,
-						elems,
-						acts,
-						aloc,
-						atloc,
-						zloc,
-						dloc,
-						arows,
-						zrows,
-						drows,
-						net_size,
-						__osize,
-						in,
-						out,
-						dopt,
-						cmp,
-						J,
-						gopt,
-						gpass);
-
-			cuda_device_free(dopt);
-		} else {
-			gradient_and_accumulate_isolated_parallelized1(
-						adj_weights,
-						acts,
-						net_size,
-						in,
-						out,
-						__cost,
-						cmp,
-						J,
-						gopt,
-						gpass);
-		}
+		gradient_and_accumulate_isolated_parallelized(
+					d_A,
+					h_rows,
+					h_cols,
+					elems,
+					acts,
+					aloc,
+					atloc,
+					zloc,
+					dloc,
+					arows,
+					zrows,
+					drows,
+					net_size,
+					__osize,
+					in,
+					out,
+					opt,
+					cmp,
+					d_J,
+					gopt,
+					gpass);
 	}
 
 	// Stop kernel time
 	lend = clk.now();
 
-	for (int i = 0; i < __size - 1; i++)
-		J[i] /= data_size;
+	// TODO: change name and blocks/threads 
+	scale_down <<<blocks, threads>>> (d_J, T(data_size), elems);
+
+	cudaDeviceSynchronize();
+
+#ifdef ZHP_GRAD_DEBUG
+
+	cout << "d_J:" << endl;
 	
-	if (printing) {
-		using namespace std;
-		cout << "Javg:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << J[i] << endl;
-	} else {
-		apply_gradient(J, alpha, 0.7);
-	}
+	__print_array <<<1, 1>>> (d_J, elems);
 
-	delete[] adj_weights;
-	delete[] acts;
-	delete[] J;
+	cudaDeviceSynchronize();
 
-	if (opt) {
-		delete[] h_rows;
-		delete[] h_cols;
-		
-		delete[] h_W;
-		delete[] h_M;
+#else
 
-		cudaFree(d_rows);
-		cudaFree(d_cols);
-		
-		cudaFree(d_W);
-		cudaFree(d_M);
-	}
+	// TODO: Change name and blocks/threads
+	apply_gradient_k <<<blocks, threads>>> (d_W, d_M, d_J, alpha, 0.7, elems);
+
+#endif
 	
 	// Stop full timer
 	fend = clk.now();
@@ -592,7 +377,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 // Epoch training with CUDA
 template <class T>
-template <class F, size_t blocks, size_t threads>
+template <class F>
 typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	::cuda_epochs(
 		const DataSet <T> &ins,
@@ -619,59 +404,136 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	size_t *arows;
 	size_t *zrows;
 	size_t *drows;
+
+	// alloc_gpu(aloc, atloc, zloc, dloc, arows, zrows, drows);
+
+	aloc = new T *[__size];
+	atloc = new T *[__size];
+	zloc = new T *[__size - 1];
+	dloc = new T *[__size - 1];
 	
-	// TODO: Remove opt everywhere once done testing
-	if (opt) {
-		aloc = new T *[__size];
-		atloc = new T *[__size];
-		zloc = new T *[__size - 1];
-		dloc = new T *[__size - 1];
-		
-		arows = new size_t[__size];
-		zrows = new size_t[__size - 1];
-		drows = new size_t[__size - 1];
-		
-		size_t i;
+	arows = new size_t[__size];
+	zrows = new size_t[__size - 1];
+	drows = new size_t[__size - 1];
+	
+	size_t i;
 
-		// As
-		i = 0;
-		while (i < __size - 1) {
-			arows[i] = __layers[i].first + 1;
+	// As
+	i = 0;
+	while (i < __size - 1) {
+		arows[i] = __layers[i].first + 1;
 
-			cudaMalloc(&aloc[i], sizeof(T) * arows[i]);
-			cudaMalloc(&atloc[i++], sizeof(T) * (arows[i] - 1));
-		}
+		cudaMalloc(&aloc[i], sizeof(T) * arows[i]);
+		cudaMalloc(&atloc[i++], sizeof(T) * (arows[i] - 1));
+	}
 
-		arows[i] = __osize;
-		
-		cudaMalloc(&aloc[i], sizeof(T) * __osize);
-		cudaMalloc(&atloc[i], sizeof(T) * __osize);
+	arows[i] = __osize;
+	
+	cudaMalloc(&aloc[i], sizeof(T) * __osize);
+	cudaMalloc(&atloc[i], sizeof(T) * __osize);
 
-		// Zs
-		i = 0;
-		while (i < __size - 2) {
-			zrows[i] = __layers[i + 1].first;
+	// Zs
+	i = 0;
+	while (i < __size - 2) {
+		zrows[i] = __layers[i + 1].first;
 
-			cudaMalloc(&zloc[i++], sizeof(T) * zrows[i]);
-		}
-		
-		zrows[i] = __osize;
+		cudaMalloc(&zloc[i++], sizeof(T) * zrows[i]);
+	}
+	
+	zrows[i] = __osize;
 
-		cudaMalloc(&zloc[i], sizeof(T) * __osize);
+	cudaMalloc(&zloc[i], sizeof(T) * __osize);
 
 
-		// Deltas
-		i = 0;
+	// Deltas
+	i = 0;
 
-		drows[i] = __osize;
+	drows[i] = __osize;
+
+	cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
+	while (i < __size - 1) {
+		drows[i] = zrows[__size - (i + 2)];
 
 		cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
-		while (i < __size - 1) {
-			drows[i] = zrows[__size - (i + 2)];
+	}
 
-			cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
+	// Activations
+	Activation <T> **acts = new Activation <T> *[__size];
+	for (int i = 0; i < __size; i++) {
+		cuda_device_alloc(&acts[i], sizeof(Activation <T>));
+		cuda_host_to_device_memcpy(acts[i], __layers[i].second,
+				sizeof(Activation <T>));
+	}
+	
+	// Optimizer
+	Optimizer <T> *opt;
+
+	cuda_device_alloc(&opt, sizeof(Optimizer <T>));
+	cuda_host_to_device_memcpy(opt, __cost, sizeof(Optimizer <T>));
+	
+	// Weights and momentum
+	size_t *d_rows;
+	size_t *d_cols;
+	
+	size_t *h_rows;
+	size_t *h_cols;
+	
+	T *d_W;
+	T *d_M;
+	T *d_A;
+	T *d_J; // Gradient array
+	
+	T *h_W;
+	T *h_M;
+	
+	// Allocation constants
+	size_t bytes;
+	size_t elems;
+	
+	// Allocate dimensions to GPU
+	h_rows = new size_t[__size - 1];
+	h_cols = new size_t[__size - 1];
+
+	bytes = sizeof(size_t) * (__size - 1);
+
+	cudaMalloc(&d_rows, bytes);
+	cudaMalloc(&d_cols, bytes);
+
+	bytes = 0;
+	elems = 0;
+	for (size_t i = 0; i < __size - 1; i++) {
+		h_rows[i] = __weights[i].get_rows();
+		h_cols[i] = __weights[i].get_cols();
+
+		elems += h_rows[i] * h_cols[i];
+	}
+
+	cudaMemcpy(d_rows, h_rows, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_cols, h_cols, bytes, cudaMemcpyHostToDevice);
+
+	// Allocate matrices to GPU as flattened arrays
+	h_W = new T[elems];
+	h_M = new T[elems];
+	
+	bytes = sizeof(T) * elems;
+
+	cudaMalloc(&d_W, bytes);
+	cudaMalloc(&d_M, bytes);
+	cudaMalloc(&d_A, bytes);
+	cudaMalloc(&d_J, bytes);
+
+	size_t k = 0;
+	for (size_t i = 0; i < __size - 1; i++) {
+		for (size_t jx = 0; jx < h_rows[i]; jx++) {
+			for (size_t jy = 0; jy < h_cols[i]; jy++) {
+				h_W[k] = __weights[i][jx][jy];
+				h_M[k++] = __momentum[i][jx][jy];
+			}
 		}
 	}
+	
+	cudaMemcpy(d_W, h_W, bytes, cudaMemcpyHostToDevice);
+	cudaMemcpy(d_M, h_M, bytes, cudaMemcpyHostToDevice);
 
 	// Split the batch
 	std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
@@ -705,9 +567,20 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		for (int j = 0; j < ins_batched.size(); j++) {
 			TrainingStatistics result =
-				cuda_batch <F, blocks, threads> (
+				cuda_batch <F> (
 						ins_batched[j],
 						outs_batched[j],
+						acts,
+						opt,
+						d_W,
+						d_M,
+						d_A,
+						d_J,
+						d_rows,
+						d_cols,
+						h_rows,
+						h_cols,
+						elems,
 						aloc,
 						atloc,
 						zloc,
@@ -749,27 +622,67 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		}
 	}
 
-	if (opt) {
-		// Deallocate aloc and zloc
-		for (int i = 0; i < __size; i++) {
-			cuda_device_free(aloc[i]);
+	// TODO: Copy the device weight arrays back to the network
 
-			// Skip the last element (duplicate pointer)
-			if (i < __size - 1)
-				cuda_device_free(atloc[i]);
-		}
-		
-		for (int i = 0; i < __size - 1; i++)
-			cuda_device_free(zloc[i]);
+	// Deallocate aloc and zloc
+	for (int i = 0; i < __size; i++) {
+		cuda_device_free(aloc[i]);
 
-		delete[] aloc;
-		delete[] atloc;
-		delete[] zloc;
-
-		delete[] arows;
-		delete[] zrows;
-		delete[] drows;
+		// Skip the last element (duplicate pointer)
+		if (i < __size - 1)
+			cuda_device_free(atloc[i]);
 	}
+	
+	for (int i = 0; i < __size - 1; i++) {
+		cuda_device_free(dloc[i]);
+		cuda_device_free(zloc[i]);
+	}
+
+	delete[] aloc;
+	delete[] atloc;
+	delete[] zloc;
+
+	delete[] arows;
+	delete[] zrows;
+	delete[] drows;
+
+	// Deallocate activations
+	for (size_t i = 0; i < __size; i++)
+		cuda_device_free(acts[i]);
+	
+	delete[] acts;
+
+	// Deallocate optimizer
+	cuda_device_free(opt);
+
+	// Deallocate weights and momentum
+	cudaFree(d_rows);
+	cudaFree(d_cols);
+
+	// Copy network state back
+	cuda_device_to_host_memcpy(h_W, d_W, bytes);
+	cuda_device_to_host_memcpy(h_M, d_M, bytes);
+	
+	k = 0;
+	for (size_t i = 0; i < __size - 1; i++) {
+		for (size_t jx = 0; jx < h_rows[i]; jx++) {
+			for (size_t jy = 0; jy < h_cols[i]; jy++) {
+				__weights[i][jx][jy] = h_W[k];
+				__momentum[i][jx][jy] = h_M[k++];
+			}
+		}
+	}
+
+	delete[] h_W;
+	delete[] h_M;
+	
+	cudaFree(d_W);
+	cudaFree(d_M);
+	cudaFree(d_A);
+	cudaFree(d_J);
+
+	delete[] h_rows;
+	delete[] h_cols;
 
 	return {t_passed, t_err, t_ktime, t_ftime};
 }

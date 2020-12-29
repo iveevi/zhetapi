@@ -13,6 +13,17 @@ class Optimizer;
 
 }
 
+// For debugging only
+template <class T>
+__global__
+void __print_array(T *arr, size_t size)
+{
+	printf("{");
+	for (size_t i = 0; i < size; i++)
+		printf("%f, ", arr[i]);
+	printf("\b \b\b}\n");
+}
+
 template <class T>
 __global__
 void __mmc_fma(T *R, T *W, T *M, T c, size_t size)
@@ -155,7 +166,7 @@ void __st_mvvt_add(T *R, T *V, T *Vt, size_t rows, size_t cols)
 	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
 
 	for (size_t i = tid; i < rows * cols; i += threads)
-		R[i] = V[i / cols] * Vt[i % cols];
+		R[i] += V[i / cols] * Vt[i % cols];
 }
 
 }

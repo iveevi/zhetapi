@@ -200,7 +200,7 @@ Vector <T> Vector <T> ::append_above(const T &x)
 	for (size_t i = 1; i <= this->__size; i++)
 		apped[i] = this->__array[i - 1];
 
-	return Vector(this->__size + 1, apped);
+	return Vector(this->__size + 1, apped, true);
 }
 
 template <class T>
@@ -229,7 +229,7 @@ Vector <T> Vector <T> ::remove_top()
 	for (size_t i = 0; i < this->__size - 1; i++)
 		apped[i] = this->__array[i + 1];
 
-	return Vector(this->__size - 1, apped);
+	return Vector(this->__size - 1, apped, true);
 }
 
 template <class T>

@@ -168,11 +168,22 @@ public:
 	static const Comparator <T>		__default_comparator;
 
 #ifdef ZHP_CUDA
-	
-	template <class F, size_t = 1, size_t = 1>
+
+	template <class F>
 	TrainingStatistics cuda_batch(
 		const DataSet <T> &,
 		const DataSet <T> &,
+		Activation <T> **,
+		Optimizer <T> *,
+		T *,
+		T *,
+		T *,
+		T *,
+		size_t *,
+		size_t *,
+		size_t *,
+		size_t *,
+		size_t,
 		T **,
 		T **,
 		T **,
@@ -185,7 +196,7 @@ public:
 		F,
 		bool = false);
 
-	template <class F, size_t = 1, size_t = 1>
+	template <class F>
 	TrainingStatistics cuda_epochs(
 		const DataSet <T> &,
 		const DataSet <T> &,
@@ -843,6 +854,11 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 			Matrix <T> *adj = adjusted(0.7);
 
 			grads[i] = gradient(adj, ins[i], outs[i], __cost);
+			
+			/* using namespace std;
+			cout << endl << "grad[i] = " << endl;
+			for (int j = 0; j < __size - 1; j++)
+				cout << "\t" << grads[i][j] << endl; */
 
 			delete[] adj;
 
@@ -930,14 +946,18 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	for (size_t j = 0; j < __size - 1; j++)
 		grad[j] /= (double) size;
 
-	if (printing) {
-		using namespace std;	
-		cout << endl << "Javg:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << grad[i] << endl;
-	} else {	
-		apply_gradient(grad, alpha, 0.7);
-	}
+#ifdef ZHP_GRAD_DEBUG
+
+	using namespace std;
+	cout << endl << "Javg:" << endl;
+	for (int i = 0; i < __size - 1; i++)
+		cout << "\t" << grad[i] << endl;
+
+#else
+
+	apply_gradient(grad, alpha, 0.7);
+
+#endif
 	
 	// Release memory
 	delete[] grad;
@@ -1061,6 +1081,12 @@ void NeuralNetwork <T> ::print() const
 	size_t n = 0;
 	for (int i = 0; i < __size - 1; i++)
 		std::cout << "[" << ++n << "]\t" << __weights[i] << std::endl;
+	
+	std::cout << "Momentum:" << std::endl;
+
+	n = 0;
+	for (int i = 0; i < __size - 1; i++)
+		std::cout << "[" << ++n << "]\t" << __momentum[i] << std::endl;
 	
 	std::cout << "================================" << std::endl;
 }
