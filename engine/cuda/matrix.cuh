@@ -112,18 +112,8 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
 		this->clear();
-		// delete[] this->__array;
-		// delete[] this->__dim;
 
 		this->__array = new T[other.__size];
-
-		/* if (!this->__array) {
-			printf("Failed to allocate memory for Matrix::operator=\n");
-		} else {
-			size_t bytes = other.__rows * other.__cols * sizeof(T);
-
-			printf("Successfully allocated %lu bytes for Matrix::operator=\n", bytes);
-		} */
 
 		this->__rows = other.__rows;
 		this->__cols = other.__cols;
@@ -182,6 +172,7 @@ void Matrix <T> ::allocate_managed(size_t rs, size_t cs, T def)
 	__cols = cs;
 
 	this->__size = rs * cs;
+	this->__dims = 2;
 
 	cudaMallocManaged(&this->__dim, 2 * sizeof(size_t));
 	cudaCheckError(nullptr);
@@ -200,7 +191,6 @@ template <class T>
 __host__ __device__
 void Matrix <T> ::show(int tid) const
 {
-	// printf("array = %p (", this->__array);
 	printf("{");
 
 	for (size_t i = 0; i < this->__size; i++) {
@@ -210,11 +200,7 @@ void Matrix <T> ::show(int tid) const
 			printf(", ");
 	}
 
-	printf("}\n"); /* dim = %p ", this->__dim);
-	printf("rows = %lu, ", __rows);
-	printf("cols = %lu, ", __cols);
-	printf("size = %lu, ", this->__size);
-	printf("dims = %lu\n", this->__dims); */
+	printf("}\n");
 }
 
 template <class T>

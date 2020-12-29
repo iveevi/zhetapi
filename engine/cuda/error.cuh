@@ -27,9 +27,10 @@ cudaError_t e;
 	cudaCheckError(dst);
 
 // Deallocation
-#define cuda_device_free(ptr)		\
+#define cuda_device_free(ptr) {		\
 	cudaFree(ptr);			\
-	cudaCheckError(ptr);
+	cudaCheckError(ptr);		\
+}
 
 // Memory status
 void cuda_check_memory_status(const char *file, size_t line)

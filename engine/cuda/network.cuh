@@ -10,11 +10,13 @@
 // CUDA headers
 #include <cuda/activation.cuh>
 #include <cuda/error.cuh>
+#include <cuda/kernels.cuh>
 #include <cuda/lock.cuh>
 #include <cuda/matrix.cuh>
 #include <cuda/optimizer.cuh>
 #include <cuda/vector.cuh>
 
+// TODO: Add a #define constant for the maximum number of threads and blocks
 namespace zhetapi {
 
 namespace ml {
@@ -134,17 +136,6 @@ void gradient_and_accumulate_isolated_parallelized1(
 }
 
 template <class T>
-__global__
-void __mmc_fma(T *R, T *W, T *M, T c, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < size; i += threads)
-		R[i] = W[i] + c * M[i];
-}
-
-template <class T>
 Matrix <T> *adjusted2(
 		T *d_W,
 		T *d_M,
@@ -188,66 +179,6 @@ Matrix <T> *adjusted2(
 }
 
 template <class T>
-__global__
-void __vmv_mult(T *R, T *W, T *A, size_t rows, size_t cols)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < rows; i += threads) {
-		// Cache the row
-		T *row = &(W[i * cols]);
-
-		T acc = 0;
-
-		for (size_t k = 0; k < cols; k++)
-			acc += row[k] * A[k];
-
-		R[i] = acc;
-	}
-}
-
-// Append one (copy) kernel
-template <class T>
-__global__
-void __apt_one_cpy(T *R, T *A, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-	
-	if (tid == 0)
-		R[0] = 1;
-
-	for (size_t i = tid; i < size - 1; i += threads)
-		R[i + 1] = A[i];
-}
-
-// Apply the activation (R) and its derivative (Rext)
-// (Both copies are in place, no allocation done)
-template <class T>
-__global__
-void __act_dual_cpy(T *R, T *Rext, Activation <T> *act, size_t size)
-{
-	Activation <T> *a = copy(act);
-	Activation <T> *ad = a->derivative();
-
-	// Create vectors for each array (without duplicating resources)
-	Vector <T> t(size, R);
-	Vector <T> ts(size, Rext);
-
-	ts.stable_transfer((*ad)(t));
-
-	__syncthreads();
-	
-	Vector <T> ta = (*a)(t);
-
-	t.stable_transfer((*a)(t));
-
-	delete a;
-	delete ad;
-}
-
-template <class T>
 void compute_isolated_parallelized2(
 		const Vector <T> &in,
 		T *d_W,
@@ -272,7 +203,8 @@ void compute_isolated_parallelized2(
 		cudaDeviceSynchronize();
 
 		/* TODO: Instead of launching a kernel for this, do
-		 * the extra work in the multiplication kernel
+		 * the extra work in the multiplication kernel (ie. remove the
+		 * neccesity of atloc).
 		 */
 		__apt_one_cpy <<<1, 1>>> (aloc[i], atloc[i], arows[i]);
 
@@ -283,7 +215,7 @@ void compute_isolated_parallelized2(
 		
 		cudaDeviceSynchronize();
 		
-		// Apply activations (with only two threads)
+		// Apply activations
 		__act_dual_cpy <<<1, 1>>> (atloc[i + 1], zloc[i], acts[i + 1],
 				zrows[i]);
 		
@@ -297,80 +229,6 @@ void compute_isolated_parallelized2(
 
 	// This is the output of the network
 	aloc[i] = atloc[i];
-}
-
-// Accumulate and apply optimizer kernel
-template <class T, class F>
-__global__
-void __acc_opt(
-		T *delta,
-		T *actual,
-		T *out,
-		size_t size,
-		F cmp,
-		Optimizer <T> *opt,
-		double *gopt,
-		size_t *gpass)
-{
-	Vector <T> v_act(size, actual);
-	Vector <T> v_out(size, out);
-	Vector <T> v_delta(size, delta);
-
-	Optimizer <T> *dopt = copy(opt);
-	
-	if (cmp(v_act, v_out))
-		(*gpass)++;
-
-	*gopt += (*dopt)(v_act, v_out)[0];
-
-	Optimizer <T> *ddopt = dopt->derivative();
-
-	v_delta.stable_transfer((*ddopt)(v_out, v_act));
-
-	delete ddopt;
-	delete dopt;
-}
-
-// Stable vector-vector shur kernel
-template <class T>
-__global__
-void __st_vv_shur(T *R, T *A, size_t size)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < size; i += threads)
-		R[i] *= A[i];
-}
-
-// Remove top, transposed matrix times vector kernel
-template <class T>
-__global__
-void __rmt_mtv_mult(T *R, T *W, T *A, size_t rows, size_t cols)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid + 1; i < cols; i += threads) {
-		T acc = 0;
-
-		for (size_t k = 0; k < rows; k++) 
-			acc += W[k * cols + i] * A[k];
-
-		R[i - 1] = acc;
-	}
-}
-
-// Multipy a vector and a transposed vector and add to a matrix
-template <class T>
-__global__
-void __st_mvvt_add(T *R, T *V, T *Vt, size_t rows, size_t cols)
-{
-	size_t threads = blockDim.x * gridDim.x;
-	size_t tid = threadIdx.x + blockIdx.x * blockDim.x;
-
-	for (size_t i = tid; i < rows * cols; i += threads)
-		R[i] = V[i / cols] * Vt[i % cols];
 }
 
 template <class T, class F>
@@ -435,25 +293,32 @@ void gradient_and_accumulate_isolated_parallelized2(
 
 	// Construction the Jacobian using backpropogation
 	size_t offset = elems - (h_rows[size - 2] * h_cols[size - 2]);
+
+
+	size_t blocks = 1;
+	size_t threads = 1;
 	for (int i = size - 2; i >= 0; i--) {
 		size_t ai = size - (i + 2);
 
 		if (i < size - 2) {
-			__rmt_mtv_mult <<<1, 1>>> (dloc[ai], d_W + offset,
+			threads = min(128L, h_cols[i]);
+
+			__rmt_mtv_mult <<<1, threads>>> (dloc[ai], d_W + offset,
 					dloc[ai - 1], h_rows[i + 1], h_cols[i + 1]);
 			
 			offset -= h_rows[i] * h_cols[i];
 		}
 
-		size_t blocks = 1;
-		size_t threads = 1;
-
+		threads = min(128L, zrows[i]);
 		__st_vv_shur <<<blocks, threads>>>  (dloc[ai], zloc[i],
 				zrows[i]);
 		
 		cudaDeviceSynchronize();
 		
-		__st_mvvt_add <<<1, 1>>> (grad[i].arr(), dloc[ai], aloc[i], zrows[i],
+		blocks = min(128L, h_rows[i]);
+		threads = min(128L, h_cols[i]);
+
+		__st_mvvt_add <<<blocks, threads>>> (grad[i].arr(), dloc[ai], aloc[i], zrows[i],
 				arows[i]);
 		
 		cudaDeviceSynchronize();
@@ -632,7 +497,6 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 					net_size,
 					0.7);
 	}
-
 	for (int i = 0; i < data_size; i++) {
 		Vector <T> in = ins[i];
 		Vector <T> out = outs[i];
@@ -665,6 +529,8 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 						J,
 						gopt,
 						gpass);
+
+			cuda_device_free(dopt);
 		} else {
 			gradient_and_accumulate_isolated_parallelized1(
 						adj_weights,
@@ -689,11 +555,8 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	if (printing) {
 		using namespace std;
 		cout << "Javg:" << endl;
-		for (int i = 0; i < __size - 1; i++) {
-			printf("\t");
-
-			J[i].show();
-		}
+		for (int i = 0; i < __size - 1; i++)
+			cout << "\t" << J[i] << endl;
 	} else {
 		apply_gradient(J, alpha, 0.7);
 	}
@@ -767,13 +630,8 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		arows = new size_t[__size];
 		zrows = new size_t[__size - 1];
 		drows = new size_t[__size - 1];
-
-		/* using namespace std;
-		cout << "__size = " << __size << endl; */
 		
 		size_t i;
-
-		using namespace std;
 
 		// As
 		i = 0;
@@ -813,28 +671,6 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 			cudaMalloc(&dloc[i++], sizeof(T) * drows[i]);
 		}
-
-		/* using namespace std;
-		cout << "a:" << endl;
-		for (int i = 0; i < __size; i++)
-			cout << "\t" << aloc[i] << endl;
-		
-		cout << "z:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << zloc[i] << endl;
-
-		using namespace std;
-		cout << "arows:" << endl;
-		for (int i = 0; i < __size; i++)
-			cout << "\t" << arows[i] << endl;
-		
-		cout << "zrows:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << zrows[i] << endl;
-		
-		cout << "drows:" << endl;
-		for (int i = 0; i < __size - 1; i++)
-			cout << "\t" << drows[i] << endl; */
 	}
 
 	// Split the batch
@@ -916,14 +752,15 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	if (opt) {
 		// Deallocate aloc and zloc
 		for (int i = 0; i < __size; i++) {
-			// TODO: There is a problem in freeing the very last
-			// element (duplicated frmo compute)
-			cudaFree(aloc[i]);
-			cudaFree(atloc[i]);
+			cuda_device_free(aloc[i]);
+
+			// Skip the last element (duplicate pointer)
+			if (i < __size - 1)
+				cuda_device_free(atloc[i]);
 		}
 		
 		for (int i = 0; i < __size - 1; i++)
-			cudaFree(zloc[i]);
+			cuda_device_free(zloc[i]);
 
 		delete[] aloc;
 		delete[] atloc;
@@ -931,6 +768,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		delete[] arows;
 		delete[] zrows;
+		delete[] drows;
 	}
 
 	return {t_passed, t_err, t_ktime, t_ftime};
