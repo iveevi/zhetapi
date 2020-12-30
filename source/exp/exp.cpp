@@ -45,4 +45,13 @@ int main()
 	model.train(in, out, 0.001);
 	
 	cout << "model(in) = " << model(in) << endl;
+
+	ml::Activation <double> *bolta = new ml::Softmax <double> ();
+	ml::Activation <double> *boltb = new ml::SoftmaxInterval <double> ();
+
+	cout << "plain bolta: " << (*bolta)(model(in)) << endl;
+	cout << "plain bolta: " << (*boltb)(model(in)) << endl;
+
+	delete bolta;
+	delete boltb;
 }

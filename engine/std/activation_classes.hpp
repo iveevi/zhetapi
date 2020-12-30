@@ -372,6 +372,36 @@ namespace zhetapi {
 				return new __DSoftmax <T> ();
 			}
 		};
+		
+		template <class T>
+		class SoftmaxInterval : public Activation <T> {
+		public:
+			Vector <T> operator()(const Vector <T> &x) const {
+				// Subtract by max for numerical stability
+				T _max = x[0];
+				for (size_t i = 1; i < x.size(); i++)
+					_max = (_max > x[i]) ? _max : x[i];
+
+				T _sum;
+				for (size_t i = 0; i < x.size(); i++)
+					_sum += exp(x[i] - _max);
+
+				T _acc = 0;
+				return Vector <T> (x.size(),
+					[&](size_t i) {
+						_acc += exp(x[i] - _max)/_sum;
+
+						return _acc;
+					}
+				);
+			}
+
+#warning "The derivative for the SoftmaxInterval activation has not yet been properly configured."
+
+			Activation <T> *derivative() const {
+				return new __DSoftmax <T> ();
+			}
+		};
 
 		// TODO: Make a more generalized version,
 		// which will also work on the gpu (the issues is virtual
