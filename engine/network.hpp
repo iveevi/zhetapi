@@ -153,6 +153,8 @@ public:
 			Optimizer <T> *,
 			bool = false);
 
+	void train(const Vector <T> &, const Vector <T> &, T);
+
 	template <size_t = 1>
 	TrainingStatistics train(const DataSet <T> &,
 		const DataSet <T> &,
@@ -872,6 +874,32 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 
 	// Return the gradient
 	return J;
+}
+
+template <class T>
+void NeuralNetwork <T> ::train(const Vector <T> &in, const Vector <T> &out, T alpha)
+{
+	Vector <T> actual = compute(in);
+
+	Matrix <T> *adj = adjusted(0.7);
+	Matrix <T> *grad = gradient(adj, in, out, __cost);
+	
+	delete[] adj;
+
+#ifdef ZHP_GRAD_DEBUG
+
+	using namespace std;
+	cout << endl << "Javg:" << endl;
+	for (int i = 0; i < __size - 1; i++)
+		cout << "\t" << grad[i] << endl;
+
+#else
+
+	apply_gradient(grad, alpha, 0.7);
+
+#endif
+
+	delete[] grad;
 }
 
 template <class T>

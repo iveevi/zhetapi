@@ -21,10 +21,28 @@ int main()
 
 	ml::NeuralNetwork <double> model;
 	
-	model = zhetapi::ml::NeuralNetwork <double> ({
+	model = ml::NeuralNetwork <double> ({
                 {8, new zhetapi::ml::Linear <double> ()},
                 {10, new zhetapi::ml::Sigmoid <double> ()},
                 {10, new zhetapi::ml::ReLU <double> ()},
                 {9, new zhetapi::ml::Linear <double> ()}
         }, initializer);
+
+	model.randomize();
+
+	Vector <double> in(8, [](size_t i) {return rand()/((double) RAND_MAX);});
+	Vector <double> out(9, [](size_t i) {return rand()/((double) RAND_MAX);});
+
+	ml::Optimizer <double> *opt = new ml::MeanSquaredError <double> ();
+
+	model.set_cost(opt);
+
+	cout << "in = " << in << endl;
+	cout << "out = " << out << endl;
+
+	cout << "model(in) = " << model(in) << endl;
+
+	model.train(in, out, 0.001);
+	
+	cout << "model(in) = " << model(in) << endl;
 }
