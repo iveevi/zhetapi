@@ -47,6 +47,7 @@ int main()
 	model.epochs <8> (ins, outs, 1, 250, 0.1, true);
 
 	ml::NeuralNetwork cpy = model;
+	cpy = model;
 
 	cpy.epochs <8> (ins, outs, 1, 250, 0.1, true);
 

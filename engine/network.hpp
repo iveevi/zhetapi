@@ -96,12 +96,16 @@ private:
 	Optimizer <T> *				__cost = nullptr; // Safe to copy
 	
 	Comparator <T>				__cmp = __default_comparator;
+
+	void clear();
 public:
 	NeuralNetwork();
 	NeuralNetwork(const NeuralNetwork &);
 	NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
 
 	~NeuralNetwork();
+
+	NeuralNetwork &operator=(const NeuralNetwork &);
 
 	// Saving and loading the network
 	void save(const std::string &);
@@ -285,12 +289,60 @@ NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer <T>> &layers,
 template <class T>
 NeuralNetwork <T> ::~NeuralNetwork()
 {
+	clear();
+}
+
+template <class T>
+NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
+{
+	if (this != &other) {
+		clear();
+
+		__size - other.__size;
+		__isize - other.__isize;
+		__osize - other.__osize;
+		
+		__cmp = other.__cmp;
+		__cost = other.__cost;
+		__random = other.__random;
+
+		__layers = new Layer <T> [__size];
+
+		__weights = new Matrix <T> [__size - 1];
+		__momentum = new Matrix <T> [__size - 1];
+		for (size_t i = 0; i < __size - 1; i++) {
+			__weights[i] = other.__weights[i];
+			__momentum[i] = other.__momentum[i];
+		}
+		
+		for (size_t i = 0; i < __size; i++) {
+			__layers[i] = {
+				other.__layers[i].first,
+				copy(other.__layers[i].second)
+			};
+		}
+		
+		__a = std::vector <Vector <T>> (__size);
+		__z = std::vector <Vector <T>> (__size - 1);
+	}
+
+	return *this;
+}
+
+template <class T>
+void NeuralNetwork <T> ::clear()
+{
 	for (int i = 0; i < __size; i++)
 		delete __layers[i].second;
 
-	delete[] __layers;
-	delete[] __weights;
-	delete[] __momentum;
+	if (__layers)
+		delete[] __layers;
+
+	if (__weights)
+		delete[] __weights;
+
+	if (__momentum)
+		delete[] __momentum;
 }
 
 // Saving and loading
