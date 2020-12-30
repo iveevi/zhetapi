@@ -81,6 +81,8 @@ elif [ $1 = "gdb" ]; then
 	make -j8 $2
 
 	mv $2 debug/$2-debug
+
+	gdb debug/$2-debug
 elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
 	echo "Running source/$2.cpp on valgrind"
 

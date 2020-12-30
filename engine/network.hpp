@@ -93,11 +93,12 @@ private:
 	std::vector <Vector <T>>		__a = {};
 	std::vector <Vector <T>>		__z = {};
 
-	Optimizer <T> *				__cost = nullptr;
+	Optimizer <T> *				__cost = nullptr; // Safe to copy
 	
 	Comparator <T>				__cmp = __default_comparator;
 public:
 	NeuralNetwork();
+	NeuralNetwork(const NeuralNetwork &);
 	NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
 
 	~NeuralNetwork();
@@ -218,6 +219,32 @@ const Comparator <T> NeuralNetwork <T> ::__default_comparator
 // Constructors
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork() {}
+
+template <class T>
+NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
+	__random(other.__random), __size(other.__size),
+	__isize(other.__isize), __osize(other.__osize),
+	__cost(other.__cost), __cmp(other.__cmp)
+{
+	__layers = new Layer <T> [__size];
+
+	__weights = new Matrix <T> [__size - 1];
+	__momentum = new Matrix <T> [__size - 1];
+	for (size_t i = 0; i < __size - 1; i++) {
+		__weights[i] = other.__weights[i];
+		__momentum[i] = other.__momentum[i];
+	}
+	
+	for (size_t i = 0; i < __size; i++) {
+		__layers[i] = {
+			other.__layers[i].first,
+			copy(other.__layers[i].second)
+		};
+	}
+	
+	__a = std::vector <Vector <T>> (__size);
+	__z = std::vector <Vector <T>> (__size - 1);
+}
 
 /*
  * NOTE: The pointers allocated and passed into this function

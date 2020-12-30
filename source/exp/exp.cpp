@@ -46,6 +46,10 @@ int main()
 	model.set_cost(opt);
 	model.epochs <8> (ins, outs, 1, 250, 0.1, true);
 
+	ml::NeuralNetwork cpy = model;
+
+	cpy.epochs <8> (ins, outs, 1, 250, 0.1, true);
+
 	cout << "Saving model..." << endl;
 	model.save("model.out");
 

@@ -14,6 +14,8 @@
 
 #include <std/activation_functions.hpp>
 
+#include <cuda/essentials.cuh>
+
 namespace zhetapi {
 		
 	namespace ml {
@@ -371,11 +373,12 @@ namespace zhetapi {
 			}
 		};
 
-#ifdef ZHP_CUDA
-
-		// Copy base activations
+		// TODO: Make a more generalized version,
+		// which will also work on the gpu (the issues is virtual
+		// functions; maybe returning a __host__ __device__
+		// function pointer for computation will work)
 		template <class T>
-		__host__ __device__
+		__cuda_dual_prefix
 		Activation <T> *copy(Activation <T> *act)
 		{
 			switch (act->kind) {
@@ -392,8 +395,6 @@ namespace zhetapi {
 
 			return nullptr;
 		}
-
-#endif
 
 	}
 

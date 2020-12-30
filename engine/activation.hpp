@@ -16,6 +16,8 @@
 
 #endif
 
+#include <cuda/essentials.cuh>
+
 namespace zhetapi {
 
 	namespace ml {
@@ -60,11 +62,11 @@ namespace zhetapi {
 			__host__ __device__
 			int get_activation_type() const;
 
-			template <class U>
-			__host__ __device__
-			friend Activation <U> *copy(Activation <U> *);
-
 #endif
+
+		template <class U>
+		__cuda_dual_prefix
+		friend Activation <U> *copy(Activation <U> *);
 
 		protected:
 			activation_type kind;
