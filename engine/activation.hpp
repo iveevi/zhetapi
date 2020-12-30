@@ -6,13 +6,13 @@
 #include <functional>
 
 // Engine headers
-#ifndef ZHP_CUDA
+#ifdef ZHP_CUDA
 
-#include <vector.hpp>
+#include <cuda/vector.cuh>
 
 #else
 
-#include <cuda/vector.cuh>
+#include <vector.hpp>
 
 #endif
 
@@ -20,84 +20,80 @@
 
 namespace zhetapi {
 
-	namespace ml {
+namespace ml {
 
-		/*
-		* Scalar activation
-		*
-		* @tparam T the input and output type of the activation
-		*/
-		template <class T>
-		class Activation {
-		public:
+/*
+* Scalar activation
+*
+* @tparam T the input and output type of the activation
+*/
+template <class T>
+class Activation {
+public:
+	// TODO: Replace with a string
+	enum activation_type {
+		AT_Default,
+		AT_Linear,
+		AT_ReLU,
+		AT_Sigmoid
+	};
 
-			enum activation_type {
-				AT_Default,
-				AT_Linear,
-				AT_ReLU,
-				AT_Sigmoid
-			};
+	// TODO: Add a vector <double> constructor for JSON
+	__cuda_dual_prefix
+	Activation();
+	
+	__cuda_dual_prefix
+	Vector <T> compute(const Vector <T> &) const;
+
+	__cuda_dual_prefix
+	virtual Vector <T> operator()(const Vector <T> &) const;
+
+	__cuda_dual_prefix
+	virtual Activation *derivative() const;
+	
+	__cuda_dual_prefix
+	int get_activation_type() const;
+
+	template <class U>
+	__cuda_dual_prefix
+	friend Activation <U> *copy(Activation <U> *);
+protected:
+	activation_type kind;
+};
 
 #ifndef ZHP_CUDA
-			
-			Activation();
 
-			virtual Vector <T> operator()(const Vector <T> &) const;
+template <class T>
+Activation <T> ::Activation() : kind(AT_Default) {}
 
-			virtual Activation *derivative() const;
+// TODO: Reverse compute and operator()
+template <class T>
+Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
+{
+	return x;
+}
 
-			int get_activation_type() const;
+template <class T>
+Vector <T> Activation <T> ::compute(const Vector <T> &x) const
+{
+	return (*this)(x);
+}
 
-#else
+template <class T>
+Activation <T> *Activation <T> ::derivative() const
+{
+	return new Activation();
+}
 
-			__host__ __device__
-			Activation();
-
-			__host__ __device__
-			virtual Vector <T> operator()(const Vector <T> &) const;
-
-			__host__ __device__
-			virtual Activation *derivative() const;
-
-			__host__ __device__
-			int get_activation_type() const;
+template <class T>
+int Activation <T> ::get_activation_type() const
+{
+	return kind;
+}
 
 #endif
 
-		template <class U>
-		__cuda_dual_prefix
-		friend Activation <U> *copy(Activation <U> *);
-
-		protected:
-			activation_type kind;
-		};
-
-#ifndef ZHP_CUDA
-		
-		template <class T>
-		Activation <T> ::Activation() : kind(AT_Default) {}
-
-		template <class T>
-		Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
-		{
-			return x;
-		}
-
-		template <class T>
-		Activation <T> *Activation <T> ::derivative() const
-		{
-			return new Activation();
-		}
-
-		template <class T>
-		int Activation <T> ::get_activation_type() const
-		{
-			return kind;
-		}
-
-#endif
-
-	}
+}
 
 }
 

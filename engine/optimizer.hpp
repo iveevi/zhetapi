@@ -6,90 +6,88 @@
 #include <memory>
 
 // Engine headers
-#ifndef ZHP_CUDA
-
-#include <vector.hpp>
-
-#else
+#ifdef ZHP_CUDA
 
 #include <cuda/vector.cuh>
 
+#else
+
+#include <vector.hpp>
+
 #endif
+
+#include <cuda/essentials.cuh>
 
 namespace zhetapi {
 		
-	namespace ml {
+namespace ml {
 
-		template <class T>
-		class Optimizer {
-		public:
-			
-			enum optimizer_type {
-				OPT_Default,
-				OPT_SE,
-				OPT_MSE,
-			};
+template <class T>
+class Optimizer {
+public:
+	// TODO: Replace with a string
+	enum optimizer_type {
+		OPT_Default,
+		OPT_SE,
+		OPT_MSE,
+	};
 
-#ifndef ZHP_CUDA
-			
-			Optimizer();
+	// TODO: Add a vector <double> constructor for JSON
+	__cuda_dual_prefix
+	Optimizer();
 
-			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
+	__cuda_dual_prefix
+	Vector <T> compute(const Vector <T> &, const Vector <T> &) const;
 
-			virtual Optimizer *derivative() const;
-			
-			int get_optimizer_type() const;
+	__cuda_dual_prefix
+	virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
-#else
+	__cuda_dual_prefix
+	virtual Optimizer *derivative() const;
 
-			__host__ __device__
-			Optimizer();
+	__cuda_dual_prefix
+	int get_optimizer_type() const;
 
-			__host__ __device__
-			virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
-			
-			__host__ __device__
-			virtual Optimizer *derivative() const;
-		
-			__host__ __device__
-			int get_optimizer_type() const;
-
-			template <class U>
-			__host__ __device__
-			friend Optimizer <U> *copy(Optimizer <U> *);
-
-#endif
-
-		protected:
-			optimizer_type kind;
-		};
+	template <class U>
+	__cuda_dual_prefix
+	friend Optimizer <U> *copy(Optimizer <U> *);
+protected:
+	optimizer_type kind;
+};
 
 #ifndef ZHP_CUDA
 
-		template <class T>
-		Optimizer <T> ::Optimizer() : kind(OPT_Default) {}
+template <class T>
+Optimizer <T> ::Optimizer() : kind(OPT_Default) {}
 
-		template <class T>
-		Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
-		{
-			return {(comp - in).norm()};
-		}
+// TODO: Reverse compute and operator()
+template <class T>
+Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
+{
+	return {(comp - in).norm()};
+}
 
-		template <class T>
-		Optimizer <T> *Optimizer <T> ::derivative() const
-		{
-			return new Optimizer();
-		}
+template <class T>
+Vector <T> Optimizer <T> ::compute(const Vector <T> &comp, const Vector <T> &in) const
+{
+	return (*this)(comp, in);
+}
 
-		template <class T>
-		int Optimizer <T> ::get_optimizer_type() const
-		{
-			return kind;
-		}
+template <class T>
+Optimizer <T> *Optimizer <T> ::derivative() const
+{
+	return new Optimizer();
+}
+
+template <class T>
+int Optimizer <T> ::get_optimizer_type() const
+{
+	return kind;
+}
 
 #endif
 
-	}
+}
 
 }
 

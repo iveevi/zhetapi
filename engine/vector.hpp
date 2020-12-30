@@ -118,7 +118,7 @@ public:
 
 	void transfer_from_device(Vector <T> &);
 
-	PREFIX
+	__cuda_dual_prefix
 	T *whole() const {
 		return this->__array;
 	}
