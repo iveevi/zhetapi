@@ -8,7 +8,7 @@
 #include <dlfcn.h>
 
 // Engine headers
-#include <hidden/node_manager.hpp>
+#include <core/node_manager.hpp>
 
 namespace zhetapi {
 

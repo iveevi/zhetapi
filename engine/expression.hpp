@@ -13,7 +13,7 @@
 // Engine headers
 #include <barn.hpp>
 
-#include <hidden/node_manager.hpp>
+#include <core/node_manager.hpp>
 
 namespace zhetapi {
 

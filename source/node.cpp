@@ -1,4 +1,4 @@
-#include <hidden/node.hpp>
+#include <core/node.hpp>
 
 namespace zhetapi {
 

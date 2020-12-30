@@ -1,4 +1,4 @@
-#include <hidden/label.hpp>
+#include <core/label.hpp>
 
 namespace zhetapi {
 

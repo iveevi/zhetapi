@@ -1,4 +1,4 @@
-#include <hidden/node_reference.hpp>
+#include <core/node_reference.hpp>
 
 namespace zhetapi {
 

@@ -8,9 +8,9 @@ elif [ $1 = "install" ]; then
 	echo "Installing..."
 
 	# Register apps directory
-	echo "PATH=${PATH}:$(pwd)/bin" >> .env
+	# echo "PATH=${PATH}:$(pwd)/bin" >> .env
 
-	source .env
+	# source .env
 
 	# Run cmake
 	cmake .
@@ -27,7 +27,7 @@ elif [ $1 = "install" ]; then
 	fi
 
 	mv zhetapi czhp bin/
-	mv port exp build/
+	mv port exp cuda build/
 elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .
@@ -133,4 +133,6 @@ else
 	fi
 fi
 
-mv libzhp.* debug
+if [ $1 != "install" ]; then
+	mv libzhp.* debug
+fi
