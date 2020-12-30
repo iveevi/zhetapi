@@ -10,8 +10,8 @@
 // Engine headers
 #include <token.hpp>
 
-#include <hidden/label.hpp>
-#include <hidden/class.hpp>
+#include <core/label.hpp>
+#include <core/class.hpp>
 
 namespace zhetapi {
 

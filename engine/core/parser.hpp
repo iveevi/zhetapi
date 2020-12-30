@@ -20,9 +20,9 @@
 // Engine headers
 #include <operand.hpp>
 
-#include <hidden/node.hpp>
-#include <hidden/operation_holder.hpp>
-#include <hidden/variable_cluster.hpp>
+#include <core/node.hpp>
+#include <core/operation_holder.hpp>
+#include <core/variable_cluster.hpp>
 
 #define __add_operation_symbol(name, str)						\
 	name = lit(#str) [							\

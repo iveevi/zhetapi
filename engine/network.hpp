@@ -12,7 +12,7 @@
 #include <vector>
 
 // JSON library
-// #include <json.hpp>
+#include <json.hpp>
 
 // Engine headers
 #include <dataset.hpp>
@@ -104,7 +104,7 @@ public:
 
 	// Saving and loading the network
 	void save(const std::string &);
-	// void load_json(const std::string &);
+	void load_json(const std::string &);
 
 	// Setters
 	void set_cost(Optimizer <T> *);
@@ -289,7 +289,6 @@ void NeuralNetwork <T> ::save(const std::string &file)
 	}
 }
 
-/*
 template <class T>
 void NeuralNetwork <T> ::load_json(const std::string &file)
 {
@@ -318,7 +317,7 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 		std::cout << "\t" << activation << std::endl;
 		std::cout << "\t" << neurons << std::endl;
 	}
-} */
+}
 
 // Setters
 template <class T>

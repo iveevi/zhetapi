@@ -8,9 +8,9 @@
 // Engine headers
 #include <barn.hpp>
 
-#include <hidden/node_reference.hpp>
-#include <hidden/parser.hpp>
-#include <hidden/types.hpp>
+#include <core/node_reference.hpp>
+#include <core/parser.hpp>
+#include <core/types.hpp>
 
 namespace zhetapi {
 
@@ -913,6 +913,6 @@ namespace zhetapi {
 
 }
 
-#include <hidden/node_differentiation.hpp>
+#include <core/node_differentiation.hpp>
 
 #endif

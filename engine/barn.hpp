@@ -25,10 +25,10 @@
 #include <vector.hpp>
 #include <variable.hpp>
 
-#include <hidden/types.hpp>
-#include <hidden/ftable.hpp>
-#include <hidden/operation.hpp>
-#include <hidden/vtable.hpp>
+#include <core/types.hpp>
+#include <core/ftable.hpp>
+#include <core/operation.hpp>
+#include <core/vtable.hpp>
 
 #include <std/combinatorial.hpp>
 
