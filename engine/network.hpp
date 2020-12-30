@@ -12,7 +12,7 @@
 #include <vector>
 
 // JSON library
-#include <json.hpp>
+#include <json/json.hpp>
 
 // Engine headers
 #include <dataset.hpp>
