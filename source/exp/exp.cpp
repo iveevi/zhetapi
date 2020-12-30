@@ -15,49 +15,16 @@ using namespace zhetapi;
 
 int main()
 {
-	srand(clock());
+	auto initializer = []() {
+                return 0.5 - (rand()/(double) RAND_MAX);
+        };
 
-	const int size = 1000;
+	ml::NeuralNetwork <double> model;
 	
-	// vector <Vector <double>> ins;
-	DataSet <double> ins;
-	DataSet <double> outs;
-	
-	for (int i = 0; i < size; i++) {
-		ins.push_back({(i + 1)/23.0, (i - 0.5)/23.0});
-		outs.push_back({rand()/(RAND_MAX * 0.1), rand()/(RAND_MAX * 0.1)});
-	}
-
-	ml::NeuralNetwork <double> model ({
-		{2, new zhetapi::ml::Linear <double> ()},
-		{5, new zhetapi::ml::Sigmoid <double> ()},
-		{5, new zhetapi::ml::ReLU <double> ()},
-		{2, new zhetapi::ml::ReLU <double> ()}
-	}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
-
-	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
-		return actual == expected;
-	};
-
-	ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
-
-	model.randomize();
-
-	model.set_cost(opt);
-	model.epochs <8> (ins, outs, 1, 250, 0.1, true);
-
-	ml::NeuralNetwork cpy = model;
-	cpy = model;
-
-	cpy.epochs <8> (ins, outs, 1, 250, 0.1, true);
-
-	cout << "Saving model..." << endl;
-	model.save("model.out");
-
-	ml::NeuralNetwork <double> loaded;
-
-	loaded.load_json("samples/mnist/model.json");
-
-	// Free resources
-	delete opt;
+	model = zhetapi::ml::NeuralNetwork <double> ({
+                {8, new zhetapi::ml::Linear <double> ()},
+                {10, new zhetapi::ml::Sigmoid <double> ()},
+                {10, new zhetapi::ml::ReLU <double> ()},
+                {9, new zhetapi::ml::Linear <double> ()}
+        }, initializer);
 }

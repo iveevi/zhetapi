@@ -298,9 +298,9 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 	if (this != &other) {
 		clear();
 
-		__size - other.__size;
-		__isize - other.__isize;
-		__osize - other.__osize;
+		__size = other.__size;
+		__isize = other.__isize;
+		__osize = other.__osize;
 		
 		__cmp = other.__cmp;
 		__cost = other.__cost;
