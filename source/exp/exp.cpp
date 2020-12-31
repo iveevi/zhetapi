@@ -51,6 +51,9 @@ int main()
 
 	cout << "plain bolta: " << (*bolta)(model(in)) << endl;
 	cout << "plain bolta: " << (*boltb)(model(in)) << endl;
+	
+	cout << "mxb: " << (*bolta)(model(in)).max() << endl;
+	cout << "mxa: " << (*boltb)(model(in)).max() << endl;
 
 	delete bolta;
 	delete boltb;

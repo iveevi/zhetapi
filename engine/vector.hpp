@@ -34,6 +34,10 @@ public:
 	Vector(A);
 
 	T arg() const;
+	
+	// Min and max value
+	T min() const;
+	T max() const;
 
 	// Min and max index
 	size_t imin() const;
@@ -190,6 +194,32 @@ template <class T>
 T Vector <T> ::arg() const
 {
 	return atan2((*this)[1], (*this)[0]);
+}
+
+template <class T>
+T Vector <T> ::min() const
+{
+	T mn = this->__array[0];
+
+	for (size_t j = 1; j < this->__size; j++) {
+		if (mn > this->__array[j])
+			mn = this->__array[j];
+	}
+
+	return mn;
+}
+
+template <class T>
+T Vector <T> ::max() const
+{
+	T mx = this->__array[0];
+
+	for (size_t j = 1; j < this->__size; j++) {
+		if (mx < this->__array[j])
+			mx = this->__array[j];
+	}
+
+	return mx;
 }
 
 template <class T>
