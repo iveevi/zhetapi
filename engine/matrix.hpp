@@ -170,6 +170,10 @@ namespace zhetapi {
 		template <class U>
 		friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
 
+		// Miscellaneous functions
+		template <class U>
+		friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &); 
+
 #else
 
 		__host__ __device__
@@ -1039,6 +1043,27 @@ namespace zhetapi {
 			}
 		);
         }
+
+	template <class T>
+	Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
+	{
+		size_t rs = M.__rows;
+		size_t cs = M.__cols;
+
+		Vector <T> out(rs, T(0));
+
+		size_t k = V.__size;
+		for (size_t i = 0; i < rs; i++) {
+			T acc = M.__array[i * cs];
+
+			for (size_t j = 0; j < k; j++)
+				acc += M.__array[i * cs + 1 + j] * V.__array[j];
+
+			out.__array[i] = acc;
+		}
+
+		return out;
+	}
 
 #endif
 

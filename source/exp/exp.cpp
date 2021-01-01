@@ -22,9 +22,10 @@ int main()
 	ml::NeuralNetwork <double> model;
 	
 	model = ml::NeuralNetwork <double> ({
-                {8, new zhetapi::ml::Linear <double> ()},
+                {11, new zhetapi::ml::Linear <double> ()},
                 {10, new zhetapi::ml::Sigmoid <double> ()},
                 {10, new zhetapi::ml::ReLU <double> ()},
+                {10, new zhetapi::ml::Sigmoid <double> ()},
                 {9, new zhetapi::ml::Linear <double> ()}
         }, initializer);
 
@@ -37,24 +38,36 @@ int main()
 
 	model.set_cost(opt);
 
-	cout << "in = " << in << endl;
-	cout << "out = " << out << endl;
+	DataSet <double> ins;
+	DataSet <double> outs;
+	for (size_t i = 0; i < 5000; i++) {
+		auto rng = [](size_t i) {
+			return rand()/((double) RAND_MAX);
+		};
 
-	cout << "model(in) = " << model(in) << endl;
+		ins.push_back(Vector <double> (11, rng));
+		outs.push_back(Vector <double> (9, rng));
+	}
 
-	model.train(in, out, 0.001);
+        std::chrono::high_resolution_clock clk;
 	
-	cout << "model(in) = " << model(in) << endl;
+	std::chrono::high_resolution_clock::time_point start;
+        std::chrono::high_resolution_clock::time_point end;
 
-	ml::Activation <double> *bolta = new ml::Softmax <double> ();
-	ml::Activation <double> *boltb = new ml::SoftmaxInterval <double> ();
+	double t_norm;
+	for (size_t i = 0; i < 10; i++) {
+		start = clk.now();
 
-	cout << "plain bolta: " << (*bolta)(model(in)) << endl;
-	cout << "plain bolta: " << (*boltb)(model(in)) << endl;
-	
-	cout << "mxb: " << (*bolta)(model(in)).max() << endl;
-	cout << "mxa: " << (*boltb)(model(in)).max() << endl;
+		for (size_t i = 0; i < ins.size(); i++)
+			model.compute_no_cache(ins[i]);
 
-	delete bolta;
-	delete boltb;
+		end = clk.now();
+
+		t_norm = std::chrono::duration_cast
+			<std::chrono::microseconds> (end - start).count();
+		
+		start = clk.now();
+
+		cout << "t_norm = " << t_norm << endl;
+	}
 }

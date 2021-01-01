@@ -554,18 +554,11 @@ Vector <T> NeuralNetwork <T> ::compute_no_cache(const Vector <T> &in) const
 	if (in.size() != __isize)
 		throw bad_io_dimensions();
 
-	Vector <T> prv = in;
 	Vector <T> tmp = in;
 
 	size_t i = 0;
 	while (i < __size - 1) {
-		prv = __weights[i] * Matrix <T> (tmp.append_above(T (1)));
-
-		tmp = (*__layers[i + 1].second)(prv);
-
-		Activation <T> *act = __layers[i + 1].second->derivative();
-
-		delete act;
+		tmp = __layers[i + 1].second->compute(apt_and_mult(__weights[i], tmp));
 
 		i++;
 	}
