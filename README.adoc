@@ -66,7 +66,7 @@ the value of the passed expression as a string. The difference in these two lies
 in the fact that `exprf()` takes in a formatted string, while `expr()`
 takes a string object.
 
-```{cpp}
+```cpp
 // Not formatted, prints "1.0"
 cout << expr("1 + 2!/2.0") << endl;
 
@@ -80,7 +80,7 @@ The library provides constructs that allow the user to store variables and
 retrieve them in the scope of the `Barn` class. Users can then refer to these
 variables, and their values can be retrieved or changed.
 
-```{cpp}
+```cpp
 Variable <double> x{"x", 46};
 
 Barn <double, int> brn;
@@ -99,7 +99,7 @@ cout << brn.get("y") << endl;
 Users can create mathematical functions, which can then be used as any other C++
 functor object.
 
-```{cpp}
+```cpp
 Function <double, int> f = "f(x) = x^2";
 
 // Prints "10"
@@ -119,7 +119,7 @@ variables, to get its gradients and such. This process is symbolic, which has
 the advantage that one has a closed form for the derivative, but the
 disadvantage that it could be very complicated.
 
-```{cpp}
+```cpp
 Function <double, int> f = "f(x) = x^2";
 
 // Compute df/dx
@@ -143,7 +143,7 @@ machine learning capabilities. Currently, Zhetapi provides a `NeuralNetwork`
 class that user can use to train deep neural networks on data sets. An
 example of its usage is below:
 
-```{cpp}
+```cpp
 zhetapi::ml::NeuralNetwork <double> model ({
 	{2, new zhetapi::ml::Linear <double> ()},
 	{5, new zhetapi::ml::Sigmoid <double> ()},
@@ -156,7 +156,7 @@ Users can customize the model by specifying the number of neurons in each
 layer and the activation to use. With C++ operator overloading, using the
 neural network is as easy as calling it as a function:
 
-```{cpp}
+```cpp
 // Initialize weights randomly
 model.randomize();
 
@@ -166,7 +166,7 @@ cout << model({4, 5}) << endl;
 
 Training is also very simple:
 
-```{cpp}
+```cpp
 // Create the cost function
 ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
@@ -194,7 +194,7 @@ In addition to being able to define and use functions, the user can generate
 source code for the function using the `Function::generate_general` method.
 The user should note that the code generated still uses the Zhetapi API.
 
-```{cpp}
+```cpp
 Function <double, int> f = "f(x) = x^2 + x * ln(x)";
 
 // Generates the source code for
@@ -205,7 +205,7 @@ f.generate_general();
 For the example function above, the source code generated would look like the
 following:
 
-```{cpp}
+```cpp
 #include <token.hpp>
 #include <function.hpp>
 
@@ -227,7 +227,7 @@ extern "C" {
 The user can also dynamically compile these generated files using the
 `Function::compile_general` method:
 
-```{cpp}
+```cpp
 // Initialize the Function object
 Function <double, int> fx = "f(x) = x^2 + x * ln(x)";
 
