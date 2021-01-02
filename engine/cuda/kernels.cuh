@@ -1,5 +1,5 @@
-#ifndef KERNELS_H_
-#define KERNELS_H_
+#ifndef CUDA_KERNELS_H_
+#define CUDA_KERNELS_H_
 
 namespace zhetapi {
 

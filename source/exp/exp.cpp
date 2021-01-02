@@ -61,7 +61,7 @@ int main()
 	for (size_t i = 0; i < 10; i++) {
 		start = clk.now();
 
-		model.train(ins, outs, 2.5e-4);
+		model.train <10> (ins, outs, 2.5e-4);
 
 		end = clk.now();
 
@@ -70,7 +70,7 @@ int main()
 
 		start = clk.now();
 
-		model.simple_train(ins, outs, 2.5e-4);
+		model.simple_train <10> (ins, outs, 2.5e-4);
 
 		end = clk.now();
 

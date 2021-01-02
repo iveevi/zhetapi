@@ -16,20 +16,21 @@
 
 // Engine headers
 #include <dataset.hpp>
+#include <kernels.hpp>
 
-#ifndef ZHP_CUDA
-
-#include <activation.hpp>
-#include <matrix.hpp>
-#include <optimizer.hpp>
-#include <vector.hpp>
-
-#else
+#ifdef ZHP_CUDA
 
 #include <cuda/activation.cuh>
 #include <cuda/matrix.cuh>
 #include <cuda/optimizer.cuh>
 #include <cuda/vector.cuh>
+
+#else
+
+#include <activation.hpp>
+#include <matrix.hpp>
+#include <optimizer.hpp>
+#include <vector.hpp>
 
 #endif
 
@@ -1261,7 +1262,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
 		
 		delta.stable_shur(z[i]);
 
-		J[i] = std::move(vvt_mult(delta, __a[i]));
+		J[i] = std::move(vvt_mult(delta, a[i]));
 	}
 
 	// Free resources
