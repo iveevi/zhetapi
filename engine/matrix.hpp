@@ -3,23 +3,27 @@
 
 // C/C++ headers
 #include <cassert>
+#include <fstream>
 #include <functional>
-#include <utility>
-#include <vector>
 #include <iostream>
 #include <sstream>
+#include <utility>
+#include <vector>
 
 // Engine headers
-#ifndef ZHP_CUDA
-
-#include <tensor.hpp>
-
-#else
+#ifdef ZHP_CUDA
 
 #include <cuda/tensor.cuh>
 
+#else
+
+#include <tensor.hpp>
+
 #endif
 
+#include <cuda/essentials.cuh>
+
+// Redeclare minor as a matrix operation
 #ifdef minor
 
 #undef minor
@@ -68,6 +72,10 @@ namespace zhetapi {
 
                 Vector <T> get_column(size_t) const;
 
+		// Rading from a binary file
+		void write(::std::ofstream &);
+		void read(::std::ifstream &);
+
                 // Concatenating matrices
                 Matrix append_above(const Matrix &);
                 Matrix append_below(const Matrix &);
@@ -87,6 +95,9 @@ namespace zhetapi {
 
                 // Miscellanious opertions
                 void randomize(const ::std::function <T ()> &);
+		
+		__cuda_dual_prefix
+		void stable_shur(const Matrix <T> &);
 
                 // Values
                 T determinant() const;
@@ -107,6 +118,16 @@ namespace zhetapi {
 
                 // Special matrix generation
                 static Matrix identity(size_t);
+
+		// Miscellaneous functions
+		template <class U>
+		friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &); 
+		
+		template <class U>
+		friend Vector <U> rmt_and_mult(const Matrix <U> &, const Vector <U> &); 
+		
+		template <class U>
+		friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &); 
 
 		class dimension_mismatch {};
         protected:
@@ -170,10 +191,6 @@ namespace zhetapi {
 		template <class U>
 		friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
 
-		// Miscellaneous functions
-		template <class U>
-		friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &); 
-
 #else
 
 		__host__ __device__
@@ -208,9 +225,6 @@ namespace zhetapi {
 
 		__host__ __device__
 		void stable_transfer(const Matrix <T> &);
-
-		__host__ __device__
-		void stable_shur(const Matrix <T> &);
 
 		void allocate_managed(size_t, size_t, T);
 
@@ -421,6 +435,20 @@ namespace zhetapi {
                         return this->__array[__cols * i + r];
                 });
         }
+	
+	template <class T>
+	void Matrix <T> ::write(::std::ofstream &fout)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			fout.write((char *) &(this->__array[i]), sizeof(T));
+	}
+
+	template <class T>
+	void Matrix <T> ::read(::std::ifstream &fin)
+	{
+		for (size_t i = 0; i < this->__size; i++)
+			fin.read((char *) &(this->__array[i]), sizeof(T));
+	}
 
         template <class T>
         Matrix <T> Matrix <T> ::append_above(const Matrix &m)
@@ -905,6 +933,17 @@ namespace zhetapi {
 				return this->__array[j * __cols + i];
 		});
         }
+	
+	template <class T>
+	void Matrix <T> ::stable_shur(const Matrix <T> &other)
+	{
+		if (!((other.get_rows() == __rows)
+			&& (other.get_cols() == __cols)))
+			throw typename Matrix <T> ::dimension_mismatch();
+
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] *= other.__array[i];
+	}
 
         template <class T>
         void Matrix <T> ::operator+=(const Matrix <T> &other)
@@ -1061,6 +1100,40 @@ namespace zhetapi {
 
 			out.__array[i] = acc;
 		}
+
+		return out;
+	}
+	
+	template <class T>
+	Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
+	{
+		size_t rs = M.__rows;
+		size_t cs = M.__cols;
+
+		Vector <T> out(cs - 1, T(0));
+		for (size_t i = 1; i < cs; i++) {
+			T acc = 0;
+
+			for (size_t k = 0; k < rs; k++) 
+				acc += M.__array[k * cs + i] * V.__array[k];
+
+			out.__array[i - 1] = acc;
+		}
+
+		return out;
+	}
+	
+	template <class T>
+	Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
+	{
+		size_t rs = V.__size;
+		size_t cs = Vt.__size;
+
+		Matrix <T> out(rs, cs, T(0));
+
+		size_t n = rs * cs;
+		for (size_t i = 0; i < n; i++)
+			out.__array[i] = V.__array[i / cs] * Vt.__array[i % cs];
 
 		return out;
 	}

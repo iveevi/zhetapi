@@ -109,6 +109,7 @@ public:
 
 	// Saving and loading the network
 	void save(const std::string &);
+	void load(const std::string &);
 	void load_json(const std::string &);
 
 	// Setters
@@ -152,6 +153,22 @@ public:
 			const Vector <T> &,
 			Optimizer <T> *,
 			bool = false);
+	
+	Matrix <T> *simple_gradient(Matrix <T> *,
+			const Vector <T> &,
+			const Vector <T> &,
+			Optimizer <T> *);
+	Matrix <T> *simple_gradient(Matrix <T> *,
+			Vector <T> *,
+			Vector <T> *,
+			const Vector <T> &,
+			const Vector <T> &,
+			Optimizer <T> *);
+
+	template <size_t = 1>
+	void simple_train(const DataSet <T> &,
+			const DataSet <T> &,
+			T);
 
 	void train(const Vector <T> &, const Vector <T> &, T);
 
@@ -334,11 +351,14 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 template <class T>
 void NeuralNetwork <T> ::clear()
 {
-	for (int i = 0; i < __size; i++)
-		delete __layers[i].second;
+	if (__layers) {
+		for (int i = 0; i < __size; i++) {
+			if (__layers[i].second)
+				delete __layers[i].second;
+		}
 
-	if (__layers)
 		delete[] __layers;
+	}
 
 	if (__weights)
 		delete[] __weights;
@@ -358,6 +378,17 @@ void NeuralNetwork <T> ::save(const std::string &file)
 	fout.write((char *) &type_size, sizeof(size_t));
 	fout.write((char *) &__size, sizeof(size_t));
 
+	using namespace std;
+
+	std::string aname = typeid(*__layers[0].second).name();
+	size_t len = aname.length();
+
+	fout.write((char *) &len, sizeof(size_t));
+	fout << aname;
+	
+	cout << "len = " << len << endl;
+	cout << "aname = " << aname << endl;
+
 	for (int i = 0; i < __size - 1; i++) {
 		size_t r = __weights[i].get_rows();
 		size_t c = __weights[i].get_cols();
@@ -365,8 +396,81 @@ void NeuralNetwork <T> ::save(const std::string &file)
 		fout.write((char *) &r, sizeof(size_t));
 		fout.write((char *) &c, sizeof(size_t));
 
-		for (int k = 0; k < r * c; k++)
-			fout.write((char *) __weights[i][k], sizeof(T));
+		__weights[i].write(fout);
+		
+		aname = typeid(*__layers[i + 1].second).name();
+
+		len = aname.length();
+
+		fout.write((char *) &len, sizeof(size_t));
+
+		fout << aname;
+		
+		cout << "len = " << len << endl;
+		cout << "aname = " << aname << endl;
+	}
+
+	cout << "============================================" << endl;
+}
+
+template <class T>
+void NeuralNetwork <T> ::load(const std::string &file)
+{
+	std::ifstream fin(file);
+
+	size_t type_size = sizeof(T);
+
+	fin.read((char *) &type_size, sizeof(size_t));
+	fin.read((char *) &__size, sizeof(size_t));
+
+	using namespace std;
+	cout << "type_size = " << type_size << endl;
+	cout << "__size = " << __size << endl;
+
+	__weights = new Matrix <T> [__size - 1];
+	__momentum = new Matrix <T> [__size - 1];
+	__layers = new Layer <T> [__size];
+
+	// Read the first activation
+	size_t len;
+
+	fin.read((char *) &len, sizeof(size_t));
+
+	cout << "type-len = " << len << endl;
+
+	char *aname = new char[len + 1];
+
+	fin.read(aname, sizeof(char) * (len));
+
+	aname[len] = '\0';
+	cout << "aname = " << aname << endl;
+	delete[] aname;
+
+	// Loop through for the rest
+	for (int i = 0; i < __size - 1; i++) {
+		size_t r;
+		size_t c;
+
+		fin.read((char *) &r, sizeof(size_t));
+		fin.read((char *) &c, sizeof(size_t));
+
+		__weights[i] = Matrix <T> (r, c, 0);
+		__momentum[i] = Matrix <T> (r, c, 0);
+		__weights[i].read(fin);
+
+		fin.read((char *) &len, sizeof(size_t));
+
+		cout << "type-len = " << len << endl;
+
+		aname = new char[len + 1];
+
+		fin.read(aname, sizeof(char) * len);
+
+		aname[len] = '\0';
+		cout << "aname = " << aname << endl;
+		delete[] aname;
+
+		/* fout << typeid(*__layers[i].second).name(); */
 	}
 }
 
@@ -1088,6 +1192,158 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	}
 	
 	return {passed, opt_error, tot_time};
+}
+
+// No statistical accumulation
+template <class T>
+Matrix <T> *NeuralNetwork <T> ::simple_gradient(
+		Matrix <T> *weights,
+		const Vector <T> &in,
+		const Vector <T> &out,
+		Optimizer <T> *opt)
+{
+	// Check dimensions of input and output
+	if ((in.size() != __isize) || (out.size() != __osize))
+		throw bad_io_dimensions();
+
+	// Compute the actual value
+	Vector <T> actual = compute(in, weights);
+			
+	// Get the derivative of the cost
+	Optimizer <T> *dopt = opt->derivative();
+	
+	// Construction the Jacobian using backpropogation
+	Matrix <T> *J = new Matrix <T> [__size - 1];
+
+	Vector <T> delta = (*dopt)(out, actual);
+	
+	for (int i = __size - 2; i >= 0; i--) {
+		if (i < __size - 2)
+			delta = std::move(rmt_and_mult(weights[i + 1], delta));
+		
+		delta.stable_shur(__z[i]);
+
+		J[i] = std::move(vvt_mult(delta, __a[i]));
+	}
+
+	// Free resources
+	delete dopt;
+
+	// Return the gradient
+	return J;
+}
+
+template <class T>
+Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
+		Vector <T> *a,
+		Vector <T> *z,
+		const Vector <T> &in,
+		const Vector <T> &out,
+		Optimizer <T> *opt)
+{
+	// Check dimensions of input and output
+	if ((in.size() != __isize) || (out.size() != __osize))
+		throw bad_io_dimensions();
+
+	// Compute the actual value
+	Vector <T> actual = compute(in, weights, a, z);
+	
+	// Get the derivative of the cost
+	Optimizer <T> *dopt = opt->derivative();
+	
+	// Construction the Jacobian using backpropogation
+	Matrix <T> *J = new Matrix <T> [__size - 1];
+
+	Vector <T> delta = dopt->compute(out, actual);
+	for (int i = __size - 2; i >= 0; i--) {
+		if (i < __size - 2)
+			delta = std::move(rmt_and_mult(weights[i + 1], delta));
+		
+		delta.stable_shur(z[i]);
+
+		J[i] = std::move(vvt_mult(delta, __a[i]));
+	}
+
+	// Free resources
+	delete dopt;
+
+	// Return the gradient
+	return J;
+}
+
+template <class T>
+template <size_t threads>
+void NeuralNetwork <T> ::simple_train(
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		T alpha)
+{
+	if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	int size = ins.size();
+
+	// Compute modified weights
+	Matrix <T> *adj = adjusted(0.7);
+
+	Matrix <T> **grads = new Matrix <T> *[size];
+	if (threads == 1) {
+		for (int i = 0; i < size; i++)
+			grads[i] = simple_gradient(adj, ins[i], outs[i], __cost);
+	} else {
+		std::vector <std::thread> army;
+		
+		auto proc = [&](size_t offset) {
+			Vector <T> *aloc = new Vector <T> [__size];
+			Vector <T> *zloc = new Vector <T> [__size];
+
+			for (int i = offset; i < size; i += threads)
+				grads[i] = simple_gradient(adj, aloc, zloc, ins[i], outs[i], __cost);
+
+			delete[] aloc;
+			delete[] zloc;
+		};
+
+		for (int i = 0; i < threads; i++)
+			army.push_back(std::thread(proc, i));
+
+		for (int i = 0; i < threads; i++)
+			army[i].join();
+	}
+
+	Matrix <T> *grad = new Matrix <T> [__size - 1];
+	for (int i = 0; i < __size - 1; i++)
+		grad[i] = grads[0][i];
+	
+	for (size_t i = 1; i < size; i++) {
+		for (size_t j = 0; j < __size - 1; j++)
+			grad[j] += grads[i][j];
+	}
+
+	for (size_t j = 0; j < __size - 1; j++)
+		grad[j] /= (double) size;
+
+#ifdef ZHP_GRAD_DEBUG
+
+	using namespace std;
+	cout << endl << "Javg:" << endl;
+	for (int i = 0; i < __size - 1; i++)
+		cout << "\t" << grad[i] << endl;
+
+#else
+
+	apply_gradient(grad, alpha, 0.7);
+
+#endif
+	
+	// Release memory
+	delete[] grad;
+	delete[] adj;
+
+	for (int i = 0; i < size; i++)
+		delete[] grads[i];
+
+	delete[] grads;
 }
 
 template <class T>

@@ -3,6 +3,8 @@
 #include <iostream>
 #include <vector>
 
+// #define ZHP_GRAD_DEBUG
+
 // Engine headers
 #include <std/activation_classes.hpp>
 #include <std/optimizer_classes.hpp>
@@ -15,12 +17,12 @@ using namespace zhetapi;
 
 int main()
 {
-	auto initializer = []() {
+		auto initializer = []() {
                 return 0.5 - (rand()/(double) RAND_MAX);
         };
 
 	ml::NeuralNetwork <double> model;
-	
+
 	model = ml::NeuralNetwork <double> ({
                 {11, new zhetapi::ml::Linear <double> ()},
                 {10, new zhetapi::ml::Sigmoid <double> ()},
@@ -50,24 +52,31 @@ int main()
 	}
 
         std::chrono::high_resolution_clock clk;
-	
+
 	std::chrono::high_resolution_clock::time_point start;
         std::chrono::high_resolution_clock::time_point end;
 
 	double t_norm;
+	double t_opt;
 	for (size_t i = 0; i < 10; i++) {
 		start = clk.now();
 
-		for (size_t i = 0; i < ins.size(); i++)
-			model.compute_no_cache(ins[i]);
+		model.train(ins, outs, 2.5e-4);
 
 		end = clk.now();
 
 		t_norm = std::chrono::duration_cast
 			<std::chrono::microseconds> (end - start).count();
-		
+
 		start = clk.now();
 
-		cout << "t_norm = " << t_norm << endl;
+		model.simple_train(ins, outs, 2.5e-4);
+
+		end = clk.now();
+
+		t_opt = std::chrono::duration_cast
+			<std::chrono::microseconds> (end - start).count();
+
+		cout << t_norm << ", " << t_opt << endl;
 	}
 }

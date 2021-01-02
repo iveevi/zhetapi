@@ -244,8 +244,14 @@ namespace zhetapi {
 	template <class T>
 	Tensor <T> ::~Tensor()
 	{
-		delete[] __dim;
-		delete[] __array;
+		if (!__array && !__dim)
+			return;
+	
+		if (__dim)
+			delete[] __dim;
+
+		if (__array)
+			delete[] __array;
 	}
 
         template <class T>

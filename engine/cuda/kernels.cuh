@@ -193,7 +193,7 @@ void __st_mc_div(T *J, T c, size_t size)
 }
 
 
-// Aplpy gradient
+// Apply gradient
 template <class T>
 __global__
 void __st_mmmcc_grad(T *W, T *M, T *J, T alpha, T mu, size_t size)

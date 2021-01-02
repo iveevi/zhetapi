@@ -116,7 +116,7 @@ __host__ __device__
 void Tensor <T> ::clear(int id)
 {
 	// Skip if neither are allocated
-	if (!this->__array && !this->__dim)
+	if (!__array && !__dim)
 		return;
 
 #ifndef __CUDA_ARCH__
