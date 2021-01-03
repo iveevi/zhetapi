@@ -741,51 +741,6 @@ Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 	// Free resources
 	delete dopt;
 
-	// Skip gradient checking
-	if (!check)
-		return J;
-
-	// Epsilon value
-	T epsilon = 1e-8;
-
-	// Generate individual gradients
-	Matrix <T> *qJ = new Matrix <T> [__size - 1];
-	for (int i = 0; i < __size - 1; i++)
-		qJ[i] = __weights[i];
-	
-	for (int i = 0; i < __size - 1; i++) {
-		for (int x = 0; x < __weights[i].get_rows(); x++) {
-			for (int y = 0; y < __weights[i].get_cols(); y++) {
-				Matrix <T> *wplus = new Matrix <T> [__size - 1];
-				Matrix <T> *wminus = new Matrix <T> [__size - 1];
-				
-				for (int k = 0; k < __size - 1; k++)
-					wplus[k] = wminus[k] = __weights[k];
-
-				wplus[i][x][y] += epsilon;
-				wminus[i][x][y] -= epsilon;
-
-				Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
-				Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
-
-				qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
-
-				// Compute the error
-				T a = J[i][x][y];
-				T b = qJ[i][x][y];
-
-				T d = a - b;
-
-				T e = (d * d) / (a * a + b * b + epsilon);
-
-				// If the error is more than epsilon throw an error
-				if (e > epsilon)
-					throw bad_gradient();
-			}
-		}
-
-	}
-
 	// Return the gradient
 	return J;
 }
@@ -827,51 +782,6 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 
 	// Free resources
 	delete dopt;
-
-	// Skip gradient checking
-	if (!check)
-		return J;
-
-	// Epsilon value
-	T epsilon = 1e-8;
-
-	// Generate individual gradients
-	Matrix <T> *qJ = new Matrix <T> [__size - 1];
-	for (int i = 0; i < __size - 1; i++)
-		qJ[i] = weights[i];
-	
-	for (int i = 0; i < __size - 1; i++) {
-		for (int x = 0; x < weights[i].get_rows(); x++) {
-			for (int y = 0; y < weights[i].get_cols(); y++) {
-				Matrix <T> *wplus = new Matrix <T> [__size - 1];
-				Matrix <T> *wminus = new Matrix <T> [__size - 1];
-				
-				for (int k = 0; k < __size - 1; k++)
-					wplus[k] = wminus[k] = __weights[k];
-
-				wplus[i][x][y] += epsilon;
-				wminus[i][x][y] -= epsilon;
-
-				Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
-				Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
-
-				qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
-
-				// Compute the error
-				T a = J[i][x][y];
-				T b = qJ[i][x][y];
-
-				T d = a - b;
-
-				T e = (d * d) / (a * a + b * b + epsilon);
-
-				// If the error is more than epsilon throw an error
-				if (e > epsilon)
-					throw bad_gradient();
-			}
-		}
-
-	}
 
 	// Return the gradient
 	return J;
@@ -915,51 +825,6 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 
 	// Free resources
 	delete dopt;
-
-	// Skip gradient checking
-	if (!check)
-		return J;
-
-	// Epsilon value
-	T epsilon = 1e-8;
-
-	// Generate individual gradients
-	Matrix <T> *qJ = new Matrix <T> [__size - 1];
-	for (int i = 0; i < __size - 1; i++)
-		qJ[i] = weights[i];
-	
-	for (int i = 0; i < __size - 1; i++) {
-		for (int x = 0; x < weights[i].get_rows(); x++) {
-			for (int y = 0; y < weights[i].get_cols(); y++) {
-				Matrix <T> *wplus = new Matrix <T> [__size - 1];
-				Matrix <T> *wminus = new Matrix <T> [__size - 1];
-				
-				for (int k = 0; k < __size - 2; k++)
-					wplus[k] = wminus[k] = weights[k];
-
-				wplus[i][x][y] += epsilon;
-				wminus[i][x][y] -= epsilon;
-
-				Vector <T> jplus = (*opt)(out, compute_no_cache(in, wplus));
-				Vector <T> jminus = (*opt)(out, compute_no_cache(in, wminus));
-
-				qJ[i][x][y] = (jplus[0] - jminus[0])/(epsilon + epsilon);
-
-				// Compute the error
-				T a = J[i][x][y];
-				T b = qJ[i][x][y];
-
-				T d = a - b;
-
-				T e = (d * d) / (a * a + b * b + epsilon);
-
-				// If the error is more than epsilon throw an error
-				if (e > epsilon)
-					throw bad_gradient();
-			}
-		}
-
-	}
 
 	// Return the gradient
 	return J;

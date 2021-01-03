@@ -393,7 +393,7 @@ public:
 };
 
 template <class T>
-void __zhp_register_standard_activations()
+void ZhetapiRegisterStandardActivations()
 {
 	__zhp_register_activation(Linear, T, load_linear <T>);
 	__zhp_register_activation(ReLU, T, load_relu <T>);

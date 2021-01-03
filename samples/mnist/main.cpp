@@ -82,7 +82,7 @@ vector <double> read_image_print()
 int main()
 {
 	// Initialize the model
-	// srand(clock());
+	srand(clock());
 
 	model.randomize();
 

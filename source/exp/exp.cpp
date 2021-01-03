@@ -16,7 +16,7 @@ using namespace zhetapi;
 
 int main()
 {
-	ml::__zhp_register_standard_activations <double> ();
+	ml::ZhetapiRegisterStandardActivations <double> ();
 
 	auto initializer = []() {
                 return 0.5 - (rand()/(double) RAND_MAX);
