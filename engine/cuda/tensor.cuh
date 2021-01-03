@@ -113,7 +113,7 @@ Tensor <T> ::~Tensor()
 
 template <class T>
 __host__ __device__
-void Tensor <T> ::clear(int id)
+void Tensor <T> ::clear()
 {
 	// Skip if neither are allocated
 	if (!__array && !__dim)

@@ -33,7 +33,7 @@ class Activation;
 
 // Format of an activation loader
 template <class T>
-using loader = Activation <T> *(*)(const std::vector <double> &);
+using Loader = Activation <T> *(*)(const std::vector <T> &);
 
 /*
  * Represents an activation in machine learning. Takes a vector of type T as an
@@ -50,15 +50,33 @@ public:
 		AT_Sigmoid
 	};
 
-	// TODO: Add a vector <double> constructor for JSON
 	__cuda_dual_prefix
-	Activation();
+	Activation();						// Default constructor
+
+	__cuda_dual_prefix
+	Activation(activation_type);				// Type constructor
+
+	__cuda_dual_prefix
+	Activation(const std::vector <T> &);			// Argument constructor
 	
+	__cuda_dual_prefix
+	Activation(activation_type, const std::vector <T> &);	// Type and argument constructor
+	
+	// Computation
 	__cuda_dual_prefix
 	Vector <T> compute(const Vector <T> &) const;
 
 	__cuda_dual_prefix
 	virtual Vector <T> operator()(const Vector <T> &) const;
+
+	// Saving
+	void write_type(std::ofstream &) const;
+	void write_args(std::ofstream &) const;
+
+	virtual void write(std::ofstream &) const;
+
+	// Loading
+	static Activation <T> *load(std::ifstream &);
 
 	__cuda_dual_prefix
 	virtual Activation *derivative() const;
@@ -71,7 +89,7 @@ public:
 	friend Activation <U> *copy(Activation <U> *);
 
 	// Global list of all registered activations
-	static std::map <std::string, loader <T>> __activation_loaders;
+	static std::map <std::string, Loader <T>> __activation_loaders;
 
 	static void display_loaders()
 	{
@@ -81,17 +99,32 @@ public:
 			cout << pr.first << " is registered" << endl;
 	}
 protected:
-	activation_type kind;
+	// Arguments, empty by default
+	std::vector <T>	__args = {};
+
+	activation_type	__kind = AT_Default;
 };
 
 
 template <class T>
-std::map <std::string, loader <T>> Activation <T> ::__activation_loaders;
+std::map <std::string, Loader <T>> Activation <T> ::__activation_loaders;
 
 #ifndef ZHP_CUDA
 
+// Constructors
 template <class T>
-Activation <T> ::Activation() : kind(AT_Default) {}
+Activation <T> ::Activation() : __kind(AT_Default) {}
+
+template <class T>
+Activation <T> ::Activation(activation_type kind) : __kind(kind) {}
+
+template <class T>
+Activation <T> ::Activation(const std::vector <T> &args) : __args(args),
+		__kind(AT_Default) {}
+
+template <class T>
+Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
+		: __args(args), __kind(kind) {}
 
 // TODO: Reverse compute and operator()
 template <class T>
@@ -106,6 +139,92 @@ Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 	return (*this)(x);
 }
 
+// Saving
+template <class T>
+void Activation <T> ::write_type(std::ofstream &fout) const
+{
+	using namespace std;
+
+	std::string aname = typeid(*this).name();
+	size_t len = aname.length();
+
+	fout.write((char *) &len, sizeof(size_t));
+
+	fout << aname;
+	
+	cout << "len = " << len << endl;
+	cout << "aname = " << aname << endl;
+}
+
+template <class T>
+void Activation <T> ::write_args(std::ofstream &fout) const
+{
+	using namespace std;
+	size_t argc = __args.size();
+
+	fout.write((char *) &argc, sizeof(size_t));
+	
+	cout << "writing " << argc << " arguments..." << endl;
+	for (size_t i = 0; i < argc; i++) {
+		cout << "\twriting " << __args[i] << endl;
+		fout.write((char *) &(__args[i]), sizeof(T));
+	}
+}
+
+template <class T>
+void Activation <T> ::write(std::ofstream &fout) const
+{
+	write_type(fout);
+	write_args(fout);
+}
+
+// Loading
+template <class T>
+Activation <T> *Activation <T> ::load(std::ifstream &fin)
+{
+	using namespace std;
+	cout << "Loading..." << endl;
+	
+	size_t len;
+
+	fin.read((char *) &len, sizeof(size_t));
+
+	cout << "type-len = " << len << endl;
+
+	char *aname = new char[len + 1];
+
+	fin.read(aname, sizeof(char) * (len));
+
+	aname[len] = '\0';
+	cout << "aname = " << aname << endl;
+
+	std::string name = aname;
+
+	size_t argc;
+	
+	fin.read((char *) &argc, sizeof(size_t));
+
+	cout << "argc = " << argc << endl;
+
+	std::vector <T> args;
+	for (size_t i = 0; i < argc; i++) {
+		T t;
+
+		fin.read((char *) &t, sizeof(T));
+
+		cout << "\tread " << t << endl;
+
+		args.push_back(t);
+	}
+
+	Loader <T> loader = __activation_loaders[name];
+
+	delete[] aname;
+
+	return loader(args);
+}
+
+// Derivative
 template <class T>
 Activation <T> *Activation <T> ::derivative() const
 {
@@ -115,7 +234,7 @@ Activation <T> *Activation <T> ::derivative() const
 template <class T>
 int Activation <T> ::get_activation_type() const
 {
-	return kind;
+	return __kind;
 }
 
 #endif

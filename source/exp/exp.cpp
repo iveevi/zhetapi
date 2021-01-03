@@ -3,8 +3,6 @@
 #include <iostream>
 #include <vector>
 
-// #define ZHP_GRAD_DEBUG
-
 // Engine headers
 #include <std/activation_classes.hpp>
 #include <std/optimizer_classes.hpp>
@@ -17,11 +15,16 @@ using namespace zhetapi;
 
 int main()
 {
-		auto initializer = []() {
+	ml::__zhp_register_standard_activations <double> ();
+
+	ml::Activation <double> ::display_loaders();
+
+	auto initializer = []() {
                 return 0.5 - (rand()/(double) RAND_MAX);
         };
 
 	ml::NeuralNetwork <double> model;
+	ml::NeuralNetwork <double> cpy;
 
 	model = ml::NeuralNetwork <double> ({
                 {11, new zhetapi::ml::Linear <double> ()},
@@ -33,50 +36,19 @@ int main()
 
 	model.randomize();
 
-	Vector <double> in(8, [](size_t i) {return rand()/((double) RAND_MAX);});
-	Vector <double> out(9, [](size_t i) {return rand()/((double) RAND_MAX);});
-
 	ml::Optimizer <double> *opt = new ml::MeanSquaredError <double> ();
 
 	model.set_cost(opt);
 
-	DataSet <double> ins;
-	DataSet <double> outs;
-	for (size_t i = 0; i < 5000; i++) {
-		auto rng = [](size_t i) {
-			return rand()/((double) RAND_MAX);
-		};
+	model.save("model.out");
+	cpy.load("model.out");
 
-		ins.push_back(Vector <double> (11, rng));
-		outs.push_back(Vector <double> (9, rng));
-	}
+	Vector <double> in(11, [](size_t i) {return rand()/((double) RAND_MAX);});
+	Vector <double> out(9, [](size_t i) {return rand()/((double) RAND_MAX);});
 
-        std::chrono::high_resolution_clock clk;
+	model.print();
+	cpy.print();
 
-	std::chrono::high_resolution_clock::time_point start;
-        std::chrono::high_resolution_clock::time_point end;
-
-	double t_norm;
-	double t_opt;
-	for (size_t i = 0; i < 10; i++) {
-		start = clk.now();
-
-		model.train <10> (ins, outs, 2.5e-4);
-
-		end = clk.now();
-
-		t_norm = std::chrono::duration_cast
-			<std::chrono::microseconds> (end - start).count();
-
-		start = clk.now();
-
-		model.simple_train <10> (ins, outs, 2.5e-4);
-
-		end = clk.now();
-
-		t_opt = std::chrono::duration_cast
-			<std::chrono::microseconds> (end - start).count();
-
-		cout << t_norm << ", " << t_opt << endl;
-	}
+	cout << "model = " << model(in) << endl;
+	cout << "cpy = " << cpy(in) << endl;
 }

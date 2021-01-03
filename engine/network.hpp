@@ -378,18 +378,13 @@ void NeuralNetwork <T> ::save(const std::string &file)
 
 	fout.write((char *) &type_size, sizeof(size_t));
 	fout.write((char *) &__size, sizeof(size_t));
+	fout.write((char *) &__isize, sizeof(size_t));
+	fout.write((char *) &__osize, sizeof(size_t));
 
 	using namespace std;
 
-	std::string aname = typeid(*__layers[0].second).name();
-	size_t len = aname.length();
 
-	fout.write((char *) &len, sizeof(size_t));
-	fout << aname;
-	
-	cout << "len = " << len << endl;
-	cout << "aname = " << aname << endl;
-
+	__layers[0].second->write(fout);
 	for (int i = 0; i < __size - 1; i++) {
 		size_t r = __weights[i].get_rows();
 		size_t c = __weights[i].get_cols();
@@ -398,17 +393,8 @@ void NeuralNetwork <T> ::save(const std::string &file)
 		fout.write((char *) &c, sizeof(size_t));
 
 		__weights[i].write(fout);
-		
-		aname = typeid(*__layers[i + 1].second).name();
-
-		len = aname.length();
-
-		fout.write((char *) &len, sizeof(size_t));
-
-		fout << aname;
-		
-		cout << "len = " << len << endl;
-		cout << "aname = " << aname << endl;
+		__momentum[i].write(fout);
+		__layers[i + 1].second->write(fout);
 	}
 
 	cout << "============================================" << endl;
@@ -423,6 +409,8 @@ void NeuralNetwork <T> ::load(const std::string &file)
 
 	fin.read((char *) &type_size, sizeof(size_t));
 	fin.read((char *) &__size, sizeof(size_t));
+	fin.read((char *) &__isize, sizeof(size_t));
+	fin.read((char *) &__osize, sizeof(size_t));
 
 	using namespace std;
 	cout << "type_size = " << type_size << endl;
@@ -433,19 +421,7 @@ void NeuralNetwork <T> ::load(const std::string &file)
 	__layers = new Layer <T> [__size];
 
 	// Read the first activation
-	size_t len;
-
-	fin.read((char *) &len, sizeof(size_t));
-
-	cout << "type-len = " << len << endl;
-
-	char *aname = new char[len + 1];
-
-	fin.read(aname, sizeof(char) * (len));
-
-	aname[len] = '\0';
-	cout << "aname = " << aname << endl;
-	delete[] aname;
+	__layers[0].second = Activation <T> ::load(fin);
 
 	// Loop through for the rest
 	for (int i = 0; i < __size - 1; i++) {
@@ -457,21 +433,11 @@ void NeuralNetwork <T> ::load(const std::string &file)
 
 		__weights[i] = Matrix <T> (r, c, 0);
 		__momentum[i] = Matrix <T> (r, c, 0);
+		
 		__weights[i].read(fin);
-
-		fin.read((char *) &len, sizeof(size_t));
-
-		cout << "type-len = " << len << endl;
-
-		aname = new char[len + 1];
-
-		fin.read(aname, sizeof(char) * len);
-
-		aname[len] = '\0';
-		cout << "aname = " << aname << endl;
-		delete[] aname;
-
-		/* fout << typeid(*__layers[i].second).name(); */
+		__momentum[i].read(fin);
+		
+		__layers[i + 1].second = Activation <T> ::load(fin);
 	}
 }
 

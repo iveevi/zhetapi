@@ -10,308 +10,317 @@
 #include <string>
 #include <vector>
 
+#include <cuda/essentials.cuh>
+
 namespace zhetapi {
 
-	template <class T>
-	class Tensor {
-        protected:
-		T	*__array = nullptr;
-		size_t	__size = 0;
+template <class T>
+class Tensor {
+protected:
+	T	*__array = nullptr;
+	size_t	__size = 0;
 
-		// Variables for printing
-		size_t	*__dim = nullptr;
-		size_t	__dims = 0;
+	// Variables for printing
+	size_t	*__dim = nullptr;
+	size_t	__dims = 0;
 
 #ifdef ZHP_CUDA
 
-		bool	__on_device = false;	// Flag for device allocation
-		bool	__sliced = false;	// Flag for no deallocation
+	bool	__on_device = false;	// Flag for device allocation
+	bool	__sliced = false;	// Flag for no deallocation
 
-		__host__ __device__
-		void clear(int = 0);
 #endif
 
-	public:
-		// TODO: Remove this method
-		T *arr() const {return __array;}
+	__cuda_dual_prefix
+	void clear();
+public:
+	// TODO: Remove this method
+	T *arr() const {return __array;}
 
-		Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
-		
-		// Printing functions
-		::std::string print() const;
+	Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
+	
+	// Printing functions
+	::std::string print() const;
 
-		template <class U>
-		friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
+	template <class U>
+	friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
 
-                // Dimension mismatch exception
-                class dimension_mismatch {};
-		class bad_dimensions {};
+	// Dimension mismatch exception
+	class dimension_mismatch {};
+	class bad_dimensions {};
 
 #ifndef ZHP_CUDA
 
-                // Construction and memory
-		Tensor();
-                Tensor(const Tensor &);
-		Tensor(const ::std::vector <T> &);
-		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+	// Construction and memory
+	Tensor();
+	Tensor(const Tensor &);
+	Tensor(const ::std::vector <T> &);
+	Tensor(const ::std::vector <::std::size_t> &, const T & = T());
 
-		~Tensor();
+	~Tensor();
 
-                Tensor &operator=(const Tensor &);
+	Tensor &operator=(const Tensor &);
 
-		// Indexing
-		T &operator[](const ::std::vector <size_t> &);
-		const T &operator[](const ::std::vector <size_t> &) const;
+	// Indexing
+	T &operator[](const ::std::vector <size_t> &);
+	const T &operator[](const ::std::vector <size_t> &) const;
 
-		// Comparison
-		template <class U>
-		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
+	// Comparison
+	template <class U>
+	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
 
 #else
 
-		__host__ __device__
-		Tensor();
+	__host__ __device__
+	Tensor();
 
-		__host__ __device__
-		Tensor(bool);
+	__host__ __device__
+	Tensor(bool);
 
-		__host__ __device__
-                Tensor(const Tensor &);
-		
-		__host__ __device__
-		Tensor(size_t, size_t, const T &);
+	__host__ __device__
+	Tensor(const Tensor &);
+	
+	__host__ __device__
+	Tensor(size_t, size_t, const T &);
 
-		__host__ __device__
-		Tensor(const ::std::vector <T> &);
+	__host__ __device__
+	Tensor(const ::std::vector <T> &);
 
-		__host__ __device__
-		Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+	__host__ __device__
+	Tensor(const ::std::vector <::std::size_t> &, const T & = T());
 
-		__host__ __device__
-		~Tensor();
+	__host__ __device__
+	~Tensor();
 
-		__host__ __device__
-                Tensor &operator=(const Tensor &);
+	__host__ __device__
+	Tensor &operator=(const Tensor &);
 
-		template <class U>
-		__host__ __device__
-		friend bool operator==(const Tensor <U> &, const Tensor <U> &);
+	template <class U>
+	__host__ __device__
+	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
 
 #endif
 
-	};
+};
 
-	template <class T>
-	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
-			: __dims(dim.size())
-	{
+template <class T>
+Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
+		: __dims(dim.size())
+{
 
 #ifdef ZHP_CUDA
 
-		__on_device = false;
+	__on_device = false;
 
 #endif
 
-		__dim = new size_t[__dims];
+	__dim = new size_t[__dims];
 
-		size_t prod = 1;
-		for (size_t i = 0; i < __dims; i++) {
-			prod *= dim[i];
+	size_t prod = 1;
+	for (size_t i = 0; i < __dims; i++) {
+		prod *= dim[i];
 
-			__dim[i] = dim[i];
-		}
-
-		__size = prod;
-
-		if (!__size)
-			throw bad_dimensions();
-
-		if (arr.size() != __size)
-                        throw dimension_mismatch();
-
-		__array = new T[prod];
-
-		for (size_t i = 0; i < prod; i++)
-			__array[i] = arr[i];
+		__dim[i] = dim[i];
 	}
 
-	// Printing functions
-	template <class T>
-	::std::string Tensor <T> ::print() const
-	{
-		if (!__dim)
-			return "[]";
+	__size = prod;
+
+	if (!__size)
+		throw bad_dimensions();
+
+	if (arr.size() != __size)
+		throw dimension_mismatch();
+
+	__array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		__array[i] = arr[i];
+}
+
+// Printing functions
+template <class T>
+::std::string Tensor <T> ::print() const
+{
+	if (!__dim)
+		return "[]";
+	
+	if (__dims == 0) {
+		::std::ostringstream oss;
+
+		oss << __array[0];
+
+		return oss.str();
+	}
+	
+	::std::string out = "[";
+
+	::std::vector <size_t> cropped;
+	for (int i = 0; i < ((int) __dims) - 1; i++)
+		cropped.push_back(__dim[i + 1]);
+
+	size_t left = __size/__dim[0];
+	for (size_t i = 0; i < __dim[0]; i++) {
+		::std::vector <T> elems;
+
+		for (size_t k = 0; k < left; k++)
+			elems.push_back(__array[left * i + k]);
 		
-		if (__dims == 0) {
-			::std::ostringstream oss;
+		Tensor tmp(cropped, elems);
 
-			oss << __array[0];
+		out += tmp.print();
 
-			return oss.str();
-		}
-		
-		::std::string out = "[";
-
-		::std::vector <size_t> cropped;
-		for (int i = 0; i < ((int) __dims) - 1; i++)
-			cropped.push_back(__dim[i + 1]);
-
-		size_t left = __size/__dim[0];
-		for (size_t i = 0; i < __dim[0]; i++) {
-			::std::vector <T> elems;
-
-			for (size_t k = 0; k < left; k++)
-				elems.push_back(__array[left * i + k]);
-			
-			Tensor tmp(cropped, elems);
-
-			out += tmp.print();
-
-			if (i < __dim[0] - 1)
-				out += ", ";
-		}
-
-		return out + "]";
+		if (i < __dim[0] - 1)
+			out += ", ";
 	}
 
-	template <class T>
-	::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
-	{
-		os << ts.print();
+	return out + "]";
+}
 
-		return os;
-	}
+template <class T>
+::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
+{
+	os << ts.print();
+
+	return os;
+}
 
 #ifndef ZHP_CUDA
 
-	// Constructors and memory relevant functions
-	template <class T>
-	Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
-			__size(0) {}
+// Constructors and memory relevant functions
+template <class T>
+Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
+		__size(0) {}
 
-        template <class T>
-        Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)
-        {
-                __dim = new size_t[__dims];
-                for (size_t i = 0; i < __dims; i++)
-                        __dim[i] = other.__dim[i];
+template <class T>
+Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)
+{
+	__dim = new size_t[__dims];
+	for (size_t i = 0; i < __dims; i++)
+		__dim[i] = other.__dim[i];
 
-                __array = new T[__size];
-                for (size_t i = 0; i < __size; i++)
-                        __array[i] = other.__array[i];
-        }
+	__array = new T[__size];
+	for (size_t i = 0; i < __size; i++)
+		__array[i] = other.__array[i];
+}
 
-	template <class T>
-	Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size())
-	{
-		__dim = new size_t[1];
+template <class T>
+Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size())
+{
+	__dim = new size_t[1];
 
-		__dim[0] = __size;
+	__dim[0] = __size;
 
-		if (!__size)
-			throw bad_dimensions();
+	if (!__size)
+		throw bad_dimensions();
+
+	__array = new T[__size];
+
+	for (size_t i = 0; i < __size; i++)
+		__array[i] = arr[i];
+}
+
+template <class T>
+Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
+		: __dims(dim.size())
+{
+	__dim = new size_t[__dims];
+
+	size_t prod = 1;
+	for (size_t i = 0; i < __dims; i++) {
+		prod *= dim[i];
+
+		__dim[i] = dim[i];
+	}
+
+	__size = prod;
+
+	if (!__size)
+		throw bad_dimensions();
+
+	__array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		__array[i] = def;
+}
+
+template <class T>
+Tensor <T> ::~Tensor()
+{
+	clear();
+}
+
+template <class T>
+void Tensor <T> ::clear()
+{
+	if (!__array && !__dim)
+		return;
+
+	if (__dim)
+		delete[] __dim;
+
+	if (__array)
+		delete[] __array;
+}
+
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+{
+	if (this != &other) {
+		__dims = other.__dims;
+		__size = other.__size;
+	
+		__dim = new size_t[__dims];
+		for (size_t i = 0; i < __dims; i++)
+			__dim[i] = other.__dim[i];
 
 		__array = new T[__size];
-
 		for (size_t i = 0; i < __size; i++)
-			__array[i] = arr[i];
+			__array[i] = other.__array[i];
 	}
 
-	template <class T>
-	Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
-			: __dims(dim.size())
-	{
-		__dim = new size_t[__dims];
+	return *this;
+}
 
-		size_t prod = 1;
-		for (size_t i = 0; i < __dims; i++) {
-			prod *= dim[i];
+// Index
+template <class T>
+T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices)
+{
+	size_t full = 0;
 
-			__dim[i] = dim[i];
-		}
-
-		__size = prod;
-
-		if (!__size)
-			throw bad_dimensions();
-
-		__array = new T[prod];
-
-		for (size_t i = 0; i < prod; i++)
-			__array[i] = def;
-	}
-
-	template <class T>
-	Tensor <T> ::~Tensor()
-	{
-		if (!__array && !__dim)
-			return;
+	assert(indices.size() == __dims);
+	for (size_t i = 0; i < __dims; i++)
+		full += indices[i] * __dim[__dims - (i + 1)];
 	
-		if (__dim)
-			delete[] __dim;
+	return __array[full];
+}
 
-		if (__array)
-			delete[] __array;
-	}
+template <class T>
+const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
+{
+	size_t full = 0;
 
-        template <class T>
-        Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
-        {
-                if (this != &other) {
-                        __dims = other.__dims;
-                        __size = other.__size;
-                
-                        __dim = new size_t[__dims];
-                        for (size_t i = 0; i < __dims; i++)
-                                __dim[i] = other.__dim[i];
+	assert(indices.size() == __dims);
+	for (size_t i = 0; i < __dims; i++)
+		full += indices[i] * __dim[__dims - (i + 1)];
+	
+	return __array[full];
+}
 
-                        __array = new T[__size];
-                        for (size_t i = 0; i < __size; i++)
-                                __array[i] = other.__array[i];
-                }
+// Comparison
+template <class T>
+bool operator==(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a.__size != b.__size)
+		return false;
 
-                return *this;
-        }
-
-	// Index
-	template <class T>
-	T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices)
-	{
-		size_t full = 0;
-
-		assert(indices.size() == __dims);
-		for (size_t i = 0; i < __dims; i++)
-			full += indices[i] * __dim[__dims - (i + 1)];
-		
-		return __array[full];
-	}
-
-	template <class T>
-	const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
-	{
-		size_t full = 0;
-
-		assert(indices.size() == __dims);
-		for (size_t i = 0; i < __dims; i++)
-			full += indices[i] * __dim[__dims - (i + 1)];
-		
-		return __array[full];
-	}
-
-	// Comparison
-	template <class T>
-	bool operator==(const Tensor <T> &a, const Tensor <T> &b)
-	{
-		if (a.__size != b.__size)
+	for (size_t i = 0; i < a.__size; i++) {
+		if (a.__array[i] != b.__array[i])
 			return false;
-
-		for (size_t i = 0; i < a.__size; i++) {
-			if (a.__array[i] != b.__array[i])
-				return false;
-		}
-
-		return true;
 	}
+
+	return true;
+}
 
 #endif
 
