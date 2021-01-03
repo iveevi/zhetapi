@@ -14,7 +14,7 @@ image::zhetapi-logo.png[]
 |===
 
 # Introduction
-Zhetapi (ℤHΠ) is a C++ (14) computation library that was built in the hopes of
+Zhetapi is a `C++17` computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
 users.
 

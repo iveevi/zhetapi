@@ -23,8 +23,6 @@ int main()
         };
 
 	ml::NeuralNetwork <double> model;
-	ml::NeuralNetwork <double> cpy;
-	ml::NeuralNetwork <double> ld;
 
 	model = ml::NeuralNetwork <double> ({
                 {11, new zhetapi::ml::Linear <double> ()},
@@ -40,14 +38,22 @@ int main()
 
 	model.set_cost(opt);
 
-	model.save("model.out");
-	cpy.load("model.out");
+	DataSet <double> ins;
+	DataSet <double> outs;
 
-	Vector <double> in(11, [](size_t i) {return rand()/((double) RAND_MAX);});
-	Vector <double> out(9, [](size_t i) {return rand()/((double) RAND_MAX);});
+	for (size_t i = 0; i < 50; i++) {
+		ins.push_back(Vector <double> (11,
+			[](size_t i) {
+				return rand()/((double) RAND_MAX);
+			}
+		));
+		
+		outs.push_back(Vector <double> (9,
+			[](size_t i) {
+				return rand()/((double) RAND_MAX);
+			}
+		));
+	}
 
-	cout << "model = " << model(in) << endl;
-	cout << "cpy = " << cpy(in) << endl;
-
-	ld.load_json("samples/mnist/model.json");
+	model.epochs(ins, outs, 3, 10, 0.001, Display::epoch | Display::graph);
 }

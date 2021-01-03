@@ -12,7 +12,6 @@
 struct Display {
 	static const uint8_t epoch;
 	static const uint8_t batch;
-	static const uint8_t validation;
 	static const uint8_t graph;
 };
 

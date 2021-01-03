@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 if [ ! -f train-labels-idx1-ubyte ]; then
 	wget http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz
 
@@ -15,7 +17,7 @@ fi
 if [ "$1" == "debug" ]; then
 	g++-8 -I ../../engine main.cpp -pthread -g -o mnist
 else
-	g++-8 -I ../../engine main.cpp -pthread -O3 -o mnist
+	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -O3 -o mnist
 fi
 
 mkdir -p bin

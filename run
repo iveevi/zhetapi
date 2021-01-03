@@ -7,12 +7,8 @@ if [ "$#" -eq 0 ]; then
 elif [ $1 = "install" ]; then
 	echo "Installing..."
 
-	# Register apps directory
-	# echo "PATH=${PATH}:$(pwd)/bin" >> .env
+	set +e
 
-	# source .env
-
-	# Run cmake
 	cmake .
 	
 	mkdir -p bin
