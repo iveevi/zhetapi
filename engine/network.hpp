@@ -423,6 +423,9 @@ void NeuralNetwork <T> ::load(const std::string &file)
 	// Read the first activation
 	__layers[0].second = Activation <T> ::load(fin);
 
+	__a = std::vector <Vector <T>> (__size);
+	__z = std::vector <Vector <T>> (__size - 1);
+
 	// Loop through for the rest
 	for (int i = 0; i < __size - 1; i++) {
 		size_t r;
