@@ -19,113 +19,41 @@ namespace zhetapi {
 
 #define BUF_SIZE 1024
 
-	// Exception classes
-	class type_mismatch {};
-	class invalid_expr {};
+// Exception classes
+class type_mismatch {};
+class invalid_expr {};
 
-	template <class O = int, class T = double, class U = int>
-	O expr(::std::string str, Barn <T, U> barn = Barn <T, U> ())
-	{
-		if (str.empty())
-			throw invalid_expr();
+template <class O = int, class T = double, class U = int>
+O expr(::std::string str, Barn <T, U> barn = Barn <T, U> ())
+{
+	if (str.empty())
+		throw invalid_expr();
 
-		node_manager <T, U> out(str, barn);
+	node_manager <T, U> out(str, barn);
 
-		Token *tptr = out.value();
-		
-		Operand <O> *optr = dynamic_cast <Operand <O> *> (tptr);
-
-		if (optr == nullptr)
-			throw type_mismatch();
-
-		// in = optr->get();
-		return optr->get();
-	}
+	Token *tptr = out.value();
 	
-	template <class T = double, class U = int>
-	::std::string expr_str(::std::string str, Barn <T, U> barn = Barn <T, U> ())
-	{
-		if (str.empty())
-			throw invalid_expr();
+	Operand <O> *optr = dynamic_cast <Operand <O> *> (tptr);
 
-		node_manager <T, U> out(str, barn);
+	if (optr == nullptr)
+		throw type_mismatch();
 
-		Token *tptr = out.value();
+	// in = optr->get();
+	return optr->get();
+}
 
-		return tptr->str();
-	}
+template <class T = double, class U = int>
+::std::string expr_str(::std::string str, Barn <T, U> barn = Barn <T, U> ())
+{
+	if (str.empty())
+		throw invalid_expr();
 
-	/* template <class O = int, class T = double, class U = int>
-	void expressionf(O &in, const char *format, ...)
-	{
-		va_list arg;
-		int done;
+	node_manager <T, U> out(str, barn);
 
-		char buf[BUF_SIZE];
-		
-		va_start(arg, format);
-		done = sprintf(buf, format, arg);
-		va_end(arg);
+	Token *tptr = out.value();
 
-		if (done < 0)
-			throw invalid_expr();
-		
-		expr <O, T, U> (in, std::string(buf));
-	}
-
-	template <class O = int, class T = double, class U = int>
-	void expressionf(O &in, Barn <T, U> brn, const char *format, ...)
-	{
-		va_list arg;
-		int done;
-
-		char buf[BUF_SIZE];
-		
-		va_start(arg, format);
-		done = sprintf(buf, format, arg);
-		va_end(arg);
-
-		if (done < 0)
-			throw invalid_expr();
-		
-		expr <O, T, U> (in, std::string(buf));
-	}
-
-	* template <class T = double, class U = int>
-	std::string exprf(const char *format, ...)
-	{
-		va_list arg;
-		int done;
-
-		char buf[BUF_SIZE];
-		
-		va_start(arg, format);
-		done = sprintf(buf, format, arg);
-		va_end(arg);
-
-		if (done < 0)
-			throw invalid_expr();
-		
-		return expr <T, U> (std::string(buf));
-	}
-
-	template <class T = double, class U = int>
-	std::string exprf(Barn <T, U> brn, const char *format, ...)
-	{
-		va_list arg;
-		int done;
-
-		char buf[BUF_SIZE];
-		
-		va_start(arg, format);
-		done = sprintf(buf, format, arg);
-		va_end(arg);
-
-		if (done < 0)
-			throw invalid_expr();
-		
-		return expr <T, U> (std::string(buf));
-	} */
+	return tptr->str();
+}
 
 }
 

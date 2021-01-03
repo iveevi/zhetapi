@@ -55,5 +55,13 @@ int main()
 		));
 	}
 
-	model.epochs(ins, outs, 3, 10, 0.001, Display::epoch | Display::graph);
+	model.train_epochs(ins, outs, 3, 10, 0.001,
+			Display::epoch
+			| Display::batch
+			| Display::graph);
+	
+	model.train_epochs_and_validate(ins, outs, ins, outs, 3, 10, 0.001,
+			Display::epoch
+			| Display::batch
+			| Display::graph);
 }

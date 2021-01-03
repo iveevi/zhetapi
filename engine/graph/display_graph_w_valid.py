@@ -22,9 +22,13 @@ def animate(k):
     x = data['epoch']
     y1 = data['accuracy']
     y2 = data['loss']
+    y3 = data['vaccuracy']
+    y4 = data['vloss']
 
     plt.plot(x, y1, label="Accuracy")
     plt.plot(x, y2, label="Loss")
+    plt.plot(x, y3, label="Validation Accuracy")
+    plt.plot(x, y4, label="Valid Loss")
 
     plt.xlabel("Epoch")
     plt.title("Training Statistics")

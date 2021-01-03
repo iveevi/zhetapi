@@ -173,23 +173,47 @@ public:
 			const Vector <T> &,
 			const Vector <T> &,
 			Erf <T> *);
-
+	
 	template <size_t = 1>
-	void simple_train(const DataSet <T> &,
+	TrainingStatistics validate(
+			const DataSet <T> &,
+			const DataSet <T> &);
+
+	void train(const Vector <T> &, const Vector <T> &, T);
+	
+	template <size_t = 1>
+	void simple_train(
+			const DataSet <T> &,
 			const DataSet <T> &,
 			T);
 
-	void train(const Vector <T> &, const Vector <T> &, T);
+	template <size_t = 1>
+	TrainingStatistics train(
+			const DataSet <T> &,
+			const DataSet <T> &,
+			T,
+			uint8_t = 0,
+			size_t = 0);
 
 	template <size_t = 1>
-	TrainingStatistics train(const DataSet <T> &,
-		const DataSet <T> &,
-		T, uint8_t = 0, size_t = 0);
+	TrainingStatistics train_epochs(
+			const DataSet <T> &,
+			const DataSet <T> &,
+			size_t,
+			size_t,
+			T,
+			uint8_t = 0);
 
 	template <size_t = 1>
-	TrainingStatistics epochs(const DataSet <T> &,
-		const DataSet <T> &,
-		size_t, size_t, T, uint8_t = 0);
+	TrainingStatistics train_epochs_and_validate(
+			const DataSet <T> &,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			size_t,
+			size_t,
+			T,
+			uint8_t = 0);
 
 	void randomize();
 
@@ -1009,6 +1033,82 @@ void NeuralNetwork <T> ::train(const Vector <T> &in, const Vector <T> &out, T al
 template <class T>
 template <size_t threads>
 typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+	::validate(const DataSet <T> &ins,
+		const DataSet <T> &outs)
+{
+	std::chrono::high_resolution_clock::time_point start;
+	std::chrono::high_resolution_clock::time_point end;
+	
+	std::chrono::high_resolution_clock clk;
+
+	size_t passed = 0;
+	double opt_error = 0;
+	double per_error = 0;
+
+	start = clk.now();
+
+	int size = ins.size();
+
+	if (threads == 1) {
+		for (int i = 0; i < size; i++) {
+			Vector <T> actual = compute_no_cache(ins[i]);
+
+			if (__cmp(actual, outs[i]))
+				passed++;
+
+			opt_error += (*__cost)(outs[i], actual)[0];
+			per_error += 100 * (actual - outs[i]).norm()/outs[i].norm();
+		}
+	} else {
+		std::vector <std::thread> army;
+		
+		double *optes = new double[threads];
+		double *peres = new double[threads];
+		int *pass = new int[threads];
+
+		auto proc = [&](size_t offset) {
+			for (int i = offset; i < size; i += threads) {
+				Vector <T> actual = compute_no_cache(ins[i]);
+
+				if (__cmp(actual, outs[i]))
+					pass[offset]++;
+
+				optes[offset] += (*__cost)(outs[i], actual)[0];
+				peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
+			}
+		};
+
+		for (int i = 0; i < threads; i++) {
+			optes[i] = peres[i] = pass[i] = 0;
+
+			army.push_back(std::thread(proc, i));
+		}
+
+		for (int i = 0; i < threads; i++) {
+			army[i].join();
+
+			opt_error += optes[i];
+			per_error += peres[i];
+			passed += pass[i];
+		}
+
+		// Free resources
+		delete[] optes;
+		delete[] peres;
+		delete[] pass;
+	}
+
+	end = clk.now();
+
+	double tot_time = std::chrono::duration_cast
+		<std::chrono::microseconds> (end - start).count();
+	
+	return {passed, opt_error, tot_time};
+}
+
+template <class T>
+template <size_t threads>
+typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	::train(const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		T alpha,
@@ -1193,7 +1293,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 template <class T>
 template <size_t threads>
 typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
-	::epochs(const DataSet <T> &ins,
+	::train_epochs(const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		size_t iterations,
 		size_t batch_size,
@@ -1212,7 +1312,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 		csv.open(gpath);
 
-		csv << "epoch,accuracy" << std::endl;
+		csv << "epoch,accuracy,loss" << std::endl;
 
 		char pwd_bf[FILENAME_MAX];
 
@@ -1277,7 +1377,110 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		}
 
 		if (display & Display::graph) {
-			csv << (i + 1) << "," << ((double) passed)/ins.size() << std::endl;
+			csv << (i + 1) << "," << ((double) passed)/ins.size()
+				<< "," << err/ins.size() << std::endl;
+		}
+	}
+
+	return {t_passed, t_err, t_ktime, t_ftime};
+}
+
+template <class T>
+template <size_t threads>
+typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
+	::train_epochs_and_validate(
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			const DataSet <T> &vins,
+			const DataSet <T> &vouts,
+			size_t iterations,
+			size_t batch_size,
+			T alpha,
+			uint8_t display)
+{
+	if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	std::ofstream csv;
+
+	if (display & Display::graph) {
+		std::string gpath;
+
+		gpath = "vgraph.csv";
+
+		csv.open(gpath);
+
+		csv << "epoch,accuracy,loss,vaccuracy,vloss" << std::endl;
+
+		char pwd_bf[FILENAME_MAX];
+
+		getcwd(pwd_bf, FILENAME_MAX);
+		gpath = pwd_bf + ("/" + gpath);
+
+		std::string cmd = "python3 " + (ZHP_ENGINE_PATH + ("/graph/display_graph_w_valid.py " + gpath)) + " &";
+		system(cmd.c_str());
+	}
+
+	std::vector <DataSet <T>> ins_batched = split(ins, batch_size);
+	std::vector <DataSet <T>> outs_batched = split(outs, batch_size);
+
+	T lr = alpha;
+
+	T t_err = 0;
+	double t_ktime = 0;
+	double t_ftime = 0;
+	size_t t_passed = 0;
+	
+	size_t total = 0;
+	size_t passed;
+	double kt;
+	T err;
+	for (size_t i = 0; i < iterations; i++) {
+		if (display & Display::epoch) {
+			std::cout << std::string(20, '-')
+				<< std::endl
+				<< "\nEpoch #" << (i + 1)
+				<< " (" << lr
+				<< ")\n" << std::endl;
+		}
+		
+		passed = 0;
+		err = 0;
+		kt = 0;
+		for (int j = 0; j < ins_batched.size(); j++) {
+			TrainingStatistics result = train <threads> (ins_batched[j],
+				outs_batched[j], lr, display, j + 1);
+
+			passed += result.__passed;
+			err += result.__cost;
+			kt += result.__kernel_time;
+
+			lr = alpha * pow(0.1, (++total)/50000.0);
+		}
+
+		t_passed += passed;
+		t_err += err;
+		t_ktime += kt;
+		
+		if (display & Display::epoch) {
+			std::cout << "\nTotal cost:\t"
+				<< err << std::endl
+				<< "Total time:\t" << kt/1000
+				<< " ms" << std::endl
+				<< "Cases passed:\t"
+				<< passed
+				<< "/" << ins.size() << " ("
+				<< 100 * ((double) passed)/ins.size()
+				<< "%)" << std::endl;
+		}
+
+		if (display & Display::graph) {
+			TrainingStatistics ts = validate <threads> (vins, vouts);
+
+			csv << (i + 1) << "," << ((double) passed)/ins.size()
+				<< "," << err/ins.size() << ","
+				<< ((double) ts.__passed)/vins.size() << ","
+				<< ts.__cost/vins.size() << std::endl;
 		}
 	}
 
