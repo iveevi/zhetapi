@@ -5,7 +5,7 @@
 
 // Engine headers
 #include <std/activation_classes.hpp>
-#include <std/erf_classes.hpp>
+#include <std/erfs.hpp>
 #include <network.hpp>
 
 #include <dataset.hpp>
