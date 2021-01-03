@@ -52,7 +52,9 @@ protected:
 	size_t  __rows;
 	size_t  __cols;
 public:
-	Matrix(T **);
+	__cuda_dual_prefix
+	Matrix(size_t, size_t, T *, bool = false);
+
 	Matrix(const ::std::vector <T> &);
 	Matrix(const ::std::vector <::std::vector <T>> &);
 
@@ -207,9 +209,6 @@ public:
 
 	__host__ __device__
 	Matrix(size_t, size_t, T = T());
-
-	__host__ __device__
-	Matrix(size_t, size_t, T *, bool = false);
 	
 	template <class F>
 	__host__ __device__
@@ -301,22 +300,24 @@ public:
 
 };
 
+// Owner implies that the vector object will take care of the deallocation
 template <class T>
-Matrix <T> ::Matrix(T **ref) : Tensor <T> ({sizeof(ref)/sizeof(T), sizeof(ref[0])/sizeof(T)}, T())
+__cuda_dual_prefix
+Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool owner)
 {
-	__rows = sizeof(ref)/sizeof(T);
+	this->__size = rs * cs;
 
-	assert(__rows > 0);
+	__rows = rs;
+	__cols = cs;
 
-	__cols = sizeof(ref[0])/sizeof(T);
+	this->__dim = new size_t[2];
 
-	assert(__cols > 0);
+	this->__dim[0] = rs;
+	this->__dim[1] = cs;
 
-	// Allocate and fill
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
-			this->__array[__cols * i + j] = ref[i][j];
-	}
+	this->__array = arr;
+
+	this->__sliced = !owner;
 }
 
 template <class T>
@@ -821,10 +822,8 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> ({rs, cs}, T())
 	__rows = rs;
 	__cols = cs;
 	
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
-			this->__array[__cols * i + j] = val;
-	}
+	for (size_t i = 0; i < this->__size; i++)
+		this->__array[i] = val;
 }
 
 template <class T>

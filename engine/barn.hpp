@@ -667,8 +667,6 @@ namespace zhetapi {
 	template <class T, class U>
 	::std::string Barn <T, U> ::overloads(const ::std::string &str) const
 	{
-		auto it = ops.end();
-
 		::std::vector <::std::vector <::std::type_index>> loads;
 		for (auto itr = ops.begin(); itr != ops.end(); itr++) {
 			if (itr->first.first == str)

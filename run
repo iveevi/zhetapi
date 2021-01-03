@@ -33,13 +33,6 @@ elif [ $1 = "port" ]; then
 	cmake .
 	
 	mkdir -p bin
-
-	# Compile and move shared library
-	make -j8 zhp
-
-	if [ -f "libzhp.so" ]; then
-		mv libzhp.* bin/
-	fi
 	
 	# Compile and move apps
 	make -j8 port

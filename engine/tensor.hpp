@@ -24,10 +24,11 @@ protected:
 	size_t	*__dim = nullptr;
 	size_t	__dims = 0;
 
+	bool	__sliced = false;	// Flag for no deallocation
+
 #ifdef ZHP_CUDA
 
 	bool	__on_device = false;	// Flag for device allocation
-	bool	__sliced = false;	// Flag for no deallocation
 
 #endif
 

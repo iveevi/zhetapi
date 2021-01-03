@@ -399,8 +399,6 @@ template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
 	if (this != &other) {
-		// delete[] this->__array;
-		// delete[] this->__dim;
 		this->clear();
 
 		this->__array = new T[other.__size];

@@ -15,8 +15,7 @@ set(CMAKE_CXX_COMPILER "g++-8")
 
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 
-# Compile shared library
-add_library(zhp-shared SHARED
+set(ZHETAPI_SOURCE 
 	source/class.cpp
 	source/complex.cpp
 	source/label.cpp
@@ -27,23 +26,16 @@ add_library(zhp-shared SHARED
 	source/variable_cluster.cpp
 	source/token.cpp
 	source/node.cpp
+	source/display.cpp
 )
+
+# Compile shared library
+add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
 
-add_library(zhp-static STATIC
-	source/class.cpp
-	source/complex.cpp
-	source/label.cpp
-	source/node_reference.cpp
-	source/operation_holder.cpp
-	source/operation.cpp
-	source/registration.cpp
-	source/variable_cluster.cpp
-	source/token.cpp
-	source/node.cpp
-)
+add_library(zhp-static STATIC ${ZHETAPI_SOURCE})
 
 SET_TARGET_PROPERTIES(zhp-static PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)

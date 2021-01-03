@@ -5,7 +5,7 @@ vector <pair <string, bool(*)()>> rig {
 	{"vector construction and memory safety", &vector_construction_and_memory},
 	{"matrix construction and memory safety", &matrix_construction_and_memory},
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
-	{"function compuation", &function_computation},
+	{"function computation", &function_computation},
 	{"function general compilation", &function_compilation_testing}
 };
 
@@ -49,12 +49,12 @@ int main()
 		else
 			cout << endl;
 
-		cout << "==============================" << endl;
+		cout << string(100, '=') << endl;
 		cout << mark << "Running \"" << pr.first << "\" test:" << endl;
 
-		cout << endl << "--------------------" << endl;
+		cout << string(100, '-') << endl;
 		bool tmp = pr.second();
-		cout << "--------------------" << endl;
+		cout << string(100, '-') << endl;
 
 		if (tmp) {
 			cout << endl << "\"" << pr.first << "\" test PASSED." << endl;
@@ -63,7 +63,7 @@ int main()
 			cout << endl << "\"" << pr.first << "\" test FAILED." << endl;
 		}
 
-		cout << "==============================" << endl;
+		cout << string(100, '=') << endl;
 	}
 
 	cout << endl << mark << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;

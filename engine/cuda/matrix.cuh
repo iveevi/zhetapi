@@ -69,29 +69,6 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> (rs, cs, T())
 	}
 }
 
-// Owner implies that the vector object will take care of the deallocation
-template <class T>
-__host__ __device__
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool owner) // : Tensor <T> (rs, cs, T())
-{
-	this->__size = rs * cs;
-
-	__rows = rs;
-	__cols = cs;
-
-	this->__dim = new size_t[2];
-
-	this->__dim[0] = rs;
-	this->__dim[1] = cs;
-
-	this->__array = arr;
-
-	this->__sliced = !owner;
-
-	/* for (int i = 0; i < this->__size; i++)
-		this->__array[i] = arr[i]; */
-}
-
 template <class T>
 template <class F>
 __host__ __device__

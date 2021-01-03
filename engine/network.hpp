@@ -58,17 +58,6 @@ bool default_comparator(const Vector <T> &a, const Vector <T> &e)
 	return a == e;
 };
 
-#ifdef ZHP_CUDA
-
-template <class T>
-__device__
-bool cuda_default_comparator(const Vector <T> &a, const Vector <T> &e)
-{
-	return a == e;
-};
-
-#endif
-
 /*
 * Nerual Network
 *
@@ -433,8 +422,8 @@ void NeuralNetwork <T> ::load(const std::string &file)
 		fin.read((char *) &r, sizeof(size_t));
 		fin.read((char *) &c, sizeof(size_t));
 
-		__weights[i] = Matrix <T> (r, c, 0);
-		__momentum[i] = Matrix <T> (r, c, 0);
+		__weights[i] = Matrix <T> (r, c, T(0));
+		__momentum[i] = Matrix <T> (r, c, T(0));
 		
 		__weights[i].read(fin);
 		__momentum[i].read(fin);
@@ -488,8 +477,8 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 	}
 
 	for (size_t i = 1; i < __size; i++) {
-		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, 0);
-		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, 0);
+		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
+		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
 	}
 
 	__random = default_initializer <T> {};

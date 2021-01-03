@@ -68,13 +68,13 @@ bool function_compilation_testing()
 	}
 
 	// Repeat, with a different function
-	Function <double, int> g = "f(x) = sin(x) - log(x)";
+	Function <double, int> g = "g(x) = sin(x) - log(x)";
 
 	// Create the typedef for the compiled function
 	typedef Token *(*ftr2)(Token *);
 
 	tb = bench();
-	ftr2 tmp2 = (ftr2) f.compile_general();
+	ftr2 tmp2 = (ftr2) g.compile_general();
 
 	cout << "Compilation time for second: " << tb << endl;
 
