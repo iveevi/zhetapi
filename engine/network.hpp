@@ -22,14 +22,14 @@
 
 #include <cuda/activation.cuh>
 #include <cuda/matrix.cuh>
-#include <cuda/optimizer.cuh>
+#include <cuda/Erf.cuh>
 #include <cuda/vector.cuh>
 
 #else
 
 #include <activation.hpp>
 #include <matrix.hpp>
-#include <optimizer.hpp>
+#include <erf.hpp>
 #include <vector.hpp>
 
 #endif
@@ -94,7 +94,7 @@ private:
 	std::vector <Vector <T>>		__a = {};
 	std::vector <Vector <T>>		__z = {};
 
-	Optimizer <T> *				__cost = nullptr; // Safe to copy
+	Erf <T> *				__cost = nullptr; // Safe to copy
 	
 	Comparator <T>				__cmp = __default_comparator;
 
@@ -114,7 +114,7 @@ public:
 	void load_json(const std::string &);
 
 	// Setters
-	void set_cost(Optimizer <T> *);
+	void set_cost(Erf <T> *);
 	void set_comparator(const Comparator <T> &);
 
 	Matrix <T> *adjusted(T mu);
@@ -140,31 +140,31 @@ public:
 
 	Matrix <T> *gradient(const Vector <T> &,
 			const Vector <T> &,
-			Optimizer <T> *,
+			Erf <T> *,
 			bool = false);
 	Matrix <T> *gradient(Matrix <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
-			Optimizer <T> *,
+			Erf <T> *,
 			bool = false);
 	Matrix <T> *gradient(Matrix <T> *,
 			Vector <T> *,
 			Vector <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
-			Optimizer <T> *,
+			Erf <T> *,
 			bool = false);
 	
 	Matrix <T> *simple_gradient(Matrix <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
-			Optimizer <T> *);
+			Erf <T> *);
 	Matrix <T> *simple_gradient(Matrix <T> *,
 			Vector <T> *,
 			Vector <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
-			Optimizer <T> *);
+			Erf <T> *);
 
 	template <size_t = 1>
 	void simple_train(const DataSet <T> &,
@@ -199,7 +199,7 @@ public:
 		const DataSet <T> &,
 		const DataSet <T> &,
 		Activation <T> **,
-		Optimizer <T> *,
+		Erf <T> *,
 		T *,
 		T *,
 		T *,
@@ -476,7 +476,7 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 
 // Setters
 template <class T>
-void NeuralNetwork <T> ::set_cost(Optimizer<T> *opt)
+void NeuralNetwork <T> ::set_cost(Erf<T> *opt)
 {
 	__cost = opt;
 }
@@ -686,7 +686,7 @@ void NeuralNetwork <T> ::apply_gradient(Matrix <T> *grad,
 template <class T>
 Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 		const Vector <T> &out,
-		Optimizer <T> *opt,
+		Erf <T> *opt,
 		bool check)
 {
 	// Check dimensions of input and output
@@ -697,7 +697,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 	Vector <T> actual = compute(in);
 	
 	// Get the derivative of the cost
-	Optimizer <T> *dopt = opt->derivative();
+	Erf <T> *dopt = opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
@@ -772,7 +772,7 @@ template <class T>
 Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 		const Vector <T> &in,
 		const Vector <T> &out,
-		Optimizer <T> *opt,
+		Erf <T> *opt,
 		bool check)
 {
 	// Check dimensions of input and output
@@ -783,7 +783,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 	Vector <T> actual = compute(in, weights);
 	
 	// Get the derivative of the cost
-	Optimizer <T> *dopt = opt->derivative();
+	Erf <T> *dopt = opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
@@ -861,7 +861,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 		Vector <T> *z,
 		const Vector <T> &in,
 		const Vector <T> &out,
-		Optimizer <T> *opt,
+		Erf <T> *opt,
 		bool check)
 {
 	// Check dimensions of input and output
@@ -872,7 +872,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 	Vector <T> actual = compute(in, weights, a, z);
 	
 	// Get the derivative of the cost
-	Optimizer <T> *dopt = opt->derivative();
+	Erf <T> *dopt = opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
@@ -1170,7 +1170,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(
 		Matrix <T> *weights,
 		const Vector <T> &in,
 		const Vector <T> &out,
-		Optimizer <T> *opt)
+		Erf <T> *opt)
 {
 	// Check dimensions of input and output
 	if ((in.size() != __isize) || (out.size() != __osize))
@@ -1180,7 +1180,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(
 	Vector <T> actual = compute(in, weights);
 			
 	// Get the derivative of the cost
-	Optimizer <T> *dopt = opt->derivative();
+	Erf <T> *dopt = opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
@@ -1209,7 +1209,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
 		Vector <T> *z,
 		const Vector <T> &in,
 		const Vector <T> &out,
-		Optimizer <T> *opt)
+		Erf <T> *opt)
 {
 	// Check dimensions of input and output
 	if ((in.size() != __isize) || (out.size() != __osize))
@@ -1219,7 +1219,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
 	Vector <T> actual = compute(in, weights, a, z);
 	
 	// Get the derivative of the cost
-	Optimizer <T> *dopt = opt->derivative();
+	Erf <T> *dopt = opt->derivative();
 	
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];

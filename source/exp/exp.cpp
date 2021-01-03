@@ -5,7 +5,7 @@
 
 // Engine headers
 #include <std/activation_classes.hpp>
-#include <std/optimizer_classes.hpp>
+#include <std/erf_classes.hpp>
 #include <network.hpp>
 
 #include <dataset.hpp>
@@ -36,7 +36,7 @@ int main()
 
 	model.randomize();
 
-	ml::Optimizer <double> *opt = new ml::MeanSquaredError <double> ();
+	ml::Erf <double> *opt = new ml::MeanSquaredError <double> ();
 
 	model.set_cost(opt);
 

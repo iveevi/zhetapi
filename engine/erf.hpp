@@ -1,5 +1,5 @@
-#ifndef OPTIMIZER_H_
-#define OPTIMIZER_H_
+#ifndef ERF_H_
+#define ERF_H_
 
 // C/C++ headers
 #include <cmath>
@@ -23,10 +23,10 @@ namespace zhetapi {
 namespace ml {
 
 template <class T>
-class Optimizer {
+class Erf {
 public:
 	// TODO: Replace with a string
-	enum optimizer_type {
+	enum erf_type {
 		OPT_Default,
 		OPT_SE,
 		OPT_MSE,
@@ -34,7 +34,7 @@ public:
 
 	// TODO: Add a vector <double> constructor for JSON
 	__cuda_dual_prefix
-	Optimizer();
+	Erf();
 
 	__cuda_dual_prefix
 	Vector <T> compute(const Vector <T> &, const Vector <T> &) const;
@@ -43,44 +43,44 @@ public:
 	virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
 	__cuda_dual_prefix
-	virtual Optimizer *derivative() const;
+	virtual Erf *derivative() const;
 
 	__cuda_dual_prefix
-	int get_optimizer_type() const;
+	int get_erf_type() const;
 
 	template <class U>
 	__cuda_dual_prefix
-	friend Optimizer <U> *copy(Optimizer <U> *);
+	friend Erf <U> *copy(Erf <U> *);
 protected:
-	optimizer_type kind;
+	erf_type kind;
 };
 
 #ifndef ZHP_CUDA
 
 template <class T>
-Optimizer <T> ::Optimizer() : kind(OPT_Default) {}
+Erf <T> ::Erf() : kind(OPT_Default) {}
 
 // TODO: Reverse compute and operator()
 template <class T>
-Vector <T> Optimizer <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
+Vector <T> Erf <T> ::operator()(const Vector <T> &comp, const Vector <T> &in) const
 {
 	return {(comp - in).norm()};
 }
 
 template <class T>
-Vector <T> Optimizer <T> ::compute(const Vector <T> &comp, const Vector <T> &in) const
+Vector <T> Erf <T> ::compute(const Vector <T> &comp, const Vector <T> &in) const
 {
 	return (*this)(comp, in);
 }
 
 template <class T>
-Optimizer <T> *Optimizer <T> ::derivative() const
+Erf <T> *Erf <T> ::derivative() const
 {
-	return new Optimizer();
+	return new Erf();
 }
 
 template <class T>
-int Optimizer <T> ::get_optimizer_type() const
+int Erf <T> ::get_erf_type() const
 {
 	return kind;
 }

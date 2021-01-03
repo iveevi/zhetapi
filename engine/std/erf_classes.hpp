@@ -1,25 +1,25 @@
-#ifndef STD_OPTIMIZER_CLASSES_H_
-#define STD_OPTIMIZER_CLASSES_H_
+#ifndef STD_Erf_CLASSES_H_
+#define STD_Erf_CLASSES_H_
 
 // Engine headers
-#include <optimizer.hpp>
+#include <erf.hpp>
 
 // Engine std module headers
-#include <std/optimizer_functions.hpp>
+#include <std/erf_functions.hpp>
 
 namespace zhetapi {
 		
 	namespace ml {
 		
 		/*
-		* All optimizer classes have inlined member functions for the same
+		* All Erf classes have inlined member functions for the same
 		* reason that the activation classes are inlined. Obscure naming is
 		* also done for the same reason.
 		*/
 
 		// Squared error
 		template <class T>
-		class __DSquaredError : public Optimizer <T> {
+		class __DSquaredError : public Erf <T> {
 		public:
 
 #ifndef ZHP_CUDA
@@ -40,20 +40,20 @@ namespace zhetapi {
 		};
 
 		template <class T>
-		class SquaredError : public Optimizer <T> {
+		class SquaredError : public Erf <T> {
 		public:
 
 #ifndef ZHP_CUDA
 
 			SquaredError() {
-				this->kind = Optimizer <T> ::OPT_SE; 
+				this->kind = Erf <T> ::OPT_SE; 
 			}
 
 			Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 				return __squared <T> (comp, in);
 			}
 
-			Optimizer <T> *derivative() const
+			Erf <T> *derivative() const
 			{
 				return new __DSquaredError <T> ();
 			}
@@ -62,7 +62,7 @@ namespace zhetapi {
 
 			__host__ __device__
 			SquaredError() {
-				this->kind = Optimizer <T> ::OPT_SE;
+				this->kind = Erf <T> ::OPT_SE;
 			}
 
 			__host__ __device__
@@ -76,7 +76,7 @@ namespace zhetapi {
 			}
 
 			__host__ __device__
-			Optimizer <T> *derivative() const
+			Erf <T> *derivative() const
 			{
 				return new __DSquaredError <T> ();
 			}
@@ -87,7 +87,7 @@ namespace zhetapi {
 
 		// Mean squared error
 		template <class T>
-		class __DMeanSquaredError : public Optimizer <T> {
+		class __DMeanSquaredError : public Erf <T> {
 		public:
 
 #ifndef ZHP_CUDA
@@ -108,21 +108,21 @@ namespace zhetapi {
 		};
 
 		template <class T>
-		class MeanSquaredError : public Optimizer <T> {
+		class MeanSquaredError : public Erf <T> {
 		public:
 
 #ifndef ZHP_CUDA
 
 			MeanSquaredError()
 			{
-				this->kind = Optimizer <T> ::OPT_MSE;
+				this->kind = Erf <T> ::OPT_MSE;
 			}
 			
 			Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 				return __mean_squared <T> (comp, in);
 			}
 
-			Optimizer <T> *derivative() const
+			Erf <T> *derivative() const
 			{
 				return new __DMeanSquaredError <T> ();
 			}
@@ -131,7 +131,7 @@ namespace zhetapi {
 
 			__host__ __device__
 			MeanSquaredError() {
-				this->kind = Optimizer <T> ::OPT_MSE;
+				this->kind = Erf <T> ::OPT_MSE;
 			}
 
 			__host__ __device__
@@ -145,7 +145,7 @@ namespace zhetapi {
 			}
 
 			__host__ __device__
-			Optimizer <T> *derivative() const {
+			Erf <T> *derivative() const {
 				return new __DMeanSquaredError <T> ();
 			}
 
@@ -158,14 +158,14 @@ namespace zhetapi {
 		// Copy base activations
 		template <class T>
 		__host__ __device__
-		Optimizer <T> *copy(Optimizer <T> *opt)
+		Erf <T> *copy(Erf <T> *opt)
 		{
 			switch (opt->kind) {
-			case Optimizer <T> ::OPT_Default:
-				return new Optimizer <T> ();
-			case Optimizer <T> ::OPT_SE:
+			case Erf <T> ::OPT_Default:
+				return new Erf <T> ();
+			case Erf <T> ::OPT_SE:
 				return new SquaredError <T> ();
-			case Optimizer <T> ::OPT_MSE:
+			case Erf <T> ::OPT_MSE:
 				return new MeanSquaredError <T> ();
 			}
 
