@@ -3,28 +3,31 @@
 #include <fstream>
 #include <vector>
 
+// Engine standard headers
+#include <std/activations.hpp>
+#include <std/erfs.hpp>
+
 // Engine headers
-#include <std/activation_classes.hpp>
-#include <std/optimizer_classes.hpp>
 #include <network.hpp>
 
 #define IMAGES	60000
 #define SIZE	28
 
 using namespace std;
+using namespace zhetapi;
 
 // Global variables
 ifstream images("train-images-idx3-ubyte", ios::binary);
 ifstream labels("train-labels-idx1-ubyte", ios::binary);
 
-zhetapi::ml::NeuralNetwork <double> model({
+ml::NeuralNetwork <double> model({
 	{784, new zhetapi::ml::Linear <double> ()},
 	{30, new zhetapi::ml::Sigmoid <double> ()},
 	{10, new zhetapi::ml::Softmax <double> ()}
 }, []() {return 0.5 - (rand()/(double) RAND_MAX);});
 
-vector <zhetapi::Vector <double>> imgs;
-vector <zhetapi::Vector <double>> exps;
+vector <Vector <double>> imgs;
+vector <Vector <double>> exps;
 
 unsigned int tmp;
 
@@ -94,7 +97,7 @@ int main()
 	labels.read((char *) &tmp, sizeof(tmp));
 
 	// Pass critique
-	auto crit = [](zhetapi::Vector <double> actual, zhetapi::Vector <double> expected) {
+	auto crit = [](const Vector <double> &actual, const Vector <double> &expected) {
 		int mi = 0;
 		for (int i = 1; i < 10; i++) {
 			if (actual[mi] < actual[i])
@@ -106,13 +109,13 @@ int main()
 
 	int size = SIZE * SIZE;
 	for(size_t i = 0; i < IMAGES; i++) {
-		zhetapi::Vector <double> in = read_image();
+		Vector <double> in = read_image();
 
 		unsigned char actual;
 
 		labels.read((char *) &actual, sizeof(actual));
 
-		zhetapi::Vector <double> exp(10,
+		Vector <double> exp(10,
 			[&](size_t i) {
 				return (i == actual) ? 1.0 : 0.0;
 			}
@@ -122,11 +125,11 @@ int main()
 		exps.push_back(exp);
 	}
 
-	zhetapi::ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
+	ml::Erf <double> *opt = new ml::MeanSquaredError <double> ();
 
 	model.set_cost(opt);
 	model.set_comparator(crit);
-	model.epochs <10> (imgs, exps, 100, 128, 1, false);
+	model.epochs <10> (imgs, exps, 100, 128, 1, true);
 
 	// Free resources
 	delete opt;

@@ -20,9 +20,11 @@
 #include <cuda/essentials.cuh>
 
 // A is class name, T is the type (template), L is the loader function
-#define __zhp_register_activation(A, T, L)		\
-	zhetapi::ml::Activation <T>			\
-	::__activation_loaders[typeid(A <T>).name()] = L;
+#define __zhp_register_activation(A, T, L)			\
+	zhetapi::ml::Activation <T>				\
+	::__act_loaders_id[typeid(A <T>).name()] = L;	\
+	zhetapi::ml::Activation <T>				\
+	::__act_loaders_name[#A] = L;
 
 namespace zhetapi {
 
@@ -77,6 +79,7 @@ public:
 
 	// Loading
 	static Activation <T> *load(std::ifstream &);
+	static Activation <T> *load(const std::string &, const std::vector <T> &);
 
 	__cuda_dual_prefix
 	virtual Activation *derivative() const;
@@ -89,15 +92,11 @@ public:
 	friend Activation <U> *copy(Activation <U> *);
 
 	// Global list of all registered activations
-	static std::map <std::string, Loader <T>> __activation_loaders;
+	static std::map <std::string, Loader <T>> __act_loaders_id;
+	static std::map <std::string, Loader <T>> __act_loaders_name;
 
-	static void display_loaders()
-	{
-		using namespace std;
-		cout << "LOADERS:" << endl;
-		for (auto pr : __activation_loaders)
-			cout << pr.first << " is registered" << endl;
-	}
+	// Exceptions
+	class undefined_loader {};
 protected:
 	// Arguments, empty by default
 	std::vector <T>	__args = {};
@@ -107,7 +106,10 @@ protected:
 
 
 template <class T>
-std::map <std::string, Loader <T>> Activation <T> ::__activation_loaders;
+std::map <std::string, Loader <T>> Activation <T> ::__act_loaders_id;
+
+template <class T>
+std::map <std::string, Loader <T>> Activation <T> ::__act_loaders_name;
 
 #ifndef ZHP_CUDA
 
@@ -143,32 +145,23 @@ Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 template <class T>
 void Activation <T> ::write_type(std::ofstream &fout) const
 {
-	using namespace std;
-
 	std::string aname = typeid(*this).name();
 	size_t len = aname.length();
 
 	fout.write((char *) &len, sizeof(size_t));
 
 	fout << aname;
-	
-	cout << "len = " << len << endl;
-	cout << "aname = " << aname << endl;
 }
 
 template <class T>
 void Activation <T> ::write_args(std::ofstream &fout) const
 {
-	using namespace std;
 	size_t argc = __args.size();
 
 	fout.write((char *) &argc, sizeof(size_t));
 	
-	cout << "writing " << argc << " arguments..." << endl;
-	for (size_t i = 0; i < argc; i++) {
-		cout << "\twriting " << __args[i] << endl;
+	for (size_t i = 0; i < argc; i++)
 		fout.write((char *) &(__args[i]), sizeof(T));
-	}
 }
 
 template <class T>
@@ -182,21 +175,15 @@ void Activation <T> ::write(std::ofstream &fout) const
 template <class T>
 Activation <T> *Activation <T> ::load(std::ifstream &fin)
 {
-	using namespace std;
-	cout << "Loading..." << endl;
-	
 	size_t len;
 
 	fin.read((char *) &len, sizeof(size_t));
-
-	cout << "type-len = " << len << endl;
 
 	char *aname = new char[len + 1];
 
 	fin.read(aname, sizeof(char) * (len));
 
 	aname[len] = '\0';
-	cout << "aname = " << aname << endl;
 
 	std::string name = aname;
 
@@ -204,22 +191,30 @@ Activation <T> *Activation <T> ::load(std::ifstream &fin)
 	
 	fin.read((char *) &argc, sizeof(size_t));
 
-	cout << "argc = " << argc << endl;
-
 	std::vector <T> args;
 	for (size_t i = 0; i < argc; i++) {
 		T t;
-
 		fin.read((char *) &t, sizeof(T));
-
-		cout << "\tread " << t << endl;
-
 		args.push_back(t);
 	}
 
-	Loader <T> loader = __activation_loaders[name];
+	if (__act_loaders_id.find(name) == __act_loaders_id.end())
+		throw undefined_loader();
+
+	Loader <T> loader = __act_loaders_id[name];
 
 	delete[] aname;
+
+	return loader(args);
+}
+
+template <class T>
+Activation <T> *Activation <T> ::load(const std::string &name, const std::vector <T> &args)
+{
+	if (__act_loaders_name.find(name) == __act_loaders_name.end())
+		throw undefined_loader();
+	
+	Loader <T> loader = __act_loaders_name[name];
 
 	return loader(args);
 }

@@ -15,6 +15,9 @@ class ReLU;
 template <class T>
 class Sigmoid;
 
+template <class T>
+class Softmax;
+
 // Loaders
 template <class T>
 Activation <T> *load_linear(const std::vector <T> &args)
@@ -32,6 +35,12 @@ template <class T>
 Activation <T> *load_sigmoid(const std::vector <T> &args)
 {
 	return new Sigmoid <T> ();
+}
+
+template <class T>
+Activation <T> *load_softmax(const std::vector <T> &args)
+{
+	return new Softmax <T> ();
 }
 
 }

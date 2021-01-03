@@ -38,11 +38,19 @@ namespace zhetapi {
 		
 namespace ml {
 
+// TODO: Extract into a more generalized abstraction
 template <class T>
 using Layer = std::pair <size_t, Activation <T> *>;
 
 template <class T>
 using Comparator = bool (*)(const Vector <T> &, const Vector <T> &);
+
+template <class T>
+struct default_initializer {
+	T operator()() {
+		return T(rand()/((double) RAND_MAX));
+	}
+};
 
 template <class T>
 bool default_comparator(const Vector <T> &a, const Vector <T> &e)
@@ -381,9 +389,6 @@ void NeuralNetwork <T> ::save(const std::string &file)
 	fout.write((char *) &__isize, sizeof(size_t));
 	fout.write((char *) &__osize, sizeof(size_t));
 
-	using namespace std;
-
-
 	__layers[0].second->write(fout);
 	for (int i = 0; i < __size - 1; i++) {
 		size_t r = __weights[i].get_rows();
@@ -396,8 +401,6 @@ void NeuralNetwork <T> ::save(const std::string &file)
 		__momentum[i].write(fout);
 		__layers[i + 1].second->write(fout);
 	}
-
-	cout << "============================================" << endl;
 }
 
 template <class T>
@@ -412,19 +415,15 @@ void NeuralNetwork <T> ::load(const std::string &file)
 	fin.read((char *) &__isize, sizeof(size_t));
 	fin.read((char *) &__osize, sizeof(size_t));
 
-	using namespace std;
-	cout << "type_size = " << type_size << endl;
-	cout << "__size = " << __size << endl;
-
 	__weights = new Matrix <T> [__size - 1];
 	__momentum = new Matrix <T> [__size - 1];
 	__layers = new Layer <T> [__size];
 
-	// Read the first activation
-	__layers[0].second = Activation <T> ::load(fin);
-
 	__a = std::vector <Vector <T>> (__size);
 	__z = std::vector <Vector <T>> (__size - 1);
+
+	// Read the first activation
+	__layers[0].second = Activation <T> ::load(fin);
 
 	// Loop through for the rest
 	for (int i = 0; i < __size - 1; i++) {
@@ -453,25 +452,48 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 
 	fin >> structure;
 
-	std::cout << "Parsed structure: " << std::endl << structure << std::endl;
-	std::cout << "elem0: " << structure["Layers"] << std::endl;
-
 	auto layers = structure["Layers"];
-	std::cout << "type: " << layers.type_name() << std::endl;
-	std::cout << "size: " << layers.size() << std::endl;
 
-	size_t n = layers.size();
+	// Allocate size information
+	__size = layers.size();
+	__isize = layers[0]["Neurons"];
+	__osize = layers[__size - 1]["Neurons"];
+	
+	// Allocate matrices and activations
+	__weights = new Matrix <T> [__size - 1];
+	__momentum = new Matrix <T> [__size - 1];
+	__layers = new Layer <T> [__size];
+	
+	// Allocate caches
+	__a = std::vector <Vector <T>> (__size);
+	__z = std::vector <Vector <T>> (__size - 1);
 
-	for (int i = 0; i < n; i++) {
+	std::vector <size_t> sizes;
+	for (size_t i = 0; i < __size; i++) {
 		auto layer = layers[i];
 
-		std::string activation = layer["Activation"];
+		auto activation = layer["Activation"];
 		size_t neurons = layer["Neurons"];
 
-		std::cout << "layers[" << i << "]:" << std::endl;
-		std::cout << "\t" << activation << std::endl;
-		std::cout << "\t" << neurons << std::endl;
+		std::vector <T> args;
+
+		for (auto arg : activation["Arguments"])
+			args.push_back(arg);
+
+		std::string name = activation["Name"];
+
+		sizes.push_back(layer["Neurons"]);
+
+		__layers[i].second = Activation <T> ::load(name, args);
 	}
+
+	for (size_t i = 1; i < __size; i++) {
+		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, 0);
+		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, 0);
+	}
+
+	__random = default_initializer <T> {};
+	__cmp = default_comparator;
 }
 
 // Setters

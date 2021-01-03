@@ -4,11 +4,12 @@
 #include <vector>
 
 // Engine headers
-#include <std/activation_classes.hpp>
-#include <std/erfs.hpp>
+#include <dataset.hpp>
 #include <network.hpp>
 
-#include <dataset.hpp>
+// Engine standard headers
+#include <std/activations.hpp>
+#include <std/erfs.hpp>
 
 using namespace std;
 using namespace zhetapi;
@@ -17,14 +18,13 @@ int main()
 {
 	ml::__zhp_register_standard_activations <double> ();
 
-	ml::Activation <double> ::display_loaders();
-
 	auto initializer = []() {
                 return 0.5 - (rand()/(double) RAND_MAX);
         };
 
 	ml::NeuralNetwork <double> model;
 	ml::NeuralNetwork <double> cpy;
+	ml::NeuralNetwork <double> ld;
 
 	model = ml::NeuralNetwork <double> ({
                 {11, new zhetapi::ml::Linear <double> ()},
@@ -46,9 +46,8 @@ int main()
 	Vector <double> in(11, [](size_t i) {return rand()/((double) RAND_MAX);});
 	Vector <double> out(9, [](size_t i) {return rand()/((double) RAND_MAX);});
 
-	model.print();
-	cpy.print();
-
 	cout << "model = " << model(in) << endl;
 	cout << "cpy = " << cpy(in) << endl;
+
+	ld.load_json("samples/mnist/model.json");
 }

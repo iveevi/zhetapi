@@ -12,8 +12,7 @@
 
 #endif
 
-// Engine Standard headers
-#include <std/activation_functions.hpp>
+// Engine standard headers
 #include <std/loaders.hpp>
 
 // Engine CUDA headers
@@ -113,7 +112,7 @@ public:
 	Vector <T> operator()(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) { 
-				return __d_relu(x[i]);
+				return (x[i] > 0) ? 1 : 0;
 			}
 		);
 	}
@@ -218,7 +217,9 @@ public:
 	Vector <T> operator()(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
-				return __d_sigmoid(x[i]);
+				T tmp = 1.0/(1.0 + exp(-x[i]));
+
+				return tmp * (T (1.0) - tmp);
 			}
 		);
 	}
@@ -337,6 +338,8 @@ public:
 template <class T>
 class Softmax : public Activation <T> {
 public:
+	Softmax() : Activation <T> ({}) {}
+
 	Vector <T> operator()(const Vector <T> &x) const {
 		// Subtract by max for numerical stability
 		T _max = x[0];
@@ -395,6 +398,7 @@ void __zhp_register_standard_activations()
 	__zhp_register_activation(Linear, T, load_linear <T>);
 	__zhp_register_activation(ReLU, T, load_relu <T>);
 	__zhp_register_activation(Sigmoid, T, load_sigmoid <T>);
+	__zhp_register_activation(Softmax, T, load_softmax <T>);
 }
 
 // TODO: Make a more generalized version,

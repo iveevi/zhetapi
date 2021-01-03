@@ -1,18 +1,27 @@
 {
     "Layers" : [
         {
-            "Neurons" : 784,
-            "Activation" : "Linear"
+            "Neurons": 784,
+            "Activation": {
+		    "Name": "Linear",
+		    "Arguments": [1]
+	    }
         },
 
         {
-            "Neurons" : 30,
-            "Activation" : "Sigmoid"
+            "Neurons": 30,
+            "Activation": {
+		    "Name": "Sigmoid",
+		    "Arguments": []
+	    }
         },
 
         {
-            "Neurons" : 10,
-            "Activation" : "Softmax"
+            "Neurons": 10,
+            "Activation": {
+		    "Name": "Softmax",
+		    "Arguments": []
+	    }
         }
     ]
 }
