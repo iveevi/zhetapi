@@ -24,7 +24,7 @@ static int parse_parenthesized(string &parenthesized)
 	return 0;
 }
 
-static int parse_block(string &block)
+static int parse_block()
 {
 	char c;
 	
@@ -33,17 +33,32 @@ static int parse_block(string &block)
 	}
 
 	if (c == '{') {
-		while ((c = getchar()) != '}') {
-			block += c;
-
-			__lineup(c);
-		}
+		parse('}');
 	} else {
 		fseek(stdin, -1, SEEK_CUR);
 
-		while ((c = getchar()) != '\n' && (c != EOF)) {
-			block += c;
-		}
+		parse('\n');
+
+		__lineup(c);
+	}
+
+	return 0;
+}
+
+static int parse_block_ignore()
+{
+	char c;
+	
+	while (isspace(c = getchar())) {
+		__lineup(c);
+	}
+
+	if (c == '{') {
+		while ((c = getchar()) != '}');
+	} else {
+		fseek(stdin, -1, SEEK_CUR);
+
+		while ((c = getchar()) != '\n');
 
 		__lineup(c);
 	}
@@ -57,36 +72,32 @@ static void check(string &keyword)
 	string block;
 
 	if (keyword == "if") {
-		cout << "IF" << endl;
+		// cout << "IF" << endl;
 		
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an if\n", line);
 			exit(-1);
 		} else {
-			cout << "\tparen = \"" << parenthesized << "\"" << endl;
+			// cout << "\tparen = \"" << parenthesized << "\"" << endl;
 		}
 
-		cout << "evaluated (paren):" << endl;
+		// cout << "evaluated (paren):" << endl;
 
-		zhetapi::Token *t = execute(parenthesized);
+		Token *t = execute(parenthesized);
 
-		cout << "\ttoken: " << t->str() << endl;
+		// cout << "\ttoken: " << t->str() << endl;
 
 		if (*t == op_true) {
-			cout << "\tequals true!" << endl;
-		}
-
-		if (parse_block(block)) {
-			printf("Syntax error at line %lu: missing statement after if\n", line);
-			exit(-1);
+			// cout << "\tequals true!" << endl;
+			parse_block();
 		} else {
-			cout << "\tblock = \"" << block << "\"" << endl;
+			parse_block_ignore();
 		}
 		
 		keyword.clear();
 	}
 
-	if (keyword == "for") {
+	/* if (keyword == "for") {
 		cout << "FOR" << endl;
 
 		if (parse_parenthesized(parenthesized)) {
@@ -124,24 +135,54 @@ static void check(string &keyword)
 		}
 		
 		keyword.clear();
-	}
+	} */
 }
 
 // Parsing machine
-int parse()
+int parse(char ex)
 {
-	string tmp;
+	static bool quoted = false;
+	static bool paren = false;
 
+	string tmp;
 	char c;
 
-	while ((c = getchar()) != EOF) {
-		if (!isspace(c))
+	while ((c = getchar()) != ex) {
+		if (!quoted) {
+			if (c == '\"')
+				quoted = true;
+			if (c == '(')
+				paren = true;
+			if (c == ')' && paren == true)
+				paren = false;
+			
+			if (c == '\n' || (!paren && c == ',')) {
+				if (!tmp.empty()) {
+					execute(tmp);
+
+					tmp.clear();
+				}
+			} else if (!isspace(c)) {
+				tmp += c;
+			}
+		} else {
+			if (c == '\"')
+				quoted = false;
+			
 			tmp += c;
+		}
 
 		__lineup(c);
 
 		// cout << "tmp = " << tmp << endl;
 		check(tmp);
+	}
+
+	// Flush last instruction
+	if (!tmp.empty()) {
+		execute(tmp);
+
+		tmp.clear();
 	}
 
 	return 0;
@@ -150,6 +191,8 @@ int parse()
 // Splitting equalities
 vector <string> split(string str)
 {
+	bool quoted = false;
+
 	vector <string> out;
 	size_t n;
 
@@ -157,13 +200,23 @@ vector <string> split(string str)
 
 	string tmp;
 	for (size_t i = 0; i < n; i++) {
-		if (str[i] == '=') {
-			if (!tmp.empty()) {
-				out.push_back(tmp);
+		if (!quoted) {
+			if (str[i] == '=') {
+				if (!tmp.empty()) {
+					out.push_back(tmp);
 
-				tmp.clear();
+					tmp.clear();
+				}
+			} else {
+				if (str[i] == '\"')
+					quoted = true;
+				
+				tmp += str[i];
 			}
 		} else {
+			if (str[i] == '\"')
+				quoted = false;
+			
 			tmp += str[i];
 		}
 	}

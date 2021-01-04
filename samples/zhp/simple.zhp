@@ -1,22 +1,19 @@
+x = 0
+
+println("x = ", x)
+println("Pre if")
+
 if (true) {
 	println("TRUE")
+	println("again, x = ", x)
+
+	println("second")
 }
 
 if (true)
-	print("one-liner")
+	println("One-liner")
 
-for (i in [0, 10]) {
-	print("i = ", i)
-}
+if (false)
+	println("Should not print")
 
-for (i in [1, 5])
-	println("one-line, ", i)
-
-while (i < 10) {
-	print("i = ", i)
-
-	i++
-}
-
-while (i < 2)
-	print("one-liner: ", i)
+println("Post if")

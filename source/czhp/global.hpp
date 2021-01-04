@@ -10,21 +10,22 @@
 
 // Namespaces
 using namespace std;
+using namespace zhetapi;
 
 extern size_t line;
 extern vector <string> global;
-extern zhetapi::Barn <double, int> barn;
+extern Barn <double, int> barn;
 
-extern zhetapi::Operand <bool> *op_true;
-extern zhetapi::Operand <bool> *op_false;
+extern Operand <bool> *op_true;
+extern Operand <bool> *op_false;
 
-int parse();
+int parse(char = EOF);
 
-zhetapi::Token *execute(string);
+Token *execute(string);
 
 vector <string> split(string);
 
-zhetapi::Token *print(const std::vector <zhetapi::Token *> &);
-zhetapi::Token *println(const std::vector <zhetapi::Token *> &);
+Token *print(const vector <Token *> &);
+Token *println(const vector <Token *> &);
 
 #endif

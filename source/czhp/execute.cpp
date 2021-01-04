@@ -1,17 +1,44 @@
 #include "global.hpp"
 
-zhetapi::Token *execute(string str)
+Token *execute(string str)
 {
-	// "Execute" the statement
-	zhetapi::Token *tptr = nullptr;
+	// Skip comments
+	if (str[0] == '#')
+		return nullptr;
+
+	vector <string> tmp = split(str);
 	
-	try {
+	size_t tsize = tmp.size();
+	if (tsize > 1) {
+		zhetapi::Token *tptr = nullptr;
+		
+		try {
+			cout << "last = " << tmp[tsize - 1] << endl;
+			zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
+
+			tptr = mg.value();
+		} catch (...) {}
+
+		for (int i = tsize - 2; i >= 0; i--) {
+			string ftr = tmp[i] + " = " + tmp[tsize - 1];
+
+			try {
+				zhetapi::Function <double, int> f = ftr;
+
+				barn.put(f);
+			} catch (...) {
+				barn.put(tptr, tmp[i]);
+			}
+		}
+		
+		delete tptr;
+	} else {		
+		// All functions and algorithms are stored in barn
 		zhetapi::node_manager <double, int> mg(str, barn);
 
-		tptr = mg.value();
-	} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
-		cout << "error: " << e.what() << endl;
+		// "Execute" the statement
+		return mg.value();
 	}
 
-	return tptr;
+	return nullptr;
 }

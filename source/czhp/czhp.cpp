@@ -2,12 +2,11 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-zhetapi::Barn <double, int> barn;
-
+Barn <double, int> barn;
 
 // Constants
-zhetapi::Operand <bool> *op_true = new zhetapi::Operand <bool> (true);
-zhetapi::Operand <bool> *op_false = new zhetapi::Operand <bool> (false);
+Operand <bool> *op_true = new Operand <bool> (true);
+Operand <bool> *op_false = new Operand <bool> (false);
 
 size_t line = 1;
 
@@ -23,11 +22,11 @@ int main(int argc, char *argv[])
 	}
 	
 	// Barn setup	
-	barn.put(zhetapi::Registrable("print", &print));
-	barn.put(zhetapi::Registrable("println", &println));
+	barn.put(Registrable("print", &print));
+	barn.put(Registrable("println", &println));
 
-	barn.put(zhetapi::Variable <double, int> (op_true->copy(), "true"));
-	barn.put(zhetapi::Variable <double, int> (op_false->copy(), "false"));
+	barn.put(Variable <double, int> (op_true->copy(), "true"));
+	barn.put(Variable <double, int> (op_false->copy(), "false"));
 
 	return parse();
 }
