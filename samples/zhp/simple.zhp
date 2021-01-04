@@ -1,5 +1,12 @@
-f(x) = x^2
+if (true) {
+	println("TRUE")
+}
 
-println(f)
+if (true)
+	print("one-liner")
 
-println(f(4))
+if true {}
+
+for (i in [0, 10]) {
+	print("i = ", i)
+}

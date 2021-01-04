@@ -80,7 +80,10 @@ endif ()
 # Compile czhp file
 project(czhp)
 
-add_executable(czhp source/czhp/czhp.cpp source/czhp/builtin.cpp)
+add_executable(czhp
+	source/czhp/czhp.cpp
+	source/czhp/builtin.cpp
+	source/czhp/parser.cpp)
 
 target_link_libraries(czhp PUBLIC zhp-static)
 

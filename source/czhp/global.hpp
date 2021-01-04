@@ -11,6 +11,13 @@
 // Namespaces
 using namespace std;
 
+extern size_t line;
+extern vector <string> global;
+
+int parse();
+
+vector <string> split(string);
+
 zhetapi::Token *print(const std::vector <zhetapi::Token *> &);
 zhetapi::Token *println(const std::vector <zhetapi::Token *> &);
 
