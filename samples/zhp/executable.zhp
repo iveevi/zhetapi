@@ -1,4 +1,4 @@
-#!debug/czhp-run
+#!../../debug/czhp-run
 f(x) = x^3
 
 println(f)

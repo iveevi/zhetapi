@@ -1,12 +1,5 @@
-// C/C++ headers
-#include <iostream>
-#include <vector>
-
-// Engine headers
-#include <function.hpp>
-
-// Includes
-using namespace std;
+// Source headers
+#include "global.hpp"
 
 // Global scope code
 vector <string> global;
@@ -109,6 +102,10 @@ vector <string> split(string str)
 // Global processing
 void process(string statement)
 {
+	// Skip comments
+	if (statement[0] == '#')
+		return;
+
 	vector <string> tmp = split(statement);
 	
 	size_t tsize = tmp.size();
@@ -143,29 +140,16 @@ void process(string statement)
 	}
 }
 
-zhetapi::Token *print(const std::vector <zhetapi::Token *> &ins)
-{
-	for (zhetapi::Token *tptr : ins)
-		cout << tptr->str();
-	
-	return ins[0];
-}
-
-zhetapi::Token *println(const std::vector <zhetapi::Token *> &ins)
-{
-	for (zhetapi::Token *tptr : ins)
-		cout << tptr->str();
-	
-	cout << "\n";
-	
-	return ins[0];
-}
-
 // Main
 int main(int argc, char *argv[])
 {
-	if (argc == 2)
-		freopen(argv[1], "r", stdin);
+	if (argc == 2) {
+		if (!freopen(argv[1], "r", stdin)) {
+			printf("Fatal error: failed to open file '%s'.\n", argv[1]);
+
+			exit(-1);
+		}
+	}
 	
 	// Barn setup	
 	barn.put(zhetapi::Registrable("print", &print));
