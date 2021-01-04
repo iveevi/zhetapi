@@ -13,8 +13,14 @@ using namespace std;
 
 extern size_t line;
 extern vector <string> global;
+extern zhetapi::Barn <double, int> barn;
+
+extern zhetapi::Operand <bool> *op_true;
+extern zhetapi::Operand <bool> *op_false;
 
 int parse();
+
+zhetapi::Token *execute(string);
 
 vector <string> split(string);
 

@@ -4,48 +4,12 @@
 // Zhetapi API storage
 zhetapi::Barn <double, int> barn;
 
+
+// Constants
+zhetapi::Operand <bool> *op_true = new zhetapi::Operand <bool> (true);
+zhetapi::Operand <bool> *op_false = new zhetapi::Operand <bool> (false);
+
 size_t line = 1;
-
-// Global processing
-void process(string statement)
-{
-	// Skip comments
-	if (statement[0] == '#')
-		return;
-
-	vector <string> tmp = split(statement);
-	
-	size_t tsize = tmp.size();
-	if (tsize > 1) {
-		zhetapi::Token *tptr = nullptr;
-		
-		try {
-			zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
-
-			tptr = mg.value();
-		} catch (...) {}
-
-		for (int i = tsize - 2; i >= 0; i--) {
-			string ftr = tmp[i] + " = " + tmp[tsize - 1];
-
-			try {
-				zhetapi::Function <double, int> f = ftr;
-
-				barn.put(f);
-			} catch (...) {
-				barn.put(tptr, tmp[i]);
-			}
-		}
-		
-		delete tptr;
-	} else {
-		// All functions and algorithms are stored in barn
-		zhetapi::node_manager <double, int> mg(statement, barn);
-
-		// "Execute" the statement
-		mg.value();
-	}
-}
 
 // Main
 int main(int argc, char *argv[])
@@ -61,6 +25,9 @@ int main(int argc, char *argv[])
 	// Barn setup	
 	barn.put(zhetapi::Registrable("print", &print));
 	barn.put(zhetapi::Registrable("println", &println));
+
+	barn.put(zhetapi::Variable <double, int> (op_true->copy(), "true"));
+	barn.put(zhetapi::Variable <double, int> (op_false->copy(), "false"));
 
 	return parse();
 }

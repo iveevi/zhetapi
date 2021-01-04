@@ -5,8 +5,18 @@ if (true) {
 if (true)
 	print("one-liner")
 
-if true {}
-
 for (i in [0, 10]) {
 	print("i = ", i)
 }
+
+for (i in [1, 5])
+	println("one-line, ", i)
+
+while (i < 10) {
+	print("i = ", i)
+
+	i++
+}
+
+while (i < 2)
+	print("one-liner: ", i)

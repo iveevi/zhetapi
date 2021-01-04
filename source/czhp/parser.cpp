@@ -1,13 +1,8 @@
 #include "global.hpp"
 
 #define __lineup(c) 						\
-	if (c == '\n') {					\
-		fseek(stdin, -2, SEEK_CUR);			\
-								\
-		c = getchar();					\
-		cout << "newline after '" << c << "'" << endl;	\
-		c = getchar();					\
-	}
+	if (c == '\n')						\
+		line++;
 
 // Global scope code
 vector <string> global;
@@ -58,20 +53,32 @@ static int parse_block(string &block)
 
 static void check(string &keyword)
 {
+	string parenthesized;
+	string block;
+
 	if (keyword == "if") {
 		cout << "IF" << endl;
-		string parenthesized;
 		
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an if\n", line);
+			exit(-1);
 		} else {
 			cout << "\tparen = \"" << parenthesized << "\"" << endl;
 		}
 
-		string block;
-		
+		cout << "evaluated (paren):" << endl;
+
+		zhetapi::Token *t = execute(parenthesized);
+
+		cout << "\ttoken: " << t->str() << endl;
+
+		if (*t == op_true) {
+			cout << "\tequals true!" << endl;
+		}
+
 		if (parse_block(block)) {
 			printf("Syntax error at line %lu: missing statement after if\n", line);
+			exit(-1);
 		} else {
 			cout << "\tblock = \"" << block << "\"" << endl;
 		}
@@ -79,8 +86,45 @@ static void check(string &keyword)
 		keyword.clear();
 	}
 
-	if (keyword == "for")
+	if (keyword == "for") {
 		cout << "FOR" << endl;
+
+		if (parse_parenthesized(parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after a for\n", line);
+			exit(-1);
+		} else {
+			cout << "\tparen = \"" << parenthesized << "\"" << endl;
+		}
+		
+		if (parse_block(block)) {
+			printf("Syntax error at line %lu: missing statement after a for\n", line);
+			exit(-1);
+		} else {
+			cout << "\tblock = \"" << block << "\"" << endl;
+		}
+		
+		keyword.clear();
+	}
+
+	if (keyword == "while") {
+		cout << "WHILE" << endl;
+
+		if (parse_parenthesized(parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after a while\n", line);
+			exit(-1);
+		} else {
+			cout << "\tparen = \"" << parenthesized << "\"" << endl;
+		}
+		
+		if (parse_block(block)) {
+			printf("Syntax error at line %lu: missing statement after a while\n", line);
+			exit(-1);
+		} else {
+			cout << "\tblock = \"" << block << "\"" << endl;
+		}
+		
+		keyword.clear();
+	}
 }
 
 // Parsing machine
@@ -89,6 +133,7 @@ int parse()
 	string tmp;
 
 	char c;
+
 	while ((c = getchar()) != EOF) {
 		if (!isspace(c))
 			tmp += c;

@@ -83,7 +83,8 @@ project(czhp)
 add_executable(czhp
 	source/czhp/czhp.cpp
 	source/czhp/builtin.cpp
-	source/czhp/parser.cpp)
+	source/czhp/parser.cpp
+	source/czhp/execute.cpp)
 
 target_link_libraries(czhp PUBLIC zhp-static)
 
