@@ -1,6 +1,25 @@
 #!../../debug/czhp-run
-f(x) = x^3
+x = 0
 
-println(f)
+f(x) = x^2
 
-println(f(4))
+println("x = ", x)
+println("Pre if")
+println("f(x), ", f)
+
+if (true) {
+	println("TRUE")
+	println("again, x = ", x)
+
+	println("second")
+}
+
+println("f(4) = ", f(4))
+
+if (true)
+	println("One-liner")
+
+if (false)
+	println("Should not print")
+
+println("Post if")

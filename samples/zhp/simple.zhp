@@ -16,4 +16,10 @@ if (true)
 if (false)
 	println("Should not print")
 
+if (x > 0)
+	println("x > 0!")
+
+if (x >= 0)
+	println("x >= 0!")
+
 println("Post if")

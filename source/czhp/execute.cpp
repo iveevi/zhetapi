@@ -13,7 +13,6 @@ Token *execute(string str)
 		zhetapi::Token *tptr = nullptr;
 		
 		try {
-			cout << "last = " << tmp[tsize - 1] << endl;
 			zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
 
 			tptr = mg.value();
