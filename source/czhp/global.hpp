@@ -20,6 +20,7 @@ extern Operand <bool> *op_true;
 extern Operand <bool> *op_false;
 
 int parse(char = EOF);
+int parse(string);
 
 Token *execute(string);
 

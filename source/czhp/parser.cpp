@@ -24,6 +24,27 @@ static int parse_parenthesized(string &parenthesized)
 	return 0;
 }
 
+static int extract_block(string &block)
+{
+	char c;
+	
+	while (isspace(c = getchar()));
+
+	if (c == '{') {
+		while ((c = getchar()) != '}')
+			block += c;
+	} else {
+		fseek(stdin, -1, SEEK_CUR);
+
+		while ((c = getchar()) != '\n')
+			block += c;
+
+		__lineup(c);
+	}
+
+	return 0;
+}
+
 static int parse_block()
 {
 	char c;
@@ -72,70 +93,41 @@ static void check(string &keyword)
 	string block;
 
 	if (keyword == "if") {
-		// cout << "IF" << endl;
-		
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an if\n", line);
 			exit(-1);
-		} else {
-			// cout << "\tparen = \"" << parenthesized << "\"" << endl;
 		}
-
-		// cout << "evaluated (paren):" << endl;
 
 		Token *t = execute(parenthesized);
 
-		// cout << "\ttoken: " << t->str() << endl;
-
-		if (*t == op_true) {
-			// cout << "\tequals true!" << endl;
+		if (*t == op_true)
 			parse_block();
-		} else {
+		else
 			parse_block_ignore();
-		}
-		
-		keyword.clear();
-	}
-
-	/* if (keyword == "for") {
-		cout << "FOR" << endl;
-
-		if (parse_parenthesized(parenthesized)) {
-			printf("Syntax error at line %lu: missing parenthesis after a for\n", line);
-			exit(-1);
-		} else {
-			cout << "\tparen = \"" << parenthesized << "\"" << endl;
-		}
-		
-		if (parse_block(block)) {
-			printf("Syntax error at line %lu: missing statement after a for\n", line);
-			exit(-1);
-		} else {
-			cout << "\tblock = \"" << block << "\"" << endl;
-		}
 		
 		keyword.clear();
 	}
 
 	if (keyword == "while") {
-		cout << "WHILE" << endl;
-
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after a while\n", line);
 			exit(-1);
-		} else {
-			cout << "\tparen = \"" << parenthesized << "\"" << endl;
 		}
 		
-		if (parse_block(block)) {
+		if (extract_block(block)) {
 			printf("Syntax error at line %lu: missing statement after a while\n", line);
 			exit(-1);
-		} else {
-			cout << "\tblock = \"" << block << "\"" << endl;
+		}
+
+		Token *t = execute(parenthesized);
+		while (*t == op_true) {
+			parse(block);
+			
+			t = execute(parenthesized);
 		}
 		
 		keyword.clear();
-	} */
+	}
 }
 
 // Parsing machine
@@ -148,6 +140,58 @@ int parse(char ex)
 	char c;
 
 	while ((c = getchar()) != ex) {
+		if (!quoted) {
+			if (c == '\"')
+				quoted = true;
+			if (c == '(')
+				paren = true;
+			if (c == ')' && paren == true)
+				paren = false;
+			
+			if (c == '\n' || (!paren && c == ',')) {
+				if (!tmp.empty()) {
+					execute(tmp);
+
+					tmp.clear();
+				}
+			} else if (!isspace(c)) {
+				tmp += c;
+			}
+		} else {
+			if (c == '\"')
+				quoted = false;
+			
+			tmp += c;
+		}
+
+		__lineup(c);
+
+		// cout << "tmp = " << tmp << endl;
+		check(tmp);
+	}
+
+	// Flush last instruction
+	if (!tmp.empty()) {
+		execute(tmp);
+
+		tmp.clear();
+	}
+
+	return 0;
+}
+
+// Parsing machine
+int parse(string str)
+{
+	static bool quoted = false;
+	static bool paren = false;
+
+	string tmp;
+	char c;
+
+	for (size_t i = 0; i < str.length(); i++) {
+		c = str[i];
+
 		if (!quoted) {
 			if (c == '\"')
 				quoted = true;
