@@ -27,9 +27,12 @@ namespace zhetapi {
 		node();
 		node(Token *, const ::std::vector <node> &);
 		node(Token *, lbl, const ::std::vector <node> &);
+
+		// Unary
+		explicit node(Token *, const node &, bool);
 		
 		// Binary
-		node(Token *, const node &, const node &);
+		explicit node(Token *, const node &, const node &);
 		
 		// Member functions
 		void transfer(const node &);

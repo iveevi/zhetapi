@@ -56,6 +56,9 @@ namespace zhetapi {
 		// Variable
 		"variable",
 		"variable constant",
+
+		// Modifiers
+		"post modifier"
 	};
 
 	bool is_constant(lbl type)

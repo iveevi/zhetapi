@@ -30,6 +30,12 @@
 			<operation_holder> (::std::string(#str))	\
 	];
 
+#define __add_operation_heter_symbol(name, str, act)			\
+	name = lit(#str) [						\
+		_val = phoenix::new_					\
+			<operation_holder> (::std::string(#act))	\
+	];
+
 namespace zhetapi {
 
 typedef ::std::string::const_iterator siter;
@@ -75,6 +81,10 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		__add_operation_symbol(__geq, >=);
 		__add_operation_symbol(__leq, <=);
 
+		// Unary increment/decrement
+		__add_operation_heter_symbol(__post_incr, ++, p++);
+		__add_operation_heter_symbol(__post_decr, --, p--);
+
 		/*
 		 * Represents a binary operation of lowest priotrity.
 		 * These are used to combine terms into expressions.
@@ -98,6 +108,8 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		 * exponentiation operation.
 		 */
 		__t2_bin = __power;
+
+		__t_post = __post_incr | __post_decr;
 
 		// Type parsers (change dependence on int_ and double_ parsers
 		// specifically)
@@ -451,11 +463,16 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 					_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 				]
 
+				| (__node_var >> __t_post) [
+					_val = phoenix::construct <zhetapi::node> (_2, _1, true)
+				]
+
 				| __node_factor [_val = _1] >> *(
 					(__t1_bin >> __node_factor)
 					[_val = phoenix::construct
 					<zhetapi::node> (_1, _val, _2)]
 				)
+
 			);
 
 		/*
@@ -677,7 +694,9 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t0_bin;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t1_bin;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t2_bin;
-	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t3_bin;
+
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t_pre;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t_post;
 
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__eq;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__neq;
@@ -685,6 +704,9 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__le;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__leq;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__geq;
+
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__post_incr;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__post_decr;
 
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__plus;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__minus;

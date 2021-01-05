@@ -31,7 +31,9 @@ namespace zhetapi {
 	"greater than",
 	"less than",
 	"geq",
-	"leq"
+	"leq",
+	"post incr",
+	"post decr"
 };
 
 operation_holder::operation_holder(const ::std::string &str) : rep(str)
@@ -95,6 +97,10 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = geq;
 	else if (str == "<=")
 		code = leq;
+	else if (str == "p++")
+		code = pin;
+	else if (str == "p--")
+		code = pde;
 }
 
 Token::type operation_holder::caller() const

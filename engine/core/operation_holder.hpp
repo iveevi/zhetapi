@@ -38,7 +38,9 @@ enum codes {
 	xge,	// Greater than
 	xle,	// Less than
 	geq,	// Greater than or equal to
-	leq	// Less than or equal to
+	leq,	// Less than or equal to
+	pin,	// Post increment
+	pde,	// Pre increment
 };
 
 extern ::std::string strcodes[];

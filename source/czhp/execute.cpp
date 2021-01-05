@@ -35,8 +35,11 @@ Token *execute(string str)
 		// All functions and algorithms are stored in barn
 		zhetapi::node_manager <double, int> mg(str, barn);
 
+		/* cout << "mg:" << endl;
+		mg.print(); */
+
 		// "Execute" the statement
-		return mg.value();
+		return mg.value(barn);
 	}
 
 	return nullptr;

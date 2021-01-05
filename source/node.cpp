@@ -16,6 +16,12 @@ namespace zhetapi {
 		__tptr.reset(tptr);
 	}
 
+	node::node(Token *tptr, const node &a, bool bl) : __leaves({a}),
+		__label(l_none), __nodes(0)
+	{
+		__tptr.reset(tptr);
+	}
+
 	node::node(Token *tptr, const node &a, const node &b) : __leaves({a,
 			b}), __label(l_none), __nodes(0)
 	{

@@ -3,12 +3,16 @@ f(x) = x^3 + x
 if (f(5) > 0)
 	println("f(5) = ", f(5))
 
-if (f(5) == 130)
-	println("Equality")
-
 i = 0
 while (i < 10) {
-	println("\ti = ", i)
+	println("i = ", f(i), " and i = ", i)
 
-	i = i + 1
+	i++
+}
+
+i = 9
+while (i >= 0) {
+	println("i = ", f(i), " and i = ", i)
+
+	i--
 }

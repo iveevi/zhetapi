@@ -134,7 +134,7 @@ static void check(string &keyword)
 int parse(char ex)
 {
 	static bool quoted = false;
-	static bool paren = false;
+	static int paren = 0;
 
 	string tmp;
 	char c;
@@ -144,9 +144,9 @@ int parse(char ex)
 			if (c == '\"')
 				quoted = true;
 			if (c == '(')
-				paren = true;
-			if (c == ')' && paren == true)
-				paren = false;
+				paren++;
+			if (c == ')')
+				paren--;
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
@@ -184,7 +184,7 @@ int parse(char ex)
 int parse(string str)
 {
 	static bool quoted = false;
-	static bool paren = false;
+	static int paren = 0;
 
 	string tmp;
 	char c;
@@ -196,12 +196,13 @@ int parse(string str)
 			if (c == '\"')
 				quoted = true;
 			if (c == '(')
-				paren = true;
-			if (c == ')' && paren == true)
-				paren = false;
+				paren++;
+			if (c == ')' && paren)
+				paren--;
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
+					// cout << "executing tmp = " << tmp << endl;
 					execute(tmp);
 
 					tmp.clear();

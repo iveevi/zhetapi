@@ -33,7 +33,8 @@ public:
 
 	node_manager &operator=(const node_manager &);
 
-	Token *value(size_t = 0) const;
+	Token *value() const;
+	Token *value(Barn <T, U> &) const;
 
 	Token *substitute_and_compute(::std::vector <Token *> &, size_t = 1);
 
@@ -61,7 +62,8 @@ public:
 	// Static methods
 	static bool loose_match(const node_manager <T, U> &, const node_manager <T, U> &);
 private:
-	Token *value(node, size_t = 0) const;
+	Token *value(node) const;
+	Token *value(node, Barn <T, U> &) const;
 
 	size_t count_up(node &);
 	
@@ -201,17 +203,31 @@ template <class T, class U> node_manager <T, U> &node_manager <T, U>
 
 // Value finding methods
 template <class T, class U>
-Token *node_manager <T, U> ::value(size_t spare_threads) const
+Token *node_manager <T, U> ::value() const
 {
-	return value(__tree, spare_threads);
+	return value(__tree);
 }
 
 template <class T, class U>
-Token *node_manager <T, U> ::value(node tree, size_t spare_threads) const
+Token *node_manager <T, U> ::value(Barn <T, U> &ext) const
+{
+	return value(__tree, ext);
+}
+
+template <class T, class U>
+Token *node_manager <T, U> ::value(node tree) const
 {
 	::std::vector <Token *> values;
+
 	node *unrefd;
+
 	Token *tptr;
+	Token *vptr;
+
+	Variable <T, U> v;
+
+	::std::string ident;
+
 	int size;
 
 	// ::std::cout << "Spare threads: " << spare_threads << ::std::endl;
@@ -219,13 +235,84 @@ Token *node_manager <T, U> ::value(node tree, size_t spare_threads) const
 	switch (*(tree.__tptr)) {
 	case Token::opd:
 		return tree.__tptr.get()->copy();
-	case Token::oph:
+	case Token::oph:	
 		size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
 		tptr = __barn.compute((dynamic_cast <operation_holder *>
-					(tree.__tptr.get()))->rep, values);
+						(tree.__tptr.get()))->rep, values);
+
+		return tptr->copy();
+	case Token::var:
+		tptr = (dynamic_cast <Variable <T, U> *> (tree.__tptr.get()))->get().get();
+
+		return tptr->copy();
+	case Token::ftn:
+		if (tree.__leaves.empty())
+			return tree.__tptr->copy();
+		
+		for (node leaf : tree.__leaves)
+			values.push_back(value(leaf));
+
+		tptr = (*(dynamic_cast <Function <T, U> *> (tree.__tptr.get())))(values);
+
+		return tptr->copy();
+	case Token::ndr:
+		unrefd = (dynamic_cast <node_reference *>
+				(tree.__tptr.get()))->get();
+
+		return unrefd->__tptr.get()->copy();
+	case Token::reg:
+		for (node leaf : tree.__leaves)
+			values.push_back(value(leaf));
+
+		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
+
+		return tptr->copy();
+	}
+
+	return nullptr;
+}
+
+template <class T, class U>
+Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
+{
+	::std::vector <Token *> values;
+
+	node *unrefd;
+
+	Token *tptr;
+	Token *vptr;
+
+	Variable <T, U> v;
+
+	::std::string ident;
+
+	int size;
+
+	// ::std::cout << "Spare threads: " << spare_threads << ::std::endl;
+	
+	switch (*(tree.__tptr)) {
+	case Token::opd:
+		return tree.__tptr.get()->copy();
+	case Token::oph:	
+		size = tree.__leaves.size();
+		for (node leaf : tree.__leaves)
+			values.push_back(value(leaf));
+
+		tptr = __barn.compute((dynamic_cast <operation_holder *>
+						(tree.__tptr.get()))->rep, values);
+		
+		if (tree.__label == l_post_modifier) {
+			vptr = tree.__leaves[0].__tptr.get();
+
+			ident = (dynamic_cast <Variable <T, U> *> (vptr))->symbol();
+
+			v = Variable <T, U> (tptr, ident);
+
+			ext.put(v);
+		}
 
 		return tptr->copy();
 	case Token::var:
@@ -270,7 +357,7 @@ Token *node_manager <T, U> ::substitute_and_compute(::std::vector <Token *>
 		label(__refs[i]);
 	}
 
-	return value(__tree, total_threads - 1);
+	return value(__tree);
 }
 
 // Expansion methods
@@ -801,6 +888,9 @@ void node_manager <T, U> ::label(node &ref)
 			label(leaf);
 
 		break;
+	case Token::var:
+		ref.__label = l_variable;
+		break;
 	case Token::ndr:
 		// Transfer labels, makes things easier
 		ref.__label = (dynamic_cast <node_reference *>
@@ -869,6 +959,10 @@ void node_manager <T, U> ::label_operation(node &ref)
 	case sch:
 	case cth:
 		ref.__label = l_hyperbolic;
+		break;
+	case pin:
+	case pde:
+		ref.__label = l_post_modifier;
 		break;
 	}
 }
