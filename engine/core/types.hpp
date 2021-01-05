@@ -11,6 +11,7 @@
 #include <matrix.hpp>
 
 #define __TYPEDEFS__						\
+		typedef bool B;					\
 		typedef U Z;					\
 		typedef Rational <Z> Q;				\
 		typedef T R;					\

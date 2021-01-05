@@ -9,50 +9,54 @@
 
 namespace zhetapi {
 
-	// Make this more flexible
-	// to the user later on
-	enum codes {
-		add,
-		sub,
-		mul,
-		dvs,
-		shr,
-		fct,	// Factorial
-		pwr,
-		dot,	// Dot product
-		sin,
-		cos,
-		tan,
-		csc,
-		sec,
-		cot,
-		snh,
-		csh,
-		tnh,
-		cch,
-		sch,
-		cth,
-		lxg,	// Log base 10
-		xln,	// Natural log
-		xlg	// Log base 2
-	};
+enum codes {
+	add,
+	sub,
+	mul,
+	dvs,
+	shr,
+	fct,	// Factorial
+	pwr,
+	dot,	// Dot product
+	sin,
+	cos,
+	tan,
+	csc,
+	sec,
+	cot,
+	snh,
+	csh,
+	tnh,
+	cch,
+	sch,
+	cth,
+	lxg,	// Log base 10
+	xln,	// Natural log
+	xlg,	// Log base 2
+	xeq,	// Equals
+	neq,	// Not equals
+	xge,	// Greater than
+	xle,	// Less than
+	geq,	// Greater than or equal to
+	leq	// Less than or equal to
+};
 
-	extern ::std::string strcodes[];
+extern ::std::string strcodes[];
 
-	struct operation_holder : public Token {
-		::std::string rep;
+struct operation_holder : public Token {
+	::std::string rep;
 
-		codes code;
+	codes code;
 
-		operation_holder(const ::std::string &);
+	operation_holder(const ::std::string &);
 
-		type caller() const override;
-		Token *copy() const override;
-		::std::string str() const override;
+	type caller() const override;
+	Token *copy() const override;
+	::std::string str() const override;
 
-		virtual bool operator==(Token *) const override;
-	};
-	
+	virtual bool operator==(Token *) const override;
+};
+
 }
 
 #endif

@@ -81,7 +81,9 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		 * Exmaples of such operations are addition,
 		 * subtraction and the dot product.
 		 */
-		__t0_bin = __plus | __minus | __dot;
+		__t0_bin = __plus | __minus | __dot
+				| __eq | __neq | __geq
+				| __leq | __ge | __le;
 
 		/*
 		 * Represents a binary operation of second to lowest
@@ -675,6 +677,14 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t0_bin;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t1_bin;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t2_bin;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__t3_bin;
+
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__eq;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__neq;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__ge;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__le;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__leq;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__geq;
 
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__plus;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__minus;

@@ -193,6 +193,8 @@ vector <string> split(string str)
 {
 	bool quoted = false;
 
+	char pc = 0;
+
 	vector <string> out;
 	size_t n;
 
@@ -201,7 +203,13 @@ vector <string> split(string str)
 	string tmp;
 	for (size_t i = 0; i < n; i++) {
 		if (!quoted) {
-			if (str[i] == '=') {
+			bool ignore = false;
+
+			if (pc == '>' || pc == '<' || pc == '!'
+				|| (i > 0 && str[i - 1] == '='))
+				ignore = true;
+			
+			if (!ignore && str[i] == '=') {
 				if (!tmp.empty()) {
 					out.push_back(tmp);
 
@@ -219,6 +227,8 @@ vector <string> split(string str)
 			
 			tmp += str[i];
 		}
+
+		pc = str[i];
 	}
 
 	if (!tmp.empty())

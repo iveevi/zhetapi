@@ -21,6 +21,7 @@
 #include <dataset.hpp>
 #include <display.hpp>
 #include <kernels.hpp>
+#include <optimizer.hpp>
 
 #ifdef ZHP_CUDA
 
@@ -843,83 +844,6 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 		Matrix <T> Ji = delta * a[i].transpose();
 
 		J[i] = Ji;
-	}
-
-	// Free resources
-	delete dopt;
-
-	// Return the gradient
-	return J;
-}
-
-// No statistical accumulation
-template <class T>
-Matrix <T> *NeuralNetwork <T> ::simple_gradient(
-		Matrix <T> *weights,
-		const Vector <T> &in,
-		const Vector <T> &out,
-		Erf <T> *opt)
-{
-	// Check dimensions of input and output
-	if ((in.size() != __isize) || (out.size() != __osize))
-		throw bad_io_dimensions();
-
-	// Compute the actual value
-	Vector <T> actual = compute(in, weights);
-			
-	// Get the derivative of the cost
-	Erf <T> *dopt = opt->derivative();
-	
-	// Construction the Jacobian using backpropogation
-	Matrix <T> *J = new Matrix <T> [__size - 1];
-
-	Vector <T> delta = (*dopt)(out, actual);
-	
-	for (int i = __size - 2; i >= 0; i--) {
-		if (i < __size - 2)
-			delta = std::move(rmt_and_mult(weights[i + 1], delta));
-		
-		delta.stable_shur(__z[i]);
-
-		J[i] = std::move(vvt_mult(delta, __a[i]));
-	}
-
-	// Free resources
-	delete dopt;
-
-	// Return the gradient
-	return J;
-}
-
-template <class T>
-Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
-		Vector <T> *a,
-		Vector <T> *z,
-		const Vector <T> &in,
-		const Vector <T> &out,
-		Erf <T> *opt)
-{
-	// Check dimensions of input and output
-	if ((in.size() != __isize) || (out.size() != __osize))
-		throw bad_io_dimensions();
-
-	// Compute the actual value
-	Vector <T> actual = compute(in, weights, a, z);
-	
-	// Get the derivative of the cost
-	Erf <T> *dopt = opt->derivative();
-	
-	// Construction the Jacobian using backpropogation
-	Matrix <T> *J = new Matrix <T> [__size - 1];
-
-	Vector <T> delta = dopt->compute(out, actual);
-	for (int i = __size - 2; i >= 0; i--) {
-		if (i < __size - 2)
-			delta = std::move(rmt_and_mult(weights[i + 1], delta));
-		
-		delta.stable_shur(z[i]);
-
-		J[i] = std::move(vvt_mult(delta, a[i]));
 	}
 
 	// Free resources

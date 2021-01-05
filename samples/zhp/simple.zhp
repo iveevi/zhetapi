@@ -1,25 +1,7 @@
-x = 0
+f(x) = x^3 + x
 
-println("x = ", x)
-println("Pre if")
+if (f(5) > 0)
+	println("f(5) = ", f(5))
 
-if (true) {
-	println("TRUE")
-	println("again, x = ", x)
-
-	println("second")
-}
-
-if (true)
-	println("One-liner")
-
-if (false)
-	println("Should not print")
-
-if (x > 0)
-	println("x > 0!")
-
-if (x >= 0)
-	println("x >= 0!")
-
-println("Post if")
+if (f(5) == 130)
+	println("Equality")

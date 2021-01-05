@@ -2,108 +2,126 @@
 
 namespace zhetapi {
 
-	::std::string strcodes[] = {
-		"add",
-		"subtract",
-		"multiply",
-		"divide",
-		"shur",
-		"factorial",
-		"power",
-		"dot",
-		"sin",
-		"cos",
-		"tan",
-		"csc",
-		"sec",
-		"cot",
-		"sinh",
-		"cosh",
-		"tanh",
-		"csch",
-		"sech",
-		"coth",
-		"log",
-		"ln",
-		"lg"
-	};
+::std::string strcodes[] = {
+	"add",
+	"subtract",
+	"multiply",
+	"divide",
+	"shur",
+	"factorial",
+	"power",
+	"dot",
+	"sin",
+	"cos",
+	"tan",
+	"csc",
+	"sec",
+	"cot",
+	"sinh",
+	"cosh",
+	"tanh",
+	"csch",
+	"sech",
+	"coth",
+	"log",
+	"ln",
+	"lg",
+	"equals",
+	"neq",
+	"greater than",
+	"less than",
+	"geq",
+	"leq"
+};
 
-	operation_holder::operation_holder(const ::std::string &str) : rep(str)
-	{
-		if (str == "+")
-			code = add;
-		else if (str == "-")
-			code = sub;
-		else if (str == "*")
-			code = mul;
-		else if (str == "/")
-			code = dvs;
-		else if (str == "shur")
-			code = shr;
-		else if (str == "!")
-			code = fct;
-		else if (str == "^")
-			code = pwr;
-		else if (str == ".")
-			code = dot;
-		else if (str == "sin")
-			code = sin;
-		else if (str == "cos")
-			code = cos;
-		else if (str == "tan")
-			code = tan;
-		else if (str == "csc")
-			code = csc;
-		else if (str == "sec")
-			code = sec;
-		else if (str == "cot")
-			code = cot;
-		else if (str == "sinh")
-			code = snh;
-		else if (str == "cosh")
-			code = csh;
-		else if (str == "tanh")
-			code = tnh;
-		else if (str == "csch")
-			code = cch;
-		else if (str == "sech")
-			code = sch;
-		else if (str == "coth")
-			code = cth;
-		else if (str == "log")
-			code = lxg;
-		else if (str == "ln")
-			code = xln;
-		else if (str == "lg")
-			code = xlg;
+operation_holder::operation_holder(const ::std::string &str) : rep(str)
+{
+	// Store information into some sort of structure
+	if (str == "+")
+		code = add;
+	else if (str == "-")
+		code = sub;
+	else if (str == "*")
+		code = mul;
+	else if (str == "/")
+		code = dvs;
+	else if (str == "shur")
+		code = shr;
+	else if (str == "!")
+		code = fct;
+	else if (str == "^")
+		code = pwr;
+	else if (str == ".")
+		code = dot;
+	else if (str == "sin")
+		code = sin;
+	else if (str == "cos")
+		code = cos;
+	else if (str == "tan")
+		code = tan;
+	else if (str == "csc")
+		code = csc;
+	else if (str == "sec")
+		code = sec;
+	else if (str == "cot")
+		code = cot;
+	else if (str == "sinh")
+		code = snh;
+	else if (str == "cosh")
+		code = csh;
+	else if (str == "tanh")
+		code = tnh;
+	else if (str == "csch")
+		code = cch;
+	else if (str == "sech")
+		code = sch;
+	else if (str == "coth")
+		code = cth;
+	else if (str == "log")
+		code = lxg;
+	else if (str == "ln")
+		code = xln;
+	else if (str == "lg")
+		code = xlg;
+	else if (str == "==")
+		code = xeq;
+	else if (str == "!=")
+		code = neq;
+	else if (str == ">")
+		code = xge;
+	else if (str == "<")
+		code = xle;
+	else if (str == ">=")
+		code = geq;
+	else if (str == "<=")
+		code = leq;
+}
 
-	}
+Token::type operation_holder::caller() const
+{
+	return Token::oph;
+}
 
-	Token::type operation_holder::caller() const
-	{
-		return Token::oph;
-	}
+Token *operation_holder::copy() const
+{
+	// instead of having to re-evaluate
+	// codes, pass the code as well
+	return new operation_holder(rep);
+}
 
-	Token *operation_holder::copy() const
-	{
-		// instead of having to re-evaluate
-		// codes, pass the code as well
-		return new operation_holder(rep);
-	}
+::std::string operation_holder::str() const
+{
+	return rep + " [" + strcodes[code] + "]";
+}
 
-	::std::string operation_holder::str() const
-	{
-		return rep + " [" + strcodes[code] + "]";
-	}
+bool operation_holder::operator==(Token *tptr) const
+{
+	operation_holder *oph = dynamic_cast <operation_holder *> (tptr);
 
-	bool operation_holder::operator==(Token *tptr) const
-	{
-		operation_holder *oph = dynamic_cast <operation_holder *> (tptr);
+	if (oph == nullptr)
+		return false;
 
-		if (oph == nullptr)
-			return false;
-
-		return oph->rep == rep;
-	}
+	return oph->rep == rep;
+}
 
 }
