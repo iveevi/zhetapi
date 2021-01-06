@@ -123,29 +123,25 @@ Complex <T> Complex <T> ::normalize() const
 //////////////////////////////////////////
 // Output Methods
 //////////////////////////////////////////
-namespace std {
+template <class T>
+::std::string to_string(const Complex <T> &z)
+{
+	::std::string str;
 
-	template <class T>
-	::std::string to_string(const Complex <T> &z)
-	{
-		::std::string str;
+	bool pl = false;
 
-		bool pl = false;
-
-		if (z.real()) {
-			pl = true;
-			str += to_string(z.real());
-		}
-
-		if (z.imag()) {
-			if (pl)
-				str += " + ";
-			str += to_string(z.imag()) + "i";
-		}
-
-		return str;
+	if (z.real()) {
+		pl = true;
+		str += to_string(z.real());
 	}
 
+	if (z.imag()) {
+		if (pl)
+			str += " + ";
+		str += to_string(z.imag()) + "i";
+	}
+
+	return str;
 }
 
 template <class T>

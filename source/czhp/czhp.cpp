@@ -19,6 +19,16 @@ int main(int argc, char *argv[])
 
 			exit(-1);
 		}
+	} else if (argc == 3) {
+		string o1 = "-c";
+
+		if (argv[1] == o1) {
+			return compile_library(argv[2]);
+		} else {
+			printf("Fatal error: unexpected argument '%s'\n", argv[1]);
+
+			exit(-1);
+		}
 	}
 	
 	// Barn setup	

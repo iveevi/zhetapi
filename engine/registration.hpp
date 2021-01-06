@@ -32,107 +32,110 @@
 
 namespace zhetapi {
 
-	class Registrable : public Token {
-	public:
-		using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
-	private:
-		mapper		__ftn;
+#define ZHETAPI_REGISTER(fident)	\
+	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
-		::std::string	__ident;
-	public:
-		Registrable();
-		Registrable(const Registrable &);
-		Registrable(const ::std::string &, mapper);
+class Registrable : public Token {
+public:
+	using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
+private:
+	mapper		__ftn;
 
-		Token *operator()(const ::std::vector <Token *> &) const;
+	::std::string	__ident;
+public:
+	Registrable();
+	Registrable(const Registrable &);
+	Registrable(const ::std::string &, mapper);
 
-		::std::string str() const override;
+	Token *operator()(const ::std::vector <Token *> &) const;
 
-		type caller() const override;
+	::std::string str() const override;
 
-		Token *copy() const override;
+	type caller() const override;
 
-		bool operator==(Token *) const override;
-	};
+	Token *copy() const override;
 
-	/**
-	 * ==============================
-	 * ZHETAPI CAST NULLPTR EXCEPTION
-	 * ==============================
-	 *
-	 * This exception is thrown when the casting process (into a Zhetapi
-	 * Token type) fails. Technically speaking, this is not an exception,
-	 * but rather the feault of the user. Regardless, this exception is
-	 * thrown in such a situation, and gives the user a way to ensure that
-	 * the casting has failed, and act accordingly.
-	 */
+	bool operator==(Token *) const override;
+};
 
-	class zhetapi_cast_nullptr {};
+/**
+ * ==============================
+ * ZHETAPI CAST NULLPTR EXCEPTION
+ * ==============================
+ *
+ * This exception is thrown when the casting process (into a Zhetapi
+ * Token type) fails. Technically speaking, this is not an exception,
+ * but rather the feault of the user. Regardless, this exception is
+ * thrown in such a situation, and gives the user a way to ensure that
+ * the casting has failed, and act accordingly.
+ */
 
-	/**
-	 * ===============================
-	 * ZHETAPI CAST OVERFLOW EXCEPTION
-	 * ===============================
-	 *
-	 * This exception is thrown when the number of pointers that are to be
-	 * casted exceeds the number of Tokens in the passed vector. This is
-	 * thrown with the purpose of alterting the user of this situation.
-	 */
+class zhetapi_cast_nullptr {};
 
-	class zhetapi_cast_overflow {};
+/**
+ * ===============================
+ * ZHETAPI CAST OVERFLOW EXCEPTION
+ * ===============================
+ *
+ * This exception is thrown when the number of pointers that are to be
+ * casted exceeds the number of Tokens in the passed vector. This is
+ * thrown with the purpose of alterting the user of this situation.
+ */
 
-	/**
-	 * ============
-	 * ZHETAPI CAST
-	 * ============
-	 *
-	 * Casts the Zhetapi Tokens into the passed POINTERS:
-	 *
-	 * zhetapi_cast(tokens, [ptr_1], [ptr_2], ... , [ptr_n])
-	 *
-	 * The function casts tokens[0] to a pointer of type decltype(ptr_1),
-	 * tokens[1] to a pointer of type decltype(ptr_2), and so on until
-	 * [ptr_n]. A zhetapi_cast_nullptr exception is thrown if a cast fails
-	 * (results in a null result), and a zhetapi_cast_overflow exception is
-	 * thrown if the number of pointers to cast to is larger than the size
-	 * of the vector passed in. Both these exceptions are thrown so that
-	 * users can handle such cases with ease (rather than checking each
-	 * casted pointer).
-	 */
+class zhetapi_cast_overflow {};
 
-	template <class T>
-	void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
-			i, T &tptr)
-	{
-		if (i >= tokens.size())
-			throw zhetapi_cast_overflow();
+/**
+ * ============
+ * ZHETAPI CAST
+ * ============
+ *
+ * Casts the Zhetapi Tokens into the passed POINTERS:
+ *
+ * zhetapi_cast(tokens, [ptr_1], [ptr_2], ... , [ptr_n])
+ *
+ * The function casts tokens[0] to a pointer of type decltype(ptr_1),
+ * tokens[1] to a pointer of type decltype(ptr_2), and so on until
+ * [ptr_n]. A zhetapi_cast_nullptr exception is thrown if a cast fails
+ * (results in a null result), and a zhetapi_cast_overflow exception is
+ * thrown if the number of pointers to cast to is larger than the size
+ * of the vector passed in. Both these exceptions are thrown so that
+ * users can handle such cases with ease (rather than checking each
+ * casted pointer).
+ */
 
-		tptr = dynamic_cast <T> (tokens[i]);
+template <class T>
+void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
+		i, T &tptr)
+{
+	if (i >= tokens.size())
+		throw zhetapi_cast_overflow();
 
-		if (!tptr)
-			throw zhetapi_cast_nullptr();
-	}
+	tptr = dynamic_cast <T> (tokens[i]);
 
-	template <class T, class ... A>
-	void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
-			i, T &tptr, A &... args)
-	{
-		if (i >= tokens.size())
-			throw zhetapi_cast_overflow();
-		
-		tptr = dynamic_cast <T> (tokens[i]);
+	if (!tptr)
+		throw zhetapi_cast_nullptr();
+}
 
-		if (!tptr)
-			throw zhetapi_cast_nullptr();
-		
-		zhetapi_cast_process(tokens, i + 1, args ...);
-	}
+template <class T, class ... A>
+void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
+		i, T &tptr, A &... args)
+{
+	if (i >= tokens.size())
+		throw zhetapi_cast_overflow();
+	
+	tptr = dynamic_cast <T> (tokens[i]);
 
-	template <class ... A>
-	void zhetapi_cast(const ::std::vector <Token *> &tokens, A &... args)
-	{
-		zhetapi_cast_process(tokens, 0, args ...);
-	}
+	if (!tptr)
+		throw zhetapi_cast_nullptr();
+	
+	zhetapi_cast_process(tokens, i + 1, args ...);
+}
+
+template <class ... A>
+void zhetapi_cast(const ::std::vector <Token *> &tokens, A &... args)
+{
+	zhetapi_cast_process(tokens, 0, args ...);
+}
 
 }
 

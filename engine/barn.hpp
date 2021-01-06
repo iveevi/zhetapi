@@ -221,6 +221,8 @@ public:
 	using ID = ::std::pair <::std::string, ::std::vector <::std::type_index>>;
 
 	using signature = ::std::vector <::std::type_index>;
+
+	using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
 private:
 	vtable <T, U> vstack;
 	ftable <T, U> fstack;
@@ -230,6 +232,8 @@ private:
 	::std::unordered_map <::std::string, Registrable> __reg_table;
 
 	mutable ::std::unordered_map <::std::string, ::std::vector <::std::pair <signature, Token *>>> table;
+	
+	__loc_table lt;
 public:
 	Barn();
 	Barn(const Barn &);
