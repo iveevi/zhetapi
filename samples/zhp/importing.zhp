@@ -4,4 +4,4 @@ hello()
 
 print_hello_world()
 
-println("first = ", first(10, 11))
+println("first = ", frst(10, 11))

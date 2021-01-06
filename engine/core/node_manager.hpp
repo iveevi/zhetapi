@@ -471,7 +471,7 @@ node node_manager <T, U> ::expand(const ::std::string &str, const ::std::vector 
 	 * match for it, and therefore the parsing is incomplete.
 	 */
 	if (!valid)
-		throw undefined_symbol("Undefined symbol cluster \"" + str + "\"");
+		throw undefined_symbol(str);
 
 	/*
 	 * The very last Token is attributed the leaves

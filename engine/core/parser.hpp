@@ -27,18 +27,18 @@
 #define __add_operation_symbol(name, str)				\
 	name = lit(#str) [						\
 		_val = phoenix::new_					\
-			<operation_holder> (::std::string(#str))	\
+			<operation_holder> (std::string(#str))		\
 	];
 
 #define __add_operation_heter_symbol(name, str, act)			\
 	name = lit(#str) [						\
 		_val = phoenix::new_					\
-			<operation_holder> (::std::string(#act))	\
+			<operation_holder> (std::string(#act))		\
 	];
 
 namespace zhetapi {
 
-typedef ::std::string::const_iterator siter;
+typedef std::string::const_iterator siter;
 
 using namespace boost;
 

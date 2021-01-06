@@ -136,24 +136,82 @@ cout << "df/dx(2) = " << f.differentiate(2) << endl;
 cout << "df/dx(2) = " << df(2) << endl;
 ```
 
-## Machine Learning with Deep Neural Networks
+## Machine Learning
 
 Along with providing many mathematical utilities, Zhetapi also provides
 machine learning capabilities. Currently, Zhetapi provides a `NeuralNetwork`
-class that user can use to train deep neural networks on data sets. An
-example of its usage is below:
+class that user can use to train deep neural networks on data sets.
+
+### Construction of Models
+Deep neural networks can be initialized in three ways. The first and canonical
+method is as follows:
 
 ```cpp
-zhetapi::ml::NeuralNetwork <double> model ({
+model = zhetapi::NeuralNetwork <double> ({
 	{2, new zhetapi::ml::Linear <double> ()},
 	{5, new zhetapi::ml::Sigmoid <double> ()},
 	{5, new zhetapi::ml::ReLU <double> ()},
 	{2, new zhetapi::ml::ReLU <double> ()}
-}, []() {return 0.5 - (rand()/(double) RAND_MAX);});
+}, []() {return rand()/(double) RAND_MAX;});
 ```
 
 Users can customize the model by specifying the number of neurons in each
-layer and the activation to use. With C++ operator overloading, using the
+layer and the activation to use.
+
+Users can also load models from save files:
+
+```cpp
+model.load("model-save.out");
+```
+
+The file `model-save.out` must adhere to a specific binary format, that is
+automated with the `NeuralNetwork::save` method:
+
+```cpp
+old.save("model-save.out");
+```
+
+Finally, users can load the structure of a model using a JSON file:
+
+```cpp
+model.load_json("model.json");
+```
+
+The file `model.json` must be in a structure similar to the following:
+
+```json
+{
+    "Layers" : [
+			{
+            "Neurons": 784,
+            "Activation": {
+		    "Name": "Linear",
+		    "Arguments": [1]
+	    }
+        },
+
+        {
+            "Neurons": 30,
+            "Activation": {
+		    "Name": "Sigmoid",
+		    "Arguments": []
+	    }
+        },
+
+        {
+            "Neurons": 10,
+            "Activation": {
+		    "Name": "Softmax",
+		    "Arguments": []
+	    }
+        }
+    ]
+}
+```
+
+### Using the Models
+
+With C++ operator overloading, using the
 neural network is as easy as calling it as a function:
 
 ```cpp
@@ -164,11 +222,13 @@ cout << model({3, 5}) << endl;
 cout << model({4, 5}) << endl;
 ```
 
+### Training the Models
+
 Training is also very simple:
 
 ```cpp
 // Create the cost function
-ml::Optimizer <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
+zhetapi::ml::Erf <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
 
 model.set_cost(opt);
 
@@ -180,13 +240,29 @@ model.set_cost(opt);
  * Runs with 8 threads, as specified in the template
  * parameter.
  */
-model.epochs <8> (ins, outs, 10, 250, 0.1, true);
+model.train_epochs <8> (ins, outs, 10, 250, 0.1);
 ```
 
-For a more comprehensive and practical exmaple, see `samples/mnist/main.cpp`,
-in which we train a deep neural network to recognize hand written digits from
-the MNIST data set (run `./compile` in the `samples/mnist` directory to run
-the program).
+Note that the `NeuralNetwork::train_epochs` method takes a template parameter.
+This parameter indicates how many threads are to be used to train the model.
+
+Support for NVIDIA GPUs is granted with the Zhetapi library's `cuda` branch.
+Training on these GPUs is as simple as follows:
+
+```cpp
+// The critique function: determines when two outputs are equivalent
+// Note that it must be defined on the device, using the __device__ attribute
+auto crit = [] __device__ (zhetapi::Vector <double> actual,
+	zhetapi::Vector <double> expected) {
+		return actual == expected;
+};
+
+model.cuda_epochs(ins, outs, 10, 250, 0.1, crit);
+```
+
+For a more comprehensive and practical example, see the `samples/mnist`
+directory, in which we train a deep neural network to recognize hand written
+digits from the MNIST data set.
 
 ## Code Generation and Dynamically Optimizing Functions
 

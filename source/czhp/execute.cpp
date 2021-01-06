@@ -33,7 +33,17 @@ Token *execute(string str)
 		delete tptr;
 	} else {		
 		// All functions and algorithms are stored in barn
-		zhetapi::node_manager <double, int> mg(str, barn);
+		node_manager <double, int> mg;
+		
+		try {
+			mg = node_manager <double, int> (str, barn);
+		} catch (node_manager <double, int> ::undefined_symbol e) {
+			cout << "Error at line " << line
+				<< ": undefined symbol \""
+				<< e.what() << "\"" << endl;
+
+			exit(-1);
+		}
 
 		/* cout << "mg:" << endl;
 		mg.print(); */
