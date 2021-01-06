@@ -109,6 +109,7 @@ target_link_libraries(port PUBLIC port_function)
 target_link_libraries(port PUBLIC timer)
 
 target_link_libraries(port PUBLIC ${CMAKE_DL_LIBS})
+target_link_libraries(czhp PUBLIC ${CMAKE_DL_LIBS})
 
 # Include directories
 include_directories(PUBLIC engine)

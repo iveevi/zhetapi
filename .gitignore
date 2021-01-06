@@ -6,6 +6,8 @@
 *.output
 *.so
 *.swp
+*.zhplib
+*ubyte
 *~
 .env
 .vscode
@@ -25,4 +27,3 @@ portability
 train*
 zhetapi
 zhetapi-headers
-*ubyte

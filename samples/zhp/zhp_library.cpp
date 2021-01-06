@@ -13,3 +13,13 @@ ZHETAPI_REGISTER(print_hello_world)
 
 	return nullptr;
 }
+
+extern "C" {
+
+ZHETAPI_LIBRARY()
+{
+	ZHETAPI_EXPORT(print_hello_world);
+	ZHETAPI_EXPORT_SYMBOL(hello, print_hello_world);
+}
+
+}

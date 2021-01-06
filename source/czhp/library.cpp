@@ -1,38 +1,61 @@
 #include "global.hpp"
 
+typedef void (*exporter)(Barn <double, int> &);
+
 int compile_library(string file)
 {
 	// Assume the file ends with ".cpp" for now
 	string base = file.substr(0, file.length() - 4);
 	string outlib = base + ".zhplib";
-	string outso = base + ".so";
 
-	printf("Compiling '%s' into zhp library '%s'...\n", file.c_str(), outso.c_str());
+	printf("Compiling '%s' into zhp library '%s'...\n", file.c_str(), outlib.c_str());
 	string cmd = "g++-8 --no-gnu-unique -I engine -I inc/hidden -I inc/std \
-				-g -rdynamic -fPIC -shared " + file  + " -o " + outso;
+				-g -rdynamic -fPIC -shared " + file  + " source/registration.cpp -o " + outlib;
 
-	int ret = system(cmd.c_str());
+	return system(cmd.c_str());
+}
 
-	ifstream fin(file);
-	ofstream fout(outlib);
+int assess_library(string file)
+{
+	Barn <double, int> tmp;
 
-	fout << file << endl;
+	const char *dlsymerr = nullptr;
 
-	string str;
-	while (fin >> str) {
-		if (str.substr(0, 16) == "ZHETAPI_REGISTER") {
-			int i = 17;
-			string ident;
+	// Load the library
+	void *handle = dlopen(file.c_str(), RTLD_NOW);
 
-			while (i < str.length() && str[i] != ')') {
-				ident += str[i];
+	// Check for errors
+	dlsymerr = dlerror();
 
-				i++;
-			}
+	if (dlsymerr) {
+		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
 
-			fout << ident << endl;
-		}
+		return -1;
 	}
 
-	return ret;
+	// Get the exporter
+	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	exporter exprt = (exporter) ptr;
+
+	if (!exprt) {
+		printf("Failed to extract exporter\n");
+
+		return -1;
+	}
+
+	exprt(tmp);
+
+	tmp.list_registered(file);
+
+	return 0;
 }

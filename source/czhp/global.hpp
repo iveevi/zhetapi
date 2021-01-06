@@ -23,6 +23,7 @@ int parse(char = EOF);
 int parse(string);
 
 int compile_library(string);
+int assess_library(string);
 
 Token *execute(string);
 

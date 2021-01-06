@@ -21,9 +21,12 @@ int main(int argc, char *argv[])
 		}
 	} else if (argc == 3) {
 		string o1 = "-c";
+		string o2 = "-d";
 
 		if (argv[1] == o1) {
 			return compile_library(argv[2]);
+		} else if (argv[1] == o2) {
+			return assess_library(argv[2]);
 		} else {
 			printf("Fatal error: unexpected argument '%s'\n", argv[1]);
 

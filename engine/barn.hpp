@@ -263,6 +263,8 @@ public:
 	::std::string overloads(const ::std::string &) const;
 
 	void list() const;
+	void list_registered(::std::string) const;
+
 	void print(bool = false) const;
 
 	// Exceptions
@@ -739,11 +741,19 @@ void Barn <T, U> ::list() const
 }
 
 template <class T, class U>
+void Barn <T, U> ::list_registered(std::string file) const
+{
+	printf("Symbols recorded in %s:\n", file.c_str());
+	for (auto spr : __reg_table)
+		std::cout << "\t" << spr.second.str() << std::endl;
+}
+
+template <class T, class U>
 void Barn <T, U> ::print(bool show_ops) const
 {
-	::std::cout << ::std::string(50, '-') << ::std::endl;
-	::std::cout << "Variables:" << ::std::endl;
-	::std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << "Variables:" << ::std::endl;
+	std::cout << ::std::string(50, '-') << ::std::endl;
 
 	vstack.print();
 

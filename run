@@ -117,7 +117,15 @@ else
 	mv $1 debug/$1-run
 
 	if [ "$1" == "czhp" ]; then
+		set +e
+
+		# Compile the library
 		./debug/$1-run -c samples/zhp/zhp_library.cpp
+
+		# Display the symbols
+		./debug/$1-run -d samples/zhp/zhp_library.zhplib
+
+		# Run a sample script
 		./debug/$1-run samples/zhp/simple.zhp
 	else
 		./debug/$1-run
