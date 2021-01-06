@@ -283,9 +283,11 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 	node *unrefd;
 
 	Token *tptr;
+
 	Token *vptr;
 
 	Variable <T, U> v;
+	Variable <T, U> *vp;
 
 	::std::string ident;
 
@@ -299,7 +301,7 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 	case Token::oph:	
 		size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(leaf, ext));
 
 		tptr = __barn.compute((dynamic_cast <operation_holder *>
 						(tree.__tptr.get()))->rep, values);
@@ -307,8 +309,24 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 		if (tree.__label == l_post_modifier) {
 			vptr = tree.__leaves[0].__tptr.get();
 
-			ident = (dynamic_cast <Variable <T, U> *> (vptr))->symbol();
+			vp = dynamic_cast <Variable <T, U> *> (vptr);
 
+			ident = vp->symbol();
+			
+			v = Variable <T, U> (tptr, ident);
+
+			ext.put(v);
+
+			tptr = vp->get().get();
+
+			return tptr->copy();
+		} else if (tree.__label == l_pre_modifier) {
+			vptr = tree.__leaves[0].__tptr.get();
+
+			vp = dynamic_cast <Variable <T, U> *> (vptr);
+
+			ident = vp->symbol();
+			
 			v = Variable <T, U> (tptr, ident);
 
 			ext.put(v);
@@ -324,7 +342,7 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 			return tree.__tptr->copy();
 		
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(leaf, ext));
 
 		tptr = (*(dynamic_cast <Function <T, U> *> (tree.__tptr.get())))(values);
 
@@ -336,7 +354,7 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 		return unrefd->__tptr.get()->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(leaf, ext));
 
 		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
 
@@ -963,6 +981,10 @@ void node_manager <T, U> ::label_operation(node &ref)
 	case pin:
 	case pde:
 		ref.__label = l_post_modifier;
+		break;
+	case rin:
+	case rde:
+		ref.__label = l_pre_modifier;
 		break;
 	}
 }

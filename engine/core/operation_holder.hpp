@@ -40,7 +40,9 @@ enum codes {
 	geq,	// Greater than or equal to
 	leq,	// Less than or equal to
 	pin,	// Post increment
-	pde,	// Pre increment
+	pde,	// Post decrement
+	rde,	// Pre incremeny
+	rin,	// Pre decrement
 };
 
 extern ::std::string strcodes[];

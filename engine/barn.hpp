@@ -291,6 +291,9 @@ Barn <T, U> ::Barn() : vstack(), fstack()
 	// Increment and decrement
 	__add_unary_operation_ftr(p++, Z, Z, in->get() + 1);
 	__add_unary_operation_ftr(p--, Z, Z, in->get() - 1);
+	
+	__add_unary_operation_ftr(r++, Z, Z, in->get() + 1);
+	__add_unary_operation_ftr(r--, Z, Z, in->get() - 1);
 
 	// Multiplication
 	__add_binary_operation(*, Z, Z, Z);

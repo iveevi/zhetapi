@@ -101,6 +101,10 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = pin;
 	else if (str == "p--")
 		code = pde;
+	else if (str == "r++")
+		code = rin;
+	else if (str == "r--")
+		code = rde;
 }
 
 Token::type operation_holder::caller() const

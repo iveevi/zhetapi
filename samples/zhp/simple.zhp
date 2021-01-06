@@ -1,18 +1,7 @@
-f(x) = x^3 + x
-
-if (f(5) > 0)
-	println("f(5) = ", f(5))
+i = 0
+while (i++ < 10)
+	println("i = ", i)
 
 i = 0
-while (i < 10) {
-	println("i = ", f(i), " and i = ", i)
-
-	i++
-}
-
-i = 9
-while (i >= 0) {
-	println("i = ", f(i), " and i = ", i)
-
-	i--
-}
+while (++i < 10)
+	println("i = ", i)

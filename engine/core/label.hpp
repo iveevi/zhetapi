@@ -78,7 +78,8 @@ namespace zhetapi {
 		l_variable_constant,	// Variable as a constant (differentiation)
 
 		// Modifier,
-		l_post_modifier
+		l_post_modifier,
+		l_pre_modifier
 	};
 
 	/**

@@ -84,6 +84,9 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		// Unary increment/decrement
 		__add_operation_heter_symbol(__post_incr, ++, p++);
 		__add_operation_heter_symbol(__post_decr, --, p--);
+		
+		__add_operation_heter_symbol(__pre_incr, ++, r++);
+		__add_operation_heter_symbol(__pre_decr, --, r--);
 
 		/*
 		 * Represents a binary operation of lowest priotrity.
@@ -110,6 +113,7 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		__t2_bin = __power;
 
 		__t_post = __post_incr | __post_decr;
+		__t_pre = __pre_incr | __pre_decr;
 
 		// Type parsers (change dependence on int_ and double_ parsers
 		// specifically)
@@ -462,6 +466,10 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 				(__node_factor >> __power >> __node_term) [
 					_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 				]
+				
+				| (__t_pre >> __node_var) [
+					_val = phoenix::construct <zhetapi::node> (_1, _2, true)
+				]
 
 				| (__node_var >> __t_post) [
 					_val = phoenix::construct <zhetapi::node> (_2, _1, true)
@@ -707,6 +715,9 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__post_incr;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__post_decr;
+	
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__pre_incr;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__pre_decr;
 
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__plus;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__minus;
