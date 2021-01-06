@@ -91,6 +91,7 @@ static void check(string &keyword)
 {
 	string parenthesized;
 	string block;
+	string library;
 
 	if (keyword == "if") {
 		if (parse_parenthesized(parenthesized)) {
@@ -126,6 +127,21 @@ static void check(string &keyword)
 			t = execute(parenthesized);
 		}
 		
+		keyword.clear();
+	}
+
+	if (keyword == "import") {
+		cin >> library;
+
+		// TODO: Prioritize *.zhp over *.zhplib
+		cout << "need to import \"" << library << "\".zhp or .zhplib" << endl;
+
+		// For now only import *.zhplib
+		import_library("./" + library + ".zhplib");
+
+		// NOTE: the import system only checks in the current directory
+		// and the script directory
+
 		keyword.clear();
 	}
 }

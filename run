@@ -127,6 +127,9 @@ else
 
 		# Run a sample script
 		./debug/$1-run samples/zhp/simple.zhp
+	
+		# Run a sample script with importing
+		./debug/$1-run samples/zhp/importing.zhp
 	else
 		./debug/$1-run
 	fi

@@ -60,7 +60,7 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		 * Parser for an identifier. Used to construct variable
 		 * clusters.
 		 */
-		__ident = +qi::char_("a-zA-Z$");
+		__ident = +qi::char_("a-zA-Z$_");
 
 		__str = +(__esc | (qi::char_ - '\"'));
 

@@ -24,6 +24,7 @@ int parse(string);
 
 int compile_library(string);
 int assess_library(string);
+int import_library(string);
 
 Token *execute(string);
 

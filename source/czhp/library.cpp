@@ -59,3 +59,44 @@ int assess_library(string file)
 
 	return 0;
 }
+
+int import_library(string file)
+{
+	const char *dlsymerr = nullptr;
+
+	// Load the library
+	void *handle = dlopen(file.c_str(), RTLD_NOW);
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	// Get the exporter
+	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	exporter exprt = (exporter) ptr;
+
+	if (!exprt) {
+		printf("Failed to extract exporter\n");
+
+		return -1;
+	}
+
+	exprt(barn);
+
+	return 0;
+}

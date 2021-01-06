@@ -269,7 +269,8 @@ Token *node_manager <T, U> ::value(node tree) const
 
 		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
 
-		return tptr->copy();
+		if (tptr)
+			return tptr->copy();
 	}
 
 	return nullptr;
@@ -358,7 +359,8 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 
 		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
 
-		return tptr->copy();
+		if (tptr)
+			return tptr->copy();
 	}
 
 	return nullptr;

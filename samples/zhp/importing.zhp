@@ -1,0 +1,7 @@
+import zhp_library
+
+hello()
+
+print_hello_world()
+
+println("first = ", first(10, 11))
