@@ -14,7 +14,7 @@ function compile_debug {
 
 	make -j8 $1
 
-	mv $1 debug/$1-run
+	mv $1 debug/$1-debug
 }
 
 function czhp_normal {

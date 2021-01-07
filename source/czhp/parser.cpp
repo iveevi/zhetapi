@@ -105,7 +105,7 @@ static int parse_block_ignore()
 	} else {
 		fseek(stdin, -1, SEEK_CUR);
 
-		while ((c = getchar()) != '\n');
+		while ((c = getchar()) != '\n' && c != EOF);
 
 		__lineup(c);
 	}
@@ -159,6 +159,33 @@ static void check(string &keyword)
 		}
 
 		if_prev = true;
+
+		Token *t = execute(parenthesized);
+
+		if (*t == op_true) {
+			if_true = true;
+
+			parse_block();
+		} else {
+			if_true = false;
+
+			parse_block_ignore();
+		}
+		
+		keyword.clear();
+	}
+
+	if (keyword == "elif") {
+		if (!if_prev) {
+			printf("Error at line %lu: need an if before an elif\n", line);
+
+			exit(-1);
+		}
+
+		if (parse_parenthesized(parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after an if\n", line);
+			exit(-1);
+		}
 
 		Token *t = execute(parenthesized);
 
@@ -378,7 +405,9 @@ vector <string> split(string str)
 				ignore = true;
 			
 			if (!ignore && str[i] == '=') {
-				if (!tmp.empty()) {
+				if (i < n - 1 && str[i + 1] == '=') {
+					tmp += "==";
+				} else if (!tmp.empty()) {
 					out.push_back(tmp);
 
 					tmp.clear();
@@ -401,6 +430,10 @@ vector <string> split(string str)
 
 	if (!tmp.empty())
 		out.push_back(tmp);
+	
+	/* cout << "split:" << endl;
+	for (auto s : out)
+		cout << "\ts = " << s << endl; */
 
 	return out;
 }
