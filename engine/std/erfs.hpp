@@ -1,5 +1,5 @@
-#ifndef ERFS_H_
-#define ERFS_H_
+#ifndef STD_ERFS_H_
+#define STD_ERFS_H_
 
 // Engine headers
 #include <erf.hpp>

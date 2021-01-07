@@ -30,6 +30,7 @@ namespace zhetapi {
 		 * 	wld - wildcard
 		 */
 		enum type {
+			alg,
 			opd,
 			oph,
 			opn,

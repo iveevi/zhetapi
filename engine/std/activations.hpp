@@ -1,5 +1,5 @@
-#ifndef STD_ACTIVATION_CLASSES_H_
-#define STD_ACTIVATION_CLASSES_H_
+#ifndef STD_ACTIVATIONS_H_
+#define STD_ACTIVATIONS_H_
 
 // Engine headers
 #ifdef ZHP_CUDA

@@ -13,6 +13,7 @@ using namespace std;
 using namespace zhetapi;
 
 extern size_t line;
+extern string file;
 extern vector <string> global;
 extern Barn <double, int> barn;
 

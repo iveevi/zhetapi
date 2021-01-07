@@ -9,6 +9,7 @@ Operand <bool> *op_true = new Operand <bool> (true);
 Operand <bool> *op_false = new Operand <bool> (false);
 
 size_t line = 1;
+string file = "";
 
 // Main
 int main(int argc, char *argv[])
@@ -19,6 +20,8 @@ int main(int argc, char *argv[])
 
 			exit(-1);
 		}
+
+		file = argv[1];
 	} else if (argc == 3) {
 		string o1 = "-c";
 		string o2 = "-d";

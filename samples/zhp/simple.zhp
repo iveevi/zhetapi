@@ -1,14 +1,8 @@
-i = 0
-while (i++ < 10)
-	println("i = ", i)
+x = 1
+if (x > 0)
+	println("x > 0")
 
-i = 0
-while (++i < 10)
-	println("i = ", i)
-
-alg my_func(x)
-{
-	println("hello, x =" x)
-}
-
-my_func(10)
+if (x < 0)
+	println("x < 0")
+else
+	println("x >= 0")

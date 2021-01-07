@@ -1,11 +1,33 @@
 #include "global.hpp"
 
-#define __lineup(c) 	\
-	if (c == '\n')	\
+#define __lineup(c) 		\
+	if (c == '\n')		\
 		line++;
 
-#define __skip_space()	\
+#define __skip_space()		\
 	while (isspace(c = getchar()));
+
+#define __skip_to_char(s)	\
+	while ((c = getchar()) != s);
+
+static inline bool __file_exists(string file)
+{
+	if (FILE *f = fopen(file.c_str(), "r")) {
+		fclose(f);
+
+		return true;
+	} else {
+		return false;
+	} 
+}
+
+static inline string __get_dir(string file)
+{
+	size_t i = file.length() - 1;
+	while (file[i--] != '/');
+
+	return file.substr(0, i + 2);
+}
 
 // Global scope code
 vector <string> global;
@@ -121,6 +143,9 @@ static int parse_function(string &ident, vector <string> &params)
 	return 0;
 }
 
+bool if_prev = false;
+bool if_true = false;
+
 static void check(string &keyword)
 {
 	string parenthesized;
@@ -133,12 +158,36 @@ static void check(string &keyword)
 			exit(-1);
 		}
 
+		if_prev = true;
+
 		Token *t = execute(parenthesized);
 
-		if (*t == op_true)
+		if (*t == op_true) {
+			if_true = true;
+
 			parse_block();
-		else
+		} else {
+			if_true = false;
+
 			parse_block_ignore();
+		}
+		
+		keyword.clear();
+	}
+
+	if (keyword == "else") {
+		if (!if_prev) {
+			printf("Error at line %lu: need an if before an else\n", line);
+
+			exit(-1);
+		}
+		
+		if_prev  = false;
+
+		if (if_true)
+			parse_block_ignore();
+		else
+			parse_block();
 		
 		keyword.clear();
 	}
@@ -167,14 +216,17 @@ static void check(string &keyword)
 	if (keyword == "include") {
 		cin >> library;
 
-		// TODO: Prioritize *.zhp over *.zhplib
-		cout << "need to import \"" << library << "\".zhp or .zhplib" << endl;
+		// Check current dir
+		string current_dir = "./" + library + ".zhplib";
+		string script_dir = __get_dir(file) + library + ".zhplib";
 
 		// For now only import *.zhplib
-		import_library("./" + library + ".zhplib");
-
-		// NOTE: the import system only checks in the current directory
-		// and the script directory
+		if (__file_exists(current_dir))
+			import_library(current_dir);
+		else if (__file_exists(script_dir))
+			import_library(script_dir);
+		else
+			printf("Error at line %lu: could not import library '%s'\n", line, library.c_str());
 
 		keyword.clear();
 	}
