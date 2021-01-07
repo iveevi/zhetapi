@@ -1,5 +1,54 @@
 #!/bin/bash
 
+# Functions
+function compile_normal {
+	cmake -DCMAKE_BUILD_TYPE=Release .
+
+	make -j8 $1
+}
+
+function compile_debug {
+	mkdir -p debug
+
+	cmake -DCMAKE_BUILD_TYPE=Debug .
+
+	make -j8 $1
+
+	mv $1 debug/$1-run
+}
+
+function czhp_normal {
+	set +e
+
+	# Compile the library
+	echo "================================================="
+	echo "Testing library compilation..."
+	echo -e "=================================================\n"
+	./debug/czhp-run -c samples/zhp/zhp_library.cpp
+
+	# Display the symbols
+
+	echo -e "\n================================================="
+	echo "Displaying symbols in library..."
+	echo -e "=================================================\n"
+	./debug/czhp-run -d samples/zhp/zhp_library.zhplib
+
+	# Run a sample script
+
+	echo -e "\n================================================="
+	echo "Running sample script for general features..."
+	echo -e "=================================================\n"
+	./debug/czhp-run samples/zhp/simple.zhp
+
+	# Run a sample script with importing
+
+	echo -e "\n================================================="
+	echo "Running sample script for import features..."
+	echo -e "=================================================\n"
+	./debug/czhp-run samples/zhp/importing.zhp
+}
+
+# Ignore errors
 set -e
 
 if [ "$#" -eq 0 ]; then
@@ -9,27 +58,25 @@ elif [ $1 = "install" ]; then
 
 	set +e
 
-	cmake .
-	
 	mkdir -p bin
 	mkdir -p build
 
-	# Compile apps
-	make -j8 all
+	compile_normal all
 
 	# Move executables and libraries
 	if [ -f "libzhp.so" ]; then
 		mv libzhp.* bin/
 	fi
 
+	# Place the binaries into their appropriate directories
 	mv zhetapi czhp bin/
 	mv port exp cuda build/
 elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .
-	
+
 	mkdir -p bin
-	
+
 	# Compile and move apps
 	make -j8 port
 
@@ -37,99 +84,38 @@ elif [ $1 = "port" ]; then
 
 	./bin/port
 elif [ $1 = "cuda-memcheck" ]; then
-	echo "Running $2 on cuda-gdb"
-
-	mkdir -p debug
-
-	cmake -DCMAKE_BUILD_TYPE=Debug .
-
-	make -j8 $2
-
-	mv $2 debug/$2-debug
+	compile_debug $2
 
 	cuda-memcheck --show-backtrace yes --racecheck-report all --leak-check full ./debug/$2-debug
 elif [ $1 = "cuda-gdb" ]; then
-	echo "Running $2 on cuda-gdb"
-
-	mkdir -p debug
-
-	cmake -DCMAKE_BUILD_TYPE=Debug .
-
-	make -j8 $2
-
-	mv $2 debug/$2-debug
+	compile_debug $2
 
 	cuda-gdb ./debug/$2-debug
 elif [ $1 = "gdb" ]; then
-	echo "Running source/$2.cpp on gdb"
-
-	mkdir -p debug
-
-	cmake -DCMAKE_BUILD_TYPE=Debug .
-
-	make -j8 $2
-
-	mv $2 debug/$2-debug
+	compile_debug $2
 
 	gdb debug/$2-debug
 elif [ $1 = "valgrind" ] || [ $1 = "vgrind" ]; then
-	echo "Running source/$2.cpp on valgrind"
-
-	mkdir -p debug
-
-	cmake -DCMAKE_BUILD_TYPE=Debug .
-
-	make -j8 $2
-
-	mv $2 debug/$2-debug
+	compile_debug $2
 
 	valgrind --leak-check=full --show-leak-kinds=all ./debug/$2-debug
-elif [ $1 = "callgrind" ] || [ $1 = "vgrind" ]; then
-	mkdir -p debug
-
-	cmake -DCMAKE_BUILD_TYPE=Debug .
-
-	make -j8 $2
-
-	mv $2 debug/$2-run
+elif [ $1 = "callgrind" ] || [ $1 = "kgrind" ]; then
+	compile_debug $2
 
 	valgrind --tool=callgrind --callgrind-out-file=cgrind.out ./debug/$2-run
+
 	kcachegrind cgrind.out
 
 	rm cgrind.out
-elif [ $1 = "optimize" ] || [ $1 = "opt" ]; then
-	echo "Running source/$2.cpp with optimization"
-
-	mkdir -p debug
-
-	g++-8 -O3 source/$2.cpp -o debug/$2-opt
-
-	./debug/$2-opt
 else
-	echo "Running source/$1.cpp"
-
 	mkdir -p debug
 
-	cmake -DCMAKE_BUILD_TYPE=Release .
-
-	make -j8 $1
+	compile_normal $1
 
 	mv $1 debug/$1-run
 
 	if [ "$1" == "czhp" ]; then
-		set +e
-
-		# Compile the library
-		./debug/$1-run -c samples/zhp/zhp_library.cpp
-
-		# Display the symbols
-		./debug/$1-run -d samples/zhp/zhp_library.zhplib
-
-		# Run a sample script
-		./debug/$1-run samples/zhp/simple.zhp
-	
-		# Run a sample script with importing
-		./debug/$1-run samples/zhp/importing.zhp
+		czhp_normal
 	else
 		./debug/$1-run
 	fi

@@ -1,8 +1,11 @@
 #include "global.hpp"
 
-#define __lineup(c) 						\
-	if (c == '\n')						\
+#define __lineup(c) 	\
+	if (c == '\n')	\
 		line++;
+
+#define __skip_space()	\
+	while (isspace(c = getchar()));
 
 // Global scope code
 vector <string> global;
@@ -28,7 +31,8 @@ static int extract_block(string &block)
 {
 	char c;
 	
-	while (isspace(c = getchar()));
+	__skip_space();
+	// while (isspace(c = getchar()));
 
 	if (c == '{') {
 		while ((c = getchar()) != '}')
@@ -87,6 +91,36 @@ static int parse_block_ignore()
 	return 0;
 }
 
+static int parse_function(string &ident, vector <string> &params)
+{
+	char c;
+
+	__skip_space();
+	
+	fseek(stdin, -1, SEEK_CUR);
+
+	while ((c = getchar()) != '(')
+		ident += c;
+
+	string tmp;
+	while ((c = getchar()) != ')') {
+		if (c == ',') {
+			if (!tmp.empty()) {
+				params.push_back(tmp);
+
+				tmp.clear();
+			}
+		} else if (!isspace(c)) {
+			tmp += c;
+		}
+	}
+
+	if (!tmp.empty())
+		params.push_back(tmp);
+
+	return 0;
+}
+
 static void check(string &keyword)
 {
 	string parenthesized;
@@ -130,7 +164,7 @@ static void check(string &keyword)
 		keyword.clear();
 	}
 
-	if (keyword == "import") {
+	if (keyword == "include") {
 		cin >> library;
 
 		// TODO: Prioritize *.zhp over *.zhplib
@@ -141,6 +175,27 @@ static void check(string &keyword)
 
 		// NOTE: the import system only checks in the current directory
 		// and the script directory
+
+		keyword.clear();
+	}
+
+	if (keyword == "alg") {
+		cout << "Algorithm!" << endl;
+
+		string ident;
+
+		vector <string> params;
+
+		if (parse_function(ident, params)) {
+			cout << "Failed to parse function..." << endl;
+
+			exit(-1);
+		} else {
+			cout << "ident = " << ident << endl;
+			cout << "params:" << endl;
+			for (auto i : params)
+				cout << "\t\"" << i << "\"" << endl;
+		}
 
 		keyword.clear();
 	}

@@ -407,8 +407,8 @@ Below are the currently usable classes.
 | `Function` | A mathematical function | `function.hpp`
 | `Matrix` | A matrix in linear algebra | `matrix.hpp`
 | `Network` | A deep neural network in machine learning | `network.hpp`
-| `Optimizer` | A class which computes costs, in the standard machine learning
-context | `optimizer.hpp`
+| `Erf` | A class which computes costs, in the standard machine learning
+context | `erf.hpp`
 | `Polynomial` | A polynomial in algebra | `polynomial.hpp`
 | `Rational` | A rational number in algebra | `rational.hpp`
 | `Tensor` | Represents a tensor in algebra | `tensor.hpp`
@@ -428,10 +428,19 @@ A description of each directory is presented below:
 | engine | Contains the library template headers. All library features are
 present in this module. It will later contain API functions.
 
-| matplotlib-cpp | Contains source from the matplotlib-cpp repository. Used for
-graphing applications in the library.
+| engine/core | Contains the core API of the Zhetapi library, that runs behind
+the scenes of the convenient features provided by the library.
 
-| samples | Contains examples of library usage.
+| engine/cuda | Contains CUDA headers for the CUDA functions provided by the
+library.
+
+| engine/graph | Contains python scripts to assist in graphing procedures.
+
+| engine/json | Contains nlohmann's single header C++ API for parsing JSON files.
+
+| samples | Contains examples of library usage. Currently contains the `zhp`
+directory for scripts and library samples and the `mnist` directory for a showcase
+of the `NeuralNetwork` class.
 
 | source | Contains source code for the headers, CLI, tests and upcoming
 features of this library.

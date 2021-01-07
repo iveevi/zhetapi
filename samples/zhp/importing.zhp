@@ -1,4 +1,4 @@
-import zhp_library
+include zhp_library
 
 hello()
 

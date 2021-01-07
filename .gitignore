@@ -13,7 +13,6 @@
 .vscode
 CMakeCache.txt
 CMakeFiles
-Makefile
 __gen*
 __pycache__
 bin
