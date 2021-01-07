@@ -22,9 +22,14 @@ function czhp_normal {
 
 	# Compile the library
 	echo "================================================="
-	echo "Testing library compilation..."
+	echo "Testing single file library compilation..."
 	echo -e "=================================================\n"
 	./debug/czhp-run -c samples/zhp/zhp_library.cpp
+
+	echo -e "\n================================================="
+	echo "Testing separate file library compilation..."
+	echo -e "=================================================\n"
+	./debug/czhp-run -c samples/zhp/l1.cpp samples/zhp/l2.cpp
 
 	# Display the symbols
 
@@ -71,6 +76,12 @@ elif [ $1 = "install" ]; then
 	# Place the binaries into their appropriate directories
 	mv zhetapi czhp bin/
 	mv port exp cuda build/
+elif [ $1 = "lib" ]; then
+	echo "Compiling libraries..."
+	bin/czhp -c source/lib/io/io.cpp
+
+	echo "Displaying symbols..."
+	bin/czhp -d source/lib/io/io.zhplib
 elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .
@@ -121,6 +132,6 @@ else
 	fi
 fi
 
-if [ $1 != "install" ]; then
+if [ -f libzhp.* ]; then
 	mv libzhp.* debug
 fi

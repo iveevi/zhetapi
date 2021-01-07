@@ -14,7 +14,40 @@ string file = "";
 // Main
 int main(int argc, char *argv[])
 {
-	if (argc == 2) {
+	char c;
+
+	string sources;
+	char *next;
+	int index;
+	
+	while ((c = getopt(argc, argv, ":c:d:")) != EOF) {
+		switch (c) {
+		case 'c':
+			index = optind - 1;
+
+			sources = "";
+			while (index < argc) {
+				next = strdup(argv[index++]);
+
+				sources += next;
+				sources += " ";
+
+				if (next[0] == '-')
+					break;
+			}
+
+			cout << "Compiling option! (optarg = " << sources << ")" << endl;
+			break;
+		case 'd':
+			cout << "Library viewer! (optarg = " << optarg << ")" << endl;
+			break;
+		default:
+			cout << "Normal mode: (optarg = " << optarg << ")" << endl;
+			break;
+		}
+	}
+	
+	/*if (argc == 2) {
 		if (!freopen(argv[1], "r", stdin)) {
 			printf("Fatal error: failed to open file '%s'.\n", argv[1]);
 
@@ -44,5 +77,5 @@ int main(int argc, char *argv[])
 	barn.put(Variable <double, int> (op_true->copy(), "true"));
 	barn.put(Variable <double, int> (op_false->copy(), "false"));
 
-	return parse();
+	return parse(); */
 }

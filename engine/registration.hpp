@@ -36,7 +36,7 @@ namespace zhetapi {
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
 #define ZHETAPI_LIBRARY()			\
-	void zhetapi_export_symbols(zhetapi::Barn <double, int> &barn)
+	extern "C" void zhetapi_export_symbols(zhetapi::Barn <double, int> &barn)
 
 #define ZHETAPI_EXPORT(symbol)			\
 	barn.put(zhetapi::Registrable(#symbol, &symbol));
