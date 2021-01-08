@@ -4,6 +4,8 @@
 // C++ standard headers
 #include <cstdint>
 
+namespace zhetapi {
+
 /**
  * Display:
  *
@@ -14,5 +16,7 @@ struct Display {
 	static const uint8_t batch;
 	static const uint8_t graph;
 };
+
+}
 
 #endif

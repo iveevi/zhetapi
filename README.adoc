@@ -437,11 +437,11 @@ Below are the currently usable classes.
 | `Activation` | An activation in the standard machine learning context | `activations.hpp`
 | `Barn` | A class which contains settings for other classes like functions | `rational.hpp`
 | `Complex` | A complex number in mathematics | `complex.hpp`
-| `Function` | A mathematical function | `function.hpp`
-| `Matrix` | A matrix in linear algebra | `matrix.hpp`
-| `Network` | A deep neural network in machine learning | `network.hpp`
 | `Erf` | A class which computes costs, in the standard machine learning
 context | `erf.hpp`
+| `Function` | A mathematical function | `function.hpp`
+| `Matrix` | A matrix in linear algebra | `matrix.hpp`
+| `NeuralNetwork` | A deep neural network in machine learning | `network.hpp`
 | `Polynomial` | A polynomial in algebra | `polynomial.hpp`
 | `Rational` | A rational number in algebra | `rational.hpp`
 | `Tensor` | Represents a tensor in algebra | `tensor.hpp`
@@ -493,7 +493,7 @@ actions.
 
 As an example that is not yet featured, it is not yet possible to have the
 object recognize that `3xy + 5yx` is the same as `8xy`. This feature would also
-help reduce the complexity of derivates of these objects.
+help reduce the complexity of derivatives of these objects.
 
 ## Integration and Differentiation
 

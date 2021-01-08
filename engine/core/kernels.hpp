@@ -3,7 +3,8 @@
 
 /**
  * This file contains CPU "kernels" which speed up computation in other parts of
- * the library, such as Neural Network training.
+ * the library, such as Neural Network training. Some of these kernels may be
+ * moved to become part of the public API.
  */
 namespace zhetapi {
 
@@ -46,7 +47,7 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 	for (size_t i = 1; i < cs; i++) {
 		T acc = 0;
 
-		for (size_t k = 0; k < rs; k++) 
+		for (size_t k = 0; k < rs; k++)
 			acc += M.__array[k * cs + i] * V.__array[k];
 
 		out.__array[i - 1] = acc;

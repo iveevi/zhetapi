@@ -1,7 +1,7 @@
 #ifndef OPERAND_H_
 #define OPERAND_H_
 
-// C/C++ headers
+// C++ headers
 #include <sstream>
 
 // Engine headers
@@ -9,266 +9,101 @@
 
 namespace zhetapi {
 
-	/* Operand Class:
-	 * 
-	 * Represents an Operand in mathematics
-	 * by using data_t as the numerical data
-	 * type or value */
-	template <typename data_t>
-	class Operand : public Token {
-		/* data_t [val] - the only member of Operand
-		 * which represents its value */
-		data_t val;
-	public:
-		/* Constructors:
-		 * Operand() - sets the private member Variable
-		 *   [val] to the default value of data_t
-		 * Operand(data_t) - sets the private member Variable
-		 *   [val] to whatever value is passed */
-		Operand();
-		// Operand(data_t);
-		Operand(const data_t &);
-		Operand(const Operand &);
+// Operand class
+template <class T>
+class Operand : public Token {
+	T	__val = T();
+public:
+	Operand();
+	Operand(const T &);
+	Operand(const Operand &);
 
-		/* Virtualized Member Functions:
-		 * void [set](data_t) - sets the private member Variable
-		 *   to whatever value is passed
-		 * void operator[](data_t) - sets the private member
-		 *   Variable to whatever value is passed
-		 * data_t &[get]() - returns a reference to the private
-		 *   member Variable
-		 * const data_t &[get]() - returns a constant (unchangeable)
-		 *   reference to the private member Variable
-		 * data_t &operator*() - returns a reference to the private
-		 *   member Variable
-		 * const data_t &operator*() - returns a constant (unchangeable)
-		 *   reference to the private member Variable */
-		virtual void set(data_t);
-		virtual void operator[](data_t);
-		
-		virtual data_t &get();
-		virtual const data_t &get() const;
+	Operand &operator=(const Operand &);
 
-		virtual data_t &operator*();
-		virtual const data_t &operator*() const;
+	T &get();
+	const T &get() const;
 
-		const ::std::string &symbol() const {
-			::std::string *nout = new ::std::string(str());
-			return *nout;
-		}
+	void set(const T &);
 
-		// Add descriptors later
-		Operand &operator=(const Operand &);
+	// Virtual functionss
+	type caller() const override;
+	std::string str() const override;
+	Token *copy() const override;
 
-		type caller() const override;
-		::std::string str() const override;
-		Token *copy() const override;
+	bool operator==(Token *) const override;
+};
 
-		bool operator==(Token *) const override;
+// Constructors
+template <class T>
+Operand <T> ::Operand () {}
 
-		/* Friends:
-		 * ::std::ostream &operator<<(::std::ostream &, const Operand
-		 *   <data_t> &) - outputs the value of val onto the stream
-		 *   pointed to by the passed ostream object
-		 * ::std::istream &operator>>(::std::istream &, Operand &) - reads
-		 *   input from the stream passed in and sets the value
-		 *   of the val in the passed Operand object to the read data_t
-		 *   value */
-		template <typename type>
-		friend ::std::ostream &operator<<(::std::ostream &, const
-			Operand <data_t> &);
+template <class T>
+Operand <T> ::Operand(const T &data) : __val(data) {}
 
-		template <typename type>
-		friend ::std::istream &operator>>(::std::istream &, Operand
-			<data_t> &);
+template <class T>
+Operand <T> ::Operand(const Operand &other) : __val(other.__val) {}
 
-		/* Comparison Operators: */
-		template <typename type>
-		friend bool &operator==(const Operand &, const Operand &);
-		
-		template <typename type>
-		friend bool &operator!=(const Operand &, const Operand &);
-		
-		template <typename type>
-		friend bool &operator>(const Operand &, const Operand &);
-		
-		template <typename type>
-		friend bool &operator<(const Operand &, const Operand &);
-		
-		template <typename type>
-		friend bool &operator>=(const Operand &, const Operand &);
-		
-		template <typename type>
-		friend bool &operator<=(const Operand &, const Operand &);
+template <class T>
+Operand <T> &Operand <T> ::operator=(const Operand &other)
+{
+	if (this != &other)
+		__val = other.__val;
 
-		// on
-		template <class A>
-		operator Operand <A> ();
-	};
+	return *this;
+}
 
-	/* Operand Class Member Functions
-	 * 
-	 * See class declaration to see a
-	 * description of each function
-	 *
-	 * Constructors: */
-	template <typename data_t>
-	Operand <data_t> ::Operand () : val(data_t()) {}
+// Getters and setters
+template <class T>
+T &Operand <T> ::get()
+{
+	return __val;
+}
 
-	//template <typename data_t>
-	//Operand <data_t> ::Operand(data_t data) : val(data) {}
-	
-	template <typename data_t>
-	Operand <data_t> ::Operand(const data_t &data) : val(data) {}
+template <class T>
+const T &Operand <T> ::get() const
+{
+	return __val;
+}
 
-	template <typename data_t>
-	Operand <data_t> ::Operand(const Operand &other) : val(other.val) {}
+template <class T>
+void Operand <T> ::set(const T &x)
+{
+	__val = x;
+}
 
-	/* Virtualized member functions:
-	 * setters, getter and operators */
-	template <typename data_t>
-	void Operand <data_t> ::set(data_t data)
-	{
-		val = data;
-	}
+// Virtual overrides
+template <class T>
+Token::type Operand <T> ::caller() const
+{
+	return opd;
+}
 
-	template <typename data_t>
-	void Operand <data_t> ::operator[](data_t data)
-	{
-		val = data;
-	}
+template <class T>
+std::string Operand <T> ::str() const
+{
+	std::ostringstream oss;
 
-	template <typename data_t>
-	data_t &Operand <data_t> ::get()
-	{
-		return val;
-	}
+	oss << __val;
 
-	template <typename data_t>
-	const data_t &Operand <data_t> ::get() const
-	{
-		return val;
-	}
+	return oss.str();
+}
 
-	template <typename data_t>
-	data_t &Operand <data_t> ::operator*()
-	{
-		return val;
-	}
+template <class T>
+Token *Operand <T> ::copy() const
+{
+	return new Operand(__val);
+}
 
-	template <typename data_t>
-	const data_t &Operand <data_t> ::operator*() const
-	{
-		return val;
-	}
+template <class T>
+bool Operand <T> ::operator==(Token *tptr) const
+{	
+	Operand *opd = dynamic_cast <Operand *> (tptr);
 
-	template <typename data_t>
-	Operand <data_t> &Operand <data_t> ::operator=(const Operand &other)
-	{
-		val = other.val;
-		return *this;
-	}
+	if (opd == nullptr)
+		return false;
 
-	/* Friend functions: istream and
-	 * ostream utilities */
-	template <typename data_t>
-	::std::ostream &operator<< (::std::ostream &os, const Operand <data_t>
-		&right)
-	{
-		os << right.get();
-		return os;
-	}
-
-	template <typename data_t>
-	::std::istream &operator>> (::std::istream &is, Operand <data_t> &right)
-	{
-		data_t temp;
-		is >> temp;
-		right.set(temp);
-		return is;
-	}
-
-	/* Comparison functions: */
-	template <typename data_t>
-	bool operator==(const Operand <data_t> &right, const Operand
-		<data_t> &left)
-	{
-		return *right == *left;
-	}
-
-	template <typename data_t>
-	bool operator!=(const Operand <data_t> &right, const Operand
-		<data_t> &left)
-	{
-		return right != left;
-	}
-
-	template <typename data_t>
-	bool operator>(const Operand <data_t> &right, const Operand <data_t>
-		&left)
-	{
-		return right.val > left.val;
-	}
-
-	template <typename data_t>
-	bool operator<(const Operand <data_t> &right, const Operand <data_t>
-	&left)
-	{
-		return right.val < left.val;
-	}
-
-	template <typename data_t>
-	bool operator>=(const Operand <data_t> &right, const Operand <data_t>
-	&left)
-	{
-		return right.val >= left.val;
-
-	}
-	template <typename data_t>
-	bool operator<=(const Operand <data_t> &right, const Operand <data_t>
-	&left)
-	{
-		return right.val <= left.val;
-	}
-
-	/* Token class derived functions: */
-	template <typename data_t>
-	Token::type Operand <data_t> ::caller() const
-	{
-		return opd;
-	}
-
-	template <typename data_t>
-	::std::string Operand <data_t> ::str() const
-	{
-		::std::ostringstream oss;
-
-		oss << val;
-
-		return oss.str();
-	}
-
-	template <class T>
-	Token *Operand <T> ::copy() const
-	{
-		return new Operand(*this);
-	}
-
-	template <class T>
-	bool Operand <T> ::operator==(Token *t) const
-	{
-		if (dynamic_cast <Operand <T> *> (t) == nullptr)
-			return false;
-
-		return val == (dynamic_cast <Operand *> (t))->get();
-	}
-
-	template <class T>
-	template <class A>
-	Operand <T> ::operator Operand <A> ()
-	{
-		return Operand <A> {(A) val};
-	}
+	return (opd->__val == __val);
+}
 
 }
 

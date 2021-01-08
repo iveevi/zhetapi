@@ -18,9 +18,10 @@
 #include <json/json.hpp>
 
 // Engine headers
+#include <core/kernels.hpp>
+
 #include <dataset.hpp>
 #include <display.hpp>
-#include <kernels.hpp>
 #include <optimizer.hpp>
 
 #ifdef ZHP_CUDA
@@ -47,7 +48,7 @@
 #endif
 
 namespace zhetapi {
-		
+
 namespace ml {
 
 // TODO: Extract into a more generalized abstraction
@@ -70,13 +71,7 @@ bool default_comparator(const Vector <T> &a, const Vector <T> &e)
 	return a == e;
 };
 
-/*
-* Nerual Network
-*
-* @tparam T is the type with which calculations are performed
-* @tparam U is the type of activation parameter scheme, ie. unary or
-* binary
-*/
+// Neural network class
 template <class T>
 class NeuralNetwork {
 public:
@@ -104,7 +99,7 @@ private:
 	std::vector <Vector <T>>		__z = {};
 
 	Erf <T> *				__cost = nullptr; // Safe to copy
-	
+
 	Comparator <T>				__cmp = __default_comparator;
 
 	void clear();
@@ -127,7 +122,7 @@ public:
 	void set_comparator(const Comparator <T> &);
 
 	Matrix <T> *adjusted(T mu);
-	
+
 	Vector <T> compute(const Vector <T> &);
 	Vector <T> compute(const Vector <T> &,
 			Matrix <T> *);
@@ -138,7 +133,7 @@ public:
 			Matrix <T> *,
 			Vector <T> *,
 			Vector <T> *) const;
-	
+
 	Vector <T> compute_no_cache(const Vector <T> &) const;
 	Vector <T> compute_no_cache(const Vector <T> &,
 			Matrix <T> *) const;
@@ -163,7 +158,7 @@ public:
 			const Vector <T> &,
 			Erf <T> *,
 			bool = false);
-	
+
 	Matrix <T> *simple_gradient(Matrix <T> *,
 			const Vector <T> &,
 			const Vector <T> &,
@@ -174,14 +169,14 @@ public:
 			const Vector <T> &,
 			const Vector <T> &,
 			Erf <T> *);
-	
+
 	template <size_t = 1>
 	TrainingStatistics validate(
 			const DataSet <T> &,
 			const DataSet <T> &);
 
 	void train(const Vector <T> &, const Vector <T> &, T);
-	
+
 	template <size_t = 1>
 	void simple_train(
 			const DataSet <T> &,
@@ -289,14 +284,14 @@ NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
 		__weights[i] = other.__weights[i];
 		__momentum[i] = other.__momentum[i];
 	}
-	
+
 	for (size_t i = 0; i < __size; i++) {
 		__layers[i] = {
 			other.__layers[i].first,
 			copy(other.__layers[i].second)
 		};
 	}
-	
+
 	__a = std::vector <Vector <T>> (__size);
 	__z = std::vector <Vector <T>> (__size - 1);
 }
@@ -322,7 +317,7 @@ NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer <T>> &layers,
 	__layers = new Layer <T> [__size];
 	for (int i = 0; i < __size; i++)
 		__layers[i] = layers[i];
-	
+
 	__weights = new Matrix <T> [__size - 1];
 	__momentum = new Matrix <T> [__size - 1];
 
@@ -352,7 +347,7 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 		__size = other.__size;
 		__isize = other.__isize;
 		__osize = other.__osize;
-		
+
 		__cmp = other.__cmp;
 		__cost = other.__cost;
 		__random = other.__random;
@@ -365,14 +360,14 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 			__weights[i] = other.__weights[i];
 			__momentum[i] = other.__momentum[i];
 		}
-		
+
 		for (size_t i = 0; i < __size; i++) {
 			__layers[i] = {
 				other.__layers[i].first,
 				copy(other.__layers[i].second)
 			};
 		}
-		
+
 		__a = std::vector <Vector <T>> (__size);
 		__z = std::vector <Vector <T>> (__size - 1);
 	}
@@ -458,10 +453,10 @@ void NeuralNetwork <T> ::load(const std::string &file)
 
 		__weights[i] = Matrix <T> (r, c, T(0));
 		__momentum[i] = Matrix <T> (r, c, T(0));
-		
+
 		__weights[i].read(fin);
 		__momentum[i].read(fin);
-		
+
 		__layers[i + 1].second = Activation <T> ::load(fin);
 	}
 }
@@ -481,12 +476,12 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 	__size = layers.size();
 	__isize = layers[0]["Neurons"];
 	__osize = layers[__size - 1]["Neurons"];
-	
+
 	// Allocate matrices and activations
 	__weights = new Matrix <T> [__size - 1];
 	__momentum = new Matrix <T> [__size - 1];
 	__layers = new Layer <T> [__size];
-	
+
 	// Allocate caches
 	__a = std::vector <Vector <T>> (__size);
 	__z = std::vector <Vector <T>> (__size - 1);
@@ -570,7 +565,7 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 	}
 
 	__a[i] = tmp;
-	
+
 	return tmp;
 }
 
@@ -600,7 +595,7 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
 	}
 
 	__a[i] = tmp;
-	
+
 	return tmp;
 }
 
@@ -631,7 +626,7 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
 	}
 
 	a[i] = tmp;
-	
+
 	return tmp;
 }
 
@@ -663,7 +658,7 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in,
 	}
 
 	a[i] = tmp;
-	
+
 	return tmp;
 }
 
@@ -681,7 +676,7 @@ Vector <T> NeuralNetwork <T> ::compute_no_cache(const Vector <T> &in) const
 
 		i++;
 	}
-	
+
 	return tmp;
 }
 
@@ -707,7 +702,7 @@ Vector <T> NeuralNetwork <T> ::compute_no_cache(const Vector <T> &in,
 
 		i++;
 	}
-	
+
 	return tmp;
 }
 
@@ -740,10 +735,10 @@ Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 
 	// Compute the actual value
 	Vector <T> actual = compute(in);
-	
+
 	// Get the derivative of the cost
 	Erf <T> *dopt = opt->derivative();
-	
+
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
 
@@ -753,7 +748,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(const Vector <T> &in,
 			delta = __weights[i + 1].transpose() * delta;
 			delta = delta.remove_top();
 		}
-		
+
 		delta = shur(delta, __z[i]);
 
 		Matrix <T> Ji = delta * __a[i].transpose();
@@ -781,21 +776,21 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 
 	// Compute the actual value
 	Vector <T> actual = compute(in, weights);
-	
+
 	// Get the derivative of the cost
 	Erf <T> *dopt = opt->derivative();
-	
+
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
 
 	Vector <T> delta = (*dopt)(out, actual);
-	
+
 	for (int i = __size - 2; i >= 0; i--) {
 		if (i < __size - 2) {
 			delta = weights[i + 1].transpose() * delta;
 			delta = delta.remove_top();
 		}
-		
+
 		delta = shur(delta, __z[i]);
 
 		Matrix <T> Ji = delta * __a[i].transpose();
@@ -825,10 +820,10 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 
 	// Compute the actual value
 	Vector <T> actual = compute(in, weights, a, z);
-	
+
 	// Get the derivative of the cost
 	Erf <T> *dopt = opt->derivative();
-	
+
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
 
@@ -838,7 +833,7 @@ Matrix <T> *NeuralNetwork <T> ::gradient(Matrix <T> *weights,
 			delta = weights[i + 1].transpose() * delta;
 			delta = delta.remove_top();
 		}
-		
+
 		delta = shur(delta, z[i]);
 
 		Matrix <T> Ji = delta * a[i].transpose();
@@ -867,19 +862,19 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(
 
 	// Compute the actual value
 	Vector <T> actual = compute(in, weights);
-			
+
 	// Get the derivative of the cost
 	Erf <T> *dopt = opt->derivative();
-	
+
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
 
 	Vector <T> delta = (*dopt)(out, actual);
-	
+
 	for (int i = __size - 2; i >= 0; i--) {
 		if (i < __size - 2)
 			delta = std::move(rmt_and_mult(weights[i + 1], delta));
-		
+
 		delta.stable_shur(__z[i]);
 
 		J[i] = std::move(vvt_mult(delta, __a[i]));
@@ -906,10 +901,10 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
 
 	// Compute the actual value
 	Vector <T> actual = compute(in, weights, a, z);
-	
+
 	// Get the derivative of the cost
 	Erf <T> *dopt = opt->derivative();
-	
+
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [__size - 1];
 
@@ -917,7 +912,7 @@ Matrix <T> *NeuralNetwork <T> ::simple_gradient(Matrix <T> *weights,
 	for (int i = __size - 2; i >= 0; i--) {
 		if (i < __size - 2)
 			delta = std::move(rmt_and_mult(weights[i + 1], delta));
-		
+
 		delta.stable_shur(z[i]);
 
 		J[i] = std::move(vvt_mult(delta, a[i]));
@@ -951,7 +946,7 @@ void NeuralNetwork <T> ::simple_train(
 			grads[i] = simple_gradient(adj, ins[i], outs[i], __cost);
 	} else {
 		std::vector <std::thread> army;
-		
+
 		auto proc = [&](size_t offset) {
 			Vector <T> *aloc = new Vector <T> [__size];
 			Vector <T> *zloc = new Vector <T> [__size];
@@ -973,7 +968,7 @@ void NeuralNetwork <T> ::simple_train(
 	Matrix <T> *grad = new Matrix <T> [__size - 1];
 	for (int i = 0; i < __size - 1; i++)
 		grad[i] = grads[0][i];
-	
+
 	for (size_t i = 1; i < size; i++) {
 		for (size_t j = 0; j < __size - 1; j++)
 			grad[j] += grads[i][j];
@@ -994,7 +989,7 @@ void NeuralNetwork <T> ::simple_train(
 	apply_gradient(grad, alpha, 0.7);
 
 #endif
-	
+
 	// Release memory
 	delete[] grad;
 	delete[] adj;
@@ -1012,7 +1007,7 @@ void NeuralNetwork <T> ::train(const Vector <T> &in, const Vector <T> &out, T al
 
 	Matrix <T> *adj = adjusted(0.7);
 	Matrix <T> *grad = gradient(adj, in, out, __cost);
-	
+
 	delete[] adj;
 
 #ifdef ZHP_GRAD_DEBUG
@@ -1039,7 +1034,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 {
 	std::chrono::high_resolution_clock::time_point start;
 	std::chrono::high_resolution_clock::time_point end;
-	
+
 	std::chrono::high_resolution_clock clk;
 
 	size_t passed = 0;
@@ -1062,7 +1057,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		}
 	} else {
 		std::vector <std::thread> army;
-		
+
 		double *optes = new double[threads];
 		double *peres = new double[threads];
 		int *pass = new int[threads];
@@ -1103,7 +1098,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 
 	double tot_time = std::chrono::duration_cast
 		<std::chrono::microseconds> (end - start).count();
-	
+
 	return {passed, opt_error, tot_time};
 }
 
@@ -1118,14 +1113,14 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 {
 	if (ins.size() != outs.size())
 		throw bad_io_dimensions();
-	
+
 	const int len = 15;
 	const int width = 7;
 
 	std::chrono::high_resolution_clock::time_point start;
 	std::chrono::high_resolution_clock::time_point end;
 	std::chrono::high_resolution_clock::time_point total;
-	
+
 	std::chrono::high_resolution_clock clk;
 
 	if (display & Display::batch) {
@@ -1152,7 +1147,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	if (threads == 1) {
 		if (display & Display::batch)
 			std::cout << " [";
-		
+
 		for (int i = 0; i < size; i++) {
 			Vector <T> actual = compute(ins[i]);
 
@@ -1183,7 +1178,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 			std::cout << "]";
 	} else {
 		std::vector <std::thread> army;
-		
+
 		double *optes = new double[threads];
 		double *peres = new double[threads];
 		int *pass = new int[threads];
@@ -1203,7 +1198,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 				grads[i] = gradient(adj, aloc, zloc, ins[i], outs[i], __cost);
 
 				delete[] adj;
-			
+
 				optes[offset] += (*__cost)(outs[i], actual)[0];
 				peres[offset] += 100 * (actual - outs[i]).norm()/outs[i].norm();
 			}
@@ -1237,7 +1232,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	Matrix <T> *grad = new Matrix <T> [__size - 1];
 	for (int i = 0; i < __size - 1; i++)
 		grad[i] = grads[0][i];
-	
+
 	for (size_t i = 1; i < size; i++) {
 		for (size_t j = 0; j < __size - 1; j++)
 			grad[j] += grads[i][j];
@@ -1258,7 +1253,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	apply_gradient(grad, alpha, 0.7);
 
 #endif
-	
+
 	// Release memory
 	delete[] grad;
 
@@ -1266,7 +1261,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		delete[] grads[i];
 
 	delete[] grads;
-	
+
 	// Stop timer
 	total = clk.now();
 
@@ -1287,7 +1282,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 			<< "µ-time: " << avg_time << " µs"
 			<< std::endl;
 	}
-	
+
 	return {passed, opt_error, tot_time};
 }
 
@@ -1333,7 +1328,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	double t_ktime = 0;
 	double t_ftime = 0;
 	size_t t_passed = 0;
-	
+
 	size_t total = 0;
 	size_t passed;
 	double kt;
@@ -1346,7 +1341,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 				<< " (" << lr
 				<< ")\n" << std::endl;
 		}
-		
+
 		passed = 0;
 		err = 0;
 		kt = 0;
@@ -1364,7 +1359,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		t_passed += passed;
 		t_err += err;
 		t_ktime += kt;
-		
+
 		if (display & Display::epoch) {
 			std::cout << "\nTotal cost:\t"
 				<< err << std::endl
@@ -1431,7 +1426,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 	double t_ktime = 0;
 	double t_ftime = 0;
 	size_t t_passed = 0;
-	
+
 	size_t total = 0;
 	size_t passed;
 	double kt;
@@ -1444,7 +1439,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 				<< " (" << lr
 				<< ")\n" << std::endl;
 		}
-		
+
 		passed = 0;
 		err = 0;
 		kt = 0;
@@ -1462,7 +1457,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 		t_passed += passed;
 		t_err += err;
 		t_ktime += kt;
-		
+
 		if (display & Display::epoch) {
 			std::cout << "\nTotal cost:\t"
 				<< err << std::endl
@@ -1491,7 +1486,7 @@ typename NeuralNetwork <T> ::TrainingStatistics NeuralNetwork <T>
 template <class T>
 void NeuralNetwork <T> ::randomize()
 {
-	for (int i = 0; i < __size - 1; i++)			
+	for (int i = 0; i < __size - 1; i++)
 		__weights[i].randomize(__random);
 }
 
@@ -1499,19 +1494,19 @@ template <class T>
 void NeuralNetwork <T> ::print() const
 {
 	std::cout << "================================" << std::endl;
-	
+
 	std::cout << "Weights:" << std::endl;
 
 	size_t n = 0;
 	for (int i = 0; i < __size - 1; i++)
 		std::cout << "[" << ++n << "]\t" << __weights[i] << std::endl;
-	
+
 	std::cout << "Momentum:" << std::endl;
 
 	n = 0;
 	for (int i = 0; i < __size - 1; i++)
 		std::cout << "[" << ++n << "]\t" << __momentum[i] << std::endl;
-	
+
 	std::cout << "================================" << std::endl;
 }
 

@@ -62,7 +62,7 @@ namespace zhetapi {
 		if (ndr == nullptr)
 			return false;
 
-		return ndr->__symbol == __symbol;
+		return (ndr->__symbol == __symbol);
 	}
 
 }
