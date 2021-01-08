@@ -40,11 +40,44 @@ $ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
 
 ## Zhetapi CLI
 
-The Zhetapi CLI is a command-line calculator application, similar to GNU Octave, with additional abilities to store variables and define functions. The user can also enter special commands, by using a `#` before specifying the command name (ie. the `#list` command lists all available commands).
+The Zhetapi CLI is a command-line calculator application, similar to GNU Octave,
+with additional abilities to store variables and define functions. The user can
+also enter special commands, by using a `#` before specifying the command name
+(ie. the `#list` command lists all available commands).
 
-To install the CLI (Unix systems only), change to the `zhetapi` directory and run `. ./run install` (run `chmod +x install` if necessary). The command will build the CLI and make the `zhetapi` command globally available.
+To install the CLI (Unix systems only), change to the `zhetapi` directory and
+run `. ./run install` (run `chmod +x install` if necessary). The command will
+build the CLI and make the `zhetapi` command globally available.
 
-To exit the CLI, simply enter `#q` or `#quit` from the CLi or terminate the program with `Ctrl-C`.
+To exit the CLI, simply enter `#q` or `#quit` from the CLI or terminate the
+program with `Ctrl-C`.
+
+## Zhetapi-lang
+
+Along with API and CLI application, Zhetapi provides a scripting language
+(currently in the process of development). Current features include declaring
+values (constants and functions), `while` loops and `if`-`elif`-`else` branching,
+as well as a very basic form of importing libraries. A sample script is presented
+below:
+
+```
+# Single-line comments are alike to Python and Bash
+
+# Note the simplicity in defining mathematical functions
+f(x) = x^3 + x * sin(x)
+
+if (f(10) >= 0)
+	println("f(10) = ", f(10))
+else
+	println("f(10) is less than 0")
+
+i = 0
+while (i++ < 10)
+	println("[i = ", i, "] f(i) = ", f(i))
+```
+
+Zhetapi-lang is a scripting language intended to make the development of numerical
+and machine learning algorithms very simple.
 
 # Features
 
@@ -449,15 +482,6 @@ features of this library.
 
 # What Next?
 
-## New Language and Interpreter
-
-While C++ is great for fast programs, it also can be quite clunky to use. The
-purpose of a new interpreted language, based on the Zhetapi API, is to further
-ease the process of testing and developing numerical algorithms. This new language
-will support all of the features the API provides, in a cleaner form, and provide
-a library system which will allow users to reuse existing (and perhaps standard)
-numerical routines.
-
 ## Simplification of Functions
 
 Currently, objects of the `Function` class lack the complete ability to simplify
@@ -497,7 +521,7 @@ would be implementing convolutional networks, recurrent networks, and other stru
 used in supervised learning. In addition, structures and algorithms used in unsupervised
 learning and other branches of AI shall also be added.
 
-## Native Code Generation
+## Primitive Code Generation
 
 The library already can generate, compile and link `Function`
 objects in runtime. However, as mentioned, the source generated uses the Zhetapi
@@ -510,6 +534,12 @@ the user specifies. The only library functions that should be used are those in
 any of the headers in the `inc/std` directory (for example, if the function uses
 the binomial coefficient, then the source would include the
 `std_combinatorial.hpp` header).
+
+## Python Bindings
+
+Python is a very well supported scripting language, with many existing libraries
+and a large community. Adding bindings for certain library features, especially
+the machine learning facilities, would make it much easier to use and test them.
 
 ## Improve Semantics
 
