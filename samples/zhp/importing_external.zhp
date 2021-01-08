@@ -8,4 +8,4 @@ println("first = ", first(10, 11))
 
 include io
 
-fprintln("hello, from fprintln");
+fprintln("script.out", "hello, from fprintln");

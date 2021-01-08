@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 	while ((c = getopt(argc, argv, ":c:d:o:L:h")) != EOF) {
 		switch (c) {
 		case 'c':
-			if (md == help)
+			if (md != help)
 				md = build;
 
 			index = optind - 1;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
 			
 			break;
 		case 'd':
-			if (md == help)
+			if (md != help)
 				md = unbox;
 
 			index = optind - 1;

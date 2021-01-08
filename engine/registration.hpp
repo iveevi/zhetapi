@@ -113,7 +113,7 @@ class zhetapi_cast_overflow {};
  */
 
 template <class T>
-void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
+void zhetapi_cast_process(const std::vector <Token *> &tokens, size_t
 		i, T &tptr)
 {
 	if (i >= tokens.size())
@@ -126,7 +126,7 @@ void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
 }
 
 template <class T, class ... A>
-void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
+void zhetapi_cast_process(const std::vector <Token *> &tokens, size_t
 		i, T &tptr, A &... args)
 {
 	if (i >= tokens.size())
@@ -141,7 +141,7 @@ void zhetapi_cast_process(const ::std::vector <Token *> &tokens, size_t
 }
 
 template <class ... A>
-void zhetapi_cast(const ::std::vector <Token *> &tokens, A &... args)
+void zhetapi_cast(const std::vector <Token *> &tokens, A &... args)
 {
 	zhetapi_cast_process(tokens, 0, args ...);
 }

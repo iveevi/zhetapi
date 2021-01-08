@@ -136,6 +136,8 @@ elif [ $1 = "install" ]; then
 	[ -f cuda ] && mv cuda build
 
 	genlibs
+elif [ $1 = "genlibs" ]; then
+	genlibs
 elif [ $1 = "port" ]; then
 	# Run cmake
 	cmake .
