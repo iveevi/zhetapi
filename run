@@ -73,6 +73,18 @@ function czhp_normal {
 	echo -e "===========================================================\n"
 
 	./debug/czhp-run samples/zhp/importing.zhp
+
+	echo -e "\n==========================================================="
+	echo "Running sample script for external import features..."
+	echo -e "===========================================================\n"
+
+	./debug/czhp-run samples/zhp/importing_external.zhp -L include
+
+	echo -e "\n==========================================================="
+	echo "Running czhp help guide..."
+	echo -e "===========================================================\n"
+
+	./debug/czhp-run -h
 }
 
 function genlibs {
@@ -82,9 +94,13 @@ function genlibs {
 	echo "Compiling libraries..."
 	echo -e "===========================================================\n"
 
-	bin/czhp -c lib/io/io.cpp -o include/io.zhplib
+	bin/czhp -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib
 
-	tree include
+	if ! [ -x "$(command -v tree)" ]; then
+		ls include
+	else
+		tree include
+	fi
 
 	echo -e "\n==========================================================="
 	echo "Displaying symbols..."
@@ -112,8 +128,12 @@ elif [ $1 = "install" ]; then
 	fi
 
 	# Place the binaries into their appropriate directories
-	mv zhetapi czhp bin/
-	mv port exp cuda build/
+	[ -f zhetapi ] && mv zhetapi bin
+	[ -f czhp ] && mv czhp bin
+
+	[ -f port ] && mv port build
+	[ -f exp ] && mv exp build
+	[ -f cuda ] && mv cuda build
 
 	genlibs
 elif [ $1 = "port" ]; then

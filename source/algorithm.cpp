@@ -6,6 +6,7 @@ algorithm::algorithm(std::string ident, const std::vector <std::string> &args,
 		const std;:vector <std::string> &statements) : __ident(ident),
 		__args(args), __statements(statements) {}
 
+// Virtual functions
 Token::type algorithm::caller() const
 {
 	return Token::alg;

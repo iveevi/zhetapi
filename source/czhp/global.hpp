@@ -4,6 +4,7 @@
 // C/C++ headers
 #include <iostream>
 #include <vector>
+#include <iterator>
 
 // Engine headers
 #include <function.hpp>
@@ -15,6 +16,7 @@ using namespace zhetapi;
 extern size_t line;
 extern string file;
 extern vector <string> global;
+extern vector <string> idirs;
 extern Barn <double, int> barn;
 
 extern Operand <bool> *op_true;

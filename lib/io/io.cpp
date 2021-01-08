@@ -1,20 +1,9 @@
-// C++ headers
-#include <vector>
-
-// Engine include
-#include <barn.hpp>
-
-using namespace std;
-using namespace zhetapi;
-
-ZHETAPI_REGISTER(__zhp_std_printf)
-{
-	cout << "Printf!" << endl;
-
-	return nullptr;
-}
+#include "io.hpp"
 
 ZHETAPI_LIBRARY()
 {
 	ZHETAPI_EXPORT_SYMBOL(printf, __zhp_std_printf);
+
+	ZHETAPI_EXPORT_SYMBOL(fprint, __zhp_std_fprint);
+	ZHETAPI_EXPORT_SYMBOL(fprintln, __zhp_std_fprintln);
 }

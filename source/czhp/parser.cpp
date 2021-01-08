@@ -10,7 +10,7 @@
 #define __skip_to_char(s)	\
 	while ((c = getchar()) != s);
 
-static inline bool __file_exists(string file)
+inline bool __file_exists(string file)
 {
 	if (FILE *f = fopen(file.c_str(), "r")) {
 		fclose(f);
@@ -19,14 +19,6 @@ static inline bool __file_exists(string file)
 	} else {
 		return false;
 	} 
-}
-
-static inline string __get_dir(string file)
-{
-	size_t i = file.length() - 1;
-	while (file[i--] != '/');
-
-	return file.substr(0, i + 2);
 }
 
 // Global scope code
@@ -157,7 +149,7 @@ static void check(string &keyword)
 {
 	string parenthesized;
 	string block;
-	string library;
+	string lname;
 
 	if (keyword == "if") {
 		if (parse_parenthesized(parenthesized)) {
@@ -248,19 +240,35 @@ static void check(string &keyword)
 	}
 
 	if (keyword == "include") {
-		cin >> library;
+		cin >> lname;
+
+		string library = lname + ".zhplib";
+
+
 
 		// Check current dir
-		string current_dir = "./" + library + ".zhplib";
-		string script_dir = __get_dir(file) + library + ".zhplib";
+		string current_dir = "./" + library;
+		// string script_dir = __get_dir(file) + library;
 
-		// For now only import *.zhplib
-		if (__file_exists(current_dir))
-			import_library(current_dir);
-		else if (__file_exists(script_dir))
-			import_library(script_dir);
-		else
+		string libfile;
+
+		bool found = false;
+		for (string dir : idirs) {
+			libfile = dir + "/" + library;
+
+			if (__file_exists(libfile)) {
+				import_library(libfile);
+
+				found = true;
+				break;
+			}
+		}
+
+		if (!found) {
 			printf("Error at line %lu: could not import library '%s'\n", line, library.c_str());
+
+			exit(-1);
+		}
 
 		keyword.clear();
 	}
