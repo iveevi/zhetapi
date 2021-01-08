@@ -29,6 +29,7 @@
 #include <core/ftable.hpp>
 #include <core/operation.hpp>
 #include <core/vtable.hpp>
+#include <core/algorithm.hpp>
 
 #include <std/combinatorial.hpp>
 
@@ -37,8 +38,8 @@ namespace zhetapi {
 #define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
-				::std::string(#str),						\
-				::std::vector <::std::type_index> {					\
+				std::string(#str),						\
+				std::vector <std::type_index> {					\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
@@ -88,11 +89,11 @@ namespace zhetapi {
 			}									\
 	});
 
-#define __add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)								\
+#define __add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)				\
 	ops.push_back({										\
 			{									\
 				::std::string(#str),						\
-				::std::vector <::std::type_index> {					\
+				::std::vector <::std::type_index> {				\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
@@ -103,7 +104,7 @@ namespace zhetapi {
 				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
 					+ " $2 (" + ::std::string(#B) + ")",			\
 				2,								\
-				[&](const ::std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {			\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
@@ -115,7 +116,7 @@ namespace zhetapi {
 	ops.push_back({										\
 			{									\
 				::std::string(#str),						\
-				::std::vector <::std::type_index> {					\
+				::std::vector <::std::type_index> {				\
 					typeid(Operand <B>),					\
 					typeid(Operand <A>)					\
 				}								\
@@ -126,7 +127,7 @@ namespace zhetapi {
 				"$1 (" + ::std::string(#B) + ") " + ::std::string(#str)		\
 					+ " $2 (" + ::std::string(#A) + ")",			\
 				2,								\
-				[&](const ::std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {			\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[1]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[0]);	\
 												\
@@ -169,9 +170,9 @@ namespace zhetapi {
 												\
 			new operation {								\
 				::std::string(#str),						\
-				"$1 (" + ::std::string(#I) + ")",					\
+				"$1 (" + ::std::string(#I) + ")",				\
 				1, 								\
-				[&](const ::std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {			\
 					Operand <I> *in = dynamic_cast				\
 						<Operand <I> *> (ins[0]);			\
 												\
@@ -189,9 +190,9 @@ namespace zhetapi {
 												\
 			new operation {								\
 				::std::string(#str),						\
-				"$1 (" + ::std::string(#I) + ")",					\
+				"$1 (" + ::std::string(#I) + ")",				\
 				1, 								\
-				[&](const ::std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {			\
 					Operand <I> *in = dynamic_cast				\
 						<Operand <I> *> (ins[0]);			\
 												\
@@ -218,22 +219,23 @@ class Barn {
 public:
 	__TYPEDEFS__
 	
-	using ID = ::std::pair <::std::string, ::std::vector <::std::type_index>>;
+	using ID = std::pair <std::string, std::vector <std::type_index>>;
 
-	using signature = ::std::vector <::std::type_index>;
+	using signature = std::vector <std::type_index>;
 
-	using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
+	// using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
 private:
 	vtable <T, U> vstack;
 	ftable <T, U> fstack;
 
-	::std::vector <::std::pair <ID, Token *>> ops;
+	std::vector <std::pair <ID, Token *>> ops;
 
-	::std::unordered_map <::std::string, Registrable> __reg_table;
+	std::unordered_map <std::string, Registrable> __reg_table;
+	std::unordered_map <std::string, algorithm <T, U>> __alg_table;
 
-	mutable ::std::unordered_map <::std::string, ::std::vector <::std::pair <signature, Token *>>> table;
+	mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;
 	
-	__loc_table lt;
+	// __loc_table lt;
 public:
 	Barn();
 	Barn(const Barn &);
@@ -247,6 +249,7 @@ public:
 	void put(Variable <T, U>);
 	void put(Function <T, U>);
 	void put(Registrable);
+	void put(algorithm <T, U>);
 
 	template <class A>
 	void put(const ::std::string &, A);
@@ -520,7 +523,9 @@ Barn <T, U> ::Barn() : vstack(), fstack()
 }
 
 template <class T, class U>
-Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack), fstack(other.fstack), __reg_table(other.__reg_table)
+Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack),
+		fstack(other.fstack), __reg_table(other.__reg_table),
+		__alg_table(other.__alg_table)
 {
 	for (auto pr : other.ops)
 		ops.push_back({pr.first, pr.second->copy()});
@@ -594,6 +599,15 @@ void Barn <T, U> ::put(Registrable reg)
 }
 
 template <class T, class U>
+void Barn <T, U> ::put(algorithm <T, U> alg)
+{
+	if (__alg_table.find(alg.symbol()) != __alg_table.end())
+		__alg_table[alg.symbol()] = alg;
+	else
+		__alg_table.insert(std::make_pair(alg.symbol(), alg));
+}
+
+template <class T, class U>
 template <class A>
 void Barn <T, U> ::put(const ::std::string &str, A x)
 {
@@ -614,8 +628,12 @@ Variable <T, U> &Barn <T, U> ::retrieve_variable(const ::std::string &str)
 }
 
 template <class T, class U>
-Token *Barn <T, U> ::get(const ::std::string &str)
+Token *Barn <T, U> ::get(const std::string &str)
 {
+	// Prioritize algorithms
+	if (__alg_table.count(str))
+		return __alg_table[str].copy();
+	
 	if (vstack.contains(str))
 		return (vstack.get(str)).copy();
 	
@@ -768,6 +786,13 @@ void Barn <T, U> ::print(bool show_ops) const
 	::std::cout << ::std::string(50, '-') << ::std::endl;
 
 	for (auto spr : __reg_table)
+		::std::cout << spr.second.str() << ::std::endl;
+	
+	::std::cout << ::std::string(50, '-') << ::std::endl;
+	::std::cout << "Algorithms [" << __alg_table.size() << "]" << ::std::endl;
+	::std::cout << ::std::string(50, '-') << ::std::endl;
+
+	for (auto spr : __alg_table)
 		::std::cout << spr.second.str() << ::std::endl;
 
 	if (show_ops) {

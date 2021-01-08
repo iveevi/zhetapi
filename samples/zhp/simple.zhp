@@ -8,3 +8,10 @@ elif (x == 1)
 	println("x == 1")
 else
 	println("x >= 0")
+
+alg foo(a, b)
+{
+	print("hello")
+}
+
+foo(10, 5)

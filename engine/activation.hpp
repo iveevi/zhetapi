@@ -22,7 +22,7 @@
 // A is class name, T is the type (template), L is the loader function
 #define __zhp_register_activation(A, T, L)			\
 	zhetapi::ml::Activation <T>				\
-	::__act_loaders_id[typeid(A <T>).name()] = L;	\
+	::__act_loaders_id[typeid(A <T>).name()] = L;		\
 	zhetapi::ml::Activation <T>				\
 	::__act_loaders_name[#A] = L;
 

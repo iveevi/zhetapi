@@ -91,6 +91,29 @@ static int parse_block()
 	return 0;
 }
 
+static int parse_block(string &str)
+{
+	char c;
+	
+	while (isspace(c = getchar())) {
+		__lineup(c);
+	}
+
+	if (c == '{') {
+		while ((c = getchar()) != '}')
+			str += c;
+	} else {
+		fseek(stdin, -1, SEEK_CUR);
+
+		while ((c = getchar()) != '\n')
+			str += c;
+
+		__lineup(c);
+	}
+
+	return 0;
+}
+
 static int parse_block_ignore()
 {
 	char c;
@@ -145,7 +168,7 @@ static int parse_function(string &ident, vector <string> &params)
 bool if_prev = false;
 bool if_true = false;
 
-static void check(string &keyword)
+void check(string &keyword)
 {
 	string parenthesized;
 	string block;
@@ -289,6 +312,13 @@ static void check(string &keyword)
 			cout << "params:" << endl;
 			for (auto i : params)
 				cout << "\t\"" << i << "\"" << endl;
+			parse_block(block);
+			cout << "block:\n" << block << endl;
+
+			algorithm <double, int> alg(ident, params, block);
+			barn.put(alg);
+
+			// barn.print();
 		}
 
 		keyword.clear();

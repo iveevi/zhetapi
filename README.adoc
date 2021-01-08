@@ -46,8 +46,8 @@ also enter special commands, by using a `#` before specifying the command name
 (ie. the `#list` command lists all available commands).
 
 To install the CLI (Unix systems only), change to the `zhetapi` directory and
-run `. ./run install` (run `chmod +x install` if necessary). The command will
-build the CLI and make the `zhetapi` command globally available.
+execute `./run install`. The command will build the CLI, along with other applications
+and make the `zhetapi` command globally available.
 
 To exit the CLI, simply enter `#q` or `#quit` from the CLI or terminate the
 program with `Ctrl-C`.
@@ -76,8 +76,13 @@ while (i++ < 10)
 	println("[i = ", i, "] f(i) = ", f(i))
 ```
 
-Zhetapi-lang is a scripting language intended to make the development of numerical
-and machine learning algorithms very simple.
+Zhetapi-lang is a scripting language intended to make the
+development of numerical and machine learning algorithms
+very simple.
+
+To compile the interpreter, run the `./run install` command in the
+repository's home, and add its `bin` folder to your shell's `$PATH`
+variable. From there, use `czhp -h` to get started with the interpreter.
 
 # Features
 
@@ -114,7 +119,7 @@ retrieve them in the scope of the `Barn` class. Users can then refer to these
 variables, and their values can be retrieved or changed.
 
 ```cpp
-Variable <double> x{"x", 46};
+Variable <double> x {"x", 46};
 
 Barn <double, int> brn;
 

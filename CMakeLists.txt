@@ -29,7 +29,7 @@ set(ZHETAPI_SOURCE
 	source/display.cpp
 )
 
-# Compile shared library
+# Compile shared and static library
 add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
