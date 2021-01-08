@@ -32,6 +32,13 @@ static inline string __get_dir(string file)
 // Global scope code
 vector <string> global;
 
+// Constants
+Operand <bool> *op_true = new Operand <bool> (true);
+Operand <bool> *op_false = new Operand <bool> (false);
+
+size_t line = 1;
+string file = "";
+
 static int parse_parenthesized(string &parenthesized)
 {
 	char c;

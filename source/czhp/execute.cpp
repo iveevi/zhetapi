@@ -1,5 +1,8 @@
 #include "global.hpp"
 
+// Zhetapi API storage
+Barn <double, int> barn;
+
 Token *execute(string str)
 {
 	// Skip comments

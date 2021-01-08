@@ -1,3 +1,5 @@
+#include "l.hpp"
+
 ZHETAPI_LIBRARY()
 {
 	ZHETAPI_EXPORT(print_hello_world);

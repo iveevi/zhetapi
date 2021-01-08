@@ -23,8 +23,10 @@ extern Operand <bool> *op_false;
 int parse(char = EOF);
 int parse(string);
 
-int compile_library(string);
-int assess_library(string);
+int compile_library(vector <string>, string);
+
+int assess_libraries(vector <string>);
+
 int import_library(string);
 
 Token *execute(string);

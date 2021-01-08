@@ -9,8 +9,8 @@
 // Engine headers
 #include <cuda/network.cuh>
 
-#include <std/activation_classes.hpp>
-#include <std/optimizer_classes.hpp>
+#include <std/activations.hpp>
+#include <std/erfs.hpp>
 
 #include <dataset.hpp>
 
@@ -131,9 +131,7 @@ int main()
 	model.set_cost(opt);
 	
 	model.cuda_epochs(ins, outs, 2, 100, 0.1, crit, true);
-	// model.print();
 	model.epochs(ins, outs, 2, 100, 0.1, true);
-	// model.print();
 
 #endif
 

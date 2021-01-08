@@ -1,81 +1,106 @@
 // Source headers
 #include "global.hpp"
 
-// Zhetapi API storage
-Barn <double, int> barn;
+// Execution modes
+enum mode {
+	interpret,	// Interpreting files
+	build,		// Compiling libraries
+	unbox,		// Show symbols
+};
 
-// Constants
-Operand <bool> *op_true = new Operand <bool> (true);
-Operand <bool> *op_false = new Operand <bool> (false);
-
-size_t line = 1;
-string file = "";
-
-// Main
-int main(int argc, char *argv[])
+// Interpretation kernel
+static int interpreter(string infile)
 {
-	char c;
+	if (!freopen(infile.c_str(), "r", stdin)) {
+		printf("Fatal error: failed to open file '%s'.\n", infile.c_str());
 
-	string sources;
-	char *next;
-	int index;
-	
-	while ((c = getopt(argc, argv, ":c:d:")) != EOF) {
-		switch (c) {
-		case 'c':
-			index = optind - 1;
-
-			sources = "";
-			while (index < argc) {
-				next = strdup(argv[index++]);
-
-				sources += next;
-				sources += " ";
-
-				if (next[0] == '-')
-					break;
-			}
-
-			cout << "Compiling option! (optarg = " << sources << ")" << endl;
-			break;
-		case 'd':
-			cout << "Library viewer! (optarg = " << optarg << ")" << endl;
-			break;
-		default:
-			cout << "Normal mode: (optarg = " << optarg << ")" << endl;
-			break;
-		}
+		exit(-1);
 	}
+
+	file = infile;
 	
-	/*if (argc == 2) {
-		if (!freopen(argv[1], "r", stdin)) {
-			printf("Fatal error: failed to open file '%s'.\n", argv[1]);
-
-			exit(-1);
-		}
-
-		file = argv[1];
-	} else if (argc == 3) {
-		string o1 = "-c";
-		string o2 = "-d";
-
-		if (argv[1] == o1) {
-			return compile_library(argv[2]);
-		} else if (argv[1] == o2) {
-			return assess_library(argv[2]);
-		} else {
-			printf("Fatal error: unexpected argument '%s'\n", argv[1]);
-
-			exit(-1);
-		}
-	}
-	
-	// Barn setup	
+	// Register builtin symbols
 	barn.put(Registrable("print", &print));
 	barn.put(Registrable("println", &println));
 
 	barn.put(Variable <double, int> (op_true->copy(), "true"));
 	barn.put(Variable <double, int> (op_false->copy(), "false"));
 
-	return parse(); */
+	return parse();
+}
+
+// Main
+int main(int argc, char *argv[])
+{
+	int ret;
+
+	char c;
+
+	vector <string> sources;
+
+	string infile;
+	string output;
+
+	char *next;
+	int index;
+
+	mode md = interpret;
+	while ((c = getopt(argc, argv, ":c:d:o:")) != EOF) {
+		switch (c) {
+		case 'c':
+			md = build;
+
+			index = optind - 1;
+
+			sources.clear();
+			while (index < argc) {
+				next = strdup(argv[index++]);
+
+				if (next[0] == '-')
+					break;
+			
+				sources.push_back(next);
+			}
+			
+			break;
+		case 'd':
+			md = unbox;
+
+			index = optind - 1;
+
+			sources.clear();
+			while (index < argc) {
+				next = strdup(argv[index++]);
+
+				if (next[0] == '-')
+					break;
+				
+				sources.push_back(next);
+			}
+			
+			break;
+		case 'o':
+			output = optarg;
+			break;
+		default:
+			break;
+		}
+	}
+
+	if (optind < argc)
+		infile = argv[optind];
+
+	switch (md) {
+	case build:
+		ret = compile_library(sources, output);
+		break;
+	case unbox:
+		ret = assess_libraries(sources);
+		break;
+	case interpret:
+		ret = interpreter(infile);
+		break;
+	}
+
+	return ret;
 }

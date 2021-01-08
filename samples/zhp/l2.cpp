@@ -1,11 +1,4 @@
-// C++ headers
-#include <vector>
-
-// Engine include
-#include <barn.hpp>
-
-using namespace std;
-using namespace zhetapi;
+#include "l.hpp"
 
 ZHETAPI_REGISTER(print_hello_world)
 {

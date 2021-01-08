@@ -1019,24 +1019,6 @@ Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 }
 
 template <class T>
-Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
-{
-	if (a.__cols != b.__rows)
-		throw typename Matrix <T> ::dimension_mismatch();
-
-	return Matrix <T> (a.__rows, b.__cols,
-		[&](size_t i, size_t j) {
-			T acc = 0;
-
-			for (size_t k = 0; k < a.__cols; k++)
-				acc += a[i][k] * b[k][j];
-
-			return acc;
-		}
-	);
-}
-
-template <class T>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 {
 	if (A.__cols != B.__rows)

@@ -2,20 +2,40 @@
 
 typedef void (*exporter)(Barn <double, int> &);
 
-int compile_library(string file)
-{
-	// Assume the file ends with ".cpp" for now
-	string base = file.substr(0, file.length() - 4);
-	string outlib = base + ".zhplib";
+static int assess_library(string);
 
-	printf("Compiling '%s' into zhp library '%s'...\n", file.c_str(), outlib.c_str());
-	string cmd = "g++-8 --no-gnu-unique -I engine -I inc/hidden -I inc/std \
-				-g -rdynamic -fPIC -shared " + file  + " source/registration.cpp -o " + outlib;
+int compile_library(vector <string> files, string output)
+{
+	string sources = "";
+	for (string file : files)
+		sources += file + " ";
+
+	// Assume the file ends with ".cpp" for now
+	string outlib = output;
+	if (output.empty()) {
+		string base = files[0].substr(0, files[0].length() - 4);
+
+		outlib = base + ".zhplib";
+	}
+
+	string opts = " --no-gnu-unique -g -rdynamic -fPIC -shared ";
+	string idir = " -I engine ";
+	string esrc = " source/registration.cpp ";
+
+	string cmd = "g++-8" + opts + idir + sources + esrc + " -o " + outlib;
 
 	return system(cmd.c_str());
 }
 
-int assess_library(string file)
+int assess_libraries(vector <string> files)
+{
+	for (string file : files)
+		assess_library(file);
+
+	return 0;
+}
+
+static int assess_library(string file)
 {
 	Barn <double, int> tmp;
 
