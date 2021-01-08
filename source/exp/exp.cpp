@@ -2,66 +2,47 @@
 #include <ios>
 #include <iostream>
 #include <vector>
+#include <iomanip>
 
 // Engine headers
-#include <dataset.hpp>
-#include <network.hpp>
-
-// Engine standard headers
-#include <std/activations.hpp>
-#include <std/erfs.hpp>
+#include <matrix.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
+#define MIN_SIZE	10
+#define MAX_SIZE	1000
+#define STEP		10
+
 int main()
 {
-	ml::ZhetapiRegisterStandardActivations <double> ();
-
-	auto initializer = []() {
-                return 0.5 - (rand()/(double) RAND_MAX);
-        };
-
-	ml::NeuralNetwork <double> model;
-
-	model = ml::NeuralNetwork <double> ({
-                {11, new zhetapi::ml::Linear <double> ()},
-                {10, new zhetapi::ml::Sigmoid <double> ()},
-                {10, new zhetapi::ml::ReLU <double> ()},
-                {10, new zhetapi::ml::Sigmoid <double> ()},
-                {9, new zhetapi::ml::Linear <double> ()}
-        }, initializer);
-
-	model.randomize();
-
-	ml::Erf <double> *opt = new ml::MeanSquaredError <double> ();
-
-	model.set_cost(opt);
-
-	DataSet <double> ins;
-	DataSet <double> outs;
-
-	for (size_t i = 0; i < 50; i++) {
-		ins.push_back(Vector <double> (11,
-			[](size_t i) {
-				return rand()/((double) RAND_MAX);
-			}
-		));
-		
-		outs.push_back(Vector <double> (9,
-			[](size_t i) {
-				return rand()/((double) RAND_MAX);
-			}
-		));
-	}
-
-	model.train_epochs(ins, outs, 3, 10, 0.001,
-			Display::epoch
-			| Display::batch
-			| Display::graph);
+	clock_t start;
+	clock_t end;
 	
-	model.train_epochs_and_validate(ins, outs, ins, outs, 3, 10, 0.001,
-			Display::epoch
-			| Display::batch
-			| Display::graph);
+	ofstream fout("data/mat_mult.dat");
+
+	Matrix <double> c;
+	for (size_t i = MIN_SIZE; i <= MAX_SIZE; i += STEP) {
+		Matrix <double> a(i, i,
+			[](size_t r, size_t c) {
+				return rand()/((double) RAND_MAX);
+			}
+		);
+		
+		Matrix <double> b(i, i,
+			[](size_t r, size_t c) {
+				return rand()/((double) RAND_MAX);
+			}
+		);
+
+		start = clock();
+
+		a * b;
+
+		end = clock();
+
+		fout << i << "\t";
+		fout << setprecision(6) << fixed
+			<< (end - start)/((double) CLOCKS_PER_SEC) << endl;
+	}
 }

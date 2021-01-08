@@ -30,6 +30,22 @@
 
 #endif
 
+// In function initialization
+#define inline_init_mat(mat, rs, cs)	\
+	Matrix <T> mat;			\
+					\
+	mat.__rows = rs;		\
+	mat.__cols = cs;		\
+					\
+	mat.__array = new T[rs * cs];	\
+					\
+	mat.__dims = 2;		\
+					\
+	mat.__dim = new size_t[2];	\
+					\
+	mat.__dim[0] = rs;		\
+	mat.__dim[1] = cs;
+
 namespace zhetapi {
 
 template <class T>
@@ -171,10 +187,10 @@ public:
 	
 	template <class U>
 	friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
-
+	
 	template <class U>
 	friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
-
+	
 	template <class U>
 	friend Matrix <U> operator*(const Matrix <U> &, const U &);
 	
@@ -1021,13 +1037,35 @@ Matrix <T> operator*(const Matrix <T> &a, const Matrix <T> &b)
 }
 
 template <class T>
-Matrix <T> operator*(const Matrix <T> &a, const T &scalar)
+Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 {
-	return Matrix <T> (a.__rows, a.__cols,
-		[&](size_t i, size_t j) {
-			return a[i][j] * scalar;
+	if (A.__cols != B.__rows)
+		throw typename Matrix <T> ::dimension_mismatch();
+
+	size_t rs = A.__rows;
+	size_t cs = B.__cols;
+
+	size_t kmax = B.__rows;
+
+	inline_init_mat(C, rs, cs);
+
+	T *Cr;
+	T a;
+
+	for (size_t i = 0; i < rs; i++) {
+		const T *Ar = A[i];
+		Cr = C[i];
+
+		for (size_t k = 0; k < kmax; k++) {
+			const T *Br = B[k];
+
+			a = Ar[k];
+			for (size_t j = 0; j < cs; j++)
+				Cr[j] += a * Br[j];
 		}
-	);
+	}
+
+	return C;
 }
 
 template <class T>
