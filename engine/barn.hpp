@@ -29,7 +29,6 @@
 #include <core/ftable.hpp>
 #include <core/operation.hpp>
 #include <core/vtable.hpp>
-#include <core/algorithm.hpp>
 
 #include <std/combinatorial.hpp>
 
@@ -203,6 +202,9 @@ namespace zhetapi {
 
 template <class T, class U>
 class Function;
+
+template <class T, class U>
+class algorithm;
 
 /**
  * @brief Represents the working space of a [zhetapi] function or

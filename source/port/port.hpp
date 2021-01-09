@@ -12,7 +12,8 @@
 #include <string.h>
 
 // Engine headers
-#include <function.hpp>
+#include <zhplib.hpp>
+
 #include <vector.hpp>
 #include <matrix.hpp>
 #include <tensor.hpp>

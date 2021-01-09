@@ -37,7 +37,10 @@ Token *execute(string str)
 	} else {		
 		// All functions and algorithms are stored in barn
 		node_manager <double, int> mg;
-		
+	
+		/* cout << "BARN:" << endl;
+		barn.print(); */
+
 		try {
 			mg = node_manager <double, int> (str, barn);
 		} catch (node_manager <double, int> ::undefined_symbol e) {
@@ -48,8 +51,8 @@ Token *execute(string str)
 			exit(-1);
 		}
 
-		cout << "mg:" << endl;
-		mg.print();
+		/* cout << "mg:" << endl;
+		mg.print(); */
 
 		// "Execute" the statement
 		return mg.value(barn);

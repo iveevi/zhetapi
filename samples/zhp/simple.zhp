@@ -10,8 +10,6 @@ else
 	println("x >= 0")
 
 alg foo(a, b)
-{
-	print("hello")
-}
+	println("hello from foo: a = ", a, " and b = ", b)
 
 foo(10, 5)

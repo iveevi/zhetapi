@@ -88,11 +88,11 @@ private:
 	
 	void refactor_reference(node &, const ::std::string &, Token *);
 
-	::std::string generate(::std::string, node, ::std::ofstream &, size_t &, size_t &) const;
+	std::string generate(::std::string, node, ::std::ofstream &, size_t &, size_t &) const;
 
-	::std::string display(node) const;
-	::std::string display_operation(node) const;
-	::std::string display_pemdas(node, node) const;
+	std::string display(node) const;
+	std::string display_operation(node) const;
+	std::string display_pemdas(node, node) const;
 
 	/*
 	 * Node factories; produce special nodes such as ones, zeros,
@@ -217,7 +217,7 @@ Token *node_manager <T, U> ::value(Barn <T, U> &ext) const
 template <class T, class U>
 Token *node_manager <T, U> ::value(node tree) const
 {
-	::std::vector <Token *> values;
+	std::vector <Token *> values;
 
 	node *unrefd;
 
@@ -226,9 +226,9 @@ Token *node_manager <T, U> ::value(node tree) const
 
 	Variable <T, U> v;
 
-	::std::string ident;
+	std::string ident;
 
-	int size;
+	// int size;
 
 	// ::std::cout << "Spare threads: " << spare_threads << ::std::endl;
 	
@@ -236,7 +236,7 @@ Token *node_manager <T, U> ::value(node tree) const
 	case Token::opd:
 		return tree.__tptr.get()->copy();
 	case Token::oph:	
-		size = tree.__leaves.size();
+		// size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
@@ -271,6 +271,14 @@ Token *node_manager <T, U> ::value(node tree) const
 
 		if (tptr)
 			return tptr->copy();
+	case Token::alg:
+		for (node leaf : tree.__leaves)
+			values.push_back(value(leaf));
+
+		tptr = (dynamic_cast <algorithm <T, U> *> (tree.__tptr.get()))->execute(__barn, values);
+
+		if (tptr)
+			return tptr->copy();
 	}
 
 	return nullptr;
@@ -289,6 +297,8 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 
 	Variable <T, U> v;
 	Variable <T, U> *vp;
+
+	algorithm <T, U> *alg;
 
 	::std::string ident;
 
@@ -361,13 +371,25 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 
 		if (tptr)
 			return tptr->copy();
+
+		break;
+	case Token::alg:
+		for (node leaf : tree.__leaves)
+			values.push_back(value(leaf, ext));
+
+		tptr = (dynamic_cast <algorithm <T, U> *> (tree.__tptr.get()))->execute(ext, values);
+
+		if (tptr)
+			return tptr->copy();
+
+		break;
 	}
 
 	return nullptr;
 }
 
 template <class T, class U>
-Token *node_manager <T, U> ::substitute_and_compute(::std::vector <Token *>
+Token *node_manager <T, U> ::substitute_and_compute(std::vector <Token *>
 		&toks, size_t total_threads)
 {
 	assert(__refs.size() == toks.size());

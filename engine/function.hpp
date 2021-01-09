@@ -17,16 +17,16 @@ namespace zhetapi {
  */
 template <class T, class U>
 class Function : public Token {
-	::std::string			__symbol;
-	::std::vector <::std::string>	__params;
+	std::string			__symbol;
+	std::vector <std::string>	__params;
 	node_manager <T, U>		__manager;
 	size_t				__threads;
 public:
 	Function();
 	Function(const char *);
-	Function(const ::std::string &);
+	Function(const std::string &);
 
-	Function(const ::std::string &, const ::std::vector <::std::string>
+	Function(const std::string &, const std::vector <std::string>
 			&, const node_manager <T, U> &);
 
 	Function(const Function &);

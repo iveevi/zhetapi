@@ -9,6 +9,8 @@
 // Engine headers
 #include <function.hpp>
 
+#include <core/algorithm.hpp>
+
 // Namespaces
 using namespace std;
 using namespace zhetapi;

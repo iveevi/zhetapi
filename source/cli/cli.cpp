@@ -8,7 +8,8 @@
 #include <ncurses.h>
 
 // Engine headers
-#include <function.hpp>
+#include <zhplib.hpp>
+
 #include <expression.hpp>
 
 using namespace std;

@@ -297,8 +297,6 @@ void check(string &keyword)
 	}
 
 	if (keyword == "alg") {
-		cout << "Algorithm!" << endl;
-
 		string ident;
 
 		vector <string> params;
@@ -308,17 +306,10 @@ void check(string &keyword)
 
 			exit(-1);
 		} else {
-			cout << "ident = " << ident << endl;
-			cout << "params:" << endl;
-			for (auto i : params)
-				cout << "\t\"" << i << "\"" << endl;
 			parse_block(block);
-			cout << "block:\n" << block << endl;
 
 			algorithm <double, int> alg(ident, params, block);
 			barn.put(alg);
-
-			// barn.print();
 		}
 
 		keyword.clear();
