@@ -26,7 +26,7 @@
 #include <variable.hpp>
 
 #include <core/types.hpp>
-#include <core/ftable.hpp>
+// #include <core/ftable.hpp>
 #include <core/operation.hpp>
 
 #include <std/combinatorial.hpp>
@@ -66,19 +66,19 @@ namespace zhetapi {
 #define __add_binary_operation_ftr(str, A, B, O, ftr)						\
 	ops.push_back({										\
 			{									\
-				::std::string(#str),						\
-				::std::vector <::std::type_index> {					\
+				std::string(#str),						\
+				std::vector <std::type_index> {					\
 					typeid(Operand <A>),					\
 					typeid(Operand <B>)					\
 				}								\
 			},									\
 												\
 			new operation {								\
-				::std::string(#str),						\
-				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
-					+ " $2 (" + ::std::string(#B) + ")",			\
+				std::string(#str),						\
+				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
+					+ " $2 (" + std::string(#B) + ")",			\
 				2,								\
-				[&](const ::std::vector <Token *> &ins) {				\
+				[&](const ::std::vector <Token *> &ins) {			\
 					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
 					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
 												\
@@ -199,7 +199,6 @@ namespace zhetapi {
 			}									\
 	});
 
-template <class T, class U>
 class Function;
 
 template <class T, class U>
@@ -226,11 +225,13 @@ public:
 
 	// using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
 private:
-	ftable <T, U> fstack;
+	//ftable <T, U> fstack;
 
 	std::vector <std::pair <ID, Token *>> ops;
 
 	std::unordered_map <std::string, Variable>		__var_table;
+	std::unordered_map <std::string, Variable>		__ftr_table;
+
 	std::unordered_map <std::string, Registrable>		__reg_table;
 	std::unordered_map <std::string, algorithm <T, U>>	__alg_table;
 
@@ -245,35 +246,35 @@ public:
 
 	Barn &operator=(const Barn &);
 
-	bool present(const ::std::string &) const;
+	bool present(const std::string &) const;
 
 	void put(Variable);
-	void put(Function <T, U>);
+	void put(Function);
 	void put(Registrable);
 	void put(algorithm <T, U>);
 
 	/* template <class A>
 	void put(const ::std::string &, A); */
 
-	void put(Token *, const ::std::string &);
+	void put(Token *, const std::string &);
 
 	Variable &retrieve_variable(const std::string &);
-	Function <T, U> &retrieve_function(const std::string &);
+	Function &retrieve_function(const std::string &);
 
 	Token *get(const std::string &);
 
 	Token *compute(const std::string &, const std::vector <Token *> &) const;
 	
-	::std::string overloads(const std::string &) const;
+	std::string overloads(const std::string &) const;
 
 	void list() const;
-	void list_registered(::std::string) const;
+	void list_registered(std::string) const;
 
 	void print(bool = false) const;
 
 	// Exceptions
 	class unknown_operation_overload_exception {
-		::std::string __str;
+		std::string __str;
 	public:
 		unknown_operation_overload_exception(const ::std::string &str) : __str(str) {}
 
@@ -711,15 +712,15 @@ Token *Barn <T, U> ::compute(const ::std::string &str, const ::std::vector <Toke
 }
 
 template <class T, class U>
-::std::string Barn <T, U> ::overloads(const ::std::string &str) const
+std::string Barn <T, U> ::overloads(const std::string &str) const
 {
-	::std::vector <::std::vector <::std::type_index>> loads;
+	std::vector <::std::vector <::std::type_index>> loads;
 	for (auto itr = ops.begin(); itr != ops.end(); itr++) {
 		if (itr->first.first == str)
 			loads.push_back(itr->first.second);
 	}
 
-	::std::ostringstream oss;
+	std::ostringstream oss;
 
 	oss << "Available overloads for \"" << str << "\": {";
 
@@ -750,14 +751,10 @@ void Barn <T, U> ::list() const
 	std::cout << "\tVariables:" << std::endl;
 	for (auto spr : __var_table)
 		std::cout << "\t\t" << spr.second.str() << std::endl;
-
-	std::vector <Function <T, U>> f = fstack.list();
 	
-	if (f.size()) {
-		std::cout << "\tFunctions:" << std::endl;
-		for (auto ftn : f)
-			std::cout << "\t\t" << ftn << std::endl;
-	}
+	std::cout << "\tFunctions:" << std::endl;
+	for (auto spr : __ftr_table)
+		std::cout << spr.second.str() << std::endl;
 }
 
 template <class T, class U>
@@ -782,7 +779,8 @@ void Barn <T, U> ::print(bool show_ops) const
 	std::cout << "Functions:" << std::endl;
 	std::cout << std::string(50, '-') << std::endl;
 
-	fstack.print();
+	for (auto spr : __ftr_table)
+		std::cout << spr.second.str() << std::endl;
 
 	::std::cout << ::std::string(50, '-') << ::std::endl;
 	::std::cout << "Reg Table:" << ::std::endl;

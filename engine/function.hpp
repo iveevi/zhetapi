@@ -15,11 +15,10 @@ namespace zhetapi {
 /*
  * Represents a mathematical function.
  */
-template <class T, class U>
 class Function : public Token {
 	std::string			__symbol;
 	std::vector <std::string>	__params;
-	node_manager <T, U>		__manager;
+	node_manager			__manager;
 	size_t				__threads;
 public:
 	Function();
@@ -27,12 +26,12 @@ public:
 	Function(const std::string &);
 
 	Function(const std::string &, const std::vector <std::string>
-			&, const node_manager <T, U> &);
+			&, const node_manager &);
 
 	Function(const Function &);
 
-	::std::string &symbol();
-	const ::std::string symbol() const;
+	std::string &symbol();
+	const std::string symbol() const;
 
 	void set_threads(size_t);
 
@@ -47,65 +46,56 @@ public:
 	template <class ... A>
 	Token *derivative(const ::std::string &, A ...);
 
-	Function <T, U> differentiate(const ::std::string &) const;
+	Function differentiate(const ::std::string &) const;
 
-	template <class A, class B>
-	friend bool operator<(const Function <A, B> &, const Function <A, B> &);
+	friend bool operator<(const Function &, const Function &);
+	friend bool operator>(const Function &, const Function &);
 
-	template <class A, class B>
-	friend bool operator>(const Function <A, B> &, const Function <A, B> &);
-
-	::std::string generate_general() const;
+	std::string generate_general() const;
 
 	void *compile_general() const;
 
 	// Virtual overloads
 	Token::type caller() const override;
-	::std::string str() const override;
+	std::string str() const override;
 	Token *copy() const override;
 	bool operator==(Token *) const override;
 
 	// Printing
 	void print() const;
 
-	::std::string display() const;
+	std::string display() const;
 
-	template <class A, class B>
-	friend ::std::ostream &operator<<(::std::ostream &, const Function <A, B> &);
+	friend std::ostream &operator<<(::std::ostream &, const Function &);
 private:
 	template <class A>
-	void gather(::std::vector <Token *> &, A);
+	void gather(std::vector <Token *> &, A);
 
 	template <class A, class ... B>
-	void gather(::std::vector <Token *> &, A, B ...);
+	void gather(std::vector <Token *> &, A, B ...);
 
-	size_t index(const ::std::string &) const;
+	size_t index(const std::string &) const;
 public:
 	// Exception classes
 	class invalid_definition {};
 
 	// Static variables
-	static Barn <T, U> barn;
+	static Barn barn;
 
 	static T h;
 };
 
 // Static
-template <class T, class U>
-Barn <T, U> Function <T, U> ::barn = Barn <T, U> ();
+Barn Function::barn = Barn();
 
-template <class T, class U>
-T Function <T, U> ::h = 0.0001;
+T Function::h = 0.0001;
 
 // Constructors
-template <class T, class U>
 Function <T, U> ::Function() : __threads(1) {}
 
-template <class T, class U>
 Function <T, U> ::Function(const char *str) : Function(::std::string
 		(str)) {}
 
-template <class T, class U>
 Function <T, U> ::Function(const ::std::string &str) : __threads(1)
 {
 	::std::string pack;
@@ -184,38 +174,32 @@ Function <T, U> ::Function(const ::std::string &str) : __threads(1)
 }
 
 // Member-wise construction
-template <class T, class U>
-Function <T, U> ::Function(const ::std::string &symbol, const ::std::vector
+Function::Function(const ::std::string &symbol, const ::std::vector
 		<::std::string> &params, const node_manager <T, U>
 		&manager) : __symbol(symbol), __params(params),
 		__manager(manager), __threads(1) {}
 
-template <class T, class U>
-Function <T, U> ::Function(const Function <T, U> &other) :
+Function::Function(const Function &other) :
 	__symbol(other.__symbol), __params(other.__params),
 	__manager(other.__manager), __threads(1) {}
 
 // Getters
-template <class T, class U>
-::std::string &Function <T, U> ::symbol()
+std::string &Function::symbol()
 {
 	return __symbol;
 }
 
-template <class T, class U>
 const ::std::string Function <T, U> ::symbol() const
 {
 	return __symbol;
 }
 
-template <class T, class U>
 void Function <T, U> ::set_threads(size_t threads)
 {
 	__threads = threads;
 }
 
 // Computational utilities
-template <class T, class U>
 Token *Function <T, U> ::operator()(::std::vector <Token *> toks)
 {
 	assert(toks.size() == __params.size());
@@ -223,7 +207,6 @@ Token *Function <T, U> ::operator()(::std::vector <Token *> toks)
 	return __manager.substitute_and_compute(toks, __threads);
 }
 
-template <class T, class U>
 template <class ... A>
 Token *Function <T, U> ::operator()(A ... args)
 {
@@ -236,7 +219,6 @@ Token *Function <T, U> ::operator()(A ... args)
 	return __manager.substitute_and_compute(Tokens, __threads);
 }
 
-template <class T, class U>
 template <class ... A>
 Token *Function <T, U> ::derivative(const ::std::string &str, A ... args)
 {
@@ -282,11 +264,10 @@ Token *Function <T, U> ::derivative(const ::std::string &str, A ... args)
 	return diff;
 }
 
-template <class T, class U>
-Function <T, U> Function <T, U> ::differentiate(const ::std::string &str) const
+Function Function::differentiate(const std::string &str) const
 {
 	// Improve naming later
-	::std::string name = "d" + __symbol + "/d" + str;
+	std::string name = "d" + __symbol + "/d" + str;
 
 	node_manager <T, U> dm = __manager;
 
@@ -297,16 +278,11 @@ Function <T, U> Function <T, U> ::differentiate(const ::std::string &str) const
 	return df;
 }
 
-template <class T, class U>
-::std::string Function <T, U> ::generate_general() const
+std::string Function::generate_general() const
 {
 	using namespace std;
 
-	// cout << endl << "Generating" << endl;
-	
-
-
-	::std::string file;
+	std::string file;
 
 	file = "__gen_" + __symbol;
 
@@ -317,10 +293,9 @@ template <class T, class U>
 	return file;
 }
 
-template <class T, class U>
-void *Function <T, U> ::compile_general() const
+void *Function::compile_general() const
 {
-	::std::string file = generate_general();
+	std::string file = generate_general();
 
 #ifdef __linux__
 
@@ -390,28 +365,24 @@ void *Function <T, U> ::compile_general() const
 }
 
 // Virtual functions
-template <class T, class U>
-Token::type Function <T, U> ::caller() const
+Token::type Function::caller() const
 {
 	return Token::ftn;
 }
 
-template <class T, class U>
-::std::string Function <T, U> ::str() const
+std::string Function::str() const
 {
 	return display();
 }
 
-template <class T, class U>
-Token *Function <T, U> ::copy() const
+Token *Function::copy() const
 {
-	return new Function <T, U> (*this);
+	return new Function(*this);
 }
 
-template <class T, class U>
-bool Function <T, U> ::operator==(Token *tptr) const
+bool Function::operator==(Token *tptr) const
 {
-	Function <T, U> *ftn = dynamic_cast <Function <T, U> *> (tptr);
+	Function *ftn = dynamic_cast <Function *> (tptr);
 
 	if (!ftn)
 		return false;
@@ -420,16 +391,14 @@ bool Function <T, U> ::operator==(Token *tptr) const
 }
 
 // Printing utilities
-template <class T, class U>
-void Function <T, U> ::print() const
+void Function::print() const
 {
 	__manager.print();
 }
 
-template <class T, class U>
-::std::string Function <T, U> ::display() const
+std::string Function::display() const
 {
-	::std::string str = __symbol + "(";
+	std::string str = __symbol + "(";
 
 	size_t n = __params.size();
 	for (size_t i = 0; i < n; i++) {
@@ -444,35 +413,30 @@ template <class T, class U>
 	return str;
 }
 
-template <class T, class U>
-::std::ostream &operator<<(::std::ostream &os, const Function <T, U> &ftr)
+std::ostream &operator<<(std::ostream &os, const Function &ftr)
 {
 	os << ftr.display();
 	return os;
 }
 
 // Comparing
-template <class T, class U>
-bool operator<(const Function <T, U> &a, const Function <T, U> &b)
+bool operator<(const Function &a, const Function &b)
 {
 	return a.symbol() < b.symbol();
 }
 
-template <class T, class U>
-bool operator>(const Function <T, U> &a, const Function <T, U> &b)
+bool operator>(const Function &a, const Function &b)
 {
 	return a.symbol() > b.symbol();
 }
 
 // Gathering facilities
-template <class T, class U>
 template <class A>
 void Function <T, U> ::gather(::std::vector <Token *> &Tokens, A in)
 {
 	Tokens.push_back(new Operand <A>(in));
 }
 
-template <class T, class U>
 template <class A, class ... B>
 void Function <T, U> ::gather(::std::vector <Token *> &Tokens, A in, B ... args)
 {
@@ -481,29 +445,26 @@ void Function <T, U> ::gather(::std::vector <Token *> &Tokens, A in, B ... args)
 	gather(Tokens, args...);
 }
 
-template <class T, class U>
-size_t Function <T, U> ::index(const ::std::string &str) const
+size_t Function::index(const std::string &str) const
 {
-	auto itr = ::std::find(__params.begin(), __params.end(), str);
+	auto itr = std::find(__params.begin(), __params.end(), str);
 
 	if (itr == __params.end())
 		return -1;
 
-	return ::std::distance(__params.begin(), itr);
+	return std::distance(__params.begin(), itr);
 }
 
 // External classes
-template <class T, class U>
-void Barn <T, U> ::put(Function <T, U> ftr)
+void Barn::put(Function ftr)
 {
-	if (fstack.contains(ftr.symbol()))
-		fstack.get(ftr.symbol()) = ftr;
+	if (__ftr_table.count(ftr.symbol()))
+		__ftr_table[ftr.symbol()] = ftr;
 	else
-		fstack.insert(ftr);
+		__ftr_table.insert(std::make_pair(ftr.symbol(), ftr));
 }
 
-template <class T, class U>
-Function <T, U> &Barn <T, U> ::retrieve_function(const ::std::string &str)
+Function &Barn::retrieve_function(const std::string &str)
 {
 	return fstack.get(str);
 }

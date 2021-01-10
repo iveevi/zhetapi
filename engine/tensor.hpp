@@ -146,16 +146,16 @@ template <class T>
 		return "[]";
 	
 	if (__dims == 0) {
-		::std::ostringstream oss;
+		std::ostringstream oss;
 
 		oss << __array[0];
 
 		return oss.str();
 	}
 	
-	::std::string out = "[";
+	std::string out = "[";
 
-	::std::vector <size_t> cropped;
+	std::vector <size_t> cropped;
 	for (int i = 0; i < ((int) __dims) - 1; i++)
 		cropped.push_back(__dim[i + 1]);
 

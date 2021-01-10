@@ -10,10 +10,7 @@
 
 namespace zhetapi {
 
-template <class T, class U>
 class Barn;
-
-template <class T, class U>
 class node_manager;
 
 // Algorithm class
@@ -125,7 +122,7 @@ Token *algorithm <T, U> ::execute(Barn <T, U> &barn, std::string str)
 		zhetapi::Token *tptr = nullptr;
 		
 		try {
-			zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
+			zhetapi::node_manager mg(tmp[tsize - 1], barn);
 
 			tptr = mg.value();
 		} catch (...) {}
@@ -134,7 +131,7 @@ Token *algorithm <T, U> ::execute(Barn <T, U> &barn, std::string str)
 			std::string ftr = tmp[i] + " = " + tmp[tsize - 1];
 
 			try {
-				zhetapi::Function <double, int> f = ftr;
+				zhetapi::Function f = ftr;
 
 				barn.put(f);
 			} catch (...) {
@@ -145,11 +142,11 @@ Token *algorithm <T, U> ::execute(Barn <T, U> &barn, std::string str)
 		delete tptr;
 	} else {		
 		// All functions and algorithms are stored in barn
-		node_manager <double, int> mg;
+		node_manager mg;
 		
 		try {
-			mg = node_manager <double, int> (str, barn);
-		} catch (node_manager <double, int> ::undefined_symbol e) {
+			mg = node_manager (str, barn);
+		} catch (node_manager::undefined_symbol e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""
 				<< e.what() << "\"" << std::endl;

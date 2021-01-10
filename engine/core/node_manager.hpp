@@ -14,27 +14,24 @@
 
 namespace zhetapi {
 
-template <class T, class U>
 class Function;
 
-template <class T, class U>
 class node_manager {
-	Barn <T, U>			__barn;
+	Barn				__barn;
 	node				__tree;
-	::std::vector <node>		__refs;
-	::std::vector <::std::string>	__params;
+	std::vector <node>		__refs;
+	std::vector <std::string>	__params;
 public:
 	node_manager();
-	node_manager(const ::std::string &, Barn <T, U> = Barn <T, U> ());
-	node_manager(const ::std::string &, const ::std::vector
-			<::std::string> &, Barn <T, U> = Barn <T, U> ());
+	node_manager(const std::string &, Barn = Barn());
+	node_manager(const std::string &, const std::vector <std::string> &, Barn = Barn());
 
 	node_manager(const node_manager &);
 
 	node_manager &operator=(const node_manager &);
 
 	Token *value() const;
-	Token *value(Barn <T, U> &) const;
+	Token *value(Barn &) const;
 
 	Token *substitute_and_compute(::std::vector <Token *> &, size_t = 1);
 
@@ -46,21 +43,21 @@ public:
 
 	void simplify();
 
-	void differentiate(const ::std::string &);
+	void differentiate(const std::string &);
 
-	void refactor_reference(const ::std::string &, Token *);
+	void refactor_reference(const std::string &, Token *);
 
 	/*
 	 * Code generator. Requires the specification of an output file.
 	 */
-	void generate(::std::string &) const;
+	void generate(std::string &) const;
 
-	::std::string display() const;
+	std::string display() const;
 
 	void print(bool = false) const;
 
 	// Static methods
-	static bool loose_match(const node_manager <T, U> &, const node_manager <T, U> &);
+	static bool loose_match(const node_manager &, const node_manager &);
 private:
 	Token *value(node) const;
 	Token *value(node, Barn <T, U> &) const;
@@ -147,9 +144,8 @@ node_manager <T, U> ::node_manager(const ::std::string &str, Barn <T, U>
 	count_up(__tree);
 }
 
-template <class T, class U>
-node_manager <T, U> ::node_manager(const ::std::string &str, const
-		::std::vector <::std::string> &params, Barn <T, U> barn) :
+node_manager::node_manager(const std::string &str, const
+		std::vector <std::string> &params, Barn <T, U> barn) :
 	__params(params), __barn(barn) 
 {
 	zhetapi::parser <T, U> pr;
@@ -403,8 +399,7 @@ Token *node_manager <T, U> ::substitute_and_compute(std::vector <Token *>
 }
 
 // Expansion methods
-template <class T, class U>
-void node_manager <T, U> ::expand(node &ref)
+void node_manager::expand(node &ref)
 {
 	if (*(ref.__tptr) == Token::vcl) {
 		/*
@@ -422,8 +417,7 @@ void node_manager <T, U> ::expand(node &ref)
 		expand(leaf);
 }
 
-template <class T, class U>
-node node_manager <T, U> ::expand(const std::string &str, const std::vector <node> &leaves)
+node node_manager::expand(const std::string &str, const std::vector <node> &leaves)
 {
 	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
 		
@@ -526,8 +520,7 @@ node node_manager <T, U> ::expand(const std::string &str, const std::vector <nod
 }
 
 // Counting nodes
-template <class T, class U>
-size_t node_manager <T, U> ::count_up(node &ref)
+size_t node_manager::count_up(node &ref)
 {
 	size_t total = 1;
 	for (auto &child : ref.__leaves)
@@ -539,14 +532,12 @@ size_t node_manager <T, U> ::count_up(node &ref)
 }
 
 // Simplication methods
-template <class T, class U>
-void node_manager <T, U> ::simplify()
+void node_manager::simplify()
 {
 	simplify(__tree);
 }
 
-template <class T, class U>
-void node_manager <T, U> ::simplify(node &ref)
+void node_manager::simplify(node &ref)
 {
 	if (ref.__label == l_operation_constant) {
 		ref.transfer(node(value(ref), l_constant, {}));
@@ -563,14 +554,13 @@ void node_manager <T, U> ::simplify(node &ref)
 		simplify(child);
 }
 
-template <class T, class U>
-void node_manager <T, U> ::simplify_separable(node &ref)
+void node_manager::simplify_separable(node &ref)
 {
 	Token *opd = new Operand <U> (0);
 
-	::std::stack <node> process;
+	std::stack <node> process;
 
-	::std::vector <node> sums;
+	std::vector <node> sums;
 	
 	process.push(ref);
 
@@ -591,7 +581,7 @@ void node_manager <T, U> ::simplify_separable(node &ref)
 	}
 
 	// Make copies, not address copies
-	::std::vector <node> rest;
+	std::vector <node> rest;
 	for (auto sep : sums) {
 		// Includes variable_constant; remove this exception
 		if (is_constant(sep.__label))
@@ -623,7 +613,6 @@ void node_manager <T, U> ::simplify_separable(node &ref)
 }
 
 // Differentiation
-template <class T, class U>
 void node_manager <T, U> ::differentiate(const ::std::string &str)
 {
 	for (size_t i = 0; i < __refs.size(); i++) {
@@ -683,15 +672,13 @@ void node_manager <T, U> ::differentiate(node &ref)
 }
 
 // Refactoring methods
-template <class T, class U>
-void node_manager <T, U> ::refactor_reference(const ::std::string &str, Token *tptr)
+void node_manager::refactor_reference(const std::string &str, Token *tptr)
 {
 	refactor_reference(__tree, str, tptr);
 }
 
-template <class T, class U>
-void node_manager <T, U> ::refactor_reference(node &ref, const
-		::std::string &str, Token *tptr)
+void node_manager::refactor_reference(node &ref, const
+		std::string &str, Token *tptr)
 {
 	node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
 	
@@ -906,8 +893,7 @@ void node_manager <T, U> ::print(bool address) const
 }
 
 // Labeling utilities
-template <class T, class U>
-void node_manager <T, U> ::label(node &ref)
+void node_manager::label(node &ref)
 {
 	switch (ref.__tptr->caller()) {
 	case Token::opd:
@@ -1031,20 +1017,17 @@ void node_manager <T, U> ::rereference(node &ref)
 }
 
 // Static methods
-template <class T, class U>
 bool node_manager <T, U> ::loose_match(const node_manager <T, U> &a, const node_manager <T, U> &b)
 {
 	return node::loose_match(a.__tree, b.__tree);
 }
 
 // Node factories
-template <class T, class U>
 node node_manager <T, U> ::nf_one()
 {
 	return node(new Operand <U> (1), {});
 }
 
-template <class T, class U>
 node node_manager <T, U> ::nf_zero()
 {
 	return node(new Operand <U> (0), {});
