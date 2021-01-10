@@ -24,6 +24,7 @@ set(ZHETAPI_SOURCE
 	source/operation.cpp
 	source/registration.cpp
 	source/variable_cluster.cpp
+	source/variable.cpp
 	source/token.cpp
 	source/node.cpp
 	source/display.cpp

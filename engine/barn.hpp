@@ -28,7 +28,6 @@
 #include <core/types.hpp>
 #include <core/ftable.hpp>
 #include <core/operation.hpp>
-#include <core/vtable.hpp>
 
 #include <std/combinatorial.hpp>
 
@@ -227,13 +226,13 @@ public:
 
 	// using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
 private:
-	vtable <T, U> vstack;
 	ftable <T, U> fstack;
 
 	std::vector <std::pair <ID, Token *>> ops;
 
-	std::unordered_map <std::string, Registrable> __reg_table;
-	std::unordered_map <std::string, algorithm <T, U>> __alg_table;
+	std::unordered_map <std::string, Variable>		__var_table;
+	std::unordered_map <std::string, Registrable>		__reg_table;
+	std::unordered_map <std::string, algorithm <T, U>>	__alg_table;
 
 	mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;
 	
@@ -248,24 +247,24 @@ public:
 
 	bool present(const ::std::string &) const;
 
-	void put(Variable <T, U>);
+	void put(Variable);
 	void put(Function <T, U>);
 	void put(Registrable);
 	void put(algorithm <T, U>);
 
-	template <class A>
-	void put(const ::std::string &, A);
+	/* template <class A>
+	void put(const ::std::string &, A); */
 
 	void put(Token *, const ::std::string &);
 
-	Variable <T, U> &retrieve_variable(const ::std::string &);
-	Function <T, U> &retrieve_function(const ::std::string &);
+	Variable &retrieve_variable(const std::string &);
+	Function <T, U> &retrieve_function(const std::string &);
 
-	Token *get(const ::std::string &);
+	Token *get(const std::string &);
 
-	Token *compute(const ::std::string &, const ::std::vector <Token *> &) const;
+	Token *compute(const std::string &, const std::vector <Token *> &) const;
 	
-	::std::string overloads(const ::std::string &) const;
+	::std::string overloads(const std::string &) const;
 
 	void list() const;
 	void list_registered(::std::string) const;
@@ -289,7 +288,7 @@ public:
 //////////////////////////////////////////
 
 template <class T, class U>
-Barn <T, U> ::Barn() : vstack(), fstack()
+Barn <T, U> ::Barn() : fstack()
 {
 	//////////////////////////////////////////
 	// Real Scalar Arithemtic
@@ -525,9 +524,10 @@ Barn <T, U> ::Barn() : vstack(), fstack()
 }
 
 template <class T, class U>
-Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack),
-		fstack(other.fstack), __reg_table(other.__reg_table),
-		__alg_table(other.__alg_table)
+Barn <T, U> ::Barn(const Barn <T, U> &other) : fstack(other.fstack),
+		__reg_table(other.__reg_table),
+		__alg_table(other.__alg_table),
+		__var_table(other.__var_table)
 {
 	for (auto pr : other.ops)
 		ops.push_back({pr.first, pr.second->copy()});
@@ -538,7 +538,7 @@ Barn <T, U> ::Barn(const Barn <T, U> &other) : vstack(other.vstack),
 		if (table.count(pr.first.first))
 			table[pr.first.first].push_back({pr.first.second, pr.second});
 		else
-			table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+			table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 	}
 }
 
@@ -546,7 +546,8 @@ template <class T, class U>
 Barn <T, U> &Barn <T, U> ::operator=(const Barn <T, U> &other)
 {
 	if (this != &other) {
-		vstack = other.vstack;
+		__var_table = other.__var_table;
+
 		fstack = other.fstack;
 
 		for (auto pr : other.ops)
@@ -558,7 +559,7 @@ Barn <T, U> &Barn <T, U> ::operator=(const Barn <T, U> &other)
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 		}
 	}
 
@@ -573,22 +574,24 @@ Barn <T, U> ::~Barn()
 }
 
 template <class T, class U>
-bool Barn <T, U> ::present(const ::std::string &str) const
+bool Barn <T, U> ::present(const std::string &str) const
 {
-	auto itr = ::std::find_if(ops.begin(), ops.end(), [&](const ::std::pair <ID, Token *> &pr) {
-		return pr.first.first == str;
-	});
+	auto itr = std::find_if(ops.begin(), ops.end(),
+		[&](const ::std::pair <ID, Token *> &pr) {
+			return pr.first.first == str;
+		}
+	);
 
 	return itr != ops.end();
 }
 
 template <class T, class U>
-void Barn <T, U> ::put(Variable <T, U> var)
+void Barn <T, U> ::put(Variable var)
 {
-	if (vstack.contains(var.symbol()))
-		vstack.get(var.symbol()) = var;
+	if (__var_table.count(var.symbol()))
+		__var_table[var.symbol()] = var;
 	else
-		vstack.insert(var);
+		__var_table.insert(std::make_pair(var.symbol(), var));
 }
 
 template <class T, class U>
@@ -597,7 +600,7 @@ void Barn <T, U> ::put(Registrable reg)
 	if (__reg_table.find(reg.str()) != __reg_table.end())
 		__reg_table[reg.str()] = reg;
 	else
-		__reg_table.insert(::std::make_pair(reg.str(), reg));
+		__reg_table.insert(std::make_pair(reg.str(), reg));
 }
 
 template <class T, class U>
@@ -609,24 +612,25 @@ void Barn <T, U> ::put(algorithm <T, U> alg)
 		__alg_table.insert(std::make_pair(alg.symbol(), alg));
 }
 
+/*
 template <class T, class U>
 template <class A>
 void Barn <T, U> ::put(const ::std::string &str, A x)
 {
-	put(Variable <T, U> {str, x});
-}
+	put(Variable(str, x));
+} */
 
 template <class T, class U>
-void Barn <T, U> ::put(Token *tptr, const ::std::string &str)
+void Barn <T, U> ::put(Token *tptr, const std::string &str)
 {
 	// Leave the passed pointer alone, and copy it instead
-	put(Variable <T, U> {tptr->copy(), str});
+	put(Variable(tptr->copy(), str));
 }
 
 template <class T, class U>
-Variable <T, U> &Barn <T, U> ::retrieve_variable(const ::std::string &str)
+Variable &Barn <T, U> ::retrieve_variable(const std::string &str)
 {
-	return vstack.get(str);
+	return __var_table[str];
 }
 
 template <class T, class U>
@@ -636,8 +640,8 @@ Token *Barn <T, U> ::get(const std::string &str)
 	if (__alg_table.count(str))
 		return __alg_table[str].copy();
 	
-	if (vstack.contains(str))
-		return (vstack.get(str)).copy();
+	if (__var_table.count(str))
+		return __var_table[str].copy();
 	
 	if (fstack.contains(str))
 		return (fstack.get(str)).copy();
@@ -743,20 +747,16 @@ template <class T, class U>
 template <class T, class U>
 void Barn <T, U> ::list() const
 {
-	::std::vector <Variable <T, U>> v = vstack.list();
+	std::cout << "\tVariables:" << std::endl;
+	for (auto spr : __var_table)
+		std::cout << "\t\t" << spr.second.str() << std::endl;
 
-	if (v.size()) {
-		::std::cout << "\tVariables:" << ::std::endl;
-		for (auto var : v)
-			::std::cout << "\t\t" << var << ::std::endl;
-	}
-
-	::std::vector <Function <T, U>> f = fstack.list();
+	std::vector <Function <T, U>> f = fstack.list();
 	
 	if (f.size()) {
-		::std::cout << "\tFunctions:" << ::std::endl;
+		std::cout << "\tFunctions:" << std::endl;
 		for (auto ftn : f)
-			::std::cout << "\t\t" << ftn << ::std::endl;
+			std::cout << "\t\t" << ftn << std::endl;
 	}
 }
 
@@ -775,11 +775,12 @@ void Barn <T, U> ::print(bool show_ops) const
 	std::cout << "Variables:" << ::std::endl;
 	std::cout << ::std::string(50, '-') << ::std::endl;
 
-	vstack.print();
+	for (auto spr : __var_table)
+		std::cout << spr.second.str() << std::endl;
 
-	::std::cout << ::std::string(50, '-') << ::std::endl;
-	::std::cout << "Functions:" << ::std::endl;
-	::std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << std::string(50, '-') << std::endl;
+	std::cout << "Functions:" << std::endl;
+	std::cout << std::string(50, '-') << std::endl;
 
 	fstack.print();
 
@@ -788,7 +789,7 @@ void Barn <T, U> ::print(bool show_ops) const
 	::std::cout << ::std::string(50, '-') << ::std::endl;
 
 	for (auto spr : __reg_table)
-		::std::cout << spr.second.str() << ::std::endl;
+		std::cout << spr.second.str() << std::endl;
 	
 	::std::cout << ::std::string(50, '-') << ::std::endl;
 	::std::cout << "Algorithms [" << __alg_table.size() << "]" << ::std::endl;

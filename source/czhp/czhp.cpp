@@ -51,8 +51,8 @@ static int interpreter(string infile)
 	barn.put(Registrable("print", &print));
 	barn.put(Registrable("println", &println));
 
-	barn.put(Variable <double, int> (op_true->copy(), "true"));
-	barn.put(Variable <double, int> (op_false->copy(), "false"));
+	barn.put(Variable(op_true->copy(), "true"));
+	barn.put(Variable(op_false->copy(), "false"));
 
 	return parse();
 }

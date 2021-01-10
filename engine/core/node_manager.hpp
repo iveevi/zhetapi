@@ -224,7 +224,7 @@ Token *node_manager <T, U> ::value(node tree) const
 	Token *tptr;
 	Token *vptr;
 
-	Variable <T, U> v;
+	Variable v;
 
 	std::string ident;
 
@@ -245,7 +245,7 @@ Token *node_manager <T, U> ::value(node tree) const
 
 		return tptr->copy();
 	case Token::var:
-		tptr = (dynamic_cast <Variable <T, U> *> (tree.__tptr.get()))->get().get();
+		tptr = (dynamic_cast <Variable *> (tree.__tptr.get()))->get().get();
 
 		return tptr->copy();
 	case Token::ftn:
@@ -295,8 +295,8 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 
 	Token *vptr;
 
-	Variable <T, U> v;
-	Variable <T, U> *vp;
+	Variable v;
+	Variable *vp;
 
 	algorithm <T, U> *alg;
 
@@ -320,11 +320,11 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 		if (tree.__label == l_post_modifier) {
 			vptr = tree.__leaves[0].__tptr.get();
 
-			vp = dynamic_cast <Variable <T, U> *> (vptr);
+			vp = dynamic_cast <Variable *> (vptr);
 
 			ident = vp->symbol();
 			
-			v = Variable <T, U> (tptr, ident);
+			v = Variable(tptr, ident);
 
 			ext.put(v);
 
@@ -334,18 +334,18 @@ Token *node_manager <T, U> ::value(node tree, Barn <T, U> &ext) const
 		} else if (tree.__label == l_pre_modifier) {
 			vptr = tree.__leaves[0].__tptr.get();
 
-			vp = dynamic_cast <Variable <T, U> *> (vptr);
+			vp = dynamic_cast <Variable *> (vptr);
 
 			ident = vp->symbol();
 			
-			v = Variable <T, U> (tptr, ident);
+			v = Variable(tptr, ident);
 
 			ext.put(v);
 		}
 
 		return tptr->copy();
 	case Token::var:
-		tptr = (dynamic_cast <Variable <T, U> *> (tree.__tptr.get()))->get().get();
+		tptr = (dynamic_cast <Variable *> (tree.__tptr.get()))->get().get();
 
 		return tptr->copy();
 	case Token::ftn:
@@ -423,9 +423,9 @@ void node_manager <T, U> ::expand(node &ref)
 }
 
 template <class T, class U>
-node node_manager <T, U> ::expand(const ::std::string &str, const ::std::vector <node> &leaves)
+node node_manager <T, U> ::expand(const std::string &str, const std::vector <node> &leaves)
 {
-	typedef ::std::vector <::std::pair <::std::vector <node>, ::std::string>> ctx;
+	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
 		
 	ctx contexts;
 
