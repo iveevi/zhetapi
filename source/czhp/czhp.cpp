@@ -10,6 +10,8 @@ enum mode {
 };
 
 // Setup the default include directories
+bool verbose = false;
+
 vector <string> idirs = {"."};
 
 // Display guide
@@ -73,7 +75,7 @@ int main(int argc, char *argv[])
 	int index;
 
 	mode md = interpret;
-	while ((c = getopt(argc, argv, ":c:d:o:L:h")) != EOF) {
+	while ((c = getopt(argc, argv, ":c:d:o:L:h:v")) != EOF) {
 		switch (c) {
 		case 'c':
 			if (md != help)
@@ -119,6 +121,10 @@ int main(int argc, char *argv[])
 			break;
 		case 'h':
 			md = help;
+
+			break;
+		case 'v':
+			verbose = true;
 
 			break;
 		default:

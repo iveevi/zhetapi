@@ -13,6 +13,7 @@
 #include <expression.hpp>
 
 using namespace std;
+using namespace zhetapi;
 
 // Typedefs
 typedef zhetapi::Operand <int> z;
@@ -20,10 +21,10 @@ typedef zhetapi::Operand <Rational <int>> q;
 typedef zhetapi::Operand <double> r;
 
 // Barn for variables and functions
-zhetapi::Barn <double, int> barn;
+zhetapi::Barn barn;
 
 // Answer variable
-zhetapi::Variable <double, int> ans(new z(0), "$");
+zhetapi::Variable ans(new z(0), "$");
 
 // List of commands
 map <string, pair <string, function <void ()>>> cmds;
@@ -31,7 +32,7 @@ map <string, pair <string, function <void ()>>> cmds;
 // Inserting variables into barn
 void insert(const string &name, const string &expr)
 {
-	zhetapi::node_manager <double, int> mgr(expr, barn);
+	zhetapi::node_manager mgr(expr, barn);
 
 	zhetapi::Token *tptr = mgr.value();
 
@@ -74,7 +75,7 @@ void parse(const string &str)
 	
 	if (count == 0) {
 		try {
-			zhetapi::node_manager <double, int> mgr(str, barn);
+			zhetapi::node_manager mgr(str, barn);
 
 			zhetapi::Token *tptr = mgr.value();
 
@@ -83,12 +84,12 @@ void parse(const string &str)
 			barn.put(tptr, "$");
 			
 			delete tptr;
-		} catch (zhetapi::node_manager <double, int> ::undefined_symbol e) {
+		} catch (zhetapi::node_manager::undefined_symbol e) {
 			cout << "\n\t" << e.what() << "\n\n";
 		}
 	} else if (count == 1) {
 		try {
-			zhetapi::Function <double, int> tmp = std::string(str);
+			zhetapi::Function tmp = std::string(str);
 
 			barn.put(tmp);
 
@@ -149,8 +150,8 @@ namespace cmd {
 int main()
 {
 	// Filling out barn
-	barn.put("e", exp(1));
-	barn.put("pi", acos(-1));
+	barn.put(Variable(new Operand <double> (exp(1)), "e"));
+	barn.put(Variable(new Operand <double> (acos(-1)), "pi"));
 
 	// Ans
 	barn.put(ans);
@@ -173,6 +174,6 @@ int main()
 		else if (!line.empty())
 			parse(line);
 
-		zhetapi::Function <double, int> ::barn = barn;
+		zhetapi::Function::barn = barn;
 	}
 }

@@ -94,7 +94,7 @@ function genlibs {
 	echo "Compiling libraries..."
 	echo -e "===========================================================\n"
 
-	bin/czhp -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib
+	bin/czhp -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib
 
 	if ! [ -x "$(command -v tree)" ]; then
 		ls include
@@ -120,7 +120,7 @@ elif [ $1 = "install" ]; then
 	mkdir -p bin
 	mkdir -p build
 
-	compile_normal all
+	compile_normal czhp
 
 	# Move executables and libraries
 	if [ -f "libzhp.so" ]; then
@@ -128,12 +128,12 @@ elif [ $1 = "install" ]; then
 	fi
 
 	# Place the binaries into their appropriate directories
-	[ -f zhetapi ] && mv zhetapi bin
+	# [ -f zhetapi ] && mv zhetapi bin
 	[ -f czhp ] && mv czhp bin
 
-	[ -f port ] && mv port build
-	[ -f exp ] && mv exp build
-	[ -f cuda ] && mv cuda build
+	# [ -f port ] && mv port build
+	# [ -f exp ] && mv exp build
+	# [ -f cuda ] && mv cuda build
 
 	genlibs
 elif [ $1 = "genlibs" ]; then

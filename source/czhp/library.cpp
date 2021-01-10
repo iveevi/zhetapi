@@ -26,6 +26,9 @@ int compile_library(vector <string> files, string output)
 
 	string cmd = "g++-8 " + opts + idir + sources + ldir + libs + " -o " + outlib + rpath;
 
+	if (verbose)
+		cout << cmd << endl;
+
 	return system(cmd.c_str());
 }
 

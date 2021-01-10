@@ -83,7 +83,7 @@ std::string Operand <T> ::str() const
 {
 	std::ostringstream oss;
 
-	// oss << __val;
+	oss << __val;
 
 	return oss.str();
 }

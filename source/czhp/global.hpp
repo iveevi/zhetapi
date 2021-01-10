@@ -15,6 +15,7 @@
 using namespace std;
 using namespace zhetapi;
 
+extern bool verbose;
 extern size_t line;
 extern string file;
 extern vector <string> global;
