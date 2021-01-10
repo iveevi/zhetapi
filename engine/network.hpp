@@ -22,7 +22,9 @@
 
 #include <dataset.hpp>
 #include <display.hpp>
-#include <optimizer.hpp>
+#include <layer.hpp>
+
+// #include <optimizer.hpp>
 
 #ifdef ZHP_CUDA
 
@@ -51,19 +53,8 @@ namespace zhetapi {
 
 namespace ml {
 
-// TODO: Extract into a more generalized abstraction
-template <class T>
-using Layer = std::pair <size_t, Activation <T> *>;
-
 template <class T>
 using Comparator = bool (*)(const Vector <T> &, const Vector <T> &);
-
-template <class T>
-struct default_initializer {
-	T operator()() {
-		return T(rand()/((double) RAND_MAX));
-	}
-};
 
 template <class T>
 bool default_comparator(const Vector <T> &a, const Vector <T> &e)
@@ -88,41 +79,38 @@ public:
 	class bad_io_dimensions {};
 private:
 	Layer <T> *				__layers = nullptr;
-	Matrix <T> *				__weights = nullptr;
-	Matrix <T> *				__momentum = nullptr;
-	std::function <T ()>			__random;
-	size_t					__isize = 0;
-	size_t					__osize = 0;
 	size_t					__size = 0;
 
-	std::vector <Vector <T>>		__a = {};
-	std::vector <Vector <T>>		__z = {};
-
 	Erf <T> *				__cost = nullptr; // Safe to copy
-
 	Comparator <T>				__cmp = __default_comparator;
 
 	void clear();
 public:
 	NeuralNetwork();
 	NeuralNetwork(const NeuralNetwork &);
-	NeuralNetwork(const std::vector <Layer <T>> &, const std::function <T ()> &);
+	NeuralNetwork(size_t, const std::vector <Layer <T>> &);
 
 	~NeuralNetwork();
 
 	NeuralNetwork &operator=(const NeuralNetwork &);
 
-	// Saving and loading the network
+	/* Saving and loading the network
 	void save(const std::string &);
 	void load(const std::string &);
 	void load_json(const std::string &);
 
 	// Setters
 	void set_cost(Erf <T> *);
-	void set_comparator(const Comparator <T> &);
+	void set_comparator(const Comparator <T> &); */
 
-	Matrix <T> *adjusted(T mu);
+	// Matrix <T> *adjusted(T mu);
 
+	// Computation
+	Vector <T> operator()(const Vector <T> &);
+
+	Vector <T> simple_compute(const Vector <T> &);
+	
+	/*
 	Vector <T> compute(const Vector <T> &);
 	Vector <T> compute(const Vector <T> &,
 			Matrix <T> *);
@@ -214,10 +202,11 @@ public:
 	void randomize();
 
 	// Printing weights
-	void print() const;
+	void print() const;*/
 
 	static const Comparator <T>		__default_comparator;
 
+	/*
 #ifdef ZHP_CUDA
 
 	template <class F>
@@ -257,7 +246,7 @@ public:
 		F,
 		bool = false);
 
-#endif
+#endif */
 
 };
 
@@ -266,34 +255,19 @@ template <class T>
 const Comparator <T> NeuralNetwork <T> ::__default_comparator
 	= default_comparator <T>;
 
-// Constructors
+// Constructors and other memory related operations
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork() {}
 
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
-	__random(other.__random), __size(other.__size),
-	__isize(other.__isize), __osize(other.__osize),
-	__cost(other.__cost), __cmp(other.__cmp)
+		__size(other.__size), __cost(other.__cost),
+		__cmp(other.__cmp)
 {
 	__layers = new Layer <T> [__size];
 
-	__weights = new Matrix <T> [__size - 1];
-	__momentum = new Matrix <T> [__size - 1];
-	for (size_t i = 0; i < __size - 1; i++) {
-		__weights[i] = other.__weights[i];
-		__momentum[i] = other.__momentum[i];
-	}
-
-	for (size_t i = 0; i < __size; i++) {
-		__layers[i] = {
-			other.__layers[i].first,
-			copy(other.__layers[i].second)
-		};
-	}
-
-	__a = std::vector <Vector <T>> (__size);
-	__z = std::vector <Vector <T>> (__size - 1);
+	for (size_t i = 0; i < __size; i++)
+		__layers[i] = other.__layers[i];
 }
 
 /*
@@ -304,31 +278,18 @@ NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
  * NeuralNetwork class do the work for you.
  */
 template <class T>
-NeuralNetwork <T> ::NeuralNetwork(const std::vector <Layer <T>> &layers,
-		const std::function <T ()> &random)
-		: __random(random),
-		__size(layers.size()),
-		__isize(layers[0].first),
-		__osize(layers[layers.size() - 1].first),
-		__layers(nullptr),
-		__cost(nullptr),
-		__cmp(__default_comparator)
+NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &layers)
+		: __size(layers.size())
 {
 	__layers = new Layer <T> [__size];
-	for (int i = 0; i < __size; i++)
+
+	size_t tmp = isize;
+	for (int i = 0; i < __size; i++) {
 		__layers[i] = layers[i];
 
-	__weights = new Matrix <T> [__size - 1];
-	__momentum = new Matrix <T> [__size - 1];
+		__layers[i].set_fan_in(tmp);
 
-	__a = std::vector <Vector <T>> (__size);
-	__z = std::vector <Vector <T>> (__size - 1);
-	for (size_t i = 0; i < __size - 1; i++) {
-		// Add extra column for constants (biases)
-		Matrix <T> mat(__layers[i + 1].first, __layers[i].first + 1);
-
-		__weights[i] = mat;
-		__momentum[i] = mat;
+		isize = __layers[i].get_fan_out();
 	}
 }
 
@@ -343,33 +304,6 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 {
 	if (this != &other) {
 		clear();
-
-		__size = other.__size;
-		__isize = other.__isize;
-		__osize = other.__osize;
-
-		__cmp = other.__cmp;
-		__cost = other.__cost;
-		__random = other.__random;
-
-		__layers = new Layer <T> [__size];
-
-		__weights = new Matrix <T> [__size - 1];
-		__momentum = new Matrix <T> [__size - 1];
-		for (size_t i = 0; i < __size - 1; i++) {
-			__weights[i] = other.__weights[i];
-			__momentum[i] = other.__momentum[i];
-		}
-
-		for (size_t i = 0; i < __size; i++) {
-			__layers[i] = {
-				other.__layers[i].first,
-				copy(other.__layers[i].second)
-			};
-		}
-
-		__a = std::vector <Vector <T>> (__size);
-		__z = std::vector <Vector <T>> (__size - 1);
 	}
 
 	return *this;
@@ -378,22 +312,34 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 template <class T>
 void NeuralNetwork <T> ::clear()
 {
-	if (__layers) {
-		for (int i = 0; i < __size; i++) {
-			if (__layers[i].second)
-				delete __layers[i].second;
-		}
-
-		delete[] __layers;
-	}
-
-	if (__weights)
-		delete[] __weights;
-
-	if (__momentum)
-		delete[] __momentum;
+	delete[] __layers;
 }
 
+// Computation
+template <class T>
+Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
+{
+	return simple_compute(in);
+}
+
+template <class T>
+Vector <T> NeuralNetwork <T> ::simple_compute(const Vector <T> &in)
+{
+	Vector <T> tmp = in;
+
+	using namespace std;
+	cout << "in = " << in << endl;
+	for (size_t i = 0; i < __size; i++) {
+		cout << "tmp = " << tmp << endl;
+		tmp = __layers[i].forward_propogate(tmp);
+	}
+
+	cout << "tmp = " << tmp << endl;
+
+	return tmp;
+}
+
+/*
 // Saving and loading
 template <class T>
 void NeuralNetwork <T> ::save(const std::string &file)
@@ -1508,7 +1454,7 @@ void NeuralNetwork <T> ::print() const
 		std::cout << "[" << ++n << "]\t" << __momentum[i] << std::endl;
 
 	std::cout << "================================" << std::endl;
-}
+} */
 
 }
 

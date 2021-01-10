@@ -1,5 +1,5 @@
-#ifndef NODE_DIFFERENTIATION_H_
-#define NODE_DIFFERENTIATION_H_
+#include <core/node_manager.hpp>
+#include <barn.hpp>
 
 namespace zhetapi {
 
@@ -28,7 +28,7 @@ void node_manager::differentiate_mul(node &ref)
 void node_manager::differentiate_pow(node &ref)
 {
 	Token *mul = ref.__leaves[1].__tptr->copy();
-	Token *exp = __barn.compute("-", {mul, new Operand <U> (1)});
+	Token *exp = __barn->compute("-", {mul, new opd_z(1)});
 
 	node diffed(ref.__leaves[0]);
 	differentiate(diffed);
@@ -68,7 +68,7 @@ void node_manager::differentiate_lg(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__barn.compute("ln", {new Operand <U> (2)}), l_none, {}),
+			node(__barn->compute("ln", {new opd_z(2)}), l_none, {}),
 			node(ref.__leaves[0])
 		})
 	});
@@ -84,7 +84,7 @@ void node_manager::differentiate_const_log(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__barn.compute("ln", {value(ref.__leaves[0])}), l_none, {}),
+			node(__barn->compute("ln", {value(ref.__leaves[0])}), l_none, {}),
 			node(ref.__leaves[1])
 		})
 	});
@@ -111,7 +111,7 @@ void node_manager::differentiate_trig(node &ref)
 			node(new operation_holder("sin"), l_trigonometric, {
 				node(ref.__leaves[0])
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	case tan:
@@ -119,7 +119,7 @@ void node_manager::differentiate_trig(node &ref)
 			node(new operation_holder("sec"), l_trigonometric, {
 				node(ref.__leaves[0])
 			}),
-			node(new Operand <U> (2), l_constant_integer, {})	
+			node(new opd_z(2), l_constant_integer, {})	
 		});
 		break;
 	case sec:
@@ -142,7 +142,7 @@ void node_manager::differentiate_trig(node &ref)
 					node(ref.__leaves[0])
 				}),
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	case cot:
@@ -151,9 +151,9 @@ void node_manager::differentiate_trig(node &ref)
 				node(new operation_holder("cot"), l_trigonometric, {
 					node(ref.__leaves[0])
 				}),
-				node(new Operand <U> (2), l_constant_integer, {})	
+				node(new opd_z(2), l_constant_integer, {})	
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	default:
@@ -187,7 +187,7 @@ void node_manager::differentiate_hyp(node &ref)
 			node(new operation_holder("sinh"), l_hyperbolic, {
 				node(ref.__leaves[0])
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	case tnh:
@@ -195,7 +195,7 @@ void node_manager::differentiate_hyp(node &ref)
 			node(new operation_holder("sech"), l_hyperbolic, {
 				node(ref.__leaves[0])
 			}),
-			node(new Operand <U> (2), l_constant_integer, {})	
+			node(new opd_z(2), l_constant_integer, {})	
 		});
 		break;
 	case sch:
@@ -218,7 +218,7 @@ void node_manager::differentiate_hyp(node &ref)
 					node(ref.__leaves[0])
 				}),
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	case cth:
@@ -227,9 +227,9 @@ void node_manager::differentiate_hyp(node &ref)
 				node(new operation_holder("coth"), l_hyperbolic, {
 					node(ref.__leaves[0])
 				}),
-				node(new Operand <U> (2), l_constant_integer, {})	
+				node(new opd_z(2), l_constant_integer, {})	
 			}),
-			node(new Operand <U> (-1), l_constant_integer, {})
+			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
 	default:
@@ -243,7 +243,5 @@ void node_manager::differentiate_hyp(node &ref)
 
 	ref.transfer(tmp);
 }
-	
-}
 
-#endif
+}

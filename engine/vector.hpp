@@ -79,7 +79,7 @@ public:
 	void operator+=(const Vector &);
 	void operator-=(const Vector &);
 	
-	Vector append_above(const T &);
+	Vector append_above(const T &) const;
 	Vector append_below(const T &);
 
 	Vector remove_top();
@@ -143,7 +143,7 @@ public:
 	void operator-=(const Vector &);
 	
 	__host__ __device__
-	Vector append_above(const T &);
+	Vector append_above(const T &) const;
 	
 	__host__ __device__
 	Vector append_below(const T &);
@@ -398,6 +398,8 @@ Vector <T> ::Vector(size_t rs, ::std::function <T *(size_t)> gen)
 template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
+	using namespace std;
+	cout << "Operator = " << endl;
 	if (this != &other) {
 		this->clear();
 
@@ -464,11 +466,11 @@ void Vector <T> ::operator-=(const Vector <T> &a)
 }
 
 template <class T>
-Vector <T> Vector <T> ::append_above(const T &x)
+Vector <T> Vector <T> ::append_above(const T &x) const
 {
 	size_t t_sz = size();
 
-	::std::vector <T> total {x};
+	std::vector <T> total {x};
 
 	for (size_t i = 0; i < t_sz; i++)
 		total.push_back((*this)[i]);

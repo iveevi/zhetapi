@@ -1,7 +1,7 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-Barn <double, int> barn;
+Barn barn;
 
 Token *execute(string str)
 {
@@ -16,7 +16,7 @@ Token *execute(string str)
 		zhetapi::Token *tptr = nullptr;
 		
 		try {
-			zhetapi::node_manager <double, int> mg(tmp[tsize - 1], barn);
+			zhetapi::node_manager mg(tmp[tsize - 1], &barn);
 
 			tptr = mg.value();
 		} catch (...) {}
@@ -42,7 +42,7 @@ Token *execute(string str)
 		barn.print(); */
 
 		try {
-			mg = node_manager(str, barn);
+			mg = node_manager(str, &barn);
 		} catch (node_manager::undefined_symbol e) {
 			cout << "Error at line " << line
 				<< ": undefined symbol \""
@@ -55,7 +55,7 @@ Token *execute(string str)
 		mg.print(); */
 
 		// "Execute" the statement
-		return mg.value(barn);
+		return mg.value(&barn);
 	}
 
 	return nullptr;

@@ -8,7 +8,7 @@ bool function_computation()
 
 	const int iters = 1;
 
-	Function <double, int> f = "f(x, y) = x^2 + 2x + ln(x^3 * y - 36)";
+	Function f = "f(x, y) = x^2 + 2x + ln(x^3 * y - 36)";
 
 	tb = bench();
 	for (int i = 0; i < iters; i++)

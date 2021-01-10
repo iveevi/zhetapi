@@ -7,7 +7,7 @@
 #include <iterator>
 
 // Engine headers
-#include <function.hpp>
+#include <zhplib.hpp>
 
 #include <core/algorithm.hpp>
 
@@ -19,7 +19,8 @@ extern size_t line;
 extern string file;
 extern vector <string> global;
 extern vector <string> idirs;
-extern Barn <double, int> barn;
+
+extern Barn barn;
 
 extern Operand <bool> *op_true;
 extern Operand <bool> *op_false;

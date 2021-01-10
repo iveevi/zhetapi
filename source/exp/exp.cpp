@@ -5,44 +5,22 @@
 #include <iomanip>
 
 // Engine headers
-#include <matrix.hpp>
+#include <network.hpp>
+
+#include <std/activations.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
-#define MIN_SIZE	10
-#define MAX_SIZE	1000
-#define STEP		10
-
 int main()
 {
-	clock_t start;
-	clock_t end;
-	
-	ofstream fout("data/mat_mult.dat");
+	ml::NeuralNetwork <double> model (4, {
+		ml::Layer <double> (4, new ml::ReLU <double> ()),
+		ml::Layer <double> (4, new ml::Linear <double> ()),
+		ml::Layer <double> (4, new ml::Sigmoid <double> ())
+	});
 
-	Matrix <double> c;
-	for (size_t i = MIN_SIZE; i <= MAX_SIZE; i += STEP) {
-		Matrix <double> a(i, i,
-			[](size_t r, size_t c) {
-				return rand()/((double) RAND_MAX);
-			}
-		);
-		
-		Matrix <double> b(i, i,
-			[](size_t r, size_t c) {
-				return rand()/((double) RAND_MAX);
-			}
-		);
+	// model.randomize();
 
-		start = clock();
-
-		a * b;
-
-		end = clock();
-
-		fout << i << "\t";
-		fout << setprecision(6) << fixed
-			<< (end - start)/((double) CLOCKS_PER_SEC) << endl;
-	}
+	cout << "model-out: " << model({1, 1, 1, 1}) << endl;
 }

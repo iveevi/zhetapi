@@ -311,7 +311,7 @@ void check(string &keyword)
 			// Add a newline to flush parsing
 			block += '\n';
 
-			algorithm <double, int> alg(ident, params, block);
+			algorithm alg(ident, params, block);
 			barn.put(alg);
 		}
 

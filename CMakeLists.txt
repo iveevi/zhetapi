@@ -16,18 +16,24 @@ set(CMAKE_CXX_COMPILER "g++-8")
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 
 set(ZHETAPI_SOURCE 
+	source/algorithm.cpp
+	source/barn.cpp
 	source/class.cpp
 	source/complex.cpp
-	source/label.cpp
-	source/node_reference.cpp
-	source/operation_holder.cpp
-	source/operation.cpp
-	source/registration.cpp
-	source/variable_cluster.cpp
-	source/variable.cpp
-	source/token.cpp
-	source/node.cpp
 	source/display.cpp
+	source/function.cpp
+	source/label.cpp
+	source/node.cpp
+	source/node_differentiation.cpp
+	source/node_manager.cpp
+	source/node_reference.cpp
+	source/operation.cpp
+	source/operation_holder.cpp
+	source/registration.cpp
+	source/token.cpp
+	source/types.cpp
+	source/variable.cpp
+	source/variable_cluster.cpp
 )
 
 # Compile shared and static library

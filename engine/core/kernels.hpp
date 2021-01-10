@@ -1,6 +1,10 @@
 #ifndef KERNELS_H_
 #define KERNELS_H_
 
+// Engine headers
+#include <matrix.hpp>
+#include <vector.hpp>
+
 /**
  * This file contains CPU "kernels" which speed up computation in other parts of
  * the library, such as Neural Network training. Some of these kernels may be

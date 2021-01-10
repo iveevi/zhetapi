@@ -192,7 +192,6 @@ if [ -f libzhp.a ]; then
 	mv libzhp.a debug
 fi
 
-
 if [ -f libzhp.so ]; then
 	mv libzhp.so debug
 fi

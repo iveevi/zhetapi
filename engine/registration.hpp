@@ -36,13 +36,13 @@ namespace zhetapi {
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
 #define ZHETAPI_LIBRARY()			\
-	extern "C" void zhetapi_export_symbols(zhetapi::Barn <double, int> &barn)
+	extern "C" void zhetapi_export_symbols(zhetapi::Barn *barn)
 
 #define ZHETAPI_EXPORT(symbol)			\
-	barn.put(zhetapi::Registrable(#symbol, &symbol));
+	barn->put(zhetapi::Registrable(#symbol, &symbol));
 
 #define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)	\
-	barn.put(zhetapi::Registrable(#symbol, &ftr));
+	barn->put(zhetapi::Registrable(#symbol, &ftr));
 
 class Registrable : public Token {
 public:

@@ -46,7 +46,6 @@ using namespace boost::spirit;
 using namespace boost::phoenix;
 
 // Parser
-template <class T, class U>
 struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 
 	__TYPEDEFS__

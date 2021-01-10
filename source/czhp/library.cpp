@@ -1,6 +1,6 @@
 #include "global.hpp"
 
-typedef void (*exporter)(Barn <double, int> &);
+typedef void (*exporter)(Barn *);
 
 static int assess_library(string);
 
@@ -20,9 +20,11 @@ int compile_library(vector <string> files, string output)
 
 	string opts = " --no-gnu-unique -g -rdynamic -fPIC -shared ";
 	string idir = " -I engine ";
-	string esrc = " source/registration.cpp ";
+	string ldir = " -L$PWD/bin ";
+	string libs = " -lzhp ";
+	string rpath = " -Wl,-rpath $PWD/bin ";
 
-	string cmd = "g++-8" + opts + idir + sources + esrc + " -o " + outlib;
+	string cmd = "g++-8 " + opts + idir + sources + ldir + libs + " -o " + outlib + rpath;
 
 	return system(cmd.c_str());
 }
@@ -37,7 +39,7 @@ int assess_libraries(vector <string> files)
 
 static int assess_library(string file)
 {
-	Barn <double, int> tmp;
+	Barn tmp;
 
 	const char *dlsymerr = nullptr;
 
@@ -73,7 +75,7 @@ static int assess_library(string file)
 		return -1;
 	}
 
-	exprt(tmp);
+	exprt(&tmp);
 
 	tmp.list_registered(file);
 
@@ -116,7 +118,7 @@ int import_library(string file)
 		return -1;
 	}
 
-	exprt(barn);
+	exprt(&barn);
 
 	return 0;
 }

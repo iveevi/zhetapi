@@ -91,8 +91,8 @@ public:
 	Vector <T> get_column(size_t) const;
 
 	// Rading from a binary file
-	void write(::std::ofstream &);
-	void read(::std::ifstream &);
+	void write(std::ofstream &);
+	void read(std::ifstream &);
 
 	// Concatenating matrices
 	Matrix append_above(const Matrix &);
@@ -508,9 +508,9 @@ Matrix <T> Matrix <T> ::append_below(const Matrix &m)
 	size_t t_rows = __rows;
 	size_t m_rows = m.__rows;
 
-	::std::vector <::std::vector <T>> row;
+	std::vector <std::vector <T>> row;
 
-	::std::vector <T> total;
+	std::vector <T> total;
 
 	for (size_t i = 0; i < t_rows; i++) {
 		total.clear();
@@ -895,8 +895,7 @@ template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
-		delete[] this->__array;
-		delete[] this->__dim;
+		this->clear();
 
 		this->__array = new T[other.__size];
 		this->__rows = other.__rows;

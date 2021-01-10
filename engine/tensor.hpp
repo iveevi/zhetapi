@@ -35,9 +35,6 @@ protected:
 	__cuda_dual_prefix
 	void clear();
 public:
-	// TODO: Remove this method
-	T *arr() const {return __array;}
-
 	Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 	
 	// Printing functions
@@ -126,8 +123,10 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &
 
 	__size = prod;
 
-	if (!__size)
+	if (__size < 0)
 		throw bad_dimensions();
+	else if (!__size)
+		return;
 
 	if (arr.size() != __size)
 		throw dimension_mismatch();
@@ -211,8 +210,10 @@ Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size()
 
 	__dim[0] = __size;
 
-	if (!__size)
+	if (__size < 0)
 		throw bad_dimensions();
+	else if (!__size)
+		return;
 
 	__array = new T[__size];
 
@@ -235,8 +236,10 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
 
 	__size = prod;
 
-	if (!__size)
+	if (__size < 0)
 		throw bad_dimensions();
+	else if (!__size)
+		return;
 
 	__array = new T[prod];
 
