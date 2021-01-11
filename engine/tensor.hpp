@@ -152,6 +152,8 @@ std::string Tensor <T> ::print() const
 	
 	std::string out = "[";
 
+	using namespace std;
+
 	std::vector <size_t> cropped;
 	for (int i = 0; i < ((int) __dims) - 1; i++)
 		cropped.push_back(__dim[i + 1]);

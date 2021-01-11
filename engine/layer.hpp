@@ -9,6 +9,9 @@ namespace zhetapi {
 
 namespace ml {
 
+template <class T>
+class Erf;
+
 // Move a separate file with standard initializers
 template <class T>
 struct random_initializer {
@@ -46,8 +49,34 @@ public:
 
 	void set_fan_in(size_t);
 
+	// Initialize
+	void initialize();
+
 	// Computation
 	Vector <T> forward_propogate(const Vector <T> &);
+
+	void forward_propogate(Vector <T> &, Vector <T> &);
+
+	// Friend functions
+	template <class U>
+	friend Vector <U> simple_compute_cached(
+		Layer <U> *,
+		size_t,
+		Vector <U> *,
+		Vector <U> *,
+		const Vector <U> &
+	);
+	
+	template <class U>
+	friend Matrix <U> *simple_gradient(
+		Layer <U> *,
+		size_t,
+		Vector <U> *,
+		Vector <U> *,
+		const Vector <U> &,
+		const Vector <U> &,
+		Erf <U> *
+	);
 };
 
 // Memory operations
@@ -122,14 +151,36 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 		__mat = Matrix <T> (__fan_out, __fan_in + 1);
 }
 
+// Initializer
+template <class T>
+void Layer <T> ::initialize()
+{
+	__mat.randomize(__initializer);
+}
+
 // Computation
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 {
-	using namespace std;
-	cout << "receiving " << in << endl;
-	cout << "\tmat = " << __mat << endl;
+	// std::cout << "in1 = " << in << std::endl;
+	std::cout << "apped = " << in.append_above(T (1)) << std::endl;
+	std::cout << "prv = " << __mat * in.append_above(T (1)) << std::endl;
+	// std::cout << "in2 = " << __mat * in.append_above(T (1)) << std::endl;
+
+	//std::cout << "\t__mat = " << __mat << std::endl;
 	return __act->compute(__mat * in.append_above(T (1)));
+}
+
+template <class T>
+inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
+{
+	std::cout << "in1 = " << in1 << std::endl;
+	// std::cout << "\t__mat = " << __mat << std::endl;
+
+	in2 = __mat * in1.append_above(T (1));
+	// std::cout << "in2 = " << in2 << std::endl;
+
+	in1 = __act->compute(in2);
 }
 
 }

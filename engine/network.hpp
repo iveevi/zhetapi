@@ -23,6 +23,7 @@
 #include <dataset.hpp>
 #include <display.hpp>
 #include <layer.hpp>
+#include <gradient.hpp>
 
 // #include <optimizer.hpp>
 
@@ -108,7 +109,8 @@ public:
 	// Computation
 	Vector <T> operator()(const Vector <T> &);
 
-	Vector <T> simple_compute(const Vector <T> &);
+	Vector <T> compute(const Vector <T> &);
+	Vector <T> compute_cached(const Vector <T> &);
 	
 	/*
 	Vector <T> compute(const Vector <T> &);
@@ -271,6 +273,7 @@ NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
 }
 
 /*
+ * TODO: Add a input class from specifying input format.
  * NOTE: The pointers allocated and passed into this function
  * should be left alone. They will be deallocated once the scope
  * of the network object comes to its end. In other words, DO
@@ -288,6 +291,8 @@ NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &l
 		__layers[i] = layers[i];
 
 		__layers[i].set_fan_in(tmp);
+
+		__layers[i].initialize();
 
 		isize = __layers[i].get_fan_out();
 	}
@@ -319,24 +324,27 @@ void NeuralNetwork <T> ::clear()
 template <class T>
 Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
 {
-	return simple_compute(in);
+	return compute(in);
 }
 
 template <class T>
-Vector <T> NeuralNetwork <T> ::simple_compute(const Vector <T> &in)
+Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 {
 	Vector <T> tmp = in;
 
-	using namespace std;
-	// cout << endl << "in = " << in << endl;
-	for (size_t i = 0; i < __size; i++) {
-	//	cout << "tmp = " << tmp << endl;
+	for (size_t i = 0; i < __size; i++)
 		tmp = __layers[i].forward_propogate(tmp);
-	}
-
-	// cout << "tmp = " << tmp << endl;
 
 	return tmp;
+}
+
+template <class T>
+Vector <T> NeuralNetwork <T> ::compute_cached(const Vector <T> &in)
+{
+	Vector <T> *a = new Vector <T> [__size + 1];
+	Vector <T> *z = new Vector <T> [__size];
+	
+	return simple_compute_cached(__layers, __size, a, z, in);
 }
 
 /*

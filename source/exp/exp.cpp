@@ -20,7 +20,15 @@ int main()
 		ml::Layer <double> (4, new ml::Sigmoid <double> ())
 	});
 
-	// model.randomize();
+	Vector <double> in(4, 1);
 
-	cout << "model-out: " << model({1, 1, 1, 1}) << endl;
+	cout << "model-out: " << model(in) << endl;
+
+	cout << "================================================" << endl;
+
+	cout << "model-out: " << model.compute_cached(in) << endl;
+
+	cout << "================================================" << endl;
+
+	cout << "model-out: " << model.compute_cached(in) << endl;
 }

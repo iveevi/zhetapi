@@ -469,7 +469,6 @@ Vector <T> Vector <T> ::append_above(const T &x) const
 	size_t t_sz = size();
 
 	std::vector <T> total {x};
-
 	for (size_t i = 0; i < t_sz; i++)
 		total.push_back((*this)[i]);
 
