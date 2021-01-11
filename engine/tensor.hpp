@@ -38,7 +38,7 @@ public:
 	Tensor(const ::std::vector <::std::size_t> &, const ::std::vector <T> &);
 	
 	// Printing functions
-	::std::string print() const;
+	std::string print() const;
 
 	template <class U>
 	friend ::std::ostream &operator<<(::std::ostream &, const Tensor <U> &);
@@ -52,16 +52,16 @@ public:
 	// Construction and memory
 	Tensor();
 	Tensor(const Tensor &);
-	Tensor(const ::std::vector <T> &);
-	Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+	Tensor(const std::vector <T> &);
+	Tensor(const std::vector <std::size_t> &, const T & = T());
 
 	~Tensor();
 
 	Tensor &operator=(const Tensor &);
 
 	// Indexing
-	T &operator[](const ::std::vector <size_t> &);
-	const T &operator[](const ::std::vector <size_t> &) const;
+	T &operator[](const std::vector <size_t> &);
+	const T &operator[](const std::vector <size_t> &) const;
 
 	// Comparison
 	template <class U>
@@ -123,10 +123,8 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &
 
 	__size = prod;
 
-	if (__size < 0)
+	if (__size <= 0)
 		throw bad_dimensions();
-	else if (!__size)
-		return;
 
 	if (arr.size() != __size)
 		throw dimension_mismatch();
@@ -139,7 +137,7 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &
 
 // Printing functions
 template <class T>
-::std::string Tensor <T> ::print() const
+std::string Tensor <T> ::print() const
 {
 	if (!__dim)
 		return "[]";
@@ -160,7 +158,7 @@ template <class T>
 
 	size_t left = __size/__dim[0];
 	for (size_t i = 0; i < __dim[0]; i++) {
-		::std::vector <T> elems;
+		std::vector <T> elems;
 
 		for (size_t k = 0; k < left; k++)
 			elems.push_back(__array[left * i + k]);
@@ -177,7 +175,7 @@ template <class T>
 }
 
 template <class T>
-::std::ostream &operator<<(::std::ostream &os, const Tensor <T> &ts)
+std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
 	os << ts.print();
 
@@ -204,16 +202,16 @@ Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(othe
 }
 
 template <class T>
-Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size())
+Tensor <T> ::Tensor(const std::vector <T> &arr) : __dims(1), __size(arr.size())
 {
 	__dim = new size_t[1];
 
 	__dim[0] = __size;
 
-	if (__size < 0)
-		throw bad_dimensions();
-	else if (!__size)
+	if (!__size)
 		return;
+	else if (__size < 0)
+		throw bad_dimensions();
 
 	__array = new T[__size];
 
@@ -222,7 +220,7 @@ Tensor <T> ::Tensor(const ::std::vector <T> &arr) : __dims(1), __size(arr.size()
 }
 
 template <class T>
-Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
+Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
 		: __dims(dim.size())
 {
 	__dim = new size_t[__dims];
@@ -236,10 +234,10 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const T &def)
 
 	__size = prod;
 
-	if (__size < 0)
-		throw bad_dimensions();
-	else if (!__size)
+	if (!__size)
 		return;
+	else if (__size < 0)
+		throw bad_dimensions();
 
 	__array = new T[prod];
 

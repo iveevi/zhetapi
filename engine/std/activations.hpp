@@ -39,7 +39,7 @@ public:
 
 	__DLinear(const T &alpha = T(1)) : __alpha(alpha) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), __alpha);
 	}
 
@@ -49,7 +49,7 @@ public:
 	__DLinear(const T &alpha = T(1)) : __alpha(alpha) {}
 	
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), __alpha);
 	}
 
@@ -66,9 +66,14 @@ public:
 	Linear(const T &alpha = T(1)) : __alpha(alpha),
 			Activation <T> (Activation <T> ::AT_Linear, {alpha}) {}
 
+	__cuda_dual_prefix
+	Activation <T> *copy() const {
+		return new Linear <T> (__alpha);
+	}
+
 #ifndef ZHP_CUDA
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
 				return x[i] * __alpha;
@@ -83,7 +88,7 @@ public:
 #else
 	
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[x, this] __host__ __device__ (size_t i) {
 				return x[i] * __alpha;
@@ -109,7 +114,7 @@ public:
 
 #ifndef ZHP_CUDA
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) { 
 				return (x[i] > 0) ? 1 : 0;
@@ -120,7 +125,7 @@ public:
 #else
 
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[x] __host__ __device__ (size_t i) {
 				return (x[i] > 0) ? 1 : 0;
@@ -139,9 +144,14 @@ public:
 	__cuda_dual_prefix
 	ReLU() : Activation <T> (Activation <T> ::AT_ReLU, {}) {}
 
+	__cuda_dual_prefix
+	Activation <T> *copy() const {
+		return new ReLU();
+	}
+
 #ifndef ZHP_CUDA
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
 				return (x[i] > 0) ? x[i] : 0;
@@ -156,7 +166,7 @@ public:
 #else
 	
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[x] __host__ __device__ (size_t i) {
 				return (x[i] > 0) ? x[i] : 0;
@@ -180,7 +190,7 @@ class __DLeakyReLU : public Activation <T> {
 public:
 	__DLeakyReLU(const T &alpha) : __alpha(alpha) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
 				return __d_leaky_relu(x[i], __alpha);
@@ -197,7 +207,7 @@ public:
 	LeakyReLU(const T &alpha) :
 			Activation <T> (Activation <T> ::AT_ReLU, {alpha}) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), [&](size_t i) {return
 				__leaky_relu(x[i], __alpha);});
 	}
@@ -214,7 +224,7 @@ public:
 
 #ifndef ZHP_CUDA
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
 				T tmp = 1.0/(1.0 + exp(-x[i]));
@@ -227,7 +237,7 @@ public:
 #else
 
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[x] __host__ __device__ (size_t i) {
 				T tmp = 1.0/(1.0 + exp(-x[i]));
@@ -248,9 +258,14 @@ public:
 	__cuda_dual_prefix
 	Sigmoid() : Activation <T> (Activation <T> ::AT_Sigmoid, {}) {}
 
+	__cuda_dual_prefix
+	Activation <T> *copy() const {
+		return new Sigmoid();
+	}
+
 #ifndef ZHP_CUDA
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
 				return 1/(1 + exp(-x[i]));
@@ -265,7 +280,7 @@ public:
 #else
 
 	__host__ __device__
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[x] __host__ __device__ (size_t i) { 
 				return 1/(1 + exp(-x[i]));
@@ -289,7 +304,7 @@ class __DScaledSigmoid : public Activation <T> {
 public:
 	__DScaledSigmoid(const T &alpha) : __alpha(alpha) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), [&](size_t i) {return
 				__d_scaled_sigmoid(x[i], __alpha);});
 	}
@@ -301,7 +316,7 @@ class ScaledSigmoid : public Activation <T> {
 public:
 	ScaledSigmoid(const T &alpha) : __alpha(alpha) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), [&](size_t i) {return
 				__scaled_sigmoid(x[i], __alpha);});
 	}
@@ -315,7 +330,7 @@ public:
 template <class T>
 class __DSoftmax : public Activation <T> {
 public:
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		// Subtract by max for numerical stability
 		T _max = x[0];
 		for (size_t i = 1; i < x.size(); i++)
@@ -340,7 +355,7 @@ class Softmax : public Activation <T> {
 public:
 	Softmax() : Activation <T> ({}) {}
 
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		// Subtract by max for numerical stability
 		T _max = x[0];
 		for (size_t i = 1; i < x.size(); i++)
@@ -365,7 +380,7 @@ public:
 template <class T>
 class SoftmaxInterval : public Activation <T> {
 public:
-	Vector <T> operator()(const Vector <T> &x) const {
+	Vector <T> compute(const Vector <T> &x) const {
 		// Subtract by max for numerical stability
 		T _max = x[0];
 		for (size_t i = 1; i < x.size(); i++)

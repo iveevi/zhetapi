@@ -28,14 +28,16 @@ class Layer {
 	Activation <T> *	__dact = nullptr;
 
 	std::function <T ()>	__initializer = random_initializer <T> ();
+
+	void clear();
 public:
 	// Memory operations
 	Layer();
 	Layer(size_t, Activation <T> *);
 
-	// Layer(const Layer &);
+	Layer(const Layer &);
 
-	// Layer &operator=(const Layer &);
+	Layer &operator=(const Layer &);
 
 	~Layer();
 
@@ -53,14 +55,55 @@ template <class T>
 Layer <T> ::Layer() {}
 
 template <class T>
-Layer <T> ::Layer(size_t fan_out, Activation <T> *act) : __fan_out(fan_out),
-		__act(act), __dact(act->derivative()) {}
+Layer <T> ::Layer(size_t fan_out, Activation <T> *act) :
+		__fan_out(fan_out),
+		__act(act)
+{
+	__dact = __act->derivative();
+}
+
+template <class T>
+Layer <T> ::Layer(const Layer <T> &other) :
+		__fan_in(other.__fan_in),
+		__fan_out(other.__fan_out),
+		__act(other.__act->copy()),
+		__mat(other.__mat)
+{
+	__dact = __act->derivative();
+}
+
+template <class T>
+Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
+{
+	if (this != &other) {
+		clear();
+
+		__fan_in = other.__fan_in;
+		__fan_out = other.__fan_out;
+
+		__act = other.__act->copy();
+		__dact = __act->derivative();
+
+		__mat = other.__mat;
+	}
+
+	return *this;
+}
 
 template <class T>
 Layer <T> ::~Layer()
 {
-	if (__act);
+	clear();
+}
+
+template <class T>
+void Layer <T> ::clear()
+{
+	if (__act)
 		delete __act;
+
+	if (__dact)
+		delete __dact;
 }
 
 // Getters and setters
@@ -85,6 +128,7 @@ inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 {
 	using namespace std;
 	cout << "receiving " << in << endl;
+	cout << "\tmat = " << __mat << endl;
 	return __act->compute(__mat * in.append_above(T (1)));
 }
 

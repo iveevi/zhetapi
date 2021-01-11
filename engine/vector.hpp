@@ -398,8 +398,6 @@ Vector <T> ::Vector(size_t rs, ::std::function <T *(size_t)> gen)
 template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
-	using namespace std;
-	cout << "Operator = " << endl;
 	if (this != &other) {
 		this->clear();
 

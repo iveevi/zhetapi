@@ -63,6 +63,8 @@ public:
 	
 	__cuda_dual_prefix
 	Activation(activation_type, const std::vector <T> &);	// Type and argument constructor
+
+	virtual Activation *copy() const;
 	
 	// Computation
 	__cuda_dual_prefix
@@ -128,17 +130,25 @@ template <class T>
 Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
 		: __args(args), __kind(kind) {}
 
+template <class T>
+Activation <T> *Activation <T> ::copy() const
+{
+	std::cout << "Warning (from activation.hpp): using the default copy method." << std::endl;
+
+	return new Activation <T> ();
+}
+
 // TODO: Reverse compute and operator()
 template <class T>
 Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
 {
-	return x;
+	return this->compute(x);
 }
 
 template <class T>
 Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 {
-	return (*this)(x);
+	return x;
 }
 
 // Saving

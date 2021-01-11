@@ -79,7 +79,7 @@ public:
 	template <class A>
 	explicit Matrix(A);
 
-	::std::pair <size_t, size_t> get_dimensions() const;
+	std::pair <size_t, size_t> get_dimensions() const;
 
 	Matrix slice(const ::std::pair <size_t, size_t> &,
 			const ::std::pair <size_t, size_t> &) const;

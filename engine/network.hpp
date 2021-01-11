@@ -328,13 +328,13 @@ Vector <T> NeuralNetwork <T> ::simple_compute(const Vector <T> &in)
 	Vector <T> tmp = in;
 
 	using namespace std;
-	cout << "in = " << in << endl;
+	// cout << endl << "in = " << in << endl;
 	for (size_t i = 0; i < __size; i++) {
-		cout << "tmp = " << tmp << endl;
+	//	cout << "tmp = " << tmp << endl;
 		tmp = __layers[i].forward_propogate(tmp);
 	}
 
-	cout << "tmp = " << tmp << endl;
+	// cout << "tmp = " << tmp << endl;
 
 	return tmp;
 }
