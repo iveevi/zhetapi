@@ -1086,6 +1086,16 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 }
 
 template <class T>
+Matrix <T> operator*(const Matrix <T> &a, const T &scalar)
+{
+	return Matrix <T> (a.__rows, a.__cols,
+		[&](size_t i, size_t j) {
+			return a[i][j] * scalar;
+		}
+	);
+}
+
+template <class T>
 Matrix <T> operator*(const T &scalar, const Matrix <T> &a)
 {
 	return a * scalar;

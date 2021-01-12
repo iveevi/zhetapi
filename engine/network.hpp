@@ -80,13 +80,13 @@ public:
 	class bad_gradient {};
 	class bad_io_dimensions {};
 private:
-	Layer <T> *				__layers = nullptr;
-	size_t					__size = 0;
+	Layer <T> *		__layers = nullptr;
+	size_t			__size = 0;
 
-	Erf <T> *				__cost = nullptr; // Safe to copy
-    Optimizer <T> *         __opt = nullptr;
+	Erf <T> *		__cost = nullptr; // Safe to copy
+	Optimizer <T> *         __opt = nullptr;
 
-	Comparator <T>			__cmp = __default_comparator;
+	Comparator <T>		__cmp = __default_comparator;
 
 	void clear();
 public:
@@ -270,7 +270,7 @@ NeuralNetwork <T> ::NeuralNetwork() {}
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
 		__size(other.__size), __cost(other.__cost),
-		__cmp(other.__cmp)
+		__opt(other.__opt), __cmp(other.__cmp)
 {
 	__layers = new Layer <T> [__size];
 
@@ -315,6 +315,16 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 {
 	if (this != &other) {
 		clear();
+
+		__size = other.__size;
+		__cmp = other.__cmp;
+
+		__cost = other.__cost;
+		__opt = other.__opt;
+
+		__layers = new Layer <T> [__size];
+		for (size_t i = 0; i < __size; i++)
+			__layers[i] = other.__layers[i];
 	}
 
 	return *this;
