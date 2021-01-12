@@ -2,7 +2,7 @@
 #define OPTIMIZER_H_
 
 // Engine headers
-#include <network.hpp>
+#include <gradient.hpp>
 
 namespace zhetapi {
 
@@ -12,7 +12,7 @@ namespace ml {
 template <class T>
 class Optimizer {
 public:
-	virtual Matrix <T> *gradient(NeuralNetwork <T> &) = 0;
+	virtual Matrix <T> *gradient(Layer <T> *, size_t, const Vector <T> &, const Vector <T> &, Erf <T> *) = 0;
 };
 
 }

@@ -26,12 +26,9 @@ Vector <T> simple_compute_cached(
 	while (i < size) {
 		a[i] = tmp.append_above(T (1));
 
-		// prv = layers[i].__mat * Matrix <T> (tmp.append_above(T (1)));
+		layers[i].forward_propogate(tmp, prv);
 
-		tmp = layers[i].forward_propogate(tmp);
-
-		// z[i++] = layers[i].__dact->compute(prv);
-		i++;
+		z[i++] = layers[i].__dact->compute(prv);
 	}
 
 	a[i] = tmp;

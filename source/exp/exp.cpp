@@ -8,6 +8,8 @@
 #include <network.hpp>
 
 #include <std/activations.hpp>
+#include <std/erfs.hpp>
+#include <std/optimizers.hpp>
 
 using namespace std;
 using namespace zhetapi;
@@ -22,15 +24,20 @@ int main()
 		ml::Layer <double> (4, new ml::Sigmoid <double> ())
 	});
 
-	Vector <double> in(4, 1);
+    ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
+    ml::Optimizer <double> *opt = new ml::DefaultOptimizer <double> (1);
 
+    model.set_cost(cost);
+    model.set_optimizer(opt);
+
+	Vector <double> in(4, 1);
+    Vector <double> out(4, 4);
+
+    cout << "out: " << out << endl;
 	cout << "model-out: " << model(in) << endl;
 
-	cout << "================================================" << endl;
+    for (size_t i = 0; i < 100; i++)
+        model.fit(in, out);
 
-	cout << "model-out: " << model.compute_cached(in) << endl;
-
-	cout << "================================================" << endl;
-
-	cout << "model-out: " << model.compute_cached(in) << endl;
+    cout << "model-out: " << model(in) << endl;
 }

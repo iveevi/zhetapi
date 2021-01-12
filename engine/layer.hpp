@@ -57,6 +57,8 @@ public:
 
 	void forward_propogate(Vector <T> &, Vector <T> &);
 
+    void apply_gradient(const Matrix <T> &);
+
 	// Friend functions
 	template <class U>
 	friend Vector <U> simple_compute_cached(
@@ -170,6 +172,12 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 {
 	in2 = __mat * in1.append_above(T (1));
 	in1 = __act->compute(in2);
+}
+
+template <class T>
+inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
+{
+	__mat -= J;
 }
 
 }

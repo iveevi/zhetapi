@@ -24,6 +24,7 @@
 #include <display.hpp>
 #include <layer.hpp>
 #include <gradient.hpp>
+#include <optimizer.hpp>
 
 // #include <optimizer.hpp>
 
@@ -83,7 +84,9 @@ private:
 	size_t					__size = 0;
 
 	Erf <T> *				__cost = nullptr; // Safe to copy
-	Comparator <T>				__cmp = __default_comparator;
+    Optimizer <T> *         __opt = nullptr;
+
+	Comparator <T>			__cmp = __default_comparator;
 
 	void clear();
 public:
@@ -98,11 +101,13 @@ public:
 	/* Saving and loading the network
 	void save(const std::string &);
 	void load(const std::string &);
-	void load_json(const std::string &);
+	void load_json(const std::string &); */
 
 	// Setters
 	void set_cost(Erf <T> *);
-	void set_comparator(const Comparator <T> &); */
+	void set_optimizer(Optimizer <T> *);
+
+	// void set_comparator(const Comparator <T> &); 
 
 	// Matrix <T> *adjusted(T mu);
 
@@ -110,7 +115,8 @@ public:
 	Vector <T> operator()(const Vector <T> &);
 
 	Vector <T> compute(const Vector <T> &);
-	Vector <T> compute_cached(const Vector <T> &);
+	
+	void fit(const Vector <T> &, const Vector <T> &);
 	
 	/*
 	Vector <T> compute(const Vector <T> &);
@@ -320,6 +326,19 @@ void NeuralNetwork <T> ::clear()
 	delete[] __layers;
 }
 
+// Property managers and viewers
+template <class T>
+void NeuralNetwork <T> ::set_cost(Erf <T> *cost)
+{
+	__cost = cost;
+}
+
+template <class T>
+void NeuralNetwork <T> ::set_optimizer(Optimizer <T> *opt)
+{
+	__opt = opt;
+}
+
 // Computation
 template <class T>
 Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
@@ -339,12 +358,12 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 }
 
 template <class T>
-Vector <T> NeuralNetwork <T> ::compute_cached(const Vector <T> &in)
+void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 {
-	Vector <T> *a = new Vector <T> [__size + 1];
-	Vector <T> *z = new Vector <T> [__size];
-	
-	return simple_compute_cached(__layers, __size, a, z, in);
+	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
+
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].apply_gradient(J[i]);
 }
 
 /*
