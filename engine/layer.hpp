@@ -162,24 +162,13 @@ void Layer <T> ::initialize()
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 {
-	// std::cout << "in1 = " << in << std::endl;
-	std::cout << "apped = " << in.append_above(T (1)) << std::endl;
-	std::cout << "prv = " << __mat * in.append_above(T (1)) << std::endl;
-	// std::cout << "in2 = " << __mat * in.append_above(T (1)) << std::endl;
-
-	//std::cout << "\t__mat = " << __mat << std::endl;
 	return __act->compute(__mat * in.append_above(T (1)));
 }
 
 template <class T>
 inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 {
-	std::cout << "in1 = " << in1 << std::endl;
-	// std::cout << "\t__mat = " << __mat << std::endl;
-
 	in2 = __mat * in1.append_above(T (1));
-	// std::cout << "in2 = " << in2 << std::endl;
-
 	in1 = __act->compute(in2);
 }
 

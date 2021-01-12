@@ -31,19 +31,21 @@
 #endif
 
 // In function initialization
-#define inline_init_mat(mat, rs, cs)	\
-	Matrix <T> mat;			\
-					\
-	mat.__rows = rs;		\
-	mat.__cols = cs;		\
-					\
-	mat.__array = new T[rs * cs];	\
-					\
-	mat.__dims = 2;		\
-					\
-	mat.__dim = new size_t[2];	\
-					\
-	mat.__dim[0] = rs;		\
+#define inline_init_mat(mat, rs, cs)			\
+	Matrix <T> mat;					\
+							\
+	mat.__rows = rs;				\
+	mat.__cols = cs;				\
+							\
+	mat.__array = new T[rs * cs];			\
+							\
+	memset(mat.__array, 0, rs * cs * sizeof(T));	\
+							\
+	mat.__dims = 2;					\
+							\
+	mat.__dim = new size_t[2];			\
+							\
+	mat.__dim[0] = rs;				\
 	mat.__dim[1] = cs;
 
 namespace zhetapi {
@@ -132,7 +134,10 @@ public:
 
 	bool symmetric() const;
 
-	::std::string display() const;
+	std::string display() const;
+	
+	template <class U>
+	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &); 
 
 	// Special matrix generation
 	static Matrix identity(size_t);
@@ -724,9 +729,9 @@ bool Matrix <T> ::symmetric() const
 }
 
 template <class T>
-::std::string Matrix <T> ::display() const
+std::string Matrix <T> ::display() const
 {
-	::std::ostringstream oss;
+	std::ostringstream oss;
 
 	oss << "[";
 
@@ -752,6 +757,35 @@ template <class T>
 	oss << "]";
 
 	return oss.str();
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
+{
+	os << "[";
+
+	for (int i = 0; i < mat.__rows; i++) {
+		if (mat.__cols > 1) {
+			os << '[';
+
+			for (int j = 0; j < mat.__cols; j++) {
+				os << mat.__array[i * mat.__cols * j];
+				if (j != mat.__cols - 1)
+					os << ", ";
+			}
+
+			os << ']';
+		} else {
+			os << mat.__array[i * mat.__cols];
+		}
+
+		if (i < mat.__rows - 1)
+			os << ", ";
+	}
+
+	os << "]";
+
+	return os;
 }
 
 template <class T>
@@ -1023,6 +1057,8 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 	if (A.__cols != B.__rows)
 		throw typename Matrix <T> ::dimension_mismatch();
 
+	using namespace std;
+	
 	size_t rs = A.__rows;
 	size_t cs = B.__cols;
 

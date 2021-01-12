@@ -68,10 +68,10 @@ public:
 	
 	// Computation
 	__cuda_dual_prefix
-	Vector <T> compute(const Vector <T> &) const;
+	virtual Vector <T> compute(const Vector <T> &) const;
 
 	__cuda_dual_prefix
-	virtual Vector <T> operator()(const Vector <T> &) const;
+	Vector <T> operator()(const Vector <T> &) const;
 
 	// Saving
 	void write_type(std::ofstream &) const;
@@ -148,6 +148,8 @@ Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
 template <class T>
 Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 {
+	std::cout << "Warning (from activation.hpp): using the default compute method." << std::endl;
+
 	return x;
 }
 

@@ -14,6 +14,8 @@ using namespace zhetapi;
 
 int main()
 {
+	srand(clock());
+
 	ml::NeuralNetwork <double> model (4, {
 		ml::Layer <double> (4, new ml::ReLU <double> ()),
 		ml::Layer <double> (4, new ml::Linear <double> ()),
