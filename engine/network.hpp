@@ -77,11 +77,13 @@ public:
 	};
 
 	// Exceptions
-	class bad_gradient {};
 	class bad_io_dimensions {};
 private:
 	Layer <T> *		__layers = nullptr;
 	size_t			__size = 0;
+
+	size_t			__isize = 0;
+	size_t			__osize = 0;
 
 	Erf <T> *		__cost = nullptr; // Safe to copy
 	Optimizer <T> *         __opt = nullptr;
@@ -269,7 +271,8 @@ NeuralNetwork <T> ::NeuralNetwork() {}
 
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
-		__size(other.__size), __cost(other.__cost),
+		__size(other.__size), __isize(other.__isize),
+		__osize(other.__osize), __cost(other.__cost),
 		__opt(other.__opt), __cmp(other.__cmp)
 {
 	__layers = new Layer <T> [__size];
@@ -288,7 +291,7 @@ NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
  */
 template <class T>
 NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &layers)
-		: __size(layers.size())
+		: __size(layers.size()), __isize(isize)
 {
 	__layers = new Layer <T> [__size];
 
@@ -300,8 +303,10 @@ NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &l
 
 		__layers[i].initialize();
 
-		isize = __layers[i].get_fan_out();
+		tmp = __layers[i].get_fan_out();
 	}
+
+	__osize = tmp;
 }
 
 template <class T>
@@ -317,6 +322,9 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 		clear();
 
 		__size = other.__size;
+		__isize = other.__isize;
+		__osize = other.__osize;
+
 		__cmp = other.__cmp;
 
 		__cost = other.__cost;
@@ -370,6 +378,9 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 template <class T>
 void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 {
+	if ((in.size() != __isize) || (out.size() != __osize))
+		throw bad_io_dimensions();
+
 	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
 
 	for (size_t i = 0; i < __size; i++)

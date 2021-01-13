@@ -28,7 +28,9 @@ Vector <T> simple_compute_cached(
 
 		layers[i].forward_propogate(tmp, prv);
 
-		z[i++] = layers[i].__dact->compute(prv);
+		z[i] = layers[i].__dact->compute(prv);
+
+		i++;
 	}
 
 	a[i] = tmp;

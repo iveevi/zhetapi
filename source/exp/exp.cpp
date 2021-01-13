@@ -18,10 +18,10 @@ int main()
 {
 	// srand(clock());
 
-	Vector <double> in(4, 1);
+	Vector <double> in(2, 1);
 	Vector <double> out(4, 4);
 
-	ml::NeuralNetwork <double> base (4, {
+	ml::NeuralNetwork <double> base (2, {
 		ml::Layer <double> (4, new ml::ReLU <double> ()),
 		ml::Layer <double> (4, new ml::Sigmoid <double> ()),
 		ml::Layer <double> (4, new ml::Linear <double> ())
@@ -48,7 +48,7 @@ int main()
 		m.set_optimizer(opt);
 	
 		cout << "\tmodel-out: " << m(in) << endl;
-		for (size_t i = 0; i < 100; i++)
+		for (size_t i = 0; i < 10; i++)
 			m.fit(in, out);
 
 		cout << "\tmodel-out: " << m(in) << endl;
