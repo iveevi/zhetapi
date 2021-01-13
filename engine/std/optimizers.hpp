@@ -18,7 +18,7 @@ template <class T>
 class SGD : public Optimizer <T> {
 	T	__alpha;
 public:
-	SGD(T alpha) : __alpha(alpha) {}
+	SGD(T alpha = 0.001) : __alpha(alpha) {}
 
 	Matrix <T> *gradient(
 			Layer <T> *layers,
@@ -47,7 +47,7 @@ class Momentum : public Optimizer <T> {
 	Matrix <T> *	__M = nullptr;
 	size_t		__size = 0;
 public:
-	Momentum(T alpha, T beta) : __alpha(alpha), __beta(beta) {}
+	Momentum(T alpha = 0.001, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
 
 	~Momentum() {
 		delete[] __M;
@@ -103,7 +103,7 @@ class Nesterov : public Optimizer <T> {
 	Matrix <T> *	__M = nullptr;
 	size_t		__size = 0;
 public:
-	Nesterov(T alpha, T beta) : __alpha(alpha), __beta(beta) {}
+	Nesterov(T alpha = 0.001, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
 
 	~Nesterov() {
 		delete[] __M;
@@ -166,7 +166,7 @@ class AdaGrad : public Optimizer <T> {
 	Matrix <T> *	__S = nullptr;
 	size_t		__size = 0;
 public:
-	AdaGrad(T eta) : __eta(eta) {}
+	AdaGrad(T eta = 0.001) : __eta(eta) {}
 
 	~AdaGrad() {
 		delete[] __S;
@@ -242,7 +242,7 @@ class RMSProp : public Optimizer <T> {
 	Matrix <T> *	__S = nullptr;
 	size_t		__size = 0;
 public:
-	RMSProp(T alpha, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
+	RMSProp(T alpha = 0.001, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
 
 	~RMSProp() {
 		delete[] __S;
@@ -314,7 +314,7 @@ class Adam : public Optimizer <T> {
 	size_t		__size = 0;
 	size_t		__iter = 0;
 public:
-	Adam(T eta, T beta1 = 0.9, T beta2 = 0.999) : __eta(eta),
+	Adam(T eta = 0.001, T beta1 = 0.9, T beta2 = 0.999) : __eta(eta),
 			__beta1(beta1), __beta2(beta2) {}
 
 	~Adam() {

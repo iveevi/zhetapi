@@ -30,12 +30,12 @@ int main()
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
 
 	vector <ml::Optimizer <double> *> optimizers {
-		new ml::SGD <double> (1),
-		new ml::Momentum <double> (0.9, 0.6),
-		new ml::Nesterov <double> (0.9, 0.6),
-		new ml::AdaGrad <double> (0.9),
-		new ml::RMSProp <double> (0.9),
-		new ml::Adam <double> (0.9)
+		new ml::SGD <double> (),
+		new ml::Momentum <double> (),
+		new ml::Nesterov <double> (),
+		new ml::AdaGrad <double> (),
+		new ml::RMSProp <double> (),
+		new ml::Adam <double> ()
 	};
 
 	cout << "out: " << out << endl;
@@ -46,10 +46,9 @@ int main()
 
 		m.set_cost(cost);
 		m.set_optimizer(opt);
-		
+	
 		cout << "\tmodel-out: " << m(in) << endl;
-
-		for (size_t i = 0; i < 1; i++)
+		for (size_t i = 0; i < 100; i++)
 			m.fit(in, out);
 
 		cout << "\tmodel-out: " << m(in) << endl;
