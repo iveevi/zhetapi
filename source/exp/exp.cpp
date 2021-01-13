@@ -16,7 +16,7 @@ using namespace zhetapi;
 
 int main()
 {
-	srand(clock());
+	// srand(clock());
 
 	Vector <double> in(4, 1);
 	Vector <double> out(4, 4);
@@ -32,7 +32,10 @@ int main()
 	vector <ml::Optimizer <double> *> optimizers {
 		new ml::SGD <double> (1),
 		new ml::Momentum <double> (0.9, 0.6),
-		new ml::Nesterov <double> (0.9, 0.6)
+		new ml::Nesterov <double> (0.9, 0.6),
+		new ml::AdaGrad <double> (0.9),
+		new ml::RMSProp <double> (0.9),
+		new ml::Adam <double> (0.9)
 	};
 
 	cout << "out: " << out << endl;
@@ -46,7 +49,7 @@ int main()
 		
 		cout << "\tmodel-out: " << m(in) << endl;
 
-		for (size_t i = 0; i < 10; i++)
+		for (size_t i = 0; i < 1; i++)
 			m.fit(in, out);
 
 		cout << "\tmodel-out: " << m(in) << endl;

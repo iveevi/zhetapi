@@ -213,6 +213,9 @@ public:
 
 	template <class U>
 	friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
+	
+	template <class U>
+	friend Matrix <U> inv_shur(const Matrix <U> &, const Matrix <U> &);
 
 #else
 
@@ -613,7 +616,7 @@ void Matrix <T> ::add_rows(size_t a, size_t b, T k)
 template <class T>
 void Matrix <T> ::swap_rows(size_t a, size_t b)
 {
-	::std::swap(this->__array[a], this->__array[b]);
+	std::swap(this->__array[a], this->__array[b]);
 }
 
 template <class T>
@@ -852,10 +855,8 @@ template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
 					       ({other.__rows, other.__cols}, T())
 {
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
-			this->__array[__cols * i + j] = other.__array[__cols * i + j];
-	}
+	for (int i = 0; i < this->__size; i++)
+		this->__array[i] = other.__array[i];
 }
 
 template <class T>
@@ -929,6 +930,9 @@ template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
+		/* using namespace std;
+		cout << "cpy-other = " << other << endl; */
+
 		this->clear();
 
 		this->__array = new T[other.__size];
@@ -936,14 +940,19 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 		this->__cols = other.__cols;
 
 		this->__size = other.__size;
-		for (size_t i = 0; i < this->__size; i++)
+		for (size_t i = 0; i < this->__size; i++) {
+			// cout << "\tother = " << other.__array[i] << endl;
 			this->__array[i] = other.__array[i];
+			// cout << "\tarr = " << this->__array[i] << endl;
+		}
 		
 		this->__dims = 2;
 		this->__dim = new size_t[2];
 
 		this->__dim[0] = this->__rows;
 		this->__dim[1] = this->__cols;
+		
+		// cout << "cpy-this = " << *this << endl;
 	}
 
 	return *this;
@@ -1143,6 +1152,20 @@ Matrix <T> shur(const Matrix <T> &a, const Matrix <T> &b)
 	return Matrix <T> (a.get_rows(), b.get_cols(),
 		[&](size_t i, size_t j) {
 			return a[i][j] * b[i][j];
+		}
+	);
+}
+
+template <class T>
+Matrix <T> inv_shur(const Matrix <T> &a, const Matrix <T> &b)
+{
+	if (!((a.get_rows() == b.get_rows())
+		&& (a.get_cols() == b.get_cols())))
+		throw typename Matrix <T> ::dimension_mismatch();
+
+	return Matrix <T> (a.get_rows(), b.get_cols(),
+		[&](size_t i, size_t j) {
+			return a[i][j] / b[i][j];
 		}
 	);
 }
