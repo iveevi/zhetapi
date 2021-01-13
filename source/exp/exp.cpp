@@ -19,44 +19,36 @@ int main()
 	srand(clock());
 
 	Vector <double> in(4, 1);
-    Vector <double> out(4, 4);
+	Vector <double> out(4, 4);
 
 	ml::NeuralNetwork <double> base (4, {
 		ml::Layer <double> (4, new ml::ReLU <double> ()),
-		ml::Layer <double> (4, new ml::Linear <double> ()),
-		ml::Layer <double> (4, new ml::Sigmoid <double> ())
+		ml::Layer <double> (4, new ml::Sigmoid <double> ()),
+		ml::Layer <double> (4, new ml::Linear <double> ())
 	});
 
-    ml::NeuralNetwork <double> m1 = base;
-    ml::NeuralNetwork <double> m2 = base;
+	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
 
-    ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
-    ml::Optimizer <double> *dopt = new ml::DefaultOptimizer <double> (1);
-    ml::Optimizer <double> *mopt = new ml::MomentumOptimizer <double> (0.9, 0.6);
+	vector <ml::Optimizer <double> *> optimizers {
+		new ml::SGD <double> (1),
+		new ml::Momentum <double> (0.9, 0.6),
+		new ml::Nesterov <double> (0.9, 0.6)
+	};
 
-    m1.set_cost(cost);
-    m1.set_optimizer(dopt);
+	cout << "out: " << out << endl;
+	for (auto opt : optimizers) {
+		cout << "\nopt: " << typeid(*opt).name() << endl;
 
-    m2.set_cost(cost);
-    m2.set_optimizer(mopt);
+		ml::NeuralNetwork <double> m = base;
 
-    cout << "FIRST MODEL:" << endl;
+		m.set_cost(cost);
+		m.set_optimizer(opt);
+		
+		cout << "\tmodel-out: " << m(in) << endl;
 
-    cout << "out: " << out << endl;
-	cout << "model-out: " << m1(in) << endl;
+		for (size_t i = 0; i < 10; i++)
+			m.fit(in, out);
 
-    for (size_t i = 0; i < 100; i++)
-        m1.fit(in, out);
-
-    cout << "model-out: " << m1(in) << endl;
-
-    cout << "SECOND MODEL:" << endl;
-
-    cout << "out: " << out << endl;
-	cout << "model-out: " << m2(in) << endl;
-
-    for (size_t i = 0; i < 100; i++)
-        m2.fit(in, out);
-
-    cout << "model-out: " << m2(in) << endl;
+		cout << "\tmodel-out: " << m(in) << endl;
+	}
 }

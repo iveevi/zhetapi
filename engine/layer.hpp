@@ -45,6 +45,7 @@ public:
 	~Layer();
 
 	// Getters and setters
+	size_t get_fan_in() const;
 	size_t get_fan_out() const;
 
 	void set_fan_in(size_t);
@@ -56,8 +57,8 @@ public:
 	Vector <T> forward_propogate(const Vector <T> &);
 
 	void forward_propogate(Vector <T> &, Vector <T> &);
-
-    void apply_gradient(const Matrix <T> &);
+	
+	void apply_gradient(const Matrix <T> &);
 
 	// Friend functions
 	template <class U>
@@ -79,6 +80,9 @@ public:
 		const Vector <U> &,
 		Erf <U> *
 	);
+
+	template <class U>
+	friend Layer <U> operator-(const Layer <U> &, const Matrix <U> &);
 };
 
 // Memory operations
@@ -112,8 +116,10 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 		__fan_in = other.__fan_in;
 		__fan_out = other.__fan_out;
 
-		__act = other.__act->copy();
-		__dact = __act->derivative();
+		if (other.__act) {
+			__act = other.__act->copy();
+			__dact = __act->derivative();
+		}
 
 		__mat = other.__mat;
 	}
@@ -138,6 +144,12 @@ void Layer <T> ::clear()
 }
 
 // Getters and setters
+template <class T>
+size_t Layer <T> ::get_fan_in() const
+{
+	return __fan_in;
+}
+
 template <class T>
 size_t Layer <T> ::get_fan_out() const
 {
@@ -178,6 +190,17 @@ template <class T>
 inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 {
 	__mat -= J;
+}
+
+// Friends
+template <class T>
+Layer <T> operator-(const Layer <T> &L, const Matrix <T> &M)
+{
+	Layer <T> out = L;
+
+	out.__mat -= M;
+
+	return out;
 }
 
 }
