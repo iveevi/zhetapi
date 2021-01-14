@@ -772,7 +772,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 			os << '[';
 
 			for (int j = 0; j < mat.__cols; j++) {
-				os << mat.__array[i * mat.__cols * j];
+				os << mat[i][j];
 				if (j != mat.__cols - 1)
 					os << ", ";
 			}

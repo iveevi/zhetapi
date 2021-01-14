@@ -109,6 +109,8 @@ public:
 	void set_cost(Erf <T> *);
 	void set_optimizer(Optimizer <T> *);
 
+	void diagnose() const;
+
 	// void set_comparator(const Comparator <T> &); 
 
 	// Matrix <T> *adjusted(T mu);
@@ -385,6 +387,13 @@ void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].apply_gradient(J[i]);
+}
+
+template <class T>
+void NeuralNetwork <T> ::diagnose() const
+{
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].diagnose();
 }
 
 /*
