@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	int index;
 
 	mode md = interpret;
-	while ((c = getopt(argc, argv, ":c:d:o:L:h:v")) != EOF) {
+	while ((c = getopt(argc, argv, ":c:d:o:L:hv")) != EOF) {
 		switch (c) {
 		case 'c':
 			if (md != help)

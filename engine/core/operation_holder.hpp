@@ -18,6 +18,7 @@ enum codes {
 	fct,	// Factorial
 	pwr,
 	dot,	// Dot product
+	mod,	// Modulo operator
 	sin,
 	cos,
 	tan,
@@ -48,7 +49,7 @@ enum codes {
 extern ::std::string strcodes[];
 
 struct operation_holder : public Token {
-	::std::string rep;
+	std::string rep;
 
 	codes code;
 
@@ -56,7 +57,7 @@ struct operation_holder : public Token {
 
 	type caller() const override;
 	Token *copy() const override;
-	::std::string str() const override;
+	std::string str() const override;
 
 	virtual bool operator==(Token *) const override;
 };

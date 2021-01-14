@@ -1,15 +1,8 @@
-x = 1
-if (x > 0)
-	println("x > 0")
+i = 0
 
-if (x < 0)
-	println("x < 0")
-elif (x == 1)
-	println("x == 1")
-else
-	println("x >= 0")
+x = 3
+while (i++ < 10) {
+	println("i = ", i, " x = ", x)
 
-alg foo(a, b)
-	println("hello from foo: a = ", a, " and b = ", b)
-
-foo(10, 5)
+	x = (x * 3) % 7;
+}

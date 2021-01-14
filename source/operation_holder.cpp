@@ -11,6 +11,7 @@ namespace zhetapi {
 	"factorial",
 	"power",
 	"dot",
+	"mod",
 	"sin",
 	"cos",
 	"tan",
@@ -55,6 +56,8 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = pwr;
 	else if (str == ".")
 		code = dot;
+	else if (str == "%")
+		code = mod;
 	else if (str == "sin")
 		code = sin;
 	else if (str == "cos")

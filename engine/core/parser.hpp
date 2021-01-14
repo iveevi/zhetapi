@@ -71,6 +71,7 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		__add_operation_symbol(__divide, /);
 		__add_operation_symbol(__power, ^);
 		__add_operation_symbol(__dot, .);
+		__add_operation_symbol(__mod, %);
 		
 		// Binary comparison
 		__add_operation_symbol(__eq, ==);
@@ -93,7 +94,7 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 		 * Exmaples of such operations are addition,
 		 * subtraction and the dot product.
 		 */
-		__t0_bin = __plus | __minus | __dot
+		__t0_bin = __plus | __minus | __dot | __mod
 				| __eq | __neq | __geq
 				| __leq | __ge | __le;
 
@@ -721,6 +722,7 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__plus;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__minus;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__dot;
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__mod;
 	
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__times;
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__divide;

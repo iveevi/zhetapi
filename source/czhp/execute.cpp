@@ -18,8 +18,14 @@ Token *execute(string str)
 		try {
 			zhetapi::node_manager mg(tmp[tsize - 1], &barn);
 
+			/* cout << "mg:" << endl;
+			mg.print(); */
+
 			tptr = mg.value();
-		} catch (...) {}
+		} catch (Barn::unknown_operation_overload_exception e)  {
+			cout << "err: " << e.what() << endl;
+			exit(-1);
+		}
 
 		for (int i = tsize - 2; i >= 0; i--) {
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];

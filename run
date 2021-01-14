@@ -20,6 +20,8 @@ function compile_debug {
 function czhp_normal {
 	set +e
 
+	mkdir -p bin
+
 	# Compile the library
 	echo "==========================================================="
 	echo "Testing single file library compilation..."
@@ -121,6 +123,8 @@ elif [ $1 = "install" ]; then
 	mkdir -p build
 
 	compile_normal czhp
+	compile_normal zhp-shared
+	compile_normal zhp-static
 
 	# Move executables and libraries
 	if [ -f "libzhp.so" ]; then

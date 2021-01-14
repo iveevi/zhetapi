@@ -27,6 +27,9 @@ Barn::Barn()
 	__add_unary_operation_ftr(r++, Z, Z, in->get() + 1);
 	__add_unary_operation_ftr(r--, Z, Z, in->get() - 1);
 
+	// Modular arithmetic
+	__add_binary_operation(%, Z, Z, Z);
+
 	// Multiplication
 	__add_binary_operation(*, Z, Z, Z);
 	__add_binary_operation(*, R, R, R);
