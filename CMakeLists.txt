@@ -15,6 +15,14 @@ set(CMAKE_CXX_COMPILER "g++-8")
 
 set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 
+# Projects
+project(exp)
+
+# Packages
+find_package(PNG REQUIRED)
+
+include_directories(${PNG_INCLUDE_DIR})
+
 set(ZHETAPI_SOURCE 
 	source/algorithm.cpp
 	source/barn.cpp
@@ -22,6 +30,7 @@ set(ZHETAPI_SOURCE
 	source/complex.cpp
 	source/display.cpp
 	source/function.cpp
+	source/image.cpp
 	source/label.cpp
 	source/node.cpp
 	source/node_differentiation.cpp
@@ -39,6 +48,9 @@ set(ZHETAPI_SOURCE
 # Compile shared and static library
 add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 
+target_link_libraries(zhp-shared ${PNG_LIBRARY})
+target_link_libraries(zhp-shared ${CMAKE_DL_LIBS})
+
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
 
@@ -55,13 +67,7 @@ add_executable(zhetapi source/cli/cli.cpp)
 target_link_libraries(zhetapi PUBLIC zhp-shared)
 
 # Compile exp file
-project(exp)
-
 add_executable(exp source/exp/exp.cpp)
-
-find_package(PNG REQUIRED)
-
-include_directories(${PNG_INCLUDE_DIR})
 
 target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
 

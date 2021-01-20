@@ -681,6 +681,36 @@ source/function.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/function.cpp.s
 .PHONY : source/function.cpp.s
 
+source/image.o: source/image.cpp.o
+
+.PHONY : source/image.o
+
+# target to build an object file
+source/image.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.o
+.PHONY : source/image.cpp.o
+
+source/image.i: source/image.cpp.i
+
+.PHONY : source/image.i
+
+# target to preprocess a source file
+source/image.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.i
+.PHONY : source/image.cpp.i
+
+source/image.s: source/image.cpp.s
+
+.PHONY : source/image.s
+
+# target to generate assembly for a file
+source/image.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.s
+.PHONY : source/image.cpp.s
+
 source/label.o: source/label.cpp.o
 
 .PHONY : source/label.o
@@ -1265,6 +1295,9 @@ help:
 	@echo "... source/function.o"
 	@echo "... source/function.i"
 	@echo "... source/function.s"
+	@echo "... source/image.o"
+	@echo "... source/image.i"
+	@echo "... source/image.s"
 	@echo "... source/label.o"
 	@echo "... source/label.i"
 	@echo "... source/label.s"
