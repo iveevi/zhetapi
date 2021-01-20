@@ -59,7 +59,11 @@ project(exp)
 
 add_executable(exp source/exp/exp.cpp)
 
-target_link_libraries(exp PUBLIC zhp-shared)
+find_package(PNG REQUIRED)
+
+include_directories(${PNG_INCLUDE_DIR})
+
+target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
 
 # Compile cuda program
 find_package(CUDA)
