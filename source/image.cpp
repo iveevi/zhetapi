@@ -11,14 +11,45 @@ Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size
 		memcpy(__array + i * rbytes, data[i], rbytes);
 }
 
+size_t Image::width() const
+{
+	return __dim[0];
+}
+
+size_t Image::height() const
+{
+	return __dim[1];
+}
+
+size_t Image::channels() const
+{
+	return __dim[2];
+}
+
+const unsigned char *const Image::raw() const
+{
+	return __array;
+}
+
+unsigned char **Image::row_bytes() const
+{
+	unsigned char **rows = new unsigned char *[__dim[0]];
+
+	size_t stride = __dim[1] * __dim[2];
+	for (size_t i = 0; i < __dim[0]; i++)
+		rows[i] = &(__array[stride * i]);
+
+	return rows;
+}
+
 /*
  * PNG Parsing.
  *
  * TODO: Throw more specific exceptions.
  */
-Image read_png(const char *img)
+Image load_png(const char *impath)
 {
-	FILE *file = fopen(img, "rb");
+	FILE *file = fopen(impath, "rb");
 
 	if (!file)
 		throw bad_file();
@@ -86,6 +117,48 @@ Image read_png(const char *img)
 	};
 
 	return Image(data, width, height, channels, rbytes);
+}
+
+void save_png(Image img, const char *path)
+{
+	FILE *fp = fopen(path, "wb");
+
+	if(!fp)
+		abort();
+
+	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+	if (!png)
+		abort();
+
+	png_infop info = png_create_info_struct(png);
+	if (!info)
+		abort();
+
+	if (setjmp(png_jmpbuf(png))) abort();
+
+	png_init_io(png, fp);
+
+	// Output is 8bit depth, RGBA format.
+	png_set_IHDR(
+		png,
+		info,
+		img.width(),
+		img.height(),
+		8,
+		PNG_COLOR_TYPE_RGBA,	// Needs to be changed (store in Image)
+		PNG_INTERLACE_NONE,
+		PNG_COMPRESSION_TYPE_DEFAULT,
+		PNG_FILTER_TYPE_DEFAULT
+	);
+
+	png_write_info(png, info);
+
+	png_write_image(png, img.row_bytes());
+	png_write_end(png, NULL);
+
+	fclose(fp);
+
+	png_destroy_write_struct(&png, &info);
 }
 
 }

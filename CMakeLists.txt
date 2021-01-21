@@ -77,7 +77,7 @@ add_executable(exp source/exp/exp.cpp ${EXT_SOURCE})
 find_package(OpenGL)
 find_package(glfw3)
 
-target_link_libraries(exp ${OPENGL_LIBRARIES} glfw ${PNG_LIBRARY} zhp-shared)
+target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
 
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
@@ -112,7 +112,8 @@ add_executable(czhp
 	source/czhp/parser.cpp
 	source/czhp/library.cpp
 	source/czhp/execute.cpp
-	source/builtin/basic_io.cpp)
+	source/builtin/basic_io.cpp
+)
 
 target_link_libraries(czhp PUBLIC zhp-static)
 
