@@ -50,8 +50,8 @@ static int interpreter(string infile)
 	file = infile;
 	
 	// Register builtin symbols
-	barn.put(Registrable("print", &print));
-	barn.put(Registrable("println", &println));
+	barn.put(Registrable("print", &bt_print));
+	barn.put(Registrable("println", &bt_println));
 
 	barn.put(Variable(op_true->copy(), "true"));
 	barn.put(Variable(op_false->copy(), "false"));

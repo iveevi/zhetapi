@@ -8,6 +8,7 @@
 // Engine headers
 #include <core/node_manager.hpp>
 
+
 namespace zhetapi {
 
 class Barn;
@@ -19,6 +20,8 @@ class algorithm : public Token {
 
 	std::vector <std::string>	__args;
 
+	node_manager			__compiled;
+
 	// Compile when called on
 	// std::vector <std::string>			__statements;
 
@@ -29,7 +32,7 @@ public:
 			const std::string &);
 	
 	Token *execute(const Barn &, const std::vector <Token *> &);
-	Token *execute(Barn *, std::string str);
+	Token *execute(Barn *, std::string str, node_manager &);
 
 	std::vector <std::string> split(std::string str);
 	

@@ -5,7 +5,7 @@
 using namespace zhetapi;
 using namespace std;
 
-ZHETAPI_REGISTER(print)
+ZHETAPI_REGISTER(bt_print)
 {
 	for (Token *tptr : inputs)
 		cout << tptr->str();
@@ -13,7 +13,7 @@ ZHETAPI_REGISTER(print)
 	return nullptr;
 }
 
-ZHETAPI_REGISTER(println)
+ZHETAPI_REGISTER(bt_println)
 {
 	for (Token *tptr : inputs)
 		cout << tptr->str();

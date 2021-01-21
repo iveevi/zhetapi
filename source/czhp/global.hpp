@@ -39,7 +39,8 @@ Token *execute(string);
 
 vector <string> split(string);
 
-Token *print(const vector <Token *> &);
-Token *println(const vector <Token *> &);
+// Builtin functions
+Token *bt_print(const vector <Token *> &);
+Token *bt_println(const vector <Token *> &);
 
 #endif

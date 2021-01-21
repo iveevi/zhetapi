@@ -37,6 +37,8 @@ public:
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
 
+	void append(const node_manager &);
+
 	/*
 	 * Responsible for expanding variable clusters and truning them
 	 * into product of Operands.

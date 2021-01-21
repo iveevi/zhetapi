@@ -50,7 +50,7 @@ public:
 private:
 	mapper		__ftn;
 
-	::std::string	__ident;
+	std::string	__ident;
 public:
 	Registrable();
 	Registrable(const Registrable &);
@@ -58,7 +58,7 @@ public:
 
 	Token *operator()(const ::std::vector <Token *> &) const;
 
-	::std::string str() const override;
+	std::string str() const override;
 
 	type caller() const override;
 

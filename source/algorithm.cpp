@@ -46,7 +46,7 @@ Token *algorithm::execute(const Barn &barn, const std::vector <Token *> &args)
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
-					execute(cpy, tmp);
+					execute(cpy, tmp, __compiled);
 
 					tmp.clear();
 				}
@@ -61,15 +61,24 @@ Token *algorithm::execute(const Barn &barn, const std::vector <Token *> &args)
 		}
 	}
 
+	using namespace std;
+
+	cout << "full alg:" << endl;
+	__compiled.print();
+
 	// Return the "return" value instead of nullptr
 	return nullptr;
 }
 
-Token *algorithm::execute(Barn *barn, std::string str)
+Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 {
+	using namespace std;
+
 	// Skip comments
-	if (str[0] == '#')
+	if (str[0] == '#') {
+		cout << "Skip line" << endl;
 		return nullptr;
+	}
 
 	std::vector <std::string> tmp = split(str);
 	
@@ -109,6 +118,11 @@ Token *algorithm::execute(Barn *barn, std::string str)
 
 			exit(-1);
 		}
+
+		cout << "Next sequential instruction:" << endl;
+		rnm.append(mg);
+
+		mg.print();
 
 		/* std::cout << "mg:" << std::endl;
 		mg.print(); */
