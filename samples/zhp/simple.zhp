@@ -6,3 +6,12 @@ while (i++ < 10) {
 
 	x = (x * 3) % 7;
 }
+
+alg f()
+{
+	print("hello from f")
+
+	print("second printf")
+}
+
+f()

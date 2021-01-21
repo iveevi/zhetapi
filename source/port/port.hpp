@@ -19,6 +19,7 @@
 #include <tensor.hpp>
 
 #include <std/functions.hpp>
+#include <std/calculus.hpp>
 
 using namespace std;
 
@@ -46,6 +47,8 @@ bool gamma_and_factorial();
 bool vector_construction_and_memory();
 bool matrix_construction_and_memory();
 bool tensor_construction_and_memory();
+
+bool integration();
 
 bool function_computation();
 bool function_compilation_testing();

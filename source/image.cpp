@@ -121,9 +121,9 @@ Image load_png(const char *impath)
 
 void save_png(Image img, const char *path)
 {
-	FILE *fp = fopen(path, "wb");
+	FILE *file = fopen(path, "wb");
 
-	if(!fp)
+	if(!file)
 		abort();
 
 	png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -136,7 +136,7 @@ void save_png(Image img, const char *path)
 
 	if (setjmp(png_jmpbuf(png))) abort();
 
-	png_init_io(png, fp);
+	png_init_io(png, file);
 
 	// Output is 8bit depth, RGBA format.
 	png_set_IHDR(
@@ -153,10 +153,14 @@ void save_png(Image img, const char *path)
 
 	png_write_info(png, info);
 
-	png_write_image(png, img.row_bytes());
+	unsigned char **data = img.row_bytes();
+
+	png_write_image(png, data);
 	png_write_end(png, NULL);
 
-	fclose(fp);
+	delete[] data;
+
+	fclose(file);
 
 	png_destroy_write_struct(&png, &info);
 }

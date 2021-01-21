@@ -234,6 +234,19 @@ czhp/fast:
 .PHONY : czhp/fast
 
 #=============================================================================
+# Target rules for targets named port_matrix
+
+# Build rule for target.
+port_matrix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
+.PHONY : port_matrix
+
+# fast build rule for target.
+port_matrix/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
+.PHONY : port_matrix/fast
+
+#=============================================================================
 # Target rules for targets named port_function
 
 # Build rule for target.
@@ -273,17 +286,17 @@ port_special/fast:
 .PHONY : port_special/fast
 
 #=============================================================================
-# Target rules for targets named port_matrix
+# Target rules for targets named port_calculus
 
 # Build rule for target.
-port_matrix: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
-.PHONY : port_matrix
+port_calculus: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_calculus
+.PHONY : port_calculus
 
 # fast build rule for target.
-port_matrix/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
-.PHONY : port_matrix/fast
+port_calculus/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_calculus.dir/build.make CMakeFiles/port_calculus.dir/build
+.PHONY : port_calculus/fast
 
 glad/glad.o: glad/glad.c.o
 
@@ -921,6 +934,33 @@ source/operation_holder.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.s
 .PHONY : source/operation_holder.cpp.s
 
+source/port/port-calculus.o: source/port/port-calculus.cpp.o
+
+.PHONY : source/port/port-calculus.o
+
+# target to build an object file
+source/port/port-calculus.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_calculus.dir/build.make CMakeFiles/port_calculus.dir/source/port/port-calculus.cpp.o
+.PHONY : source/port/port-calculus.cpp.o
+
+source/port/port-calculus.i: source/port/port-calculus.cpp.i
+
+.PHONY : source/port/port-calculus.i
+
+# target to preprocess a source file
+source/port/port-calculus.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_calculus.dir/build.make CMakeFiles/port_calculus.dir/source/port/port-calculus.cpp.i
+.PHONY : source/port/port-calculus.cpp.i
+
+source/port/port-calculus.s: source/port/port-calculus.cpp.s
+
+.PHONY : source/port/port-calculus.s
+
+# target to generate assembly for a file
+source/port/port-calculus.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_calculus.dir/build.make CMakeFiles/port_calculus.dir/source/port/port-calculus.cpp.s
+.PHONY : source/port/port-calculus.cpp.s
+
 source/port/port-function.o: source/port/port-function.cpp.o
 
 .PHONY : source/port/port-function.o
@@ -1301,6 +1341,7 @@ help:
 	@echo "... czhp"
 	@echo "... exp"
 	@echo "... port"
+	@echo "... port_calculus"
 	@echo "... port_function"
 	@echo "... port_matrix"
 	@echo "... port_special"
@@ -1376,6 +1417,9 @@ help:
 	@echo "... source/operation_holder.o"
 	@echo "... source/operation_holder.i"
 	@echo "... source/operation_holder.s"
+	@echo "... source/port/port-calculus.o"
+	@echo "... source/port/port-calculus.i"
+	@echo "... source/port/port-calculus.s"
 	@echo "... source/port/port-function.o"
 	@echo "... source/port/port-function.i"
 	@echo "... source/port/port-function.s"

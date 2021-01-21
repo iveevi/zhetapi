@@ -269,6 +269,13 @@ Token *node_manager::substitute_and_compute(std::vector <Token *>
 	return value(__tree);
 }
 
+void node_manager::append(const node_manager &nm)
+{
+	__tree.append(nm.__tree);
+
+	// Add the rest of the elements
+}
+
 // Expansion methods
 void node_manager::expand(node &ref)
 {
@@ -862,6 +869,9 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref)
 {
+	if (!ref.__tptr.get())
+		return;
+	
 	if (ref.__tptr->caller() == Token::ndr) {
 		std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
 

@@ -6,6 +6,7 @@ vector <pair <string, bool(*)()>> rig {
 	{"vector construction and memory safety", &vector_construction_and_memory},
 	{"matrix construction and memory safety", &matrix_construction_and_memory},
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
+	{"integration techniques", &integration},
 	{"function computation", &function_computation},
 	{"function general compilation", &function_compilation_testing}
 };
