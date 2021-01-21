@@ -58,14 +58,11 @@ bool function_compilation_testing()
 	Token *t1 = f(3.544, 56, 343.54454);
 	Token *t2 = tmp1(op1, op2, op3);
 
-	cout << "t1: " << t1->str() << endl;
+	cout << "\nt1: " << t1->str() << endl;
 	cout << "t2: " << t2->str() << endl;
 
-	if (t1 == t2) {
-		cout << "\nEqual tokens!" << endl;
-
+	if (tokcmp(t1, t2))
 		count++;
-	}
 
 	// Repeat, with a different function
 	Function g = "g(x) = sin(x) - log(x)";
@@ -76,7 +73,7 @@ bool function_compilation_testing()
 	tb = bench();
 	ftr2 tmp2 = (ftr2) g.compile_general();
 
-	cout << "Compilation time for second: " << tb << endl;
+	cout << "\nCompilation time for second: " << tb << endl;
 
 	// Allocate operands
 	Operand <double> *op4 = new Operand <double> (4.767);
@@ -85,14 +82,11 @@ bool function_compilation_testing()
 	Token *t3 = g(4.767);
 	Token *t4 = tmp2(op4);
 
-	cout << "t1: " << t3->str() << endl;
-	cout << "t2: " << t4->str() << endl;
+	cout << "\nt3: " << t3->str() << endl;
+	cout << "t4: " << t4->str() << endl;
 
-	if (t3 == t4) {
-		cout << "\nEqual tokens!" << endl;
-
+	if (tokcmp(t3, t4))
 		count++;
-	}
 	
 	// Free resources
 	delete op1;
@@ -101,7 +95,7 @@ bool function_compilation_testing()
 	delete op4;
 
 	// Deliver the verdict
-	cout << "Verdict: " << count << "/2 matches." << endl;
+	cout << "\nVerdict: " << count << "/2 matches." << endl;
 
 	return (count == 2);
 #endif

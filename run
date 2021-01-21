@@ -200,6 +200,8 @@ else
 	mv $1 debug/$1-run
 
 	if [ "$1" == "czhp" ]; then
+		czhp_simple
+	elif [ "$1" == "czhp_full" ]; then
 		czhp_normal
 	else
 		./debug/$1-run

@@ -564,13 +564,12 @@ void node_manager::generate(std::string &name) const
 {
 	std::ofstream fout(name + ".cpp");
 
-	fout << "#include <token.hpp>\n";
-	fout << "#include <function.hpp>\n";
+	fout << "#include <zhplib.hpp>\n";
 	fout << "\n";
 
 	fout << "extern \"C\" {\n";
 	// Make more robust to T and U
-	fout << "\tzhetapi::Barn <double, int> " << name << "_barn;\n";
+	fout << "\tzhetapi::Barn " << name << "_barn;\n";
 
 	fout << "\n";
 	fout << "\tzhetapi::Token *" << name << "(";

@@ -251,7 +251,7 @@ void *Function::compile_general() const
 	dlsym_error = dlerror();
 
 	if (dlsym_error) {
-		::std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
+		std::cerr << "Cannot close for symbol '" << file << "': " << dlsym_error << '\n';
 		
 		// dlclose(handle);
 		
