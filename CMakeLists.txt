@@ -23,6 +23,10 @@ find_package(PNG REQUIRED)
 
 include_directories(${PNG_INCLUDE_DIR})
 
+set(EXT_SOURCE
+	glad/glad.c
+)
+
 set(ZHETAPI_SOURCE 
 	source/algorithm.cpp
 	source/barn.cpp
@@ -67,9 +71,14 @@ add_executable(zhetapi source/cli/cli.cpp)
 target_link_libraries(zhetapi PUBLIC zhp-shared)
 
 # Compile exp file
-add_executable(exp source/exp/exp.cpp)
+add_executable(exp source/exp/exp.cpp ${EXT_SOURCE})
 
-target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+
+target_link_libraries(exp ${OPENGL_LIBRARIES} glfw ${PNG_LIBRARY} zhp-shared)
+
+include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
 # Compile cuda program
 find_package(CUDA)
@@ -130,7 +139,7 @@ target_link_libraries(czhp PUBLIC ${CMAKE_DL_LIBS})
 
 # Include directories
 include_directories(PUBLIC engine)
-include_directories(PUBLIC json)
+include_directories(PUBLIC glad)
 
 include_directories(PUBLIC /usr/local/include)
 include_directories(PUBLIC CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES)

@@ -285,6 +285,33 @@ exp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/build
 .PHONY : exp/fast
 
+glad/glad.o: glad/glad.c.o
+
+.PHONY : glad/glad.o
+
+# target to build an object file
+glad/glad.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.o
+.PHONY : glad/glad.c.o
+
+glad/glad.i: glad/glad.c.i
+
+.PHONY : glad/glad.i
+
+# target to preprocess a source file
+glad/glad.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.i
+.PHONY : glad/glad.c.i
+
+glad/glad.s: glad/glad.c.s
+
+.PHONY : glad/glad.s
+
+# target to generate assembly for a file
+glad/glad.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.s
+.PHONY : glad/glad.c.s
+
 source/algorithm.o: source/algorithm.cpp.o
 
 .PHONY : source/algorithm.o
@@ -1253,6 +1280,9 @@ help:
 	@echo "... zhetapi"
 	@echo "... zhp-shared"
 	@echo "... zhp-static"
+	@echo "... glad/glad.o"
+	@echo "... glad/glad.i"
+	@echo "... glad/glad.s"
 	@echo "... source/algorithm.o"
 	@echo "... source/algorithm.i"
 	@echo "... source/algorithm.s"
