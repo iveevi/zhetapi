@@ -203,9 +203,7 @@ void *Function::compile_general() const
 {
 	std::string file = generate_general();
 
-#ifdef __linux__
-
-#define ZHP_FUNCTION_COMPILE_GENERAL
+#ifdef ZHP_COMPILE_LINUX
 
 	int ret;
 

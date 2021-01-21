@@ -25,7 +25,7 @@ bool vector_construction_and_memory()
 	double *arr = new double[10];
 	for (size_t i = 0; i < 10; i++)
 		arr[i] = pow(i, 3.14);
-
+	
 	tmp = Vector <double> (10, arr);
 
 	cout << "Size and pointer constructor: " << tmp << endl;
@@ -33,8 +33,6 @@ bool vector_construction_and_memory()
 	tmp = Vector <double> (5, arr);
 	
 	cout << "Cropped size and pointer constructor: " << tmp << endl;
-
-	delete arr;
 
 	return true;
 }

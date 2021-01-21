@@ -89,6 +89,20 @@ function czhp_normal {
 	./debug/czhp-run -h
 }
 
+function czhp_simple {
+	set +e
+
+	mkdir -p bin
+
+	# Run a sample script
+
+	echo -e "\n==========================================================="
+	echo "Running sample script for general features..."
+	echo -e "===========================================================\n"
+
+	./debug/czhp-run samples/zhp/simple.zhp
+}
+
 function genlibs {
 	mkdir -p include
 

@@ -71,7 +71,7 @@ protected:
 	size_t  __cols;
 public:
 	__cuda_dual_prefix
-	Matrix(size_t, size_t, T *, bool = false);
+	Matrix(size_t, size_t, T *, bool = true);
 
 	Matrix(const ::std::vector <T> &);
 	Matrix(const ::std::vector <::std::vector <T>> &);
@@ -327,7 +327,7 @@ public:
 // Owner implies that the vector object will take care of the deallocation
 template <class T>
 __cuda_dual_prefix
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool owner)
+Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 {
 	this->__size = rs * cs;
 
@@ -341,7 +341,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool owner)
 
 	this->__array = arr;
 
-	this->__sliced = !owner;
+	this->__sliced = slice;
 }
 
 template <class T>

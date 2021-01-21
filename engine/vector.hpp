@@ -27,8 +27,8 @@ namespace zhetapi {
 template <class T>
 class Vector : public Matrix <T> {
 public:	
-	Vector(const ::std::vector <T> &);
-	Vector(const ::std::initializer_list <T> &);
+	Vector(const std::vector <T> &);
+	Vector(const std::initializer_list <T> &);
 
 	template <class A>
 	Vector(A);
@@ -63,10 +63,10 @@ public:
 	Vector(const Matrix <T> &);
 	
 	Vector(size_t, T);
-	Vector(size_t, T *);
+	Vector(size_t, T *, bool = true);
 
-	Vector(size_t, ::std::function <T (size_t)>);
-	Vector(size_t, ::std::function <T *(size_t)>);
+	Vector(size_t, std::function <T (size_t)>);
+	Vector(size_t, std::function <T *(size_t)>);
 
 	Vector &operator=(const Vector &);
 	Vector &operator=(const Matrix <T> &);
@@ -385,7 +385,7 @@ Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
 
 // FIXME: Delegate Matrix constructor
 template <class T>
-Vector <T> ::Vector(size_t rs, T *ref) : Matrix <T> (rs, 1, ref) {}
+Vector <T> ::Vector(size_t rs, T *ref, bool slice) : Matrix <T> (rs, 1, ref, slice) {}
 
 template <class T>
 Vector <T> ::Vector(size_t rs, ::std::function <T (size_t)> gen)

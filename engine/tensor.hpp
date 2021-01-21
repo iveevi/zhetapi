@@ -139,6 +139,9 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &
 template <class T>
 std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 {
+	if (size == 0)
+		return "[]";
+	
 	std::string out = "[";
 
 	// Size of each dimension
@@ -251,7 +254,7 @@ void Tensor <T> ::clear()
 	if (__dim)
 		delete[] __dim;
 
-	if (__array)
+	if (__array && !__sliced)
 		delete[] __array;
 }
 

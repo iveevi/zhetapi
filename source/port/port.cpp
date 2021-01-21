@@ -51,7 +51,7 @@ int main()
 			cout << endl;
 
 		cout << string(100, '=') << endl;
-		cout << mark << "Running \"" << pr.first << "\" test:" << endl;
+		cout << mark << "Running \"" << pr.first << "\" test:\n" << endl;
 
 		cout << string(100, '-') << endl;
 		bool tmp = pr.second();

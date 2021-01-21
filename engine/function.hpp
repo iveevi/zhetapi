@@ -10,6 +10,21 @@
 // Engine headers
 #include <core/node_manager.hpp>
 
+// Undefine compilation flag
+#ifdef ZHP_FUNCTION_COMPILE_GENERAL
+
+#undef ZHP_FUNCTION_COMPILE_GENERAL
+
+#endif
+
+// Set the correct compilation mode
+#ifdef __linux__
+
+#define ZHP_FUNCTION_COMPILE_GENERAL
+#define ZHP_COMPILE_LINUX
+
+#endif
+
 namespace zhetapi {
 
 class Function : public Token {
