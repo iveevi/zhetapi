@@ -58,19 +58,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /snap/cmake/769/bin/cmake
+CMAKE_COMMAND = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake
 
 # The command to remove a file.
-RM = /snap/cmake/769/bin/cmake -E rm -f
+RM = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ram/zhetapi
+CMAKE_SOURCE_DIR = /workspace/zhetapi
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ram/zhetapi
+CMAKE_BINARY_DIR = /workspace/zhetapi
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ CMAKE_BINARY_DIR = /home/ram/zhetapi
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/snap/cmake/769/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -89,7 +89,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/snap/cmake/715/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles /home/ram/zhetapi//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/CMakeFiles /workspace/zhetapi//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -130,71 +130,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named port
-
-# Build rule for target.
-port: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port
-.PHONY : port
-
-# fast build rule for target.
-port/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port.dir/build.make CMakeFiles/port.dir/build
-.PHONY : port/fast
-
-#=============================================================================
-# Target rules for targets named timer
-
-# Build rule for target.
-timer: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer
-.PHONY : timer
-
-# fast build rule for target.
-timer/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/build
-.PHONY : timer/fast
-
-#=============================================================================
-# Target rules for targets named port_function
-
-# Build rule for target.
-port_function: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_function
-.PHONY : port_function
-
-# fast build rule for target.
-port_function/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_function.dir/build.make CMakeFiles/port_function.dir/build
-.PHONY : port_function/fast
-
-#=============================================================================
-# Target rules for targets named port_tensor
-
-# Build rule for target.
-port_tensor: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_tensor
-.PHONY : port_tensor
-
-# fast build rule for target.
-port_tensor/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_tensor.dir/build.make CMakeFiles/port_tensor.dir/build
-.PHONY : port_tensor/fast
-
-#=============================================================================
-# Target rules for targets named zhp-static
-
-# Build rule for target.
-zhp-static: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhp-static
-.PHONY : zhp-static
-
-# fast build rule for target.
-zhp-static/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/build
-.PHONY : zhp-static/fast
-
-#=============================================================================
 # Target rules for targets named zhp-shared
 
 # Build rule for target.
@@ -206,45 +141,6 @@ zhp-shared: cmake_check_build_system
 zhp-shared/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/build
 .PHONY : zhp-shared/fast
-
-#=============================================================================
-# Target rules for targets named cuda
-
-# Build rule for target.
-cuda: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuda
-.PHONY : cuda
-
-# fast build rule for target.
-cuda/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/build
-.PHONY : cuda/fast
-
-#=============================================================================
-# Target rules for targets named czhp
-
-# Build rule for target.
-czhp: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 czhp
-.PHONY : czhp
-
-# fast build rule for target.
-czhp/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/czhp.dir/build.make CMakeFiles/czhp.dir/build
-.PHONY : czhp/fast
-
-#=============================================================================
-# Target rules for targets named port_matrix
-
-# Build rule for target.
-port_matrix: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
-.PHONY : port_matrix
-
-# fast build rule for target.
-port_matrix/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
-.PHONY : port_matrix/fast
 
 #=============================================================================
 # Target rules for targets named port_vector
@@ -285,6 +181,110 @@ exp/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/build
 .PHONY : exp/fast
 
+#=============================================================================
+# Target rules for targets named port_tensor
+
+# Build rule for target.
+port_tensor: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_tensor
+.PHONY : port_tensor
+
+# fast build rule for target.
+port_tensor/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_tensor.dir/build.make CMakeFiles/port_tensor.dir/build
+.PHONY : port_tensor/fast
+
+#=============================================================================
+# Target rules for targets named zhp-static
+
+# Build rule for target.
+zhp-static: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhp-static
+.PHONY : zhp-static
+
+# fast build rule for target.
+zhp-static/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/build
+.PHONY : zhp-static/fast
+
+#=============================================================================
+# Target rules for targets named timer
+
+# Build rule for target.
+timer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer
+.PHONY : timer
+
+# fast build rule for target.
+timer/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/build
+.PHONY : timer/fast
+
+#=============================================================================
+# Target rules for targets named czhp
+
+# Build rule for target.
+czhp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 czhp
+.PHONY : czhp
+
+# fast build rule for target.
+czhp/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/czhp.dir/build.make CMakeFiles/czhp.dir/build
+.PHONY : czhp/fast
+
+#=============================================================================
+# Target rules for targets named port_function
+
+# Build rule for target.
+port_function: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_function
+.PHONY : port_function
+
+# fast build rule for target.
+port_function/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_function.dir/build.make CMakeFiles/port_function.dir/build
+.PHONY : port_function/fast
+
+#=============================================================================
+# Target rules for targets named port
+
+# Build rule for target.
+port: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port
+.PHONY : port
+
+# fast build rule for target.
+port/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port.dir/build.make CMakeFiles/port.dir/build
+.PHONY : port/fast
+
+#=============================================================================
+# Target rules for targets named port_special
+
+# Build rule for target.
+port_special: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_special
+.PHONY : port_special
+
+# fast build rule for target.
+port_special/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_special.dir/build.make CMakeFiles/port_special.dir/build
+.PHONY : port_special/fast
+
+#=============================================================================
+# Target rules for targets named port_matrix
+
+# Build rule for target.
+port_matrix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
+.PHONY : port_matrix
+
+# fast build rule for target.
+port_matrix/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
+.PHONY : port_matrix/fast
+
 glad/glad.o: glad/glad.c.o
 
 .PHONY : glad/glad.o
@@ -318,8 +318,8 @@ source/algorithm.o: source/algorithm.cpp.o
 
 # target to build an object file
 source/algorithm.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/algorithm.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.o
 .PHONY : source/algorithm.cpp.o
 
 source/algorithm.i: source/algorithm.cpp.i
@@ -328,8 +328,8 @@ source/algorithm.i: source/algorithm.cpp.i
 
 # target to preprocess a source file
 source/algorithm.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/algorithm.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.i
 .PHONY : source/algorithm.cpp.i
 
 source/algorithm.s: source/algorithm.cpp.s
@@ -338,8 +338,8 @@ source/algorithm.s: source/algorithm.cpp.s
 
 # target to generate assembly for a file
 source/algorithm.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/algorithm.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/algorithm.cpp.s
 .PHONY : source/algorithm.cpp.s
 
 source/barn.o: source/barn.cpp.o
@@ -348,8 +348,8 @@ source/barn.o: source/barn.cpp.o
 
 # target to build an object file
 source/barn.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/barn.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.o
 .PHONY : source/barn.cpp.o
 
 source/barn.i: source/barn.cpp.i
@@ -358,8 +358,8 @@ source/barn.i: source/barn.cpp.i
 
 # target to preprocess a source file
 source/barn.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/barn.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.i
 .PHONY : source/barn.cpp.i
 
 source/barn.s: source/barn.cpp.s
@@ -368,8 +368,8 @@ source/barn.s: source/barn.cpp.s
 
 # target to generate assembly for a file
 source/barn.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/barn.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/barn.cpp.s
 .PHONY : source/barn.cpp.s
 
 source/builtin/basic_io.o: source/builtin/basic_io.cpp.o
@@ -405,8 +405,8 @@ source/class.o: source/class.cpp.o
 
 # target to build an object file
 source/class.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/class.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.o
 .PHONY : source/class.cpp.o
 
 source/class.i: source/class.cpp.i
@@ -415,8 +415,8 @@ source/class.i: source/class.cpp.i
 
 # target to preprocess a source file
 source/class.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/class.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.i
 .PHONY : source/class.cpp.i
 
 source/class.s: source/class.cpp.s
@@ -425,8 +425,8 @@ source/class.s: source/class.cpp.s
 
 # target to generate assembly for a file
 source/class.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/class.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/class.cpp.s
 .PHONY : source/class.cpp.s
 
 source/cli/cli.o: source/cli/cli.cpp.o
@@ -462,8 +462,8 @@ source/complex.o: source/complex.cpp.o
 
 # target to build an object file
 source/complex.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/complex.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.o
 .PHONY : source/complex.cpp.o
 
 source/complex.i: source/complex.cpp.i
@@ -472,8 +472,8 @@ source/complex.i: source/complex.cpp.i
 
 # target to preprocess a source file
 source/complex.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/complex.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.i
 .PHONY : source/complex.cpp.i
 
 source/complex.s: source/complex.cpp.s
@@ -482,36 +482,9 @@ source/complex.s: source/complex.cpp.s
 
 # target to generate assembly for a file
 source/complex.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/complex.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.s
 .PHONY : source/complex.cpp.s
-
-source/cuda/main.o: source/cuda/main.cu.o
-
-.PHONY : source/cuda/main.o
-
-# target to build an object file
-source/cuda/main.cu.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.o
-.PHONY : source/cuda/main.cu.o
-
-source/cuda/main.i: source/cuda/main.cu.i
-
-.PHONY : source/cuda/main.i
-
-# target to preprocess a source file
-source/cuda/main.cu.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.i
-.PHONY : source/cuda/main.cu.i
-
-source/cuda/main.s: source/cuda/main.cu.s
-
-.PHONY : source/cuda/main.s
-
-# target to generate assembly for a file
-source/cuda/main.cu.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.s
-.PHONY : source/cuda/main.cu.s
 
 source/czhp/czhp.o: source/czhp/czhp.cpp.o
 
@@ -627,8 +600,8 @@ source/display.o: source/display.cpp.o
 
 # target to build an object file
 source/display.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/display.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.o
 .PHONY : source/display.cpp.o
 
 source/display.i: source/display.cpp.i
@@ -637,8 +610,8 @@ source/display.i: source/display.cpp.i
 
 # target to preprocess a source file
 source/display.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/display.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.i
 .PHONY : source/display.cpp.i
 
 source/display.s: source/display.cpp.s
@@ -647,8 +620,8 @@ source/display.s: source/display.cpp.s
 
 # target to generate assembly for a file
 source/display.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/display.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/display.cpp.s
 .PHONY : source/display.cpp.s
 
 source/exp/exp.o: source/exp/exp.cpp.o
@@ -684,8 +657,8 @@ source/function.o: source/function.cpp.o
 
 # target to build an object file
 source/function.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/function.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.o
 .PHONY : source/function.cpp.o
 
 source/function.i: source/function.cpp.i
@@ -694,8 +667,8 @@ source/function.i: source/function.cpp.i
 
 # target to preprocess a source file
 source/function.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/function.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.i
 .PHONY : source/function.cpp.i
 
 source/function.s: source/function.cpp.s
@@ -704,8 +677,8 @@ source/function.s: source/function.cpp.s
 
 # target to generate assembly for a file
 source/function.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/function.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/function.cpp.s
 .PHONY : source/function.cpp.s
 
 source/image.o: source/image.cpp.o
@@ -714,8 +687,8 @@ source/image.o: source/image.cpp.o
 
 # target to build an object file
 source/image.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.o
 .PHONY : source/image.cpp.o
 
 source/image.i: source/image.cpp.i
@@ -724,8 +697,8 @@ source/image.i: source/image.cpp.i
 
 # target to preprocess a source file
 source/image.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.i
 .PHONY : source/image.cpp.i
 
 source/image.s: source/image.cpp.s
@@ -734,8 +707,8 @@ source/image.s: source/image.cpp.s
 
 # target to generate assembly for a file
 source/image.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/image.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/image.cpp.s
 .PHONY : source/image.cpp.s
 
 source/label.o: source/label.cpp.o
@@ -744,8 +717,8 @@ source/label.o: source/label.cpp.o
 
 # target to build an object file
 source/label.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/label.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.o
 .PHONY : source/label.cpp.o
 
 source/label.i: source/label.cpp.i
@@ -754,8 +727,8 @@ source/label.i: source/label.cpp.i
 
 # target to preprocess a source file
 source/label.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/label.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.i
 .PHONY : source/label.cpp.i
 
 source/label.s: source/label.cpp.s
@@ -764,8 +737,8 @@ source/label.s: source/label.cpp.s
 
 # target to generate assembly for a file
 source/label.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/label.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/label.cpp.s
 .PHONY : source/label.cpp.s
 
 source/node.o: source/node.cpp.o
@@ -774,8 +747,8 @@ source/node.o: source/node.cpp.o
 
 # target to build an object file
 source/node.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.o
 .PHONY : source/node.cpp.o
 
 source/node.i: source/node.cpp.i
@@ -784,8 +757,8 @@ source/node.i: source/node.cpp.i
 
 # target to preprocess a source file
 source/node.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.i
 .PHONY : source/node.cpp.i
 
 source/node.s: source/node.cpp.s
@@ -794,8 +767,8 @@ source/node.s: source/node.cpp.s
 
 # target to generate assembly for a file
 source/node.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node.cpp.s
 .PHONY : source/node.cpp.s
 
 source/node_differentiation.o: source/node_differentiation.cpp.o
@@ -804,8 +777,8 @@ source/node_differentiation.o: source/node_differentiation.cpp.o
 
 # target to build an object file
 source/node_differentiation.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_differentiation.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.o
 .PHONY : source/node_differentiation.cpp.o
 
 source/node_differentiation.i: source/node_differentiation.cpp.i
@@ -814,8 +787,8 @@ source/node_differentiation.i: source/node_differentiation.cpp.i
 
 # target to preprocess a source file
 source/node_differentiation.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_differentiation.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.i
 .PHONY : source/node_differentiation.cpp.i
 
 source/node_differentiation.s: source/node_differentiation.cpp.s
@@ -824,8 +797,8 @@ source/node_differentiation.s: source/node_differentiation.cpp.s
 
 # target to generate assembly for a file
 source/node_differentiation.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_differentiation.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_differentiation.cpp.s
 .PHONY : source/node_differentiation.cpp.s
 
 source/node_manager.o: source/node_manager.cpp.o
@@ -834,8 +807,8 @@ source/node_manager.o: source/node_manager.cpp.o
 
 # target to build an object file
 source/node_manager.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_manager.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.o
 .PHONY : source/node_manager.cpp.o
 
 source/node_manager.i: source/node_manager.cpp.i
@@ -844,8 +817,8 @@ source/node_manager.i: source/node_manager.cpp.i
 
 # target to preprocess a source file
 source/node_manager.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_manager.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.i
 .PHONY : source/node_manager.cpp.i
 
 source/node_manager.s: source/node_manager.cpp.s
@@ -854,8 +827,8 @@ source/node_manager.s: source/node_manager.cpp.s
 
 # target to generate assembly for a file
 source/node_manager.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_manager.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_manager.cpp.s
 .PHONY : source/node_manager.cpp.s
 
 source/node_reference.o: source/node_reference.cpp.o
@@ -864,8 +837,8 @@ source/node_reference.o: source/node_reference.cpp.o
 
 # target to build an object file
 source/node_reference.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_reference.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.o
 .PHONY : source/node_reference.cpp.o
 
 source/node_reference.i: source/node_reference.cpp.i
@@ -874,8 +847,8 @@ source/node_reference.i: source/node_reference.cpp.i
 
 # target to preprocess a source file
 source/node_reference.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_reference.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.i
 .PHONY : source/node_reference.cpp.i
 
 source/node_reference.s: source/node_reference.cpp.s
@@ -884,8 +857,8 @@ source/node_reference.s: source/node_reference.cpp.s
 
 # target to generate assembly for a file
 source/node_reference.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/node_reference.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/node_reference.cpp.s
 .PHONY : source/node_reference.cpp.s
 
 source/operation.o: source/operation.cpp.o
@@ -894,8 +867,8 @@ source/operation.o: source/operation.cpp.o
 
 # target to build an object file
 source/operation.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.o
 .PHONY : source/operation.cpp.o
 
 source/operation.i: source/operation.cpp.i
@@ -904,8 +877,8 @@ source/operation.i: source/operation.cpp.i
 
 # target to preprocess a source file
 source/operation.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.i
 .PHONY : source/operation.cpp.i
 
 source/operation.s: source/operation.cpp.s
@@ -914,8 +887,8 @@ source/operation.s: source/operation.cpp.s
 
 # target to generate assembly for a file
 source/operation.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation.cpp.s
 .PHONY : source/operation.cpp.s
 
 source/operation_holder.o: source/operation_holder.cpp.o
@@ -924,8 +897,8 @@ source/operation_holder.o: source/operation_holder.cpp.o
 
 # target to build an object file
 source/operation_holder.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation_holder.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.o
 .PHONY : source/operation_holder.cpp.o
 
 source/operation_holder.i: source/operation_holder.cpp.i
@@ -934,8 +907,8 @@ source/operation_holder.i: source/operation_holder.cpp.i
 
 # target to preprocess a source file
 source/operation_holder.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation_holder.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.i
 .PHONY : source/operation_holder.cpp.i
 
 source/operation_holder.s: source/operation_holder.cpp.s
@@ -944,8 +917,8 @@ source/operation_holder.s: source/operation_holder.cpp.s
 
 # target to generate assembly for a file
 source/operation_holder.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/operation_holder.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/operation_holder.cpp.s
 .PHONY : source/operation_holder.cpp.s
 
 source/port/port-function.o: source/port/port-function.cpp.o
@@ -1001,6 +974,33 @@ source/port/port-matrix.s: source/port/port-matrix.cpp.s
 source/port/port-matrix.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/source/port/port-matrix.cpp.s
 .PHONY : source/port/port-matrix.cpp.s
+
+source/port/port-special.o: source/port/port-special.cpp.o
+
+.PHONY : source/port/port-special.o
+
+# target to build an object file
+source/port/port-special.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_special.dir/build.make CMakeFiles/port_special.dir/source/port/port-special.cpp.o
+.PHONY : source/port/port-special.cpp.o
+
+source/port/port-special.i: source/port/port-special.cpp.i
+
+.PHONY : source/port/port-special.i
+
+# target to preprocess a source file
+source/port/port-special.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_special.dir/build.make CMakeFiles/port_special.dir/source/port/port-special.cpp.i
+.PHONY : source/port/port-special.cpp.i
+
+source/port/port-special.s: source/port/port-special.cpp.s
+
+.PHONY : source/port/port-special.s
+
+# target to generate assembly for a file
+source/port/port-special.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_special.dir/build.make CMakeFiles/port_special.dir/source/port/port-special.cpp.s
+.PHONY : source/port/port-special.cpp.s
 
 source/port/port-tensor.o: source/port/port-tensor.cpp.o
 
@@ -1116,8 +1116,8 @@ source/registration.o: source/registration.cpp.o
 
 # target to build an object file
 source/registration.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/registration.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.o
 .PHONY : source/registration.cpp.o
 
 source/registration.i: source/registration.cpp.i
@@ -1126,8 +1126,8 @@ source/registration.i: source/registration.cpp.i
 
 # target to preprocess a source file
 source/registration.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/registration.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.i
 .PHONY : source/registration.cpp.i
 
 source/registration.s: source/registration.cpp.s
@@ -1136,9 +1136,39 @@ source/registration.s: source/registration.cpp.s
 
 # target to generate assembly for a file
 source/registration.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/registration.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.s
 .PHONY : source/registration.cpp.s
+
+source/std_functions.o: source/std_functions.cpp.o
+
+.PHONY : source/std_functions.o
+
+# target to build an object file
+source/std_functions.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/std_functions.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/std_functions.cpp.o
+.PHONY : source/std_functions.cpp.o
+
+source/std_functions.i: source/std_functions.cpp.i
+
+.PHONY : source/std_functions.i
+
+# target to preprocess a source file
+source/std_functions.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/std_functions.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/std_functions.cpp.i
+.PHONY : source/std_functions.cpp.i
+
+source/std_functions.s: source/std_functions.cpp.s
+
+.PHONY : source/std_functions.s
+
+# target to generate assembly for a file
+source/std_functions.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/std_functions.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/std_functions.cpp.s
+.PHONY : source/std_functions.cpp.s
 
 source/token.o: source/token.cpp.o
 
@@ -1146,8 +1176,8 @@ source/token.o: source/token.cpp.o
 
 # target to build an object file
 source/token.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/token.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.o
 .PHONY : source/token.cpp.o
 
 source/token.i: source/token.cpp.i
@@ -1156,8 +1186,8 @@ source/token.i: source/token.cpp.i
 
 # target to preprocess a source file
 source/token.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/token.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.i
 .PHONY : source/token.cpp.i
 
 source/token.s: source/token.cpp.s
@@ -1166,8 +1196,8 @@ source/token.s: source/token.cpp.s
 
 # target to generate assembly for a file
 source/token.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/token.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/token.cpp.s
 .PHONY : source/token.cpp.s
 
 source/types.o: source/types.cpp.o
@@ -1176,8 +1206,8 @@ source/types.o: source/types.cpp.o
 
 # target to build an object file
 source/types.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/types.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.o
 .PHONY : source/types.cpp.o
 
 source/types.i: source/types.cpp.i
@@ -1186,8 +1216,8 @@ source/types.i: source/types.cpp.i
 
 # target to preprocess a source file
 source/types.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/types.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.i
 .PHONY : source/types.cpp.i
 
 source/types.s: source/types.cpp.s
@@ -1196,8 +1226,8 @@ source/types.s: source/types.cpp.s
 
 # target to generate assembly for a file
 source/types.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/types.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/types.cpp.s
 .PHONY : source/types.cpp.s
 
 source/variable.o: source/variable.cpp.o
@@ -1206,8 +1236,8 @@ source/variable.o: source/variable.cpp.o
 
 # target to build an object file
 source/variable.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.o
 .PHONY : source/variable.cpp.o
 
 source/variable.i: source/variable.cpp.i
@@ -1216,8 +1246,8 @@ source/variable.i: source/variable.cpp.i
 
 # target to preprocess a source file
 source/variable.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.i
 .PHONY : source/variable.cpp.i
 
 source/variable.s: source/variable.cpp.s
@@ -1226,8 +1256,8 @@ source/variable.s: source/variable.cpp.s
 
 # target to generate assembly for a file
 source/variable.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable.cpp.s
 .PHONY : source/variable.cpp.s
 
 source/variable_cluster.o: source/variable_cluster.cpp.o
@@ -1236,8 +1266,8 @@ source/variable_cluster.o: source/variable_cluster.cpp.o
 
 # target to build an object file
 source/variable_cluster.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable_cluster.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.o
 .PHONY : source/variable_cluster.cpp.o
 
 source/variable_cluster.i: source/variable_cluster.cpp.i
@@ -1246,8 +1276,8 @@ source/variable_cluster.i: source/variable_cluster.cpp.i
 
 # target to preprocess a source file
 source/variable_cluster.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable_cluster.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.i
 .PHONY : source/variable_cluster.cpp.i
 
 source/variable_cluster.s: source/variable_cluster.cpp.s
@@ -1256,8 +1286,8 @@ source/variable_cluster.s: source/variable_cluster.cpp.s
 
 # target to generate assembly for a file
 source/variable_cluster.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/variable_cluster.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/variable_cluster.cpp.s
 .PHONY : source/variable_cluster.cpp.s
 
 # Help Target
@@ -1268,12 +1298,12 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... cuda"
 	@echo "... czhp"
 	@echo "... exp"
 	@echo "... port"
 	@echo "... port_function"
 	@echo "... port_matrix"
+	@echo "... port_special"
 	@echo "... port_tensor"
 	@echo "... port_vector"
 	@echo "... timer"
@@ -1301,9 +1331,6 @@ help:
 	@echo "... source/complex.o"
 	@echo "... source/complex.i"
 	@echo "... source/complex.s"
-	@echo "... source/cuda/main.o"
-	@echo "... source/cuda/main.i"
-	@echo "... source/cuda/main.s"
 	@echo "... source/czhp/czhp.o"
 	@echo "... source/czhp/czhp.i"
 	@echo "... source/czhp/czhp.s"
@@ -1355,6 +1382,9 @@ help:
 	@echo "... source/port/port-matrix.o"
 	@echo "... source/port/port-matrix.i"
 	@echo "... source/port/port-matrix.s"
+	@echo "... source/port/port-special.o"
+	@echo "... source/port/port-special.i"
+	@echo "... source/port/port-special.s"
 	@echo "... source/port/port-tensor.o"
 	@echo "... source/port/port-tensor.i"
 	@echo "... source/port/port-tensor.s"
@@ -1370,6 +1400,9 @@ help:
 	@echo "... source/registration.o"
 	@echo "... source/registration.i"
 	@echo "... source/registration.s"
+	@echo "... source/std_functions.o"
+	@echo "... source/std_functions.i"
+	@echo "... source/std_functions.s"
 	@echo "... source/token.o"
 	@echo "... source/token.i"
 	@echo "... source/token.s"

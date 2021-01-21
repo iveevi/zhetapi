@@ -12,7 +12,7 @@
 namespace utility {
 
 	template <class T>
-	::std::vector <Vector <T>> gram_schmidt(const ::std::vector <Vector <T>> &span) {
+	std::vector <Vector <T>> gram_schmidt(const ::std::vector <Vector <T>> &span) {
 		assert(span.size());
 
 		::std::vector <Vector <T>> basis = {span[0]};
@@ -34,10 +34,10 @@ namespace utility {
 	}
 	
 	template <class T>
-	::std::vector <Vector <T>> gram_schmidt_normalized(const ::std::vector <Vector <T>> &span) {
+	std::vector <Vector <T>> gram_schmidt_normalized(const std::vector <Vector <T>> &span) {
 		assert(span.size());
 
-		::std::vector <Vector <T>> basis = {span[0].normalize()};
+		std::vector <Vector <T>> basis = {span[0].normalize()};
 	
 		Vector <T> nelem;
 		for (size_t i = 1; i < span.size(); i++) {
@@ -81,7 +81,7 @@ namespace utility {
 
 	/* Make member */
 	template <class T>
-	::std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
+	std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
 	{
 		assert(a.get_rows() == a.get_cols());
 

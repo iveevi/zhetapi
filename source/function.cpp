@@ -107,7 +107,7 @@ std::string &Function::symbol()
 	return __symbol;
 }
 
-const ::std::string Function::symbol() const
+const std::string Function::symbol() const
 {
 	return __symbol;
 }
@@ -118,7 +118,7 @@ void Function::set_threads(size_t threads)
 }
 
 // Computational utilities
-Token *Function::operator()(::std::vector <Token *> toks)
+Token *Function::operator()(std::vector <Token *> toks)
 {
 	assert(toks.size() == __params.size());
 
@@ -126,19 +126,7 @@ Token *Function::operator()(::std::vector <Token *> toks)
 }
 
 template <class ... A>
-Token *Function::operator()(A ... args)
-{
-	std::vector <Token *> Tokens;
-
-	gather(Tokens, args...);
-
-	assert(Tokens.size() == __params.size());
-
-	return __manager.substitute_and_compute(Tokens, __threads);
-}
-
-template <class ... A>
-Token *Function::derivative(const ::std::string &str, A ... args)
+Token *Function::derivative(const std::string &str, A ... args)
 {
 	std::vector <Token *> Tokens;
 
@@ -346,21 +334,6 @@ bool operator<(const Function &a, const Function &b)
 bool operator>(const Function &a, const Function &b)
 {
 	return a.symbol() > b.symbol();
-}
-
-// Gathering facilities
-template <class A>
-void Function::gather(::std::vector <Token *> &Tokens, A in)
-{
-	Tokens.push_back(new Operand <A>(in));
-}
-
-template <class A, class ... B>
-void Function::gather(std::vector <Token *> &Tokens, A in, B ... args)
-{
-	Tokens.push_back(new Operand <A>(in));
-
-	gather(Tokens, args...);
 }
 
 size_t Function::index(const std::string &str) const

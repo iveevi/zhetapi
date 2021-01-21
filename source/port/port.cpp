@@ -2,6 +2,7 @@
 
 // Testing rig
 vector <pair <string, bool(*)()>> rig {
+	{"gamma and factorial functions", &gamma_and_factorial},
 	{"vector construction and memory safety", &vector_construction_and_memory},
 	{"matrix construction and memory safety", &matrix_construction_and_memory},
 	{"tensor construction and memory safety", &tensor_construction_and_memory},

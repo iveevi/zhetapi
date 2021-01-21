@@ -18,6 +18,8 @@
 #include <matrix.hpp>
 #include <tensor.hpp>
 
+#include <std/functions.hpp>
+
 using namespace std;
 
 // Typedefs
@@ -39,6 +41,8 @@ struct bench {
 ostream &operator<<(ostream &, const bench &);
 
 // Test functions
+bool gamma_and_factorial();
+
 bool vector_construction_and_memory();
 bool matrix_construction_and_memory();
 bool tensor_construction_and_memory();

@@ -82,6 +82,33 @@ public:
 	static double h;
 };
 
+template <class ... A>
+Token *Function::operator()(A ... args)
+{
+	std::vector <Token *> Tokens;
+
+	gather(Tokens, args...);
+
+	assert(Tokens.size() == __params.size());
+
+	return __manager.substitute_and_compute(Tokens, __threads);
+}
+
+// Gathering facilities
+template <class A>
+void Function::gather(::std::vector <Token *> &Tokens, A in)
+{
+	Tokens.push_back(new Operand <A>(in));
+}
+
+template <class A, class ... B>
+void Function::gather(std::vector <Token *> &Tokens, A in, B ... args)
+{
+	Tokens.push_back(new Operand <A>(in));
+
+	gather(Tokens, args...);
+}
+
 }
 
 #endif

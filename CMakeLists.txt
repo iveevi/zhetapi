@@ -47,6 +47,7 @@ set(ZHETAPI_SOURCE
 	source/types.cpp
 	source/variable.cpp
 	source/variable_cluster.cpp
+	source/std_functions.cpp
 )
 
 # Compile shared and static library
@@ -73,8 +74,8 @@ target_link_libraries(zhetapi PUBLIC zhp-shared)
 # Compile exp file
 add_executable(exp source/exp/exp.cpp ${EXT_SOURCE})
 
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
+find_package(OpenGL)
+find_package(glfw3)
 
 target_link_libraries(exp ${OPENGL_LIBRARIES} glfw ${PNG_LIBRARY} zhp-shared)
 
@@ -122,6 +123,7 @@ add_library(port_vector OBJECT source/port/port-vector.cpp)
 add_library(port_matrix OBJECT source/port/port-matrix.cpp)
 add_library(port_tensor OBJECT source/port/port-tensor.cpp)
 add_library(port_function OBJECT source/port/port-function.cpp)
+add_library(port_special OBJECT source/port/port-special.cpp)
 add_library(timer OBJECT source/port/timers.cpp)
 
 add_executable(port source/port/port.cpp)
@@ -132,9 +134,11 @@ target_link_libraries(port PUBLIC port_vector)
 target_link_libraries(port PUBLIC port_matrix)
 target_link_libraries(port PUBLIC port_tensor)
 target_link_libraries(port PUBLIC port_function)
+target_link_libraries(port PUBLIC port_special)
 target_link_libraries(port PUBLIC timer)
 
 target_link_libraries(port PUBLIC ${CMAKE_DL_LIBS})
+
 target_link_libraries(czhp PUBLIC ${CMAKE_DL_LIBS})
 
 # Include directories
