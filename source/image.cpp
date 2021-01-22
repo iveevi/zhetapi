@@ -42,6 +42,8 @@ unsigned char **Image::row_bytes() const
 	return rows;
 }
 
+#ifndef ZHP_NO_GUI
+
 int Image::show() const
 {
 	glfwInit();
@@ -52,17 +54,16 @@ int Image::show() const
 
 	GLFWwindow* window = glfwCreateWindow(__dim[0], __dim[1], "Zhetapi Image Viewer", NULL, NULL);
 
-	if (window == NULL)
-	{
+	if (!window) {
 		std::cout << "Failed to create GLFW window" << std::endl;
 		glfwTerminate();
 		return -1;
 	}
+
 	glfwMakeContextCurrent(window);
 	glfwSetFramebufferSizeCallback(window, image_viewer_resize_processor);
 
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-	{
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
@@ -80,6 +81,7 @@ int Image::show() const
 		0, 1, 3, // first triangle
 		1, 2, 3  // second triangle
 	};
+
 	unsigned int VBO, VAO, EBO;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
@@ -119,13 +121,10 @@ int Image::show() const
 	int width, height, nrChannels;
 	
 	const unsigned char *data = __array;
-	if (data)
-	{
+	if (data) {
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, __dim[0], __dim[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
+	} else {
 		std::cout << "Failed to load texture" << std::endl;
 	}
 
@@ -154,6 +153,8 @@ int Image::show() const
 
 	return 0;
 }
+
+#endif
 
 /*
  * PNG Parsing.
@@ -278,6 +279,8 @@ void save_png(Image img, const char *path)
 	png_destroy_write_struct(&png, &info);
 }
 
+#ifndef ZHP_NO_GUI
+
 // GLFW helpers
 void image_viewer_input_processor(GLFWwindow *window)
 {
@@ -289,6 +292,8 @@ void image_viewer_resize_processor(GLFWwindow* window, int width, int height)
 {
 	glViewport(0, 0, width, height);
 }
+
+#endif
 
 }
 

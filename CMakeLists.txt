@@ -1,6 +1,15 @@
 # Set CMake version
 cmake_minimum_required(VERSION 3.14)
 
+# Colors
+if(NOT WIN32)
+	string(ASCII 27 esc)
+
+	set(reset 	"${esc}[m")
+	set(present	"${esc}[1;32m")
+	set(notify	"${esc}[1;31m")
+endif()
+
 # Set the right flags
 set(CMAKE_CXX_FLAGS "-pthread -std=c++17")
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
@@ -19,15 +28,39 @@ set(CMAKE_CUDA_COMPILER "/usr/local/cuda/bin/nvcc")
 project(exp)
 
 # Packages
-find_package(PNG REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(glfw3 REQUIRED)
+find_package(PNG QUIET)
+
+if (PNG_FOUND)
+	message("${present}Found PNG library.${reset}")
+else()
+endif()
+
+find_package(OpenGL QUIET)
+
+if (OpenGL_FOUND)
+	message("${present}Found OpenGL.${reset}")
+else()
+	message("${notify}Missing OpenGL: GUI functions such as Image::show() will not be available.${reset}")
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZHP_NO_GUI=0")
+endif()
+
+find_package(glfw3 QUIET)
+
+set(GLFW_LIBRARY "")
+if (glfw_FOUND)
+	set(GLFW_LIBRARY "glfw")
+
+	message("${present}Found GLFW3.${reset}")
+else()
+	message("${notify}Missing glfw3: GUI functions such as Image::show() will not be available.${reset}")
+endif()
 
 include_directories(${PNG_INCLUDE_DIR})
 
-set(EXT_SOURCE
-	glad/glad.c
-)
+# set(EXT_SOURCE
+# glad/glad.c
+# )
 
 set(ZHETAPI_SOURCE 
 	source/algorithm.cpp
@@ -60,7 +93,7 @@ add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 target_link_libraries(zhp-shared ${PNG_LIBRARY})
 target_link_libraries(zhp-shared ${CMAKE_DL_LIBS})
 target_link_libraries(zhp-shared ${OPENGL_LIBRARIES})
-target_link_libraries(zhp-shared glfw)
+target_link_libraries(zhp-shared ${GLFW_LIBRARY})
 
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
@@ -109,8 +142,8 @@ if (CUDA_FOUND)
 	else()
 		target_compile_options(cuda PRIVATE
 			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -O3>)
-	endif ()
-endif ()
+	endif()
+endif()
 
 # Compile czhp file
 project(czhp)

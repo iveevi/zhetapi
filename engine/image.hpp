@@ -5,9 +5,13 @@
 #include <cstring>
 #include <bitset>
 
+#ifndef ZHP_NO_GUI
+
 // GLFW
 #include <glad.h>	// Replace this header
 #include <GLFW/glfw3.h>
+
+#endif
 
 // PNG library
 #include <png.h>
@@ -33,7 +37,12 @@ public:
 
 	unsigned char **row_bytes() const;
 
+#ifndef ZHP_NO_GUI
+
 	int show() const;
+
+#endif
+
 };
 
 // Thrown when the file cannot be accessed (replace with std)
@@ -46,9 +55,13 @@ class bad_png {};
 Image load_png(const char *);
 void save_png(Image, const char *);
 
+#ifndef ZHP_NO_GUI
+
 // GLFW helpers
 void image_viewer_input_processor(GLFWwindow *);
 void image_viewer_resize_processor(GLFWwindow *, int, int);
+
+#endif
 
 }
 
