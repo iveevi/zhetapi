@@ -117,6 +117,7 @@ public:
 	Vector <T> compute(const Vector <T> &);
 	
 	void fit(const Vector <T> &, const Vector <T> &);
+	void fit(const DataSet <T> &, const DataSet <T> &);
 	
 	static const Comparator <T>		__default_comparator;
 };
@@ -246,6 +247,8 @@ void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].apply_gradient(J[i]);
+
+	delete[] J;
 }
 
 template <class T>
@@ -259,19 +262,23 @@ void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 
 	Matrix <T> *J = __opt->gradient(__layers, __size, ins[0], outs[0], __cost);
 
-	Matrix <T> *T;
+	Matrix <T> *tJ;
 	size_t n;
 	
 	n = ins.size();
 	for (size_t i = 1; i < n; i++) {
-		T = __opt->gradient(__layers, __Size, ins[i], outs[i],, __cost);
+		tJ = __opt->gradient(__layers, __size, ins[i], outs[i], __cost);
 
 		for (size_t i = 0; i < __size; i++)
-			J[i] += T[i];
+			J[i] += tJ[i];
+
+		delete[] tJ;
 	}
 
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].apply_gradient(J[i] / T(n));
+
+	delete[] J;
 }
 
 template <class T>

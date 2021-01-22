@@ -353,8 +353,8 @@ public:
 			__M[i] = __beta1 * __M[i] + (1 - __beta1) * J[i];
 			__S[i] = __beta2 * __S[i] + (1 - __beta2) * shur(J[i], J[i]);
 
-			__Mh[i] = __M[i] / (1 + pow(__beta1, __iter));
-			__Sh[i] = __S[i] / (1 + pow(__beta2, __iter));
+			__Mh[i] = __M[i] / T(1 + pow(__beta1, __iter));
+			__Sh[i] = __S[i] / T(1 + pow(__beta2, __iter));
 
 			J[i] = inv_shur(__eta * __Mh[i], __Sh[i] + e);
 		}
