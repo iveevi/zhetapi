@@ -20,6 +20,8 @@ project(exp)
 
 # Packages
 find_package(PNG REQUIRED)
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
 
 include_directories(${PNG_INCLUDE_DIR})
 
@@ -56,6 +58,8 @@ add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 
 target_link_libraries(zhp-shared ${PNG_LIBRARY})
 target_link_libraries(zhp-shared ${CMAKE_DL_LIBS})
+target_link_libraries(zhp-shared ${OPENGL_LIBRARIES})
+target_link_libraries(zhp-shared glfw)
 
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)
@@ -79,9 +83,6 @@ target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
 
 # Compile exp file
 add_executable(gui source/exp/gui.cpp ${EXT_SOURCE})
-
-find_package(OpenGL)
-find_package(glfw3)
 
 target_link_libraries(gui ${PNG_LIBRARY} ${OPENGL_LIBRARIES} glfw zhp-shared)
 

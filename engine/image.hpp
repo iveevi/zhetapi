@@ -5,11 +5,16 @@
 #include <cstring>
 #include <bitset>
 
+// GLFW
+#include <glad.h>	// Replace this header
+#include <GLFW/glfw3.h>
+
 // PNG library
 #include <png.h>
 
 // Engine headers
 #include <tensor.hpp>
+#include <core/shader.hpp>
 
 namespace zhetapi {
 
@@ -27,6 +32,8 @@ public:
 	const unsigned char *const raw() const;
 
 	unsigned char **row_bytes() const;
+
+	int show() const;
 };
 
 // Thrown when the file cannot be accessed (replace with std)
@@ -38,6 +45,10 @@ class bad_png {};
 // Image loading and saving
 Image load_png(const char *);
 void save_png(Image, const char *);
+
+// GLFW helpers
+void image_viewer_input_processor(GLFWwindow *);
+void image_viewer_resize_processor(GLFWwindow *, int, int);
 
 }
 
