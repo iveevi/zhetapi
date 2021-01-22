@@ -37,6 +37,7 @@ public:
 	Polynomial differentiate() const;
 	T differentiate(const T &) const;
 
+	std::vector <T> roots() const;
 	std::vector <T> roots(size_t, const T &, const T & = exp(1.0)) const;
 
 	std::pair <Polynomial, T> synthetic_divide(const T &) const;
@@ -124,6 +125,14 @@ T Polynomial <T> ::integrate(const T &a, const T &b) const
 	Polynomial prim = integrate();
 
 	return prim(b) - prim(a);
+}
+
+template <class T>
+std::vector <T> Polynomial <T> ::roots() const
+{
+	switch (degree()) {
+	
+	};
 }
 
 /**
