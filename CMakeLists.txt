@@ -74,10 +74,15 @@ target_link_libraries(zhetapi PUBLIC zhp-shared)
 # Compile exp file
 add_executable(exp source/exp/exp.cpp ${EXT_SOURCE})
 
+target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
+
+# Compile exp file
+add_executable(gui source/exp/gui.cpp ${EXT_SOURCE})
+
 find_package(OpenGL)
 find_package(glfw3)
 
-target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
+target_link_libraries(gui ${PNG_LIBRARY} ${OPENGL_LIBRARIES} glfw zhp-shared)
 
 include_directories(${OPENGL_INCLUDE_DIRS} ${GLUT_INCLUDE_DIRS})
 
