@@ -3,7 +3,8 @@
 
 #include <iostream>
 
-#include "shader.hpp"
+// #include "shader.hpp"
+#include <core/shader.hpp>
 
 #include <image.hpp>
 
@@ -45,9 +46,9 @@ int main()
 		return -1;
 	}
 
-	// build and compile our shader zprogram
+	// build and compile our shader program
 	// ------------------------------------
-	Shader ourShader("source/exp/texture.vs", "source/exp/texture.fs"); 
+	unsigned int shader = graphics::create_image_shader();
 
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
@@ -130,7 +131,10 @@ int main()
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		// render container
-		ourShader.use();
+		// ourShader.use();
+
+		glUseProgram(shader);
+
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 

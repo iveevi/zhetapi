@@ -48,6 +48,7 @@ set(ZHETAPI_SOURCE
 	source/variable.cpp
 	source/variable_cluster.cpp
 	source/std_functions.cpp
+	source/shader.cpp
 )
 
 # Compile shared and static library

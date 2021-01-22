@@ -1263,6 +1263,36 @@ source/registration.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/registration.cpp.s
 .PHONY : source/registration.cpp.s
 
+source/shader.o: source/shader.cpp.o
+
+.PHONY : source/shader.o
+
+# target to build an object file
+source/shader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/shader.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/shader.cpp.o
+.PHONY : source/shader.cpp.o
+
+source/shader.i: source/shader.cpp.i
+
+.PHONY : source/shader.i
+
+# target to preprocess a source file
+source/shader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/shader.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/shader.cpp.i
+.PHONY : source/shader.cpp.i
+
+source/shader.s: source/shader.cpp.s
+
+.PHONY : source/shader.s
+
+# target to generate assembly for a file
+source/shader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/shader.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/shader.cpp.s
+.PHONY : source/shader.cpp.s
+
 source/std_functions.o: source/std_functions.cpp.o
 
 .PHONY : source/std_functions.o
@@ -1535,6 +1565,9 @@ help:
 	@echo "... source/registration.o"
 	@echo "... source/registration.i"
 	@echo "... source/registration.s"
+	@echo "... source/shader.o"
+	@echo "... source/shader.i"
+	@echo "... source/shader.s"
 	@echo "... source/std_functions.o"
 	@echo "... source/std_functions.i"
 	@echo "... source/std_functions.s"
