@@ -51,6 +51,7 @@ set(ZHETAPI_SOURCE
 	source/variable_cluster.cpp
 	source/std_functions.cpp
 	source/shader.cpp
+	glad/glad.c
 )
 
 # Compile shared and static library

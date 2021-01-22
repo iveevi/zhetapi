@@ -67,10 +67,10 @@ RM = /snap/cmake/769/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ram/zhetapi
+CMAKE_SOURCE_DIR = /home/ram/godot/racing/zhetapi
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ram/zhetapi
+CMAKE_BINARY_DIR = /home/ram/godot/racing/zhetapi
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -89,7 +89,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/snap/cmake/715/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/743/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles /home/ram/zhetapi//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/godot/racing/zhetapi/CMakeFiles /home/ram/godot/racing/zhetapi//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/godot/racing/zhetapi/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -331,6 +331,8 @@ glad/glad.o: glad/glad.c.o
 # target to build an object file
 glad/glad.c.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gui.dir/build.make CMakeFiles/gui.dir/glad/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/glad/glad.c.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/glad/glad.c.o
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.o
 .PHONY : glad/glad.c.o
 
@@ -341,6 +343,8 @@ glad/glad.i: glad/glad.c.i
 # target to preprocess a source file
 glad/glad.c.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gui.dir/build.make CMakeFiles/gui.dir/glad/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/glad/glad.c.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/glad/glad.c.i
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.i
 .PHONY : glad/glad.c.i
 
@@ -351,6 +355,8 @@ glad/glad.s: glad/glad.c.s
 # target to generate assembly for a file
 glad/glad.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/gui.dir/build.make CMakeFiles/gui.dir/glad/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/glad/glad.c.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/glad/glad.c.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/exp.dir/build.make CMakeFiles/exp.dir/glad/glad.c.s
 .PHONY : glad/glad.c.s
 
