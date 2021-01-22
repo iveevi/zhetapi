@@ -3,6 +3,7 @@
 
 // Engine headers
 #include <gradient.hpp>
+#include <dataset.hpp>
 
 namespace zhetapi {
 
