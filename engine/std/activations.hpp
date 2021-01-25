@@ -355,6 +355,11 @@ class Softmax : public Activation <T> {
 public:
 	Softmax() : Activation <T> ({}) {}
 
+	__cuda_dual_prefix
+	Activation <T> *copy() const {
+		return new Softmax();
+	}
+
 	Vector <T> compute(const Vector <T> &x) const {
 		// Subtract by max for numerical stability
 		T _max = x[0];

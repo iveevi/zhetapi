@@ -175,6 +175,8 @@ void Layer <T> ::initialize()
 	__mat.randomize(__initializer);
 }
 
+using namespace std;
+
 // Computation
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)

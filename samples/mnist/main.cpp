@@ -5,12 +5,14 @@
 
 // Engine standard headers
 #include <std/activations.hpp>
+#include <std/optimizers.hpp>
 #include <std/erfs.hpp>
 
 #define ZHP_ENGINE_PATH "../../engine"
 
 // Engine headers
 #include <network.hpp>
+#include <training.hpp>
 
 #define TRAIN_IMAGES	60000
 #define VALID_IMAGES	10000
@@ -27,8 +29,8 @@ ifstream valid_images("train-images-idx3-ubyte", ios::binary);
 ifstream valid_labels("train-labels-idx1-ubyte", ios::binary);
 
 ml::NeuralNetwork <double> model(784, {
-	ml::Layer <double> (30, new ml::Sigmoid()),
-	ml::Layer <double> (10, new ml::Softmax())
+	ml::Layer <double> (30, new ml::Sigmoid <double> ()),
+	ml::Layer <double> (10, new ml::Softmax <double> ())
 });;
 
 DataSet <double> train_imgs;
@@ -36,6 +38,18 @@ DataSet <double> train_exps;
 
 DataSet <double> valid_imgs;
 DataSet <double> valid_exps;
+
+// Pass critique
+bool match(const Vector <double> &actual, const Vector <double> &expected)
+{
+	int mi = 0;
+	for (int i = 1; i < 10; i++) {
+		if (actual[mi] < actual[i])
+			mi = i;
+	}
+
+	return (expected[mi] == 1);
+};
 
 // Reading images
 vector <double> read_image(ifstream &fin)
@@ -61,13 +75,13 @@ int main()
 	ml::ZhetapiRegisterStandardActivations <double> ();
 
 	// Load the model structure
-	model.load_json("model.json");
+	// model.load_json("model.json");
 
 	// Seed generator
 	srand(clock());
 
 	// Initialize the model
-	model.randomize();
+	// model.randomize();
 
 	// Temporary variable
 	unsigned int tmp;
@@ -90,19 +104,8 @@ int main()
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 
-	// Pass critique
-	auto crit = [](const Vector <double> &actual, const Vector <double> &expected) {
-		int mi = 0;
-		for (int i = 1; i < 10; i++) {
-			if (actual[mi] < actual[i])
-				mi = i;
-		}
-
-		return (expected[mi] == 1);
-	};
-
 	// Extract training data
-	for(size_t i = 0; i < TRAIN_IMAGES; i++) {
+	for(size_t i = 0; i < 10; i++) {
 		Vector <double> in = read_image(train_images);
 
 		unsigned char actual;
@@ -137,20 +140,13 @@ int main()
 		valid_exps.push_back(exp);
 	}
 
-	ml::Erf <double> *opt = new ml::MeanSquaredError <double> ();
+	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
+	ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
-	model.set_cost(opt);
-	model.set_comparator(crit);
+	model.set_cost(cost);
+	model.set_optimizer(opt);
 
-	model.train_epochs_and_validate <10> (
-			train_imgs,
-			train_exps,
-			valid_imgs,
-			valid_exps,
-			100,
-			128,
-			1,
-			Display::graph);
+	train_dataset_perf(model, train_imgs, train_exps, 2, cost, match, Display::batch);
 
 	// Free resources
 	delete opt;

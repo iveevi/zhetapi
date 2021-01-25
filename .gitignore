@@ -5,7 +5,7 @@
 *.out
 *.output
 *.so
-*.swp
+*.sw
 *.zhplib
 *ubyte
 *~

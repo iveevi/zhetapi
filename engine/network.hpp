@@ -55,15 +55,6 @@ namespace zhetapi {
 
 namespace ml {
 
-template <class T>
-using Comparator = bool (*)(const Vector <T> &, const Vector <T> &);
-
-template <class T>
-bool default_comparator(const Vector <T> &a, const Vector <T> &e)
-{
-	return a == e;
-};
-
 // Neural network class
 template <class T>
 class NeuralNetwork {
@@ -79,8 +70,6 @@ private:
 
 	Erf <T> *		__cost = nullptr; // Safe to copy
 	Optimizer <T> *         __opt = nullptr;
-
-	Comparator <T>		__cmp = __default_comparator;
 
 	void clear();
 public:
@@ -109,15 +98,8 @@ public:
 	Vector <T> compute(const Vector <T> &);
 	
 	void fit(const Vector <T> &, const Vector <T> &);
-	void fit(const DataSet <T> &, const DataSet <T> &);
-	
-	static const Comparator <T>		__default_comparator;
+	void fit(const DataSet <T> &, const DataSet <T> &);	
 };
-
-// Static variables
-template <class T>
-const Comparator <T> NeuralNetwork <T> ::__default_comparator
-	= default_comparator <T>;
 
 // Constructors and other memory related operations
 template <class T>
@@ -127,7 +109,7 @@ template <class T>
 NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
 		__size(other.__size), __isize(other.__isize),
 		__osize(other.__osize), __cost(other.__cost),
-		__opt(other.__opt), __cmp(other.__cmp)
+		__opt(other.__opt)
 {
 	__layers = new Layer <T> [__size];
 
@@ -178,8 +160,6 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 		__size = other.__size;
 		__isize = other.__isize;
 		__osize = other.__osize;
-
-		__cmp = other.__cmp;
 
 		__cost = other.__cost;
 		__opt = other.__opt;
