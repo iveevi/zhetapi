@@ -23,6 +23,6 @@ debug
 gen
 makefile
 portability
-train*
+*ubyte
 zhetapi
 zhetapi-headers
