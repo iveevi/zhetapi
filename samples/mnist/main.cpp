@@ -26,7 +26,10 @@ ifstream train_labels("train-labels-idx1-ubyte", ios::binary);
 ifstream valid_images("train-images-idx3-ubyte", ios::binary);
 ifstream valid_labels("train-labels-idx1-ubyte", ios::binary);
 
-ml::NeuralNetwork <double> model;
+ml::NeuralNetwork <double> model(784, {
+	ml::Layer <double> (30, new ml::Sigmoid()),
+	ml::Layer <double> (10, new ml::Softmax())
+});;
 
 DataSet <double> train_imgs;
 DataSet <double> train_exps;

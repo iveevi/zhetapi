@@ -68,14 +68,6 @@ bool default_comparator(const Vector <T> &a, const Vector <T> &e)
 template <class T>
 class NeuralNetwork {
 public:
-	// Training statistics
-	struct TrainingStatistics {
-		size_t	__passed = 0;
-		T	__cost = T(0);
-		double	__kernel_time = 0;
-		double	__full_time = 0;
-	};
-
 	// Exceptions
 	class bad_io_dimensions {};
 private:
