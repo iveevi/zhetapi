@@ -14,7 +14,7 @@ class Erf;
 
 // Move a separate file with standard initializers
 template <class T>
-struct random_initializer {
+struct RandomInitializer {
 	T operator()() {
 		return T (rand() / ((double) RAND_MAX));
 	}
@@ -30,19 +30,22 @@ class Layer {
 	Activation <T> *	__act = nullptr;
 	Activation <T> *	__dact = nullptr;
 
-	std::function <T ()>	__initializer = random_initializer <T> ();
+	std::function <T ()>	__initializer;
 
 	void clear();
 public:
 	// Memory operations
 	Layer();
-	Layer(size_t, Activation <T> *);
+	Layer(size_t, Activation <T> *,
+			std::function <T ()> = RandomInitializer <T> ());
 
 	Layer(const Layer &);
 
 	Layer &operator=(const Layer &);
 
 	~Layer();
+
+	Matrix <T> &mat() {return __mat;}
 
 	// Getters and setters
 	size_t get_fan_in() const;
@@ -93,10 +96,13 @@ template <class T>
 Layer <T> ::Layer() {}
 
 template <class T>
-Layer <T> ::Layer(size_t fan_out, Activation <T> *act) :
+Layer <T> ::Layer(size_t fan_out, Activation <T> *act,
+		std::function <T ()> init) :
 		__fan_out(fan_out),
-		__act(act)
+		__act(act),
+		__initializer(RandomInitializer<T> ())
 {
+	std::cout << "init() = " << __initializer() << std::endl;
 	__dact = __act->derivative();
 }
 
@@ -123,8 +129,6 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 			__act = other.__act->copy();
 			__dact = __act->derivative();
 		}
-
-		__mat = other.__mat;
 	}
 
 	return *this;

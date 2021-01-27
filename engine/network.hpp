@@ -220,6 +220,9 @@ void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 	if (!__opt)
 		throw null_optimizer();
 
+	Vector <T> *a = new Vector <T> [__size + 1];
+	Vector <T> *z = new Vector <T> [__size];
+
 	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
 
 	for (size_t i = 0; i < __size; i++)

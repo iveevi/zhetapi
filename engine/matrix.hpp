@@ -114,7 +114,7 @@ public:
 	void multiply_row(size_t, T);
 
 	// Miscellanious opertions
-	void randomize(const ::std::function <T ()> &);
+	void randomize(std::function <T ()>);
 	
 	__cuda_dual_prefix
 	void stable_shur(const Matrix <T> &);
@@ -627,7 +627,7 @@ void Matrix <T> ::multiply_row(size_t a, T k)
 }
 
 template <class T>
-void Matrix <T> ::randomize(const ::std::function<T ()> &ftr)
+void Matrix <T> ::randomize(std::function <T ()> ftr)
 {
 	for (size_t i = 0; i < __rows; i++) {
 		for (size_t j = 0; j < __cols; j++)
