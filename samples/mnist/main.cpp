@@ -28,11 +28,6 @@ ifstream train_labels("train-labels-idx1-ubyte", ios::binary);
 ifstream valid_images("train-images-idx3-ubyte", ios::binary);
 ifstream valid_labels("train-labels-idx1-ubyte", ios::binary);
 
-ml::NeuralNetwork <double> model(784, {
-	ml::Layer <double> (30, new ml::Sigmoid <double> ()),
-	ml::Layer <double> (10, new ml::Softmax <double> ())
-});;
-
 DataSet <double> train_imgs;
 DataSet <double> train_exps;
 
@@ -80,6 +75,12 @@ int main()
 	// Seed generator
 	srand(clock());
 
+	// Create the model
+	ml::NeuralNetwork <double> model(784, {
+		ml::Layer <double> (30, new ml::Sigmoid <double> ()),
+		ml::Layer <double> (10, new ml::Softmax <double> ())
+	});
+
 	// Initialize the model
 	// model.randomize();
 
@@ -105,7 +106,7 @@ int main()
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 
 	// Extract training data
-	for(size_t i = 0; i < 10; i++) {
+	for(size_t i = 0; i < 1000; i++) {
 		Vector <double> in = read_image(train_images);
 
 		unsigned char actual;
@@ -141,12 +142,13 @@ int main()
 	}
 
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
-	ml::Optimizer <double> *opt = new ml::Adam <double> ();
+	ml::Optimizer <double> *opt = new ml::SGD <double> ();
 
 	model.set_cost(cost);
 	model.set_optimizer(opt);
 
-	train_dataset_perf(model, train_imgs, train_exps, 2, cost, match, Display::batch);
+	for (int i = 0; i < 1000; i++)
+		train_dataset_perf(model, train_imgs, train_exps, 128, cost, match, Display::batch);
 
 	// Free resources
 	delete opt;

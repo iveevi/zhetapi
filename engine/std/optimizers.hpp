@@ -39,6 +39,10 @@ public:
 	}
 };
 
+/*
+ * TODO: Cache J in the optimizer itself so that we do not need to repeatedly
+ * allocate and free the gradient.
+ */
 template <class T>
 class Momentum : public Optimizer <T> {
 	T		__alpha = 0;
@@ -71,20 +75,22 @@ public:
 			__size = size;
 			__M = new Matrix <T> [__size];
 		}
-		
+	
+		Matrix <T> *Jo = new Matrix <T> [size];
 		for (size_t i = 0; i < __size; i++) {
 			std::pair <size_t, size_t> odim = J[i].get_dimensions();
 
 			if (__M[i].get_dimensions() != odim)
 				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
 			
-			__M[i] = __beta * __M[i] + __alpha * J[i];
+			Jo[i] = __M[i] = __beta * __M[i] + __alpha * J[i];
 		}
 		
 		delete[] a;
 		delete[] z;
+		delete[] J;
 
-		return __M;
+		return Jo;
 	}
 
 	void reset() {
@@ -140,15 +146,17 @@ public:
 		}
 
     		Matrix <T> *J = simple_gradient(adj, size, a, z, in, out, cost);
-		
+
+		Matrix <T> *Jo = new Matrix <T> [size];
 		for (size_t i = 0; i < __size; i++)
-			__M[i] = __beta * __M[i] + __alpha * J[i];
+			Jo[i] = __M[i] = __beta * __M[i] + __alpha * J[i];
 		
 		delete[] a;
 		delete[] z;
+		delete[] J;
 		delete[] adj;
 
-		return __M;
+		return Jo;
 	}
 
 	void reset() {

@@ -45,16 +45,15 @@ void train_mini_batch(
 {
 	assert(ins.size() == outs.size());
 
-	Vector <double> to;
 	size_t n;
 
 	n = ins.size();
 	for (size_t i = 0; i < n; i++)
-		to = net(ins[i]);
+		net.fit(ins[i], outs[i]);
 }
 
 template <class T>
-PerformanceStatistics <T> train_dataset(
+void train_dataset(
 		NeuralNetwork <T> &net,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
@@ -65,21 +64,14 @@ PerformanceStatistics <T> train_dataset(
 	std::vector <DataSet <T>> input_batches = ins.split(batch_size);
 	std::vector <DataSet <T>> output_batches = outs.split(batch_size);
 
-	PerformanceStatistics <T> ns;
-	PerformanceStatistics <T> bs;
 	size_t n;
 
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
-		bs = train_mini_batch(net,
+		train_mini_batch(net,
 				input_batches[i],
 				output_batches[i]);
-
-		ns.__cost += bs.__cost;
-		ns.__passed += bs.__cost;
 	}
-
-	return ns;
 }
 
 // Statistical counterparts of the above (with performance metrics)
@@ -96,13 +88,29 @@ PerformanceStatistics <T> train_mini_batch_perf(
 
 	PerformanceStatistics <T> ns;
 	Vector <double> to;
+	T perr;
 	size_t n;
 
+	perr = 0;
 	n = ins.size();
+
+	// Performance statistics first
 	for (size_t i = 0; i < n; i++) {
 		to = net(ins[i]);
 		ns.__cost += (*cost)(to, outs[i])[0];
 		ns.__passed += (cmp(to, outs[i]));
+
+		perr += fabs((to - outs[i]).norm() / outs[i].norm());
+	}
+
+	net.fit(ins, outs);
+
+	perr /= n;
+	if (display & Display::batch) {
+		std::cout << "Batch done:"
+			<< " %-err = " << perr << "%"
+			<< " %-passed = " << (100.0 * ns.__passed)/n << "%"
+			<< std::endl;
 	}
 
 	return ns;

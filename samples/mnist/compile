@@ -29,7 +29,7 @@ fi
 
 # Compile and run/debug
 if [ "$1" == "debug" ]; then
-	g++-8 -I ../../engine main.cpp -pthread -g -o mnist
+	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -g -o mnist
 else
 	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -O3 -o mnist
 fi
@@ -39,7 +39,7 @@ mkdir -p bin
 mv mnist bin/
 
 if [ "$1" == "debug" ]; then
-	valgrind --leak-check=full --track-origins=yes ./bin/mnist 2>vgrind.out
+	gdb ./bin/mnist
 else
 	./bin/mnist
 fi

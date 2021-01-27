@@ -1,15 +1,31 @@
-#include <image.hpp>
+#include <network.hpp>
+
+#include <std/activations.hpp>
+#include <std/optimizers.hpp>
+#include <std/erfs.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
 int main()
 {
-	image::Image img1 = image::load_png("zhetapi-logo.png");
+	srand(clock());
 
-	img1.show();
+	Vector <double> i = {1, 1, 1};
+	Vector <double> o = {1, 1, 1};
 
-	image::Image img2 = image::load_png("samples/imgs/sample_png.png");
+	ml::NeuralNetwork <double> model (3, {
+		ml::Layer <double> (3, new ml::ReLU <double> ())
+	});
 
-	img2.show();
+	model.set_optimizer(new ml::SGD <double> ());
+	model.set_cost(new ml::MeanSquaredError <double> ());
+
+	cout << model(i) << endl;
+
+	for (int k = 0; k < 10; k++) {
+		model.fit(i, o);
+
+		cout << model(i) << endl;
+	}
 }

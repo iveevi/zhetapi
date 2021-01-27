@@ -61,6 +61,7 @@ class NeuralNetwork {
 public:
 	// Exceptions
 	class bad_io_dimensions {};
+	class null_optimizer {};
 private:
 	Layer <T> *		__layers = nullptr;
 	size_t			__size = 0;
@@ -68,6 +69,7 @@ private:
 	size_t			__isize = 0;
 	size_t			__osize = 0;
 
+	// Remove erf and optimizer later
 	Erf <T> *		__cost = nullptr; // Safe to copy
 	Optimizer <T> *         __opt = nullptr;
 
@@ -215,6 +217,9 @@ void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 	if ((in.size() != __isize) || (out.size() != __osize))
 		throw bad_io_dimensions();
 
+	if (!__opt)
+		throw null_optimizer();
+
 	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
 
 	for (size_t i = 0; i < __size; i++)
@@ -231,6 +236,9 @@ void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 
 	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
 		throw bad_io_dimensions();
+
+	if (!__opt)
+		throw null_optimizer();
 
 	Matrix <T> *J = __opt->gradient(__layers, __size, ins[0], outs[0], __cost);
 
