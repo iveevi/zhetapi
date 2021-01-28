@@ -100,9 +100,8 @@ Layer <T> ::Layer(size_t fan_out, Activation <T> *act,
 		std::function <T ()> init) :
 		__fan_out(fan_out),
 		__act(act),
-		__initializer(RandomInitializer<T> ())
+		__initializer(RandomInitializer <T> ())
 {
-	std::cout << "init() = " << __initializer() << std::endl;
 	__dact = __act->derivative();
 }
 
@@ -111,7 +110,8 @@ Layer <T> ::Layer(const Layer <T> &other) :
 		__fan_in(other.__fan_in),
 		__fan_out(other.__fan_out),
 		__act(other.__act->copy()),
-		__mat(other.__mat)
+		__mat(other.__mat),
+		__initializer(other.__initializer)
 {
 	__dact = __act->derivative();
 }
@@ -124,6 +124,8 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 
 		__fan_in = other.__fan_in;
 		__fan_out = other.__fan_out;
+
+		__initializer = other.__initializer;
 
 		if (other.__act) {
 			__act = other.__act->copy();
@@ -176,6 +178,8 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 template <class T>
 void Layer <T> ::initialize()
 {
+	std::cout << "init-init() = " << __initializer() << std::endl;
+
 	__mat.randomize(__initializer);
 }
 
