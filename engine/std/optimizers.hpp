@@ -31,6 +31,9 @@ public:
 		Vector <T> *z = new Vector <T> [size];
 
     		Matrix <T> *J = simple_gradient(layers, size, a, z, in, out, cost);
+
+		for (size_t i = 0; i < size; i++)
+			J[i] *= __alpha;
 		
 		delete[] a;
 		delete[] z;

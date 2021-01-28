@@ -125,6 +125,8 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 		__fan_in = other.__fan_in;
 		__fan_out = other.__fan_out;
 
+		__mat = other.__mat;
+
 		__initializer = other.__initializer;
 
 		if (other.__act) {
@@ -178,8 +180,6 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 template <class T>
 void Layer <T> ::initialize()
 {
-	std::cout << "init-init() = " << __initializer() << std::endl;
-
 	__mat.randomize(__initializer);
 }
 

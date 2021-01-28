@@ -13,21 +13,39 @@ int main()
 	srand(clock());
 
 	Vector <double> i = {1, 1, 1};
-	Vector <double> o = {1, 1, 1};
+	Vector <double> o = {0.5, 0.5, 0.5};
 
 	ml::NeuralNetwork <double> model (3, {
+		ml::Layer <double> (3, new ml::Sigmoid <double> ()),
+		ml::Layer <double> (3, new ml::ReLU <double> ()),
 		ml::Layer <double> (3, new ml::Sigmoid <double> ()),
 		ml::Layer <double> (3, new ml::ReLU <double> ())
 	});
 
-	model.set_optimizer(new ml::SGD <double> ());
+	ml::NeuralNetwork <double> base;
+
+	vector <ml::Optimizer <double> *> opts = {
+		new ml::SGD <double> (),
+		new ml::Momentum <double> (),
+		new ml::Nesterov <double> (),
+		new ml::AdaGrad <double> (),
+		new ml::RMSProp <double> (),
+		new ml::Adam <double> ()
+	};
+
 	model.set_cost(new ml::MeanSquaredError <double> ());
 
-	cout << model(i) << endl;
+	for (auto opt : opts) {
+		cout << "Optimizer: " << typeid(*opt).name() << endl;
 
-	for (int k = 0; k < 100; k++) {
-		model.fit(i, o);
+		base = model;
+		base.set_optimizer(opt);
 
-		cout << model(i) << endl;
+		cout << "\t" << base(i) << endl;
+
+		for (int k = 0; k < 200; k++)
+			base.fit(i, o);
+		
+		cout << "\t" << base(i) << endl;
 	}
 }

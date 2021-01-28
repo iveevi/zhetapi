@@ -110,6 +110,7 @@ PerformanceStatistics <T> train_mini_batch_perf(
 		std::cout << "Batch done:"
 			<< " %-err = " << perr << "%"
 			<< " %-passed = " << (100.0 * ns.__passed)/n << "%"
+			<< " #passed = " << ns.__passed
 			<< std::endl;
 	}
 

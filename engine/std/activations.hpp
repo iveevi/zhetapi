@@ -188,12 +188,12 @@ template <class T>
 class __DLeakyReLU : public Activation <T> {
 	T	__alpha;
 public:
-	__DLeakyReLU(const T &alpha) : __alpha(alpha) {}
+	__DLeakyReLU(const T &alpha = 1) : __alpha(alpha) {}
 
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
-				return __d_leaky_relu(x[i], __alpha);
+				return (x[i] < 0) ? __alpha : 1;
 			}
 		);
 	}
@@ -204,12 +204,20 @@ class LeakyReLU : public Activation <T> {
 	T	__alpha;
 public:
 	__cuda_dual_prefix
-	LeakyReLU(const T &alpha) :
+	LeakyReLU(const T &alpha = 1) :
 			Activation <T> (Activation <T> ::AT_ReLU, {alpha}) {}
+	
+	__cuda_dual_prefix
+	Activation <T> *copy() const {
+		return new LeakyReLU <T> (__alpha);
+	}
 
 	Vector <T> compute(const Vector <T> &x) const {
-		return Vector <T> (x.size(), [&](size_t i) {return
-				__leaky_relu(x[i], __alpha);});
+		return Vector <T> (x.size(),
+			[&](size_t i) {
+				return (x[i] > 0) ? x[i] : __alpha * x[i];
+			}
+		);
 	}
 
 	Activation <T> *derivative() const {

@@ -26,8 +26,6 @@
 #include <gradient.hpp>
 #include <optimizer.hpp>
 
-// #include <optimizer.hpp>
-
 #ifdef ZHP_CUDA
 
 #include <cuda/activation.cuh>
