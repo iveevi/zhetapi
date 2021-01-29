@@ -73,7 +73,7 @@ int main()
 	// model.load_json("model.json");
 
 	// Seed generator
-	srand(clock());
+	// srand(clock());
 
 	// Create the model
 	ml::NeuralNetwork <double> model(784, {
@@ -106,7 +106,7 @@ int main()
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 
 	// Extract training data
-	for(size_t i = 0; i < 100; i++) {
+	for(size_t i = 0; i < 10; i++) {
 		Vector <double> in = read_image(train_images);
 
 		unsigned char actual;
@@ -142,13 +142,13 @@ int main()
 	}
 
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
-	ml::Optimizer <double> *opt = new ml::Adam <double> ();
+	ml::Optimizer <double> *opt = new ml::Nesterov <double> (1, 0.7);
 
 	model.set_cost(cost);
 	model.set_optimizer(opt);
 
 	for (int i = 0; i < 10; i++)
-		train_dataset_perf(model, train_imgs, train_exps, 10, cost, match, Display::batch);
+		train_dataset_perf(model, train_imgs, train_exps, 128, cost, match, Display::batch);
 
 	// Free resources
 	delete opt;
