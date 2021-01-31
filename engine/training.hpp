@@ -108,7 +108,7 @@ PerformanceStatistics <T> train_mini_batch_perf(
 	perr /= n;
 	if (display & Display::batch) {
 		std::cout << "Batch done:"
-			<< " %-err = " << perr << "%"
+			<< " %-err = " << 100 * perr << "%"
 			<< " %-passed = " << (100.0 * ns.__passed)/n << "%"
 			<< " #passed = " << ns.__passed
 			<< std::endl;
@@ -135,7 +135,7 @@ PerformanceStatistics <T> train_dataset_perf(
 	PerformanceStatistics <T> ns;
 	PerformanceStatistics <T> bs;
 	size_t n;
-
+	
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
 		bs = train_mini_batch_perf(net,

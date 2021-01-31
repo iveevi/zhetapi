@@ -16,7 +16,7 @@ class Erf;
 template <class T>
 struct RandomInitializer {
 	T operator()() {
-		return T (rand() / ((double) RAND_MAX));
+		return T (0.5 - rand()/((double) RAND_MAX));
 	}
 };
 
@@ -65,6 +65,7 @@ public:
 
 	// Diagnosing methods
 	void diagnose() const;
+	void print() const;
 
 	// Friend functions
 	template <class U>
@@ -89,6 +90,9 @@ public:
 
 	template <class U>
 	friend Layer <U> operator-(const Layer <U> &, const Matrix <U> &);
+	
+	template <class U>
+	friend Layer <U> operator+(const Layer <U> &, const Matrix <U> &);
 };
 
 // Memory operations
@@ -183,8 +187,6 @@ void Layer <T> ::initialize()
 	__mat.randomize(__initializer);
 }
 
-using namespace std;
-
 // Computation
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
@@ -202,6 +204,7 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 template <class T>
 inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 {
+	// std::cout << "Delta J: " << J << std::endl;
 	__mat -= J;
 }
 
@@ -220,7 +223,23 @@ void Layer <T> ::diagnose() const
 	}
 }
 
+template <class T>
+void Layer <T> ::print() const
+{
+	std::cout << "W = " << __mat << std::endl;
+}
+
 // Friends
+template <class T>
+Layer <T> operator+(const Layer <T> &L, const Matrix <T> &M)
+{
+	Layer <T> out = L;
+
+	out.__mat += M;
+
+	return out;
+}
+
 template <class T>
 Layer <T> operator-(const Layer <T> &L, const Matrix <T> &M)
 {

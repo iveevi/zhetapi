@@ -91,6 +91,7 @@ public:
 	void set_optimizer(Optimizer <T> *);
 
 	void diagnose() const;
+	void print() const;
 
 	// Computation
 	Vector <T> operator()(const Vector <T> &);
@@ -241,23 +242,10 @@ void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 	if (!__opt)
 		throw null_optimizer();
 
-	Matrix <T> *J = __opt->gradient(__layers, __size, ins[0], outs[0], __cost);
-
-	Matrix <T> *tJ;
-	size_t n;
-	
-	n = ins.size();
-	for (size_t i = 1; i < n; i++) {
-		tJ = __opt->gradient(__layers, __size, ins[i], outs[i], __cost);
-
-		for (size_t i = 0; i < __size; i++)
-			J[i] += tJ[i];
-
-		delete[] tJ;
-	}
+	Matrix <T> *J = __opt->gradient(__layers, __size, ins, outs, __cost);
 
 	for (size_t i = 0; i < __size; i++)
-		__layers[i].apply_gradient(J[i] / T(n));
+		__layers[i].apply_gradient(J[i]);
 
 	delete[] J;
 }
@@ -267,6 +255,13 @@ void NeuralNetwork <T> ::diagnose() const
 {
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].diagnose();
+}
+
+template <class T>
+void NeuralNetwork <T> ::print() const
+{
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].print();
 }
 
 /*

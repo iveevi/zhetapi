@@ -42,11 +42,20 @@ Vector <T> simple_compute_cached(
 	while (i < size) {
 		a[i] = tmp.append_above(T (1));
 
-		layers[i].forward_propogate(tmp, prv);
+		// layers[i].forward_propogate(tmp, prv);
+		
+		prv = layers[i].__mat * tmp.append_above(T (1));
 
-		z[i] = layers[i].__dact->compute(prv);
+		// Vector <T> cpy = prv;
 
-		i++;
+		tmp = layers[i].__act->compute(prv);
+
+		// cout << "prv = " << prv << endl;
+		// layers[i].__act->compute(prv);
+		// cpy = prv;
+
+		z[i++] = layers[i].__dact->compute(prv);
+		// cout << "2prv = " << prv << endl;
 	}
 
 	a[i] = tmp;

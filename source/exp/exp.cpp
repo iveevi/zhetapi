@@ -43,9 +43,10 @@ int main()
 
 		cout << "\t" << base(i) << endl;
 
-		for (int k = 0; k < 200; k++)
+		for (int k = 0; k < 10; k++) {
+			cout << "\t" << base(i) << endl;
+
 			base.fit(i, o);
-		
-		cout << "\t" << base(i) << endl;
+		}
 	}
 }

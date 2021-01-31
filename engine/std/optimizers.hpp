@@ -86,7 +86,9 @@ public:
 			if (__M[i].get_dimensions() != odim)
 				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
 			
-			Jo[i] = __M[i] = __beta * __M[i] + __alpha * J[i];
+			__M[i] = __beta * __M[i] - __alpha * J[i];
+
+			Jo[i] = T(-1) * __M[i];
 		}
 		
 		delete[] a;
@@ -145,14 +147,82 @@ public:
 			if (__M[i].get_dimensions() != std::make_pair(rs, cs))
 				__M[i] = Matrix <T> (rs, cs, T(0));
 
-			adj[i] = layers[i] - __M[i];
+			adj[i] = layers[i] + __beta * __M[i];
 		}
 
     		Matrix <T> *J = simple_gradient(adj, size, a, z, in, out, cost);
 
 		Matrix <T> *Jo = new Matrix <T> [size];
-		for (size_t i = 0; i < __size; i++)
-			Jo[i] = __M[i] = __beta * __M[i] + __alpha * J[i];
+		for (size_t i = 0; i < __size; i++) {
+			__M[i] = __beta * __M[i] - __alpha * J[i];
+
+			Jo[i] = T(-1) * __M[i];
+		}
+		
+		delete[] a;
+		delete[] z;
+		delete[] J;
+		delete[] adj;
+
+		return Jo;
+	}
+	
+	Matrix <T> *gradient(
+			Layer <T> *layers,
+			size_t size,
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			Erf <T> *cost)
+	{
+		// TODO: Add assertions
+		Vector <T> *a = new Vector <T> [size + 1];
+		Vector <T> *z = new Vector <T> [size];
+
+		Layer <T> *adj = new Layer <T> [size];
+		
+		// Ensure that __M is of the right size
+		if (size != __size) {
+			delete[] __M;
+
+			__size = size;
+			__M = new Matrix <T> [__size];
+		}
+
+		for (size_t i = 0; i < size; i++) {
+			size_t rs = layers[i].get_fan_out();
+			size_t cs = layers[i].get_fan_in() + 1;
+
+			if (__M[i].get_dimensions() != std::make_pair(rs, cs))
+				__M[i] = Matrix <T> (rs, cs, T(0));
+
+			adj[i] = layers[i] + __beta * __M[i];
+		}
+
+		size_t ds = ins.size();
+
+    		Matrix <T> *J;
+		Matrix <T> *Q;
+
+		J = simple_gradient(adj, size, a, z, ins[0], outs[0], cost);
+		for (size_t i = 1; i < ds; i++) {
+			Q = simple_gradient(adj, size, a, z, ins[i], outs[i], cost);
+
+			for (size_t k = 0; k < size; k++)
+				J[k] += Q[k];
+
+			delete[] Q;
+		}
+		
+		for (size_t i = 0; i < size; i++)
+			J[i] /= T(ds);
+
+		Matrix <T> *Jo = new Matrix <T> [size];
+
+		for (size_t i = 0; i < __size; i++) {
+			__M[i] = __beta * __M[i] - __alpha * J[i];
+
+			Jo[i] = T(-1) * __M[i];
+		}
 		
 		delete[] a;
 		delete[] z;

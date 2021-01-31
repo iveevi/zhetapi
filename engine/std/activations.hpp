@@ -344,7 +344,7 @@ public:
 		for (size_t i = 1; i < x.size(); i++)
 			_max = (_max > x[i]) ? _max : x[i];
 
-		T _sum;
+		T _sum = 0;
 		for (size_t i = 0; i < x.size(); i++)
 			_sum += exp(x[i] - _max);
 
@@ -374,7 +374,7 @@ public:
 		for (size_t i = 1; i < x.size(); i++)
 			_max = (_max > x[i]) ? _max : x[i];
 
-		T _sum;
+		T _sum = 0;
 		for (size_t i = 0; i < x.size(); i++)
 			_sum += exp(x[i] - _max);
 

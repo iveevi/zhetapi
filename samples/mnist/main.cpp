@@ -73,7 +73,7 @@ int main()
 	// model.load_json("model.json");
 
 	// Seed generator
-	// srand(clock());
+	srand(clock());
 
 	// Create the model
 	ml::NeuralNetwork <double> model(784, {
@@ -81,8 +81,7 @@ int main()
 		ml::Layer <double> (10, new ml::Softmax <double> ())
 	});
 
-	// Initialize the model
-	// model.randomize();
+	// model.print();
 
 	// Temporary variable
 	unsigned int tmp;
@@ -106,7 +105,7 @@ int main()
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 
 	// Extract training data
-	for(size_t i = 0; i < 10; i++) {
+	for (size_t i = 0; i < TRAIN_IMAGES; i++) {
 		Vector <double> in = read_image(train_images);
 
 		unsigned char actual;
@@ -124,7 +123,7 @@ int main()
 	}
 	
 	// Extract validation data
-	for(size_t i = 0; i < VALID_IMAGES; i++) {
+	for (size_t i = 0; i < VALID_IMAGES; i++) {
 		Vector <double> in = read_image(valid_images);
 
 		unsigned char actual;
@@ -147,9 +146,10 @@ int main()
 	model.set_cost(cost);
 	model.set_optimizer(opt);
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 100; i++)
 		train_dataset_perf(model, train_imgs, train_exps, 128, cost, match, Display::batch);
 
 	// Free resources
+	delete cost;
 	delete opt;
 }

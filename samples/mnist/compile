@@ -28,7 +28,7 @@ if [ ! -f t10k-labels-idx1-ubyte ]; then
 fi
 
 # Compile and run/debug
-if [ "$1" == "debug" ]; then
+if [ "$1" == "vgrind" ]; then
 	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -g -o mnist
 else
 	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -O3 -o mnist
@@ -38,8 +38,10 @@ mkdir -p bin
 
 mv mnist bin/
 
-if [ "$1" == "debug" ]; then
+if [ "$1" == "gdb" ]; then
 	gdb ./bin/mnist
+elif [ "$1" == "vgrind" ]; then
+	valgrind --leak-check=full --track-origins=yes ./bin/mnist
 else
 	./bin/mnist
 fi
