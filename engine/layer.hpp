@@ -88,6 +88,8 @@ public:
 		Erf <U> *
 	);
 
+	Layer <T> &operator+=(const Matrix <T> &);
+
 	template <class U>
 	friend Layer <U> operator-(const Layer <U> &, const Matrix <U> &);
 	
@@ -204,8 +206,7 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 template <class T>
 inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 {
-	// std::cout << "Delta J: " << J << std::endl;
-	__mat -= J;
+	__mat += J;
 }
 
 // Diagnosing
@@ -227,6 +228,14 @@ template <class T>
 void Layer <T> ::print() const
 {
 	std::cout << "W = " << __mat << std::endl;
+}
+
+template <class T>
+Layer <T> &Layer <T> ::operator+=(const Matrix <T> &M)
+{
+	__mat += M;
+
+	return *this;
 }
 
 // Friends

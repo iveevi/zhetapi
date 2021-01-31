@@ -2,8 +2,8 @@
 #define OPTIMIZER_H_
 
 // Engine headers
-#include <gradient.hpp>
 #include <dataset.hpp>
+#include <gradient.hpp>
 
 namespace zhetapi {
 
@@ -12,22 +12,153 @@ namespace ml {
 // Optimizer class
 template <class T>
 class Optimizer {
-public:
-	virtual ~Optimizer();
+protected:
+	// Cached
+	Vector <T> *	__a		= nullptr;
+	Vector <T> *	__z		= nullptr;
 
-	virtual Matrix <T> *gradient(
+	size_t		__size		= 0;
+
+	bool		__switch	= false;
+
+	virtual Matrix <T> *raw_gradient(
 			Layer <T> *,
 			size_t,
 			const Vector <T> &,
 			const Vector <T> &,
-			Erf <T> *) = 0;
+			Erf <T> *);
+	
+	virtual Matrix <T> *raw_batch_gradient(
+			Layer <T> *,
+			size_t,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			Erf <T> *);
 
-	// TODO: Make pure virtual
-	virtual Matrix <T> *gradient(Layer <T> *, size_t, const DataSet <T> &, const DataSet <T> &, Erf <T> *) {return nullptr;};
+	virtual Matrix <T> *update(
+			Matrix <T> *,
+			size_t) = 0;
+public:
+	virtual ~Optimizer();
+
+	Matrix <T> *gradient(
+			Layer <T> *,
+			size_t,
+			const Vector <T> &,
+			const Vector <T> &,
+			Erf <T> *);
+
+	Matrix <T> *batch_gradient(
+			Layer <T> *,
+			size_t,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			Erf <T> *);
 };
 
 template <class T>
-Optimizer <T> ::~Optimizer() {}
+Optimizer <T> ::~Optimizer() 
+{
+	delete[] __a;
+	delete[] __z;
+}
+
+template <class T>
+Matrix <T> *Optimizer <T> ::raw_gradient(
+			Layer <T> *layers,
+			size_t size,
+			const Vector <T> &in,
+			const Vector <T> &out,
+			Erf <T> *cost)
+{
+	if (size != __size) {
+		delete[] __a;
+		delete[] __z;
+
+		__size = size;
+
+		__a = new Vector <T> [__size + 1]; 
+		__z = new Vector <T> [__size];
+
+		__switch = true;
+	} else {
+		__switch = false;
+	}
+	
+	return simple_gradient(
+			layers,
+			size,
+			__a,
+			__z,
+			in,
+			out,
+			cost);
+}
+
+template <class T>
+Matrix <T> *Optimizer <T> ::raw_batch_gradient(
+			Layer <T> *layers,
+			size_t size,
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			Erf <T> *cost)
+{
+	if (size != __size) {
+		delete[] __a;
+		delete[] __z;
+
+		__size = size;
+
+		__a = new Vector <T> [__size + 1]; 
+		__z = new Vector <T> [__size]; 
+
+		__switch = true;
+	} else {
+		__switch = false;
+	}
+	
+	return simple_batch_gradient(
+			layers,
+			size,
+			__a,
+			__z,
+			ins,
+			outs,
+			cost);
+}
+
+template <class T>
+Matrix <T> *Optimizer <T> ::gradient(
+			Layer <T> *layers,
+			size_t size,
+			const Vector <T> &in,
+			const Vector <T> &out,
+			Erf <T> *cost)
+{
+
+	return update(raw_gradient(
+			layers,
+			size,
+			in,
+			out,
+			cost), size);
+}
+
+template <class T>
+Matrix <T> *Optimizer <T> ::batch_gradient(
+			Layer <T> *layers,
+			size_t size,
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			Erf <T> *cost)
+{
+	return update(raw_batch_gradient(
+			layers,
+			size,
+			ins,
+			outs,
+			cost), size);
+}
 
 }
 

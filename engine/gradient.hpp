@@ -42,20 +42,9 @@ Vector <T> simple_compute_cached(
 	while (i < size) {
 		a[i] = tmp.append_above(T (1));
 
-		// layers[i].forward_propogate(tmp, prv);
+		layers[i].forward_propogate(tmp, prv);
 		
-		prv = layers[i].__mat * tmp.append_above(T (1));
-
-		// Vector <T> cpy = prv;
-
-		tmp = layers[i].__act->compute(prv);
-
-		// cout << "prv = " << prv << endl;
-		// layers[i].__act->compute(prv);
-		// cpy = prv;
-
 		z[i++] = layers[i].__dact->compute(prv);
-		// cout << "2prv = " << prv << endl;
 	}
 
 	a[i] = tmp;
@@ -96,6 +85,37 @@ Matrix <T> *simple_gradient(
 	delete dcost;
 
 	// Return the gradient
+	return J;
+}
+
+template <class T>
+Matrix <T> *simple_batch_gradient(
+		Layer <T> *layers,
+		size_t size,
+		Vector <T> *a,
+		Vector <T> *z,
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		Erf <T> *cost)
+{
+	size_t ds = ins.size();
+
+	Matrix <T> *J;
+	Matrix <T> *Q;
+
+	J = simple_gradient(layers, size, a, z, ins[0], outs[0], cost);
+	for (size_t i = 1; i < ds; i++) {
+		Q = simple_gradient(layers, size, a, z, ins[i], outs[i], cost);
+
+		for (size_t k = 0; k < size; k++)
+			J[k] += Q[k];
+
+		delete[] Q;
+	}
+
+	for (size_t i = 0; i < size; i++)
+		J[i] /= T(ds);
+
 	return J;
 }
 

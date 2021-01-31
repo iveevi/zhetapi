@@ -30,6 +30,8 @@ fi
 # Compile and run/debug
 if [ "$1" == "vgrind" ]; then
 	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -g -o mnist
+elif [ "$1" == "gdb" ]; then
+	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -g -o mnist
 else
 	g++-8 -I ../../engine main.cpp ../../bin/libzhp.a -pthread -O3 -o mnist
 fi

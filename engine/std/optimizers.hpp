@@ -8,6 +8,10 @@ namespace zhetapi {
 
 namespace ml {
 
+// TODO: Cache a and z vectors in the class itself
+// In general cache as much data as possible
+// Instead of creating a new gradient, modify the one passed
+
 /*
  * This header contains the standard optimizers.
  *
@@ -16,28 +20,15 @@ namespace ml {
 
 template <class T>
 class SGD : public Optimizer <T> {
-	T	__alpha;
+	T	__eta;
 public:
-	SGD(T alpha = 0.001) : __alpha(alpha) {}
+	SGD(T eta = 0.001) : __eta(eta) {}
 
-	Matrix <T> *gradient(
-			Layer <T> *layers,
-			size_t size,
-			const Vector <T> &in,
-			const Vector <T> &out,
-			Erf <T> *cost)
+	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
-		Vector <T> *a = new Vector <T> [size + 1];
-		Vector <T> *z = new Vector <T> [size];
-
-    		Matrix <T> *J = simple_gradient(layers, size, a, z, in, out, cost);
-
 		for (size_t i = 0; i < size; i++)
-			J[i] *= __alpha;
+			J[i] *= -1 * __eta;
 		
-		delete[] a;
-		delete[] z;
-
 		return J;
 	}
 };
@@ -48,195 +39,140 @@ public:
  */
 template <class T>
 class Momentum : public Optimizer <T> {
-	T		__alpha = 0;
-	T		__beta = 0;
+	T		__eta	= 0;
+	T		__mu	= 0;
 
-	Matrix <T> *	__M = nullptr;
-	size_t		__size = 0;
+	Matrix <T> *	__M	= nullptr;
 public:
-	Momentum(T alpha = 0.001, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
+	Momentum(T eta = 0.001, T mu = 0.9) : __eta(eta), __mu(mu) {}
 
 	~Momentum() {
 		delete[] __M;
 	}
 
-	Matrix <T> *gradient(
-			Layer <T> *layers,
-			size_t size,
-			const Vector <T> &in,
-			const Vector <T> &out,
-			Erf <T> *cost)
+	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
-		Vector <T> *a = new Vector <T> [size + 1];
-		Vector <T> *z = new Vector <T> [size];
-
-    		Matrix <T> *J = simple_gradient(layers, size, a, z, in, out, cost);
-		
-		if (size != __size) {
+		if (this->__switch) {
 			delete[] __M;
 
-			__size = size;
-			__M = new Matrix <T> [__size];
+			__M = new Matrix <T> [size];
 		}
-	
+		
 		Matrix <T> *Jo = new Matrix <T> [size];
-		for (size_t i = 0; i < __size; i++) {
+		for (size_t i = 0; i < size; i++) {
 			std::pair <size_t, size_t> odim = J[i].get_dimensions();
 
 			if (__M[i].get_dimensions() != odim)
 				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
 			
-			__M[i] = __beta * __M[i] - __alpha * J[i];
-
-			Jo[i] = T(-1) * __M[i];
+			Jo[i] = __M[i] = __mu * __M[i] - __eta * J[i];
 		}
-		
-		delete[] a;
-		delete[] z;
+
 		delete[] J;
 
 		return Jo;
 	}
-
-	void reset() {
-		delete[] __M;
-
-		__size = 0;
-		__M = nullptr;
-	}
 };
 
+// TODO: Inherit Nesterov from Momentum
 template <class T>
 class Nesterov : public Optimizer <T> {
-	T		__alpha;
-	T		__beta;
+	T		__eta;
+	T		__mu;
 
 	Matrix <T> *	__M = nullptr;
-	size_t		__size = 0;
 public:
-	Nesterov(T alpha = 0.001, T beta = 0.9) : __alpha(alpha), __beta(beta) {}
+	Nesterov(T eta = 0.001, T mu = 0.9) : __eta(eta), __mu(mu) {}
 
 	~Nesterov() {
 		delete[] __M;
 	}
 
-	Matrix <T> *gradient(
-			Layer <T> *layers,
-			size_t size,
-			const Vector <T> &in,
-			const Vector <T> &out,
-			Erf <T> *cost)
+	Layer <T> *adjusted(Layer <T> *layers, size_t size)
 	{
-		Vector <T> *a = new Vector <T> [size + 1];
-		Vector <T> *z = new Vector <T> [size];
-
 		Layer <T> *adj = new Layer <T> [size];
-		
-		// Ensure that __M is of the right size
-		if (size != __size) {
-			delete[] __M;
-
-			__size = size;
-			__M = new Matrix <T> [__size];
-		}
-
-		for (size_t i = 0; i < size; i++) {
-			size_t rs = layers[i].get_fan_out();
-			size_t cs = layers[i].get_fan_in() + 1;
-
-			if (__M[i].get_dimensions() != std::make_pair(rs, cs))
-				__M[i] = Matrix <T> (rs, cs, T(0));
-
-			adj[i] = layers[i] + __beta * __M[i];
-		}
-
-    		Matrix <T> *J = simple_gradient(adj, size, a, z, in, out, cost);
-
-		Matrix <T> *Jo = new Matrix <T> [size];
-		for (size_t i = 0; i < __size; i++) {
-			__M[i] = __beta * __M[i] - __alpha * J[i];
-
-			Jo[i] = T(-1) * __M[i];
-		}
-		
-		delete[] a;
-		delete[] z;
-		delete[] J;
-		delete[] adj;
-
-		return Jo;
-	}
-	
-	Matrix <T> *gradient(
-			Layer <T> *layers,
-			size_t size,
-			const DataSet <T> &ins,
-			const DataSet <T> &outs,
-			Erf <T> *cost)
-	{
-		// TODO: Add assertions
-		Vector <T> *a = new Vector <T> [size + 1];
-		Vector <T> *z = new Vector <T> [size];
-
-		Layer <T> *adj = new Layer <T> [size];
-		
-		// Ensure that __M is of the right size
-		if (size != __size) {
-			delete[] __M;
-
-			__size = size;
-			__M = new Matrix <T> [__size];
-		}
-
-		for (size_t i = 0; i < size; i++) {
-			size_t rs = layers[i].get_fan_out();
-			size_t cs = layers[i].get_fan_in() + 1;
-
-			if (__M[i].get_dimensions() != std::make_pair(rs, cs))
-				__M[i] = Matrix <T> (rs, cs, T(0));
-
-			adj[i] = layers[i] + __beta * __M[i];
-		}
-
-		size_t ds = ins.size();
-
-    		Matrix <T> *J;
-		Matrix <T> *Q;
-
-		J = simple_gradient(adj, size, a, z, ins[0], outs[0], cost);
-		for (size_t i = 1; i < ds; i++) {
-			Q = simple_gradient(adj, size, a, z, ins[i], outs[i], cost);
-
-			for (size_t k = 0; k < size; k++)
-				J[k] += Q[k];
-
-			delete[] Q;
-		}
-		
 		for (size_t i = 0; i < size; i++)
-			J[i] /= T(ds);
+			adj[i] = layers[i];
 
-		Matrix <T> *Jo = new Matrix <T> [size];
+		if (size != this->__size)
+			return adj;
 
-		for (size_t i = 0; i < __size; i++) {
-			__M[i] = __beta * __M[i] - __alpha * J[i];
+		for (size_t i = 0; i < size; i++) {
+			size_t rs = layers[i].get_fan_out();
+			size_t cs = layers[i].get_fan_in() + 1;
 
-			Jo[i] = T(-1) * __M[i];
+			if (__M[i].get_dimensions() != std::make_pair(rs, cs))
+				__M[i] = Matrix <T> (rs, cs, T(0));
+
+			adj[i] += __mu * __M[i];
 		}
-		
-		delete[] a;
-		delete[] z;
-		delete[] J;
-		delete[] adj;
 
-		return Jo;
+		return adj;
 	}
 
-	void reset() {
-		delete[] __M;
+	Matrix <T> *raw_gradient(
+				Layer <T> *layers,
+				size_t size,
+				const Vector <T> &in,
+				const Vector <T> &out,
+				Erf <T> *cost) override
+	{
+		Layer <T> *adj = adjusted(layers, size);
 
-		__size = 0;
-		__M = nullptr;
+		Matrix <T> *Delta = Optimizer <T> ::raw_gradient(
+				adj,
+				size,
+				in,
+				out,
+				cost);
+
+		delete[] adj;
+
+		return Delta;
+	}
+
+	Matrix <T> *raw_batch_gradient(
+				Layer <T> *layers,
+				size_t size,
+				const DataSet <T> &ins,
+				const DataSet <T> &outs,
+				Erf <T> *cost) override
+	{
+		Layer <T> *adj = adjusted(layers, size);
+
+		Matrix <T> *Delta = Optimizer <T> ::raw_gradient(
+				adj,
+				size,
+				ins,
+				outs,
+				cost);
+
+		delete[] adj;
+
+		return Delta;
+	}
+
+	Matrix <T> *update(Matrix <T> *J, size_t size)
+	{
+		if (this->__switch) {
+			delete[] __M;
+
+			__M = new Matrix <T> [size];
+		}
+		
+		Matrix <T> *Jo = new Matrix <T> [size];
+		for (size_t i = 0; i < size; i++) {
+			std::pair <size_t, size_t> odim = J[i].get_dimensions();
+
+			if (__M[i].get_dimensions() != odim)
+				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
+			
+			Jo[i] = __M[i] = __mu * __M[i] - __eta * J[i];
+		}
+
+		delete[] J;
+
+		return Jo;
 	}
 };
 
@@ -272,26 +208,16 @@ public:
 			__S = new Matrix <T> [__size];
 		}
 
-		using namespace std;
 		for (size_t i = 0; i < __size; i++) {
 			// Correct matrix size if necessary
 			std::pair <size_t, size_t> odim = J[i].get_dimensions();
 
-			if (__S[i].get_dimensions() != odim) {
-				/*cout << "Reseting __S:" << endl;
-				cout << "\t" << __S[i] << endl;*/
+			if (__S[i].get_dimensions() != odim)
 				__S[i] = Matrix <T> (odim.first, odim.second, T(0));
-				// cout << "\t" << __S[i] << endl;
-			}
 
 			Matrix <T> e = Matrix <T> (odim.first, odim.second, epsilon);
 
-			// cout << "S[i] = " << __S[i] << endl;
 			__S[i] = __S[i] + shur(J[i], J[i]);
-
-			/* cout << "S'[i] = " << __S[i] << endl;
-			cout << "J[i] = " << J[i] << endl;
-			cout << "===================================" << endl; */
 
 			J[i] = inv_shur(__eta * J[i], __S[i] + e);
 		}
