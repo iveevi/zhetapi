@@ -141,7 +141,7 @@ int main()
 	}
 
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
-	ml::Optimizer <double> *opt = new ml::Nesterov <double> (1, 0.7);
+	ml::Optimizer <double> *opt = new ml::RMSProp <double> (1);
 
 	model.set_cost(cost);
 	model.set_optimizer(opt);

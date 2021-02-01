@@ -91,6 +91,7 @@ public:
 	Layer <T> *adjusted(Layer <T> *layers, size_t size)
 	{
 		Layer <T> *adj = new Layer <T> [size];
+		
 		for (size_t i = 0; i < size; i++)
 			adj[i] = layers[i];
 
@@ -140,7 +141,7 @@ public:
 	{
 		Layer <T> *adj = adjusted(layers, size);
 
-		Matrix <T> *Delta = Optimizer <T> ::raw_gradient(
+		Matrix <T> *Delta = Optimizer <T> ::raw_batch_gradient(
 				adj,
 				size,
 				ins,

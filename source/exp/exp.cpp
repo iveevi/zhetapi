@@ -46,7 +46,10 @@ int main()
 		for (int k = 0; k < 10; k++) {
 			cout << "\t" << base(i) << endl;
 
-			base.fit(i, o);
+			DataSet <double> ins = {i};
+			DataSet <double> outs = {o};
+
+			base.fit(ins, outs);
 		}
 		
 		cout << "\t" << base(i) << endl;
