@@ -8,7 +8,8 @@ vector <pair <string, bool(*)()>> rig {
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
 	{"integration techniques", &integration},
 	{"function computation", &function_computation},
-	{"function general compilation", &function_compilation_testing}
+	{"function general compilation", &function_compilation_testing},
+	{"vector operations", &vector_operations}
 };
 
 // Segfault handler

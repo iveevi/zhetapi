@@ -36,6 +36,16 @@ protected:
 	void clear();
 public:
 	Tensor(const std::vector <std::size_t> &, const ::std::vector <T> &);
+
+	// TODO: remove size term from vector and matrix classes
+	size_t size() const;
+
+	// Boolean operators (generalize with prefix)
+	template <class U>
+	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
 	
 	// Printing functions
 	std::string print() const;
@@ -62,10 +72,6 @@ public:
 	// Indexing
 	T &operator[](const std::vector <size_t> &);
 	const T &operator[](const std::vector <size_t> &) const;
-
-	// Comparison
-	template <class U>
-	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
 
 #else
 
@@ -102,7 +108,7 @@ public:
 };
 
 template <class T>
-Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &arr)
+Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
 		: __dims(dim.size())
 {
 
@@ -133,6 +139,33 @@ Tensor <T> ::Tensor(const ::std::vector <size_t> &dim, const ::std::vector <T> &
 
 	for (size_t i = 0; i < prod; i++)
 		__array[i] = arr[i];
+}
+
+template <class T>
+size_t Tensor <T> ::size() const
+{
+	return __size;
+}
+
+// Boolean comparison
+template <class T>
+bool operator==(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a.__size != b.__size)
+		return false;
+
+	for (size_t i = 0; i < a.__size; i++) {
+		if (a.__array[i] != b.__array[i])
+			return false;
+	}
+
+	return true;
+}
+
+template <class T>
+bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
+{
+	return !(a == b);
 }
 
 // Printing functions
@@ -301,21 +334,6 @@ const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
 		full += indices[i] * __dim[__dims - (i + 1)];
 	
 	return __array[full];
-}
-
-// Comparison
-template <class T>
-bool operator==(const Tensor <T> &a, const Tensor <T> &b)
-{
-	if (a.__size != b.__size)
-		return false;
-
-	for (size_t i = 0; i < a.__size; i++) {
-		if (a.__array[i] != b.__array[i])
-			return false;
-	}
-
-	return true;
 }
 
 #endif

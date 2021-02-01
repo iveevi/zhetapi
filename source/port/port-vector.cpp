@@ -36,3 +36,28 @@ bool vector_construction_and_memory()
 
 	return true;
 }
+
+bool vector_operations()
+{
+	using namespace zhetapi;
+
+	Vector <int> a = {1, 2, 3};
+	Vector <int> b = {4, 5, 6};
+	Vector <int> c = {1, 2, 3, 4, 5, 6};
+
+	cout << "a = " << a << endl;
+	cout << "b = " << b << endl;
+
+	cout << concat(a, b) << endl;
+	cout << c << endl;
+
+	if (c != concat(a, b)) {
+		cout << "Concatenation is incorrect." << endl;
+
+		return false;
+	} else {
+		cout << "Concatenation passed." << endl;
+	}
+
+	return true;
+}

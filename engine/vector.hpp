@@ -50,7 +50,10 @@ public:
 
 	// Vector operations
 	template <class U>
-	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
+	friend U cross(const Vector <U> &, const Vector <U> &);
+
+	template <class U>
+	friend Vector <U> concat(const Vector <U> &, const Vector <U> &);
 
 	// Static methods
 	static Vector one(size_t);
@@ -335,6 +338,19 @@ Vector <T> operator/(const T &b, const Vector <T> &a)
 	return out;
 }
 
+// Static methods
+template <class T>
+Vector <T> Vector <T> ::one(size_t size)
+{
+	return Vector <T> (size, T(1));
+}
+
+template <class T>
+Vector <T> Vector <T> ::rarg(double r, double theta)
+{
+	return Vector <T> {r * cos(theta), r * sin(theta)};
+}
+
 // Non-member functions
 template <class T>
 T cross(const Vector <T> &a, const Vector <T> &b)
@@ -348,17 +364,18 @@ T cross(const Vector <T> &a, const Vector <T> &b)
 	};
 }
 
-// Static methods
 template <class T>
-Vector <T> Vector <T> ::one(size_t size)
+Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 {
-	return Vector <T> (size, T(1));
-}
+	T *arr = new T[a.__dim[0] + b.__dim[0]];
 
-template <class T>
-Vector <T> Vector <T> ::rarg(double r, double theta)
-{
-	return Vector <T> {r * cos(theta), r * sin(theta)};
+	for (size_t i = 0; i < a.size(); i++)
+		arr[i] = a[i];
+	
+	for (size_t i = 0; i < b.size(); i++)
+		arr[a.size() + i] = b[i];
+	
+	return Vector <T> (a.size() + b.size(), arr);
 }
 
 #ifndef ZHP_CUDA
