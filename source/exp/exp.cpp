@@ -28,9 +28,9 @@ int main()
 		new ml::SGD <double> (),
 		new ml::Momentum <double> (),
 		new ml::Nesterov <double> (),
-		/* new ml::AdaGrad <double> (),
+		new ml::AdaGrad <double> (),
 		new ml::RMSProp <double> (),
-		new ml::Adam <double> () */
+		new ml::Adam <double> ()
 	};
 
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();

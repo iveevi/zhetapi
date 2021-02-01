@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <cassert>
+#include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
@@ -113,6 +114,8 @@ public:
 
 	void multiply_row(size_t, T);
 
+	void pow(const T &);
+
 	// Miscellanious opertions
 	void randomize(std::function <T ()>);
 	
@@ -210,7 +213,7 @@ public:
 
 	template <class U>
 	friend bool operator==(const Matrix <U> &, const Matrix <U> &);
-
+	
 	template <class U>
 	friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
 	
@@ -624,6 +627,14 @@ void Matrix <T> ::multiply_row(size_t a, T k)
 {
 	for (size_t i = 0; i < __cols; i++)
 		this->__array[a][i] *= k;
+}
+
+template <class T>
+void Matrix <T> ::pow(const T &x)
+{
+	size_t s = __cols * __rows;
+	for (size_t i = 0; i < s; i++)
+		this->__array[i] = std::pow(this->__array[i], x);
 }
 
 template <class T>
