@@ -17,10 +17,15 @@ protected:
 	Vector <T> *	__a		= nullptr;
 	Vector <T> *	__z		= nullptr;
 
+	T		__eta		= 0;
+
 	size_t		__size		= 0;
 
 	bool		__switch	= false;
 
+	// Functions
+	Optimizer(T);
+	
 	virtual Matrix <T> *raw_gradient(
 			Layer <T> *,
 			size_t,
@@ -41,6 +46,8 @@ protected:
 public:
 	virtual ~Optimizer();
 
+	void set_learning_rate(T);
+
 	Matrix <T> *gradient(
 			Layer <T> *,
 			size_t,
@@ -57,10 +64,19 @@ public:
 };
 
 template <class T>
+Optimizer <T> ::Optimizer(T lr) : __eta(lr) {}
+
+template <class T>
 Optimizer <T> ::~Optimizer() 
 {
 	delete[] __a;
 	delete[] __z;
+}
+
+template <class T>
+void Optimizer <T> ::set_learning_rate(T lr)
+{
+	__eta = lr;
 }
 
 template <class T>

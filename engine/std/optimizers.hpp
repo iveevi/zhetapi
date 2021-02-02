@@ -20,14 +20,13 @@ namespace ml {
 
 template <class T>
 class SGD : public Optimizer <T> {
-	T	__eta;
 public:
-	SGD(T eta = 0.001) : __eta(eta) {}
+	SGD(T eta = 0.001) : Optimizer <T> (eta) {}
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
 		for (size_t i = 0; i < size; i++)
-			J[i] *= -1 * __eta;
+			J[i] *= -1 * this->__eta;
 		
 		return J;
 	}
@@ -39,12 +38,13 @@ public:
  */
 template <class T>
 class Momentum : public Optimizer <T> {
-	T		__eta	= 0;
 	T		__mu	= 0;
 
 	Matrix <T> *	__M	= nullptr;
 public:
-	Momentum(T eta = 0.001, T mu = 0.9) : __eta(eta), __mu(mu) {}
+	Momentum(T eta = 0.001, T mu = 0.9)
+			: Optimizer <T> (eta),
+			__mu(mu) {}
 
 	~Momentum() {
 		delete[] __M;
@@ -65,7 +65,7 @@ public:
 			if (__M[i].get_dimensions() != odim)
 				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
 			
-			Jo[i] = __M[i] = __mu * __M[i] - __eta * J[i];
+			Jo[i] = __M[i] = __mu * __M[i] - this->__eta * J[i];
 		}
 
 		delete[] J;
@@ -77,12 +77,13 @@ public:
 // TODO: Inherit Nesterov from Momentum
 template <class T>
 class Nesterov : public Optimizer <T> {
-	T		__eta;
 	T		__mu;
 
 	Matrix <T> *	__M = nullptr;
 public:
-	Nesterov(T eta = 0.001, T mu = 0.9) : __eta(eta), __mu(mu) {}
+	Nesterov(T eta = 0.001, T mu = 0.9)
+			: Optimizer <T> (eta),
+			__mu(mu) {}
 
 	~Nesterov() {
 		delete[] __M;
@@ -168,7 +169,7 @@ public:
 			if (__M[i].get_dimensions() != odim)
 				__M[i] = Matrix <T> (odim.first, odim.second, T(0));
 			
-			Jo[i] = __M[i] = __mu * __M[i] - __eta * J[i];
+			Jo[i] = __M[i] = __mu * __M[i] - this->__eta * J[i];
 		}
 
 		delete[] J;
@@ -179,11 +180,10 @@ public:
 
 template <class T>
 class AdaGrad : public Optimizer <T> {
-	T		__eta;
-
 	Matrix <T> *	__S = nullptr;
 public:
-	AdaGrad(T eta = 0.001) : __eta(eta) {}
+	AdaGrad(T eta = 0.001)
+			: Optimizer <T> (eta) {}
 
 	~AdaGrad() {
 		delete[] __S;
@@ -213,7 +213,7 @@ public:
 
 			tmp.pow(0.5);
 
-			J[i] = inv_shur((-1 * __eta) * J[i], tmp);
+			J[i] = inv_shur((-1 * this->__eta) * J[i], tmp);
 		}
 
 		return J;
@@ -227,12 +227,13 @@ const T AdaGrad <T> ::epsilon = 1e-10;
 
 template <class T>
 class RMSProp : public Optimizer <T> {
-	T		__eta;
 	T		__beta;
 
 	Matrix <T> *	__S = nullptr;
 public:
-	RMSProp(T eta = 0.001, T beta = 0.9) : __eta(eta), __beta(beta) {}
+	RMSProp(T eta = 0.001, T beta = 0.9)
+			: Optimizer <T> (eta),
+			__beta(beta) {}
 
 	~RMSProp() {
 		delete[] __S;
@@ -263,7 +264,7 @@ public:
 
 			tmp.pow(0.5);
 
-			J[i] = inv_shur((-1 * __eta) * J[i], tmp);
+			J[i] = inv_shur((-1 * this->__eta) * J[i], tmp);
 		}
 
 		return J;
@@ -277,7 +278,6 @@ const T RMSProp <T> ::epsilon = 1e-10;
 
 template <class T>
 class Adam : public Optimizer <T> {
-	T		__eta;
 	T		__beta1;
 	T		__beta2;
 
@@ -289,7 +289,9 @@ class Adam : public Optimizer <T> {
 	size_t		__iter	= 1;
 public:
 	Adam(T eta = 0.001, T beta1 = 0.9, T beta2 = 0.999)
-			: __eta(eta), __beta1(beta1), __beta2(beta2) {}
+			: Optimizer <T> (eta),
+			__beta1(beta1),
+			__beta2(beta2) {}
 
 	~Adam() {
 		delete[] __M;
@@ -326,7 +328,7 @@ public:
 
 			tmp.pow(0.5);
 
-			J[i] = inv_shur(__eta * __Mh[i], tmp);
+			J[i] = inv_shur(this->__eta * __Mh[i], tmp);
 		}
 
 		__iter++;
