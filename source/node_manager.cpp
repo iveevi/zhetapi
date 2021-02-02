@@ -73,7 +73,12 @@ node_manager &node_manager::operator=(const node_manager &other)
 }
 
 // Getters
-node node_manager::tree() const
+node &node_manager::tree()
+{
+	return __tree;
+}
+
+const node &node_manager::tree() const
 {
 	return __tree;
 }
@@ -279,6 +284,7 @@ void node_manager::append(const node &n)
 	__tree.append(n);
 
 	// Add the rest of the elements
+	count_up(__tree);
 }
 
 void node_manager::append(const node_manager &nm)
@@ -286,6 +292,7 @@ void node_manager::append(const node_manager &nm)
 	__tree.append(nm.__tree);
 
 	// Add the rest of the elements
+	count_up(__tree);
 }
 
 // Expansion methods
@@ -788,14 +795,13 @@ void node_manager::label(node &ref)
 
 		break;
 	case Token::ftn:
+		for (node &leaf : ref.__leaves)
+			label(leaf);
+		
 		/* Also add a different labeling if it is constant,
 		 * probably needs to be called an operation constant
 		 */
 		ref.__label = l_function;
-
-		for (node &leaf : ref.__leaves)
-			label(leaf);
-
 		break;
 	case Token::var:
 		ref.__label = l_variable;
@@ -804,6 +810,12 @@ void node_manager::label(node &ref)
 		// Transfer labels, makes things easier
 		ref.__label = (dynamic_cast <node_reference *>
 				(ref.__tptr.get()))->get()->__label;
+		break;
+	case Token::reg:
+		for (node &leaf : ref.__leaves)
+			label(leaf);
+
+		ref.__label = l_registrable;
 		break;
 	}
 }

@@ -40,13 +40,21 @@ enum lbl {
 	l_constant_matrix_complex_rational,
 	l_constant_matrix_complex_real,
 
+	l_constant_boolean,
+	l_constant_string,
+
 	// References
 	l_variable_reference,
 	l_node_reference,
 
+	// Algorithm
+	l_sequential,				// Sequential node
+	l_assign_chain,				// Assignment statements
+
 	// Miscellaneious
 	l_constant,
 	l_function,
+	l_registrable,
 	l_operation_constant,
 
 	// Operations

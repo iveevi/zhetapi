@@ -61,6 +61,8 @@ Token *algorithm::execute(const Barn &barn, const std::vector <Token *> &args)
 		}
 	}
 
+	__compiled.tree().__label = l_sequential;
+
 	using namespace std;
 
 	cout << "full alg:" << endl;
@@ -75,17 +77,13 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 	using namespace std;
 
 	// Skip comments
-	if (str[0] == '#') {
-		cout << "Skip line" << endl;
+	if (str[0] == '#')
 		return nullptr;
-	}
 
 	std::vector <std::string> tmp = split(str);
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
-		cout << "Equal statement" << endl;
-
 		vector <node> order;
 
 		zhetapi::Token *tptr = nullptr;
@@ -114,10 +112,7 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 			}
 		}
 
-		node n(new Operand <std::string> ("Chain"), order);
-
-		cout << "Equal:" << endl;
-		n.print();
+		node n(nullptr, l_assign_chain, order);
 
 		rnm.append(n);
 		
@@ -136,13 +131,7 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 			exit(-1);
 		}
 
-		cout << "Next sequential instruction:" << endl;
 		rnm.append(mg);
-
-		mg.print();
-
-		/* std::cout << "mg:" << std::endl;
-		mg.print(); */
 
 		// "Execute" the statement
 		return mg.value(barn);

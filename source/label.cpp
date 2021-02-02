@@ -30,14 +30,22 @@ std::string strlabs[] = {
 	"constant matrix complex integer",
 	"constant matrix complex rational",
 	"constant matrix complex real",
+
+	"constant boolean",
+	"constant string",
 	
 	// References
 	"variable reference",
 	"node reference",
 
+	// Algorithm
+	"sequential",
+	"assignment chain",
+
 	// Miscellaneious
 	"constant",
 	"function",
+	"registrable",
 	"operation constant",
 
 	// Operations
@@ -129,6 +137,12 @@ lbl constant_label(Token *tptr)
 		return l_constant_matrix_complex_rational;
 	if (dynamic_cast <types::opd_m_cr *> (tptr))
 		return l_constant_matrix_complex_real;
+	
+	// Other
+	if (dynamic_cast <types::opd_b *> (tptr))
+		return l_constant_boolean;
+	if (dynamic_cast <types::opd_s *> (tptr))
+		return l_constant_string;
 
 	return l_none;
 }

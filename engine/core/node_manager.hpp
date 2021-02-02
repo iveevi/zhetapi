@@ -31,7 +31,9 @@ public:
 
 	node_manager &operator=(const node_manager &);
 
-	node tree() const;
+	// TODO: replace these to keep consistent interface
+	node &tree();
+	const node &tree() const;
 
 	Token *value() const;
 	Token *value(Barn *) const;

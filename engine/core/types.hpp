@@ -12,10 +12,11 @@
 #include <vector.hpp>
 
 #define __TYPEDEFS__						\
-		typedef bool B;					\
 		typedef int Z;					\
-		typedef Rational <Z> Q;				\
 		typedef double R;				\
+		typedef bool B;					\
+		typedef std::string S;				\
+		typedef Rational <Z> Q;				\
 								\
 		typedef Complex <Z> CZ;				\
 		typedef Complex <Q> CQ;				\
@@ -59,7 +60,10 @@
 								\
 		typedef zhetapi::Operand <MCZ> opd_m_cz;	\
 		typedef zhetapi::Operand <MCQ> opd_m_cq;	\
-		typedef zhetapi::Operand <MCR> opd_m_cr;
+		typedef zhetapi::Operand <MCR> opd_m_cr;	\
+								\
+		typedef zhetapi::Operand <B> opd_b;		\
+		typedef zhetapi::Operand <S> opd_s;
 
 #define	ONE	1
 
