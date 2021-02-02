@@ -1,17 +1,18 @@
-i = 0
-
 x = 3
-while (i++ < 10) {
-	println("i = ", i, " x = ", x)
 
-	x = (x * 3) % 7;
-}
+println("x = ", x)
 
 alg f()
 {
-	print("hello from f")
+	println("hello from f")
 
-	print("second printf")
+	x = 7
+
+	println("inside f, x = ", x)
+
+	println("second printf")
 }
 
 f()
+
+println("x = ", x)

@@ -25,18 +25,20 @@ private:
 	std::vector <std::string>	__params;
 public:
 	node_manager();
+	node_manager(const node_manager &);
 	node_manager(const std::string &, Barn * = nullptr);
 	node_manager(const std::string &, const std::vector <std::string> &, Barn * = nullptr);
 
-	node_manager(const node_manager &);
-
 	node_manager &operator=(const node_manager &);
+
+	node tree() const;
 
 	Token *value() const;
 	Token *value(Barn *) const;
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
 
+	void append(const node &);
 	void append(const node_manager &);
 
 	/*

@@ -5,6 +5,13 @@ namespace zhetapi {
 
 node_manager::node_manager() {}
 
+node_manager::node_manager(const node_manager &other) :
+	__barn(other.__barn), __tree(other.__tree),
+	__refs(other.__refs), __params(other.__params)
+{
+	rereference(__tree);
+}
+
 node_manager::node_manager(const std::string &str, Barn *barn) : __barn(barn) 
 {
 	zhetapi::parser pr;
@@ -51,14 +58,6 @@ node_manager::node_manager(const std::string &str, const
 	count_up(__tree);
 }
 
-// Copy constructor and operator
-node_manager::node_manager(const node_manager &other) :
-	__barn(other.__barn), __tree(other.__tree),
-	__refs(other.__refs), __params(other.__params)
-{
-	rereference(__tree);
-}
-
 node_manager &node_manager::operator=(const node_manager &other)
 {
 	if (this != &other) {
@@ -71,6 +70,12 @@ node_manager &node_manager::operator=(const node_manager &other)
 	}
 
 	return *this;
+}
+
+// Getters
+node node_manager::tree() const
+{
+	return __tree;
 }
 
 // Value finding methods
@@ -267,6 +272,13 @@ Token *node_manager::substitute_and_compute(std::vector <Token *>
 	}
 
 	return value(__tree);
+}
+
+void node_manager::append(const node &n)
+{
+	__tree.append(n);
+
+	// Add the rest of the elements
 }
 
 void node_manager::append(const node_manager &nm)

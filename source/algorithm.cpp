@@ -84,12 +84,18 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
+		cout << "Equal statement" << endl;
+
+		vector <node> order;
+
 		zhetapi::Token *tptr = nullptr;
 		
 		try {
 			zhetapi::node_manager mg(tmp[tsize - 1], barn);
 
 			tptr = mg.value();
+
+			order.push_back(mg.tree());
 		} catch (...) {}
 
 		for (int i = tsize - 2; i >= 0; i--) {
@@ -99,10 +105,21 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 				zhetapi::Function f = ftr;
 
 				barn->put(f);
+
+				order.push_back(node(&f, {}));
 			} catch (...) {
 				barn->put(tptr, tmp[i]);
+
+				order.push_back(node(new Operand <std::string> (tmp[i]), {}));
 			}
 		}
+
+		node n(new Operand <std::string> ("Chain"), order);
+
+		cout << "Equal:" << endl;
+		n.print();
+
+		rnm.append(n);
 		
 		delete tptr;
 	} else {		
