@@ -45,6 +45,8 @@ ostream &operator<<(ostream &, const bench &);
 bool gamma_and_factorial();
 
 bool vector_construction_and_memory();
+bool vector_operations();
+
 bool matrix_construction_and_memory();
 bool tensor_construction_and_memory();
 
