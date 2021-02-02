@@ -154,7 +154,7 @@ Token *node_manager::value(node tree) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(*__barn, values);
+		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(__barn, values);
 
 		if (tptr)
 			return tptr->copy();
@@ -255,7 +255,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 
-		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(*ext, values);
+		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(ext, values);
 
 		if (tptr)
 			return tptr->copy();

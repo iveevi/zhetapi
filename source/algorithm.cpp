@@ -7,22 +7,24 @@ namespace zhetapi {
 // Constructors
 algorithm::algorithm() {}
 
-algorithm::algorithm(std::string ident,
+algorithm::algorithm(
+		const std::string &ident,
 		const std::vector <std::string> &args,
-		const std::string &alg) : __ident(ident),
-		__args(args), __alg(alg) {}
+		const std::string &alg)
+		: __ident(ident), __args(args),
+		__alg(alg) {}
 
 // Executing the function
-Token *algorithm::execute(const Barn &barn, const std::vector <Token *> &args)
+Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 {
-	Barn *cpy = new Barn(barn);
+	// Barn *cpy = new Barn(barn);
 
 	// For now, no default arguments or overloads
 	assert(args.size() == __args.size());
 
 	size_t n = __args.size();
 	for (size_t i = 0; i < n; i++)
-		cpy->put(args[i], __args[i]);
+		barn->put(args[i], __args[i]);	// Put in a new barn instead (excluding references)
 
 	// Use the definition line number
 	bool quoted = false;
@@ -46,7 +48,7 @@ Token *algorithm::execute(const Barn &barn, const std::vector <Token *> &args)
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
-					execute(cpy, tmp, __compiled);
+					execute(barn, tmp, __compiled);
 
 					tmp.clear();
 				}

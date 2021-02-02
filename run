@@ -100,7 +100,7 @@ function czhp_simple {
 	echo "Running sample script for general features..."
 	echo -e "===========================================================\n"
 
-	./debug/czhp-run samples/zhp/simple.zhp
+	./debug/czhp-run samples/zhp/simple.zhp -L include
 }
 
 function genlibs {

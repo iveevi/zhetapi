@@ -28,10 +28,13 @@ class algorithm : public Token {
 	std::string			__alg;
 public:
 	algorithm();
-	algorithm(std::string, const std::vector <std::string> &,
-			const std::string &);
+	algorithm(const std::string &,
+		const std::vector <std::string> &,
+		const std::string &);
 	
-	Token *execute(const Barn &, const std::vector <Token *> &);
+	void compile(Barn *);
+	
+	Token *execute(Barn *, const std::vector <Token *> &);
 	Token *execute(Barn *, std::string str, node_manager &);
 
 	std::vector <std::string> split(std::string str);
