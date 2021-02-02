@@ -111,6 +111,7 @@ function genlibs {
 	echo -e "===========================================================\n"
 
 	bin/czhp -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib
+	bin/czhp -v -c lib/math/math.cpp -o include/math.zhplib
 
 	if ! [ -x "$(command -v tree)" ]; then
 		ls include
@@ -123,6 +124,7 @@ function genlibs {
 	echo -e "===========================================================\n"
 
 	bin/czhp -d include/io.zhplib
+	bin/czhp -d include/math.zhplib
 }
 
 # Ignore errors

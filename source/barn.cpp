@@ -473,6 +473,10 @@ void Barn::list_registered(std::string file) const
 	printf("Symbols recorded in %s:\n", file.c_str());
 	for (auto spr : __reg_table)
 		std::cout << "\t" << spr.second.str() << std::endl;
+	for (auto spr : __var_table)
+		std::cout << "\t" << spr.second.str() << std::endl;
+	for (auto spr : __ftr_table)
+		std::cout << "\t" << spr.second.str() << std::endl;
 }
 
 void Barn::print(bool show_ops) const

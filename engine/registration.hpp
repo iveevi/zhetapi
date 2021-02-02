@@ -32,10 +32,10 @@
 
 namespace zhetapi {
 
-#define ZHETAPI_REGISTER(fident)		\
+#define ZHETAPI_REGISTER(fident)			\
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
-#define ZHETAPI_LIBRARY()			\
+#define ZHETAPI_LIBRARY()				\
 	extern "C" void zhetapi_export_symbols(zhetapi::Barn *barn)
 
 #define ZHETAPI_EXPORT(symbol)			\
@@ -44,9 +44,12 @@ namespace zhetapi {
 #define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)	\
 	barn->put(zhetapi::Registrable(#symbol, &ftr));
 
+#define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
+	barn->put(zhetapi::Variable(new zhetapi::Operand <type> (op), #symbol));
+
 class Registrable : public Token {
 public:
-	using mapper = ::std::function <Token *(const ::std::vector <Token *> &)>;
+	using mapper = std::function <Token *(const std::vector <Token *> &)>;
 private:
 	mapper		__ftn;
 
@@ -54,9 +57,9 @@ private:
 public:
 	Registrable();
 	Registrable(const Registrable &);
-	Registrable(const ::std::string &, mapper);
+	Registrable(const std::string &, mapper);
 
-	Token *operator()(const ::std::vector <Token *> &) const;
+	Token *operator()(const std::vector <Token *> &) const;
 
 	std::string str() const override;
 
