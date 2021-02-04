@@ -465,14 +465,14 @@ Vector <T> Matrix <T> ::get_column(size_t r) const
 }
 
 template <class T>
-void Matrix <T> ::write(::std::ofstream &fout)
+void Matrix <T> ::write(std::ofstream &fout)
 {
 	for (size_t i = 0; i < this->__size; i++)
 		fout.write((char *) &(this->__array[i]), sizeof(T));
 }
 
 template <class T>
-void Matrix <T> ::read(::std::ifstream &fin)
+void Matrix <T> ::read(std::ifstream &fin)
 {
 	for (size_t i = 0; i < this->__size; i++)
 		fin.read((char *) &(this->__array[i]), sizeof(T));

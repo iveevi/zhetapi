@@ -1,6 +1,9 @@
 #ifndef LAYERS_H_
 #define LAYERS_H_
 
+// JSON library
+#include <json/json.hpp>
+
 // Engine headers
 #include <matrix.hpp>
 #include <activation.hpp>
@@ -52,6 +55,10 @@ public:
 	size_t get_fan_out() const;
 
 	void set_fan_in(size_t);
+
+	// Read and write
+	void write(std::ofstream &) const;
+	void read(std::ifstream &);
 
 	// Initialize
 	void initialize();
@@ -180,6 +187,36 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 	
 	if (__fan_in * __fan_out > 0)
 		__mat = Matrix <T> (__fan_out, __fan_in + 1);
+}
+
+// Reading and writing
+template <class T>
+void Layer <T> ::write(std::ofstream &fout) const
+{
+	size_t r = __mat.get_rows();
+	size_t c = __mat.get_cols();
+
+	fout.write((char *) &r, sizeof(size_t));
+	fout.write((char *) &c, sizeof(size_t));
+
+	__mat.write(fout);
+	__act->write(fout);
+}
+
+template <class T>
+void Layer <T> ::read(std::ifstream &fin)
+{
+	size_t r;
+	size_t c;
+
+	fin.read((char *) &r, sizeof(size_t));
+	fin.read((char *) &c, sizeof(size_t));
+
+	__mat = Matrix <T> (r, c, T(0));
+
+	__mat.read(fin);
+
+	__act = Activation <T> ::load(fin);
 }
 
 // Initializer
