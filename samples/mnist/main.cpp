@@ -81,8 +81,6 @@ int main()
 		ml::Layer <double> (10, new ml::Softmax <double> ())
 	});
 
-	// model.print();
-
 	// Temporary variable
 	unsigned int tmp;
 
@@ -141,7 +139,7 @@ int main()
 	}
 
 	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
-	ml::Optimizer <double> *opt = new ml::RMSProp <double> (1);
+	ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
 	model.set_cost(cost);
 	model.set_optimizer(opt);

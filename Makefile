@@ -58,19 +58,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake
+CMAKE_COMMAND = /snap/cmake/775/bin/cmake
 
 # The command to remove a file.
-RM = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake -E rm -f
+RM = /snap/cmake/775/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /workspace/zhetapi
+CMAKE_SOURCE_DIR = /home/ram/zhetapi
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /workspace/zhetapi
+CMAKE_BINARY_DIR = /home/ram/zhetapi
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ CMAKE_BINARY_DIR = /workspace/zhetapi
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/775/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -89,7 +89,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/715/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/CMakeFiles /workspace/zhetapi//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles /home/ram/zhetapi//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -130,6 +130,45 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named gui
+
+# Build rule for target.
+gui: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gui
+.PHONY : gui
+
+# fast build rule for target.
+gui/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/gui.dir/build.make CMakeFiles/gui.dir/build
+.PHONY : gui/fast
+
+#=============================================================================
+# Target rules for targets named zhetapi
+
+# Build rule for target.
+zhetapi: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhetapi
+.PHONY : zhetapi
+
+# fast build rule for target.
+zhetapi/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhetapi.dir/build.make CMakeFiles/zhetapi.dir/build
+.PHONY : zhetapi/fast
+
+#=============================================================================
+# Target rules for targets named port_matrix
+
+# Build rule for target.
+port_matrix: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
+.PHONY : port_matrix
+
+# fast build rule for target.
+port_matrix/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
+.PHONY : port_matrix/fast
+
+#=============================================================================
 # Target rules for targets named zhp-shared
 
 # Build rule for target.
@@ -156,17 +195,30 @@ port_vector/fast:
 .PHONY : port_vector/fast
 
 #=============================================================================
-# Target rules for targets named zhetapi
+# Target rules for targets named zhp-static
 
 # Build rule for target.
-zhetapi: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhetapi
-.PHONY : zhetapi
+zhp-static: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhp-static
+.PHONY : zhp-static
 
 # fast build rule for target.
-zhetapi/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhetapi.dir/build.make CMakeFiles/zhetapi.dir/build
-.PHONY : zhetapi/fast
+zhp-static/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/build
+.PHONY : zhp-static/fast
+
+#=============================================================================
+# Target rules for targets named czhp
+
+# Build rule for target.
+czhp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 czhp
+.PHONY : czhp
+
+# fast build rule for target.
+czhp/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/czhp.dir/build.make CMakeFiles/czhp.dir/build
+.PHONY : czhp/fast
 
 #=============================================================================
 # Target rules for targets named exp
@@ -195,58 +247,6 @@ port_tensor/fast:
 .PHONY : port_tensor/fast
 
 #=============================================================================
-# Target rules for targets named zhp-static
-
-# Build rule for target.
-zhp-static: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 zhp-static
-.PHONY : zhp-static
-
-# fast build rule for target.
-zhp-static/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/build
-.PHONY : zhp-static/fast
-
-#=============================================================================
-# Target rules for targets named timer
-
-# Build rule for target.
-timer: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer
-.PHONY : timer
-
-# fast build rule for target.
-timer/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/build
-.PHONY : timer/fast
-
-#=============================================================================
-# Target rules for targets named gui
-
-# Build rule for target.
-gui: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gui
-.PHONY : gui
-
-# fast build rule for target.
-gui/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/gui.dir/build.make CMakeFiles/gui.dir/build
-.PHONY : gui/fast
-
-#=============================================================================
-# Target rules for targets named port
-
-# Build rule for target.
-port: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port
-.PHONY : port
-
-# fast build rule for target.
-port/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port.dir/build.make CMakeFiles/port.dir/build
-.PHONY : port/fast
-
-#=============================================================================
 # Target rules for targets named port_special
 
 # Build rule for target.
@@ -258,32 +258,6 @@ port_special: cmake_check_build_system
 port_special/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_special.dir/build.make CMakeFiles/port_special.dir/build
 .PHONY : port_special/fast
-
-#=============================================================================
-# Target rules for targets named czhp
-
-# Build rule for target.
-czhp: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 czhp
-.PHONY : czhp
-
-# fast build rule for target.
-czhp/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/czhp.dir/build.make CMakeFiles/czhp.dir/build
-.PHONY : czhp/fast
-
-#=============================================================================
-# Target rules for targets named port_matrix
-
-# Build rule for target.
-port_matrix: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port_matrix
-.PHONY : port_matrix
-
-# fast build rule for target.
-port_matrix/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_matrix.dir/build.make CMakeFiles/port_matrix.dir/build
-.PHONY : port_matrix/fast
 
 #=============================================================================
 # Target rules for targets named port_function
@@ -310,6 +284,45 @@ port_calculus: cmake_check_build_system
 port_calculus/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/port_calculus.dir/build.make CMakeFiles/port_calculus.dir/build
 .PHONY : port_calculus/fast
+
+#=============================================================================
+# Target rules for targets named cuda
+
+# Build rule for target.
+cuda: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 cuda
+.PHONY : cuda
+
+# fast build rule for target.
+cuda/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/build
+.PHONY : cuda/fast
+
+#=============================================================================
+# Target rules for targets named timer
+
+# Build rule for target.
+timer: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 timer
+.PHONY : timer
+
+# fast build rule for target.
+timer/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/timer.dir/build.make CMakeFiles/timer.dir/build
+.PHONY : timer/fast
+
+#=============================================================================
+# Target rules for targets named port
+
+# Build rule for target.
+port: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 port
+.PHONY : port
+
+# fast build rule for target.
+port/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/port.dir/build.make CMakeFiles/port.dir/build
+.PHONY : port/fast
 
 glad/glad.o: glad/glad.c.o
 
@@ -514,6 +527,33 @@ source/complex.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-shared.dir/build.make CMakeFiles/zhp-shared.dir/source/complex.cpp.s
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/zhp-static.dir/build.make CMakeFiles/zhp-static.dir/source/complex.cpp.s
 .PHONY : source/complex.cpp.s
+
+source/cuda/main.o: source/cuda/main.cu.o
+
+.PHONY : source/cuda/main.o
+
+# target to build an object file
+source/cuda/main.cu.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.o
+.PHONY : source/cuda/main.cu.o
+
+source/cuda/main.i: source/cuda/main.cu.i
+
+.PHONY : source/cuda/main.i
+
+# target to preprocess a source file
+source/cuda/main.cu.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.i
+.PHONY : source/cuda/main.cu.i
+
+source/cuda/main.s: source/cuda/main.cu.s
+
+.PHONY : source/cuda/main.s
+
+# target to generate assembly for a file
+source/cuda/main.cu.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/cuda.dir/build.make CMakeFiles/cuda.dir/source/cuda/main.cu.s
+.PHONY : source/cuda/main.cu.s
 
 source/czhp/czhp.o: source/czhp/czhp.cpp.o
 
@@ -1411,6 +1451,7 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... cuda"
 	@echo "... czhp"
 	@echo "... exp"
 	@echo "... gui"
@@ -1446,6 +1487,9 @@ help:
 	@echo "... source/complex.o"
 	@echo "... source/complex.i"
 	@echo "... source/complex.s"
+	@echo "... source/cuda/main.o"
+	@echo "... source/cuda/main.i"
+	@echo "... source/cuda/main.s"
 	@echo "... source/czhp/czhp.o"
 	@echo "... source/czhp/czhp.i"
 	@echo "... source/czhp/czhp.s"
