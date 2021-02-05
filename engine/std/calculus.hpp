@@ -15,13 +15,28 @@ namespace zhetapi {
 
 namespace utility {
 
-// Euler's method for single variable scalar functions
-template <class Df>
-double eulers_method(Df df, Vector <double> given, double x, size_t partition_size = 1000)
+// Single variable, scalar integration of f over [a, b]
+template <class T, class F>
+T sv_integrate(F f, T a, T b, size_t partition_size = 1000)
 {
-	double step = (x - given[0])/partition_size;
+	T step = (b - a)/partition_size;
 
-	double stop = x;
+	// Use a more accurate method later (Simpon's rule, etc.)
+	T sum = 0;
+	for (T x = a; x <= b; x += step)
+		sum += f(x) * step;
+
+	return sum;
+}
+
+
+// Euler's method for single variable scalar functions
+template <class T, class Df>
+T eulers_method(Df df, Vector <T> given, T x, size_t partition_size = 1000)
+{
+	T step = (x - given[0])/partition_size;
+
+	T stop = x;
 	while (fabs(given[0] - stop) > 1e-10) {
 		given[1] += df(given[0]) * step;
 		given[0] += step;
