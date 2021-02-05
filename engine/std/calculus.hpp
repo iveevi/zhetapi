@@ -17,7 +17,7 @@ namespace utility {
 
 // Single variable, scalar integration of f over [a, b]
 template <class T, class F>
-T sv_integrate(F f, T a, T b, size_t partition_size = 1000)
+T sv_integral(F f, T a, T b, size_t partition_size = 1000)
 {
 	T step = (b - a)/partition_size;
 
@@ -42,6 +42,21 @@ T eulers_method(Df df, Vector <T> given, T x, size_t partition_size = 1000)
 	}
 
 	return given[1];
+}
+
+template <class T, class P, class F>
+T line_integral(Parametrization <T, P, F> prm)
+{
+	// Always start from the beginning
+	prm.reset();
+
+	T sum = 0;
+
+	do {
+		sum += dot(prm.value(), prm.dpos());
+	} while (prm.step());
+
+	return sum;
 }
 
 /**

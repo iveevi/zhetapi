@@ -538,6 +538,12 @@ T Vector <T> ::norm() const
 }
 
 template <class T>
+T dot(const Vector <T> &a, const Vector <T> &b)
+{
+	return inner(a, b);
+}
+
+template <class T>
 T inner(const Vector <T> &a, const Vector <T> &b)
 {
 	T acc = 0;

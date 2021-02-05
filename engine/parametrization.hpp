@@ -25,6 +25,8 @@ public:
 	Vector <T> dpos() const;	// Derivative of vector position
 	bool step();			// Step through the parametrization
 
+	void reset();			// Reset the position
+
 	static const size_t partition_size;
 };
 
@@ -74,6 +76,12 @@ bool Parametrization <T, P, F> ::step()
 	}
 	
 	return false;
+}
+
+template <class T, class P, class F>
+void Parametrization <T, P, F> ::reset()
+{
+	__pos = __start;
 }
 
 #endif
