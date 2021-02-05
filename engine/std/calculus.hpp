@@ -10,6 +10,7 @@
 // Engine headers
 #include <function.hpp>
 #include <vector.hpp>
+#include <parametrization.hpp>
 
 namespace zhetapi {
 
@@ -53,7 +54,7 @@ T line_integral(Parametrization <T, P, F> prm)
 	T sum = 0;
 
 	do {
-		sum += dot(prm.value(), prm.dpos());
+		sum += inner(prm.value(), prm.dpos());
 	} while (prm.step());
 
 	return sum;

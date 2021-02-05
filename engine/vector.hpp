@@ -33,6 +33,12 @@ public:
 	template <class A>
 	Vector(A);
 
+	// The three major components
+	T x() const;
+	T y() const;
+	T z() const;
+
+	// Direction of the vector (radians)
 	T arg() const;
 	
 	// Min and max value
@@ -58,6 +64,9 @@ public:
 	// Static methods
 	static Vector one(size_t);
 	static Vector rarg(double, double);
+
+	// Exceptions (put in matrix later)
+	class index_out_of_bounds {};
 	
 #ifndef ZHP_CUDA
 	
@@ -189,8 +198,33 @@ Vector <T> ::Vector(const ::std::initializer_list <T> &ref)
 
 template <class T>
 template <class A>
-Vector <T> ::Vector(A x)
+Vector <T> ::Vector(A x) {}
+
+template <class T>
+T Vector <T> ::x() const
 {
+	if (this->__size < 1)
+		throw index_out_of_bounds();
+
+	return this->__array[0];
+}
+
+template <class T>
+T Vector <T> ::y() const
+{
+	if (this->__size < 2)
+		throw index_out_of_bounds();
+
+	return this->__array[1];
+}
+
+template <class T>
+T Vector <T> ::z() const
+{
+	if (this->__size < 3)
+		throw index_out_of_bounds();
+
+	return this->__array[2];
 }
 
 template <class T>
@@ -535,12 +569,6 @@ template <class T>
 T Vector <T> ::norm() const
 {
 	return sqrt(inner(*this, *this));
-}
-
-template <class T>
-T dot(const Vector <T> &a, const Vector <T> &b)
-{
-	return inner(a, b);
 }
 
 template <class T>

@@ -7,6 +7,8 @@
 // Engine headers
 #include <vector.hpp>
 
+namespace zhetapi {
+
 template <class T, class P, class F>
 class Parametrization {
 	T	__start;
@@ -82,6 +84,8 @@ template <class T, class P, class F>
 void Parametrization <T, P, F> ::reset()
 {
 	__pos = __start;
+}
+
 }
 
 #endif
