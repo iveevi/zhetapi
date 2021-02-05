@@ -29,7 +29,6 @@ T sv_integrate(F f, T a, T b, size_t partition_size = 1000)
 	return sum;
 }
 
-
 // Euler's method for single variable scalar functions
 template <class T, class Df>
 T eulers_method(Df df, Vector <T> given, T x, size_t partition_size = 1000)
