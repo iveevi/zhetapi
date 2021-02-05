@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <vector.hpp>
+#include <network.hpp>
 
 #include <std/calculus.hpp>
 
@@ -130,12 +131,36 @@ struct Agent {
 // Agent
 Agent agent;
 
+// Networks
+ml::NeuralNetwork <double> model(
+
+);
+
+ml::NeuralNetwork <double> competence(
+
+);
+
+// Heurestic
+double heurestic(Vec x)
+{
+	Vec d = agent.start - agent.position;
+	Vec Fd = d - F(x);
+	return Fd.arg();
+}
+
 // Step through each iteration
 void step(double dt)
 {
-	agent.move(F(agent.position), dt);
+	// Action
+	Vec A = Vec::rarg(agent.force, heurestic(agent.position));
+	
+	// Field
+	Vec E = F(agent.position);
 
-	cout << "Agent @ " << agent.position << endl;
+	agent.move(A + E, dt);
+
+	cout << "Agent @ " << agent.position
+		<< "\td = " << agent.distance() << endl;
 }
 
 // "Frame time"
@@ -145,7 +170,7 @@ const chrono::milliseconds frame((int) (1000 * delta));
 // Main function
 int main()
 {
-	for (size_t i = 0; i < 360; i++) {
+	for (size_t i = 0; i < 3600; i++) {
 		step(delta);
 
 		this_thread::sleep_for(frame);
