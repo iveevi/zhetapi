@@ -3,6 +3,8 @@
 #include <chrono>
 #include <thread>
 
+#include <GL/glut.h>
+
 #include <vector.hpp>
 #include <network.hpp>
 
@@ -17,8 +19,8 @@ using Vec = Vector <double>;
 // Force field
 auto F = [](const Vec &x) {
 	return Vec {
-		x[1] + 2 * std::cos(2 * x[1]),
-		4 * std::sin(5 * x[1]) * std::cos(10 * x[0]) - x[0]
+		std::sin(2 * x.x()) * x.y(),
+		-std::cos(2 * x.y()) * x.x()
 	};
 };
 
@@ -77,6 +79,16 @@ struct Agent {
 		position = start;
 
 		// Force
+		applied = Vec {
+			0.0,
+			0.0
+		};
+		
+		net = Vec {
+			0.0,
+			0.0
+		};
+
 		force = Fc(start, radius);
 
 		// Mass
@@ -93,6 +105,8 @@ struct Agent {
 	double	radius;
 
 	// Actions
+	Vec	applied;
+	Vec	net;
 	double	force;
 
 	// Methods
@@ -132,13 +146,9 @@ struct Agent {
 Agent agent;
 
 // Networks
-ml::NeuralNetwork <double> model(
+ml::NeuralNetwork <double> model();
 
-);
-
-ml::NeuralNetwork <double> competence(
-
-);
+ml::NeuralNetwork <double> competence();
 
 // Heurestic
 double heurestic(Vec x)
@@ -159,6 +169,10 @@ void step(double dt)
 
 	agent.move(A + E, dt);
 
+	// Set angle
+	agent.applied = A;
+	agent.net = A + E;
+
 	cout << "Agent @ " << agent.position
 		<< "\td = " << agent.distance() << endl;
 }
@@ -167,11 +181,117 @@ void step(double dt)
 const double delta(1.0/60.0);
 const chrono::milliseconds frame((int) (1000 * delta));
 
-// Main function
-int main()
+// Glut functions
+void timer(int value)
 {
+	step(delta);
+
+	glutPostRedisplay();
+	glutTimerFunc(1000 * delta, timer, 1);
+}
+
+void display(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	// Draw the point
+
+	double r = agent.radius;
+	double l = 1.5 * r;
+
+	Vec p = agent.position;
+	Vec s = agent.start;
+
+	Vec f = F(p);
+	Vec v = agent.velocity;
+	Vec a = agent.applied;
+	Vec n = agent.net;
+
+	glColor3f(0.0, 1.0, 0.0);
+	glBegin(GL_LINES);
+		glVertex2f(p.x()/l, p.y()/l);
+		glVertex2f((p.x() + f.x())/l, (p.y() + f.y())/l);
+	glEnd();
+	
+	glColor3f(0.0, 1.0, 1.0);
+	glBegin(GL_LINES);
+		glVertex2f(p.x()/l, p.y()/l);
+		glVertex2f((p.x() + v.x())/l, (p.y() + v.y())/l);
+	glEnd();
+	
+	glColor3f(1.0, 0.0, 1.0);
+	glBegin(GL_LINES);
+		glVertex2f(p.x()/l, p.y()/l);
+		glVertex2f((p.x() + a.x())/l, (p.y() + a.y())/l);
+	glEnd();
+	
+	glColor3f(1.0, 0.5, 1.0);
+	glBegin(GL_LINES);
+		glVertex2f(p.x()/l, p.y()/l);
+		glVertex2f((p.x() + n.x())/l, (p.y() + n.y())/l);
+	glEnd();
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POINTS);
+		glVertex2f(s.x()/l, s.y()/l);
+		glVertex2f(p.x()/l, p.y()/l);
+	glEnd();
+	
+	glColor3f(1.0, 0.0, 0.0);
+	glBegin(GL_POINTS);
+		glVertex2f(0, 0);
+	glEnd();
+
+	double turn = 2 * acos(-1) / 100;
+
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_LINE_LOOP);
+		for (double i = 0; i < 100; i++) {
+			glVertex2f(
+				(s.x() + r * std::cos(turn * i))/l,
+				(s.y() + r * std::sin(turn * i))/l
+			);
+		}
+	glEnd();
+
+	glFlush();
+	glutSwapBuffers();
+}
+
+void reshape(int w, int h)
+{
+	glViewport(0, 0, w, h);
+}
+
+// Main function
+int main(int argc, char **argv)
+{
+	// Remove std requirement for sin and cos
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_RGBA
+			| GLUT_DEPTH
+			| GLUT_DOUBLE
+			| GLUT_MULTISAMPLE);
+
+	glEnable(GL_MULTISAMPLE);
+
+	glutInitWindowSize(640, 480);
+	glutCreateWindow("Reinforcement Learning Simulation");
+
+	glutDisplayFunc(display);
+	glutReshapeFunc(reshape);
+	glutTimerFunc(1000 * delta, timer, 1);
+
+	glutMainLoop();
+
+	return 0;
 	for (size_t i = 0; i < 3600; i++) {
-		step(delta);
 
 		this_thread::sleep_for(frame);
 	}

@@ -10,9 +10,17 @@ endif ()
 # Set compiler
 set(CMAKE_CXX_COMPILER "g++-8")
 
-# Main project
+# Project listing
 project(rl)
 
+# Required libraries (create a separate cmake file for this)
+find_package(OpenGL REQUIRED)
+find_package(GLUT REQUIRED)
+
+# Main project
 add_executable(rl main.cpp)
+
+target_link_libraries(rl ${OPENGL_LIBRARIES})
+target_link_libraries(rl ${GLUT_LIBRARY})
 
 include_directories(../../engine)

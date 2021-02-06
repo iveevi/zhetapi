@@ -58,19 +58,19 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake
+CMAKE_COMMAND = /snap/cmake/775/bin/cmake
 
 # The command to remove a file.
-RM = /home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake -E rm -f
+RM = /snap/cmake/775/bin/cmake -E rm -f
 
 # Escaping for special characters.
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /workspace/zhetapi/samples/rl
+CMAKE_SOURCE_DIR = /home/ram/zhetapi/samples/rl
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /workspace/zhetapi/samples/rl
+CMAKE_BINARY_DIR = /home/ram/zhetapi/samples/rl
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -78,7 +78,7 @@ CMAKE_BINARY_DIR = /workspace/zhetapi/samples/rl
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/775/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -89,7 +89,7 @@ rebuild_cache/fast: rebuild_cache
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/home/linuxbrew/.linuxbrew/Cellar/cmake/3.19.2/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/snap/cmake/775/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/samples/rl/CMakeFiles /workspace/zhetapi/samples/rl//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/samples/rl/CMakeFiles /home/ram/zhetapi/samples/rl//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /workspace/zhetapi/samples/rl/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ram/zhetapi/samples/rl/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
