@@ -54,9 +54,21 @@ public:
 
 	Vector normalized() const;
 
-	// Vector operations
+	// Vector operations	
+	template <class F, class U>
+	friend U max(F, const Vector <U> &);
+	
+	template <class F, class U>
+	friend U min(F, const Vector <U> &);
+
+	template <class F, class U>
+	friend U argmax(F, const Vector <U> &);
+	
+	template <class F, class U>
+	friend U argmin(F, const Vector <U> &);
+	
 	template <class U>
-	friend U cross(const Vector <U> &, const Vector <U> &);
+	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
 
 	template <class U>
 	friend Vector <U> concat(const Vector <U> &, const Vector <U> &);
@@ -386,12 +398,71 @@ Vector <T> Vector <T> ::rarg(double r, double theta)
 }
 
 // Non-member functions
-template <class T>
-T cross(const Vector <T> &a, const Vector <T> &b)
+template <class F, class T>
+T max(F ftn, const Vector <T> &values)
 {
+	T max = ftn(values[0]);
+
+	size_t n = values.size();
+	for (size_t i = 1; i < n; i++) {
+		T k = ftn(values[i]);
+		if (k > max)
+			max = k;
+	}
+
+	return max;
+}
+
+template <class F, class T>
+T min(F ftn, const Vector <T> &values)
+{
+	T min = ftn(values[0]);
+
+	size_t n = values.size();
+	for (size_t i = 1; i < n; i++) {
+		T k = ftn(values[i]);
+		if (k < min)
+			min = k;
+	}
+
+	return min;
+}
+
+template <class F, class T>
+T argmax(F ftn, const Vector <T> &values)
+{
+	T max = values[0];
+
+	size_t n = values.size();
+	for (size_t i = 1; i < n; i++) {
+		if (ftn(values[i]) > ftn(max))
+			max = values[i];
+	}
+
+	return max;
+}
+
+template <class F, class T>
+T argmin(F ftn, const Vector <T> &values)
+{
+	T min = values[0];
+
+	size_t n = values.size();
+	for (size_t i = 1; i < n; i++) {
+		if (ftn(values[i]) < ftn(min))
+			min = values[i];
+	}
+
+	return min;
+}
+
+template <class T>
+Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
+{
+	// Switch between 2 and 3
 	assert(a.__size == b.size() == 3);
 
-	return {
+	return Vector <T> {
 		a[1] * b[2] - a[2] * b[1],
 		a[2] * b[0] - a[0] * b[2],
 		a[0] * b[1] - a[1] * b[0]

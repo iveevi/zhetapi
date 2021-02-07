@@ -16,11 +16,15 @@ using namespace zhetapi;
 // Type aliases
 using Vec = Vector <double>;
 
+// "Frame time"
+const double delta(1.0/60.0);
+const chrono::milliseconds frame((int) (1000 * delta));
+
 // Force field
 auto F = [](const Vec &x) {
 	return Vec {
-		std::sin(2 * x.x()) * x.y(),
-		-std::cos(2 * x.y()) * x.x()
+		0.5 * x.y(),
+		-2.0 * x.x()
 	};
 };
 
@@ -129,7 +133,7 @@ struct Agent {
 	}
 
 	double reward() {
-		return 1/distance();
+		return 1/(distance() + 0.1);
 	}
 
 	// Miscellaneous
@@ -151,15 +155,56 @@ ml::NeuralNetwork <double> model();
 ml::NeuralNetwork <double> competence();
 
 // Heurestic
+Vec dirs = acos(-1) * Vec {
+	0.5, 1.0, 1.5, 2.0
+};
+
+double reward(Agent state, double angle, int depth)
+{
+	if (depth == 0)
+		return state.reward();
+
+	// Action
+	Vec A = Vec::rarg(state.force, angle);
+	
+	// Field
+	Vec E = F(state.position);
+
+	// Dilate the time
+	state.move(A + E, 10 * delta);
+
+	auto ftn = [&](double theta) {
+		Agent c = state;
+
+		// Action
+		Vec A = Vec::rarg(c.force, theta);
+		
+		// Field
+		Vec E = F(c.position);
+
+		// Dilate the time
+		c.move(A + E, 10 * delta);
+	
+		double r = reward(c, theta, depth - 1);
+
+		return r;
+	};
+
+	return state.reward() + max(ftn, dirs);
+}
+
 double heurestic(Vec x)
 {
-	Vec d = agent.start - agent.position;
-	Vec Fd = d - F(x);
-	return Fd.arg();
+	static const int rdepth = 4;			// Recrusion depth
+	static auto ftn = [&](double theta) {
+		return reward(agent, theta, rdepth);
+	};
+
+	return argmax(ftn, dirs);
 }
 
 // Step through each iteration
-void step(double dt)
+void step()
 {
 	// Action
 	Vec A = Vec::rarg(agent.force, heurestic(agent.position));
@@ -167,7 +212,7 @@ void step(double dt)
 	// Field
 	Vec E = F(agent.position);
 
-	agent.move(A + E, dt);
+	agent.move(A + E, delta);
 
 	// Set angle
 	agent.applied = A;
@@ -177,14 +222,10 @@ void step(double dt)
 		<< "\td = " << agent.distance() << endl;
 }
 
-// "Frame time"
-const double delta(1.0/60.0);
-const chrono::milliseconds frame((int) (1000 * delta));
-
 // Glut functions
 void timer(int value)
 {
-	step(delta);
+	step();
 
 	glutPostRedisplay();
 	glutTimerFunc(1000 * delta, timer, 1);
