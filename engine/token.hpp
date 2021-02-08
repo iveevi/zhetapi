@@ -26,6 +26,7 @@ public:
 	 * 	vcl - variable cluster (place holder)
 	 * 	ftn - function
 	 * 	ndr - node reference
+	 *	ndd - node differential
 	 *	reg - barn registrable
 	 * 	wld - wildcard
 	 */
@@ -39,6 +40,7 @@ public:
 		vcl,
 		ftn,
 		ndr,
+		ndd,
 		reg,
 		wld
 	};

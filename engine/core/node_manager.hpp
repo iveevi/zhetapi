@@ -7,6 +7,7 @@
 
 // Engine headers
 #include <core/node_reference.hpp>
+#include <core/node_differential.hpp>
 #include <core/parser.hpp>
 #include <core/types.hpp>
 

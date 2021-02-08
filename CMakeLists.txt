@@ -72,6 +72,7 @@ set(ZHETAPI_SOURCE
 	source/image.cpp
 	source/label.cpp
 	source/node.cpp
+	source/node_differential.cpp
 	source/node_differentiation.cpp
 	source/node_manager.cpp
 	source/node_reference.cpp

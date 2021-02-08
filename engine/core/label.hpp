@@ -76,7 +76,10 @@ enum lbl {
 
 	// Modifier,
 	l_post_modifier,
-	l_pre_modifier
+	l_pre_modifier,
+
+	// Calculus
+	l_differential
 };
 
 /**

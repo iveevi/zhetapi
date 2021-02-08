@@ -66,7 +66,11 @@ std::string strlabs[] = {
 	"variable constant",
 
 	// Modifiers
-	"post modifier"
+	"post modifier",
+	"pre modifier",
+
+	// Calculus
+	"differential"
 };
 
 bool is_constant(lbl type)

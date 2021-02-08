@@ -322,7 +322,10 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 	contexts.push_back({{}, ""});
 
-	using namespace std;
+	// Check once for differential
+	Token *dtok = __barn->get("d");
+	auto ditr = find(__params.begin(), __params.end(), "d");
+
 	for (size_t i = 0; i < str.length(); i++) {
 		ctx tmp;
 
@@ -335,17 +338,35 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 			Token *tptr = __barn->get(pr.second);
 
+			// Potential differential node
+			auto diff = __params.end();
+			if ((pr.second)[0] == 'd'
+				&& (dtok == nullptr)
+				&& (ditr == __params.end())) {
+				std::cout << "Potential differential: " << pr.second.substr(1) << " (" << pr.second << ")" << std::endl;
+				// Priority on parameters
+				diff = find(__params.begin(), __params.end(), pr.second.substr(1));
+			}
+
+			size_t dindex = std::distance(__params.begin(), diff);
+
 			bool matches = true;
 
 			node t;
-			if (__barn->present(pr.second))
+			if (__barn->present(pr.second)) {
 				t = node(new operation_holder(pr.second), {});
-			else if (itr != __params.end())
+			} else if (itr != __params.end()) {
 				t = node(new node_reference(&__refs[index], pr.second, index, true), {});
-			else if (tptr != nullptr)
+			} else if (tptr != nullptr) {
 				t = node(tptr, {});
-			else
+			} else if (diff != __params.end()) {
+				t = node(new node_differential(&__refs[dindex], pr.second.substr(1), dindex, true), {});
+				// t = node(new node_differential(&__refs[dindex], pr.second.substr(1), dindex, true), {});
+				std::cout << "t:" << std::endl;
+				t.print();
+			} else {
 				matches = false;
+			}
 
 			if (matches) {
 				tmp.push_back(pr);
@@ -810,6 +831,9 @@ void node_manager::label(node &ref)
 		// Transfer labels, makes things easier
 		ref.__label = (dynamic_cast <node_reference *>
 				(ref.__tptr.get()))->get()->__label;
+		break;
+	case Token::ndd:
+		ref.__label = l_differential;
 		break;
 	case Token::reg:
 		for (node &leaf : ref.__leaves)
