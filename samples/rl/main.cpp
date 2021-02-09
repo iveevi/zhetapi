@@ -17,7 +17,7 @@ using namespace zhetapi;
 using Vec = Vector <double>;
 
 // "Frame time"
-const double delta(1.0/60.0);
+const double delta(1.0/120.0);
 const chrono::milliseconds frame((int) (1000 * delta));
 
 // Force field
@@ -137,11 +137,11 @@ struct Agent {
 	}
 
 	// Miscellaneous
-	double runit() {
+	static double runit() {
 		return rand() / ((double) RAND_MAX);
 	}
 
-	double rintv(double a, double b) {
+	static double rintv(double a, double b) {
 		return (a + runit() * (b - a));
 	}
 };
@@ -150,9 +150,17 @@ struct Agent {
 Agent agent;
 
 // Networks
-ml::NeuralNetwork <double> model();
+ml::NeuralNetwork <double> model(6, {
+	ml::Layer <double> (4, new ml::ReLU <double> ())
+	ml::Layer <double> (8, new ml::Sigmoid <double> ())
+	ml::Layer <double> (4, new ml::ReLU <double> ())
+});
 
-ml::NeuralNetwork <double> competence();
+ml::NeuralNetwork <double> competence(6, {
+	ml::Layer <double> (4, new ml::ReLU <double> ())
+	ml::Layer <double> (8, new ml::Sigmoid <double> ())
+	ml::Layer <double> (4, new ml::ReLU <double> ())
+});
 
 // Heurestic
 Vec dirs = acos(-1) * Vec {
@@ -217,9 +225,6 @@ void step()
 	// Set angle
 	agent.applied = A;
 	agent.net = A + E;
-
-	cout << "Agent @ " << agent.position
-		<< "\td = " << agent.distance() << endl;
 }
 
 // Glut functions

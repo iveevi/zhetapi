@@ -2,20 +2,13 @@
 #define FILTER_H_
 
 // Engine headers
-#include <image.hpp>
-#include <matrix.hpp>
+#include <tensor.hpp>
 
 namespace zhetapi {
 
-namespace image {
-
 class Filter {
-	Matrix <unsigned char>	__filter;
 public:
-	Filter(const Matrix <unsigned char> &);
 };
-
-}
 
 }
 

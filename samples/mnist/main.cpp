@@ -6,6 +6,7 @@
 // Engine standard headers
 #include <std/activations.hpp>
 #include <std/optimizers.hpp>
+#include <std/initializers.hpp>
 #include <std/erfs.hpp>
 
 #define ZHP_ENGINE_PATH "../../engine"
@@ -77,8 +78,8 @@ int main()
 
 	// Create the model
 	ml::NeuralNetwork <double> model(784, {
-		ml::Layer <double> (30, new ml::Sigmoid <double> ()),
-		ml::Layer <double> (10, new ml::Softmax <double> ())
+		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784)),
+		ml::Layer <double> (10, new ml::Softmax <double> (), ml::Xavier <double> (30))
 	});
 
 	// Temporary variable
