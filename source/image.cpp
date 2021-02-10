@@ -4,6 +4,23 @@ namespace zhetapi {
 
 namespace image {
 
+// Reinterpret constructor (row-contingious data)
+Image::Image(byte *data, size_t width, size_t height, size_t channels)
+		: Tensor <unsigned char> ({width, height, channels})
+{
+	size_t nbytes = width * height * channels;
+	memcpy(__array, data, nbytes);
+}
+
+Image::Image(byte **data, size_t width, size_t height, size_t channels)
+		: Tensor <unsigned char> ({width, height, channels})
+{
+	size_t rbytes = width * channels;
+	for (size_t i = 0; i < height; i++)
+		memcpy(__array + i * rbytes, data[i], rbytes);
+}
+
+// TODO: Resolve the similarity between this and the above constructor
 Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size_t rbytes)
 		: Tensor <unsigned char> ({width, height, channels})
 {
@@ -26,6 +43,35 @@ size_t Image::channels() const
 	return __dim[2];
 }
 
+// Cropping images (from top-right to bottom-left)
+Image Image::crop(const pixel &tr, const pixel &bl) const
+{
+	if (bl <= tr)
+		throw bad_input_order();
+
+	if (!in_bounds(tr) || !in_bounds(bl))
+		throw out_of_bounds();
+
+	size_t s_index = tr.first * __dim[1] + tr.second;
+	// size_t e_index = bl.first * __dim[1] + bl.second;
+
+	size_t n_width = bl.first - tr.first + 1;
+	size_t n_height = bl.second - tr.second + 1;
+
+	byte **rows = new byte *[n_height];
+	for (size_t i = 0; i < n_height; i++) {
+		size_t k = __dim[2] * (s_index + i * __dim[1]);
+		rows[i] = &(__array[k]);
+	}
+
+	Image out(rows, n_width, n_height, __dim[2]);
+
+	// Free the memory
+	delete[] rows;
+
+	return out;
+}
+
 const unsigned char *const Image::raw() const
 {
 	return __array;
@@ -40,6 +86,12 @@ unsigned char **Image::row_bytes() const
 		rows[i] = &(__array[stride * i]);
 
 	return rows;
+}
+
+bool Image::in_bounds(const pixel &px) const
+{
+	return (px.first >= 0 && px.first < __dim[0])
+		&& (px.second >= 0 && px.second < __dim[1]);
 }
 
 #ifndef ZHP_NO_GUI
@@ -96,28 +148,23 @@ int Image::show() const
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
 	glEnableVertexAttribArray(0);
 	// color attribute
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 	// texture coord attribute
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
 	glEnableVertexAttribArray(2);
 
 
-	// load and create a texture 
-	// -------------------------
 	unsigned int texture;
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture); // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-	// set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	// set texture wrapping to GL_REPEAT (default wrapping method)
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	// set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	// load image, create texture and generate mipmaps
 	int width, height, nrChannels;
 	
 	const unsigned char *data = __array;

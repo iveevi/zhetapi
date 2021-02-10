@@ -11,8 +11,8 @@ using namespace std;
 const string url = "https://query1.finance.yahoo.com/v7/finance/download/"; 
 
 string stocks[] = {
-	"GME",
-	"^GSPC"
+	"TSLA",
+	"BTC-USD"
 };
 
 struct stock_stamp {

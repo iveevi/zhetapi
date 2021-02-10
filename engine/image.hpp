@@ -27,11 +27,19 @@ namespace image {
 // Image class
 class Image : public Tensor <unsigned char> {
 public:
+	// Using declararations
+	using byte = unsigned char;
+	using pixel = std::pair <size_t, size_t>;
+
+	Image(byte *, size_t, size_t, size_t);
+	Image(byte **, size_t, size_t, size_t);
 	Image(png_bytep *, size_t, size_t, size_t, size_t);
 
 	size_t width() const;
 	size_t height() const;
 	size_t channels() const;
+
+	Image crop(const pixel &, const pixel &) const;
 
 	const unsigned char *const raw() const;
 
@@ -43,6 +51,10 @@ public:
 
 #endif
 
+	class out_of_bounds {};
+	class bad_input_order {};
+protected:
+	bool in_bounds(const pixel &) const;
 };
 
 // Thrown when the file cannot be accessed (replace with std)
