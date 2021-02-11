@@ -13,7 +13,7 @@ bool integration()
 	};
 
 	cout << "f(4) = " << f(4) << endl;
-	cout << "f(4) = " << eulers_method(df, {2, f(2)}, 4) << endl;
+	cout << "f(4) = " << eulers_method(df, {2.0, f(2)}, 4.0) << endl;
 
 	return true;
 }

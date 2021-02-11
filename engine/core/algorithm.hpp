@@ -22,9 +22,6 @@ class algorithm : public Token {
 
 	node_manager			__compiled;
 
-	// Compile when called on
-	// std::vector <std::string>			__statements;
-
 	std::string			__alg;
 public:
 	algorithm();

@@ -1,10 +1,21 @@
 #!/bin/bash
 
+THREADS="8"
+
+LAST="${@: -1}"
+REGEX='^[0-9]+$'
+
+if ! [[ $LAST = $REGEX ]]; then
+	echo "Setting number of threads to $LAST."
+	
+	THREADS=$LAST
+fi
+
 # Functions
 function compile_normal {
 	cmake -DCMAKE_BUILD_TYPE=Release .
 
-	make -j8 $1
+	make -j$THREADS $1
 }
 
 function compile_debug {
@@ -12,7 +23,7 @@ function compile_debug {
 
 	cmake -DCMAKE_BUILD_TYPE=Debug .
 
-	make -j8 $1
+	make -j$THREADS $1
 
 	mv $1 debug/$1-debug
 }
@@ -165,7 +176,7 @@ elif [ $1 = "port" ]; then
 	mkdir -p bin
 
 	# Compile and move apps
-	make -j8 port
+	make -j$THREADS port
 
 	mv port bin/
 
