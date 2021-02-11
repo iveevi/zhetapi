@@ -15,6 +15,9 @@ Token *execute(string str)
 	if (tsize > 1) {
 		zhetapi::Token *tptr = nullptr;
 		
+		node_manager::undefined_symbol us("");
+		bool pe = false;
+
 		try {
 			zhetapi::node_manager mg(tmp[tsize - 1], &barn);
 
@@ -25,16 +28,27 @@ Token *execute(string str)
 		} catch (Barn::unknown_operation_overload_exception e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
+		} catch (node_manager::undefined_symbol e) {
+			us = e;
+			pe = true;
 		}
 
 		for (int i = tsize - 2; i >= 0; i--) {
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];
 
 			try {
-				zhetapi::Function f = ftr;
+				zhetapi::Function f(ftr, &barn);
 
 				barn.put(f);
+
+				cout << "function:" << endl;
+				f.print();
 			} catch (...) {
+				if (pe) {
+					cout << "err:" << us.what() << endl;
+					exit(-1);
+				}
+
 				barn.put(tptr, tmp[i]);
 			}
 		}

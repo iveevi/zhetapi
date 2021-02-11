@@ -54,6 +54,8 @@ if (glfw3_FOUND)
 	message("${present}Found GLFW3.${reset}")
 else()
 	message("${notify}Missing glfw3: GUI functions such as Image::show() will not be available.${reset}")
+
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZHP_NO_GUI=0")
 endif()
 
 include_directories(${PNG_INCLUDE_DIR})

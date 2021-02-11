@@ -9,32 +9,18 @@
 
 namespace zhetapi {
 
-	class node_differential : public Token {
-	protected:
-		node *		__ref;
-		std::string	__symbol;
-		size_t		__index;
-		bool		__var;
-	public:
-		node_differential(node *, const ::std::string &, size_t, bool = false);
+class node_differential : public Token {
+protected:
+	Token *		__ref;
+public:
+	node_differential(Token *);
 
-		node *get();
-		const node &get() const;
+	type caller() const override;
+	Token *copy() const override;
+	std::string str() const override;
 
-		size_t index() const;
-
-		const ::std::string &symbol() const;
-
-		bool is_variable() const;
-
-		type caller() const override;
-		Token *copy() const override;
-		::std::string str() const override;
-
-		virtual bool operator==(Token *) const override;
-
-		static bool address;
-	};
+	virtual bool operator==(Token *) const override;
+};
 
 }
 

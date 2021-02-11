@@ -12,7 +12,8 @@ node_manager::node_manager(const node_manager &other) :
 	rereference(__tree);
 }
 
-node_manager::node_manager(const std::string &str, Barn *barn) : __barn(barn) 
+node_manager::node_manager(const std::string &str, Barn *barn)
+		: __barn(barn) 
 {
 	zhetapi::parser pr;
 
@@ -29,9 +30,10 @@ node_manager::node_manager(const std::string &str, Barn *barn) : __barn(barn)
 	count_up(__tree);
 }
 
-node_manager::node_manager(const std::string &str, const
-		std::vector <std::string> &params, Barn *barn) :
-	__params(params), __barn(barn) 
+node_manager::node_manager(const std::string &str,
+		const std::vector <std::string> &params,
+		Barn *barn) 
+		: __params(params), __barn(barn) 
 {
 	parser pr;
 
@@ -322,6 +324,10 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 	contexts.push_back({{}, ""});
 
+	using namespace std;
+	cout << "BARN: \"" << str << "\" @ " << __barn << " (nm @ " << this << ")" << endl;
+	__barn->list();
+
 	// Check once for differential
 	Token *dtok = __barn->get("d");
 	auto ditr = find(__params.begin(), __params.end(), "d");
@@ -339,13 +345,21 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 			Token *tptr = __barn->get(pr.second);
 
 			// Potential differential node
+			Token *dptr = nullptr;
 			auto diff = __params.end();
 			if ((pr.second)[0] == 'd'
 				&& (dtok == nullptr)
 				&& (ditr == __params.end())) {
-				std::cout << "Potential differential: " << pr.second.substr(1) << " (" << pr.second << ")" << std::endl;
 				// Priority on parameters
+				using namespace std;
 				diff = find(__params.begin(), __params.end(), pr.second.substr(1));
+				dptr = __barn->get(pr.second.substr(1));
+
+				cout << "pr: " << pr.second.substr(1) << endl;
+				if (dptr)
+					cout << "\tdptr: " << dptr->str() << endl;
+				else
+					cout << "\tdptr = " << dptr << endl;
 			}
 
 			size_t dindex = std::distance(__params.begin(), diff);
@@ -360,10 +374,9 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 			} else if (tptr != nullptr) {
 				t = node(tptr, {});
 			} else if (diff != __params.end()) {
-				t = node(new node_differential(&__refs[dindex], pr.second.substr(1), dindex, true), {});
-				// t = node(new node_differential(&__refs[dindex], pr.second.substr(1), dindex, true), {});
-				std::cout << "t:" << std::endl;
-				t.print();
+				t = node(new node_differential(new node_reference(&__refs[dindex], pr.second.substr(1), dindex, true)), {});
+			} else if (dptr != nullptr) {
+				t = node(new node_differential(dptr), {});
 			} else {
 				matches = false;
 			}

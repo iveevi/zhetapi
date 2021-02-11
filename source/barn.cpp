@@ -272,6 +272,8 @@ Barn &Barn::operator=(const Barn &other)
 	if (this != &other) {
 		__var_table = other.__var_table;
 		__ftr_table = other.__ftr_table;
+		__reg_table = other.__reg_table;
+		__alg_table = other.__alg_table;
 
 		for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
@@ -465,7 +467,7 @@ void Barn::list() const
 	
 	std::cout << "\tFunctions:" << std::endl;
 	for (auto spr : __ftr_table)
-		std::cout << spr.second.str() << std::endl;
+		std::cout << "\t\t" << spr.second.str() << std::endl;
 }
 
 void Barn::list_registered(std::string file) const

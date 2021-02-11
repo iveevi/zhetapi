@@ -14,10 +14,11 @@ Function::Function() : __threads(1) {}
 Function::Function(const char *str) : Function(::std::string
 		(str)) {}
 
-Function::Function(const ::std::string &str) : __threads(1)
+// Symbolic construction
+Function::Function(const std::string &str) : __threads(1)
 {
-	::std::string pack;
-	::std::string tmp;
+	std::string pack;
+	std::string tmp;
 
 	size_t count;
 	size_t index;
@@ -87,6 +88,84 @@ Function::Function(const ::std::string &str) : __threads(1)
 
 	// Construct the tree manager
 	__manager = node_manager(str.substr(++index), __params, &barn);
+
+	__manager.simplify();
+}
+
+// Symbolic constructor with external symbol table
+Function::Function(const std::string &str, Barn *bptr) : __threads(1)
+{
+	std::string pack;
+	std::string tmp;
+
+	size_t count;
+	size_t index;
+	size_t start;
+	size_t end;
+	size_t i;
+
+	bool valid;
+	bool sb;
+	bool eb;
+
+	count = 0;
+
+	valid = false;
+	sb = false;
+	eb = false;
+
+	// Split string into expression and symbols
+	for (i = 0; i < str.length(); i++) {
+		if (str[i] == '=') {
+			valid = true;
+			index = i;
+
+			++count;
+		}
+	}
+
+	if (!valid || count != 1)
+		throw invalid_definition();
+
+	__symbol = str.substr(0, index);
+
+
+	// Determine parameters' symbols
+	for (start = -1, i = 0; i < __symbol.length(); i++) {
+		if (str[i] == '(' && start == -1) {
+			start = i;
+			sb = true;
+		}
+
+		if (str[i] == ')') {
+			end = i;
+			eb = true;
+		}
+	}
+
+	if (!sb || !eb)
+		throw invalid_definition();
+
+	pack = __symbol.substr(start + 1, end - start - 1);
+
+	for (i = 0; i < pack.length(); i++) {
+		if (pack[i] == ',' && !tmp.empty()) {
+			__params.push_back(tmp);
+			
+			tmp.clear();
+		} else if (!isspace(pack[i])) {
+			tmp += pack[i];
+		}
+	}
+
+	if (!tmp.empty())
+		__params.push_back(tmp);
+	
+	// Determine function's symbol
+	__symbol = __symbol.substr(0, start);
+
+	// Construct the tree manager
+	__manager = node_manager(str.substr(++index), __params, bptr);
 
 	__manager.simplify();
 }

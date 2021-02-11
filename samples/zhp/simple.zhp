@@ -1,18 +1,2 @@
-x = 3
-
-println("x = ", x)
-
-alg f()
-{
-	println("hello from f")
-
-	x = 7
-
-	println("inside f, x = ", x)
-
-	println("second printf")
-}
-
-f()
-
-println("x = ", x)
+f(x) = x^2
+g(x) = (x^2) * (df/dx)

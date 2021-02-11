@@ -36,9 +36,11 @@ public:
 	Function();
 	Function(const char *);
 	Function(const std::string &);
+	Function(const std::string &, Barn *);
 
-	Function(const std::string &, const std::vector <std::string>
-			&, const node_manager &);
+	Function(const std::string &,
+		const std::vector <std::string> &,
+		const node_manager &);
 
 	Function(const Function &);
 
@@ -47,7 +49,7 @@ public:
 
 	void set_threads(size_t);
 
-	Token *operator()(::std::vector <Token *>);
+	Token *operator()(std::vector <Token *>);
 
 	template <class ... A>
 	Token *operator()(A ...);
