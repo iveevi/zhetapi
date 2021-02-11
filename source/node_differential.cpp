@@ -6,6 +6,11 @@ namespace zhetapi {
 
 node_differential::node_differential(Token *tptr) : __ref(tptr) {}
 
+Token *node_differential::get() const
+{
+	return __ref;
+}
+
 Token::type node_differential::caller() const
 {
 	return Token::ndd;
@@ -18,7 +23,7 @@ Token *node_differential::copy() const
 
 std::string node_differential::str() const
 {
-	return "differential \"" + __ref->str() + "\"";
+	return "differential: " + __ref->str();
 }
 
 bool node_differential::operator==(Token *tptr) const

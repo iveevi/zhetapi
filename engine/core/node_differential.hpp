@@ -15,6 +15,8 @@ protected:
 public:
 	node_differential(Token *);
 
+	Token *get() const;
+
 	type caller() const override;
 	Token *copy() const override;
 	std::string str() const override;

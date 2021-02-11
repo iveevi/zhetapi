@@ -1,2 +1,5 @@
 f(x) = x^2
 g(x) = (x^2) * (df/dx)
+
+println("f(x) = ", f)
+println("g(x) = ", g)

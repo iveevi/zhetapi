@@ -324,13 +324,9 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 	contexts.push_back({{}, ""});
 
-	using namespace std;
-	cout << "BARN: \"" << str << "\" @ " << __barn << " (nm @ " << this << ")" << endl;
-	__barn->list();
-
 	// Check once for differential
 	Token *dtok = __barn->get("d");
-	auto ditr = find(__params.begin(), __params.end(), "d");
+	auto ditr = std::find(__params.begin(), __params.end(), "d");
 
 	for (size_t i = 0; i < str.length(); i++) {
 		ctx tmp;
@@ -338,7 +334,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 		for (auto &pr : contexts) {
 			pr.second += str[i];
 		
-			auto itr = find(__params.begin(), __params.end(), pr.second);
+			auto itr = std::find(__params.begin(), __params.end(), pr.second);
 
 			size_t index = std::distance(__params.begin(), itr);
 
@@ -351,15 +347,8 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				&& (dtok == nullptr)
 				&& (ditr == __params.end())) {
 				// Priority on parameters
-				using namespace std;
 				diff = find(__params.begin(), __params.end(), pr.second.substr(1));
 				dptr = __barn->get(pr.second.substr(1));
-
-				cout << "pr: " << pr.second.substr(1) << endl;
-				if (dptr)
-					cout << "\tdptr: " << dptr->str() << endl;
-				else
-					cout << "\tdptr = " << dptr << endl;
 			}
 
 			size_t dindex = std::distance(__params.begin(), diff);
@@ -481,6 +470,9 @@ void node_manager::simplify(node &ref)
 	// if (ophptr && (ophptr->code == add || ophptr->code == sub))
 	//	simplify_separable(ref);
 
+	if (ophptr && (ophptr->code == mul || ophptr->code == dvs))
+		simplify_mult_div(ref, ophptr->code);
+
 	for (auto &child : ref.__leaves)
 		simplify(child);
 }
@@ -541,6 +533,38 @@ void node_manager::simplify_separable(node &ref)
 	}
 
 	ref.transfer(rest[0]);
+}
+
+void node_manager::simplify_mult_div(node &ref, codes c)
+{
+	if (c == dvs) {
+		lbl l1 = ref.__leaves[0].__label;
+		lbl l2 = ref.__leaves[1].__label;
+
+		if (l1 == l_differential && l2 == l_differential) {
+			Token *t1 = ref.__leaves[0].__tptr.get();
+			Token *t2 = ref.__leaves[1].__tptr.get();
+
+			t1 = (dynamic_cast <node_differential *> (t1))->get();
+			t2 = (dynamic_cast <node_differential *> (t2))->get();
+
+			Function *ftn;
+			std::string var;
+
+			if (t1->caller() == Token::ftn)
+				ftn = dynamic_cast <Function *> (t1);
+			
+			if (t2->caller() == Token::ndr)
+				var = (dynamic_cast <node_reference *> (t2))->symbol();
+
+			if (ftn->is_variable(var)) {
+				Function f = ftn->differentiate(var);
+
+				ref.__leaves.clear();
+				ref.__tptr.reset(f.copy());
+			}
+		}
+	}
 }
 
 // Differentiation

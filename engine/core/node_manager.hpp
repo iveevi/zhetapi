@@ -82,6 +82,7 @@ private:
 
 	void simplify(node &);
 	void simplify_separable(node &);
+	void simplify_mult_div(node &, codes);
 
 	void differentiate(node &);
 	void differentiate_mul(node &);

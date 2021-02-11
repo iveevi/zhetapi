@@ -23,7 +23,7 @@ namespace zhetapi {
 
 		size_t index() const;
 
-		const ::std::string &symbol() const;
+		const std::string &symbol() const;
 
 		bool is_variable() const;
 

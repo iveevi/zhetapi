@@ -181,6 +181,12 @@ Function::Function(const Function &other) :
 		__manager(other.__manager), __threads(1) {}
 
 // Getters
+bool Function::is_variable(const std::string &str) const
+{
+	return std::find(__params.begin(), __params.end(), str)
+		!= __params.end();
+}
+
 std::string &Function::symbol()
 {
 	return __symbol;

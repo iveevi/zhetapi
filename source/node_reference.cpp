@@ -43,7 +43,7 @@ namespace zhetapi {
 		return new node_reference(__ref, __symbol, __index, __var);
 	}
 
-	::std::string node_reference::str() const
+	std::string node_reference::str() const
 	{
 		::std::ostringstream oss;
 

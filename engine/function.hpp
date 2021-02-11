@@ -44,6 +44,8 @@ public:
 
 	Function(const Function &);
 
+	bool is_variable(const std::string &) const;
+
 	std::string &symbol();
 	const std::string symbol() const;
 
@@ -58,7 +60,7 @@ public:
 	Token *operator()(A ...);
 
 	template <class ... A>
-	Token *derivative(const ::std::string &, A ...);
+	Token *derivative(const std::string &, A ...);
 
 	Function differentiate(const ::std::string &) const;
 

@@ -40,9 +40,6 @@ Token *execute(string str)
 				zhetapi::Function f(ftr, &barn);
 
 				barn.put(f);
-
-				cout << "function:" << endl;
-				f.print();
 			} catch (...) {
 				if (pe) {
 					cout << "err:" << us.what() << endl;
