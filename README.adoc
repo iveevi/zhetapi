@@ -4,14 +4,9 @@
 
 image::zhetapi-logo.png[]
 
+image:https://semaphoreci.com/api/v1/vedavamadathil/zhetapi/branches/master/badge.svg[Build, link=https://semaphoreci.com/vedavamadathil/zhetapi]
+
 ---
-
-:travis-ci: https://travis-ci.com/github/vedavamadathil/zhetapi
-
-|===
-| | `CLI` | `API`
-| `Linux` | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/1?use_travis_com=true[Build Status (Travis CI), link={travis-ci}] | image:https://travis-matrix-badges.herokuapp.com/repos/vedavamadathil/zhetapi/branches/master/2?use_travis_com=true[Build Status (Travis CI), link={travis-ci}]
-|===
 
 # Introduction
 Zhetapi is a `C++17` computation library that was built in the hopes of
