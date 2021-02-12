@@ -1,4 +1,6 @@
 = Zhetapi ℤHΠ
+
+image:https://api.codacy.com/project/badge/Grade/6bce1a06063f43e8851e155f6c3922ff[link="https://app.codacy.com/gh/vedavamadathil/zhetapi?utm_source=github.com&utm_medium=referral&utm_content=vedavamadathil/zhetapi&utm_campaign=Badge_Grade"]
 :sectnums:
 :toc2:
 
