@@ -72,7 +72,14 @@ public:
 
 	template <class U>
 	friend Vector <U> concat(const Vector <U> &, const Vector <U> &);
-
+	
+	template <class U>
+	friend U inner(const Vector <U> &, const Vector <U> &);
+	
+	// Heterogenous inner product (assumes first underlying type)
+	template <class U, class V>
+	friend U inner(const Vector <U> &, const Vector <V> &);
+	
 	// Static methods
 	static Vector one(size_t);
 	static Vector rarg(double, double);
@@ -111,9 +118,6 @@ public:
 	
 	T norm() const;
 	
-	template <class U>
-	friend U inner(const Vector <U> &, const Vector <U> &);
-
 #else
 	
 	__host__ __device__
@@ -483,6 +487,30 @@ Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 	return Vector <T> (a.size() + b.size(), arr);
 }
 
+template <class T>
+T inner(const Vector <T> &a, const Vector <T> &b)
+{
+	T acc = 0;
+
+	assert(a.size() == b.size());
+	for (size_t i = 0; i < a.__size; i++)
+		acc += a[i] * b[i];
+
+	return acc;
+}
+
+template <class T, class U>
+T inner(const Vector <T> &a, const Vector <U> &b)
+{
+	T acc = 0;
+
+	assert(a.size() == b.size());
+	for (size_t i = 0; i < a.__size; i++)
+		acc += (T) (a[i] * b[i]);	// Cast the result
+
+	return acc;
+}
+
 #ifndef ZHP_CUDA
 
 template <class T>
@@ -640,18 +668,6 @@ template <class T>
 T Vector <T> ::norm() const
 {
 	return sqrt(inner(*this, *this));
-}
-
-template <class T>
-T inner(const Vector <T> &a, const Vector <T> &b)
-{
-	T acc = 0;
-
-	assert(a.size() == b.size());
-	for (size_t i = 0; i < a.__size; i++)
-		acc += a[i] * b[i];
-
-	return acc;
 }
 
 #endif

@@ -43,6 +43,39 @@ size_t Image::channels() const
 	return __dim[2];
 }
 
+void Image::set(const pixel &px, size_t channel, byte bt)
+{
+	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+
+	__array[index + channel] = bt;
+}
+
+void Image::set(const pixel &px, const Vector <byte> &bytes)
+{
+	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+
+	size_t nbytes = bytes.size();
+	for (size_t i = 0; i < nbytes && i + index < __size; i++)
+		__array[i + index] = bytes[i];
+}
+
+// Extract a single channel
+Image Image::channel(size_t channels) const
+{
+	size_t len = __dim[0] * __dim[1];
+
+	byte *data = new byte[len];
+	for (size_t i = 0; i < len; i++)
+		data[i] = __array[i * __dim[2] + channels];
+
+	Image out(data, __dim[0], __dim[1]);
+
+	// Free memory
+	delete[] data;
+
+	return out;
+}
+
 // Cropping images (from top-right to bottom-left)
 Image Image::crop(const pixel &tr, const pixel &bl) const
 {

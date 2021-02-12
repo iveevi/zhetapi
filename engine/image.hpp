@@ -18,6 +18,8 @@
 
 // Engine headers
 #include <tensor.hpp>
+#include <vector.hpp>
+
 #include <core/shader.hpp>
 
 namespace zhetapi {
@@ -31,14 +33,20 @@ public:
 	using byte = unsigned char;
 	using pixel = std::pair <size_t, size_t>;
 
-	Image(byte *, size_t, size_t, size_t);
-	Image(byte **, size_t, size_t, size_t);
-	Image(png_bytep *, size_t, size_t, size_t, size_t);
+	Image(byte *, size_t, size_t, size_t = 1);		// Contigous array
+	Image(byte **, size_t, size_t, size_t);			// List of rows
+	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
 
 	size_t width() const;
 	size_t height() const;
 	size_t channels() const;
+	
+	// Pixel value setter
+	void set(const pixel &, size_t, byte);
+	void set(const pixel &, const Vector <byte> &);
 
+	// Image extractors
+	Image channel(size_t) const;
 	Image crop(const pixel &, const pixel &) const;
 
 	const unsigned char *const raw() const;
@@ -53,6 +61,10 @@ public:
 
 	class out_of_bounds {};
 	class bad_input_order {};
+
+	// Friends
+	template <class T>
+	friend class Convolution;
 protected:
 	bool in_bounds(const pixel &) const;
 };

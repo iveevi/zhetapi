@@ -5,9 +5,9 @@ THREADS="8"
 LAST="${@: -1}"
 REGEX='^[0-9]+$'
 
-if ! [[ $LAST = $REGEX ]]; then
-	echo "Setting number of threads to $LAST."
-	
+if [[ "$LAST" =~ $REGEX ]]; then
+	echo "Setting number of concurrent threads to $LAST"
+
 	THREADS=$LAST
 fi
 

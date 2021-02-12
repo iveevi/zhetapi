@@ -114,9 +114,11 @@ add_executable(zhetapi source/cli/cli.cpp)
 target_link_libraries(zhetapi PUBLIC zhp-shared)
 
 # Compile exp file
+find_package(OpenCV QUIET)
 add_executable(exp source/exp/exp.cpp ${EXT_SOURCE})
 
-target_link_libraries(exp ${PNG_LIBRARY} zhp-shared)
+target_link_libraries(exp ${PNG_LIBRARY} zhp-shared ${OpenCV_LIBS})
+include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Compile exp file
 add_executable(gui source/exp/gui.cpp ${EXT_SOURCE})
