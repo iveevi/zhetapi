@@ -70,6 +70,7 @@ public:
 	template <class U>
 	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
 
+	// Vector concatenation
 	template <class U>
 	friend Vector <U> concat(const Vector <U> &, const Vector <U> &);
 	
@@ -485,6 +486,12 @@ Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 		arr[a.size() + i] = b[i];
 	
 	return Vector <T> (a.size() + b.size(), arr);
+}
+
+template <class T, class ... U>
+Vector <T> concat(const Vector <T> &a, const Vector <T> &b, U ... args)
+{
+	return concat(concat(a, b), args...);
 }
 
 template <class T>

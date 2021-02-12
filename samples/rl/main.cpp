@@ -9,6 +9,7 @@
 #include <network.hpp>
 
 #include <std/calculus.hpp>
+#include <std/activations.hpp>
 
 using namespace std;
 using namespace zhetapi;
@@ -150,16 +151,19 @@ struct Agent {
 Agent agent;
 
 // Networks
+
+// On-line model
 ml::NeuralNetwork <double> model(6, {
-	ml::Layer <double> (4, new ml::ReLU <double> ())
-	ml::Layer <double> (8, new ml::Sigmoid <double> ())
+	ml::Layer <double> (4, new ml::ReLU <double> ()),
+	ml::Layer <double> (8, new ml::Sigmoid <double> ()),
 	ml::Layer <double> (4, new ml::ReLU <double> ())
 });
 
-ml::NeuralNetwork <double> competence(6, {
-	ml::Layer <double> (4, new ml::ReLU <double> ())
-	ml::Layer <double> (8, new ml::Sigmoid <double> ())
-	ml::Layer <double> (4, new ml::ReLU <double> ())
+// Confidence model (percentage error estimator)
+ml::NeuralNetwork <double> confidence(6, {
+	ml::Layer <double> (4, new ml::ReLU <double> ()),
+	ml::Layer <double> (8, new ml::ReLU <double> ()),
+	ml::Layer <double> (4, new ml::Sigmoid <double> ())
 });
 
 // Heurestic
@@ -215,10 +219,23 @@ double heurestic(Vec x)
 void step()
 {
 	// Action
-	Vec A = Vec::rarg(agent.force, heurestic(agent.position));
+	double angle = 0;
+
+	Vec P = agent.position;
+	Vec V = agent.velocity;
+
+	// Get the state
+	Vec S = concat(P, V, F(P));
+
+	cout << "s = " << S << endl;
+	
+	angle = dirs[model(S).imax()];
+	// angle = heurestic(agent.position);
+
+	Vec A = Vec::rarg(agent.force, angle);
 	
 	// Field
-	Vec E = F(agent.position);
+	Vec E = F(P);
 
 	agent.move(A + E, delta);
 
@@ -271,7 +288,7 @@ void display(void)
 		glVertex2f((p.x() + v.x())/l, (p.y() + v.y())/l);
 	glEnd();
 	
-	glColor3f(1.0, 0.0, 1.0);
+	/* glColor3f(1.0, 0.0, 1.0);
 	glBegin(GL_LINES);
 		glVertex2f(p.x()/l, p.y()/l);
 		glVertex2f((p.x() + a.x())/l, (p.y() + a.y())/l);
@@ -281,7 +298,7 @@ void display(void)
 	glBegin(GL_LINES);
 		glVertex2f(p.x()/l, p.y()/l);
 		glVertex2f((p.x() + n.x())/l, (p.y() + n.y())/l);
-	glEnd();
+	glEnd(); */
 
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POINTS);

@@ -59,5 +59,13 @@ bool vector_operations()
 		cout << "Concatenation passed." << endl;
 	}
 
+	if (concat(c, c) != concat(a, b, c)) {
+		cout << "(Variadic) Concatenation is incorrect." << endl;
+
+		return false;
+	} else {
+		cout << "(Variadic) Concatenation passed." << endl;
+	}
+
 	return true;
 }
