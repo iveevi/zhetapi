@@ -1,7 +1,6 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 import argparse
-import sys
 import os
 
 # Build the parser
@@ -13,7 +12,7 @@ parser.add_argument("-m", "--mode", help="Execution mode", default='')
 parser.add_argument("-j", "--threads", help="Number of concurrent threads", type=int, default=8)
 
 # Compilation
-def compile(threads, target):
+def make_target(threads, target):
 	os.system('cmake .')
 
 	os.system('make -j{threads} {target}'.format(
@@ -32,9 +31,9 @@ modes = {
 def install(args):
 	print("Installing...")
 
-	compile(args.threads, 'czhp')
-	compile(args.threads, 'zhp-shared')
-	compile(args.threads, 'zhp-static')
+	make_target(args.threads, 'czhp')
+	make_target(args.threads, 'zhp-shared')
+	make_target(args.threads, 'zhp-static')
 
 	os.system('mkdir -p bin')
 	os.system('mv czhp bin/')
@@ -48,17 +47,17 @@ def install(args):
 		lib/io/formatted.cpp	\
 		lib/io/file.cpp		\
 		-o include/io.zhplib')
-	
+
 	os.system('./bin/czhp -v -c	\
 		lib/math/math.cpp	\
 		-o include/math.zhplib')
-	
+
 	print("\n" + 50 * '=' + "\nDisplaying symbols\n" + 50 * '=')
 	os.system('./bin/czhp -d include/io.zhplib')
 	os.system('./bin/czhp -d include/math.zhplib')
 
 def czhp(args):
-	compile(args.threads, 'czhp')
+	make_target(args.threads, 'czhp')
 
 	file = 'samples/zhp/simple.zhp'
 
@@ -88,7 +87,7 @@ args = parser.parse_args()
 if args.target in special.keys():
 	special[args.target](args)
 elif args.target in targets:
-	compile(args.threads, args.target)
+	make_target(args.threads, args.target)
 
 	os.system('{exe}{target}'.format(
 		exe=modes[args.mode],
@@ -96,7 +95,7 @@ elif args.target in targets:
 	))
 
 	os.system('mkdir -p debug/')
-	
+
 	os.system('mv {target} debug/'.format(
 		target=args.target
 	))
