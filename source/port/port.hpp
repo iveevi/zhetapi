@@ -4,7 +4,9 @@
 // C/C++ headers
 #include <chrono>
 #include <iostream>
+#include <thread>
 #include <vector>
+#include <mutex>
 
 #include <ctime>
 #include <signal.h>
@@ -42,17 +44,17 @@ struct bench {
 ostream &operator<<(ostream &, const bench &);
 
 // Test functions
-bool gamma_and_factorial();
+bool gamma_and_factorial(ostringstream &);
 
-bool vector_construction_and_memory();
-bool vector_operations();
+bool vector_construction_and_memory(ostringstream &);
+bool vector_operations(ostringstream &);
 
-bool matrix_construction_and_memory();
-bool tensor_construction_and_memory();
+bool matrix_construction_and_memory(ostringstream &);
+bool tensor_construction_and_memory(ostringstream &);
 
-bool integration();
+bool integration(ostringstream &);
 
-bool function_computation();
-bool function_compilation_testing();
+bool function_computation(ostringstream &);
+bool function_compilation_testing(ostringstream &);
 
 #endif

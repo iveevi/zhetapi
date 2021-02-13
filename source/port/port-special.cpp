@@ -1,21 +1,21 @@
 #include "port.hpp"
 
-bool gamma_and_factorial()
+bool gamma_and_factorial(ostringstream &oss)
 {
 	using namespace zhetapi::special;
 
 	for (double i = 0; i < 10; i++)
-		cout << "ln_gamma(" << (i + 1) << ") = " << ln_gamma(i + 1) << endl;
+		oss << "ln_gamma(" << (i + 1) << ") = " << ln_gamma(i + 1) << endl;
 	
 	for (double i = 0; i < 10; i++)
-		cout << "ln_factorial(" << i << ") = " << ln_factorial(i) << endl;
+		oss << "ln_factorial(" << i << ") = " << ln_factorial(i) << endl;
 	
 	try {
 		ln_gamma(0);
 
 		return false;
 	} catch (const char *err) {
-		cout << "\terr: " << err << endl;
+		oss << "\terr: " << err << endl;
 	}
 
 	try {
@@ -23,7 +23,7 @@ bool gamma_and_factorial()
 
 		return false;
 	} catch (const char *err) {
-		cout << "\terr: " << err << endl;
+		oss << "\terr: " << err << endl;
 	}
 
 	return true;

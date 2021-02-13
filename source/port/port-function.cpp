@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool function_computation()
+bool function_computation(ostringstream &oss)
 {
 	using namespace zhetapi;
 
@@ -14,7 +14,7 @@ bool function_computation()
 	for (int i = 0; i < iters; i++)
 		f(5, 4);
 	
-	cout << "Time for regular computation: " << tb << endl;
+	oss << "Time for regular computation: " << tb << endl;
 
 	f.set_threads(8);
 
@@ -22,84 +22,126 @@ bool function_computation()
 	for (int i = 0; i < iters; i++)
 		f(5, 4);
 	
-	cout << "Time for multi-threaded computation: " << tb << endl;
+	oss << "Time for multi-threaded computation: " << tb << endl;
 
 	return true;
 }
 
-bool function_compilation_testing()
+bool function_compilation_testing(ostringstream &oss)
 {
 	using namespace zhetapi;
 
 #ifdef ZHP_FUNCTION_COMPILE_GENERAL
 	// Timers
 	bench tb;
+	
+	// Mutexes
+	mutex ct_mtx;
+	mutex io_mtx;
 
 	// Verdict status
 	int count = 0;
 
-	// The function to be compiled
-	Function f = "f(x, y, z) = x^2 + 2x + x^2 + 24yz - z^5";
+	auto f1 = [&]() {
+		ostringstream oss2;
 
-	// Create the typedef for the compiled function
-	typedef Token *(*ftr1)(Token *, Token *, Token *);
+		// The function to be compiled
+		Function f = "f(x, y, z) = x^2 + 2x + x^2 + 24yz - z^5";
 
-	tb = bench();
-	ftr1 tmp1 = (ftr1) f.compile_general();
+		// Create the typedef for the compiled function
+		typedef Token *(*ftr1)(Token *, Token *, Token *);
 
-	cout << "Compilation time for first: " << tb << endl;
+		tb = bench();
+		ftr1 tmp1 = (ftr1) f.compile_general();
 
-	// Allocate operands
-	Operand <double> *op1 = new Operand <double> (3.544);
-	Operand <int> *op2 = new Operand <int> (56);
-	Operand <double> *op3 = new Operand <double> (343.54454);
+		oss2 << "Compilation time for first: " << tb << endl;
 
-	// Compare outputs
-	Token *t1 = f(3.544, 56, 343.54454);
-	Token *t2 = tmp1(op1, op2, op3);
+		// Allocate operands
+		Operand <double> *op1 = new Operand <double> (3.544);
+		Operand <int> *op2 = new Operand <int> (56);
+		Operand <double> *op3 = new Operand <double> (343.54454);
 
-	cout << "\nt1: " << t1->str() << endl;
-	cout << "t2: " << t2->str() << endl;
+		// Compare outputs
+		Token *t1 = f(3.544, 56, 343.54454);
+		Token *t2 = tmp1(op1, op2, op3);
 
-	if (tokcmp(t1, t2))
-		count++;
+		oss2 << "\nt1: " << t1->str() << endl;
+		oss2 << "t2: " << t2->str() << endl;
 
-	// Repeat, with a different function
-	Function g = "g(x) = sin(x) - log(x)";
+		if (tokcmp(t1, t2)) {
+			ct_mtx.lock();
 
-	// Create the typedef for the compiled function
-	typedef Token *(*ftr2)(Token *);
+			count++;
 
-	tb = bench();
-	ftr2 tmp2 = (ftr2) g.compile_general();
+			ct_mtx.unlock();
+		}
 
-	cout << "\nCompilation time for second: " << tb << endl;
+		io_mtx.lock();
 
-	// Allocate operands
-	Operand <double> *op4 = new Operand <double> (4.767);
+		oss << oss2.str();
 
-	// Compare outputs
-	Token *t3 = g(4.767);
-	Token *t4 = tmp2(op4);
-
-	cout << "\nt3: " << t3->str() << endl;
-	cout << "t4: " << t4->str() << endl;
-
-	if (tokcmp(t3, t4))
-		count++;
+		io_mtx.unlock();
 	
-	// Free resources
-	delete op1;
-	delete op2;
-	delete op3;
-	delete op4;
+		// Free resources
+		delete op1;
+		delete op2;
+		delete op3;
+	};
+
+	auto f2 = [&]() {
+		ostringstream oss2;
+
+		// Repeat, with a different function
+		Function g = "g(x) = sin(x) - log(x)";
+
+		// Create the typedef for the compiled function
+		typedef Token *(*ftr2)(Token *);
+
+		tb = bench();
+		ftr2 tmp2 = (ftr2) g.compile_general();
+
+		oss2 << "\nCompilation time for second: " << tb << endl;
+
+		// Allocate operands
+		Operand <double> *op4 = new Operand <double> (4.767);
+
+		// Compare outputs
+		Token *t3 = g(4.767);
+		Token *t4 = tmp2(op4);
+
+		oss2 << "\nt3: " << t3->str() << endl;
+		oss2 << "t4: " << t4->str() << endl;
+
+		if (tokcmp(t3, t4)) {
+			ct_mtx.lock();
+
+			count++;
+
+			ct_mtx.unlock();
+		}
+
+		io_mtx.lock();
+
+		oss << oss2.str();
+
+		io_mtx.unlock();
+		
+		// Free resources
+		delete op4;
+	};
+
+	thread t1(f1);
+	thread t2(f2);
+
+	t1.join();
+	t2.join();
 
 	// Deliver the verdict
-	cout << "\nVerdict: " << count << "/2 matches." << endl;
+	oss << "\nVerdict: " << count << "/2 matches." << endl;
 
 	return (count == 2);
 #endif
-	cout << "Cannot conduct proper testing of this feature." << endl;
+	oss << "Cannot conduct proper testing of this feature." << endl;
 
 	return false;
 }

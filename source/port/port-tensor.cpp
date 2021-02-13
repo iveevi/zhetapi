@@ -1,16 +1,16 @@
 #include "port.hpp"
 
-bool tensor_construction_and_memory()
+bool tensor_construction_and_memory(ostringstream &oss)
 {
 	using namespace zhetapi;
 
 	Tensor <double> t1;
 
-	cout << "Default: " << t1 << endl;
+	oss << "Default: " << t1 << endl;
 
 	Tensor <double> t2({4, 5, 6});
 
-	cout << "Dimension constructor: " << t2 << endl;
+	oss << "Dimension constructor: " << t2 << endl;
 
 	return true;
 }

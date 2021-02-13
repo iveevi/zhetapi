@@ -107,8 +107,6 @@ std::pair <Matrix <T> , Matrix <T>> lu_factorize(const Matrix <T> &a)
 			if (i == j) {
 				l[i][i] = 1;
 			} else {
-				value = 0;
-
 				for (int k = 0; k < i; k++)
 					value += l[j][k] * u[k][i];
 
@@ -189,18 +187,25 @@ const Function <T> &reduced_polynomial_fitting(const ::std::vector <::std::pair 
 }
 
 template <class T>
-::std::pair <T, ::std::vector <T>> gradient_descent(::std::vector <pair <T, T>> data,
-	::std::vector <T> weights, Function <T> ftr, size_t in,
-	size_t reps, size_t rounds, T _gamma, T diff, T eps)
+std::pair <T, std::vector <T>> gradient_descent(
+		std::vector <pair <T, T>> data,
+		std::vector <T> weights,
+		Function ftr,
+		size_t in,
+		size_t reps,
+		size_t rounds,
+		T _gamma,
+		T diff, T
+		eps)
 {
 	table <T> tbl {ftr};
 
 	config <T> *cptr = new config <T> {};
 
-	::std::vector <Variable <T>> pars;
-	::std::vector <Variable <T>> vars;
+	std::vector <Variable <T>> pars;
+	std::vector <Variable <T>> vars;
 
-	::std::vector <node <T> *> lvs;
+	std::vector <node <T> *> lvs;
 
 	for (size_t i = 0; i < ftr.ins(); i++) {
 		pars.push_back(ftr[i]);
@@ -226,7 +231,7 @@ template <class T>
 
 	Function <T> cost {"cost", pars, pk};
 
-	::std::vector <Function <T>> gradients;
+	std::vector <Function <T>> gradients;
 
 	for (size_t i = 0; i < ftr.ins(); i++) {
 		if (i == in)
@@ -256,23 +261,23 @@ template <class T>
 		best += cost.compute(ins);
 	}
 
-	::std::vector <T> bvls = weights;
+	std::vector <T> bvls = weights;
 	for (int n = 0; n < reps; n++) {
-		::std::vector <T> ws;
+		std::vector <T> ws;
 
 		for (auto vl : weights)
 			ws.push_back(vl + diff * n);
 
 		gamma = _gamma;
 
-		::std::vector <T> pvls;
+		std::vector <T> pvls;
 
 		for (auto vl : ws)
 			pvls.push_back(vl);
 
 		old = 0;
 		for (auto pnt : data) {
-			::std::vector <T> ins = pvls;
+			std::vector <T> ins = pvls;
 
 			ins.push_back(pnt.first);
 			ins.push_back(pnt.second);
@@ -280,9 +285,9 @@ template <class T>
 			old += cost.compute(ins);
 		}
 
-		::std::vector <T> wds(ws.size(), 0.0);
+		std::vector <T> wds(ws.size(), 0.0);
 
-		::std::vector <T> cvls;
+		std::vector <T> cvls;
 		for (int i = 0; i < rounds; i++) {
 			cvls.clear();
 
@@ -297,8 +302,6 @@ template <class T>
 
 				ivls.push_back(x);
 				ivls.push_back(y);
-				
-				err = cost.compute(ivls);
 
 				for (size_t i = 0; i < wds.size(); i++)
 					wds[i] += gamma * gradients[i].compute(ivls);
@@ -348,7 +351,7 @@ template <class T>
 	return {best, bvls};
 }
 
-// exception for when root finding
+// Exception for when root finding
 // hits an extrema. Later store the
 // vector wchih produced this exception.
 class extrema_exception {};

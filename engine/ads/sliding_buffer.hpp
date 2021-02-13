@@ -15,7 +15,7 @@ class SlidingBuffer {
 	size_t	__size	= 0;
 public:
 	SlidingBuffer();
-	SlidingBuffer(size_t);
+	explicit SlidingBuffer(size_t);
 
 	void resize(size_t);
 

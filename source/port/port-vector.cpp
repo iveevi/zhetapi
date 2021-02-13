@@ -1,26 +1,26 @@
 #include "port.hpp"
 
-bool vector_construction_and_memory()
+bool vector_construction_and_memory(ostringstream &oss)
 {
 	using namespace zhetapi;
 
 	Vector <double> tmp;
 
-	cout << "Default constructor: " << tmp << endl;
+	oss << "Default constructor: " << tmp << endl;
 
 	tmp = Vector <double> {1, 1, 1, 4, 6};
 
-	cout << "Initializer list constructor: " << tmp << endl;
+	oss << "Initializer list constructor: " << tmp << endl;
 
 	vector <double> nums {1, 6, 3, 8, 1};
 
 	tmp = Vector <double> (nums);
 
-	cout << "Vector construction and assignment operator: " << tmp << endl;
+	oss << "Vector construction and assignment operator: " << tmp << endl;
 
 	tmp = Vector <double> (4, 6);
 
-	cout << "Size and default value constructor: " << tmp << endl;
+	oss << "Size and default value constructor: " << tmp << endl;
 
 	double *arr = new double[10];
 	for (size_t i = 0; i < 10; i++)
@@ -28,16 +28,16 @@ bool vector_construction_and_memory()
 	
 	tmp = Vector <double> (10, arr);
 
-	cout << "Size and pointer constructor: " << tmp << endl;
+	oss << "Size and pointer constructor: " << tmp << endl;
 	
 	tmp = Vector <double> (5, arr);
 	
-	cout << "Cropped size and pointer constructor: " << tmp << endl;
+	oss << "Cropped size and pointer constructor: " << tmp << endl;
 
 	return true;
 }
 
-bool vector_operations()
+bool vector_operations(ostringstream &oss)
 {
 	using namespace zhetapi;
 
@@ -45,26 +45,37 @@ bool vector_operations()
 	Vector <int> b = {4, 5, 6};
 	Vector <int> c = {1, 2, 3, 4, 5, 6};
 
-	cout << "a = " << a << endl;
-	cout << "b = " << b << endl;
+	Vector <int> cc = {
+		1, 2, 3, 4, 5, 6,
+		1, 2, 3, 4, 5, 6,
+	};
 
-	cout << concat(a, b) << endl;
-	cout << c << endl;
+	oss << "a = " << a << endl;
+	oss << "b = " << b << endl;
+
+	oss << concat(a, b) << endl;
+	oss << c << endl;
 
 	if (c != concat(a, b)) {
-		cout << "Concatenation is incorrect." << endl;
+		oss << "Concatenation is incorrect." << endl;
 
 		return false;
 	} else {
-		cout << "Concatenation passed." << endl;
+		oss << "Concatenation passed." << endl;
 	}
+	
+	oss << "\na o b = " << concat(a, b) << endl;
+	oss << "c = " << c << endl;
+
+	oss << concat(a, b) << endl;
+	oss << concat(a, b, c) << endl;
 
 	if (concat(c, c) != concat(a, b, c)) {
-		cout << "(Variadic) Concatenation is incorrect." << endl;
+		oss << "(Variadic) Concatenation is incorrect." << endl;
 
 		return false;
 	} else {
-		cout << "(Variadic) Concatenation passed." << endl;
+		oss << "(Variadic) Concatenation passed." << endl;
 	}
 
 	return true;

@@ -1,22 +1,26 @@
 #include "port.hpp"
 
+#define THREADS	2
+
+typedef pair <string, bool (*)(ostringstream &)> singlet;
+
 // Testing rig
-vector <pair <string, bool(*)()>> rig {
+vector <pair <string, bool(*)(ostringstream &)>> rig {
 	{"gamma and factorial functions", &gamma_and_factorial},
 	{"vector construction and memory safety", &vector_construction_and_memory},
+	{"function general compilation", &function_compilation_testing},
 	{"matrix construction and memory safety", &matrix_construction_and_memory},
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
 	{"integration techniques", &integration},
 	{"function computation", &function_computation},
-	{"function general compilation", &function_compilation_testing},
 	{"vector operations", &vector_operations}
 };
 
 // Segfault handler
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {
-    printf("\nCaught segfault at address %p\n", si->si_addr);
-    exit(-1);
+	printf("\nCaught segfault at address %p\n", si->si_addr);
+	exit(-1);
 }
 
 // Timers
@@ -33,7 +37,7 @@ int main()
 	sigemptyset(&sa.sa_mask);
 
 	sa.sa_sigaction = segfault_sigaction;
-	sa.sa_flags   = SA_SIGINFO;
+	sa.sa_flags = SA_SIGINFO;
 
 	sigaction(SIGSEGV, &sa, NULL);
 
@@ -42,32 +46,63 @@ int main()
 
 	bench mark(epoch);
 
-	// Run tests in the test rig
-	bool first = true;
+	mutex io_mtx;	// I/O mutex
+	mutex tk_mtx;	// Task acquisition mutex
 
 	int count = 0;
-	for (auto pr : rig) {
-		if (first)
-			first = false;
+	int task = 0;
+
+	size_t size = rig.size();
+	auto singleter = [&](singlet s) {
+		ostringstream oss;
+		
+		oss << string(100, '=') << endl;
+		oss << mark << "Running \"" << s.first << "\" test: [" << task << "/" << size << "]\n" << endl;
+
+		oss << string(100, '-') << endl;
+		bool tmp = s.second(oss);	
+		oss << string(100, '-') << endl;
+
+		if (tmp)
+			oss << endl << "\"" << s.first << "\" test PASSED." << endl;
 		else
-			cout << endl;
+			oss << endl << "\"" << s.first << "\" test FAILED." << endl;
+		
+		oss << string(100, '=') << endl;
+		
+		io_mtx.lock();
 
-		cout << string(100, '=') << endl;
-		cout << mark << "Running \"" << pr.first << "\" test:\n" << endl;
+		cout << oss.str() << endl;
+		count += (tmp) ? 1 : 0;
 
-		cout << string(100, '-') << endl;
-		bool tmp = pr.second();
-		cout << string(100, '-') << endl;
+		io_mtx.unlock();
+	};
 
-		if (tmp) {
-			cout << endl << "\"" << pr.first << "\" test PASSED." << endl;
-			count++;
-		} else {
-			cout << endl << "\"" << pr.first << "\" test FAILED." << endl;
+	auto tasker = [&](size_t off) {
+		int t;
+		while (true) {
+			t = -1;
+
+			tk_mtx.lock();
+
+			if (task < size)
+				t = task++;
+
+			tk_mtx.unlock();
+
+			if (t < 0)
+				break;
+
+			singleter(rig[t]);
 		}
+	};
 
-		cout << string(100, '=') << endl;
-	}
+	thread *army = new thread[THREADS];
+	for (size_t i = 0; i < THREADS; i++)
+		army[i] = thread(tasker, i);
+
+	for (size_t i = 0; i < THREADS; i++)
+		army[i].join();
 
 	cout << endl << mark << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;
 }

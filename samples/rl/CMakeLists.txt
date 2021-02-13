@@ -18,7 +18,13 @@ find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
 
 # Main project
-add_executable(rl main.cpp)
+add_executable(rl
+	agent.cpp
+	field.cpp
+	heurestic.cpp
+	main.cpp
+	vis.cpp
+)
 
 target_link_libraries(rl ${OPENGL_LIBRARIES})
 target_link_libraries(rl ${GLUT_LIBRARY})

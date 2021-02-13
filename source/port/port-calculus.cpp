@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool integration()
+bool integration(ostringstream &oss)
 {
 	using namespace zhetapi::utility;
 
@@ -12,8 +12,8 @@ bool integration()
 		return 2 * x + 1;
 	};
 
-	cout << "f(4) = " << f(4) << endl;
-	cout << "f(4) = " << eulers_method(df, {2.0, f(2)}, 4.0) << endl;
+	oss << "f(4) = " << f(4) << endl;
+	oss << "f(4) = " << eulers_method(df, {2.0, f(2)}, 4.0) << endl;
 
 	return true;
 }

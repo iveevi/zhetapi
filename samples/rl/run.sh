@@ -8,6 +8,6 @@ if [ "$1" == "gdb" ]; then
 fi
 
 cmake -DCMAKE_CXX_FLAGS=$MODE .
-make rl
+make -j8 rl
 
 $EXECUTABLE ./rl

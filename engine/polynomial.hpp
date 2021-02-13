@@ -22,8 +22,8 @@ class Polynomial {
 					// the polynomial
 public:
 	// Constructor
-	Polynomial(const std::vector <T> &);
-	Polynomial(const std::initializer_list <T> &);
+	explicit Polynomial(const std::vector <T> &);
+	explicit Polynomial(const std::initializer_list <T> &);
 
 	// Getters
 	size_t degree() const;

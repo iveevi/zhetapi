@@ -271,12 +271,13 @@ public:
 	void print(bool = false) const;
 
 	// Exceptions
-	class unknown_operation_overload_exception {
-		std::string __str;
+	class unknown_operation_overload {
+		std::string	__str;
 	public:
-		unknown_operation_overload_exception(const ::std::string &str) : __str(str) {}
+		explicit unknown_operation_overload(const std::string &str)
+				: __str(str) {}
 
-		const ::std::string &what() const {
+		const std::string &what() const {
 			return __str;
 		}
 	};

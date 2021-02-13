@@ -420,7 +420,7 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) 
 		oss << ") for operation \"" << str << "\". " <<
 			overloads(str);
 
-		throw unknown_operation_overload_exception(oss.str());
+		throw unknown_operation_overload(oss.str());
 	}
 
 	return nullptr;

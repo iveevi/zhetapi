@@ -55,8 +55,10 @@ template <class T>
 class Vector;
 
 namespace ml {
-	template <class T>
-	class Activation;
+
+template <class T>
+class Activation;
+
 }
 
 /**
@@ -71,21 +73,22 @@ protected:
 	size_t  __rows;
 	size_t  __cols;
 public:
+	// Type aliases
+	using psize_t = std::pair <size_t, size_t>;
+
 	__cuda_dual_prefix
 	Matrix(size_t, size_t, T *, bool = true);
 
-	Matrix(const ::std::vector <T> &);
-	Matrix(const ::std::vector <::std::vector <T>> &);
-
-	Matrix(const ::std::initializer_list <::std::initializer_list <T>> &);
+	Matrix(const std::vector <T> &);
+	Matrix(const std::vector <std::vector <T>> &);
+	Matrix(const std::initializer_list <std::initializer_list <T>> &);
 
 	template <class A>
-	explicit Matrix(A);
+	Matrix(A);
 
-	std::pair <size_t, size_t> get_dimensions() const;
+	psize_t get_dimensions() const;
 
-	Matrix slice(const ::std::pair <size_t, size_t> &,
-			const ::std::pair <size_t, size_t> &) const;
+	Matrix slice(const psize_t &, const psize_t &) const;
 
 	void set(size_t, size_t, T);
 
@@ -126,10 +129,10 @@ public:
 	T determinant() const;
 
 	T minor(size_t, size_t) const;
-	T minor(const ::std::pair <size_t, size_t> &) const;
+	T minor(const psize_t &) const;
 
 	T cofactor(size_t, size_t) const;
-	T cofactor(const ::std::pair <size_t, size_t> &) const;
+	T cofactor(const psize_t &) const;
 
 	const Matrix &inverse() const;
 	const Matrix &adjugate() const;
@@ -168,8 +171,8 @@ public:
 
 	Matrix(size_t, size_t, T = T());
 
-	Matrix(size_t, size_t, ::std::function <T (size_t)>);
-	Matrix(size_t, size_t, ::std::function <T *(size_t)>);
+	Matrix(size_t, size_t, std::function <T (size_t)>);
+	Matrix(size_t, size_t, std::function <T *(size_t)>);
 	
 	Matrix(size_t, size_t, ::std::function <T (size_t, size_t)>);
 	Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);

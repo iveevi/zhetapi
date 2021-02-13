@@ -1,12 +1,12 @@
 #include "port.hpp"
 
-bool matrix_construction_and_memory()
+bool matrix_construction_and_memory(ostringstream &oss)
 {
 	using namespace zhetapi;
 
 	Matrix <double> tmp;
 
-	cout << "Default constructor: " << tmp << endl;
+	oss << "Default constructor: " << tmp << endl;
 
 	return true;
 }
