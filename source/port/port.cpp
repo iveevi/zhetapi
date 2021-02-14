@@ -53,11 +53,11 @@ int main()
 	int task = 0;
 
 	size_t size = rig.size();
-	auto singleter = [&](singlet s) {
+	auto singleter = [&](singlet s, size_t t) {
 		ostringstream oss;
 		
 		oss << string(100, '=') << endl;
-		oss << mark << "Running \"" << s.first << "\" test: [" << task << "/" << size << "]\n" << endl;
+		oss << mark << "Running \"" << s.first << "\" test: [" << t << "/" << size << "]\n" << endl;
 
 		oss << string(100, '-') << endl;
 		bool tmp = s.second(oss);	
@@ -78,28 +78,32 @@ int main()
 		io_mtx.unlock();
 	};
 
-	auto tasker = [&](size_t off) {
+	auto tasker = [&]() {
 		int t;
+
 		while (true) {
 			t = -1;
 
 			tk_mtx.lock();
 
-			if (task < size)
-				t = task++;
+			if (task < size) {
+				t = task;
+
+				task++;
+			}
 
 			tk_mtx.unlock();
 
 			if (t < 0)
 				break;
 
-			singleter(rig[t]);
+			singleter(rig[t], t + 1);
 		}
 	};
 
 	thread *army = new thread[THREADS];
 	for (size_t i = 0; i < THREADS; i++)
-		army[i] = thread(tasker, i);
+		army[i] = thread(tasker);
 
 	for (size_t i = 0; i < THREADS; i++)
 		army[i].join();

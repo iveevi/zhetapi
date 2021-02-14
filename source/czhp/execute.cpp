@@ -25,7 +25,7 @@ Token *execute(string str)
 			mg.print(); */
 
 			tptr = mg.value();
-		} catch (Barn::unknown_operation_overload_exception e)  {
+		} catch (Barn::unknown_operation_overload e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
 		} catch (node_manager::undefined_symbol e) {

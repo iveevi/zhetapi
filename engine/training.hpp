@@ -38,26 +38,12 @@ struct PerformanceStatistics {
 
 // Non-statistical methods (without performance statistics)
 template <class T>
-void train_mini_batch(
-		NeuralNetwork <T> &net,
-		const DataSet <T> &ins,
-		const DataSet <T> &outs)
-{
-	assert(ins.size() == outs.size());
-
-	size_t n;
-
-	n = ins.size();
-	for (size_t i = 0; i < n; i++)
-		net.fit(ins[i], outs[i]);
-}
-
-template <class T>
 void train_dataset(
 		NeuralNetwork <T> &net,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
-		size_t batch_size)
+		size_t batch_size,
+		size_t threads = 1)
 {
 	assert(ins.size() == outs.size());
 
@@ -68,9 +54,10 @@ void train_dataset(
 
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
-		train_mini_batch(net,
-				input_batches[i],
-				output_batches[i]);
+		if (threads > 1)
+			net.multithreaded_fit(input_batches[i], output_batches[i], threads);
+		else
+			net.fit(input_batches[i], output_batches[i]);
 	}
 }
 
@@ -82,7 +69,8 @@ PerformanceStatistics <T> train_mini_batch_perf(
 		const DataSet <T> &outs,
 		Erf <T> *cost,
 		Comparator <T> cmp = __def_cmp <T>,
-		Display::type display = 0)
+		Display::type display = 0,
+		size_t threads = 1)
 {
 	assert(ins.size() == outs.size());
 
@@ -103,7 +91,10 @@ PerformanceStatistics <T> train_mini_batch_perf(
 		perr += fabs((to - outs[i]).norm() / outs[i].norm());
 	}
 
-	net.fit(ins, outs);
+	if (threads > 1)
+		net.multithreaded_fit(ins, outs, threads);
+	else
+		net.fit(ins, outs);
 
 	perr /= n;
 	if (display & Display::batch) {
@@ -125,7 +116,8 @@ PerformanceStatistics <T> train_dataset_perf(
 		size_t batch_size,
 		Erf <T> *cost,
 		Comparator <T> cmp = __def_cmp <T>,
-		Display::type display = 0)
+		Display::type display = 0,
+		size_t threads = 1)
 {
 	assert(ins.size() == outs.size());
 
@@ -143,7 +135,8 @@ PerformanceStatistics <T> train_dataset_perf(
 				output_batches[i],
 				cost,
 				cmp,
-				display);
+				display,
+				threads);
 
 		ns.__cost += bs.__cost;
 		ns.__passed += bs.__cost;

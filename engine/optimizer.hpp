@@ -39,6 +39,14 @@ protected:
 			const DataSet <T> &,
 			const DataSet <T> &,
 			Erf <T> *);
+	
+	virtual Matrix <T> *raw_multithreaded_batch_gradient(
+			Layer <T> *,
+			size_t,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			Erf <T> *,
+			size_t);
 
 	virtual Matrix <T> *update(
 			Matrix <T> *,
@@ -61,6 +69,14 @@ public:
 			const DataSet <T> &,
 			const DataSet <T> &,
 			Erf <T> *);
+	
+	Matrix <T> *multithreaded_batch_gradient(
+			Layer <T> *,
+			size_t,
+			const DataSet <T> &,
+			const DataSet <T> &,
+			Erf <T> *,
+			size_t = 1);
 };
 
 template <class T>
@@ -144,6 +160,43 @@ Matrix <T> *Optimizer <T> ::raw_batch_gradient(
 }
 
 template <class T>
+Matrix <T> *Optimizer <T> ::raw_multithreaded_batch_gradient(
+			Layer <T> *layers,
+			size_t size,
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			Erf <T> *cost,
+			size_t threads)
+{
+	if (size != __size) {
+		// Although changing __a and __z are not really required for the
+		// multithreaded algorithm, we do it in case of future requests,
+		// in which the size stays the same.
+		delete[] __a;
+		delete[] __z;
+
+		__size = size;
+
+		__a = new Vector <T> [__size + 1]; 
+		__z = new Vector <T> [__size]; 
+
+		__switch = true;
+	} else {
+		__switch = false;
+	}
+	
+	return simple_multithreaded_batch_gradient(
+			layers,
+			size,
+			__a,
+			__z,
+			ins,
+			outs,
+			cost,
+			threads);
+}
+
+template <class T>
 Matrix <T> *Optimizer <T> ::gradient(
 			Layer <T> *layers,
 			size_t size,
@@ -174,6 +227,24 @@ Matrix <T> *Optimizer <T> ::batch_gradient(
 			ins,
 			outs,
 			cost), size);
+}
+
+template <class T>
+Matrix <T> *Optimizer <T> ::multithreaded_batch_gradient(
+			Layer <T> *layers,
+			size_t size,
+			const DataSet <T> &ins,
+			const DataSet <T> &outs,
+			Erf <T> *cost,
+			size_t threads)
+{
+	return update(raw_multithreaded_batch_gradient(
+			layers,
+			size,
+			ins,
+			outs,
+			cost,
+			threads), size);
 }
 
 }

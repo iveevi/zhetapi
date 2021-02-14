@@ -1,6 +1,10 @@
 #ifndef GRADIENT_H_
 #define GRADIENT_H_
 
+// C/C++ headers
+#include <mutex>
+#include <thread>
+
 // Engine headers
 #include <matrix.hpp>
 #include <erf.hpp>
@@ -112,6 +116,79 @@ Matrix <T> *simple_batch_gradient(
 
 		delete[] Q;
 	}
+
+	for (size_t i = 0; i < size; i++)
+		J[i] /= T(ds);
+
+	return J;
+}
+
+template <class T>
+Matrix <T> *simple_multithreaded_batch_gradient(
+		Layer <T> *layers,
+		size_t size,
+		Vector <T> *ta,
+		Vector <T> *tz,
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		Erf <T> *cost,
+		size_t threads)
+{
+	size_t ds = ins.size();
+
+	Matrix <T> *J;
+
+	J = simple_gradient(layers, size, ta, tz, ins[0], outs[0], cost);
+
+	std::mutex task_mtx;
+	std::mutex addm_mtx;
+
+	size_t task = 1;
+	auto ftn = [&]() {
+		Vector <T> *a = new Vector <T> [size + 1]; 
+		Vector <T> *z = new Vector <T> [size]; 
+		
+		Matrix <T> *Q;
+		int t;
+
+		while (true) {
+			t = -1;
+
+			task_mtx.lock();
+
+			if (task < ds) {
+				t = task;
+
+				task++;
+			}
+
+			task_mtx.unlock();
+
+			if (t < 0)
+				break;
+
+			Q = simple_gradient(layers, size, a, z, ins[t], outs[t], cost);
+			
+			addm_mtx.lock();
+
+			for (size_t k = 0; k < size; k++)
+				J[k] += Q[k];
+
+			addm_mtx.unlock();
+
+			delete[] Q;
+		}
+
+		delete[] a;
+		delete[] z;
+	};
+
+	std::thread *army = new std::thread[threads];
+	for (size_t i = 0; i < threads; i++)
+		army[i] = std::thread(ftn);
+
+	for (size_t i = 0; i < threads; i++)
+		army[i].join();
 
 	for (size_t i = 0; i < size; i++)
 		J[i] /= T(ds);

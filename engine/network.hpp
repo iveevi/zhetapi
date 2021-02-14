@@ -100,6 +100,8 @@ public:
 	
 	void fit(const Vector <T> &, const Vector <T> &);
 	void fit(const DataSet <T> &, const DataSet <T> &);	
+	
+	void multithreaded_fit(const DataSet <T> &, const DataSet <T> &, size_t = 1);	
 };
 
 // Constructors and other memory related operations
@@ -240,6 +242,35 @@ void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 		throw null_optimizer();
 
 	Matrix <T> *J = __opt->batch_gradient(__layers, __size, ins, outs, __cost);
+
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].apply_gradient(J[i]);
+
+	delete[] J;
+}
+
+template <class T>
+void NeuralNetwork <T> ::multithreaded_fit(
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
+		size_t threads)
+{
+	if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
+		throw bad_io_dimensions();
+
+	if (!__opt)
+		throw null_optimizer();
+
+	Matrix <T> *J = __opt->multithreaded_batch_gradient(
+			__layers,
+			__size,
+			ins,
+			outs,
+			__cost,
+			threads);
 
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].apply_gradient(J[i]);
