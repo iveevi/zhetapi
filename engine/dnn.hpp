@@ -1,5 +1,5 @@
-#ifndef NETWORK_H_
-#define NETWORK_H_
+#ifndef DNN_H_
+#define DNN_H_
 
 // C/C++ headers
 #include <chrono>
@@ -55,7 +55,7 @@ namespace ml {
 
 // Neural network class
 template <class T = double>
-class NeuralNetwork {
+class DNN {
 public:
 	// Exceptions
 	class bad_io_dimensions {};
@@ -73,13 +73,13 @@ private:
 
 	void clear();
 public:
-	NeuralNetwork();
-	NeuralNetwork(const NeuralNetwork &);
-	NeuralNetwork(size_t, const std::vector <Layer <T>> &);
+	DNN();
+	DNN(const DNN &);
+	DNN(size_t, const std::vector <Layer <T>> &);
 
-	~NeuralNetwork();
+	~DNN();
 
-	NeuralNetwork &operator=(const NeuralNetwork &);
+	DNN &operator=(const DNN &);
 
 	// Saving and loading the network
 	void save(const std::string &);
@@ -106,10 +106,10 @@ public:
 
 // Constructors and other memory related operations
 template <class T>
-NeuralNetwork <T> ::NeuralNetwork() {}
+DNN <T> ::DNN() {}
 
 template <class T>
-NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
+DNN <T> ::DNN(const DNN &other) :
 		__size(other.__size), __isize(other.__isize),
 		__osize(other.__osize), __cost(other.__cost),
 		__opt(other.__opt)
@@ -126,10 +126,10 @@ NeuralNetwork <T> ::NeuralNetwork(const NeuralNetwork &other) :
  * should be left alone. They will be deallocated once the scope
  * of the network object comes to its end. In other words, DO
  * NOT FREE ACTIVATION POINTERS, and instead let the
- * NeuralNetwork class do the work for you.
+ * DNN class do the work for you.
  */
 template <class T>
-NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &layers)
+DNN <T> ::DNN(size_t isize, const std::vector <Layer <T>> &layers)
 		: __size(layers.size()), __isize(isize)
 {
 	__layers = new Layer <T> [__size];
@@ -149,13 +149,13 @@ NeuralNetwork <T> ::NeuralNetwork(size_t isize, const std::vector <Layer <T>> &l
 }
 
 template <class T>
-NeuralNetwork <T> ::~NeuralNetwork()
+DNN <T> ::~DNN()
 {
 	clear();
 }
 
 template <class T>
-NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
+DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 {
 	if (this != &other) {
 		clear();
@@ -176,14 +176,14 @@ NeuralNetwork <T> &NeuralNetwork <T> ::operator=(const NeuralNetwork <T> &other)
 }
 
 template <class T>
-void NeuralNetwork <T> ::clear()
+void DNN <T> ::clear()
 {
 	delete[] __layers;
 }
 
 // Saving and loading
 template <class T>
-void NeuralNetwork <T> ::save(const std::string &file)
+void DNN <T> ::save(const std::string &file)
 {
 	std::ofstream fout(file);
 
@@ -196,7 +196,7 @@ void NeuralNetwork <T> ::save(const std::string &file)
 }
 
 template <class T>
-void NeuralNetwork <T> ::load(const std::string &file)
+void DNN <T> ::load(const std::string &file)
 {
 	// Clear the current members
 	clear();
@@ -214,7 +214,7 @@ void NeuralNetwork <T> ::load(const std::string &file)
 
 /*
 template <class T>
-void NeuralNetwork <T> ::load_json(const std::string &file)
+void DNN <T> ::load_json(const std::string &file)
 {
 	std::ifstream fin(file);
 
@@ -268,26 +268,26 @@ void NeuralNetwork <T> ::load_json(const std::string &file)
 
 // Property managers and viewers
 template <class T>
-void NeuralNetwork <T> ::set_cost(Erf <T> *cost)
+void DNN <T> ::set_cost(Erf <T> *cost)
 {
 	__cost = cost;
 }
 
 template <class T>
-void NeuralNetwork <T> ::set_optimizer(Optimizer <T> *opt)
+void DNN <T> ::set_optimizer(Optimizer <T> *opt)
 {
 	__opt = opt;
 }
 
 // Computation
 template <class T>
-Vector <T> NeuralNetwork <T> ::operator()(const Vector <T> &in)
+Vector <T> DNN <T> ::operator()(const Vector <T> &in)
 {
 	return compute(in);
 }
 
 template <class T>
-Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
+Vector <T> DNN <T> ::compute(const Vector <T> &in)
 {
 	Vector <T> tmp = in;
 
@@ -298,7 +298,7 @@ Vector <T> NeuralNetwork <T> ::compute(const Vector <T> &in)
 }
 
 template <class T>
-void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
+void DNN <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 {
 	if ((in.size() != __isize) || (out.size() != __osize))
 		throw bad_io_dimensions();
@@ -315,7 +315,7 @@ void NeuralNetwork <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 }
 
 template <class T>
-void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
+void DNN <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 {
 	if (ins.size() != outs.size())
 		throw bad_io_dimensions();
@@ -335,7 +335,7 @@ void NeuralNetwork <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 }
 
 template <class T>
-void NeuralNetwork <T> ::multithreaded_fit(
+void DNN <T> ::multithreaded_fit(
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		size_t threads)
@@ -364,14 +364,14 @@ void NeuralNetwork <T> ::multithreaded_fit(
 }
 
 template <class T>
-void NeuralNetwork <T> ::diagnose() const
+void DNN <T> ::diagnose() const
 {
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].diagnose();
 }
 
 template <class T>
-void NeuralNetwork <T> ::print() const
+void DNN <T> ::print() const
 {
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].print();

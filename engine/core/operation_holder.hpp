@@ -19,9 +19,9 @@ enum codes {
 	pwr,
 	dot,	// Dot product
 	mod,	// Modulo operator
-	sin,
-	cos,
-	tan,
+	sxn,
+	cxs,
+	txn,
 	csc,
 	sec,
 	cot,
@@ -46,14 +46,14 @@ enum codes {
 	rin,	// Pre decrement
 };
 
-extern ::std::string strcodes[];
+extern std::string strcodes[];
 
 struct operation_holder : public Token {
 	std::string rep;
 
 	codes code;
 
-	operation_holder(const ::std::string &);
+	explicit operation_holder(const std::string &);
 
 	type caller() const override;
 	Token *copy() const override;

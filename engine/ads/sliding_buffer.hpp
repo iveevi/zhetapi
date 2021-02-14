@@ -11,11 +11,17 @@ class SlidingBuffer {
 
 	T	__avg	= 0;
 
-	size_t	__index	= 0;
 	size_t	__size	= 0;
+	size_t	__index	= 0;
 public:
 	SlidingBuffer();
+	SlidingBuffer(const SlidingBuffer &);
+	
 	explicit SlidingBuffer(size_t);
+
+	SlidingBuffer &operator=(const SlidingBuffer &);
+
+	~SlidingBuffer();
 
 	void resize(size_t);
 
@@ -31,10 +37,46 @@ template <class T, class F>
 SlidingBuffer <T, F> ::SlidingBuffer() {}
 
 template <class T, class F>
+SlidingBuffer <T, F> ::SlidingBuffer(const SlidingBuffer &other)
+		: __size(other.__size), __index(other.__index),
+		__avg(other.__avg)
+{
+	__array = new T[__size];
+
+	memcpy(__array, other.__array, sizeof(T) * __size);
+}
+
+template <class T, class F>
 SlidingBuffer <T, F> ::SlidingBuffer(size_t buffer_size)
 	: __size(buffer_size)
 {
 	__array = new T[__size];
+}
+
+template <class T, class F>
+SlidingBuffer <T, F> &SlidingBuffer <T, F>
+		::operator=(const SlidingBuffer &other)
+{
+	if (this != &other) {
+		if (__array)
+			delete[] __array;
+
+		__size = other.__size;
+		__index = other.__index;
+		__avg = other.__index;
+
+		__array = new T[__size];
+
+		memcpy(__array, other.__array, sizeof(T) * __size);
+	}
+
+	return *this;
+}
+
+template <class T, class F>
+SlidingBuffer <T, F> ::~SlidingBuffer()
+{
+	delete[] __array;
 }
 
 template <class T, class F>

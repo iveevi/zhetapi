@@ -59,11 +59,11 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 	else if (str == "%")
 		code = mod;
 	else if (str == "sin")
-		code = sin;
+		code = sxn;
 	else if (str == "cos")
-		code = cos;
+		code = cxs;
 	else if (str == "tan")
-		code = tan;
+		code = txn;
 	else if (str == "csc")
 		code = csc;
 	else if (str == "sec")

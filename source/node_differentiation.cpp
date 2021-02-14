@@ -101,12 +101,12 @@ void node_manager::differentiate_trig(node &ref)
 
 	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
 	switch (ophptr->code) {
-	case sin:
+	case sxn:
 		op = node(new operation_holder("cos"), l_trigonometric, {
 			node(ref.__leaves[0])
 		});
 		break;
-	case cos:
+	case cxs:
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("sin"), l_trigonometric, {
 				node(ref.__leaves[0])
@@ -114,7 +114,7 @@ void node_manager::differentiate_trig(node &ref)
 			node(new opd_z(-1), l_constant_integer, {})
 		});
 		break;
-	case tan:
+	case txn:
 		op = node(new operation_holder("^"), l_power, {
 			node(new operation_holder("sec"), l_trigonometric, {
 				node(ref.__leaves[0])

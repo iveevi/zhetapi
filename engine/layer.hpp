@@ -23,7 +23,7 @@ struct RandomInitializer {
 	}
 };
 
-template <class T>
+template <class T = double>
 class Layer {
 	size_t			__fan_in = 0;
 	size_t			__fan_out = 0;

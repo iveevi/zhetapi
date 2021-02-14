@@ -67,10 +67,10 @@ bool vector_operations(ostringstream &oss)
 	oss << "\na o b = " << concat(a, b) << endl;
 	oss << "c = " << c << endl;
 
-	oss << concat(a, b) << endl;
+	oss << cc << endl;
 	oss << concat(a, b, c) << endl;
 
-	if (concat(c, c) != concat(a, b, c)) {
+	if (cc != concat(a, b, c)) {
 		oss << "(Variadic) Concatenation is incorrect." << endl;
 
 		return false;

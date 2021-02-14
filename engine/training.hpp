@@ -4,7 +4,7 @@
 // Engine headers
 #include <dataset.hpp>
 #include <display.hpp>
-#include <network.hpp>
+#include <dnn.hpp>
 
 namespace zhetapi {
 
@@ -39,7 +39,7 @@ struct PerformanceStatistics {
 // Non-statistical methods (without performance statistics)
 template <class T>
 void train_dataset(
-		NeuralNetwork <T> &net,
+		DNN <T> &dnn,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		size_t batch_size,
@@ -55,16 +55,16 @@ void train_dataset(
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
 		if (threads > 1)
-			net.multithreaded_fit(input_batches[i], output_batches[i], threads);
+			dnn.multithreaded_fit(input_batches[i], output_batches[i], threads);
 		else
-			net.fit(input_batches[i], output_batches[i]);
+			dnn.fit(input_batches[i], output_batches[i]);
 	}
 }
 
 // Statistical counterparts of the above (with performance metrics)
 template <class T>
 PerformanceStatistics <T> train_mini_batch_perf(
-		NeuralNetwork <T> &net,
+		DNN <T> &dnn,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		Erf <T> *cost,
@@ -84,7 +84,7 @@ PerformanceStatistics <T> train_mini_batch_perf(
 
 	// Performance statistics first
 	for (size_t i = 0; i < n; i++) {
-		to = net(ins[i]);
+		to = dnn(ins[i]);
 		ns.__cost += (*cost)(to, outs[i])[0];
 		ns.__passed += (cmp(to, outs[i]));
 
@@ -92,9 +92,9 @@ PerformanceStatistics <T> train_mini_batch_perf(
 	}
 
 	if (threads > 1)
-		net.multithreaded_fit(ins, outs, threads);
+		dnn.multithreaded_fit(ins, outs, threads);
 	else
-		net.fit(ins, outs);
+		dnn.fit(ins, outs);
 
 	perr /= n;
 	if (display & Display::batch) {
@@ -110,7 +110,7 @@ PerformanceStatistics <T> train_mini_batch_perf(
 
 template <class T>
 PerformanceStatistics <T> train_dataset_perf(
-		NeuralNetwork <T> &net,
+		DNN <T> &dnn,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		size_t batch_size,
@@ -130,7 +130,7 @@ PerformanceStatistics <T> train_dataset_perf(
 	
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
-		bs = train_mini_batch_perf(net,
+		bs = train_mini_batch_perf(dnn,
 				input_batches[i],
 				output_batches[i],
 				cost,

@@ -107,7 +107,7 @@ private:
 	 */
 	static node nf_one();
 	static node nf_zero();
-public:
+	
 	// General error
 	class error {
 		std::string str;
@@ -118,17 +118,19 @@ public:
 			return str;
 		}
 	};
-
+public:
 	// Syntax error
 	class syntax_error : public error {
 	public:
-		syntax_error(std::string s) : error(s) {}
+		syntax_error(const std::string &s)
+				: error(s) {}
 	};
 
 	// Undefined symbol error
 	class undefined_symbol : public error {
 	public:
-		undefined_symbol(std::string s) : error(s) {}
+		undefined_symbol(const std::string &s)
+				: error(s) {}
 	};
 };
 

@@ -134,9 +134,9 @@ public:
 	T cofactor(size_t, size_t) const;
 	T cofactor(const psize_t &) const;
 
-	const Matrix &inverse() const;
-	const Matrix &adjugate() const;
-	const Matrix &cofactor() const;
+	Matrix inverse() const;
+	Matrix adjugate() const;
+	Matrix cofactor() const;
 
 	bool symmetric() const;
 
@@ -710,25 +710,25 @@ T Matrix <T> ::cofactor(size_t i, size_t j) const
 }
 
 template <class T>
-const Matrix <T> &Matrix <T> ::inverse() const
+Matrix <T> Matrix <T> ::inverse() const
 {
 	return adjugate() / determinant();
 }
 
 template <class T>
-const Matrix <T> &Matrix <T> ::adjugate() const
+Matrix <T> Matrix <T> ::adjugate() const
 {
 	return cofactor().transpose();
 }
 
 template <class T>
-const Matrix <T> &Matrix <T> ::cofactor() const
+Matrix <T> Matrix <T> ::cofactor() const
 {
-	Matrix <T> *out = new Matrix(__rows, __cols, [&](size_t i, size_t j) {
-		return cofactor(i, j);
-	});
-
-	return *out;
+	return Matrix(__rows, __cols,
+		[&](size_t i, size_t j) {
+			return cofactor(i, j);
+		}
+	);
 }
 
 template <class T>

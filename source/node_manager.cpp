@@ -762,9 +762,9 @@ std::string node_manager::display_operation(node ref) const
 	case pwr:
 		return display_pemdas(ref, ref.__leaves[0]) + str
 			+ display_pemdas(ref, ref.__leaves[1]);
-	case sin:
-	case cos:
-	case tan:
+	case sxn:
+	case cxs:
+	case txn:
 	case sec:
 	case csc:
 	case cot:
@@ -925,9 +925,9 @@ void node_manager::label_operation(node &ref)
 			!is_constant(ref.__leaves[1].__label))
 			ref.__label = l_constant_base_log;
 		break;
-	case sin:
-	case cos:
-	case tan:
+	case sxn:
+	case cxs:
+	case txn:
 	case sec:
 	case csc:
 	case cot:

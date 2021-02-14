@@ -12,7 +12,6 @@
 #define ZHP_ENGINE_PATH "../../engine"
 
 // Engine headers
-#include <network.hpp>
 #include <training.hpp>
 
 #define TRAIN_IMAGES	60000
@@ -68,7 +67,7 @@ vector <double> read_image(ifstream &fin)
 int main()
 {
 	// Enable loading
-	ml::ZhetapiRegisterStandardActivations <double> ();
+	ml::ZhetapiInit <double> ();
 
 	// Load the model structure
 	// model.load_json("model.json");
@@ -77,7 +76,7 @@ int main()
 	srand(clock());
 
 	// Create the model
-	ml::NeuralNetwork <double> model(784, {
+	ml::DNN <double> model(784, {
 		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784)),
 		ml::Layer <double> (10, new ml::Softmax <double> (), ml::Xavier <double> (30))
 	});

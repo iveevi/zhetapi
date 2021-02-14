@@ -1,4 +1,4 @@
-#include <network.hpp>
+#include <dnn.hpp>
 
 #include <std/activations.hpp>
 
@@ -9,7 +9,7 @@ int main()
 {
 	ml::ZhetapiInit <double> ();
 
-	ml::NeuralNetwork model(4, {
+	ml::DNN model(4, {
 		ml::Layer(4, new ml::ReLU <double> ()),
 		ml::Layer(4, new ml::ReLU <double> ()),
 		ml::Layer(4, new ml::ReLU <double> ())
@@ -21,7 +21,7 @@ int main()
 
 	cout << string(50, '=') << endl;
 
-	ml::NeuralNetwork copy;
+	ml::DNN copy;
 
 	copy.load("model.out");
 
