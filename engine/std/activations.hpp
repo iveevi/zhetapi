@@ -421,7 +421,7 @@ public:
 };
 
 template <class T>
-void ZhetapiRegisterStandardActivations()
+void ZhetapiInit()
 {
 	__zhp_register_activation(Linear, T, load_linear <T>);
 	__zhp_register_activation(ReLU, T, load_relu <T>);

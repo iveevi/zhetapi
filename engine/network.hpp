@@ -54,22 +54,22 @@ namespace zhetapi {
 namespace ml {
 
 // Neural network class
-template <class T>
+template <class T = double>
 class NeuralNetwork {
 public:
 	// Exceptions
 	class bad_io_dimensions {};
 	class null_optimizer {};
 private:
-	Layer <T> *		__layers = nullptr;
-	size_t			__size = 0;
+	Layer <T> *		__layers	= nullptr;
 
-	size_t			__isize = 0;
-	size_t			__osize = 0;
+	size_t			__size		= 0;
+	size_t			__isize		= 0;
+	size_t			__osize		= 0;
 
 	// Remove erf and optimizer later
-	Erf <T> *		__cost = nullptr; // Safe to copy
-	Optimizer <T> *         __opt = nullptr;
+	Erf <T> *		__cost		= nullptr; // Safe to copy
+	Optimizer <T> *         __opt		= nullptr;
 
 	void clear();
 public:
@@ -81,10 +81,10 @@ public:
 
 	NeuralNetwork &operator=(const NeuralNetwork &);
 
-	/* Saving and loading the network
+	// Saving and loading the network
 	void save(const std::string &);
 	void load(const std::string &);
-	void load_json(const std::string &); */
+	// void load_json(const std::string &);
 
 	// Setters
 	void set_cost(Erf <T> *);
@@ -180,6 +180,91 @@ void NeuralNetwork <T> ::clear()
 {
 	delete[] __layers;
 }
+
+// Saving and loading
+template <class T>
+void NeuralNetwork <T> ::save(const std::string &file)
+{
+	std::ofstream fout(file);
+
+	fout.write((char *) &__size, sizeof(size_t));
+	fout.write((char *) &__isize, sizeof(size_t));
+	fout.write((char *) &__osize, sizeof(size_t));
+
+	for (int i = 0; i < __size; i++)
+		__layers[i].write(fout);
+}
+
+template <class T>
+void NeuralNetwork <T> ::load(const std::string &file)
+{
+	// Clear the current members
+	clear();
+
+	std::ifstream fin(file);
+
+	fin.read((char *) &__size, sizeof(size_t));
+	fin.read((char *) &__isize, sizeof(size_t));
+	fin.read((char *) &__osize, sizeof(size_t));
+
+	__layers = new Layer <T> [__size];
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].read(fin);
+}
+
+/*
+template <class T>
+void NeuralNetwork <T> ::load_json(const std::string &file)
+{
+	std::ifstream fin(file);
+
+	nlohmann::json structure;
+
+	fin >> structure;
+
+	auto layers = structure["Layers"];
+
+	// Allocate size information
+	__size = layers.size();
+	__isize = layers[0]["Neurons"];
+	__osize = layers[__size - 1]["Neurons"];
+
+	// Allocate matrices and activations
+	__weights = new Matrix <T> [__size - 1];
+	__momentum = new Matrix <T> [__size - 1];
+	__layers = new Layer <T> [__size];
+
+	// Allocate caches
+	__a = std::vector <Vector <T>> (__size);
+	__z = std::vector <Vector <T>> (__size - 1);
+
+	std::vector <size_t> sizes;
+	for (size_t i = 0; i < __size; i++) {
+		auto layer = layers[i];
+
+		auto activation = layer["Activation"];
+		size_t neurons = layer["Neurons"];
+
+		std::vector <T> args;
+
+		for (auto arg : activation["Arguments"])
+			args.push_back(arg);
+
+		std::string name = activation["Name"];
+
+		sizes.push_back(layer["Neurons"]);
+
+		__layers[i].second = Activation <T> ::load(name, args);
+	}
+
+	for (size_t i = 1; i < __size; i++) {
+		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
+		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
+	}
+
+	__random = default_initializer <T> {};
+	__cmp = default_comparator;
+} */
 
 // Property managers and viewers
 template <class T>
@@ -291,127 +376,6 @@ void NeuralNetwork <T> ::print() const
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].print();
 }
-
-/*
-// Saving and loading
-template <class T>
-void NeuralNetwork <T> ::save(const std::string &file)
-{
-	std::ofstream fout(file);
-
-	size_t type_size = sizeof(T);
-
-	fout.write((char *) &type_size, sizeof(size_t));
-	fout.write((char *) &__size, sizeof(size_t));
-	fout.write((char *) &__isize, sizeof(size_t));
-	fout.write((char *) &__osize, sizeof(size_t));
-
-	__layers[0].second->write(fout);
-	for (int i = 0; i < __size - 1; i++) {
-		size_t r = __weights[i].get_rows();
-		size_t c = __weights[i].get_cols();
-
-		fout.write((char *) &r, sizeof(size_t));
-		fout.write((char *) &c, sizeof(size_t));
-
-		__weights[i].write(fout);
-		__momentum[i].write(fout);
-		__layers[i + 1].second->write(fout);
-	}
-}
-
-template <class T>
-void NeuralNetwork <T> ::load(const std::string &file)
-{
-	std::ifstream fin(file);
-
-	size_t type_size = sizeof(T);
-
-	fin.read((char *) &type_size, sizeof(size_t));
-	fin.read((char *) &__size, sizeof(size_t));
-	fin.read((char *) &__isize, sizeof(size_t));
-	fin.read((char *) &__osize, sizeof(size_t));
-
-	__weights = new Matrix <T> [__size - 1];
-	__momentum = new Matrix <T> [__size - 1];
-	__layers = new Layer <T> [__size];
-
-	__a = std::vector <Vector <T>> (__size);
-	__z = std::vector <Vector <T>> (__size - 1);
-
-	// Read the first activation
-	__layers[0].second = Activation <T> ::load(fin);
-
-	// Loop through for the rest
-	for (int i = 0; i < __size - 1; i++) {
-		size_t r;
-		size_t c;
-
-		fin.read((char *) &r, sizeof(size_t));
-		fin.read((char *) &c, sizeof(size_t));
-
-		__weights[i] = Matrix <T> (r, c, T(0));
-		__momentum[i] = Matrix <T> (r, c, T(0));
-
-		__weights[i].read(fin);
-		__momentum[i].read(fin);
-
-		__layers[i + 1].second = Activation <T> ::load(fin);
-	}
-}
-
-template <class T>
-void NeuralNetwork <T> ::load_json(const std::string &file)
-{
-	std::ifstream fin(file);
-
-	nlohmann::json structure;
-
-	fin >> structure;
-
-	auto layers = structure["Layers"];
-
-	// Allocate size information
-	__size = layers.size();
-	__isize = layers[0]["Neurons"];
-	__osize = layers[__size - 1]["Neurons"];
-
-	// Allocate matrices and activations
-	__weights = new Matrix <T> [__size - 1];
-	__momentum = new Matrix <T> [__size - 1];
-	__layers = new Layer <T> [__size];
-
-	// Allocate caches
-	__a = std::vector <Vector <T>> (__size);
-	__z = std::vector <Vector <T>> (__size - 1);
-
-	std::vector <size_t> sizes;
-	for (size_t i = 0; i < __size; i++) {
-		auto layer = layers[i];
-
-		auto activation = layer["Activation"];
-		size_t neurons = layer["Neurons"];
-
-		std::vector <T> args;
-
-		for (auto arg : activation["Arguments"])
-			args.push_back(arg);
-
-		std::string name = activation["Name"];
-
-		sizes.push_back(layer["Neurons"]);
-
-		__layers[i].second = Activation <T> ::load(name, args);
-	}
-
-	for (size_t i = 1; i < __size; i++) {
-		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
-		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
-	}
-
-	__random = default_initializer <T> {};
-	__cmp = default_comparator;
-} */
 
 }
 

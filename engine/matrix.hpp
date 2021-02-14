@@ -97,7 +97,7 @@ public:
 	Vector <T> get_column(size_t) const;
 
 	// Rading from a binary file
-	void write(std::ofstream &);
+	void write(std::ofstream &) const;
 	void read(std::ifstream &);
 
 	// Concatenating matrices
@@ -473,7 +473,7 @@ Vector <T> Matrix <T> ::get_column(size_t r) const
 }
 
 template <class T>
-void Matrix <T> ::write(std::ofstream &fout)
+void Matrix <T> ::write(std::ofstream &fout) const
 {
 	for (size_t i = 0; i < this->__size; i++)
 		fout.write((char *) &(this->__array[i]), sizeof(T));

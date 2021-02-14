@@ -1,30 +1,29 @@
-#include <image.hpp>
-#include <std/filters.hpp>
+#include <network.hpp>
 
-#include <opencv2/opencv.hpp>
+#include <std/activations.hpp>
 
 using namespace std;
 using namespace zhetapi;
-using namespace cv;
 
 int main()
 {
-	image::Image img = image::load_png("zhetapi-logo.png");
+	ml::ZhetapiInit <double> ();
 
-	/*
-	image::Convolution <double> conv({
-		{0, 0, 0},
-		{0, 1, 0},
-		{0, 0, 0}
-	}); */
-	
-	image::Convolution <double> conv({
-		{-1, -1, -1},
-		{-1, 8, -1},
-		{-1, -1, -1}
+	ml::NeuralNetwork model(4, {
+		ml::Layer(4, new ml::ReLU <double> ()),
+		ml::Layer(4, new ml::ReLU <double> ()),
+		ml::Layer(4, new ml::ReLU <double> ())
 	});
 
-	image::Image conved = conv.process(img);
+	model.save("model.out");
 
-	conved.show();
+	model.print();
+
+	cout << string(50, '=') << endl;
+
+	ml::NeuralNetwork copy;
+
+	copy.load("model.out");
+
+	copy.print();
 }
