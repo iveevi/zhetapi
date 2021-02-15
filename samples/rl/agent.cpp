@@ -6,7 +6,7 @@ Vec dirs = acos(-1) * Vec {
 };
 
 // Constructor
-Agent::Agent()
+Agent::Agent(double gma) : gamma(gma)
 {
 	srand(clock());
 
@@ -21,23 +21,13 @@ Agent::Agent()
 
 	// Starting position
 	start = Vec {
-		rintv(0, 1),
-			rintv(0, 1)
+		rintv(-1, 1),
+		rintv(-1, 1)
 	};
 
 	position = start;
 
 	// Force
-	applied = Vec {
-		0.0,
-		0.0
-	};
-
-	net = Vec {
-		0.0,
-		0.0
-	};
-
 	force = Fc(start, radius);
 
 	// Mass
@@ -45,6 +35,11 @@ Agent::Agent()
 }
 
 // Methods
+Vec Agent::state()
+{
+	return concat(position, velocity, F(position));
+}
+
 void Agent::reset()
 {
 	velocity = Vec {

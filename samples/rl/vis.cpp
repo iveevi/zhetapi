@@ -19,8 +19,6 @@ void display()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	// Draw the point
-
 	double r = agent.radius;
 	double l = 1.5 * r;
 
@@ -29,8 +27,6 @@ void display()
 
 	Vec f = F(p);
 	Vec v = agent.velocity;
-	Vec a = agent.applied;
-	Vec n = agent.net;
 
 	glColor3f(0.0, 1.0, 0.0);
 	glBegin(GL_LINES);
@@ -44,18 +40,6 @@ void display()
 		glVertex2f((p.x() + v.x())/l, (p.y() + v.y())/l);
 	glEnd();
 	
-	/* glColor3f(1.0, 0.0, 1.0);
-	glBegin(GL_LINES);
-		glVertex2f(p.x()/l, p.y()/l);
-		glVertex2f((p.x() + a.x())/l, (p.y() + a.y())/l);
-	glEnd();
-	
-	glColor3f(1.0, 0.5, 1.0);
-	glBegin(GL_LINES);
-		glVertex2f(p.x()/l, p.y()/l);
-		glVertex2f((p.x() + n.x())/l, (p.y() + n.y())/l);
-	glEnd(); */
-
 	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POINTS);
 		glVertex2f(s.x()/l, s.y()/l);

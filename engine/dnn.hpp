@@ -60,6 +60,7 @@ public:
 	// Exceptions
 	class bad_io_dimensions {};
 	class null_optimizer {};
+	class null_loss_function {};
 private:
 	Layer <T> *		__layers	= nullptr;
 
@@ -305,6 +306,9 @@ void DNN <T> ::fit(const Vector <T> &in, const Vector <T> &out)
 
 	if (!__opt)
 		throw null_optimizer();
+	
+	if (!__cost)
+		throw null_loss_function();
 
 	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
 
@@ -325,6 +329,9 @@ void DNN <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
 
 	if (!__opt)
 		throw null_optimizer();
+	
+	if (!__cost)
+		throw null_loss_function();
 
 	Matrix <T> *J = __opt->batch_gradient(__layers, __size, ins, outs, __cost);
 
@@ -348,6 +355,9 @@ void DNN <T> ::multithreaded_fit(
 
 	if (!__opt)
 		throw null_optimizer();
+	
+	if (!__cost)
+		throw null_loss_function();
 
 	Matrix <T> *J = __opt->multithreaded_batch_gradient(
 			__layers,

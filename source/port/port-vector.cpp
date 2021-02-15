@@ -34,6 +34,9 @@ bool vector_construction_and_memory(ostringstream &oss)
 	
 	oss << "Cropped size and pointer constructor: " << tmp << endl;
 
+	// Free resources
+	delete[] arr;
+
 	return true;
 }
 

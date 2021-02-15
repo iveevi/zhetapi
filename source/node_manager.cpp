@@ -548,7 +548,7 @@ void node_manager::simplify_mult_div(node &ref, codes c)
 			t1 = (dynamic_cast <node_differential *> (t1))->get();
 			t2 = (dynamic_cast <node_differential *> (t2))->get();
 
-			Function *ftn;
+			Function *ftn = nullptr;
 			std::string var;
 
 			if (t1->caller() == Token::ftn)
@@ -557,7 +557,7 @@ void node_manager::simplify_mult_div(node &ref, codes c)
 			if (t2->caller() == Token::ndr)
 				var = (dynamic_cast <node_reference *> (t2))->symbol();
 
-			if (ftn->is_variable(var)) {
+			if (ftn && ftn->is_variable(var)) {
 				Function f = ftn->differentiate(var);
 
 				ref.__leaves.clear();

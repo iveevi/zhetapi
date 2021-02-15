@@ -24,6 +24,7 @@ add_executable(rl
 	heurestic.cpp
 	main.cpp
 	vis.cpp
+	ml.cpp
 )
 
 target_link_libraries(rl ${OPENGL_LIBRARIES})

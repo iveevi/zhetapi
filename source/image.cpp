@@ -250,11 +250,17 @@ Image load_png(const char *impath)
 
 	png_byte header[8];
 
-	if (fread(header, 1, 8, file) != 8)
-		throw bad_png();
+	if (fread(header, 1, 8, file) != 8) {
+		fclose(file);
 
-	if (png_sig_cmp(header, 0, 8))
 		throw bad_png();
+	}
+
+	if (png_sig_cmp(header, 0, 8)) {
+		fclose(file);
+
+		throw bad_png();
+	}
 
 	png_structp png_ptr = png_create_read_struct(
 			PNG_LIBPNG_VER_STRING,
@@ -262,16 +268,25 @@ Image load_png(const char *impath)
 			nullptr,
 			nullptr);
 
-	if (!png_ptr)
+	if (!png_ptr) {
+		fclose(file);
+
 		throw bad_png();
+	}
 
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 
-	if (!info_ptr)
-		throw bad_png();
+	if (!info_ptr) {
+		fclose(file);
 
-	if (setjmp(png_jmpbuf(png_ptr)))
 		throw bad_png();
+	}
+
+	if (setjmp(png_jmpbuf(png_ptr))) {
+		fclose(file);
+
+		throw bad_png();
+	}
 
 	png_init_io(png_ptr, file);
 	png_set_sig_bytes(png_ptr, 8);
