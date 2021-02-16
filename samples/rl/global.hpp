@@ -73,6 +73,20 @@ struct strategy {
 	size_t		frames		= 0;
 	size_t		tframes		= 0;
 
+	string		name		= "";
+	ofstream	csv;
+
+	// Default constructor
+	strategy() {}
+
+	// Remove copy construction
+	strategy(const strategy &) = delete;
+
+	// Starting the file
+	void open(string file) {
+		csv.open(file);
+	}
+
 	// Ensure that none of the functions are null
 	bool validate() {
 		return h_init && h_action && h_reward;

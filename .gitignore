@@ -25,4 +25,5 @@ makefile
 portability
 *ubyte
 zhetapi
-zhetapi-headers
+zhetapi-header
+samples/rl/res
