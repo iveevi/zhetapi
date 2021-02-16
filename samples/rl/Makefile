@@ -142,32 +142,32 @@ rl/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/build
 .PHONY : rl/fast
 
-agent.o: agent.cpp.o
+environment.o: environment.cpp.o
 
-.PHONY : agent.o
+.PHONY : environment.o
 
 # target to build an object file
-agent.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/agent.cpp.o
-.PHONY : agent.cpp.o
+environment.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/environment.cpp.o
+.PHONY : environment.cpp.o
 
-agent.i: agent.cpp.i
+environment.i: environment.cpp.i
 
-.PHONY : agent.i
+.PHONY : environment.i
 
 # target to preprocess a source file
-agent.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/agent.cpp.i
-.PHONY : agent.cpp.i
+environment.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/environment.cpp.i
+.PHONY : environment.cpp.i
 
-agent.s: agent.cpp.s
+environment.s: environment.cpp.s
 
-.PHONY : agent.s
+.PHONY : environment.s
 
 # target to generate assembly for a file
-agent.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/agent.cpp.s
-.PHONY : agent.cpp.s
+environment.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/environment.cpp.s
+.PHONY : environment.cpp.s
 
 field.o: field.cpp.o
 
@@ -196,33 +196,6 @@ field.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/field.cpp.s
 .PHONY : field.cpp.s
 
-heurestic.o: heurestic.cpp.o
-
-.PHONY : heurestic.o
-
-# target to build an object file
-heurestic.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/heurestic.cpp.o
-.PHONY : heurestic.cpp.o
-
-heurestic.i: heurestic.cpp.i
-
-.PHONY : heurestic.i
-
-# target to preprocess a source file
-heurestic.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/heurestic.cpp.i
-.PHONY : heurestic.cpp.i
-
-heurestic.s: heurestic.cpp.s
-
-.PHONY : heurestic.s
-
-# target to generate assembly for a file
-heurestic.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/heurestic.cpp.s
-.PHONY : heurestic.cpp.s
-
 main.o: main.cpp.o
 
 .PHONY : main.o
@@ -250,60 +223,6 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-ml.o: ml.cpp.o
-
-.PHONY : ml.o
-
-# target to build an object file
-ml.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/ml.cpp.o
-.PHONY : ml.cpp.o
-
-ml.i: ml.cpp.i
-
-.PHONY : ml.i
-
-# target to preprocess a source file
-ml.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/ml.cpp.i
-.PHONY : ml.cpp.i
-
-ml.s: ml.cpp.s
-
-.PHONY : ml.s
-
-# target to generate assembly for a file
-ml.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/ml.cpp.s
-.PHONY : ml.cpp.s
-
-vis.o: vis.cpp.o
-
-.PHONY : vis.o
-
-# target to build an object file
-vis.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/vis.cpp.o
-.PHONY : vis.cpp.o
-
-vis.i: vis.cpp.i
-
-.PHONY : vis.i
-
-# target to preprocess a source file
-vis.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/vis.cpp.i
-.PHONY : vis.cpp.i
-
-vis.s: vis.cpp.s
-
-.PHONY : vis.s
-
-# target to generate assembly for a file
-vis.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rl.dir/build.make CMakeFiles/rl.dir/vis.cpp.s
-.PHONY : vis.cpp.s
-
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -313,24 +232,15 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... rl"
-	@echo "... agent.o"
-	@echo "... agent.i"
-	@echo "... agent.s"
+	@echo "... environment.o"
+	@echo "... environment.i"
+	@echo "... environment.s"
 	@echo "... field.o"
 	@echo "... field.i"
 	@echo "... field.s"
-	@echo "... heurestic.o"
-	@echo "... heurestic.i"
-	@echo "... heurestic.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... ml.o"
-	@echo "... ml.i"
-	@echo "... ml.s"
-	@echo "... vis.o"
-	@echo "... vis.i"
-	@echo "... vis.s"
 .PHONY : help
 
 

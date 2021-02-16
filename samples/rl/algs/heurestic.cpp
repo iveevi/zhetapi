@@ -1,4 +1,9 @@
-#include "global.hpp"
+#include "../global.hpp"
+
+// Directions
+Vec dirs = acos(-1) * Vec {
+	0.5, 1.0, 1.5, 2.0
+};
 
 // Heurestic
 static double reward(Agent state, double angle, int depth)

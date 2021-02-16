@@ -2,13 +2,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set the right flags
-set(CMAKE_CXX_FLAGS "-pthread -std=c++17")
-if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-	set(CMAKE_CXX_FLAGS "$CMAKE_CXX_FLAGS -g")
-endif ()
-
-# Set compiler
-set(CMAKE_CXX_COMPILER "g++-8")
+include(../../cmake/settings.cmake)
 
 # Project listing
 project(rl)
@@ -19,15 +13,13 @@ find_package(GLUT REQUIRED)
 
 # Main project
 add_executable(rl
-	agent.cpp
+	environment.cpp
 	field.cpp
-	heurestic.cpp
 	main.cpp
-	vis.cpp
-	ml.cpp
 )
 
 target_link_libraries(rl ${OPENGL_LIBRARIES})
 target_link_libraries(rl ${GLUT_LIBRARY})
+target_link_libraries(rl ${CMAKE_DL_LIBS})
 
 include_directories(../../engine)

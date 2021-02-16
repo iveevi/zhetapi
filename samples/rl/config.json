@@ -1,0 +1,9 @@
+{
+	"Suites": [
+		{
+			"Name": "Q Learning",
+			"Sources": "algs/q_learning.cpp",
+			"Lib": "ql"
+		}
+	]
+}

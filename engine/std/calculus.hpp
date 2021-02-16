@@ -8,7 +8,6 @@
 #include <cmath>
 
 // Engine headers
-#include <function.hpp>
 #include <vector.hpp>
 #include <parametrization.hpp>
 

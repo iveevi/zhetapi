@@ -1,12 +1,7 @@
 #include "global.hpp"
 
-// Directions
-Vec dirs = acos(-1) * Vec {
-	0.5, 1.0, 1.5, 2.0
-};
-
 // Constructor
-Agent::Agent(double gma) : gamma(gma)
+Environment::Environment(double gma) : gamma(gma)
 {
 	srand(clock());
 
@@ -35,12 +30,12 @@ Agent::Agent(double gma) : gamma(gma)
 }
 
 // Methods
-Vec Agent::state()
+Vec Environment::state()
 {
 	return concat(position, velocity, F(position));
 }
 
-void Agent::reset()
+void Environment::reset()
 {
 	velocity = Vec {
 		0.0,
@@ -50,7 +45,7 @@ void Agent::reset()
 	position = start;
 }
 
-void Agent::move(Vec F, double dt) 
+void Environment::move(Vec F, double dt) 
 {
 	Vec a = F/mass;
 
@@ -61,28 +56,28 @@ void Agent::move(Vec F, double dt)
 	velocity += a * dt;
 }
 
-bool Agent::in_bounds()
+bool Environment::in_bounds()
 {
 	return distance() <= radius;
 }
 
-double Agent::distance()
+double Environment::distance()
 {
 	return (position - start).norm();
 }
 
-double Agent::reward()
+double Environment::reward()
 {
 	return 1/(distance() + 0.5);
 }
 
 // Miscellaneous
-double Agent::runit()
+double Environment::runit()
 {
 	return rand() / ((double) RAND_MAX);
 }
 
-double Agent::rintv(double a, double b)
+double Environment::rintv(double a, double b)
 {
 	return (a + runit() * (b - a));
 }

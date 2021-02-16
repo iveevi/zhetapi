@@ -1,170 +1,156 @@
 #include "global.hpp"
 
-// "Frame time"
+// 'Frame time'
 const double delta(1.0/120.0);
 const chrono::milliseconds frame((int) (1000 * delta));
 
-// Agent
-Agent agent(0.95);
+// Statistical variables
+ofstream fout("results.csv");
 
-// Replay buffer
-replays prbf(1000, 500);
+// Agent
+Environment env(0.95);
 
 // Step through each iteration
-void step()
+void step(strategy &s)
 {
-	static double reward = 0;
-	static double error = 0;
-	static size_t frames = 0;
-
-	// Experience
-	experience e;
-
-	// Action
-	double angle = 0;
-
-	Vec P = agent.position;
-	Vec V = agent.velocity;
-
-	// Get the state
-	Vec S = agent.state();
-
-	e.current = S;
-
-	// Q-value
-	Vec Q_values = model(S);
-
-	// Get the action
-	double rnd = agent.runit();
-
-	int i = -1;
-	if (rnd > 0.1) {
-		i = Q_values.imax();
-
-		e.index = i;
-
-		angle = dirs[i];
-	} else {
-		angle = heurestic(P);
-
-		i = 2 * (angle/(acos(-1)) - 0.5);
-
-		e.index = i;
-	}
-
-	// Create the action force
-	Vec A = Vec::rarg(agent.force, angle);
+	double angle = (*s.h_action)(env.state());
 	
-	// Field
-	agent.move(A + F(P), delta);
+	// Create the action force and move
+	Vec A = Vec::rarg(env.force, angle);
+	
+	env.move(A + F(env.position), delta);
 
-	// Next state
-	Vec N = agent.state();
+	// Gather reward and so on
+	double r = env.reward();
 
-	e.next = N;
+	(*s.h_reward)(r, env.state(), env.in_bounds(), s.error);
+	
+	s.reward += r;
+	s.tframes++;
+	s.frames++;
+	
+	if (!env.in_bounds() || s.frames >= 10000) {
+		env.reset();
 
-	// Reward
-	double r = agent.reward();
-
-	e.reward = r;
-
-	// TD-error
-	double err = fabs(r + agent.gamma * model(N).max() - Q_values[i]);
-
-	e.error = err;
-
-	// Update static values
-	reward += r;
-	error += err;
-	frames++;
-
-	// Decide termination
-	if (!agent.in_bounds()) {
-		agent.reset();
-
-		cout << "Final reward = " << reward
-			<< "\tframes last = " << frames
+		cout << "Final reward = " << s.reward
+			<< "\tframes last = " << s.frames
 			<< "\taverage TD-error = "
-			<< error/frames << endl;
+			<< s.error/s.frames << endl;
 
-		e.done = true;
+		fout << s.tframes << ","
+			<< s.reward << ","
+			<< s.frames << ","
+			<< s.error/s.frames
+			<< endl;
 
-		reward = 0;
-		error = 0;
-		frames = 0;
-	}
-
-	// Add the experience to the buffer
-	prbf.add(e);
-
-	// Train each step (if full)
-	if (prbf.full()) {
-		vector <experience> batch = prbf.sample();
-
-		DataSet <double> ins;
-		DataSet <double> outs;
-
-		for (auto e : batch) {
-			ins.push_back(e.current);
-
-			// Place this transformer into a separate function
-			double tr = e.reward;
-
-			if (!e.done)
-				tr += agent.gamma * model(e.next).max();
-
-			Vec tQ_values = model(e.current);
-
-			tQ_values[e.index] = tr;
-
-			outs.push_back(tQ_values);
-		}
-
-		model.multithreaded_fit(ins, outs, 8);
-
-		// Is it more sample efficient to replace the (updated)
-		// experiences back into the buffer?
-		for (auto &e : batch) {
-			e.error = fabs(e.reward + agent.gamma
-					* model(e.next).max()
-					- model(e.current)[e.index]);
-
-			prbf.add(e);
-		}
+		s.reward = 0;
+		s.error = 0;
+		s.frames = 0;
 	}
 }
 
 // Main function
 int main(int argc, char **argv)
 {
-	// Initialize the model (refactor erfs to do without the 'error' part)
-	ml::Optimizer <double> *opt = new ml::Adam <double> ();
-	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
+	// Open suites file
+	ifstream config("config.json");
 
-	model.set_optimizer(opt);
-	model.set_cost(cost);
+	// Extract json information
+	nlohmann::json suites;
 
-	// Glut initialization
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA
-			| GLUT_DEPTH
-			| GLUT_DOUBLE
-			| GLUT_MULTISAMPLE);
+	vector <string> libs;
 
-	glEnable(GL_MULTISAMPLE);
+	config >> suites;
 
-	glutInitWindowSize(640, 480);
-	glutCreateWindow("Reinforcement Learning Simulation");
+	cout << "Compiling shared files for each strategy..." << endl;
 
-	glutDisplayFunc(display);
-	glutReshapeFunc(reshape);
-	glutTimerFunc(1000 * delta, timer, 1);
+	system("mkdir -p libs");
+	for (auto suite : suites["Suites"]) {
+		string cc = "g++-8 ";
+		string flags = " -fPIC -rdynamic -shared -O3 ";
+		string libdir = " libs";
+		string idirs = " -I ../../engine ";
 
-	glutMainLoop();
+		string src = suite["Sources"];
+		string dst = suite["Lib"];
 
-	// Free resources
-	delete opt;
-	delete cost;
+		dst = "lib" + dst + ".so";
+
+		// Add the library name to the collection
+		libs.push_back(dst);
+
+		string cmd = cc + flags + src + " -o " + libdir + "/" + dst + idirs;
+
+		cout << "\t" << cmd << endl;
+
+		if (system(cmd.c_str())) {
+			cout << "Error compiling sources, terminating" << endl;
+
+			exit(-1);
+		}
+	}
+
+	vector <strategy> strats;
+	for (auto lib : libs) {
+		const char *error;
+
+		string path = "libs/" + lib;
+
+		void *handle = dlopen(path.c_str(), RTLD_NOW);
+
+		error = dlerror();
+
+		if (error) {
+			cerr << "Cannot load strategy '" << path << "': " << error << '\n';
+			
+			exit(-1);;
+		}
+
+		void *init = dlsym(handle, "init");
+		void *action = dlsym(handle, "action");
+		void *reward = dlsym(handle, "reward");
+
+		error = dlerror();
+
+		if (error) {
+			cerr << "Cannot load strategy '" << path << "': " << error << '\n';
+			
+			exit(-1);
+		}
+
+		cout << "init = " << init << endl;
+		cout << "action = " << action << endl;
+		cout << "reward = " << reward << endl;
+
+		strategy s {
+			(strategy::init_t) init,
+			(strategy::action_t) action,
+			(strategy::reward_t) reward
+		};
+
+		if (!s.validate()) {
+			cerr << "Error importing strategy '"
+				<< lib << "': null functions" << endl;
+
+			exit(-1);
+		}
+
+		strats.push_back(s);
+
+		(*s.h_init)(env);
+	}
+
+	// Initialize the CSV file
+	fout << "total_frames,final_reward,frames,avg_error" << endl;
+
+	// Launch the graphing script
+	system("python3 statistics.py &");
+
+	while (true) {
+		this_thread::sleep_for(frame);
+
+		step(strats[0]);
+	}
 
 	return 0;
 }

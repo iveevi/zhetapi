@@ -1,29 +1,12 @@
-#include <dnn.hpp>
-
-#include <std/activations.hpp>
+#include <graph/matplotlibcpp.h>
 
 using namespace std;
 using namespace zhetapi;
 
+namespace plt = matplotlibcpp;
+
 int main()
 {
-	ml::ZhetapiInit <double> ();
-
-	ml::DNN model(4, {
-		ml::Layer(4, new ml::ReLU <double> ()),
-		ml::Layer(4, new ml::ReLU <double> ()),
-		ml::Layer(4, new ml::ReLU <double> ())
-	});
-
-	model.save("model.out");
-
-	model.print();
-
-	cout << string(50, '=') << endl;
-
-	ml::DNN copy;
-
-	copy.load("model.out");
-
-	copy.print();
+	plt::plot({1,3,2,4});
+	plt::show();
 }
