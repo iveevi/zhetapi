@@ -12,7 +12,7 @@ parser.add_argument("-m", "--mode", help="Execution mode", default='')
 parser.add_argument("-j", "--threads", help="Number of concurrent threads", type=int, default=8)
 
 # Compilation
-def make_target(threads, target, mode):
+def make_target(threads, target, mode=''):
     if mode in ['gdb', 'valgrind']:
         os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
     else:
