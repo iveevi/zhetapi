@@ -31,14 +31,16 @@ protected:
 	bool	__on_device = false;	// Flag for device allocation
 
 #endif
-
-	__cuda_dual_prefix
-	void clear();
 public:
 	Tensor(const std::vector <std::size_t> &, const ::std::vector <T> &);
 
 	// TODO: remove size term from vector and matrix classes
 	size_t size() const;
+	
+	__cuda_dual_prefix
+	void clear();
+
+	bool good() const;
 
 	// Boolean operators (generalize with prefix)
 	template <class U>
@@ -240,8 +242,6 @@ Tensor <T> ::Tensor(const std::vector <size_t> &dim)
 
 	if (!__size)
 		return;
-	else if (__size < 0)
-		throw bad_dimensions();
 
 	__array = new T[prod];
 }
@@ -263,8 +263,6 @@ Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
 
 	if (!__size)
 		return;
-	else if (__size < 0)
-		throw bad_dimensions();
 
 	__array = new T[prod];
 
@@ -289,8 +287,16 @@ void Tensor <T> ::clear()
 
 	if (__array && !__sliced)
 		delete[] __array;
+
+	__array = nullptr;
+	__dim = nullptr;
 }
 
+template <class T>
+bool Tensor <T> ::good() const
+{
+	return __array != nullptr;
+}
 
 template <class T>
 Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)

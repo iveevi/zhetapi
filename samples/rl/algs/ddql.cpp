@@ -16,6 +16,8 @@ ml::DNN <double> model(6, {
 	ml::Layer <double> (4, new ml::ReLU <double> ())
 });
 
+ml::DNN <double> target;
+
 // Replay buffer
 replays prbf(1000, 500);
 
@@ -23,6 +25,7 @@ replays prbf(1000, 500);
 Vec Q_values;
 experience e;
 double discount;
+size_t frames;
 int i;
 
 // Extra functions
@@ -44,6 +47,7 @@ void init(Environment env)
 	model.set_cost(cost);
 
 	// Add a deconstruct function for freeing memory
+	target = model;
 }
 
 double action(Vec S)
@@ -86,7 +90,9 @@ void reward(double reward, Vec N, bool valid, double &error)
 	e.next = N;
 
 	// TD-error
-	double err = fabs(reward + discount * model(N).max() - Q_values[i]);
+	size_t im = model(N).imax();
+
+	double err = fabs(reward + discount * target(N)[im] - Q_values[i]);
 
 	e.error = err;
 
@@ -112,8 +118,11 @@ void reward(double reward, Vec N, bool valid, double &error)
 			// Place this transformer into a separate function
 			double tr = e.reward;
 
-			if (!e.done)
-				tr += discount * model(e.next).max();
+			if (!e.done) {
+				size_t im = model(e.next).imax();
+
+				tr += discount * target(e.next)[im];
+			}
 
 			Vec tQ_values = model(e.current);
 
@@ -127,12 +136,20 @@ void reward(double reward, Vec N, bool valid, double &error)
 		// Is it more sample efficient to replace the (updated)
 		// experiences back into the buffer?
 		for (auto &e : batch) {
+			size_t im = model(e.next).imax();
+
 			e.error = fabs(e.reward + discount
-					* model(e.next).max()
+					* target(e.next)[im]
 					- model(e.current)[e.index]);
 
 			prbf.add(e);
 		}
+	}
+
+	if (++frames > 25000) {
+		frames = 0;
+
+		target = model;
 	}
 }
 

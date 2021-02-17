@@ -40,10 +40,9 @@ const size_t Parametrization <T, P, F> ::partition_size = 1000;
 template <class T, class P, class F>
 Parametrization <T, P, F> ::Parametrization(F ftn, P par, T start, T end)
 		: __ftn(ftn), __par(par),
-		__start(start), __end(end)
+		__start(start), __end(end),
+		__pos(start)
 {
-	__pos = start;
-
 	__inc = (end - start) / (T) partition_size;
 }
 

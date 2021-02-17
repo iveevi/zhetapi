@@ -7,30 +7,27 @@ const chrono::milliseconds frame((int) (1000 * delta));
 // Statistical variables
 ofstream fout("results.csv");
 
-// Agent
-Environment env(0.95);
-
 // Step through each iteration
 void step(strategy *s)
 {
-	double angle = (*s->h_action)(env.state());
+	double angle = (*s->h_action)(s->env.state());
 	
 	// Create the action force and move
-	Vec A = Vec::rarg(env.force, angle);
+	Vec A = Vec::rarg(s->env.force, angle);
 	
-	env.move(A + F(env.position), delta);
+	s->env.move(A + F(s->env.position), delta);
 
 	// Gather reward and so on
-	double r = env.reward();
+	double r = s->env.reward();
 
-	(*s->h_reward)(r, env.state(), env.in_bounds(), s->error);
+	(*s->h_reward)(r, s->env.state(), s->env.in_bounds(), s->error);
 	
 	s->reward += r;
 	s->tframes++;
 	s->frames++;
 	
-	if (!env.in_bounds() || s->frames >= 10000) {
-		env.reset();
+	if (!s->env.in_bounds() || s->frames >= 10000) {
+		s->env.reset();
 
 		cout << s->name << "\tFinal reward = " << s->reward
 			<< "\tframes last = " << s->frames
@@ -90,7 +87,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	cout << "Done compiling, moving to loading..." << endl;
+	cout << "Done compiling, loading the strategies..." << endl;
 
 	vector <strategy *> strats;
 
@@ -138,23 +135,30 @@ int main(int argc, char **argv)
 		s->open("res/" + name + ".csv");
 
 		strats.push_back(s);
-
-		(*s->h_init)(env);
 	
-		// Initialize the CSV file
-		s->csv << "total_frames,final_reward,frames,avg_error" << endl;
-
 		// Other properties
 		s->name = name;
+
+		s->env = Environment(0.95);
+
+		// Initialize the strategy
+		(*s->h_init)(s->env);
+		
+		// Initialize the CSV file
+		s->csv << "total_frames,final_reward,frames,avg_error" << endl;
 	}
+
+	cout << "Finished loading, running simulation..." << endl;
 
 	// Launch the graphing script
 	system("python3 statistics.py &");
 
+	size_t size = strats.size();
 	while (true) {
-		this_thread::sleep_for(frame);
+		// this_thread::sleep_for(frame);
 
-		step(strats[0]);
+		for (size_t i = 0; i < size; i++)
+			step(strats[i]);
 	}
 
 	return 0;

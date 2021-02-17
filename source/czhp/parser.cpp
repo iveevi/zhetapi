@@ -376,10 +376,9 @@ int parse(string str)
 	static int paren = 0;
 
 	string tmp;
-	char c;
 
 	for (size_t i = 0; i < str.length(); i++) {
-		c = str[i];
+		char c = str[i];
 
 		if (!quoted) {
 			if (c == '\"')

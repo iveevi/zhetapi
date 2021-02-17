@@ -1,9 +1,15 @@
 {
 	"Suites": [
 		{
-			"Name": "Q Learning",
-			"Sources": "algs/q_learning.cpp",
-			"Lib": "ql"
+			"Name": "DQL",
+			"Sources": "algs/dql.cpp",
+			"Lib": "dql"
+		},
+
+		{
+			"Name": "DDQL",
+			"Sources": "algs/ddql.cpp",
+			"Lib": "ddql"
 		}
 	]
 }

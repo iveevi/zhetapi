@@ -6,6 +6,7 @@
 
 namespace zhetapi {
 
+template <class T>
 class Filter {
 public:
 };

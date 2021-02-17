@@ -1,6 +1,8 @@
 #include "global.hpp"
 
-// Constructor
+// Constructors
+Environment::Environment() {}
+
 Environment::Environment(double gma) : gamma(gma)
 {
 	srand(clock());

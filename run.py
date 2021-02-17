@@ -12,13 +12,16 @@ parser.add_argument("-m", "--mode", help="Execution mode", default='')
 parser.add_argument("-j", "--threads", help="Number of concurrent threads", type=int, default=8)
 
 # Compilation
-def make_target(threads, target):
-	os.system('cmake .')
+def make_target(threads, target, mode):
+    if mode in ['gdb', 'valgrind']:
+        os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
+    else:
+        os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
 
-	os.system('make -j{threads} {target}'.format(
-		threads=threads,
-		target=target
-	))
+    os.system('make -j{threads} {target}'.format(
+            threads=threads,
+            target=target
+    ))
 
 # Execution modes
 modes = {
@@ -87,7 +90,7 @@ args = parser.parse_args()
 if args.target in special.keys():
 	special[args.target](args)
 elif args.target in targets:
-	make_target(args.threads, args.target)
+	make_target(args.threads, args.target, args.mode)
 
 	os.system('{exe}{target}'.format(
 		exe=modes[args.mode],

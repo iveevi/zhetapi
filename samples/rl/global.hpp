@@ -40,6 +40,7 @@ struct Environment {
 	double	gamma;		// Discount factor
 	
 	// Initialize
+	Environment();
 	Environment(double);
 
 	// Methods
@@ -76,6 +77,8 @@ struct strategy {
 	string		name		= "";
 	ofstream	csv;
 
+	Environment	env;
+
 	// Default constructor
 	strategy() {}
 
@@ -94,8 +97,6 @@ struct strategy {
 };
 
 // Forward declaration of shared variables
-extern Environment env;
-
 extern "C" Vec dirs;
 
 extern const double delta;

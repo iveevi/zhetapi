@@ -125,7 +125,7 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 		
 		try {
 			mg = node_manager(str, barn);
-		} catch (node_manager::undefined_symbol e) {
+		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""
 				<< e.what() << "\"" << std::endl;

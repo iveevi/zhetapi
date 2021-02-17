@@ -1,7 +1,8 @@
-#ifndef NETWORK_NODE_H_
-#define NETWORK_NODE_H_
+#ifndef NET_NODE_H_
+#define NET_NODE_H_
 
 // C/C++ headers
+#include <iostream>
 #include <vector>
 
 // Engine headers
@@ -13,50 +14,76 @@ namespace zhetapi {
 namespace ml {
 
 template <class T = double>
-class NetworkNode {
-	Tensor <T> **	__ins	= nullptr;
-	Tensor <T> **	__outs	= nullptr;
+class NetNode {
+	Tensor <T> **		__ins		= nullptr;
+	Tensor <T> **		__outs		= nullptr;
 
-	Filter <T> *	__filter = nullptr;
+	Filter <T> *		__filter	= nullptr;
 	
-	size_t		__nins	= 0;
-	size_t		__nouts	= 0;
+	size_t			__nins		= 0;
+	size_t			__nouts		= 0;
 
-	size_t		__index	= 0;
+	size_t			__index		= 0;
+
+	std::vector <NetNode *>	__forward	= {};
+
+	std::string		__name		= "";
 public:
-	NetworkNode();
-	NetworkNode(Filter *);
+	NetNode();
+	NetNode(Filter <T> *);
 
-	~NetworkNode();
+	~NetNode();
 
-	NetworkNode &operator[](size_t);
+	NetNode &operator[](size_t);
 
-	NetworkNode &operator<<(NetworkNode &);
+	NetNode &operator<<(NetNode &);
+
+	// Debugging
+	void trace(size_t = 0) const;
+
+	// Identifier counter
+	static size_t id;
 };
 
+// Initializing static variables
 template <class T>
-NetworkNode <T> ::NetworkNode() {}
+size_t NetNode <T> ::id = 0;
 
 template <class T>
-NetworkNode <T> ::NetworkNode(Filter *filter)
-		: __filter(filter) {}
+NetNode <T> ::NetNode()
+{
+	__name = "NetNode" + std::to_string(++id);
+}
 
 template <class T>
-NetworkNode <T> ::~NetworkNode()
+NetNode <T> ::NetNode(Filter <T> *filter)
+		: __filter(filter)
+{
+	__name = "NetNode" + std::to_string(++id);
+}
+
+template <class T>
+NetNode <T> ::~NetNode()
 {
 	for (size_t i = 0; i < __nins; i++) {
 		// Ensure that the 'pipe' has not been destroyed from the
 		// other side
-		if (__ins[i])
+		if (__ins[i]->good()) {
+			__ins[i]->clear();
+
 			delete __ins[i];
+		}
 
 	}
 	
 	for (size_t i = 0; i < __nouts; i++) {
 		// Ensure that the 'pipe' has not been destroyed from the
 		// other side
-		if (__outs[i])
+		if (__outs[i]->good()) {
+			__ins[i]->clear();
+
 			delete __outs[i];
+		}
 
 	}
 
@@ -65,7 +92,7 @@ NetworkNode <T> ::~NetworkNode()
 }
 
 template <class T>
-NetworkNode &NetworkNode <T> ::operator[](size_t i)
+NetNode <T> &NetNode <T> ::operator[](size_t i)
 {
 	__index = i;
 
@@ -73,7 +100,7 @@ NetworkNode &NetworkNode <T> ::operator[](size_t i)
 }
 
 template <class T>
-NetworkNode <T> &NetworkNode <T> ::operator<<(NetworkNode &out)
+NetNode <T> &NetNode <T> ::operator<<(NetNode &out)
 {
 	// Check input size for this
 	if (__index + 1 > __nins) {
@@ -82,6 +109,10 @@ NetworkNode <T> &NetworkNode <T> ::operator<<(NetworkNode &out)
 		memcpy(__ins, tmp, sizeof(Tensor <T> *) * (__nins));
 
 		__nins = __index + 1;
+
+		delete[] __ins;
+
+		__ins = tmp;
 	}
 
 	// Checkout output size for out
@@ -91,6 +122,10 @@ NetworkNode <T> &NetworkNode <T> ::operator<<(NetworkNode &out)
 		memcpy(out.__outs, tmp, sizeof(Tensor <T> *) * (out.__nouts));
 
 		out.__nouts = out.__index + 1;
+
+		delete[] out.__outs;
+
+		out.__outs = tmp;
 	}
 
 	// Clear former connections
@@ -107,8 +142,20 @@ NetworkNode <T> &NetworkNode <T> ::operator<<(NetworkNode &out)
 
 	*icon = *ocon = con;
 
+	// Set out as the forward of this
+	__forward.push_back(&out);
+
 	// Allow next object to 'pipe' with this one
-	return *this
+	return *this;
+}
+
+// Show the flow of ouput from this node
+template <class T>
+void NetNode <T> ::trace(size_t tabs) const
+{
+	std::cout << std::string(tabs, '\t') << __name << std::endl;
+	for (NetNode *nn : __forward)
+		nn->trace(tabs + 1);
 }
 
 }

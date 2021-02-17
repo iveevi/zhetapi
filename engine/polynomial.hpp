@@ -230,21 +230,18 @@ T Polynomial <T> ::operator()(const T &in) const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Polynomial <T> &p)
 {
-	size_t i = 0;
-	if (i >= 0) {
-		if (p.coeffs[0]) {
-			if (p.coeffs[0] != 1)
-				os << p.coeffs[0];
+	if (p.coeffs[0]) {
+		if (p.coeffs[0] != 1)
+			os << p.coeffs[0];
 
-			if (p.degree() > 0)
-				os << "x";
+		if (p.degree() > 0)
+			os << "x";
 
-			if (p.degree() > 1)
-				os << "^" << p.degree();
-		}
+		if (p.degree() > 1)
+			os << "^" << p.degree();
 	}
 
-	i++;
+	size_t i = 1;
 	while (i <= p.degree()) {
 		T c = p.coeffs[i];
 
