@@ -4,6 +4,8 @@ namespace zhetapi {
 
 namespace image {
 
+Image::Image() : Tensor <unsigned char> () {}
+
 // Reinterpret constructor (row-contingious data)
 Image::Image(byte *data, size_t width, size_t height, size_t channels)
 		: Tensor <unsigned char> ({width, height, channels})
@@ -235,6 +237,11 @@ int Image::show() const
 }
 
 #endif
+
+Image load_png(const std::string &impath)
+{
+	return load_png(impath.c_str());
+}
 
 /*
  * PNG Parsing.

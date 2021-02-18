@@ -8,11 +8,13 @@
 *.sw*
 *.zhplib
 *ubyte
+*ubyte
 *~
 .env
 .vscode
 CMakeCache.txt
 CMakeFiles
+Makefile
 __gen*
 __pycache__
 bin
@@ -23,7 +25,6 @@ debug
 gen
 makefile
 portability
-*ubyte
+samples/rl/res
 zhetapi
 zhetapi-header
-samples/rl/res

@@ -33,6 +33,7 @@ public:
 	using byte = unsigned char;
 	using pixel = std::pair <size_t, size_t>;
 
+	Image();						// Default
 	Image(byte *, size_t, size_t, size_t = 1);		// Contigous array
 	Image(byte **, size_t, size_t, size_t);			// List of rows
 	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
@@ -76,6 +77,7 @@ class bad_file {};
 class bad_png {};
 
 // Image loading and saving
+Image load_png(const std::string &);
 Image load_png(const char *);
 void save_png(Image, const char *);
 
