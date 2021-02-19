@@ -38,6 +38,8 @@ public:
 	Image(byte **, size_t, size_t, size_t);			// List of rows
 	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
 
+	Vector <size_t> size() const;
+
 	size_t width() const;
 	size_t height() const;
 	size_t channels() const;

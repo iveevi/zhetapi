@@ -30,6 +30,14 @@ Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size
 		memcpy(__array + i * rbytes, data[i], rbytes);
 }
 
+Vector <size_t> Image::size() const
+{
+	return {
+		__dim[0],
+		__dim[1]
+	};
+}
+
 size_t Image::width() const
 {
 	return __dim[0];
@@ -213,7 +221,6 @@ int Image::show() const
 	while (!glfwWindowShouldClose(window)) {
 		image_viewer_input_processor(window);
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glBindTexture(GL_TEXTURE_2D, texture);

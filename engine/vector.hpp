@@ -465,7 +465,7 @@ template <class T>
 Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
 {
 	// Switch between 2 and 3
-	assert(a.__size == b.size() == 3);
+	assert((a.__size == 3) && (a.__size == 3));
 
 	return Vector <T> {
 		a[1] * b[2] - a[2] * b[1],

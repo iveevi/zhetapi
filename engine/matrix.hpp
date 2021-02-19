@@ -70,8 +70,9 @@ class Activation;
 template <class T>
 class Matrix : public Tensor <T> {
 protected:
-	size_t  __rows;
-	size_t  __cols;
+	// Remove later
+	size_t  __rows	= 0;
+	size_t  __cols	= 0;
 public:
 	// Type aliases
 	using psize_t = std::pair <size_t, size_t>;
@@ -663,14 +664,12 @@ T Matrix <T> ::determinant() const
 template <class T>
 T Matrix <T> ::minor(const ::std::pair <size_t, size_t> &pr) const
 {
-	Matrix <T> *out = new Matrix <T> (__rows - 1, __cols - 1);
+	Matrix <T> out(__rows - 1, __cols - 1);
 
-	size_t a;
-	size_t b;
+	size_t a = 0;
 
-	a = 0;
 	for (size_t i = 0; i < __rows; i++) {
-		b = 0;
+		size_t b = 0;
 		if (i == pr.first)
 			continue;
 
@@ -678,17 +677,13 @@ T Matrix <T> ::minor(const ::std::pair <size_t, size_t> &pr) const
 			if (j == pr.second)
 				continue;
 
-			(*out)[a][b++] = this->__array[i][j];
+			out[a][b++] = this->__array[i][j];
 		}
 
 		a++;
 	}
 
-	T min = determinant(*out);
-
-	delete out;
-
-	return min;
+	return determinant(out);
 }
 
 template <class T>
@@ -843,9 +838,8 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 
 	T det = 0;
 
-	Matrix <T> *temp;
 	for (size_t i = 0; i < n; i++) {
-		temp = new Matrix <T> (n - 1, n - 1);
+		Matrix <T> temp(n - 1, n - 1);
 
 		for (size_t j = 0; j < n - 1; j++) {
 			t = 0;
@@ -853,13 +847,11 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 			for (size_t k = 0; k < n; k++) {
 				if (k == i)
 					continue;
-				(*temp)[j][t++] = a[j + 1][k];
+				temp[j][t++] = a[j + 1][k];
 			}
 		}
 
-		det += ((i % 2) ? -1 : 1) * a[0][i] * determinant(*temp);
-
-		delete temp;
+		det += ((i % 2) ? -1 : 1) * a[0][i] * determinant(temp);
 	}
 
 	return det;
@@ -1094,17 +1086,14 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 
 	inline_init_mat(C, rs, cs);
 
-	T *Cr;
-	T a;
-
 	for (size_t i = 0; i < rs; i++) {
 		const T *Ar = A[i];
-		Cr = C[i];
+		T *Cr = C[i];
 
 		for (size_t k = 0; k < kmax; k++) {
 			const T *Br = B[k];
 
-			a = Ar[k];
+			T a = Ar[k];
 			for (size_t j = 0; j < cs; j++)
 				Cr[j] += a * Br[j];
 		}

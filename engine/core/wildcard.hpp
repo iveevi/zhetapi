@@ -6,45 +6,45 @@
 
 namespace zhetapi {
 
-	class wildcard : public Token {
-		node *		__ref;
-		::std::string	__symbol;
-	public:
-		wildcard();
+class wildcard : public Token {
+	node *		__ref		= nullptr;
+	std::string	__symbol	= "";
+public:
+	wildcard();
 
-		type caller() const override;
-		Token *copy() const override;
-		::std::string str() const override;
+	type caller() const override;
+	Token *copy() const override;
+	std::string str() const override;
 
-		virtual bool operator==(Token *) const override;
-	};
+	virtual bool operator==(Token *) const override;
+};
 
-	wildcard::wildcard() {}
+wildcard::wildcard() {}
 
-	Token::type wildcard::caller() const
-	{
-		return Token::wld;
-	}
+Token::type wildcard::caller() const
+{
+	return Token::wld;
+}
 
-	Token *wildcard::copy() const
-	{
-		return new wildcard();
-	}
+Token *wildcard::copy() const
+{
+	return new wildcard();
+}
 
-	::std::string wildcard::str() const
-	{
-		return "wildcard";
-	}
+std::string wildcard::str() const
+{
+	return "wildcard";
+}
 
-	bool wildcard::operator==(Token *tptr) const
-	{
-		wildcard *wld = dynamic_cast <wildcard *> (tptr);
+bool wildcard::operator==(Token *tptr) const
+{
+	wildcard *wld = dynamic_cast <wildcard *> (tptr);
 
-		if (wld == nullptr)
-			return false;
+	if (wld == nullptr)
+		return false;
 
-		return true;
-	}
+	return true;
+}
 
 }
 

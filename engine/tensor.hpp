@@ -15,6 +15,9 @@
 namespace zhetapi {
 
 template <class T>
+class Tensor;
+
+template <class T>
 class Tensor {
 protected:
 	T	*__array = nullptr;
@@ -31,6 +34,7 @@ protected:
 	bool	__on_device = false;	// Flag for device allocation
 
 #endif
+
 public:
 	Tensor(const std::vector <std::size_t> &, const ::std::vector <T> &);
 
@@ -90,10 +94,10 @@ public:
 	Tensor(size_t, size_t, const T &);
 
 	__host__ __device__
-	Tensor(const ::std::vector <T> &);
+	Tensor(const std::vector <T> &);
 
 	__host__ __device__
-	Tensor(const ::std::vector <::std::size_t> &, const T & = T());
+	Tensor(const std::vector <std::size_t> &, const T & = T());
 
 	__host__ __device__
 	~Tensor();

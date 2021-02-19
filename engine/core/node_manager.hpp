@@ -112,7 +112,7 @@ private:
 	class error {
 		std::string str;
 	public:
-		error(std::string s) : str(s) {}
+		error(const std::string &s) : str(s) {}
 
 		const std::string &what() const {
 			return str;
