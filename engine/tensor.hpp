@@ -14,9 +14,24 @@
 
 namespace zhetapi {
 
+// Forward declarations
 template <class T>
 class Tensor;
 
+// Tensor_type operations
+template <class T>
+struct Tensor_type : std::false_type {};
+
+template <class T>
+struct Tensor_type <Tensor <T>> : std::true_type {};
+
+template <class T>
+bool is_tensor_type()
+{
+	return Tensor_type <T> ::value;
+}
+
+// Tensor class
 template <class T>
 class Tensor {
 protected:
@@ -70,6 +85,10 @@ public:
 	Tensor(const Tensor &);
 	Tensor(const std::vector <std::size_t> &);
 	Tensor(const std::vector <std::size_t> &, const T &);
+
+	// Cross-type operations
+	template <class A>
+	std::enable_if <is_tensor_type <A> (), Tensor &> operator=(const Tensor <A> &);
 
 	~Tensor();
 

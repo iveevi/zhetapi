@@ -1,24 +1,17 @@
-#include <netnode.hpp>
-#include <image.hpp>
+#include <std/interval.hpp>
 
 using namespace std;
-using namespace zhetapi;
+using namespace zhetapi::utility;
 
 int main()
 {
-	ml::NetNode n1;
-	ml::NetNode n2;
-	ml::NetNode n3;
+	Interval <> a(1, 5);
+	Interval <> b(6, 7, false);
 
-	n1[0] << n2[0] << n3[0];
+	cout << "a: " << a << endl;
+	cout << "b: " << b << endl;
 
-	n1.trace();
+	cout << "a | b: " << (a | b) << endl;
 
-	image::Image img = image::load_png("zhetapi-logo.png");
-
-	cout << img.size() << endl;
-
-	Vector <double> x = img.size();
-
-	cout << x << endl;
+	cout << "length: " << (a | b).size() << endl;
 }

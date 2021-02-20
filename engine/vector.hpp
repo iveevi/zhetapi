@@ -20,6 +20,23 @@
 
 namespace zhetapi {
 
+// Forward declarations
+template <class T>
+class Vector;
+
+// Tensor_type operations
+template <class T>
+struct Vector_type : std::false_type {};
+
+template <class T>
+struct Vector_type <Vector <T>> : std::true_type {};
+
+template <class T>
+bool is_vector_type()
+{
+	return Vector_type <T> ::value;
+}
+
 /**
  * @brief Represents a vector in mathematics, on the scalar field corresponding
  * to T. Derived from the matrix class.
@@ -29,9 +46,10 @@ class Vector : public Matrix <T> {
 public:	
 	Vector(const std::vector <T> &);
 	Vector(const std::initializer_list <T> &);
-
+	
+	// Cross-type operations
 	template <class A>
-	Vector(A);
+	Vector(const A &);
 
 	// The three major components
 	T x() const;
@@ -207,15 +225,32 @@ public:
 };
 
 template <class T>
-Vector <T> ::Vector(const ::std::vector <T> &ref) : Matrix <T> (ref) {}
+Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
 
 template <class T>
-Vector <T> ::Vector(const ::std::initializer_list <T> &ref)
-	: Vector(::std::vector <T> (ref)) {}
+Vector <T> ::Vector(const std::initializer_list <T> &ref)
+	: Vector(std::vector <T> (ref)) {}
 
 template <class T>
 template <class A>
-Vector <T> ::Vector(A x) {}
+Vector <T> ::Vector(const A &other)
+{
+	if (is_vector_type <A> ()) {
+		// Add a new function for this
+		this->__array = new T[other.size()];
+		this->__rows = other.get_rows();
+		this->__cols = other.get_cols();
+
+		this->__size = other.size();
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] = other[i];
+		
+		this->__dims = 1;
+		this->__dim = new size_t[1];
+
+		this->__dim[0] = this->__size;
+	}
+}
 
 template <class T>
 T Vector <T> ::x() const
