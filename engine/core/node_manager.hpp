@@ -122,14 +122,14 @@ public:
 	// Syntax error
 	class syntax_error : public error {
 	public:
-		syntax_error(const std::string &s)
+		explicit syntax_error(const std::string &s)
 				: error(s) {}
 	};
 
 	// Undefined symbol error
 	class undefined_symbol : public error {
 	public:
-		undefined_symbol(const std::string &s)
+		explicit undefined_symbol(const std::string &s)
 				: error(s) {}
 	};
 };

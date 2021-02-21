@@ -20,16 +20,14 @@ class Complex : public std::complex <T> {
 public:
 	// Constructor
 	Complex();
-
-	template <class A>
-	Complex(A);
-
 	Complex(const T &, const T &);
-
 	Complex(const std::complex <T> &);
 	
 	// Fake constructors for conversion
 	Complex(int, bool, bool);
+	
+	template <class A>
+	Complex(A);
 
 	// Getters
 	T magnitude() const;

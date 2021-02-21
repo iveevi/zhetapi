@@ -1117,17 +1117,14 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 
 	inline_init_mat(C, rs, cs);
 
-	T *Cr;
-	T a;
-
 	for (size_t i = 0; i < rs; i++) {
 		const T *Ar = A[i];
-		Cr = C[i];
+		T *Cr = C[i];
 
 		for (size_t k = 0; k < kmax; k++) {
 			const U *Br = B[k];
 
-			a = Ar[k];
+			T a = Ar[k];
 			for (size_t j = 0; j < cs; j++)
 				Cr[j] += T(a * Br[j]);
 		}

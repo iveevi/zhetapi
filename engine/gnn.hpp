@@ -20,14 +20,64 @@ namespace ml {
  */
 template <class T = double>
 class GNN {
-	std::vector <NetNode <T>>	__ins = {};
+	std::vector <NetNode <T> *>	__ins	= {};
+	std::vector <NetNode <T> *>	__outs	= {};
+
+	// Variadic constructor helpers
+	void init(NetNode <T> *);
+
+	template <class ... U>
+	void init(NetNode <T> *, U ...);
 public:
-	GNN(const std::vector <NetNode <T>> &);
+	GNN();
+	explicit GNN(NetNode <T> *);
+	explicit GNN(const std::vector <NetNode <T> *> &);
+
+	// Variadic constructor
+	template <class ... U>
+	GNN(U ...);
+
+	void trace() const;
 };
 
 template <class T>
-GNN <T> ::GNN(const std::vector <NetNode <T>> &ins)
+GNN <T> ::GNN() {}
+
+template <class T>
+GNN <T> ::GNN(NetNode <T> *nnptr) : __ins({nnptr}) {}
+
+template <class T>
+GNN <T> ::GNN(const std::vector <NetNode <T> *> &ins)
 		: __ins(ins) {}
+
+template <class T>
+template <class ... U>
+GNN <T> ::GNN(U ... args)
+{
+	init(args...);
+}
+
+template <class T>
+void GNN <T> ::init(NetNode <T> *nnptr)
+{
+	__ins.push_back(nnptr);
+}
+
+template <class T>
+template <class ... U>
+void GNN <T> ::init(NetNode <T> *nnptr, U ... args)
+{
+	__ins.push_back(nnptr);
+
+	init(args...);
+}
+
+template <class T>
+void GNN <T> ::trace() const
+{
+	for (NetNode <T> *nn : __ins)
+		nn->trace();
+}
 
 }
 

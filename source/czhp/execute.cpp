@@ -25,10 +25,10 @@ Token *execute(string str)
 			mg.print(); */
 
 			tptr = mg.value();
-		} catch (Barn::unknown_operation_overload e)  {
+		} catch (const Barn::unknown_operation_overload &e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
-		} catch (node_manager::undefined_symbol e) {
+		} catch (const node_manager::undefined_symbol &e) {
 			us = e;
 			pe = true;
 		}
@@ -60,7 +60,7 @@ Token *execute(string str)
 
 		try {
 			mg = node_manager(str, &barn);
-		} catch (node_manager::undefined_symbol e) {
+		} catch (const node_manager::undefined_symbol &e) {
 			cout << "Error at line " << line
 				<< ": undefined symbol \""
 				<< e.what() << "\"" << endl;

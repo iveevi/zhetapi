@@ -27,7 +27,7 @@ def make_target(threads, target, mode=''):
 modes = {
 	'': './',
 	'gdb': 'gdb ',
-	'valgrind': 'valgrind --leakcheck=full '
+	'valgrind': 'valgrind --leak-check=full --track-origins=yes '
 }
 
 # Special targets

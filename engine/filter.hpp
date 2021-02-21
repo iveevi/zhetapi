@@ -17,7 +17,7 @@ public:
 	 * of pointers. Notes that the inputs are also passed as a list of
 	 * pointers.
 	 */
-	virtual process(const std::vector <Tensor <T> *> &,
+	virtual void process(const std::vector <Tensor <T> *> &,
 			const std::vector <Tensor <T> *> &) const = 0;
 };
 

@@ -1,44 +1,30 @@
-#include <image.hpp>
+#include <vector>
 
-#include <std/interval.hpp>
+#include <gnn.hpp>
+#include <netnode.hpp>
 
 using namespace std;
-using namespace zhetapi::image;
-using namespace zhetapi::utility;
+using namespace zhetapi::ml;
 
 int main()
 {
-	Interval <> a(1, 5);
-	Interval <> b(6, 7, false);
+	NetNode nn1;
+	NetNode nn2;
+	NetNode nn3;
+	NetNode nn4;
 
-	cout << "a: " << a << endl;
-	cout << "b: " << b << endl;
+	nn1[1] << nn2[2];
+	nn4[1] >> nn3[2];
 
-	cout << "a | b: " << (a | b) << endl;
+	vector <NetNode <double> *> ins {&nn4, &nn2};
 
-	cout << "length: " << (a | b).size() << endl;
+	cout << "gnn1:" << endl;
+	GNN gnn1(ins);
 
-	Image img(1000, 1000, 4, 255);
+	gnn1.trace();
+	
+	cout << "gnn2:" << endl;
+	GNN gnn2(&nn4, &nn2);
 
-	for (size_t i = 400; i < 600; i++) {
-		for (size_t j = 400; j < 600; j++)
-			img.set_hex({i, j}, "#915a56");
-	}
-
-	double cx = 700;
-	double cy = 700;
-
-	double sides = 1000.0;
-	double radius = 100.0;
-	double turn = 2 * acos(-1) / sides;
-
-	double angle = 0;
-	for (double i = 0; i < sides; i++, angle += turn) {
-		double px = cx + radius * cos(angle);
-		double py = cy + radius * sin(angle);
-
-		img.set_hex({px, py}, "#915a56");
-	}
-
-        img.show();
+	gnn2.trace();
 }

@@ -15,9 +15,12 @@ namespace ml {
 
 template <class T = double>
 class NetNode {
+	// Only the arrays are recreated, the actual 'pipes'
+	// are simply copied by address value
 	Tensor <T> **		__ins		= nullptr;
 	Tensor <T> **		__outs		= nullptr;
 
+	// Copied as is (filters are not recreated)
 	Filter <T> *		__filter	= nullptr;
 	
 	size_t			__nins		= 0;
@@ -30,7 +33,10 @@ class NetNode {
 	std::string		__name		= "";
 public:
 	NetNode();
+	NetNode(const NetNode &);
 	NetNode(Filter <T> *);
+
+	NetNode &operator=(const NetNode &);
 
 	~NetNode();
 
@@ -39,6 +45,7 @@ public:
 
 	NetNode &operator[](size_t);		// Sets index
 	NetNode &operator<<(NetNode &);		// Creates a connection
+	NetNode &operator>>(NetNode &);		// Creates a connection
 
 	// Setters and getters
 	void pass(const Tensor <T> &) const;
@@ -67,10 +74,49 @@ NetNode <T> ::NetNode()
 }
 
 template <class T>
+NetNode <T> ::NetNode(const NetNode &other)
+		: __filter(other.__filter),
+		__nins(other.__nins),
+		__nouts(other.__nouts),
+		__index(other.__index),
+		__forward(other.__forwrd),
+		__name(other.__name)
+{
+	__ins = new Tensor <T> *[__nins];
+	__outs = new Tensor <T> *[__nouts];
+
+	// Copy 'pipe' addresses by value
+	memcpy(__ins, other.__ins, sizeof(Tensor <T> *) * __nins);
+	memcpy(__outs, other.__outs, sizeof(Tensor <T> *) * __nouts);
+}
+
+template <class T>
 NetNode <T> ::NetNode(Filter <T> *filter)
 		: __filter(filter)
 {
 	__name = "NetNode" + std::to_string(++id);
+}
+
+template <class T>
+NetNode <T> &NetNode <T> ::operator=(const NetNode &other)
+{
+	if (this != &other) {
+		__filter = other.__filter;
+		__nins = other.__nins;
+		__nouts = other.__nouts;
+		__index = other.__index;
+		__forward = other.__forwrd;
+		__name = other.__name;
+
+		__ins = new Tensor <T> *[__nins];
+		__outs = new Tensor <T> *[__nouts];
+
+		// Copy 'pipe' addresses by value
+		memcpy(__ins, other.__ins, sizeof(Tensor <T> *) * __nins);
+		memcpy(__outs, other.__outs, sizeof(Tensor <T> *) * __nouts);
+	}
+
+	return *this;
 }
 
 template <class T>
@@ -120,54 +166,72 @@ NetNode <T> &NetNode <T> ::operator[](size_t i)
 	return *this;
 }
 
-// Notational usage: nn1[i] << nn2[j]
+// Notational usage: out_nn[i] << in_nn[j]
 template <class T>
-NetNode <T> &NetNode <T> ::operator<<(NetNode &out)
+NetNode <T> &NetNode <T> ::operator<<(NetNode &in)
 {
-	// Check input size for this
-	if (__index + 1 > __nins) {
+	// Check output size for this
+	if (__index + 1 > __nouts) {
 		Tensor <T> **tmp = new Tensor <T> *[__index + 1];
 
-		memcpy(__ins, tmp, sizeof(Tensor <T> *) * (__nins));
+		memcpy(__outs, tmp, sizeof(Tensor <T> *) * (__nouts));
 
-		__nins = __index + 1;
+		// Fill empty entries with default initialized tensors
+		// (exclude the entry we are going to create)
+		for (size_t i = __nouts; i < __index; i++)
+			tmp[i] = new Tensor <T> ();
 
-		delete[] __ins;
+		__nouts = __index + 1;
 
-		__ins = tmp;
+		delete[] __outs;
+
+		__outs = tmp;
 	}
 
-	// Checkout output size for out
-	if (out.__index + 1 > out.__nouts) {
-		Tensor <T> **tmp = new Tensor <T> *[out.__index + 1];
+	// Checkout input size for in
+	if (in.__index + 1 > in.__nins) {
+		Tensor <T> **tmp = new Tensor <T> *[in.__index + 1];
 
-		memcpy(out.__outs, tmp, sizeof(Tensor <T> *) * (out.__nouts));
+		memcpy(in.__ins, tmp, sizeof(Tensor <T> *) * (in.__nins));
+		
+		// Initialize unused entries
+		for (size_t i = in.__nins; i < in.__index; i++)
+			tmp[i] = new Tensor <T> ();
 
-		out.__nouts = out.__index + 1;
+		in.__nins = in.__index + 1;
 
-		delete[] out.__outs;
+		delete[] in.__ins;
 
-		out.__outs = tmp;
+		in.__ins = tmp;
 	}
 
 	// Clear former connections
-	Tensor <T> **icon = &(__ins[__index]);
-	if (*icon)
-		delete *icon;
-
-	Tensor <T> **ocon = &(out.__outs[out.__index]);
+	Tensor <T> **ocon = &(__outs[__index]);
 	if (*ocon)
 		delete *ocon;
+
+	Tensor <T> **icon = &(in.__ins[in.__index]);
+	if (*icon)
+		delete *icon;
 
 	// Create the new connection
 	Tensor <T> *con = new Tensor <T> ();	// Default initialize
 
 	*icon = *ocon = con;
 
-	// Set out as the forward of this
-	__forward.push_back(&out);
+	// Set this as the forward of in
+	in.__forward.push_back(this);
 
 	// Allow next object to 'pipe' with this one
+	return *this;
+}
+
+// Notational usage: in_nn[i] >> out_nn[j]
+template <class T>
+NetNode <T> &NetNode <T> ::operator>>(NetNode &out)
+{
+	out << *this;
+
 	return *this;
 }
 
