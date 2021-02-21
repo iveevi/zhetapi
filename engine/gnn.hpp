@@ -35,7 +35,7 @@ public:
 
 	// Variadic constructor
 	template <class ... U>
-	GNN(U ...);
+	explicit GNN(U ...);
 
 	void trace() const;
 };

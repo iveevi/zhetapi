@@ -13,7 +13,7 @@ int main()
 	NetNode nn3;
 	NetNode nn4;
 
-	nn1[1] << nn2[2];
+	nn1[1] << nn2[2] << nn4[1];
 	nn4[1] >> nn3[2];
 
 	vector <NetNode <double> *> ins {&nn4, &nn2};

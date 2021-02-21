@@ -15,6 +15,11 @@ namespace ml {
 
 template <class T = double>
 class NetNode {
+	struct iforward {
+		size_t		__index	= 0;
+		NetNode <T> *	__fw	= nullptr;
+	};
+
 	// Only the arrays are recreated, the actual 'pipes'
 	// are simply copied by address value
 	Tensor <T> **		__ins		= nullptr;
@@ -28,9 +33,13 @@ class NetNode {
 
 	size_t			__index		= 0;
 
-	std::vector <NetNode *>	__forward	= {};
+	std::vector <iforward>	__forward	= {};
 
 	std::string		__name		= "";
+
+	// Dealing with pipes
+	void copy_pipes(const NetNode &);
+	void clear_pipes();
 public:
 	NetNode();
 	NetNode(const NetNode &);
@@ -82,12 +91,7 @@ NetNode <T> ::NetNode(const NetNode &other)
 		__forward(other.__forwrd),
 		__name(other.__name)
 {
-	__ins = new Tensor <T> *[__nins];
-	__outs = new Tensor <T> *[__nouts];
-
-	// Copy 'pipe' addresses by value
-	memcpy(__ins, other.__ins, sizeof(Tensor <T> *) * __nins);
-	memcpy(__outs, other.__outs, sizeof(Tensor <T> *) * __nouts);
+	copy_pipes(other);
 }
 
 template <class T>
@@ -101,6 +105,9 @@ template <class T>
 NetNode <T> &NetNode <T> ::operator=(const NetNode &other)
 {
 	if (this != &other) {
+		// Clear pipes first
+		clear_pipes();
+
 		__filter = other.__filter;
 		__nins = other.__nins;
 		__nouts = other.__nouts;
@@ -108,12 +115,7 @@ NetNode <T> &NetNode <T> ::operator=(const NetNode &other)
 		__forward = other.__forwrd;
 		__name = other.__name;
 
-		__ins = new Tensor <T> *[__nins];
-		__outs = new Tensor <T> *[__nouts];
-
-		// Copy 'pipe' addresses by value
-		memcpy(__ins, other.__ins, sizeof(Tensor <T> *) * __nins);
-		memcpy(__outs, other.__outs, sizeof(Tensor <T> *) * __nouts);
+		copy_pipes(other);
 	}
 
 	return *this;
@@ -121,6 +123,22 @@ NetNode <T> &NetNode <T> ::operator=(const NetNode &other)
 
 template <class T>
 NetNode <T> ::~NetNode()
+{
+	clear_pipes();
+}
+
+template <class T>
+void NetNode <T> ::copy_pipes(const NetNode &other)
+{
+	__ins = new Tensor <T> *[__nins];
+	__outs = new Tensor <T> *[__nouts];
+	
+	memcpy(__ins, other.__ins, sizeof(Tensor <T> *) * __nins);
+	memcpy(__outs, other.__outs, sizeof(Tensor <T> *) * __nouts);
+}
+
+template <class T>
+void NetNode <T> ::clear_pipes()
 {
 	for (size_t i = 0; i < __nins; i++) {
 		// Ensure that the 'pipe' has not been destroyed from the
@@ -220,7 +238,7 @@ NetNode <T> &NetNode <T> ::operator<<(NetNode &in)
 	*icon = *ocon = con;
 
 	// Set this as the forward of in
-	in.__forward.push_back(this);
+	in.__forward.push_back({in.__index, this});
 
 	// Allow next object to 'pipe' with this one
 	return *this;
@@ -270,9 +288,14 @@ void NetNode <T> ::propogate() const
 template <class T>
 void NetNode <T> ::trace(size_t tabs) const
 {
-	std::cout << std::string(tabs, '\t') << __name << std::endl;
-	for (NetNode *nn : __forward)
-		nn->trace(tabs + 1);
+	std::string tb(tabs, '\t');
+
+	std::cout << __name << std::endl;
+	for (iforward ifw : __forward) {
+		std::cout << tb << "\t@" << ifw.__index << ": ";
+
+		ifw.__fw->trace(tabs + 1);
+	}
 }
 
 }

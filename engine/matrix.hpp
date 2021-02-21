@@ -201,8 +201,8 @@ public:
 	template <class U>
 	friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
 	
-	template <class U>
-	friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
+	// template <class U>
+	// friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
 	
 	// Heterogenous multiplication
 	template <class U, class V>
@@ -1071,13 +1071,12 @@ Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 	);
 }
 
+/*
 template <class T>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 {
 	if (A.__cols != B.__rows)
 		throw typename Matrix <T> ::dimension_mismatch();
-
-	using namespace std;
 	
 	size_t rs = A.__rows;
 	size_t cs = B.__cols;
@@ -1100,7 +1099,7 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 	}
 
 	return C;
-}
+} */
 
 template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
