@@ -69,7 +69,7 @@ class Interval <1> {
 	std::set <disjoint>	__union;
 
 	// Assumes that the intervals in un are disjoint
-	Interval(std::set <disjoint> un) : __union(un) {}
+	explicit Interval(const std::set <disjoint> &un) : __union(un) {}
 public:
 	Interval(double left, double right, bool closed = true) {
 		disjoint dj {left, right, closed};

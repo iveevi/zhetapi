@@ -34,15 +34,26 @@ public:
 
 	~NetNode();
 
-	NetNode &operator[](size_t);
+	// Essential overloaded operators
+	const Tensor <T> &operator*() const;	// Returns indexed OUTPUT
 
-	NetNode &operator<<(NetNode &);
+	NetNode &operator[](size_t);		// Sets index
+	NetNode &operator<<(NetNode &);		// Creates a connection
+
+	// Setters and getters
+	void pass(const Tensor <T> &) const;
+
+	// Computational methods
+	void propogate() const;
 
 	// Debugging
 	void trace(size_t = 0) const;
 
 	// Identifier counter
 	static size_t id;
+
+	// Exception classes
+	class bad_index {};
 };
 
 // Initializing static variables
@@ -91,6 +102,16 @@ NetNode <T> ::~NetNode()
 	delete[] __outs;
 }
 
+// Notational usage: ts = *(nn1[i])
+template <class T>
+const Tensor <T> &NetNode <T> ::operator*() const
+{
+	if (__index >= __nouts)
+		throw bad_index();
+
+	return *(__outs[__index]);
+}
+
 template <class T>
 NetNode <T> &NetNode <T> ::operator[](size_t i)
 {
@@ -99,6 +120,7 @@ NetNode <T> &NetNode <T> ::operator[](size_t i)
 	return *this;
 }
 
+// Notational usage: nn1[i] << nn2[j]
 template <class T>
 NetNode <T> &NetNode <T> ::operator<<(NetNode &out)
 {
@@ -147,6 +169,37 @@ NetNode <T> &NetNode <T> ::operator<<(NetNode &out)
 
 	// Allow next object to 'pipe' with this one
 	return *this;
+}
+
+// Setters and getters
+
+// Notational usage: nn[i].pass(ts)
+template <class T>
+void NetNode <T> ::pass(const Tensor <T> &ts) const
+{
+	if (__index >= __nins)
+		throw bad_index();
+
+	// Try to avoid copying here,
+	// or achieve this through r-value
+	// reference parameter overload
+	*(__ins[__index]) = ts;
+}
+
+// Computational methods
+template <class T>
+void NetNode <T> ::propogate() const
+{
+	std::vector <Tensor <T> *> inputs;
+	std::vector <Tensor <T> *> outputs;
+
+	for (size_t i = 0; i < __nins; i++)
+		inputs.push_back(__ins[i]);
+	
+	for (size_t i = 0; i < __nouts; i++)
+		outputs.push_back(__outs[i]);
+
+	__filter->process(inputs, outputs);
 }
 
 // Show the flow of ouput from this node

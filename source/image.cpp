@@ -6,6 +6,9 @@ namespace image {
 
 Image::Image() : Tensor <unsigned char> () {}
 
+Image::Image(size_t width, size_t height, size_t channels, byte def)
+		: Tensor <unsigned char> ({width, height, channels}, def) {}
+
 // Reinterpret constructor (row-contingious data)
 Image::Image(byte *data, size_t width, size_t height, size_t channels)
 		: Tensor <unsigned char> ({width, height, channels})
@@ -67,6 +70,40 @@ void Image::set(const pixel &px, const Vector <byte> &bytes)
 	size_t nbytes = bytes.size();
 	for (size_t i = 0; i < nbytes && i + index < __size; i++)
 		__array[i + index] = bytes[i];
+}
+
+void Image::set_hex(const pixel &px, size_t hexc)
+{
+	byte r = (byte) ((hexc & 0xFF0000) >> 16);
+	byte g = (byte) ((hexc & 0x00FF00) >> 8);
+	byte b = (byte) (hexc & 0x0000FF);
+
+	set(px, {r, g, b});
+}
+
+void Image::set_hex(const pixel &px, const std::string &hexs)
+{
+	static const size_t LENGTH = 7;
+	
+	static auto value = [](char c) -> byte {
+		if (isdigit(c))
+			return c - '0';
+
+		if (isupper(c))
+			return (c - 'A') + 9;
+
+		// Assume lower-case letter
+		return (c - 'a') + 9;
+	};
+
+	if (hexs.length() != LENGTH)
+		throw bad_hex_string();
+
+	byte r = 16 * value(hexs[1]) + value(hexs[2]);
+	byte g = 16 * value(hexs[3]) + value(hexs[4]);
+	byte b = 16 * value(hexs[5]) + value(hexs[6]);
+	
+	set(px, {r, g, b});
 }
 
 // Extract a single channel

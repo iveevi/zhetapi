@@ -34,6 +34,7 @@ public:
 	using pixel = std::pair <size_t, size_t>;
 
 	Image();						// Default
+	Image(size_t, size_t, size_t, byte = 0);
 	Image(byte *, size_t, size_t, size_t = 1);		// Contigous array
 	Image(byte **, size_t, size_t, size_t);			// List of rows
 	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
@@ -47,6 +48,9 @@ public:
 	// Pixel value setter
 	void set(const pixel &, size_t, byte);
 	void set(const pixel &, const Vector <byte> &);
+	
+	void set_hex(const pixel &, size_t);
+	void set_hex(const pixel &, const std::string &);
 
 	// Image extractors
 	Image channel(size_t) const;
@@ -64,6 +68,7 @@ public:
 
 	class out_of_bounds {};
 	class bad_input_order {};
+	class bad_hex_string {};
 
 	// Friends
 	template <class T>

@@ -49,7 +49,7 @@ public:
 	
 	// Cross-type operations
 	template <class A>
-	Vector(const A &);
+	explicit Vector(const A &);
 
 	// The three major components
 	T x() const;
