@@ -1,30 +1,59 @@
-#include <vector>
+#include <matrix.hpp>
+#include <vector.hpp>
 
-#include <gnn.hpp>
-#include <netnode.hpp>
+#include <chrono>
+#include <string>
+#include <iostream>
 
 using namespace std;
-using namespace zhetapi::ml;
+using namespace zhetapi;
+
+// Typedefs
+using tclk = chrono::high_resolution_clock;
+using tpoint = chrono::high_resolution_clock::time_point;
+
+tclk clk;
+tpoint start_t;
+tpoint end_t;
+
+double runit()
+{
+	srand(clock());
+
+	return rand() / ((double) RAND_MAX);
+}
 
 int main()
 {
-	NetNode nn1;
-	NetNode nn2;
-	NetNode nn3;
-	NetNode nn4;
+	auto dtime = []() -> ostream & {
+		double mcs = chrono::duration_cast
+			<chrono::microseconds>
+			(end_t - start_t).count();
 
-	nn1[1] << nn2[2] << nn4[1];
-	nn4[1] >> nn3[2];
+		return cout << mcs;
+	};
 
-	vector <NetNode <double> *> ins {&nn4, &nn2};
+	Matrix <double> A(10, 10, runit());
+	Matrix <double> B(10, 10, runit());
+	Matrix <double> C(10, 10, runit());
+	Matrix <double> D;
 
-	cout << "gnn1:" << endl;
-	GNN gnn1(ins);
+	double ka = 10 * runit();
+	double kb = 10 * runit();
 
-	gnn1.trace();
-	
-	cout << "gnn2:" << endl;
-	GNN gnn2(&nn4, &nn2);
+	start_t = clk.now();
+	for(size_t i = 0; i < 100; i++) {
+		D = ka * A * B + kb * C;
+	}
+	end_t = clk.now();
 
-	gnn2.trace();
+	dtime() << "\t";
+
+	start_t = clk.now();
+	for(size_t i = 0; i < 100; i++) {
+		D = fmak(A, B, C, ka, kb);
+	}
+	end_t = clk.now();
+
+	dtime() << endl;
 }

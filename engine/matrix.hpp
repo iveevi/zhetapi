@@ -170,6 +170,9 @@ public:
 	Matrix(const Matrix <T> &);
 	Matrix(const Vector <T> &);
 
+	// Scaled
+	Matrix(const Matrix <T> &, T);
+
 	Matrix(size_t, size_t, T = T());
 
 	Matrix(size_t, size_t, std::function <T (size_t)>);
@@ -223,11 +226,18 @@ public:
 	template <class U>
 	friend bool operator==(const Matrix <U> &, const Matrix <U> &);
 	
+	// Miscellaneous operations
 	template <class U>
 	friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
 	
 	template <class U>
 	friend Matrix <U> inv_shur(const Matrix <U> &, const Matrix <U> &);
+
+	template <class A, class B, class C>
+	friend Matrix <A> fma(const Matrix <A> &, const Matrix <B> &, const Matrix <C> &);
+
+	template <class A, class B, class C>
+	friend Matrix <A> fmak(const Matrix <A> &, const Matrix <B> &, const Matrix <C> &, A, A);
 
 #else
 
@@ -870,12 +880,21 @@ Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(othe
 		this->__array[i] = other.__array[i];
 }
 
+// TODO: Do all initialization inline or use Tensor copy constructor
 template <class T>
 Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), Tensor <T>
 					       ({other.__rows, 1}, T())
 {
 	for (int i = 0; i < __rows; i++)
 		this->__array[i] = other.__array[i];
+}
+
+template <class T>
+Matrix <T> ::Matrix(const Matrix <T> &other, T k) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
+					       ({other.__rows, other.__cols}, T())
+{
+	for (int i = 0; i < this->__size; i++)
+		this->__array[i] = k * other.__array[i];
 }
 
 template <class T>
@@ -1206,6 +1225,72 @@ Matrix <T> inv_shur(const Matrix <T> &a, const Matrix <T> &b)
 			return a[i][j] / b[i][j];
 		}
 	);
+}
+
+// Computes A * B + C
+template <class T, class U, class V>
+Matrix <T> fma(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C)
+{
+	if (A.__cols != B.__rows)
+		throw typename Matrix <T> ::dimension_mismatch();
+	
+	if (A.__rows != C.__rows || B.__cols != C.__cols)
+		throw typename Matrix <T> ::dimension_mismatch();
+	
+	size_t rs = A.__rows;
+	size_t cs = B.__cols;
+
+	size_t kmax = B.__rows;
+
+	Matrix <T> D = C;
+
+	for (size_t i = 0; i < rs; i++) {
+		const T *Ar = A[i];
+		T *Dr = D[i];
+
+		for (size_t k = 0; k < kmax; k++) {
+			const U *Br = B[k];
+
+			T a = Ar[k];
+			for (size_t j = 0; j < cs; j++)
+				Dr[j] += T(a * Br[j]);
+		}
+	}
+
+	return D;
+}
+
+// Computes ka * A * B + kb * C
+template <class T, class U, class V>
+Matrix <T> fmak(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C, T ka, T kb)
+{
+	if (A.__cols != B.__rows)
+		throw typename Matrix <T> ::dimension_mismatch();
+	
+	if (A.__rows != C.__rows || B.__cols != C.__cols)
+		throw typename Matrix <T> ::dimension_mismatch();
+	
+	size_t rs = A.__rows;
+	size_t cs = B.__cols;
+
+	size_t kmax = B.__rows;
+
+	Matrix <T> D(C, kb);
+
+	for (size_t i = 0; i < rs; i++) {
+		const T *Ar = A[i];
+		T *Dr = D[i];
+
+		for (size_t k = 0; k < kmax; k++) {
+			const U *Br = B[k];
+
+			T a = Ar[k] * ka;
+			for (size_t j = 0; j < cs; j++)
+				Dr[j] += T(a * Br[j]);
+		}
+	}
+
+	return D;
 }
 
 #endif

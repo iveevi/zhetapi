@@ -361,10 +361,13 @@ Image load_png(const char *impath)
 	switch (color) {
 	case PNG_COLOR_TYPE_RGB:
 		channels = 3;
+		break;
 	case PNG_COLOR_TYPE_GRAY_ALPHA:
 		channels = 2;
+		break;
 	case PNG_COLOR_TYPE_RGB_ALPHA:
 		channels = 4;
+		break;
 	}
 
 	// Close the file
