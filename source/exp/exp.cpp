@@ -34,6 +34,25 @@ int main()
 
 	for (int k = 0; k < 10; k++)
 		cout << "\ti.uni = " << i.uniform() << endl;
+	
+	i |= Interval <> {50, 100};
+	
+	cout << "i = " << i << endl;
+
+	for (int k = 0; k < 10; k++)
+		cout << "\ti.uni = " << i.uniform() << endl;
+	
+	i = 100.0_I;
+	cout << "i = " << i << endl;
+
+	for (int k = 0; k < 10; k++)
+		cout << "\ti.uni = " << i.uniform() << endl;
+	
+	i = 50_I;
+	cout << "i = " << i << endl;
+
+	for (int k = 0; k < 10; k++)
+		cout << "\ti.uni = " << i.uniform() << endl;
 
 	/*
 	auto dtime = []() -> ostream & {

@@ -86,6 +86,9 @@ class Interval <1> {
 	// Assumes that the intervals in un are disjoint
 	explicit Interval(const std::set <disjoint> &un) : __union(un) {}
 public:
+	Interval(unsigned long long int x) : Interval((long double) x) {}
+	Interval(long double x) : Interval(0, x) {}
+
 	Interval(double left, double right, bool closed = true) {
 		disjoint dj {left, right, closed};
 
@@ -104,6 +107,7 @@ public:
 
 	// Sampling
 	double uniform() const {
+		// TODO: Cover case where the interval is not closed
 		double len = size();
 
 		double *db = new double[__union.size() + 1];
@@ -183,6 +187,17 @@ std::ostream &operator<<(std::ostream &os, const Interval <1> &itv)
 	}
 
 	return os;
+}
+
+// Literal constructor
+Interval <1> operator""_I(unsigned long long int x)
+{
+	return Interval <1> (x);
+}
+
+Interval <1> operator""_I(long double x)
+{
+	return Interval <1> (x);
 }
 
 }
