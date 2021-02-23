@@ -2,11 +2,11 @@
 
 namespace zhetapi {
 
-	std::string strclass[] = {
-		"none",
-		"polynomial",
-		"Rational",
-		"exponential"
-	};
+std::string strclass[] = {
+	"none",
+	"polynomial",
+	"rational",
+	"exponential"
+};
 	
 }

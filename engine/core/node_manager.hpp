@@ -32,6 +32,9 @@ public:
 
 	node_manager &operator=(const node_manager &);
 
+	// Properties
+	bool empty() const;	// Is the __tree node empty?
+
 	// TODO: replace these to keep consistent interface
 	node &tree();
 	const node &tree() const;

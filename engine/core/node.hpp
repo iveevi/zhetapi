@@ -17,11 +17,11 @@ namespace zhetapi {
 
 struct node {
 	// Members
-	std::shared_ptr <Token>		__tptr;
-	lbl				__label;
-	cls				__class;
-	std::vector <node>		__leaves;
-	size_t				__nodes;
+	std::shared_ptr <Token>	__tptr		= nullptr;
+	lbl			__label		= l_none;
+	cls			__class		= c_none;
+	std::vector <node>	__leaves	= {};
+	size_t			__nodes		= 0;
 
 	// Constructors
 	node();
@@ -33,6 +33,9 @@ struct node {
 	
 	// Binary
 	explicit node(Token *, const node &, const node &);
+
+	// Properties
+	bool empty() const;
 	
 	// Member functions
 	void transfer(const node &);

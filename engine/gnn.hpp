@@ -2,6 +2,7 @@
 #define GNN_H_
 
 // C/C++ headers
+#include <queue>
 #include <vector>
 
 // Engine headers
@@ -28,6 +29,9 @@ class GNN {
 
 	template <class ... U>
 	void init(NetNode <T> *, U ...);
+
+	// Initialize outs
+	void getouts();
 public:
 	GNN();
 	explicit GNN(NetNode <T> *);
@@ -44,7 +48,10 @@ template <class T>
 GNN <T> ::GNN() {}
 
 template <class T>
-GNN <T> ::GNN(NetNode <T> *nnptr) : __ins({nnptr}) {}
+GNN <T> ::GNN(NetNode <T> *nnptr) : __ins({nnptr})
+{
+	getouts();
+}
 
 template <class T>
 GNN <T> ::GNN(const std::vector <NetNode <T> *> &ins)
@@ -61,6 +68,8 @@ template <class T>
 void GNN <T> ::init(NetNode <T> *nnptr)
 {
 	__ins.push_back(nnptr);
+
+	getouts();
 }
 
 template <class T>
@@ -70,6 +79,30 @@ void GNN <T> ::init(NetNode <T> *nnptr, U ... args)
 	__ins.push_back(nnptr);
 
 	init(args...);
+}
+
+template <class T>
+void GNN <T> ::getouts()
+{
+	// Needs to check for duplicates
+	std::queue <NetNode <T> *> queue;
+
+	for (NetNode <T> *nnptr : __ins)
+		queue.emplace(nnptr);
+	
+	while (!queue.empty()) {
+		NetNode <T> *cptr = queue.top();
+
+		queue.pop();
+
+		auto vfrw = cptr->forward();
+		if (vfrw.empty()) {
+			__outs.push_back(cptr);
+		} else {
+			for (auto frw : vfrw)
+				queue.push(frw->__fr);
+		}
+	}
 }
 
 template <class T>

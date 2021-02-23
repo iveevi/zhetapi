@@ -60,14 +60,19 @@ def install(args):
 	os.system('./bin/czhp -d include/math.zhplib')
 
 def czhp(args):
-	make_target(args.threads, 'czhp')
+	make_target(args.threads, 'czhp', args.mode)
 
 	file = 'samples/zhp/simple.zhp'
 
-	os.system('{exe}czhp {file} -L include'.format(
-		exe=modes[args.mode],
-		file=file
-	))
+	if args.mode == '':
+		os.system('{exe}czhp {file} -L include'.format(
+			exe=modes[args.mode],
+			file=file
+		))
+	else:
+		os.system('{exe}czhp'.format(
+			exe=modes[args.mode]
+		))
 
 	os.system('mkdir -p debug/')
 	os.system('mv czhp debug/')

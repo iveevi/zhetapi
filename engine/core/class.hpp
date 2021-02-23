@@ -6,14 +6,14 @@
 
 namespace zhetapi {
 
-	enum cls {
-		c_none,
-		c_polynomial,
-		c_rational,
-		c_exponential
-	};
+enum cls {
+	c_none,
+	c_polynomial,
+	c_rational,
+	c_exponential
+};
 
-	extern ::std::string strclass[];
+extern std::string strclass[];
 
 }
 

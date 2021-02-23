@@ -28,6 +28,11 @@ node::node(Token *tptr, const node &a, const node &b) : __leaves({a,
 	__tptr.reset(tptr);
 }
 
+bool node::empty() const
+{
+	return (__tptr == nullptr) && __leaves.empty();
+}
+
 void node::transfer(const node &ref)
 {
 	__tptr = ref.__tptr;

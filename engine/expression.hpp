@@ -24,7 +24,7 @@ class type_mismatch {};
 class invalid_expr {};
 
 template <class O = int, class T = double, class U = int>
-O expr(::std::string str, Barn <T, U> barn = Barn <T, U> ())
+O expr(std::string str, Barn <T, U> barn = Barn <T, U> ())
 {
 	if (str.empty())
 		throw invalid_expr();

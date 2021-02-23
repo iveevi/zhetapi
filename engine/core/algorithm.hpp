@@ -16,18 +16,23 @@ class node_manager;
 
 // Algorithm class
 class algorithm : public Token {
-	std::string			__ident;
+	std::string			__ident		= "";
+	std::string			__alg		= "";
 
-	std::vector <std::string>	__args;
+	std::vector <std::string>	__args		= {};
 
 	node_manager			__compiled;
-
-	std::string			__alg;
 public:
 	algorithm();
 	algorithm(const std::string &,
+		const std::string &,
+		const std::vector <std::string> &);
+	algorithm(const std::string &,
+		const std::string &,
 		const std::vector <std::string> &,
-		const std::string &);
+		const node_manager &);
+	
+	node_manager cmped() {return __compiled;}
 	
 	void compile(Barn *);
 	

@@ -40,6 +40,9 @@ class NetNode {
 	// Dealing with pipes
 	void copy_pipes(const NetNode &);
 	void clear_pipes();
+
+	// Get forward nodes
+	const std::vector <iforward> &forward() const;
 public:
 	NetNode();
 	NetNode(const NetNode &);
@@ -166,6 +169,8 @@ void NetNode <T> ::clear_pipes()
 	delete[] __outs;
 }
 
+// Propoerties
+
 // Notational usage: ts = *(nn1[i])
 template <class T>
 const Tensor <T> &NetNode <T> ::operator*() const
@@ -254,6 +259,12 @@ NetNode <T> &NetNode <T> ::operator>>(NetNode &out)
 }
 
 // Setters and getters
+template <class T>
+const std::vector <typename NetNode <T> ::iforward>
+		&NetNode <T> ::forward() const
+{
+	return __forward;
+}
 
 // Notational usage: nn[i].pass(ts)
 template <class T>

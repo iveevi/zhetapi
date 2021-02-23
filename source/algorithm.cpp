@@ -9,15 +9,33 @@ algorithm::algorithm() {}
 
 algorithm::algorithm(
 		const std::string &ident,
-		const std::vector <std::string> &args,
-		const std::string &alg)
+		const std::string &alg,
+		const std::vector <std::string> &args)
 		: __ident(ident), __args(args),
 		__alg(alg) {}
+
+algorithm::algorithm(
+		const std::string &ident,
+		const std::string &alg,
+		const std::vector <std::string> &args,
+		const node_manager &compiled)
+		: __ident(ident), __args(args),
+		__alg(alg), __compiled(compiled) {}
 
 // Executing the function
 Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 {
-	// Barn *cpy = new Barn(barn);
+	using namespace std;
+	if (!__compiled.empty()) {
+		cout << "Function is already compiled..." << endl;
+		__compiled.print();
+
+		return __compiled.value();
+	} else {
+		cout << "Empty compiled:(" << endl;
+	}
+
+	__compiled.print();
 
 	// For now, no default arguments or overloads
 	assert(args.size() == __args.size());
@@ -67,7 +85,7 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 
 	using namespace std;
 
-	cout << "full alg:" << endl;
+	cout << "full alg: " << this << endl;
 	__compiled.print();
 
 	// Return the "return" value instead of nullptr
@@ -76,8 +94,6 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 
 Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 {
-	using namespace std;
-
 	// Skip comments
 	if (str[0] == '#')
 		return nullptr;
@@ -86,7 +102,7 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
-		vector <node> order;
+		std::vector <node> order;
 
 		zhetapi::Token *tptr = nullptr;
 		
@@ -210,7 +226,11 @@ Token::type algorithm::caller() const
 
 Token *algorithm::copy() const
 {
-	return new algorithm(__ident, __args, __alg);
+	using namespace std;
+
+	cout << "Copying algs..." << endl;
+	__compiled.print();
+	return new algorithm(__ident, __alg, __args, __compiled);
 }
 
 std::string algorithm::str() const

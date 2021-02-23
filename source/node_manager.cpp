@@ -74,6 +74,12 @@ node_manager &node_manager::operator=(const node_manager &other)
 	return *this;
 }
 
+// Properties
+bool node_manager::empty() const
+{
+	return __tree.empty();
+}
+
 // Getters
 node &node_manager::tree()
 {
@@ -108,6 +114,8 @@ Token *node_manager::value(node tree) const
 	Variable v;
 
 	std::string ident;
+
+	algorithm *aptr;
 
 	// int size;
 
@@ -156,8 +164,10 @@ Token *node_manager::value(node tree) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(__barn, values);
+		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
+		tptr = aptr->execute(__barn, values);
 
+		// Do this outside the switch
 		if (tptr)
 			return tptr->copy();
 	}
@@ -178,7 +188,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	Variable v;
 	Variable *vp;
 
-	algorithm *alg;
+	algorithm *aptr;
 
 	std::string ident;
 
@@ -256,8 +266,12 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	case Token::alg:
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
-
-		tptr = (dynamic_cast <algorithm *> (tree.__tptr.get()))->execute(ext, values);
+		
+		using namespace std;
+		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
+		cout << "aptr = " << aptr << endl;
+		aptr->cmped().print();
+		tptr = aptr->execute(__barn, values);
 
 		if (tptr)
 			return tptr->copy();

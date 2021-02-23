@@ -62,9 +62,8 @@ int main()
 	i = 0_I;
 	cout << "is " << i << " good? " << (bool) i << endl;
 
-	i = 50_I | 25_I;
-
-	cout << i << endl;
+	cout << (50_I | 25_I) << endl;
+	// cout << (50_I & 25_I) << endl;
 
 	/*
 	auto dtime = []() -> ostream & {
