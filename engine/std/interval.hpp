@@ -4,12 +4,17 @@
 // C/C++ headers
 #include <iostream>
 #include <iterator>
+#include <random>
 #include <set>
 #include <vector>
 
 namespace zhetapi {
 
 namespace utility {
+
+// Typedefs for sanity
+using dre = std::default_random_engine;
+using udb = std::uniform_real_distribution <double>;
 
 // Some arbitrary random utils
 
@@ -30,6 +35,9 @@ class Interval {
 // TODO: Switch from double to long double
 template <>
 class Interval <1> {
+	static dre gen;
+	static udb distro;
+
 	struct disjoint {
 		using pflt = std::pair <double, double>;
 
@@ -52,7 +60,14 @@ class Interval <1> {
 
 		// Use a real uniform distro later
 		double uniform() const {
-			return left + runit() * (right - left);
+			return left + distro(gen) * (right - left);
+		}
+
+		// Check disjointed-ness
+		bool is_disjoint(const disjoint &dj) const {
+			// If either interval is greater,
+			// then it must be disjoint
+			return (*this > dj) || (*this < dj);
 		}
 
 		// The interval is completely to the left
@@ -85,6 +100,16 @@ class Interval <1> {
 
 	// Assumes that the intervals in un are disjoint
 	explicit Interval(const std::set <disjoint> &un) : __union(un) {}
+
+	// Checks that the new 'disjoint' interval is indeed disjoint
+	bool is_disjoint(const disjoint &djx) const {
+		for (const disjoint &dj : __union) {
+			if (!dj.is_disjoint(djx))
+				return false;
+		}
+
+		return true;
+	}
 public:
 	Interval(unsigned long long int x) : Interval((long double) x) {}
 	Interval(long double x) : Interval(0, x) {}
@@ -105,6 +130,10 @@ public:
 		return len;
 	}
 
+	operator bool() const {
+		return size() > 0;
+	}
+
 	// Sampling
 	double uniform() const {
 		// TODO: Cover case where the interval is not closed
@@ -121,7 +150,7 @@ public:
 			i++;
 		}
 
-		double rnd = runit();
+		double rnd = distro(gen);
 
 		for (i = 0; i < __union.size(); i++) {
 			if ((rnd > db[i]) && (rnd < db[i + 1]))
@@ -141,8 +170,15 @@ public:
 	Interval &operator|=(const Interval &itv) {
 		auto iset = itv.__union;
 
+		using namespace std;
+
 		// Check for disjointed-ness
-		__union.insert(iset.begin(), iset.end());
+		for (const disjoint &dj : iset) {
+			if (is_disjoint(dj))
+				__union.insert(__union.begin(), dj);
+			else
+				cout << "Adding a non-disjoint interval" << endl;
+		}
 
 		return *this;
 	}
@@ -153,6 +189,9 @@ public:
 
 	friend std::ostream &operator<<(std::ostream &, const Interval &);
 };
+
+dre Interval <1> ::gen;
+udb Interval <1> ::distro = udb(0, 1);
 
 Interval <1> operator|(const Interval <1> &a, const Interval <1> &b)
 {
@@ -199,6 +238,12 @@ Interval <1> operator""_I(long double x)
 {
 	return Interval <1> (x);
 }
+
+/*
+template <size_t N, size_t M>
+Interval <N + M> operator*(const Interval <N> &, const Interval <M> &)
+{
+} */
 
 }
 

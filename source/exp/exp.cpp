@@ -54,6 +54,18 @@ int main()
 	for (int k = 0; k < 10; k++)
 		cout << "\ti.uni = " << i.uniform() << endl;
 
+	cout << boolalpha << endl;
+
+	i = 1_I;
+	cout << "is " << i << " good? " << (bool) i << endl;
+	
+	i = 0_I;
+	cout << "is " << i << " good? " << (bool) i << endl;
+
+	i = 50_I | 25_I;
+
+	cout << i << endl;
+
 	/*
 	auto dtime = []() -> ostream & {
 		double mcs = chrono::duration_cast
