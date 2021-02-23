@@ -890,11 +890,24 @@ Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), 
 }
 
 template <class T>
-Matrix <T> ::Matrix(const Matrix <T> &other, T k) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
-					       ({other.__rows, other.__cols}, T())
+Matrix <T> ::Matrix(const Matrix <T> &other, T k) : __rows(other.__rows), __cols(other.__cols)
 {
-	for (int i = 0; i < this->__size; i++)
-		this->__array[i] = k * other.__array[i];
+	if (this != &other) {
+		// Use a macro
+		this->__array = new T[other.__size];
+		this->__rows = other.__rows;
+		this->__cols = other.__cols;
+
+		this->__size = other.__size;
+		for (size_t i = 0; i < this->__size; i++)
+			this->__array[i] = k * other.__array[i];
+
+		this->__dims = 2;
+		this->__dim = new size_t[2];
+
+		this->__dim[0] = this->__rows;
+		this->__dim[1] = this->__cols;
+	}
 }
 
 template <class T>

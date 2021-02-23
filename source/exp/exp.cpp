@@ -1,12 +1,15 @@
 #include <matrix.hpp>
 #include <vector.hpp>
 
+#include <std/interval.hpp>
+
 #include <chrono>
 #include <string>
 #include <iostream>
 
 using namespace std;
 using namespace zhetapi;
+using namespace zhetapi::utility;
 
 // Typedefs
 using tclk = chrono::high_resolution_clock;
@@ -16,15 +19,23 @@ tclk clk;
 tpoint start_t;
 tpoint end_t;
 
-double runit()
-{
-	srand(clock());
-
-	return rand() / ((double) RAND_MAX);
-}
-
 int main()
 {
+	Interval <> i(5, 10);
+
+	cout << "i = " << i << endl;
+
+	for (int k = 0; k < 10; k++)
+		cout << "\ti.uni = " << i.uniform() << endl;
+
+	i |= Interval <> {15, 20};
+	
+	cout << "i = " << i << endl;
+
+	for (int k = 0; k < 10; k++)
+		cout << "\ti.uni = " << i.uniform() << endl;
+
+	/*
 	auto dtime = []() -> ostream & {
 		double mcs = chrono::duration_cast
 			<chrono::microseconds>
@@ -55,5 +66,5 @@ int main()
 	}
 	end_t = clk.now();
 
-	dtime() << endl;
+	dtime() << endl; */
 }

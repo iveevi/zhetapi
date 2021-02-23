@@ -62,7 +62,7 @@ public:
 	template <class ... A>
 	Token *derivative(const std::string &, A ...);
 
-	Function differentiate(const ::std::string &) const;
+	Function differentiate(const std::string &) const;
 
 	friend bool operator<(const Function &, const Function &);
 	friend bool operator>(const Function &, const Function &);
@@ -82,7 +82,7 @@ public:
 
 	std::string display() const;
 
-	friend std::ostream &operator<<(::std::ostream &, const Function &);
+	friend std::ostream &operator<<(std::ostream &, const Function &);
 private:
 	template <class A>
 	void gather(std::vector <Token *> &, A);
@@ -115,17 +115,17 @@ Token *Function::operator()(A ... args)
 
 // Gathering facilities
 template <class A>
-void Function::gather(::std::vector <Token *> &Tokens, A in)
+void Function::gather(std::vector <Token *> &toks, A in)
 {
-	Tokens.push_back(new Operand <A>(in));
+	toks.push_back(new Operand <A>(in));
 }
 
 template <class A, class ... B>
-void Function::gather(std::vector <Token *> &Tokens, A in, B ... args)
+void Function::gather(std::vector <Token *> &toks, A in, B ... args)
 {
-	Tokens.push_back(new Operand <A>(in));
+	toks.push_back(new Operand <A> (in));
 
-	gather(Tokens, args...);
+	gather(toks, args...);
 }
 
 }

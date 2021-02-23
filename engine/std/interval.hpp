@@ -11,6 +11,15 @@ namespace zhetapi {
 
 namespace utility {
 
+// Some arbitrary random utils
+
+// Use an actual uniform distro
+auto runit = []() {
+	srand(clock());
+
+	return (rand() / ((double) RAND_MAX));
+};
+
 // N is the number of dimensions
 template <size_t N = 1>
 class Interval {
@@ -18,6 +27,7 @@ class Interval {
 	friend std::ostream &operator<<(std::ostream &, const Interval <M> &);
 };
 
+// TODO: Switch from double to long double
 template <>
 class Interval <1> {
 	struct disjoint {
@@ -38,6 +48,11 @@ class Interval <1> {
 				return {left, right};
 
 			return {left + epsilon, right - epsilon};
+		}
+
+		// Use a real uniform distro later
+		double uniform() const {
+			return left + runit() * (right - left);
 		}
 
 		// The interval is completely to the left
@@ -77,6 +92,7 @@ public:
 		__union.insert(__union.begin(), dj);
 	}
 
+	// Properties
 	double size() const {
 		double len = 0;
 
@@ -86,6 +102,48 @@ public:
 		return len;
 	}
 
+	// Sampling
+	double uniform() const {
+		double len = size();
+
+		double *db = new double[__union.size() + 1];
+
+		size_t i = 0;
+
+		db[i++] = 0;
+		for (disjoint dj : __union) {
+			db[i] = db[i - 1] + dj.length()/len;
+
+			i++;
+		}
+
+		double rnd = runit();
+
+		for (i = 0; i < __union.size(); i++) {
+			if ((rnd > db[i]) && (rnd < db[i + 1]))
+				break;
+		}
+
+		delete[] db;
+
+		auto itr = __union.begin();
+
+		std::advance(itr, i);
+
+		return itr->uniform();
+	}
+
+	// Operations
+	Interval &operator|=(const Interval &itv) {
+		auto iset = itv.__union;
+
+		// Check for disjointed-ness
+		__union.insert(iset.begin(), iset.end());
+
+		return *this;
+	}
+
+	// Binary operations
 	friend Interval operator|(const Interval &, const Interval &);
 	friend Interval operator&(const Interval &, const Interval &);
 
@@ -94,12 +152,9 @@ public:
 
 Interval <1> operator|(const Interval <1> &a, const Interval <1> &b)
 {
-	auto aset = a.__union;
-	auto bset = b.__union;
+	Interval <1> out = a;
 
-	aset.insert(bset.begin(), bset.end());
-
-	return Interval <1> (aset);
+	return out |= b;
 }
 
 std::ostream &operator<<(std::ostream &os, const Interval <1> &itv)
