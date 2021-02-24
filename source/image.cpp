@@ -391,20 +391,13 @@ int Image::show() const
 
 #endif
 
-Image load_png(const std::string &impath)
-{
-	return load_png(impath.c_str());
-}
-
 /*
  * PNG Parsing.
  *
  * TODO: Throw more specific exceptions.
  */
-Image load_png(const char *impath)
+Image load_png(FILE *file)
 {
-	FILE *file = fopen(impath, "rb");
-
 	if (!file)
 		throw bad_file();
 
@@ -491,7 +484,19 @@ Image load_png(const char *impath)
 	return Image(data, width, height, channels, rbytes);
 }
 
-void save_png(Image img, const char *path)
+Image load_png(const char *impath)
+{
+	FILE *file = fopen(impath, "rb");
+
+	return load_png(file);
+}
+
+Image load_png(const std::string &impath)
+{
+	return load_png(impath.c_str());
+}
+
+void save_png(const Image &img, const char *path)
 {
 	FILE *file = fopen(path, "wb");
 

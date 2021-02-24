@@ -104,12 +104,12 @@ Matrix <T> *simple_batch_gradient(
 {
 	size_t ds = ins.size();
 
-	Matrix <T> *J;
-	Matrix <T> *Q;
+	Matrix <T> *J = simple_gradient(layers, size, a,
+			z, ins[0], outs[0], cost);
 
-	J = simple_gradient(layers, size, a, z, ins[0], outs[0], cost);
 	for (size_t i = 1; i < ds; i++) {
-		Q = simple_gradient(layers, size, a, z, ins[i], outs[i], cost);
+		Matrix <T> *Q = simple_gradient(layers, size, a,
+				z, ins[i], outs[i], cost);
 
 		for (size_t k = 0; k < size; k++)
 			J[k] += Q[k];
@@ -136,9 +136,8 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 {
 	size_t ds = ins.size();
 
-	Matrix <T> *J;
-
-	J = simple_gradient(layers, size, ta, tz, ins[0], outs[0], cost);
+	Matrix <T> *J = simple_gradient(layers, size, ta,
+			tz, ins[0], outs[0], cost);
 
 	std::mutex task_mtx;
 	std::mutex addm_mtx;
@@ -167,7 +166,8 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 			if (t < 0)
 				break;
 
-			Q = simple_gradient(layers, size, a, z, ins[t], outs[t], cost);
+			Q = simple_gradient(layers, size, a,
+					z, ins[t], outs[t], cost);
 			
 			addm_mtx.lock();
 

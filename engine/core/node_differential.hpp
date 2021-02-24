@@ -13,7 +13,7 @@ class node_differential : public Token {
 protected:
 	Token *		__ref;
 public:
-	node_differential(Token *);
+	explicit node_differential(Token *);
 
 	Token *get() const;
 

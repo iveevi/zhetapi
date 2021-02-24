@@ -111,8 +111,14 @@ class Interval <1> {
 		return true;
 	}
 public:
-	Interval(unsigned long long int x) : Interval((long double) x) {}
-	Interval(long double x) : Interval(0, x) {}
+	// Defaults to [0, 1]
+	Interval() : Interval(1.0L) {}
+
+	explicit Interval(unsigned long long int x)
+			: Interval((long double) x) {}
+
+	explicit Interval(long double x)
+			: Interval(0, x) {}
 
 	Interval(double left, double right, bool closed = true) {
 		disjoint dj {left, right, closed};

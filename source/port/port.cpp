@@ -79,10 +79,8 @@ int main()
 	};
 
 	auto tasker = [&]() {
-		int t;
-
 		while (true) {
-			t = -1;
+			int t = -1;
 
 			tk_mtx.lock();
 

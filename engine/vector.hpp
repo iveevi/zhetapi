@@ -52,9 +52,13 @@ public:
 	explicit Vector(const A &);
 
 	// The three major components
-	T x() const;
-	T y() const;
-	T z() const;
+	T &x();
+	T &y();
+	T &z();
+	
+	const T &x() const;
+	const T &y() const;
+	const T &z() const;
 
 	// Direction of the vector (radians)
 	T arg() const;
@@ -253,7 +257,7 @@ Vector <T> ::Vector(const A &other)
 }
 
 template <class T>
-T Vector <T> ::x() const
+T &Vector <T> ::x()
 {
 	if (this->__size < 1)
 		throw index_out_of_bounds();
@@ -262,7 +266,7 @@ T Vector <T> ::x() const
 }
 
 template <class T>
-T Vector <T> ::y() const
+T &Vector <T> ::y()
 {
 	if (this->__size < 2)
 		throw index_out_of_bounds();
@@ -271,7 +275,34 @@ T Vector <T> ::y() const
 }
 
 template <class T>
-T Vector <T> ::z() const
+T &Vector <T> ::z()
+{
+	if (this->__size < 3)
+		throw index_out_of_bounds();
+
+	return this->__array[2];
+}
+
+template <class T>
+const T &Vector <T> ::x() const
+{
+	if (this->__size < 1)
+		throw index_out_of_bounds();
+
+	return this->__array[0];
+}
+
+template <class T>
+const T &Vector <T> ::y() const
+{
+	if (this->__size < 2)
+		throw index_out_of_bounds();
+
+	return this->__array[1];
+}
+
+template <class T>
+const T &Vector <T> ::z() const
 {
 	if (this->__size < 3)
 		throw index_out_of_bounds();

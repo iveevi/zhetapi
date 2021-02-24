@@ -155,9 +155,12 @@ class bad_file {};
 class bad_png {};
 
 // Image loading and saving
-Image load_png(const std::string &);
+Image load_png(std::ifstream &);
+
 Image load_png(const char *);
-void save_png(Image, const char *);
+Image load_png(const std::string &);
+
+void save_png(const Image &, const char *);
 
 #ifndef ZHP_NO_GUI
 

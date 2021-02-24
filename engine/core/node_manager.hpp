@@ -117,7 +117,7 @@ private:
 	class error {
 		std::string str;
 	public:
-		error(const std::string &s) : str(s) {}
+		explicit error(const std::string &s) : str(s) {}
 
 		const std::string &what() const {
 			return str;
