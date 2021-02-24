@@ -4,10 +4,49 @@ namespace zhetapi {
 
 namespace image {
 
+// Get hex digit value
+static byte hex_to_byte(char c)
+{
+	if (isdigit(c))
+		return c - '0';
+
+	if (isupper(c))
+		return (c - 'A') + 9;
+
+	// Assume lower-case letter
+	return (c - 'a') + 9;
+};
+
+// Color constructors
+Color::Color(const std::string &hexs)
+{
+	static const size_t LENGTH = 7;
+
+	if (hexs.length() != LENGTH)
+		throw bad_hex_string();
+
+	r = 16 * hex_to_byte(hexs[1]) + hex_to_byte(hexs[2]);
+	g = 16 * hex_to_byte(hexs[3]) + hex_to_byte(hexs[4]);
+	b = 16 * hex_to_byte(hexs[5]) + hex_to_byte(hexs[6]);
+};
+
+Color::Color(byte xr, byte xg, byte xb) : r(xr), g(xg), b(xb) {}
+
+// Image constructors
 Image::Image() : Tensor <unsigned char> () {}
 
 Image::Image(size_t width, size_t height, size_t channels, byte def)
 		: Tensor <unsigned char> ({width, height, channels}, def) {}
+
+Image::Image(size_t width, size_t height, size_t channels, const std::string &hexs)
+		: Tensor <unsigned char> ({width, height, channels})
+{
+	Color color = hexs;
+	for (size_t r = 0; r < width; r++) {
+		for (size_t c = 0; c < height; c++)
+			set(pixel {r, c}, color);
+	}
+}
 
 // Reinterpret constructor (row-contingious data)
 Image::Image(byte *data, size_t width, size_t height, size_t channels)
@@ -56,6 +95,15 @@ size_t Image::channels() const
 	return __dim[2];
 }
 
+void Image::set(const pixel &px, const Color &c)
+{
+	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+
+	__array[index] = c.r;
+	__array[index + 1] = c.g;
+	__array[index + 2] = c.b;
+}
+
 void Image::set(const pixel &px, size_t channel, byte bt)
 {
 	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
@@ -78,32 +126,12 @@ void Image::set_hex(const pixel &px, size_t hexc)
 	byte g = (byte) ((hexc & 0x00FF00) >> 8);
 	byte b = (byte) (hexc & 0x0000FF);
 
-	set(px, {r, g, b});
+	set(px, Color(r, g, b));
 }
 
 void Image::set_hex(const pixel &px, const std::string &hexs)
 {
-	static const size_t LENGTH = 7;
-	
-	static auto value = [](char c) -> byte {
-		if (isdigit(c))
-			return c - '0';
-
-		if (isupper(c))
-			return (c - 'A') + 9;
-
-		// Assume lower-case letter
-		return (c - 'a') + 9;
-	};
-
-	if (hexs.length() != LENGTH)
-		throw bad_hex_string();
-
-	byte r = 16 * value(hexs[1]) + value(hexs[2]);
-	byte g = 16 * value(hexs[3]) + value(hexs[4]);
-	byte b = 16 * value(hexs[5]) + value(hexs[6]);
-	
-	set(px, {r, g, b});
+	set(px, Color(hexs));
 }
 
 // Extract a single channel
@@ -444,6 +472,19 @@ void image_viewer_resize_processor(GLFWwindow* window, int width, int height)
 
 #endif
 
+}
+
+// Literal operators
+image::Image operator""_png(const char *str, size_t len)
+{
+	std::string file(str, len);
+
+	size_t i = file.find_last_of(".");
+
+	if (i == std::string::npos)
+		file += ".png";
+
+	return image::load_png(file);
 }
 
 }

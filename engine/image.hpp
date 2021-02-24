@@ -26,15 +26,31 @@ namespace zhetapi {
 
 namespace image {
 
+// Global type aliases
+using byte = unsigned char;
+
+// Global exceptions
+class bad_hex_string {};
+
+// Color structure
+struct Color {
+	byte	r	= 0;
+	byte	g	= 0;
+	byte	b	= 0;
+
+	Color(const std::string &);		// Hex constructor
+	Color(byte = 0, byte = 0, byte = 0);	// Value constructor
+};
+
 // Image class
 class Image : public Tensor <unsigned char> {
 public:
 	// Using declararations
-	using byte = unsigned char;
 	using pixel = std::pair <size_t, size_t>;
 
 	Image();						// Default
-	Image(size_t, size_t, size_t, byte = 0);
+	Image(size_t, size_t, size_t, byte = 0);		// Value
+	Image(size_t, size_t, size_t, const std::string &);	// Color
 	Image(byte *, size_t, size_t, size_t = 1);		// Contigous array
 	Image(byte **, size_t, size_t, size_t);			// List of rows
 	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
@@ -46,6 +62,7 @@ public:
 	size_t channels() const;
 	
 	// Pixel value setter
+	void set(const pixel &, const Color &);			// Color
 	void set(const pixel &, size_t, byte);
 	void set(const pixel &, const Vector <byte> &);
 	
@@ -68,7 +85,6 @@ public:
 
 	class out_of_bounds {};
 	class bad_input_order {};
-	class bad_hex_string {};
 
 	// Friends
 	template <class T>
@@ -97,6 +113,9 @@ void image_viewer_resize_processor(GLFWwindow *, int, int);
 #endif
 
 }
+
+// Literal operators
+image::Image operator""_png(const char *, size_t);
 
 }
 

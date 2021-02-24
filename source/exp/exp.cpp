@@ -3,6 +3,8 @@
 
 #include <std/interval.hpp>
 
+#include <image.hpp>
+
 #include <chrono>
 #include <string>
 #include <iostream>
@@ -21,7 +23,19 @@ tpoint end_t;
 
 int main()
 {
-	Interval <> i(5, 10);
+	image::Image img(400, 400, 4, "#ff0000");
+
+	img.show();
+
+	img = "zhetapi-logo"_png;
+
+	img.show();
+
+	img = "zhetapi-logo.png"_png;
+
+	img.show();
+
+	/* Interval <> i(5, 10);
 
 	cout << "i = " << i << endl;
 
@@ -63,7 +77,7 @@ int main()
 	cout << "is " << i << " good? " << (bool) i << endl;
 
 	cout << (50_I | 25_I) << endl;
-	// cout << (50_I & 25_I) << endl;
+	// cout << (50_I & 25_I) << endl; */
 
 	/*
 	auto dtime = []() -> ostream & {
