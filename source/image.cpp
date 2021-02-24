@@ -18,6 +18,8 @@ static byte hex_to_byte(char c)
 };
 
 // Color constructors
+Color::Color() {}
+
 Color::Color(const std::string &hexs)
 {
 	static const size_t LENGTH = 7;
@@ -32,11 +34,53 @@ Color::Color(const std::string &hexs)
 
 Color::Color(byte xr, byte xg, byte xb) : r(xr), g(xg), b(xb) {}
 
+// Gradient constructor
+Gradient::Gradient(const Color &A, const Color &B,
+		long double start, long double end)
+		: __base(A), __start(start), __end(end)
+{
+	__dr = B.r - A.r;
+	__dg = B.g - A.g;
+	__db = B.b - A.b;
+}
+
+Gradient::Gradient(const std::string &hexs_a, const std::string &hexs_b,
+		long double start, long double end)
+		: __base(hexs_a), __start(start), __end(end)
+{
+	Color B = hexs_b;
+
+	__dr = B.r - __base.r;
+	__dg = B.g - __base.g;
+	__db = B.b - __base.b;
+}
+
+// Gradient getter
+Color Gradient::get(long double x)
+{
+	long double k = (x - __start)/(__start - __end);
+
+	return Color {
+		(__base.r + __dr * k),
+		(__base.g + __dg * k),
+		(__base.b + __db * k)
+	};
+}
+
 // Image constructors
 Image::Image() : Tensor <unsigned char> () {}
 
 Image::Image(size_t width, size_t height, size_t channels, byte def)
 		: Tensor <unsigned char> ({width, height, channels}, def) {}
+
+Image::Image(size_t width, size_t height, size_t channels, const Color &color)
+		: Tensor <unsigned char> ({width, height, channels})
+{
+	for (size_t r = 0; r < width; r++) {
+		for (size_t c = 0; c < height; c++)
+			set(pixel {r, c}, color);
+	}
+}
 
 Image::Image(size_t width, size_t height, size_t channels, const std::string &hexs)
 		: Tensor <unsigned char> ({width, height, channels})

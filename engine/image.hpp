@@ -33,13 +33,50 @@ using byte = unsigned char;
 class bad_hex_string {};
 
 // Color structure
+//
+// TODO: Derive Color from Vector
 struct Color {
 	byte	r	= 0;
 	byte	g	= 0;
 	byte	b	= 0;
 
+	Color();
 	Color(const std::string &);		// Hex constructor
 	Color(byte = 0, byte = 0, byte = 0);	// Value constructor
+};
+
+/*
+ * Gradient:
+ *
+ * A parametrized gradient class, from color A to B, and operating on a range a
+ * to b. A value c in the range [a, b] will equate to a color appropriately
+ * in between A and B.
+ *
+ * This class can essentially be thought of as a slider from color A to color B
+ * (with the slider value ranging from a to b).
+ *
+ * The reason we do not restrict a, b = 0, 1 is to allow for more meaningful
+ * values. For example, if the gradient is intended to represent heat, the
+ * Celcius measurements in [0, 100] are more meaningful to use than are the
+ * values in [0, 1].
+ */
+
+class Gradient {
+	Color		__base;
+
+	long double	__dr	= 0;
+	long double	__dg	= 0;
+	long double	__db	= 0;
+
+	long double	__start	= 0;
+	long double	__end	= 0;
+public:
+	Gradient(const Color &, const Color &,
+			long double = 0, long double = 1);
+	Gradient(const std::string &, const std::string &,
+			long double = 0, long double = 1);
+
+	Color get(long double);
 };
 
 // Image class
@@ -50,6 +87,7 @@ public:
 
 	Image();						// Default
 	Image(size_t, size_t, size_t, byte = 0);		// Value
+	Image(size_t, size_t, size_t, const Color &);		// Color
 	Image(size_t, size_t, size_t, const std::string &);	// Color
 	Image(byte *, size_t, size_t, size_t = 1);		// Contigous array
 	Image(byte **, size_t, size_t, size_t);			// List of rows

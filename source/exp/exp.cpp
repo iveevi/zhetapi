@@ -23,7 +23,9 @@ tpoint end_t;
 
 int main()
 {
-	image::Image img(400, 400, 4, "#ff0000");
+	image::Gradient grad("#c96d51", "#48aadb");
+
+	image::Image img(400, 400, 4, grad.get(0.5));
 
 	img.show();
 
