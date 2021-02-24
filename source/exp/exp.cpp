@@ -23,19 +23,11 @@ tpoint end_t;
 
 int main()
 {
-	image::Gradient grad("#c96d51", "#48aadb");
+	cout << "value = " << image::ORANGE.value() << endl;
 
-	image::Image img(400, 400, 4, grad.get(0.5));
+	image::Image img(400, 400, 4, image::ORANGE);
 
-	img.show();
-
-	img = "zhetapi-logo"_png;
-
-	img.show();
-
-	img = "zhetapi-logo.png"_png;
-
-	img.show();
+	cout << "value = " << img.color({4, 4}) << endl;
 
 	/* Interval <> i(5, 10);
 

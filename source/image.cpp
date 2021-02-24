@@ -11,14 +11,16 @@ static byte hex_to_byte(char c)
 		return c - '0';
 
 	if (isupper(c))
-		return (c - 'A') + 9;
+		return (c - 'A') + 10;
 
 	// Assume lower-case letter
-	return (c - 'a') + 9;
+	return (c - 'a') + 10;
 };
 
 // Color constructors
 Color::Color() {}
+
+Color::Color(const char *str) : Color(std::string(str)) {}
 
 Color::Color(const std::string &hexs)
 {
@@ -33,6 +35,29 @@ Color::Color(const std::string &hexs)
 };
 
 Color::Color(byte xr, byte xg, byte xb) : r(xr), g(xg), b(xb) {}
+
+// Color properties
+
+// Return rgb in decimal form (each digit is a byte)
+uint32_t Color::value() const
+{
+	uint32_t ur = r;
+	uint32_t ug = g;
+	uint32_t ub = b;
+
+	return (((ur << 8) + ug) << 8 + ub);
+}
+
+// Standard colors
+const Color	RED	= "#FF0000";
+const Color	GREEN	= "#00FF00";
+const Color	BLUE	= "#0000FF";
+const Color	YELLOW	= "#FFFF00";
+const Color	ORANGE	= "#FFA500";
+const Color	CYAN	= "#00FFFF";
+const Color	WHITE	= "#FFFFFF";
+const Color	BLACK	= "#000000";
+const Color	GREY	= "#808080";
 
 // Gradient constructor
 Gradient::Gradient(const Color &A, const Color &B,
@@ -61,9 +86,9 @@ Color Gradient::get(long double x)
 	long double k = (x - __start)/(__start - __end);
 
 	return Color {
-		(__base.r + __dr * k),
-		(__base.g + __dg * k),
-		(__base.b + __db * k)
+		(byte) (__base.r + __dr * k),
+		(byte) (__base.g + __dg * k),
+		(byte) (__base.b + __db * k)
 	};
 }
 
@@ -176,6 +201,18 @@ void Image::set_hex(const pixel &px, size_t hexc)
 void Image::set_hex(const pixel &px, const std::string &hexs)
 {
 	set(px, Color(hexs));
+}
+
+// Pixel value getter (same value as Color::value)
+uint32_t Image::color(const pixel &px) const
+{
+	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+
+	uint32_t ur = __array[index];
+	uint32_t ug = __array[index + 1];
+	uint32_t ub = __array[index + 2];
+	
+	return (((ur << 8) + ug) << 8 + ub);
 }
 
 // Extract a single channel

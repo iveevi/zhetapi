@@ -41,9 +41,23 @@ struct Color {
 	byte	b	= 0;
 
 	Color();
+	Color(const char *);			// Hex constructor
 	Color(const std::string &);		// Hex constructor
 	Color(byte = 0, byte = 0, byte = 0);	// Value constructor
+
+	uint32_t value() const;
 };
+
+// Standard colors
+extern const Color RED;
+extern const Color GREEN;
+extern const Color BLUE;
+extern const Color YELLOW;
+extern const Color ORANGE;
+extern const Color CYAN;
+extern const Color WHITE;
+extern const Color BLACK;
+extern const Color GREY;
 
 /*
  * Gradient:
@@ -106,6 +120,9 @@ public:
 	
 	void set_hex(const pixel &, size_t);
 	void set_hex(const pixel &, const std::string &);
+
+	// Pixel value getter
+	uint32_t color(const pixel &) const;
 
 	// Image extractors
 	Image channel(size_t) const;
