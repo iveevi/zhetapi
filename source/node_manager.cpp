@@ -102,6 +102,16 @@ Token *node_manager::value(Barn *ext) const
 	return value(__tree, ext);
 }
 
+// Sequential value (returns null for now)
+Token *node_manager::sequential_value(Barn *ext) const
+{
+	// Assumes that the top node is a sequential
+	for (node nd : __tree.__leaves)
+		value(nd, ext);
+	
+	return nullptr;
+}
+
 Token *node_manager::value(node tree) const
 {
 	std::vector <Token *> values;
@@ -269,8 +279,6 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		
 		using namespace std;
 		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
-		cout << "aptr = " << aptr << endl;
-		aptr->cmped().print();
 		tptr = aptr->execute(__barn, values);
 
 		if (tptr)

@@ -22,6 +22,8 @@ class algorithm : public Token {
 	std::vector <std::string>	__args		= {};
 
 	node_manager			__compiled;
+	
+	void generate(Barn *, std::string str, node_manager &);
 public:
 	algorithm();
 	algorithm(const std::string &,
@@ -32,13 +34,11 @@ public:
 		const std::vector <std::string> &,
 		const node_manager &);
 	
-	node_manager cmped() {return __compiled;}
-	
-	void compile(Barn *);
+	void compile(Barn *);	
 	
 	Token *execute(Barn *, const std::vector <Token *> &);
-	Token *execute(Barn *, std::string str, node_manager &);
 
+	// Put somewhere else
 	std::vector <std::string> split(std::string str);
 	
 	const std::string &symbol() const;

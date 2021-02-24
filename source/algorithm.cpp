@@ -22,28 +22,8 @@ algorithm::algorithm(
 		: __ident(ident), __args(args),
 		__alg(alg), __compiled(compiled) {}
 
-// Executing the function
-Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
+void algorithm::compile(Barn *barn)
 {
-	using namespace std;
-	if (!__compiled.empty()) {
-		cout << "Function is already compiled..." << endl;
-		__compiled.print();
-
-		return __compiled.value();
-	} else {
-		cout << "Empty compiled:(" << endl;
-	}
-
-	__compiled.print();
-
-	// For now, no default arguments or overloads
-	assert(args.size() == __args.size());
-
-	size_t n = __args.size();
-	for (size_t i = 0; i < n; i++)
-		barn->put(args[i], __args[i]);	// Put in a new barn instead (excluding references)
-
 	// Use the definition line number
 	bool quoted = false;
 	int paren = 0;
@@ -52,7 +32,7 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 
 	size_t i = 0;
 	
-	n = __alg.length();
+	size_t n = __alg.length();
 
 	char c;
 	while ((i < n) && (c = __alg[i++])) {
@@ -66,7 +46,7 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
-					execute(barn, tmp, __compiled);
+					generate(barn, tmp, __compiled);
 
 					tmp.clear();
 				}
@@ -83,25 +63,26 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 
 	__compiled.tree().__label = l_sequential;
 
+	/*
 	using namespace std;
 
-	cout << "full alg: " << this << endl;
-	__compiled.print();
-
-	// Return the "return" value instead of nullptr
-	return nullptr;
+	cout << "finished compiling, full alg: " << this << endl;
+	__compiled.print(); */
 }
 
-Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
+void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 {
 	// Skip comments
 	if (str[0] == '#')
-		return nullptr;
+		return;
 
 	std::vector <std::string> tmp = split(str);
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
+		// Ignore assignment for now
+
+		/*
 		std::vector <node> order;
 
 		zhetapi::Token *tptr = nullptr;
@@ -134,7 +115,7 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 
 		rnm.append(n);
 		
-		delete tptr;
+		delete tptr; */
 	} else {		
 		// All functions and algorithms are stored in barn
 		node_manager mg;
@@ -152,10 +133,20 @@ Token *algorithm::execute(Barn *barn, std::string str, node_manager &rnm)
 		rnm.append(mg);
 
 		// "Execute" the statement
-		return mg.value(barn);
+		// return mg.value(barn);
 	}
 
-	return nullptr;
+	// return nullptr;
+}
+
+// Executing the function
+Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
+{
+	// Ignore arguments for now
+	if (__compiled.empty())
+		compile(barn);
+
+	return __compiled.sequential_value(barn);
 }
 
 // Splitting equalities
@@ -226,10 +217,6 @@ Token::type algorithm::caller() const
 
 Token *algorithm::copy() const
 {
-	using namespace std;
-
-	cout << "Copying algs..." << endl;
-	__compiled.print();
 	return new algorithm(__ident, __alg, __args, __compiled);
 }
 

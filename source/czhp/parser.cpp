@@ -311,7 +311,10 @@ void check(string &keyword)
 			// Add a newline to flush parsing
 			block += '\n';
 
+			// Create and compile the algorithm structure
 			algorithm alg(ident, block, params);
+			alg.compile(&barn);
+
 			barn.put(alg);
 		}
 
