@@ -428,7 +428,7 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) 
 
 std::string Barn::overloads(const std::string &str) const
 {
-	std::vector <::std::vector <::std::type_index>> loads;
+	std::vector <std::vector <::std::type_index>> loads;
 	for (auto itr = ops.begin(); itr != ops.end(); itr++) {
 		if (itr->first.first == str)
 			loads.push_back(itr->first.second);

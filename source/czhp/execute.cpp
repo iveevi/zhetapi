@@ -58,8 +58,15 @@ Token *execute(string str)
 		/* cout << "BARN:" << endl;
 		barn.print(); */
 
+		Token *tptr = nullptr;
+
 		try {
 			mg = node_manager(str, &barn);
+			
+			tptr = mg.value(&barn);
+		} catch (const Barn::unknown_operation_overload &e)  {
+			cout << "err evaluating \'" << str << "\'" << e.what() << endl;
+			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
 			cout << "Error at line " << line
 				<< ": undefined symbol \""
@@ -72,7 +79,7 @@ Token *execute(string str)
 		mg.print(); */
 
 		// "Execute" the statement
-		return mg.value(&barn);
+		return tptr;
 	}
 
 	return nullptr;

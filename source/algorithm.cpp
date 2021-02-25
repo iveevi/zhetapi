@@ -72,7 +72,7 @@ void algorithm::compile(Barn *barn)
 	using namespace std;
 
 	cout << "finished compiling, full alg: " << this << endl;
-	__compiled.print();
+	__compiled.print(true);
 }
 
 void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)

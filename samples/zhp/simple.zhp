@@ -1,13 +1,23 @@
 f(x) = x^2
-g(x) = (x^2) * (df/dx)
+g(x) = ln(x)
 
 println("f(x) = ", f)
 println("g(x) = ", g)
 
-alg foo(x) {
-	println("basic algorithm here!")
-	println("x = ", x)
+tmp = 0
+
+println("tmp = ", tmp)
+
+alg foo(x, y) {
+	println("val = ", x, y)
+
+	x + y
 }
 
-foo(12)
-foo(65)
+foo(12, -5)
+
+println("tmp = ", tmp)
+
+foo(65, 10)
+
+println("tmp = ", tmp)

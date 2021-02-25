@@ -348,7 +348,7 @@ void node_manager::add_args(const std::vector <std::string> &args)
 	}
 
 	// Fix broken variable references
-	rereference();
+	rereference(__tree);
 }
 
 // Expansion methods
@@ -834,6 +834,7 @@ std::string node_manager::display_operation(node ref) const
 	case xlg:
 		return str + "(" + display_pemdas(ref, ref.__leaves[0]) + ")";
 	case lxg:
+		// Fix bug with single/double argument overload
 		return str + "(" + display_pemdas(ref, ref.__leaves[0])
 			+ ", " + display_pemdas(ref, ref.__leaves[1]) + ")";
 	}
@@ -1011,7 +1012,11 @@ void node_manager::rereference(node &ref)
 	if (!ref.__tptr.get())
 		return;
 	
+	using namespace std;
 	if (ref.__tptr->caller() == Token::ndr) {
+		cout << "need to reref:" << endl;
+		ref.print();
+
 		std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
 
 		auto itr = find(__params.begin(), __params.end(), tmp);
