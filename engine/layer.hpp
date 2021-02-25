@@ -83,9 +83,33 @@ public:
 		Vector <U> *,
 		const Vector <U> &
 	);
+
+	template <class U>
+	friend U simple_compute_cached_opt(
+		Layer <U> *,
+		size_t,
+		Vector <U> *,
+		Vector <U> *,
+		const Vector <U> &,
+		const Vector <U> &,
+		size_t &,
+		Erf <U> *
+	);
 	
 	template <class U>
 	friend Matrix <U> *simple_gradient(
+		Layer <U> *,
+		size_t,
+		Vector <U> *,
+		Vector <U> *,
+		const Vector <U> &,
+		const Vector <U> &,
+		Erf <U> *
+	);
+
+	// TODO: Remove later
+	template <class U>
+	friend Matrix <U> *simple_gradient_opt(
 		Layer <U> *,
 		size_t,
 		Vector <U> *,

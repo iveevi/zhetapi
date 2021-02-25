@@ -27,11 +27,11 @@ int main()
 		return unit.uniform();
 	};
 
-	DNN <> net(4, {
-		Layer <> (6, new ReLU <double> ()),
-		Layer <> (5, new ReLU <double> ()),
-		Layer <> (6, new ReLU <double> ()),
-		Layer <> (7, new ReLU <double> ())
+	DNN <> net(40, {
+		Layer <> (60, new ReLU <double> ()),
+		Layer <> (50, new ReLU <double> ()),
+		Layer <> (60, new ReLU <double> ()),
+		Layer <> (70, new ReLU <double> ())
 	});
 
 	Optimizer <double> *opt = new Adam <double> ();
@@ -43,26 +43,66 @@ int main()
 	vector <Vector <double>> ins;
 	vector <Vector <double>> outs;
 
-	for (size_t i = 0; i < 100; i++) {
-		Vector <double> in(4, gen);
-		Vector <double> out(7, gen);
+	for (size_t i = 0; i < 1000; i++) {
+		Vector <double> in(40, gen);
+		Vector <double> out(70, gen);
 
 		ins.push_back(in);
 		outs.push_back(out);
 	}
 
-	start_t = clk.now();
-	
-	for (size_t i = 0; i < 10; i++)
-		train_dataset_perf(net, ins, outs, 20, cost, 0, 1);
-	
-	end_t = clk.now();
+	double mcs;
+	double avg;
+	double tot;
 
-	double mcs = chrono::duration_cast
-		<chrono::microseconds>
-		(end_t - start_t).count();
+	avg = 0;
+	tot = 0;
+	for (size_t i = 0; i < 10; i++) {
+		start_t = clk.now();
+
+		train_dataset_perf(net, ins, outs, 100, cost, 0, 1);
 	
-	cout << "total time = " << mcs << endl;
+		end_t = clk.now();
+
+		mcs = chrono::duration_cast
+			<chrono::microseconds>
+			(end_t - start_t).count();
+		
+		avg += mcs;
+		tot += mcs;
+	}
+
+	avg /= (1000 * 100);
+	tot /= 1000;
+	
+	cout << "total regular time = " << tot << " ms" << endl;
+	cout << "\taverage regular time = " << avg << " ms" << endl;
+
+	// Switch to optimized
+	fopt = true;
+
+	avg = 0;
+	tot = 0;
+	for (size_t i = 0; i < 10; i++) {
+		start_t = clk.now();
+
+		train_dataset_perf(net, ins, outs, 100, cost, 0, 1);
+	
+		end_t = clk.now();
+
+		mcs = chrono::duration_cast
+			<chrono::microseconds>
+			(end_t - start_t).count();
+		
+		avg += mcs;
+		tot += mcs;
+	}
+
+	avg /= (1000 * 100);
+	tot /= 1000;
+	
+	cout << "total optimized time = " << tot << " ms" << endl;
+	cout << "\taverage optimized time = " << avg << " ms" << endl;
 
 	delete opt;
 	delete cost;

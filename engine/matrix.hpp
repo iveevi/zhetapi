@@ -87,6 +87,8 @@ public:
 	template <class A>
 	Matrix(A);
 
+	void resize(size_t, size_t);
+
 	psize_t get_dimensions() const;
 
 	Matrix slice(const psize_t &, const psize_t &) const;
@@ -126,6 +128,9 @@ public:
 	__cuda_dual_prefix
 	void stable_shur(const Matrix <T> &);
 
+	__cuda_dual_prefix
+	void stable_shur_relaxed(const Matrix <T> &);
+
 	// Values
 	T determinant() const;
 
@@ -154,10 +159,16 @@ public:
 	friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &); 
 	
 	template <class U>
-	friend Vector <U> rmt_and_mult(const Matrix <U> &, const Vector <U> &); 
+	friend Vector <U> rmt_and_mult(const Matrix <U> &, const Vector <U> &);
+
+	template <class U>
+	friend void rmt_and_mult_ref(const Matrix <U> &, Vector <U> &);
 	
 	template <class U>
 	friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &); 
+
+	template <class U>
+	friend void vvt_mult_ref(Matrix <U> &, const Vector <U> &, const Vector <U> &); 
 
 	class dimension_mismatch {};
 protected:
@@ -571,9 +582,9 @@ Matrix <T> Matrix <T> ::append_left(const Matrix &m)
 	size_t t_cols = __cols;
 	size_t m_cols = m.__cols;
 
-	::std::vector <::std::vector <T>> row;
+	std::vector <::std::vector <T>> row;
 
-	::std::vector <T> total;
+	std::vector <T> total;
 
 	for (size_t i = 0; i < __rows; i++) {
 		total.clear();
@@ -873,8 +884,9 @@ template <class T>
 Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
 
 template <class T>
-Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(other.__cols), Tensor <T>
-					       ({other.__rows, other.__cols}, T())
+Matrix <T> ::Matrix(const Matrix <T> &other)
+		: __rows(other.__rows), __cols(other.__cols),
+		Tensor <T> ({other.__rows, other.__cols}, T())
 {
 	for (int i = 0; i < this->__size; i++)
 		this->__array[i] = other.__array[i];
@@ -882,15 +894,17 @@ Matrix <T> ::Matrix(const Matrix <T> &other) : __rows(other.__rows), __cols(othe
 
 // TODO: Do all initialization inline or use Tensor copy constructor
 template <class T>
-Matrix <T> ::Matrix(const Vector <T> &other) : __rows(other.__rows), __cols(1), Tensor <T>
-					       ({other.__rows, 1}, T())
+Matrix <T> ::Matrix(const Vector <T> &other)
+		: __rows(other.__rows), __cols(1),
+		Tensor <T> ({other.__rows, 1}, T())
 {
 	for (int i = 0; i < __rows; i++)
 		this->__array[i] = other.__array[i];
 }
 
 template <class T>
-Matrix <T> ::Matrix(const Matrix <T> &other, T k) : __rows(other.__rows), __cols(other.__cols)
+Matrix <T> ::Matrix(const Matrix <T> &other, T k)
+		: __rows(other.__rows), __cols(other.__cols)
 {
 	if (this != &other) {
 		// Use a macro
@@ -1002,6 +1016,29 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 }
 
 template <class T>
+void Matrix <T> ::resize(size_t rs, size_t cs)
+{
+	if (rs != __rows || cs != __cols) {
+		__rows = rs;
+		__cols = cs;
+
+		this->__size = rs * cs;
+
+		this->clear();
+
+		this->__array = new T[this->__size];
+		
+		if (!this->__dim) {
+			this->__dims = 2;
+			this->__dim = new size_t[2];
+
+			this->__dim[0] = this->__rows;
+			this->__dim[1] = this->__cols;
+		}
+	}
+}
+
+template <class T>
 T *Matrix <T> ::operator[](size_t i)
 {
 	return (this->__array + i * __cols);
@@ -1044,6 +1081,16 @@ void Matrix <T> ::stable_shur(const Matrix <T> &other)
 	for (size_t i = 0; i < this->__size; i++)
 		this->__array[i] *= other.__array[i];
 }
+
+template <class T>
+void Matrix <T> ::stable_shur_relaxed(const Matrix <T> &other)
+{
+	// Loop for the limits of the other
+	for (size_t i = 0; i < other.__size; i++)
+		this->__array[i] *= other.__array[i];
+}
+
+
 
 template <class T>
 void Matrix <T> ::operator+=(const Matrix <T> &other)

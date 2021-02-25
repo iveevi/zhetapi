@@ -14,7 +14,7 @@
 #include <string.h>
 
 // Engine headers
-#include <zhplib.hpp>
+#include <all/zhplib.hpp>
 
 #include <vector.hpp>
 #include <matrix.hpp>
