@@ -115,9 +115,9 @@ PerformanceStatistics <T> train_dataset_perf(
 		const DataSet <T> &outs,
 		size_t batch_size,
 		Erf <T> *cost,
-		Comparator <T> cmp = __def_cmp <T>,
 		Display::type display = 0,
-		size_t threads = 1)
+		size_t threads = 1,
+		Comparator <T> cmp = __def_cmp <T>)
 {
 	assert(ins.size() == outs.size());
 

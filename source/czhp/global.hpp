@@ -7,7 +7,7 @@
 #include <iterator>
 
 // Engine headers
-#include <zhplib.hpp>
+#include <all/zhplib.hpp>
 
 #include <core/algorithm.hpp>
 

@@ -6,6 +6,7 @@ set(ZHETAPI_SOURCE
 	source/display.cpp
 	source/function.cpp
 	source/image.cpp
+	source/interval.cpp
 	source/label.cpp
 	source/node.cpp
 	source/node_differential.cpp

@@ -34,7 +34,7 @@ bool interval_sampling(ostringstream &oss)
 	Invterval <> i = 100_I;
 
 	for (size_t k = 0; k < 10; k++) {
-		long double x = i.sample();
+		long double x = i.uniform();
 
 		oss << "sampled " << x << endl;
 

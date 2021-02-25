@@ -1,9 +1,6 @@
-#include <matrix.hpp>
-#include <vector.hpp>
+#include <all/ml.hpp>
 
 #include <std/interval.hpp>
-
-#include <image.hpp>
 
 #include <chrono>
 #include <string>
@@ -11,6 +8,7 @@
 
 using namespace std;
 using namespace zhetapi;
+using namespace zhetapi::ml;
 using namespace zhetapi::utility;
 
 // Typedefs
@@ -23,36 +21,49 @@ tpoint end_t;
 
 int main()
 {
-	/*
-	auto dtime = []() -> ostream & {
-		double mcs = chrono::duration_cast
-			<chrono::microseconds>
-			(end_t - start_t).count();
+	Interval <> unit = 10.0_I;
 
-		return cout << mcs;
+	auto gen = [&](size_t i) -> double {
+		return unit.uniform();
 	};
 
-	Matrix <double> A(10, 10, runit());
-	Matrix <double> B(10, 10, runit());
-	Matrix <double> C(10, 10, runit());
-	Matrix <double> D;
+	DNN <> net(4, {
+		Layer <> (6, new ReLU <double> ()),
+		Layer <> (5, new ReLU <double> ()),
+		Layer <> (6, new ReLU <double> ()),
+		Layer <> (7, new ReLU <double> ())
+	});
 
-	double ka = 10 * runit();
-	double kb = 10 * runit();
+	Optimizer <double> *opt = new Adam <double> ();
+	Erf <double> *cost = new MeanSquaredError <double> ();
+
+	net.set_optimizer(opt);
+	net.set_cost(cost);
+
+	vector <Vector <double>> ins;
+	vector <Vector <double>> outs;
+
+	for (size_t i = 0; i < 100; i++) {
+		Vector <double> in(4, gen);
+		Vector <double> out(7, gen);
+
+		ins.push_back(in);
+		outs.push_back(out);
+	}
 
 	start_t = clk.now();
-	for(size_t i = 0; i < 100; i++) {
-		D = ka * A * B + kb * C;
-	}
+	
+	for (size_t i = 0; i < 10; i++)
+		train_dataset_perf(net, ins, outs, 20, cost, 0, 1);
+	
 	end_t = clk.now();
 
-	dtime() << "\t";
+	double mcs = chrono::duration_cast
+		<chrono::microseconds>
+		(end_t - start_t).count();
+	
+	cout << "total time = " << mcs << endl;
 
-	start_t = clk.now();
-	for(size_t i = 0; i < 100; i++) {
-		D = fmak(A, B, C, ka, kb);
-	}
-	end_t = clk.now();
-
-	dtime() << endl; */
+	delete opt;
+	delete cost;
 }

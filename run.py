@@ -114,4 +114,5 @@ elif args.target in targets:
 		target=args.target
 	))
 
-os.system('[ -f libzhp.* ] && mv libzhp.* debug/')
+os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
+os.system('[ -f libzhp.os ] && mv libzhp.os debug/')
