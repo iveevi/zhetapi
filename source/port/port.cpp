@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-#define THREADS	2
+#define THREADS	8
 
 typedef pair <string, bool (*)(ostringstream &)> singlet;
 
