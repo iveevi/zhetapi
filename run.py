@@ -14,9 +14,12 @@ parser.add_argument("-j", "--threads", help="Number of concurrent threads", type
 # Compilation
 def make_target(threads, target, mode=''):
     if mode in ['gdb', 'valgrind']:
-        os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
+        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
     else:
-        os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
+        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
+
+    if ret != 0:
+        os.exit(-1)
 
     os.system('make -j{threads} {target}'.format(
             threads=threads,

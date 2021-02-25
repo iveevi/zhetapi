@@ -13,7 +13,9 @@ vector <pair <string, bool(*)(ostringstream &)>> rig {
 	{"tensor construction and memory safety", &tensor_construction_and_memory},
 	{"integration techniques", &integration},
 	{"function computation", &function_computation},
-	{"vector operations", &vector_operations}
+	{"vector operations", &vector_operations},
+	{"interval construction", &interval_construction},
+	{"interval sampling", &interval_sampling}
 };
 
 // Segfault handler

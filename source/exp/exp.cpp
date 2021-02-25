@@ -23,56 +23,6 @@ tpoint end_t;
 
 int main()
 {
-	cout << "value = " << image::ORANGE.value() << endl;
-
-	image::Image img(400, 400, 4, image::ORANGE);
-
-	cout << "value = " << img.color({4, 4}) << endl;
-
-	/* Interval <> i(5, 10);
-
-	cout << "i = " << i << endl;
-
-	for (int k = 0; k < 10; k++)
-		cout << "\ti.uni = " << i.uniform() << endl;
-
-	i |= Interval <> {15, 20};
-	
-	cout << "i = " << i << endl;
-
-	for (int k = 0; k < 10; k++)
-		cout << "\ti.uni = " << i.uniform() << endl;
-	
-	i |= Interval <> {50, 100};
-	
-	cout << "i = " << i << endl;
-
-	for (int k = 0; k < 10; k++)
-		cout << "\ti.uni = " << i.uniform() << endl;
-	
-	i = 100.0_I;
-	cout << "i = " << i << endl;
-
-	for (int k = 0; k < 10; k++)
-		cout << "\ti.uni = " << i.uniform() << endl;
-	
-	i = 50_I;
-	cout << "i = " << i << endl;
-
-	for (int k = 0; k < 10; k++)
-		cout << "\ti.uni = " << i.uniform() << endl;
-
-	cout << boolalpha << endl;
-
-	i = 1_I;
-	cout << "is " << i << " good? " << (bool) i << endl;
-	
-	i = 0_I;
-	cout << "is " << i << " good? " << (bool) i << endl;
-
-	cout << (50_I | 25_I) << endl;
-	// cout << (50_I & 25_I) << endl; */
-
 	/*
 	auto dtime = []() -> ostream & {
 		double mcs = chrono::duration_cast

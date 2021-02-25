@@ -22,6 +22,7 @@
 
 #include <std/functions.hpp>
 #include <std/calculus.hpp>
+#include <std/interval.hpp>
 
 using namespace std;
 
@@ -56,5 +57,8 @@ bool integration(ostringstream &);
 
 bool function_computation(ostringstream &);
 bool function_compilation_testing(ostringstream &);
+
+bool interval_construction(ostringstream &);
+bool interval_sampling(ostringstream &);
 
 #endif
