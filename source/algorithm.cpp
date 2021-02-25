@@ -24,6 +24,11 @@ algorithm::algorithm(
 
 void algorithm::compile(Barn *barn)
 {
+	using namespace std;
+	cout << "Compiling..." << endl;
+	for (auto str : __args)
+		cout << "args = " << str << endl;
+
 	// Use the definition line number
 	bool quoted = false;
 	int paren = 0;
@@ -62,12 +67,12 @@ void algorithm::compile(Barn *barn)
 	}
 
 	__compiled.tree().__label = l_sequential;
+	__compiled.add_args(__args);
 
-	/*
 	using namespace std;
 
 	cout << "finished compiling, full alg: " << this << endl;
-	__compiled.print(); */
+	__compiled.print();
 }
 
 void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
@@ -121,7 +126,7 @@ void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 		node_manager mg;
 		
 		try {
-			mg = node_manager(str, barn);
+			mg = node_manager(str, __args, barn);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""
@@ -146,7 +151,7 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 	if (__compiled.empty())
 		compile(barn);
 
-	return __compiled.sequential_value(barn);
+	return __compiled.substitute_and_seq_compute(barn, args);
 }
 
 // Splitting equalities

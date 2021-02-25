@@ -34,9 +34,9 @@ modes = {
 def install(args):
 	print("Installing...")
 
-	make_target(args.threads, 'czhp')
-	make_target(args.threads, 'zhp-shared')
-	make_target(args.threads, 'zhp-static')
+	make_target(args.threads, 'czhp zhp-shared zhp-static')
+	# make_target(args.threads, 'zhp-shared')
+	# make_target(args.threads, 'zhp-static')
 
 	os.system('mkdir -p bin')
 	os.system('mv czhp bin/')

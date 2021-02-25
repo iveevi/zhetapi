@@ -41,13 +41,15 @@ public:
 
 	Token *value() const;
 	Token *value(Barn *) const;
-
 	Token *sequential_value(Barn *) const;
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
+	Token *substitute_and_seq_compute(Barn *, const std::vector <Token *> &, size_t = 1);
 
 	void append(const node &);
 	void append(const node_manager &);
+
+	void add_args(const std::vector <std::string> &);
 
 	/*
 	 * Responsible for expanding variable clusters and truning them

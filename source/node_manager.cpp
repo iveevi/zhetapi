@@ -277,7 +277,6 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 		
-		using namespace std;
 		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
 		tptr = aptr->execute(__barn, values);
 
@@ -303,6 +302,23 @@ Token *node_manager::substitute_and_compute(std::vector <Token *>
 	return value(__tree);
 }
 
+Token *node_manager::substitute_and_seq_compute(Barn *ext,
+		const std::vector <Token *> &toks, size_t total_threads)
+{
+	assert(__refs.size() == toks.size());
+	for (size_t i = 0; i < __refs.size(); i++) {
+		__refs[i] = node(toks[i], {});
+
+		label(__refs[i]);
+	}
+
+	using namespace std;
+	cout << "Pre evaluation" << endl;
+	print();
+
+	return sequential_value(ext);
+}
+
 void node_manager::append(const node &n)
 {
 	__tree.append(n);
@@ -317,6 +333,22 @@ void node_manager::append(const node_manager &nm)
 
 	// Add the rest of the elements
 	count_up(__tree);
+}
+
+void node_manager::add_args(const std::vector <std::string> &args)
+{
+	// Fill references
+	node tmp;
+	for (std::string str : args) {
+		tmp = nf_zero();
+
+		tmp.__label = l_variable;
+
+		__refs.push_back(tmp);
+	}
+
+	// Fix broken variable references
+	rereference();
 }
 
 // Expansion methods

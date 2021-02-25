@@ -4,10 +4,10 @@ g(x) = (x^2) * (df/dx)
 println("f(x) = ", f)
 println("g(x) = ", g)
 
-alg foo(x, y) {
+alg foo(x) {
 	println("basic algorithm here!")
-	println("x = , y = ")
+	println("x = ", x)
 }
 
-foo()
-foo()
+foo(12)
+foo(65)
