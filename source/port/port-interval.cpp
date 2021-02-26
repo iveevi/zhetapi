@@ -33,6 +33,8 @@ bool interval_construction(ostringstream &oss)
 
 bool interval_sampling(ostringstream &oss)
 {
+	using namespace zhetapi::utility;
+	
 	Interval <> i = 100_I;
 
 	for (size_t k = 0; k < 10; k++) {

@@ -145,7 +145,7 @@ int main()
 	model.set_optimizer(opt);
 
 	for (int i = 0; i < 100; i++)
-		train_dataset_perf(model, train_imgs, train_exps, 128, cost, match, Display::batch, 8);
+		train_dataset_perf(model, train_imgs, train_exps, 128, cost, Display::batch, 8, match);
 
 	// Free resources
 	delete cost;

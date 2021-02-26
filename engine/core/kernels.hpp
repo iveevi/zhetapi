@@ -85,7 +85,7 @@ Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 	for (size_t i = 0; i < n; i++)
 		tmp[i] = V.__array[i / cs] * Vt.__array[i % cs];
 
-	return Matrix <T> (rs, cs, tmp);
+	return Matrix <T> (rs, cs, tmp, false);
 }
 
 }
