@@ -309,7 +309,7 @@ void *Function::compile_general() const
 	const char *dlsym_error = dlerror();
 
 	if (dlsym_error) {
-		::std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+		std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 		
 		// dlclose(handle);
 		

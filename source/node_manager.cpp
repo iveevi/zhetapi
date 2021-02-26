@@ -262,6 +262,9 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		unrefd = (dynamic_cast <node_reference *>
 				(tree.__tptr.get()))->get();
 
+		using namespace std;
+		cout << "Unredf: " << unrefd << endl;
+		unrefd->print(true);
 		return unrefd->__tptr.get()->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
@@ -314,7 +317,7 @@ Token *node_manager::substitute_and_seq_compute(Barn *ext,
 
 	using namespace std;
 	cout << "Pre evaluation" << endl;
-	print();
+	print(true);
 
 	return sequential_value(ext);
 }
@@ -702,7 +705,7 @@ void node_manager::generate(std::string &name) const
 {
 	std::ofstream fout(name + ".cpp");
 
-	fout << "#include <zhplib.hpp>\n";
+	fout << "#include <all/zhplib.hpp>\n";
 	fout << "\n";
 
 	fout << "extern \"C\" {\n";
@@ -1024,6 +1027,9 @@ void node_manager::rereference(node &ref)
 		size_t index = std::distance(__params.begin(), itr);
 
 		ref.__tptr.reset(new node_reference(&__refs[index], tmp, index, true));
+
+		cout << "post:" << endl;
+		ref.print();
 	}
 
 	for (node &leaf : ref.__leaves)

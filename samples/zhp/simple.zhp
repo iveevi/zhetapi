@@ -11,7 +11,7 @@ println("tmp = ", tmp)
 alg foo(x, y) {
 	println("val = ", x, y)
 
-	x + y
+	println("sum = ", x + y)
 }
 
 foo(12, -5)

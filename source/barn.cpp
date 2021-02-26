@@ -244,7 +244,7 @@ Barn::Barn()
 		if (table.count(pr.first.first))
 			table[pr.first.first].push_back({pr.first.second, pr.second});
 		else
-			table.insert(::std::pair <::std::string, ::std::vector <::std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+			table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 	}
 }
 

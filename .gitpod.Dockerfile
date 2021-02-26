@@ -8,5 +8,6 @@ RUN apt-get -yq update \
 	&& apt install -yq libboost-all-dev \
 	&& apt-get install -yq asciidoctor \
 	&& apt-get install -yq libcurl4-gnutls-dev \
+	&& apt-get install -yq doxygen \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*

@@ -14,6 +14,9 @@ class collection : public Token {
 public:
 	collection();
 	collection(const std::vector <Token *> &);
+
+	void reset();
+	Token *next() const;
 };
 
 #endif

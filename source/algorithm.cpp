@@ -66,10 +66,12 @@ void algorithm::compile(Barn *barn)
 		}
 	}
 
+	using namespace std;
+	cout << string(50, '=') << endl;
+	cout << "ARGUMENTS" << endl;
 	__compiled.tree().__label = l_sequential;
 	__compiled.add_args(__args);
-
-	using namespace std;
+	cout << string(50, '=') << endl;
 
 	cout << "finished compiling, full alg: " << this << endl;
 	__compiled.print(true);
