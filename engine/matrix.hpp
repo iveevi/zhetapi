@@ -126,6 +126,9 @@ public:
 	void randomize(std::function <T ()>);
 	
 	__cuda_dual_prefix
+	void row_shur(const Vector <T> &);
+	
+	__cuda_dual_prefix
 	void stable_shur(const Matrix <T> &);
 
 	__cuda_dual_prefix
@@ -162,13 +165,7 @@ public:
 	friend Vector <U> rmt_and_mult(const Matrix <U> &, const Vector <U> &);
 
 	template <class U>
-	friend void rmt_and_mult_ref(const Matrix <U> &, Vector <U> &);
-	
-	template <class U>
 	friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &); 
-
-	template <class U>
-	friend void vvt_mult_ref(Matrix <U> &, const Vector <U> &, const Vector <U> &); 
 
 	class dimension_mismatch {};
 protected:
@@ -1072,6 +1069,18 @@ Matrix <T> Matrix <T> ::transpose() const
 }
 
 template <class T>
+void Matrix <T> ::row_shur(const Vector <T> &other)
+{
+	// Not strict (yet)
+	for (size_t i = 0; i < __rows; i++) {
+		T *arr = &(this->__array[i * __cols]);
+
+		for (size_t j = 0; j < __cols; j++)
+			arr[j] *= other.__array[i];
+	}
+}
+
+template <class T>
 void Matrix <T> ::stable_shur(const Matrix <T> &other)
 {
 	if (!((other.get_rows() == __rows)
@@ -1196,11 +1205,11 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 	inline_init_mat(C, rs, cs);
 
 	for (size_t i = 0; i < rs; i++) {
-		const T *Ar = A[i];
+		const T *Ar = &(A.__array[i]);
 		T *Cr = C[i];
 
 		for (size_t k = 0; k < kmax; k++) {
-			const U *Br = B[k];
+			const U *Br = &(B.__array[k]);
 
 			T a = Ar[k];
 			for (size_t j = 0; j < cs; j++)

@@ -6,6 +6,9 @@
 #include <string>
 #include <iostream>
 
+#define ITERS	10
+#define NITEMS	100
+
 using namespace std;
 using namespace zhetapi;
 using namespace zhetapi::ml;
@@ -26,11 +29,11 @@ int main()
 	auto gen = [&](size_t i) -> double {
 		return unit.uniform();
 	};
-
+	
 	DNN <> net(40, {
 		Layer <> (60, new ReLU <double> ()),
 		Layer <> (50, new ReLU <double> ()),
-		Layer <> (60, new ReLU <double> ()),
+		Layer <> (80, new ReLU <double> ()),
 		Layer <> (70, new ReLU <double> ())
 	});
 
@@ -40,10 +43,12 @@ int main()
 	net.set_optimizer(opt);
 	net.set_cost(cost);
 
+	DNN <> base = net;
+
 	vector <Vector <double>> ins;
 	vector <Vector <double>> outs;
 
-	for (size_t i = 0; i < 1000; i++) {
+	for (size_t i = 0; i < NITEMS; i++) {
 		Vector <double> in(40, gen);
 		Vector <double> out(70, gen);
 
@@ -57,10 +62,10 @@ int main()
 
 	avg = 0;
 	tot = 0;
-	for (size_t i = 0; i < 10; i++) {
+	for (size_t i = 0; i < ITERS; i++) {
 		start_t = clk.now();
 
-		train_dataset_perf(net, ins, outs, 100, cost, 0, 1);
+		train_dataset_perf(net, ins, outs, NITEMS, cost, 0, 1);
 	
 		end_t = clk.now();
 
@@ -72,37 +77,11 @@ int main()
 		tot += mcs;
 	}
 
-	avg /= (1000 * 100);
+	avg /= (1000 * ITERS);
 	tot /= 1000;
 	
-	cout << "total regular time = " << tot << " ms" << endl;
-	cout << "\taverage regular time = " << avg << " ms" << endl;
-
-	// Switch to optimized
-	fopt = true;
-
-	avg = 0;
-	tot = 0;
-	for (size_t i = 0; i < 10; i++) {
-		start_t = clk.now();
-
-		train_dataset_perf(net, ins, outs, 100, cost, 0, 1);
-	
-		end_t = clk.now();
-
-		mcs = chrono::duration_cast
-			<chrono::microseconds>
-			(end_t - start_t).count();
-		
-		avg += mcs;
-		tot += mcs;
-	}
-
-	avg /= (1000 * 100);
-	tot /= 1000;
-	
-	cout << "total optimized time = " << tot << " ms" << endl;
-	cout << "\taverage optimized time = " << avg << " ms" << endl;
+	cout << "total time = " << tot << " ms" << endl;
+	cout << "\taverage time = " << avg << " ms" << endl;
 
 	delete opt;
 	delete cost;

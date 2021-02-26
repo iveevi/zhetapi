@@ -48,37 +48,25 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 	size_t cs = M.__cols;
 
 	Vector <T> out(cs - 1, T(0));
-	for (size_t i = 1; i < cs; i++) {
+	/* for (size_t i = 1; i < cs; i++) {
 		T acc = 0;
 
 		for (size_t k = 0; k < rs; k++)
 			acc += M.__array[k * cs + i] * V.__array[k];
 
 		out.__array[i - 1] = acc;
+	} */
+
+	// Reverse loops
+	for (size_t k = 0; k < rs; k++) {
+		const T *arr = &(M.__array[k * cs]);
+		T v = V.__array[k];
+
+		for (size_t i = 1; i < cs; i++)
+			out.__array[i - 1] = arr[i] * v;
 	}
 
 	return out;
-}
-
-template <class T>
-void rmt_and_mult_ref(const Matrix <T> &M, Vector <T> &V)
-{
-	size_t rs = M.__rows;
-	size_t cs = M.__cols;
-
-	T *tmp = new T[cs - 1];
-	for (size_t i = 1; i < cs; i++) {
-		T acc = 0;
-
-		for (size_t k = 0; k < rs; k++)
-			acc += M.__array[k * cs + i] * V.__array[k];
-
-		tmp[i - 1] = acc;
-	}
-
-	memcpy(V.__array, tmp, sizeof(T) * (cs - 1));
-
-	delete[] tmp;
 }
 
 /**
@@ -90,27 +78,14 @@ Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 {
 	size_t rs = V.__size;
 	size_t cs = Vt.__size;
-
-	Matrix <T> out(rs, cs, T(0));
-
+	
 	size_t n = rs * cs;
+
+	T *tmp = new T[n];
 	for (size_t i = 0; i < n; i++)
-		out.__array[i] = V.__array[i / cs] * Vt.__array[i % cs];
+		tmp[i] = V.__array[i / cs] * Vt.__array[i % cs];
 
-	return out;
-}
-
-template <class T>
-void vvt_mult_ref(Matrix <T> &A, const Vector <T> &V, const Vector <T> &Vt)
-{
-	size_t rs = V.__size;
-	size_t cs = Vt.__size;
-
-	A.resize(rs, cs);
-
-	size_t n = rs * cs;
-	for (size_t i = 0; i < n; i++)
-		A.__array[i] = V.__array[i / cs] * Vt.__array[i % cs];
+	return Matrix <T> (rs, cs, tmp);
 }
 
 }

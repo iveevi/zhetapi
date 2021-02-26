@@ -103,7 +103,6 @@ public:
 	void fit(const DataSet <T> &, const DataSet <T> &);	
 	
 	void multithreaded_fit(const DataSet <T> &, const DataSet <T> &, size_t = 1);
-	void multithreaded_fit_opt(const DataSet <T> &, const DataSet <T> &, size_t = 1);
 };
 
 // Constructors and other memory related operations

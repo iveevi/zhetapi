@@ -47,8 +47,8 @@ void train_dataset(
 {
 	assert(ins.size() == outs.size());
 
-	std::vector <DataSet <T>> input_batches = ins.split(batch_size);
-	std::vector <DataSet <T>> output_batches = outs.split(batch_size);
+	std::vector <DataSet <T>> input_batches = split(ins, batch_size);
+	std::vector <DataSet <T>> output_batches = split(outs, batch_size);
 
 	size_t n;
 

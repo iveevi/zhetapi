@@ -13,7 +13,7 @@ parser.add_argument("-j", "--threads", help="Number of concurrent threads", type
 
 # Compilation
 def make_target(threads, target, mode=''):
-	if mode in ['gdb', 'valgrind']:
+	if mode in ['gdb', 'valgrind', 'profile']:
 		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
 	else:
 		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
@@ -33,7 +33,13 @@ def make_target(threads, target, mode=''):
 modes = {
 	'': './',
 	'gdb': 'gdb ',
-	'valgrind': 'valgrind --leak-check=full --track-origins=yes '
+	'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
+        'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
+}
+
+# Post scripts
+post = {
+        'profile': 'kcachegrind callgrind.out && rm callgrind.out'
 }
 
 # Special targets
@@ -66,22 +72,22 @@ def install(args):
 	os.system('./bin/czhp -d include/math.zhplib')
 
 def czhp(args):
-	make_target(args.threads, 'czhp', args.mode)
+    make_target(args.threads, 'czhp', args.mode)
 
-	file = 'samples/zhp/simple.zhp'
+    file = 'samples/zhp/simple.zhp'
 
-	if args.mode == '':
-		os.system('{exe}czhp {file} -L include'.format(
-			exe=modes[args.mode],
-			file=file
-		))
-	else:
-		os.system('{exe}czhp'.format(
-			exe=modes[args.mode]
-		))
+    if args.mode == '':
+        os.system('{exe}czhp {file} -L include'.format(
+            exe=modes[args.mode],
+            file=file
+        ))
+    else:
+        os.system('{exe}czhp'.format(
+            exe=modes[args.mode]
+        ))
 
-	os.system('mkdir -p debug/')
-	os.system('mv czhp debug/')
+    os.system('mkdir -p debug/')
+    os.system('mv czhp debug/')
 
 special = {
 	'install': install,
@@ -92,27 +98,31 @@ special = {
 targets = []
 
 for filename in os.listdir("cmake"):
-	if filename.endswith(".cmake"):
-		targets.append(filename[:-6])
+    if filename.endswith(".cmake"):
+        targets.append(filename[:-6])
 
 args = parser.parse_args()
 
 # Execute
 if args.target in special.keys():
-	special[args.target](args)
+    special[args.target](args)
 elif args.target in targets:
-	make_target(args.threads, args.target, args.mode)
+    make_target(args.threads, args.target, args.mode)
 
-	os.system('{exe}{target}'.format(
-		exe=modes[args.mode],
-		target=args.target
-	))
+    os.system('{exe}{target}'.format(
+            exe=modes[args.mode],
+            target=args.target
+    ))
 
-	os.system('mkdir -p debug/')
+    # Check for any post processing scripts
+    if args.mode in post:
+        os.system('{cmd}'.format(cmd=post[args.mode]))
 
-	os.system('mv {target} debug/'.format(
-		target=args.target
-	))
+    os.system('mkdir -p debug/')
+
+    os.system('mv {target} debug/'.format(
+            target=args.target
+    ))
 
 os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
 os.system('[ -f libzhp.os ] && mv libzhp.os debug/')

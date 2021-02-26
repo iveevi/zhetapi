@@ -15,8 +15,6 @@ namespace zhetapi {
 
 namespace ml {
 
-bool fopt = false;
-
 template <class T>
 Vector <T> simple_compute(
 		Layer <T> *layers,
@@ -78,6 +76,8 @@ Matrix <T> *simple_gradient(
 	Matrix <T> *J = new Matrix <T> [size];
 
 	Vector <T> delta = dcost->compute(out, actual);
+	
+	using namespace std;
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
 			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
@@ -93,91 +93,6 @@ Matrix <T> *simple_gradient(
 	// Return the gradient
 	return J;
 }
-
-template <class T>
-T simple_compute_cached_opt(
-		Layer <T> *layers,
-		size_t size,
-		Vector <T> *a,
-		Vector <T> *z,
-		const Vector <T> &in,
-		const Vector <T> &out,	// More info
-		size_t &maxz,
-		Erf <T> *dcost)
-{
-	// Set to min first
-	maxz = 0;
-
-	Vector <T> prv = in;
-	Vector <T> tmp = in;
-
-	size_t i = 0;
-	while (i < size) {
-		a[i] = tmp.append_above(T (1));
-
-		layers[i].forward_propogate(tmp, prv);
-
-		if (tmp.size() > maxz)
-			maxz = tmp.size();
-		
-		z[i++] = layers[i].__dact->compute(prv);
-	}
-
-	a[i] = tmp;
-
-	return (dcost->compute(out, tmp))[0];
-}
-
-template <class T>
-Matrix <T> *simple_gradient_opt(
-		Layer <T> *layers,
-		size_t size,
-		Vector <T> *a,
-		Vector <T> *z,
-		const Vector <T> &in,
-		const Vector <T> &out,
-		Erf <T> *cost)
-{
-	// Get the derivative of the cost
-	Erf <T> *dcost = cost->derivative();
-
-	// Max size of delta
-	size_t maxz = 0;
-
-	// Compute the actual value
-	T err = simple_compute_cached_opt(layers, size, a, z, in, out, maxz, dcost);
-
-	// Allocate to maximum size once and for all
-	T *darr = new T[maxz];
-
-	// Overlay the vector on the above array
-	Vector <T> delta(maxz, darr);
-
-	// Set the first value
-	delta[0] = err;
-
-	// Construction the Jacobian using backpropogation
-	Matrix <T> *J = new Matrix <T> [size];
-
-	// Vector <T> delta = dcost->compute(out, actual);
-	for (int i = size - 1; i >= 0; i--) {
-		if (i < size - 1)
-			rmt_and_mult_ref(layers[i + 1].__mat, delta);
-
-		delta.stable_shur_relaxed(z[i]);
-
-		vvt_mult_ref(J[i], delta, a[i]);
-	}
-
-	// Free resources
-	delete[] darr;
-
-	delete dcost;
-
-	// Return the gradient
-	return J;
-}
-
 template <class T>
 Matrix <T> *simple_batch_gradient(
 		Layer <T> *layers,
@@ -191,18 +106,13 @@ Matrix <T> *simple_batch_gradient(
 	size_t ds = ins.size();
 
 	Matrix <T> *J = simple_gradient(layers, size, a,
-			z, ins[0], outs[0], cost);
+					z, ins[0], outs[0], cost);
 
 	for (size_t i = 1; i < ds; i++) {
 		Matrix <T> *Q = nullptr;
 
-		if (fopt) {
-			Q = simple_gradient_opt(layers, size, a,
-						z, ins[i], outs[i], cost);
-		} else {
-			Q = simple_gradient(layers, size, a,
-						z, ins[i], outs[i], cost);
-		}
+		Q = simple_gradient(layers, size, a,
+					z, ins[i], outs[i], cost);
 
 		for (size_t k = 0; k < size; k++)
 			J[k] += Q[k];
@@ -259,13 +169,8 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 			if (t < 0)
 				break;
 
-			if (fopt) {
-				Q = simple_gradient_opt(layers, size, a,
-						z, ins[t], outs[t], cost);
-			} else {
-				Q = simple_gradient(layers, size, a,
-						z, ins[t], outs[t], cost);
-			}
+			Q = simple_gradient(layers, size, a,
+					z, ins[t], outs[t], cost);
 			
 			addm_mtx.lock();
 

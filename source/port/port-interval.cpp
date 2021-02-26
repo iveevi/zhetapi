@@ -27,11 +27,13 @@ bool interval_construction(ostringstream &oss)
 	i = Interval <> ();
 
 	oss << i << endl;
+
+	return true;
 }
 
 bool interval_sampling(ostringstream &oss)
 {
-	Invterval <> i = 100_I;
+	Interval <> i = 100_I;
 
 	for (size_t k = 0; k < 10; k++) {
 		long double x = i.uniform();
