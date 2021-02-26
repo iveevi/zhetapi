@@ -10,9 +10,9 @@ RUN apt-get -yq update \
 	&& apt-get install -yq libcurl4-gnutls-dev \
 	&& apt-get install -yq doxygen \
 	&& apt-get install -yq texlive-latex-base \
-			texlive-fonts-recommended \
-			texlive-fonts-extra \
-			texlive-latex-extra \
-	&& apt-get install -eq graphvi
+	&& apt-get install -yq texlive-fonts-recommended \
+	&& apt-get install -yq texlive-fonts-extra \
+	&& apt-get install -yq texlive-latex-extra \
+	&& apt-get install -yq graphviz \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
