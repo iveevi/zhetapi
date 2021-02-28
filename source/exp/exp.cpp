@@ -31,10 +31,10 @@ int main()
 	};
 	
 	DNN <> net(40, {
-		Layer <> (60, new ReLU <double> ()),
 		Layer <> (50, new ReLU <double> ()),
-		Layer <> (80, new ReLU <double> ()),
-		Layer <> (70, new ReLU <double> ())
+		Layer <> (60, new ReLU <double> ()),
+		Layer <> (70, new ReLU <double> ()),
+		Layer <> (80, new ReLU <double> ())
 	});
 
 	Optimizer <double> *opt = new Adam <double> ();
@@ -50,8 +50,8 @@ int main()
 
 	for (size_t i = 0; i < NITEMS; i++) {
 		Vector <double> in(40, gen);
-		Vector <double> out(70, gen);
-
+		Vector <double> out(80, gen);
+		
 		ins.push_back(in);
 		outs.push_back(out);
 	}

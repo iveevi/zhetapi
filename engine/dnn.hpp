@@ -53,7 +53,9 @@ namespace zhetapi {
 
 namespace ml {
 
-// Neural network class
+/**
+ * @brief Neural network class
+ */
 template <class T = double>
 class DNN {
 public:

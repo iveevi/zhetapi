@@ -1193,29 +1193,29 @@ template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
 	if (A.__cols != B.__rows)
-		throw typename Matrix <T> ::dimension_mismatch();
+                throw typename Matrix <T> ::dimension_mismatch();
 
-	using namespace std;
-	
-	size_t rs = A.__rows;
-	size_t cs = B.__cols;
+        using namespace std;
 
-	size_t kmax = B.__rows;
+        size_t rs = A.__rows;
+        size_t cs = B.__cols;
 
-	inline_init_mat(C, rs, cs);
+        size_t kmax = B.__rows;
 
-	for (size_t i = 0; i < rs; i++) {
-		const T *Ar = &(A.__array[i]);
-		T *Cr = C[i];
+        inline_init_mat(C, rs, cs);
 
-		for (size_t k = 0; k < kmax; k++) {
-			const U *Br = &(B.__array[k]);
+        for (size_t i = 0; i < rs; i++) {
+                const T *Ar = A[i];
+                T *Cr = C[i];
 
-			T a = Ar[k];
-			for (size_t j = 0; j < cs; j++)
-				Cr[j] += T(a * Br[j]);
-		}
-	}
+                for (size_t k = 0; k < kmax; k++) {
+                        const U *Br = B[k];
+
+                        T a = Ar[k];
+                        for (size_t j = 0; j < cs; j++)
+                                Cr[j] += T(a * Br[j]);
+                }
+        }
 
 	return C;
 }

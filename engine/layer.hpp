@@ -67,7 +67,7 @@ public:
 	Vector <T> forward_propogate(const Vector <T> &);
 
 	void forward_propogate(Vector <T> &, Vector <T> &);
-	void forward_propogate(Vector <T> &, Matrix <T> *);
+	// void forward_propogate(Vector <T> &, Matrix <T> *);
 	
 	void apply_gradient(const Matrix <T> &);
 
@@ -237,7 +237,7 @@ inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 template <class T>
 inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 {
-	in2 = __mat * in1.append_above(T (1));
+	in2 = apt_and_mult(__mat, in1);
 	in1 = __act->compute(in2);
 }
 

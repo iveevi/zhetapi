@@ -77,7 +77,6 @@ Matrix <T> *simple_gradient(
 
 	Vector <T> delta = dcost->compute(out, actual);
 	
-	using namespace std;
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
 			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
