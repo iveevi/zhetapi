@@ -10,9 +10,14 @@
 #include <string>
 #include <vector>
 
+#include <std/interval.hpp>
+
 #include <cuda/essentials.cuh>
 
 namespace zhetapi {
+
+// Type aliases
+using utility::Interval;
 
 // Forward declarations
 template <class T>
@@ -59,7 +64,11 @@ public:
 	__cuda_dual_prefix
 	void clear();
 
+	// Properties
 	bool good() const;
+
+	// Actions
+	void nullify(long double, const Interval <1> &);
 
 	// Boolean operators (generalize with prefix)
 	template <class U>
@@ -338,6 +347,16 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 	}
 
 	return *this;
+}
+
+// Actions
+template <class T>
+void Tensor <T> ::nullify(long double p, const Interval <1> &i)
+{
+	for (size_t k = 0; k < __size; k++) {
+		if (p > i.uniform())
+			__array[k] = T(0);
+	}
 }
 
 // Index

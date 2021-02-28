@@ -8,9 +8,14 @@
 #include <matrix.hpp>
 #include <activation.hpp>
 
+#include <std/interval.hpp>
+
 namespace zhetapi {
 
 namespace ml {
+
+// Aliases
+using utility::Interval;
 
 template <class T>
 class Erf;
@@ -25,22 +30,27 @@ struct RandomInitializer {
 
 template <class T = double>
 class Layer {
-	size_t			__fan_in = 0;
-	size_t			__fan_out = 0;
+	size_t			__fan_in	= 0;
+	size_t			__fan_out	= 0;
 
-	Matrix <T>		__mat = Matrix <T> ();
+	Matrix <T>		__mat		= Matrix <T> ();
 
-	Activation <T> *	__act = nullptr;
-	Activation <T> *	__dact = nullptr;
+	Activation <T> *	__act		= nullptr;
+	Activation <T> *	__dact		= nullptr;
 
 	std::function <T ()>	__initializer;
 
+	long double		__dropout	= 0;
+
 	void clear();
+
+	static Interval <1>	__unit;
 public:
 	// Memory operations
 	Layer();
 	Layer(size_t, Activation <T> *,
-			std::function <T ()> = RandomInitializer <T> ());
+			std::function <T ()> = RandomInitializer <T> (),
+			long double = 0.0);
 
 	Layer(const Layer &);
 
@@ -66,8 +76,8 @@ public:
 	// Computation
 	Vector <T> forward_propogate(const Vector <T> &);
 
+	// Computation with dropout
 	void forward_propogate(Vector <T> &, Vector <T> &);
-	// void forward_propogate(Vector <T> &, Matrix <T> *);
 	
 	void apply_gradient(const Matrix <T> &);
 
@@ -105,16 +115,22 @@ public:
 	friend Layer <U> operator+(const Layer <U> &, const Matrix <U> &);
 };
 
+// Static variables
+template <class T>
+Interval <1> Layer <T> ::__unit(1.0L);
+
 // Memory operations
 template <class T>
 Layer <T> ::Layer() {}
 
 template <class T>
 Layer <T> ::Layer(size_t fan_out, Activation <T> *act,
-		std::function <T ()> init) :
+		std::function <T ()> init,
+		long double dropout) :
 		__fan_out(fan_out),
 		__act(act),
-		__initializer(RandomInitializer <T> ())
+		__initializer(RandomInitializer <T> ()),
+		__dropout(dropout)
 {
 	__dact = __act->derivative();
 }
@@ -125,7 +141,8 @@ Layer <T> ::Layer(const Layer <T> &other) :
 		__fan_out(other.__fan_out),
 		__act(other.__act->copy()),
 		__mat(other.__mat),
-		__initializer(other.__initializer)
+		__initializer(other.__initializer),
+		__dropout(other.__dropout)
 {
 	__dact = __act->derivative();
 }
@@ -142,6 +159,8 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 		__mat = other.__mat;
 
 		__initializer = other.__initializer;
+
+		__dropout = other.__dropout;
 
 		if (other.__act) {
 			__act = other.__act->copy();
@@ -239,6 +258,10 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 {
 	in2 = apt_and_mult(__mat, in1);
 	in1 = __act->compute(in2);
+
+	// Apply dropout (only if necessary)
+	if (__dropout > 0)
+		in1.nullify(__dropout, __unit);
 }
 
 template <class T>

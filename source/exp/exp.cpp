@@ -33,7 +33,7 @@ int main()
 	DNN <> net(40, {
 		Layer <> (50, new ReLU <double> ()),
 		Layer <> (60, new ReLU <double> ()),
-		Layer <> (70, new ReLU <double> ()),
+		Layer <> (70, new ReLU <double> (), ml::RandomInitializer <double> {}, 0.1),
 		Layer <> (80, new ReLU <double> ())
 	});
 

@@ -77,7 +77,7 @@ int main()
 
 	// Create the model
 	ml::DNN <double> model(784, {
-		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784)),
+		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784), 0.2),
 		ml::Layer <double> (10, new ml::Softmax <double> (), ml::Xavier <double> (30))
 	});
 
