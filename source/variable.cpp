@@ -2,36 +2,32 @@
 
 namespace zhetapi {
 
-// Constructors
-Variable::Variable(Token *tptr, const std::string &str) : __symbol(str)
-{
-	__tptr.reset(tptr);
-}
+Variable::Variable() {}
 
 Variable::Variable(const Variable &other)
-{
-	__tptr = other.__tptr;
-	__symbol = other.__symbol;
-}
+		: __symbol(other.__symbol),
+		__tptr(other.__tptr->copy()) {}
 
-// Copy
+Variable::Variable(Token *tptr, const std::string &str)
+		: __symbol(str), __tptr(tptr->copy()) {}
+
 Variable &Variable::operator=(const Variable &other)
 {
 	if (this != &other) {
-		__tptr = other.__tptr;
+		__tptr = other.__tptr->copy();
 		__symbol = other.__symbol;
 	}
 
 	return *this;
 }
 
-// Reference
-std::shared_ptr <Token> &Variable::get()
+Variable::~Variable()
 {
-	return __tptr;
+	delete __tptr;
 }
 
-const std::shared_ptr <Token> &Variable::get() const
+// Properties
+Token *Variable::get()
 {
 	return __tptr;
 }
@@ -50,14 +46,14 @@ Token::type Variable::caller() const
 std::string Variable::str() const
 {
 	if (__tptr)
-		return __symbol + "\t[" + __tptr->str() + "]";
+		return __symbol + " [" + __tptr->str() + "]";
 	
-	return __symbol + "\t[nullptr]";
+	return __symbol + " [nullptr]";
 }
 
 Token *Variable::copy() const
 {
-	return new Variable(__tptr->copy(), __symbol);
+	return new Variable(__tptr, __symbol);
 }
 
 bool Variable::operator==(Token *tptr) const
@@ -67,7 +63,7 @@ bool Variable::operator==(Token *tptr) const
 	if (!var)
 		return true;
 	
-	return (__symbol == var->__symbol) && (__tptr == var->__tptr);
+	return (__symbol == var->__symbol) && ((*__tptr) == var->__tptr);
 }
 
 }

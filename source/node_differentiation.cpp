@@ -99,7 +99,7 @@ void node_manager::differentiate_trig(node &ref)
 
 	node op;
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
 	switch (ophptr->code) {
 	case sxn:
 		op = node(new operation_holder("cos"), l_trigonometric, {
@@ -175,7 +175,7 @@ void node_manager::differentiate_hyp(node &ref)
 
 	node op;
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
 	switch (ophptr->code) {
 	case snh:
 		op = node(new operation_holder("cosh"), l_hyperbolic, {

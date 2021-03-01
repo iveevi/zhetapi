@@ -152,6 +152,12 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 	// Ignore arguments for now
 	if (__compiled.empty())
 		compile(barn);
+	
+	using namespace std;
+	cout << string(50, '=') << endl;
+	cout << "PRE EVAL:" << endl;
+	__compiled.print(true);
+	cout << string(50, '=') << endl;
 
 	return __compiled.substitute_and_seq_compute(barn, args);
 }
@@ -224,7 +230,15 @@ Token::type algorithm::caller() const
 
 Token *algorithm::copy() const
 {
-	return new algorithm(__ident, __alg, __args, __compiled);
+	using namespace std;
+
+	cout << string(50, '=') << endl;
+	cout << "THIS:" << endl;
+	__compiled.print(true);
+	auto ptr = new algorithm(__ident, __alg, __args, __compiled);
+	cout << "NEW:" << endl;
+	ptr->__compiled.print(true);
+	cout << string(50, '=') << endl;
 }
 
 std::string algorithm::str() const

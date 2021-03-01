@@ -13,6 +13,8 @@ namespace zhetapi {
  */
 class Token {
 public:
+	virtual ~Token();
+	
 	/*
 	 * Codes used to identify the Token, more on the is presented
 	 * below. Should not be used by the user.

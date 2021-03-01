@@ -133,18 +133,18 @@ Token *node_manager::value(node tree) const
 	
 	switch (*(tree.__tptr)) {
 	case Token::opd:
-		return tree.__tptr.get()->copy();
+		return tree.__tptr->copy();
 	case Token::oph:	
 		// size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
 		tptr = __barn->compute((dynamic_cast <operation_holder *>
-						(tree.__tptr.get()))->rep, values);
+						(tree.__tptr))->rep, values);
 
 		return tptr->copy();
 	case Token::var:
-		tptr = (dynamic_cast <Variable *> (tree.__tptr.get()))->get().get();
+		tptr = (dynamic_cast <Variable *> (tree.__tptr))->get();
 
 		return tptr->copy();
 	case Token::ftn:
@@ -154,19 +154,19 @@ Token *node_manager::value(node tree) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		tptr = (*(dynamic_cast <Function *> (tree.__tptr.get())))(values);
+		tptr = (*(dynamic_cast <Function *> (tree.__tptr)))(values);
 
 		return tptr->copy();
 	case Token::ndr:
 		unrefd = (dynamic_cast <node_reference *>
-				(tree.__tptr.get()))->get();
+				(tree.__tptr))->get();
 
-		return unrefd->__tptr.get()->copy();
+		return unrefd->__tptr->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
+		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr)))(values);
 
 		if (tptr)
 			return tptr->copy();
@@ -174,7 +174,7 @@ Token *node_manager::value(node tree) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
+		aptr = dynamic_cast <algorithm *> (tree.__tptr);
 		tptr = aptr->execute(__barn, values);
 
 		// Do this outside the switch
@@ -208,17 +208,17 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	
 	switch (*(tree.__tptr)) {
 	case Token::opd:
-		return tree.__tptr.get()->copy();
+		return tree.__tptr->copy();
 	case Token::oph:	
 		size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 
 		tptr = __barn->compute((dynamic_cast <operation_holder *>
-						(tree.__tptr.get()))->rep, values);
+						(tree.__tptr))->rep, values);
 		
 		if (tree.__label == l_post_modifier) {
-			vptr = tree.__leaves[0].__tptr.get();
+			vptr = tree.__leaves[0].__tptr;
 
 			vp = dynamic_cast <Variable *> (vptr);
 
@@ -228,11 +228,11 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 			ext->put(v);
 
-			tptr = vp->get().get();
+			tptr = vp->get();
 
 			return tptr->copy();
 		} else if (tree.__label == l_pre_modifier) {
-			vptr = tree.__leaves[0].__tptr.get();
+			vptr = tree.__leaves[0].__tptr;
 
 			vp = dynamic_cast <Variable *> (vptr);
 
@@ -245,7 +245,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 		return tptr->copy();
 	case Token::var:
-		tptr = (dynamic_cast <Variable *> (tree.__tptr.get()))->get().get();
+		tptr = (dynamic_cast <Variable *> (tree.__tptr))->get();
 
 		return tptr->copy();
 	case Token::ftn:
@@ -255,22 +255,22 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 
-		tptr = (*(dynamic_cast <Function *> (tree.__tptr.get())))(values);
+		tptr = (*(dynamic_cast <Function *> (tree.__tptr)))(values);
 
 		return tptr->copy();
 	case Token::ndr:
 		unrefd = (dynamic_cast <node_reference *>
-				(tree.__tptr.get()))->get();
+				(tree.__tptr))->get();
 
 		using namespace std;
 		cout << "Unredf: " << unrefd << endl;
 		unrefd->print(true);
-		return unrefd->__tptr.get()->copy();
+		return unrefd->__tptr->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 
-		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr.get())))(values);
+		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr)))(values);
 
 		if (tptr)
 			return tptr->copy();
@@ -280,7 +280,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));
 		
-		aptr = dynamic_cast <algorithm *> (tree.__tptr.get());
+		aptr = dynamic_cast <algorithm *> (tree.__tptr);
 		tptr = aptr->execute(__barn, values);
 
 		if (tptr)
@@ -364,7 +364,7 @@ void node_manager::expand(node &ref)
 		 */
 
 		variable_cluster *vclptr = dynamic_cast
-			<variable_cluster *> (ref.__tptr.get());
+			<variable_cluster *> (ref.__tptr);
 
 		ref = expand(vclptr->__cluster, ref.__leaves);
 	}
@@ -522,7 +522,7 @@ void node_manager::simplify(node &ref)
 		return;
 	}
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
 
 	// if (ophptr && (ophptr->code == add || ophptr->code == sub))
 	//	simplify_separable(ref);
@@ -550,7 +550,7 @@ void node_manager::simplify_separable(node &ref)
 
 		process.pop();
 
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr.get());
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr);
 
 		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
 			process.push(top.__leaves[0]);
@@ -599,8 +599,8 @@ void node_manager::simplify_mult_div(node &ref, codes c)
 		lbl l2 = ref.__leaves[1].__label;
 
 		if (l1 == l_differential && l2 == l_differential) {
-			Token *t1 = ref.__leaves[0].__tptr.get();
-			Token *t2 = ref.__leaves[1].__tptr.get();
+			Token *t1 = ref.__leaves[0].__tptr;
+			Token *t2 = ref.__leaves[1].__tptr;
 
 			t1 = (dynamic_cast <node_differential *> (t1))->get();
 			t2 = (dynamic_cast <node_differential *> (t2))->get();
@@ -618,7 +618,7 @@ void node_manager::simplify_mult_div(node &ref, codes c)
 				Function f = ftn->differentiate(var);
 
 				ref.__leaves.clear();
-				ref.__tptr.reset(f.copy());
+				ref.__tptr = f.copy();
 			}
 		}
 	}
@@ -691,10 +691,10 @@ void node_manager::refactor_reference(const std::string &str, Token *tptr)
 void node_manager::refactor_reference(node &ref, const
 		std::string &str, Token *tptr)
 {
-	node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
+	node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr);
 	
 	if (ndr && ndr->symbol() == str)
-		ref.__tptr.reset(tptr);
+		ref.__tptr = tptr;
 
 	for (node &leaf : ref.__leaves)
 		refactor_reference(leaf, str, tptr);
@@ -749,17 +749,17 @@ std::string node_manager::generate(std::string name, node ref,
 	if (is_constant_operand(ref.__label)) {
 		fout << "\t\tzhetapi::Token *c" << const_count++ << " = ";
 		fout << "new zhetapi::Operand <"
-			<< types::proper_symbol(typeid(*(ref.__tptr.get())))
+			<< types::proper_symbol(typeid(*(ref.__tptr)))
 			<< "> (" << ref.__tptr->str() << ");\n";
 
 		return "c" + std::to_string(const_count - 1);
 	} else if (ref.__tptr->caller() == Token::ndr) {
-		node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr.get());
+		node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr);
 
 		return "in" + std::to_string(ndr->index() + 1);
 	} else {
 		// Assuming we have an operation
-		operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+		operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr);
 
 		fout << "\t\tzhetapi::Token *inter" << inter_count++ <<
 			" = " << name << "_barn.compute(\"" <<
@@ -792,10 +792,10 @@ std::string node_manager::display(node ref) const
 	case Token::oph:
 		return display_operation(ref);
 	case Token::ndr:
-		if ((dynamic_cast <node_reference *> (ref.__tptr.get()))->is_variable())
-			return (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
+		if ((dynamic_cast <node_reference *> (ref.__tptr))->is_variable())
+			return (dynamic_cast <node_reference *> (ref.__tptr))->symbol();
 		
-		return display(*(dynamic_cast <node_reference *> (ref.__tptr.get())->get()));
+		return display(*(dynamic_cast <node_reference *> (ref.__tptr)->get()));
 	}
 
 	return "?";
@@ -803,9 +803,9 @@ std::string node_manager::display(node ref) const
 
 std::string node_manager::display_operation(node ref) const
 {
-	std::string str = (dynamic_cast <operation_holder *> (ref.__tptr.get()))->rep;
+	std::string str = (dynamic_cast <operation_holder *> (ref.__tptr))->rep;
 	
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
 
 	switch (ophptr->code) {
 	case add:
@@ -847,8 +847,8 @@ std::string node_manager::display_operation(node ref) const
 
 std::string node_manager::display_pemdas(node ref, node child) const
 {
-	operation_holder *rophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
-	operation_holder *cophptr = dynamic_cast <operation_holder *> (child.__tptr.get());
+	operation_holder *rophptr = dynamic_cast <operation_holder *> (ref.__tptr);
+	operation_holder *cophptr = dynamic_cast <operation_holder *> (child.__tptr);
 
 	if (!cophptr)
 		return display(child);
@@ -901,7 +901,7 @@ void node_manager::label(node &ref)
 {
 	switch (ref.__tptr->caller()) {
 	case Token::opd:
-		ref.__label = constant_label(ref.__tptr.get());
+		ref.__label = constant_label(ref.__tptr);
 		break;
 	case Token::oph:
 		for (node &leaf : ref.__leaves)
@@ -925,7 +925,7 @@ void node_manager::label(node &ref)
 	case Token::ndr:
 		// Transfer labels, makes things easier
 		ref.__label = (dynamic_cast <node_reference *>
-				(ref.__tptr.get()))->get()->__label;
+				(ref.__tptr))->get()->__label;
 		break;
 	case Token::ndd:
 		ref.__label = l_differential;
@@ -941,7 +941,7 @@ void node_manager::label(node &ref)
 
 void node_manager::label_operation(node &ref)
 {
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr.get());
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
 
 	bool constant = true;
 	for (auto child : ref.__leaves) {
@@ -1012,24 +1012,25 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref)
 {
-	if (!ref.__tptr.get())
+	if (!ref.__tptr)
 		return;
 	
 	using namespace std;
 	if (ref.__tptr->caller() == Token::ndr) {
-		cout << "need to reref:" << endl;
-		ref.print();
+		/*cout << "need to reref:" << endl;
+		ref.print();*/
 
-		std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr.get()))->symbol();
+		std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr))->symbol();
 
 		auto itr = find(__params.begin(), __params.end(), tmp);
 
 		size_t index = std::distance(__params.begin(), itr);
 
-		ref.__tptr.reset(new node_reference(&__refs[index], tmp, index, true));
+		// Need a new method to clear/reset
+		ref.__tptr = new node_reference(&__refs[index], tmp, index, true);
 
-		cout << "post:" << endl;
-		ref.print();
+		/*cout << "post:" << endl;
+		ref.print();*/
 	}
 
 	for (node &leaf : ref.__leaves)

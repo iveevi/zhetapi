@@ -2,30 +2,46 @@
 
 namespace zhetapi {
 
-node::node() : __tptr(nullptr), __label(l_none) {}
+node::node() {}
 
-node::node(Token *tptr, const ::std::vector <node> &leaves) :
-		__leaves(leaves), __label(l_none), __nodes(0)
+node::node(const node &other)
+		: __tptr(other.__tptr->copy()), __label(other.__label),
+		__class(other.__class), __nodes(other.__nodes),
+		__leaves(other.__leaves) {}
+
+node::node(Token *tptr, const node &a, bool bl)
+		: __tptr(tptr->copy()), __leaves({a}) {}
+
+node::node(Token *tptr, const node &a, const node &b)
+		: __tptr(tptr->copy()), __leaves({a, b}) {}
+
+node::node(Token *tptr, const std::vector <node> &leaves)
+		: __tptr(tptr->copy()), __leaves(leaves) {}
+
+node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
+		: __tptr(tptr->copy()), __label(label), __leaves(leaves) {}
+
+node &node::operator=(const node &other)
 {
-	__tptr.reset(tptr);
+	if (this != &other) {
+		// Separate clear() method?
+		if (__tptr)
+			delete __tptr;
+		
+		__tptr = other.__tptr->copy();
+		__label = other.__label;
+		__class = other.__class;
+		__nodes = other.__nodes;
+		__leaves = other.__leaves;
+	}
+
+	return *this;
 }
 
-node::node(Token *tptr, lbl label, const ::std::vector <node> &leaves) :
-	__leaves(leaves), __label(label), __nodes(0)
+node::~node()
 {
-	__tptr.reset(tptr);
-}
-
-node::node(Token *tptr, const node &a, bool bl) : __leaves({a}),
-	__label(l_none), __nodes(0)
-{
-	__tptr.reset(tptr);
-}
-
-node::node(Token *tptr, const node &a, const node &b) : __leaves({a,
-		b}), __label(l_none), __nodes(0)
-{
-	__tptr.reset(tptr);
+	if (__tptr)
+		delete __tptr;
 }
 
 bool node::empty() const
@@ -115,7 +131,7 @@ void node::print_no_address(int num, int lev) const
 bool node::loose_match(const node &a, const node &b)
 {
 	// Check the Token
-	if (*(a.__tptr.get()) != b.__tptr.get())
+	if (*(a.__tptr) != b.__tptr)
 		return false;
 	
 	// Check the leaves

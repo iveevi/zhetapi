@@ -2,6 +2,8 @@
 
 namespace zhetapi {
 
+Token::~Token() {}
+
 Token::operator type() const
 {
 	return caller();

@@ -13,21 +13,20 @@
 namespace zhetapi {
 
 class Variable : public Token {
-	std::string		__symbol;
-	std::shared_ptr <Token>	__tptr;
+	std::string	__symbol	= "";
+	Token *		__tptr		= nullptr;
 public:
-	// Constructor
-	Variable(Token * = nullptr, const ::std::string & = "");
-
+	// Memory and initialization
+	Variable();
 	Variable(const Variable &);
+	Variable(Token *, const std::string &);
 
-	// Copy
 	Variable &operator=(const Variable &);
 
-	// Reference
-	std::shared_ptr <Token> &get();
-	const std::shared_ptr <Token> &get() const;
+	~Variable();
 
+	// Properties
+	Token *get();
 	const std::string &symbol() const;
 	
 	// Virtual functions
@@ -35,9 +34,6 @@ public:
 	std::string str() const override;
 	Token *copy() const override;
 	bool operator==(Token *) const override;
-
-	// Exceptions
-	class illegal_type {};
 };
 	
 }

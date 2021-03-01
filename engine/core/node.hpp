@@ -17,22 +17,23 @@ namespace zhetapi {
 
 struct node {
 	// Members
-	std::shared_ptr <Token>	__tptr		= nullptr;
+	Token *			__tptr		= nullptr;
 	lbl			__label		= l_none;
 	cls			__class		= c_none;
-	std::vector <node>	__leaves	= {};
 	size_t			__nodes		= 0;
+	std::vector <node>	__leaves	= {};
 
 	// Constructors
 	node();
-	node(Token *, const ::std::vector <node> &);
-	node(Token *, lbl, const ::std::vector <node> &);
+	node(const node &);
+	node(Token *, const node &, bool);
+	node(Token *, const node &, const node &);
+	node(Token *, const std::vector <node> &);
+	node(Token *, lbl, const std::vector <node> &);
 
-	// Unary
-	explicit node(Token *, const node &, bool);
-	
-	// Binary
-	explicit node(Token *, const node &, const node &);
+	node &operator=(const node &);
+
+	~node();
 
 	// Properties
 	bool empty() const;
@@ -50,7 +51,7 @@ struct node {
 	// Static methods
 	static bool loose_match(const node &, const node &);
 
-	friend ::std::ostream &operator<<(::std::ostream &, const node &);
+	friend std::ostream &operator<<(std::ostream &, const node &);
 };
 
 }
