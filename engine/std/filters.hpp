@@ -10,11 +10,12 @@ namespace zhetapi {
 
 namespace ml {
 
-template <class T>
+template <class T = double>
 class FeedForward : public Filter {
-	Matrix <T>	__weight;
-	Activation <T> *__act;
-	Activation <T> *__dact;
+	Matrix <T>	__weight	= Matrix <T> ();
+	Activation <T> *__act		= nullptr;
+	Activation <T> *__dact		= nullptr;
+	long double	__dropout	= 0;
 public:
 };
 

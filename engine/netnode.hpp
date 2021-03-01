@@ -62,6 +62,8 @@ public:
 	// Setters and getters
 	void pass(const Tensor <T> &) const;
 
+	void pass(std::vector <Tensor <T>> &) const;
+
 	// Computational methods
 	void propogate() const;
 
@@ -277,6 +279,18 @@ void NetNode <T> ::pass(const Tensor <T> &ts) const
 	// or achieve this through r-value
 	// reference parameter overload
 	*(__ins[__index]) = ts;
+}
+
+// Starts from index 0
+template <class T>
+void NetNode <T> ::pass(std::vector <Tensor <T>> &args) const
+{
+	size_t i = 0;
+	while (!args.empty() && i < __nins) {
+		*(__ins[i++]) = args[0];
+
+		args.erase(args.begin());
+	}
 }
 
 // Computational methods

@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <queue>
+#include <set>
 #include <vector>
 
 // Engine headers
@@ -40,6 +41,15 @@ public:
 	// Variadic constructor
 	template <class ... U>
 	explicit GNN(U ...);
+
+	// Extraction
+	NetNode <T> &operator[](size_t);
+
+	const NetNode <T> &operator[](size_t) const;
+
+	// Passing
+	void pass(std::vector <Tensor <T>> &) const;
+	void pass(std::vector <Tensor <T>> &&) const;
 
 	void trace() const;
 };
@@ -84,7 +94,10 @@ void GNN <T> ::init(NetNode <T> *nnptr, U ... args)
 template <class T>
 void GNN <T> ::getouts()
 {
-	// Needs to check for duplicates
+	// Set of visited nodes
+	std::set <NetNode <T> *> vis;
+
+	// BFS queue
 	std::queue <NetNode <T> *> queue;
 
 	for (NetNode <T> *nnptr : __ins)
@@ -95,6 +108,9 @@ void GNN <T> ::getouts()
 
 		queue.pop();
 
+		if (vis.find() != vis.end())
+			continue;
+
 		auto vfrw = cptr->forward();
 		if (vfrw.empty()) {
 			__outs.push_back(cptr);
@@ -103,6 +119,46 @@ void GNN <T> ::getouts()
 				queue.push(frw->__fr);
 		}
 	}
+}
+
+/**
+ * @brief This specific overload (used for modifying the state of an input)
+ * can be used to alter the properties of a specific input node.
+ */
+template <class T>
+NetNode <T> &GNN <T> ::operator[](size_t i)
+{
+	return *(__ins[i]);
+}
+
+/**
+ * @brief This specific overload is used to extract the output nodes, from
+ * which the Tensors in the pipes can be accessed.
+ */
+template <class T>
+const NetNode <T> &GNN <T> ::operator[](size_t i) const
+{
+	return *(__outs[i]);
+}
+
+// Passing
+template <class T>
+void GNN <T> ::pass(std::vector <Tensor <T>> &args) const
+{
+	size_t i = 0;
+	while (!args.empty() && i < __ins.size()) {
+		__ins[i].pass(args);
+
+		i++;
+	}
+}
+
+template <class T>
+void GNN <T> ::pass(std::vector <Tensor <T>> &&rargs) const
+{
+	std::vector <Tensor <T>> args = std::move(rargs);
+
+	pass(args);
 }
 
 template <class T>
