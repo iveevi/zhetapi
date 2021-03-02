@@ -5,30 +5,54 @@ namespace zhetapi {
 node::node() {}
 
 node::node(const node &other)
-		: __tptr(other.__tptr->copy()), __label(other.__label),
-		__class(other.__class), __nodes(other.__nodes),
-		__leaves(other.__leaves) {}
+		: __label(other.__label), __class(other.__class),
+		__nodes(other.__nodes), __leaves(other.__leaves)
+{
+	if (other.__tptr)
+		__tptr = other.__tptr->copy();
+}
 
 node::node(Token *tptr, const node &a, bool bl)
-		: __tptr(tptr->copy()), __leaves({a}) {}
+		: __leaves({a})
+{
+	if (tptr)
+		__tptr = tptr->copy();
+}
 
 node::node(Token *tptr, const node &a, const node &b)
-		: __tptr(tptr->copy()), __leaves({a, b}) {}
+		: __leaves({a, b})
+{
+	if (tptr)
+		__tptr = tptr->copy();
+}
 
 node::node(Token *tptr, const std::vector <node> &leaves)
-		: __tptr(tptr->copy()), __leaves(leaves) {}
+		: __leaves(leaves)
+{
+	if (tptr)
+		__tptr = tptr->copy();
+}
 
 node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
-		: __tptr(tptr->copy()), __label(label), __leaves(leaves) {}
+		: __label(label), __leaves(leaves)
+{
+	if (tptr)
+		__tptr = tptr->copy();
+}
 
 node &node::operator=(const node &other)
 {
 	if (this != &other) {
 		// Separate clear() method?
-		if (__tptr)
+		if (__tptr) {
 			delete __tptr;
+
+			__tptr = nullptr;
+		}
 		
-		__tptr = other.__tptr->copy();
+		if (other.__tptr)
+			__tptr = other.__tptr->copy();
+		
 		__label = other.__label;
 		__class = other.__class;
 		__nodes = other.__nodes;
@@ -42,6 +66,8 @@ node::~node()
 {
 	if (__tptr)
 		delete __tptr;
+	
+	__tptr = nullptr;
 }
 
 bool node::empty() const
@@ -51,9 +77,16 @@ bool node::empty() const
 
 void node::transfer(const node &ref)
 {
-	__tptr = ref.__tptr;
+	if (ref.__tptr) {
+		if (__tptr)
+			delete __tptr;
+		
+		__tptr = ref.__tptr->copy();
+	}
+
 	__label = ref.__label;
 	__class = ref.__class;
+	__nodes = ref.__nodes;
 	__leaves = ref.__leaves;
 }
 
@@ -66,18 +99,19 @@ void node::print(int num, int lev) const
 {
 	int counter = lev;
 	while (counter > 0) {
-		::std::cout << "\t";
+		std::cout << "\t";
+
 		counter--;
 	}
 
 	if (__tptr) {
-		::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
-			__tptr << ", " << strlabs[__label] << ") @ " << this <<
-			::std::endl;	
+		std::cout << "#" << num << ": " << __tptr->str()
+			<< " (" << __tptr << ", " << strlabs[__label]
+			<< ") @ " << this << std::endl;	
 	} else {
-		::std::cout << "#" << num << ": null (" <<
-			__tptr << ", " << strlabs[__label] << ") @ " << this <<
-			::std::endl;
+		std::cout << "#" << num << ": null ("
+			<< __tptr << ", " << strlabs[__label] << ") @ "
+			<< this << std::endl;
 	}
 
 	counter = 0;
@@ -89,15 +123,15 @@ void node::print_no_address(int num, int lev) const
 {
 	int counter = lev;
 	while (counter > 0) {
-		::std::cout << "\t";
+		std::cout << "\t";
 		counter--;
 	}
 
 	if (__tptr) {
-		::std::cout << "#" << num << ": " << __tptr->str() << " (" <<
+		std::cout << "#" << num << ": " << __tptr->str() << " (" <<
 			strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
 	} else {
-		::std::cout << "#" << num << ": null (" <<
+		std::cout << "#" << num << ": null (" <<
 			strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
 	}
 
@@ -106,11 +140,11 @@ void node::print_no_address(int num, int lev) const
 		itr.print_no_address(++counter, lev + 1);
 }
 
-::std::string node::display(int num, int lev) const
+std::string node::display(int num, int lev) const
 {
-	::std::ostringstream oss;
+	std::ostringstream oss;
 
-	oss << ::std::endl;
+	oss << std::endl;
 
 	int counter = lev;
 	while (counter > 0) {

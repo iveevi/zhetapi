@@ -47,12 +47,6 @@ public:
 		wld
 	};
 
-	/*
-	 * Implicit conversion operator for cleaner notation, uses the
-	 * inspector function defined below.
-	 */
-	operator type() const;
-
 	bool operator!=(Token *) const;
 
 	/* 

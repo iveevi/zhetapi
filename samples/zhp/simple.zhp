@@ -9,7 +9,7 @@ tmp = 0
 println("tmp = ", tmp)
 
 alg foo(x, y) {
-	println("sum = ", x, y)
+	println("sum = ", x + y)
 }
 
 foo(12, -5)

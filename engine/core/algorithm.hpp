@@ -8,7 +8,6 @@
 // Engine headers
 #include <core/node_manager.hpp>
 
-
 namespace zhetapi {
 
 class Barn;
@@ -21,11 +20,12 @@ class algorithm : public Token {
 
 	std::vector <std::string>	__args		= {};
 
-	node_manager			__compiled;
+	node_manager			__compiled	= node_manager();
 	
 	void generate(Barn *, std::string str, node_manager &);
 public:
 	algorithm();
+	algorithm(const algorithm &);
 	algorithm(const std::string &,
 		const std::string &,
 		const std::vector <std::string> &);

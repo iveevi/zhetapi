@@ -57,13 +57,13 @@ def install(args):
 	os.system('mkdir -p include')
 
 	print(50 * '=' + "\nCompiling libraries...\n" + 50 * '=')
-	os.system('./bin/czhp -v -c	\
+	ret1 = os.system('./bin/czhp -v -c	\
 		lib/io/io.cpp		\
 		lib/io/formatted.cpp	\
 		lib/io/file.cpp		\
 		-o include/io.zhplib')
 
-	os.system('./bin/czhp -v -c	\
+	ret2 = os.system('./bin/czhp -v -c	\
 		lib/math/math.cpp	\
 		-o include/math.zhplib')
 
@@ -71,23 +71,30 @@ def install(args):
 	os.system('./bin/czhp -d include/io.zhplib')
 	os.system('./bin/czhp -d include/math.zhplib')
 
+	if (ret1 != 0) or (ret2 != 0):
+		exit(-1)
+
 def czhp(args):
     make_target(args.threads, 'czhp', args.mode)
 
     file = 'samples/zhp/simple.zhp'
 
+    ret = 0
     if args.mode == '':
-        os.system('{exe}czhp {file} -L include'.format(
+        ret = os.system('{exe}czhp {file} -L include'.format(
             exe=modes[args.mode],
             file=file
         ))
     else:
-        os.system('{exe}czhp'.format(
+        ret = os.system('{exe}czhp'.format(
             exe=modes[args.mode]
         ))
 
     os.system('mkdir -p debug/')
     os.system('mv czhp debug/')
+
+    if (ret != 0):
+        exit(-1)
 
 special = {
 	'install': install,
@@ -109,20 +116,23 @@ if args.target in special.keys():
 elif args.target in targets:
     make_target(args.threads, args.target, args.mode)
 
-    os.system('{exe}{target}'.format(
+    ret1 = os.system('{exe}{target}'.format(
             exe=modes[args.mode],
             target=args.target
     ))
 
     # Check for any post processing scripts
     if args.mode in post:
-        os.system('{cmd}'.format(cmd=post[args.mode]))
+        ret2 = os.system('{cmd}'.format(cmd=post[args.mode]))
 
     os.system('mkdir -p debug/')
 
     os.system('mv {target} debug/'.format(
             target=args.target
     ))
+
+    if (ret1 != 0) or (ret2 != 0):
+        exit(-1)
 
 os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
 os.system('[ -f libzhp.os ] && mv libzhp.os debug/')

@@ -20,10 +20,10 @@ class node_manager {
 public:
 	__TYPEDEFS__
 private:
-	Barn *				__barn;
-	node				__tree;
-	std::vector <node>		__refs;
-	std::vector <std::string>	__params;
+	Barn *				__barn		= nullptr;
+	node				__tree		= node();
+	std::vector <node>		__refs		= {};
+	std::vector <std::string>	__params	= {};
 public:
 	node_manager();
 	node_manager(const node_manager &);
@@ -34,6 +34,9 @@ public:
 
 	// Properties
 	bool empty() const;	// Is the __tree node empty?
+
+	// Setters
+	void set_barn(Barn *);
 
 	// TODO: replace these to keep consistent interface
 	node &tree();

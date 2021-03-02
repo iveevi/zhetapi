@@ -7,6 +7,10 @@ namespace zhetapi {
 // Constructors
 algorithm::algorithm() {}
 
+algorithm::algorithm(const algorithm &other)
+		: __ident(other.__ident), __alg(other.__alg),
+		__args(other.__args), __compiled(other.__compiled) {}
+
 algorithm::algorithm(
 		const std::string &ident,
 		const std::string &alg,
@@ -24,11 +28,6 @@ algorithm::algorithm(
 
 void algorithm::compile(Barn *barn)
 {
-	using namespace std;
-	cout << "Compiling..." << endl;
-	for (auto str : __args)
-		cout << "args = " << str << endl;
-
 	// Use the definition line number
 	bool quoted = false;
 	int paren = 0;
@@ -66,15 +65,10 @@ void algorithm::compile(Barn *barn)
 		}
 	}
 
-	using namespace std;
-	cout << string(50, '=') << endl;
-	cout << "ARGUMENTS" << endl;
+	// Use .set_label instead
 	__compiled.tree().__label = l_sequential;
 	__compiled.add_args(__args);
-	cout << string(50, '=') << endl;
-
-	cout << "finished compiling, full alg: " << this << endl;
-	__compiled.print(true);
+	__compiled.set_barn(barn);
 }
 
 void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
@@ -152,12 +146,6 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 	// Ignore arguments for now
 	if (__compiled.empty())
 		compile(barn);
-	
-	using namespace std;
-	cout << string(50, '=') << endl;
-	cout << "PRE EVAL:" << endl;
-	__compiled.print(true);
-	cout << string(50, '=') << endl;
 
 	return __compiled.substitute_and_seq_compute(barn, args);
 }
@@ -230,15 +218,7 @@ Token::type algorithm::caller() const
 
 Token *algorithm::copy() const
 {
-	using namespace std;
-
-	cout << string(50, '=') << endl;
-	cout << "THIS:" << endl;
-	__compiled.print(true);
-	auto ptr = new algorithm(__ident, __alg, __args, __compiled);
-	cout << "NEW:" << endl;
-	ptr->__compiled.print(true);
-	cout << string(50, '=') << endl;
+	return new algorithm(__ident, __alg, __args, __compiled);
 }
 
 std::string algorithm::str() const

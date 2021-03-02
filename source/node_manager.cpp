@@ -5,9 +5,9 @@ namespace zhetapi {
 
 node_manager::node_manager() {}
 
-node_manager::node_manager(const node_manager &other) :
-	__barn(other.__barn), __tree(other.__tree),
-	__refs(other.__refs), __params(other.__params)
+node_manager::node_manager(const node_manager &other)
+		: __barn(other.__barn), __tree(other.__tree),
+		__refs(other.__refs), __params(other.__params)
 {
 	rereference(__tree);
 }
@@ -80,6 +80,12 @@ bool node_manager::empty() const
 	return __tree.empty();
 }
 
+// Setters
+void node_manager::set_barn(Barn *barn)
+{
+	__barn = barn;
+}
+
 // Getters
 node &node_manager::tree()
 {
@@ -131,7 +137,7 @@ Token *node_manager::value(node tree) const
 
 	// std::cout << "Spare threads: " << spare_threads << std::endl;
 	
-	switch (*(tree.__tptr)) {
+	switch (tree.__tptr->caller()) {
 	case Token::opd:
 		return tree.__tptr->copy();
 	case Token::oph:	
@@ -206,7 +212,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 	// std::cout << "Spare threads: " << spare_threads << std::endl;
 	
-	switch (*(tree.__tptr)) {
+	switch (tree.__tptr->caller()) {
 	case Token::opd:
 		return tree.__tptr->copy();
 	case Token::oph:	
@@ -262,9 +268,6 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		unrefd = (dynamic_cast <node_reference *>
 				(tree.__tptr))->get();
 
-		using namespace std;
-		cout << "Unredf: " << unrefd << endl;
-		unrefd->print(true);
 		return unrefd->__tptr->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
@@ -315,10 +318,6 @@ Token *node_manager::substitute_and_seq_compute(Barn *ext,
 		label(__refs[i]);
 	}
 
-	using namespace std;
-	cout << "Pre evaluation" << endl;
-	print(true);
-
 	return sequential_value(ext);
 }
 
@@ -357,7 +356,7 @@ void node_manager::add_args(const std::vector <std::string> &args)
 // Expansion methods
 void node_manager::expand(node &ref)
 {
-	if (*(ref.__tptr) == Token::vcl) {
+	if (ref.__tptr->caller() == Token::vcl) {
 		/*
 		 * Excluding the parameters, the variable cluster should
 		 * always be a leaf of the tree.
@@ -688,13 +687,15 @@ void node_manager::refactor_reference(const std::string &str, Token *tptr)
 	refactor_reference(__tree, str, tptr);
 }
 
-void node_manager::refactor_reference(node &ref, const
-		std::string &str, Token *tptr)
+void node_manager::refactor_reference(
+		node &ref,
+		const std::string &str,
+		Token *tptr)
 {
 	node_reference *ndr = dynamic_cast <node_reference *> (ref.__tptr);
 	
 	if (ndr && ndr->symbol() == str)
-		ref.__tptr = tptr;
+		ref.__tptr = tptr->copy();
 
 	for (node &leaf : ref.__leaves)
 		refactor_reference(leaf, str, tptr);
@@ -1012,14 +1013,7 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref)
 {
-	if (!ref.__tptr)
-		return;
-	
-	using namespace std;
-	if (ref.__tptr->caller() == Token::ndr) {
-		/*cout << "need to reref:" << endl;
-		ref.print();*/
-
+	if (ref.__tptr && (ref.__tptr->caller() == Token::ndr)) {
 		std::string tmp = (dynamic_cast <node_reference *> (ref.__tptr))->symbol();
 
 		auto itr = find(__params.begin(), __params.end(), tmp);
@@ -1028,9 +1022,6 @@ void node_manager::rereference(node &ref)
 
 		// Need a new method to clear/reset
 		ref.__tptr = new node_reference(&__refs[index], tmp, index, true);
-
-		/*cout << "post:" << endl;
-		ref.print();*/
 	}
 
 	for (node &leaf : ref.__leaves)
