@@ -10,6 +10,8 @@ println("tmp = ", tmp)
 
 alg foo(x, y) {
 	println("sum = ", x + y)
+
+	tmp = x + y
 }
 
 foo(12, -5)

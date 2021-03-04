@@ -41,6 +41,7 @@ std::string strlabs[] = {
 	// Algorithm
 	"sequential",
 	"assignment chain",
+	"lvalue",
 
 	// Miscellaneious
 	"constant",

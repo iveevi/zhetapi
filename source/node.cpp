@@ -12,6 +12,12 @@ node::node(const node &other)
 		__tptr = other.__tptr->copy();
 }
 
+node::node(Token *tptr)
+		: __tptr(tptr) {}
+
+node::node(Token *tptr, lbl label)
+		: __tptr(tptr), __label(label) {}
+
 node::node(Token *tptr, const node &a, bool bl)
 		: __leaves({a})
 {
@@ -93,6 +99,12 @@ void node::transfer(const node &ref)
 void node::append(const node &ref)
 {
 	__leaves.push_back(ref);
+}
+
+// Needs a better name
+void node::append_front(const node &ref)
+{
+	__leaves.insert(__leaves.begin(), ref);
 }
 
 void node::print(int num, int lev) const

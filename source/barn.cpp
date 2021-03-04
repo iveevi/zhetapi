@@ -300,7 +300,7 @@ Barn::~Barn()
 bool Barn::present(const std::string &str) const
 {
 	auto itr = std::find_if(ops.begin(), ops.end(),
-		[&](const ::std::pair <ID, Token *> &pr) {
+		[&](const std::pair <ID, Token *> &pr) {
 			return pr.first.first == str;
 		}
 	);

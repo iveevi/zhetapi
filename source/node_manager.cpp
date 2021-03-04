@@ -81,20 +81,14 @@ bool node_manager::empty() const
 }
 
 // Setters
+void node_manager::set_label(lbl label)
+{
+	__tree.__label = label;
+}
+
 void node_manager::set_barn(Barn *barn)
 {
 	__barn = barn;
-}
-
-// Getters
-node &node_manager::tree()
-{
-	return __tree;
-}
-
-const node &node_manager::tree() const
-{
-	return __tree;
 }
 
 // Value finding methods
@@ -133,9 +127,16 @@ Token *node_manager::value(node tree) const
 
 	algorithm *aptr;
 
-	// int size;
-
-	// std::cout << "Spare threads: " << spare_threads << std::endl;
+	// If null token, resort to special execution modes
+	// (Use this instead of sequential_value for
+	// algorithms; dont remove it though)
+	if (!tree.__tptr) {
+		if (tree.__label == l_assignment_chain) {
+			std::cout << "Assigning..." << std::endl;
+		} else {
+			throw std::runtime_error("Unknown execution mode #" + strlabs[tree.__label]);
+		}
+	}
 	
 	switch (tree.__tptr->caller()) {
 	case Token::opd:
@@ -191,6 +192,8 @@ Token *node_manager::value(node tree) const
 	return nullptr;
 }
 
+// There really should not be separate value methods,
+// just add exceptions to if the external context is null
 Token *node_manager ::value(node tree, Barn *ext) const
 {
 	std::vector <Token *> values;
@@ -210,7 +213,36 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 	int size;
 
-	// std::cout << "Spare threads: " << spare_threads << std::endl;
+	// If null token, resort to special execution modes
+	// (Use this instead of sequential_value for
+	// algorithms; dont remove it though)
+	if (!tree.__tptr) {
+		if (tree.__label == l_assignment_chain) {
+			// Evaluate first node
+			Token *tmp = value(tree.__leaves[0], ext);
+
+			// Assign for the other nodes
+
+			// Add index operator for nodes
+			size_t nleaves = tree.__leaves.size(); // Use a method instead
+
+			for (size_t i = 1; i < nleaves; i++) {
+				// Ensure that the node has type lvalue
+				if (tree.__leaves[i].__label != l_lvalue)
+					throw std::runtime_error("Need an lvalue on the left side of an \'=\'");
+				
+				lvalue *lv = dynamic_cast <lvalue *> (tree.__leaves[i].__tptr);
+
+				lv->assign(tmp);
+			}
+
+			return nullptr;
+		} else {
+			throw std::runtime_error("Unknown execution mode \'" + strlabs[tree.__label] + "\'");
+		}
+	}
+
+	// else: this func
 	
 	switch (tree.__tptr->caller()) {
 	case Token::opd:
@@ -332,6 +364,23 @@ void node_manager::append(const node &n)
 void node_manager::append(const node_manager &nm)
 {
 	__tree.append(nm.__tree);
+
+	// Add the rest of the elements
+	count_up(__tree);
+}
+
+// Better names
+void node_manager::append_front(const node &n)
+{
+	__tree.append_front(n);
+
+	// Add the rest of the elements
+	count_up(__tree);
+}
+
+void node_manager::append_front(const node_manager &nm)
+{
+	__tree.append_front(nm.__tree);
 
 	// Add the rest of the elements
 	count_up(__tree);

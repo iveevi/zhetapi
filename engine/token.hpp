@@ -44,10 +44,13 @@ public:
 		ndr,
 		ndd,
 		reg,
-		wld
+		wld,
+		token_lvalue
 	};
 
 	bool operator!=(Token *) const;
+
+	// Change caller to a public member (static)
 
 	/* 
 	 * Inspector function passed on to all derived classes, helps to
@@ -59,7 +62,7 @@ public:
 	 * Returns a representation of the Token, regardless of its
 	 * type.
 	 */
-	virtual ::std::string str() const = 0;
+	virtual std::string str() const = 0;
 
 	/*
 	 * Returns a heap allocated copy of the Token. Used in copy

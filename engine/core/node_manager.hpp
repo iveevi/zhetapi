@@ -10,6 +10,7 @@
 #include <core/node_differential.hpp>
 #include <core/parser.hpp>
 #include <core/types.hpp>
+#include <core/lvalue.hpp>
 
 namespace zhetapi {
 
@@ -36,11 +37,8 @@ public:
 	bool empty() const;	// Is the __tree node empty?
 
 	// Setters
+	void set_label(lbl);
 	void set_barn(Barn *);
-
-	// TODO: replace these to keep consistent interface
-	node &tree();
-	const node &tree() const;
 
 	Token *value() const;
 	Token *value(Barn *) const;
@@ -48,6 +46,9 @@ public:
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
 	Token *substitute_and_seq_compute(Barn *, const std::vector <Token *> &, size_t = 1);
+
+	void append_front(const node &);
+	void append_front(const node_manager &);
 
 	void append(const node &);
 	void append(const node_manager &);

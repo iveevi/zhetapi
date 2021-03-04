@@ -2,6 +2,8 @@
 #include <barn.hpp>
 #include <function.hpp>
 
+#include <core/lvalue.hpp>
+
 namespace zhetapi {
 
 // Constructors
@@ -66,13 +68,19 @@ void algorithm::compile(Barn *barn)
 	}
 
 	// Use .set_label instead
-	__compiled.tree().__label = l_sequential;
 	__compiled.add_args(__args);
+	__compiled.set_label(l_sequential);
 	__compiled.set_barn(barn);
+
+	/* using namespace std;
+	cout << "compiled:" << endl;
+	__compiled.print(); */
 }
 
 void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 {
+	using namespace std;
+
 	// Skip comments
 	if (str[0] == '#')
 		return;
@@ -81,42 +89,24 @@ void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 	
 	size_t tsize = tmp.size();
 	if (tsize > 1) {
-		// Ignore assignment for now
+		node_manager eq;
 
-		/*
-		std::vector <node> order;
+		// Assume that right terms are r-value
+		for (size_t i = 0; i < tsize - 1; i++) {
+			Token *tptr = barn->get(tmp[i]);
 
-		zhetapi::Token *tptr = nullptr;
-		
-		try {
-			zhetapi::node_manager mg(tmp[tsize - 1], barn);
-
-			tptr = mg.value();
-
-			order.push_back(mg.tree());
-		} catch (...) {}
-
-		for (int i = tsize - 2; i >= 0; i--) {
-			std::string ftr = tmp[i] + " = " + tmp[tsize - 1];
-
-			try {
-				zhetapi::Function f = ftr;
-
-				barn->put(f);
-
-				order.push_back(node(&f, {}));
-			} catch (...) {
-				barn->put(tptr, tmp[i]);
-
-				order.push_back(node(new Operand <std::string> (tmp[i]), {}));
-			}
+			// Check if tptr is assignable (ie. variable or function)
+			if (tptr)
+				eq.append(node(new lvalue(tmp[i], barn), l_lvalue));
 		}
 
-		node n(nullptr, l_assign_chain, order);
+		// Only node to actually be computed (as an l-value)
+		node_manager nm(tmp[tsize - 1], __args, barn);
 
-		rnm.append(n);
-		
-		delete tptr; */
+		eq.append_front(nm);
+		eq.set_label(l_assignment_chain);
+
+		rnm.append(eq);
 	} else {		
 		// All functions and algorithms are stored in barn
 		node_manager mg;

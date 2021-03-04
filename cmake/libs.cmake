@@ -8,6 +8,7 @@ set(ZHETAPI_SOURCE
 	source/image.cpp
 	source/interval.cpp
 	source/label.cpp
+	source/lvalue.cpp
 	source/node.cpp
 	source/node_differential.cpp
 	source/node_differentiation.cpp

@@ -122,6 +122,7 @@ elif args.target in targets:
     ))
 
     # Check for any post processing scripts
+    ret2 = 0
     if args.mode in post:
         ret2 = os.system('{cmd}'.format(cmd=post[args.mode]))
 

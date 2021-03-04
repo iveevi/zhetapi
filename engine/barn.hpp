@@ -220,11 +220,7 @@ public:
 	using ID = std::pair <std::string, std::vector <std::type_index>>;
 
 	using signature = std::vector <std::type_index>;
-
-	// using __loc_table = ::std::unordered_map <::std::string, ::std::string>;
 private:
-	//ftable <T, U> fstack;
-
 	std::vector <std::pair <ID, Token *>> ops;
 
 	std::unordered_map <std::string, Variable>		__var_table;
@@ -233,9 +229,7 @@ private:
 	std::unordered_map <std::string, Registrable>		__reg_table;
 	std::unordered_map <std::string, algorithm>		__alg_table;
 
-	mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;
-	
-	// __loc_table lt;
+	mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;	
 public:
 	Barn();
 	Barn(const Barn &);

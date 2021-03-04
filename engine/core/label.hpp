@@ -49,7 +49,8 @@ enum lbl {
 
 	// Algorithm
 	l_sequential,				// Sequential node
-	l_assign_chain,				// Assignment statements
+	l_assignment_chain,			// Assignment statements
+	l_lvalue,
 
 	// Miscellaneious
 	l_constant,
