@@ -204,7 +204,6 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	node *unrefd;
 
 	Token *tptr;
-
 	Token *vptr;
 
 	Variable v;
@@ -219,22 +218,22 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	// If null token, resort to special execution modes
 	// (Use this instead of sequential_value for
 	// algorithms; dont remove it though)
-	if (!tree.__tptr) {
-		if (tree.__label == l_assignment_chain) {
+	if (tree.null()) {
+		if (tree.label() == l_assignment_chain) {
 			// Evaluate first node
-			Token *tmp = value(tree.__leaves[0], ext);
+			Token *tmp = value(tree[0], ext);
 
 			// Assign for the other nodes
 
 			// Add index operator for nodes
-			size_t nleaves = tree.__leaves.size(); // Use a method instead
+			size_t nleaves = tree.child_count(); // Use a method instead
 
 			for (size_t i = 1; i < nleaves; i++) {
 				// Ensure that the node has type lvalue
-				if (tree.__leaves[i].__label != l_lvalue)
+				if (tree[i].label() != l_lvalue)
 					throw std::runtime_error("Need an lvalue on the left side of an \'=\'");
 				
-				lvalue *lv = dynamic_cast <lvalue *> (tree.__leaves[i].__tptr);
+				lvalue *lv = tree[i].cast <lvalue> ();
 
 				lv->assign(tmp);
 			}
@@ -249,9 +248,9 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	
 	// TODO: Add a method for nodes to cast the token (ie. tree.cast <type> ())
 	
-	switch (tree.__tptr->caller()) {
+	switch (tree.caller()) {
 	case Token::opd:
-		return tree.__tptr->copy();
+		return tree.copy_token();
 	case Token::oph:	
 		size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
@@ -277,6 +276,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		} else if (tree.__label == l_pre_modifier) {
 			vptr = tree.__leaves[0].__tptr;
 
+			// zhetapi_cast({vptr}, vp);
 			vp = dynamic_cast <Variable *> (vptr);
 
 			ident = vp->symbol();
@@ -288,11 +288,11 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 		return tptr->copy();
 	case Token::var:
-		tptr = (dynamic_cast <Variable *> (tree.__tptr))->get();
-
-		return tptr->copy();
+		return (tree.cast <Variable> ())->get()->copy();
 	case Token::token_rvalue:
-		return (dynamic_cast <rvalue *> (tree.__tptr))->get()->copy();
+		return (tree.cast <rvalue> ())->get()->copy();
+	case Token::ndr:
+		return (tree.cast <node_reference> ())->get()->copy_token();
 	case Token::ftn:
 		if (tree.__leaves.empty())
 			return tree.__tptr->copy();
@@ -303,11 +303,6 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		tptr = (*(dynamic_cast <Function *> (tree.__tptr)))(values);
 
 		return tptr->copy();
-	case Token::ndr:
-		unrefd = (dynamic_cast <node_reference *>
-				(tree.__tptr))->get();
-
-		return unrefd->__tptr->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf, ext));

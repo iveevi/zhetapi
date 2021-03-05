@@ -15,7 +15,8 @@
 
 namespace zhetapi {
 
-struct node {
+class node {
+public:
 	// Members
 	Token *			__tptr		= nullptr;
 	lbl			__label		= l_none;
@@ -38,8 +39,21 @@ struct node {
 
 	~node();
 
+	// Operations for cleaner code
+	template <class T>
+	T *cast() const;
+
+	Token *copy_token() const;
+
+	node &operator[](size_t);
+	const node &operator[](size_t) const;
+
 	// Properties
+	lbl label() const;
 	bool empty() const;
+	bool null() const;
+	size_t child_count() const;
+	Token::type caller() const;
 	
 	// Member functions
 	void transfer(const node &);
@@ -58,6 +72,12 @@ struct node {
 
 	friend std::ostream &operator<<(std::ostream &, const node &);
 };
+
+template <class T>
+T *node::cast() const
+{
+	return dynamic_cast <T *> (__tptr);
+}
 
 }
 

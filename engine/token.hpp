@@ -33,6 +33,7 @@ public:
 	 * 	wld - wildcard
 	 */
 	enum type {
+		undefined,
 		alg,
 		opd,
 		oph,

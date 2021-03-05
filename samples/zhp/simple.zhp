@@ -24,3 +24,4 @@ println("tmp = ", tmp)
 foo(65, 10)
 
 println("tmp = ", tmp)
+println("inside = ", inside)

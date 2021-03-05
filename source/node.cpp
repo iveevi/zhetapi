@@ -76,9 +76,50 @@ node::~node()
 	__tptr = nullptr;
 }
 
+Token *node::copy_token() const
+{
+	if (__tptr)
+		return __tptr->copy();
+
+	return nullptr;
+}
+
+node &node::operator[](size_t i)
+{
+	return __leaves[i];
+}
+
+const node &node::operator[](size_t i) const
+{
+	return __leaves[i];
+}
+
+lbl node::label() const
+{
+	return __label;
+}
+
 bool node::empty() const
 {
 	return (__tptr == nullptr) && __leaves.empty();
+}
+
+bool node::null() const
+{
+	return (__tptr == nullptr);
+}
+
+size_t node::child_count() const
+{
+	return __leaves.size();
+}
+
+Token::type node::caller() const
+{
+	if (__tptr)
+		return __tptr->caller();
+
+	return Token::undefined;
 }
 
 void node::transfer(const node &ref)
