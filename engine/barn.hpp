@@ -34,6 +34,8 @@
 
 namespace zhetapi {
 
+// TODO: Fix these macros to accomodate for __table instead of ops
+// Instead of a macro use a private method (clearner code and header)
 #define __add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
@@ -215,26 +217,34 @@ class algorithm;
  */
 class Barn {
 public:
+	// Just include, no need for macro
 	__TYPEDEFS__
 	
-	using ID = std::pair <std::string, std::vector <std::type_index>>;
-
 	using signature = std::vector <std::type_index>;
+	using opid = std::pair <std::pair <std::string, signature>, Token *>;
+
+	template <class T>
+	using symtab = std::unordered_map <std::string, T>;
+
+	using overloads = std::vector <std::pair <signature, Token *>>;
 private:
-	std::vector <std::pair <ID, Token *>> ops;
+	// Upper scope
+	Barn *				__upper = nullptr;
+
+	// std::vector <opid>		ops;
 
 	// TODO: Replace __var table with a string to token table
 	// (is Variable even necessary?)
 	//
 	// Are any of these other tables needed (instead of a string to token
 	// table?)
-	std::unordered_map <std::string, Variable>		__var_table;
-	std::unordered_map <std::string, Function>		__ftr_table;
+	symtab <Variable>		__var_table;
+	symtab <Function>		__ftr_table;
 
-	std::unordered_map <std::string, Registrable>		__reg_table;
-	std::unordered_map <std::string, algorithm>		__alg_table;
+	symtab <Registrable>		__reg_table;
+	symtab <algorithm>		__alg_table;
 
-	mutable std::unordered_map <std::string, std::vector <std::pair <signature, Token *>>> table;	
+	symtab <overloads>		__table;
 public:
 	Barn();
 	Barn(const Barn &);
@@ -260,14 +270,14 @@ public:
 
 	Token *get(const std::string &);
 
-	Token *compute(const std::string &, const std::vector <Token *> &) const;
+	Token *compute(const std::string &, const std::vector <Token *> &);
 	
-	std::string overloads(const std::string &) const;
+	std::string get_overloads(const std::string &);
 
 	void list() const;
 	void list_registered(std::string) const;
 
-	void print(bool = false) const;
+	void print(bool = false);
 
 	// Exceptions
 	class unknown_operation_overload {

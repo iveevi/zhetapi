@@ -77,6 +77,8 @@ std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
 	return {Q, R};
 }
 
+Vector <long long int> pslq(const Vector <long double> &);
+
 }
 
 }

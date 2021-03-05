@@ -12,6 +12,8 @@ namespace zhetapi {
 
 Barn::Barn()
 {
+	std::vector <std::pair <std::pair <std::string, std::vector <std::type_index>>, Token *>> ops;
+
 	//////////////////////////////////////////
 	// Real Scalar Arithemtic
 	//////////////////////////////////////////
@@ -241,20 +243,22 @@ Barn::Barn()
 	for (auto pr : ops) {
 		operation *opn = dynamic_cast <operation *> (pr.second);
 
-		if (table.count(pr.first.first))
-			table[pr.first.first].push_back({pr.first.second, pr.second});
+		if (__table.count(pr.first.first))
+			__table[pr.first.first].push_back({pr.first.second, pr.second});
 		else
-			table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+			__table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
 	}
 }
 
-Barn::Barn(const Barn &other) :
+Barn::Barn(const Barn &other)
+		: __upper(other.__upper),
 		__reg_table(other.__reg_table),
 		__alg_table(other.__alg_table),
 		__ftr_table(other.__ftr_table),
-		__var_table(other.__var_table)
+		__var_table(other.__var_table),
+		__table(other.__table)
 {
-	for (auto pr : other.ops)
+	/* for (auto pr : other.ops)
 		ops.push_back({pr.first, pr.second->copy()});
 	
 	for (auto pr : ops) {
@@ -264,18 +268,20 @@ Barn::Barn(const Barn &other) :
 			table[pr.first.first].push_back({pr.first.second, pr.second});
 		else
 			table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
-	}
+	} */
 }
 
 Barn &Barn::operator=(const Barn &other)
 {
 	if (this != &other) {
+		__upper = other.__upper;
 		__var_table = other.__var_table;
 		__ftr_table = other.__ftr_table;
 		__reg_table = other.__reg_table;
 		__alg_table = other.__alg_table;
+		__table = other.__table;
 
-		for (auto pr : other.ops)
+		/* for (auto pr : other.ops)
 			ops.push_back({pr.first, pr.second->copy()});
 		
 		for (auto pr : ops) {
@@ -284,8 +290,8 @@ Barn &Barn::operator=(const Barn &other)
 			if (table.count(pr.first.first))
 				table[pr.first.first].push_back({pr.first.second, pr.second});
 			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, ::std::vector <::std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
-		}
+				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
+		} */
 	}
 
 	return *this;
@@ -293,19 +299,15 @@ Barn &Barn::operator=(const Barn &other)
 
 Barn::~Barn()
 {
-	for (auto pr : ops)
-		delete pr.second;
+	for (auto overload_list : __table) {
+		for (auto id : overload_list.second)
+			delete id.second;
+	}
 }
 
 bool Barn::present(const std::string &str) const
 {
-	auto itr = std::find_if(ops.begin(), ops.end(),
-		[&](const std::pair <ID, Token *> &pr) {
-			return pr.first.first == str;
-		}
-	);
-
-	return itr != ops.end();
+	return __table.find(str) != __table.end();
 }
 
 void Barn::put(Variable var)
@@ -335,7 +337,7 @@ void Barn::put(algorithm alg)
 /*
 template <class T, class U>
 template <class A>
-void Barn <T, U> ::put(const ::std::string &str, A x)
+void Barn <T, U> ::put(const std::string &str, A x)
 {
 	put(Variable(str, x));
 } */
@@ -369,7 +371,7 @@ Token *Barn::get(const std::string &str)
 	return nullptr;
 }
 
-Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) const
+Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals)
 {
 	std::vector <std::type_index> sig;
 
@@ -378,7 +380,7 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) 
 
 	Token *tptr = nullptr;
 
-	std::vector <std::pair <signature, Token *>> *siglist = &table[str];
+	std::vector <std::pair <signature, Token *>> *siglist = &__table[str];
 
 	size_t sz = sig.size();
 	for (auto itr = siglist->begin(); itr != siglist->end(); itr++) {
@@ -418,7 +420,7 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) 
 		}
 
 		oss << ") for operation \"" << str << "\". " <<
-			overloads(str);
+			get_overloads(str);
 
 		throw unknown_operation_overload(oss.str());
 	}
@@ -426,14 +428,13 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals) 
 	return nullptr;
 }
 
-std::string Barn::overloads(const std::string &str) const
+std::string Barn::get_overloads(const std::string &str)
 {
-	std::vector <std::vector <::std::type_index>> loads;
-	for (auto itr = ops.begin(); itr != ops.end(); itr++) {
-		if (itr->first.first == str)
-			loads.push_back(itr->first.second);
-	}
+	std::vector <signature> loads;
 
+	for (auto id : __table[str])
+		loads.push_back(id.first);
+	
 	std::ostringstream oss;
 
 	oss << "Available overloads for \"" << str << "\": {";
@@ -481,11 +482,11 @@ void Barn::list_registered(std::string file) const
 		std::cout << "\t" << spr.second.str() << std::endl;
 }
 
-void Barn::print(bool show_ops) const
+void Barn::print(bool show_ops)
 {
-	std::cout << ::std::string(50, '-') << ::std::endl;
-	std::cout << "Variables:" << ::std::endl;
-	std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << std::string(50, '-') << std::endl;
+	std::cout << "Variables:" << std::endl;
+	std::cout << std::string(50, '-') << std::endl;
 
 	for (auto spr : __var_table)
 		std::cout << spr.second.str() << std::endl;
@@ -497,33 +498,31 @@ void Barn::print(bool show_ops) const
 	for (auto spr : __ftr_table)
 		std::cout << spr.second.str() << std::endl;
 
-	::std::cout << ::std::string(50, '-') << ::std::endl;
-	::std::cout << "Reg Table:" << ::std::endl;
-	::std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << std::string(50, '-') << std::endl;
+	std::cout << "Reg Table:" << std::endl;
+	std::cout << std::string(50, '-') << std::endl;
 
 	for (auto spr : __reg_table)
 		std::cout << spr.second.str() << std::endl;
 	
-	::std::cout << ::std::string(50, '-') << ::std::endl;
-	::std::cout << "Algorithms [" << __alg_table.size() << "]" << ::std::endl;
-	::std::cout << ::std::string(50, '-') << ::std::endl;
+	std::cout << std::string(50, '-') << std::endl;
+	std::cout << "Algorithms [" << __alg_table.size() << "]" << std::endl;
+	std::cout << std::string(50, '-') << std::endl;
 
 	for (auto spr : __alg_table)
-		::std::cout << spr.second.str() << ::std::endl;
+		std::cout << spr.second.str() << std::endl;
 
 	if (show_ops) {
-		for (auto pr : ops) {
-			::std::cout << "op: " << pr.second->str() << " @ " <<
-				pr.second << ::std::endl;
-		}
+		for (auto itr : __table) {
+			std::cout << "str: " << itr.first << " @ size: "
+					<< itr.second.size() << " @ 2nd size: "
+					<< __table[itr.first].size()
+					<< std::endl;
 
-		::std::cout << "######################################################" << ::std::endl;
-
-		for (auto itr : table) {
-			::std::cout << "Str: " << itr.first << " @ Size: " << itr.second.size() << " @ 2nd Size: " << table[itr.first].size() << ::std::endl;
-
-			for (auto pr : itr.second)
-				::std::cout << "\t" << pr.second->str() << ::std::endl;
+			for (auto id : itr.second) {
+				std::cout << "\t" << id.second->str()
+					<< std::endl;
+			}
 		}
 	}
 }

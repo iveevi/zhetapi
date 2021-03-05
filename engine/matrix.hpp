@@ -77,8 +77,8 @@ public:
 	// Type aliases
 	using psize_t = std::pair <size_t, size_t>;
 
-	Matrix(const std::vector <Vector <T>> &);
-	Matrix(const std::initializer_list <Vector <T>> &);
+	explicit Matrix(const std::vector <Vector <T>> &);
+	explicit Matrix(const std::initializer_list <Vector <T>> &);
 
 	__cuda_dual_prefix
 	Matrix(size_t, size_t, T *, bool = true);
