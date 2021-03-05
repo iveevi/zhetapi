@@ -11,7 +11,10 @@ println("tmp = ", tmp)
 alg foo(x, y) {
 	println("sum = ", x + y)
 
-	tmp = x + y
+	inside = tmp = x + y
+
+	println("\tinside = ", inside)
+	println("\ttmp = ", tmp)
 }
 
 foo(12, -5)

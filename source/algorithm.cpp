@@ -3,6 +3,7 @@
 #include <function.hpp>
 
 #include <core/lvalue.hpp>
+#include <core/rvalue.hpp>
 
 namespace zhetapi {
 
@@ -72,7 +73,8 @@ void algorithm::compile(Barn *barn)
 	__compiled.set_label(l_sequential);
 	__compiled.set_barn(barn);
 
-	/* using namespace std;
+	/*
+	using namespace std;
 	cout << "compiled:" << endl;
 	__compiled.print(); */
 }
@@ -93,6 +95,15 @@ void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 
 		// Assume that right terms are r-value
 		for (size_t i = 0; i < tsize - 1; i++) {
+			// TODO:
+			// If the symbol is not in the barn already
+			// then add it (needs to prioritize the
+			// possibility of a function over this)
+			if (!barn->get(tmp[i])) {
+				// Default initialize the value to 0
+				barn->put(Variable(new Operand <int> (0), tmp[i]));
+			}
+
 			Token *tptr = barn->get(tmp[i]);
 
 			// Check if tptr is assignable (ie. variable or function)
@@ -136,6 +147,10 @@ Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
 	// Ignore arguments for now
 	if (__compiled.empty())
 		compile(barn);
+
+	/* using namespace std;
+	cout << "Pre eval:" << endl;
+	__compiled.print(); */
 
 	return __compiled.substitute_and_seq_compute(barn, args);
 }

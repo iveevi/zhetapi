@@ -223,6 +223,11 @@ public:
 private:
 	std::vector <std::pair <ID, Token *>> ops;
 
+	// TODO: Replace __var table with a string to token table
+	// (is Variable even necessary?)
+	//
+	// Are any of these other tables needed (instead of a string to token
+	// table?)
 	std::unordered_map <std::string, Variable>		__var_table;
 	std::unordered_map <std::string, Function>		__ftr_table;
 

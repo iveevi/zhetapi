@@ -45,7 +45,8 @@ public:
 		ndd,
 		reg,
 		wld,
-		token_lvalue
+		token_lvalue,
+		token_rvalue
 	};
 
 	bool operator!=(Token *) const;

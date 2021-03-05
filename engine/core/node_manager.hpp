@@ -11,6 +11,7 @@
 #include <core/parser.hpp>
 #include <core/types.hpp>
 #include <core/lvalue.hpp>
+#include <core/rvalue.hpp>
 
 namespace zhetapi {
 

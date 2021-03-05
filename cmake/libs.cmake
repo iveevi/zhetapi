@@ -17,6 +17,7 @@ set(ZHETAPI_SOURCE
 	source/operation.cpp
 	source/operation_holder.cpp
 	source/registration.cpp
+	source/rvalue.cpp
 	source/token.cpp
 	source/types.cpp
 	source/variable.cpp

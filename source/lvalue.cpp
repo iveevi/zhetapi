@@ -35,13 +35,13 @@ std::string lvalue::str() const
 
 bool lvalue::operator==(Token *tptr) const
 {
-	lvalue *rv = dynamic_cast <lvalue *> (tptr);
+	lvalue *lv = dynamic_cast <lvalue *> (tptr);
 
-	if (rv == nullptr)
+	if (lv == nullptr)
 		return false;
 
-	return (rv->__symbol == __symbol)
-		&& (rv->__context == __context);
+	return (lv->__symbol == __symbol)
+		&& (lv->__context == __context);
 }
 
 }

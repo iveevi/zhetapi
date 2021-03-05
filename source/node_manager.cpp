@@ -194,6 +194,9 @@ Token *node_manager::value(node tree) const
 
 // There really should not be separate value methods,
 // just add exceptions to if the external context is null
+//
+// TODO: This method should really not exist: usually (cant remember when this
+// isnt true) ext is the exact same as __barn
 Token *node_manager ::value(node tree, Barn *ext) const
 {
 	std::vector <Token *> values;
@@ -244,6 +247,8 @@ Token *node_manager ::value(node tree, Barn *ext) const
 
 	// else: this func
 	
+	// TODO: Add a method for nodes to cast the token (ie. tree.cast <type> ())
+	
 	switch (tree.__tptr->caller()) {
 	case Token::opd:
 		return tree.__tptr->copy();
@@ -286,6 +291,8 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		tptr = (dynamic_cast <Variable *> (tree.__tptr))->get();
 
 		return tptr->copy();
+	case Token::token_rvalue:
+		return (dynamic_cast <rvalue *> (tree.__tptr))->get()->copy();
 	case Token::ftn:
 		if (tree.__leaves.empty())
 			return tree.__tptr->copy();
@@ -466,7 +473,27 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 			} else if (itr != __params.end()) {
 				t = node(new node_reference(&__refs[index], pr.second, index, true), {});
 			} else if (tptr != nullptr) {
-				t = node(tptr, {});
+				// Delaying actual evaluation to
+				// evaluation - better for algorithms,
+				// where values are not always known
+				// for sure
+				//
+				// TODO: Add special case for base scope,
+				// where dependencies can be ignored (does
+				// not include if/else statements)
+				//
+				// TODO: Add a block class (maybe oversees
+				// the algorithm class as well)
+				//
+				// Only use rvalue for variables
+				if (tptr->caller() == Token::var) {
+					rvalue *rv = new rvalue((dynamic_cast <Variable *> (tptr))->symbol(), __barn);
+
+					t = node(rv);
+				} else {
+					// t = node(new rvalue(pr.second, __barn), {});
+					t = node(tptr);
+				}
 			} else if (diff != __params.end()) {
 				t = node(new node_differential(new node_reference(&__refs[dindex], pr.second.substr(1), dindex, true)), {});
 			} else if (dptr != nullptr) {
