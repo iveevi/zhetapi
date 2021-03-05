@@ -77,6 +77,9 @@ public:
 	// Type aliases
 	using psize_t = std::pair <size_t, size_t>;
 
+	Matrix(const std::vector <Vector <T>> &);
+	Matrix(const std::initializer_list <Vector <T>> &);
+
 	__cuda_dual_prefix
 	Matrix(size_t, size_t, T *, bool = true);
 
@@ -353,6 +356,32 @@ public:
 #endif
 
 };
+
+template <class T>
+Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
+{
+	if (columns.size() > 0) {
+		__rows = columns[0].size();
+		__cols = columns.size();
+
+		this->__size = __rows * __cols;
+
+		this->__dim = new size_t[2];
+		this->__dim[0] = __rows;
+		this->__dim[1] = __cols;
+
+		this->__array = new T[this->__size];
+
+		for (size_t i = 0; i < __rows; i++) {
+			for (size_t j = 0; j < __cols; j++)
+				this->__array[__cols * i + j] = columns[j][i];
+		}
+	}
+}
+
+template <class T>
+Matrix <T> ::Matrix(const std::initializer_list <Vector <T>> &columns)
+		: Matrix(std::vector <Vector <T>> (columns)) {}
 
 // Owner implies that the vector object will take care of the deallocation
 template <class T>

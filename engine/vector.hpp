@@ -74,6 +74,7 @@ public:
 	// Normalization
 	void normalize();
 
+	// Maybe a different name (is the similarity justifiable?)
 	Vector normalized() const;
 
 	// Vector operations	
