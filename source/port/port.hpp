@@ -20,10 +20,16 @@
 #include <matrix.hpp>
 #include <tensor.hpp>
 
-#include <std/functions.hpp>
 #include <std/calculus.hpp>
+#include <std/functions.hpp>
 #include <std/interval.hpp>
+#include <std/linalg.hpp>
 
+// Macros
+#define TEST(name)	bool name(ostringstream &oss)
+#define RIG(name)	{#name, &name}	
+
+// Namespaces
 using namespace std;
 
 // Typedefs
@@ -45,20 +51,24 @@ struct bench {
 ostream &operator<<(ostream &, const bench &);
 
 // Test functions
-bool gamma_and_factorial(ostringstream &);
+TEST(gamma_and_factorial);
 
-bool vector_construction_and_memory(ostringstream &);
-bool vector_operations(ostringstream &);
+TEST(vector_construction_and_memory);
+TEST(vector_operations);
 
-bool matrix_construction_and_memory(ostringstream &);
-bool tensor_construction_and_memory(ostringstream &);
+TEST(matrix_construction_and_memory);
+TEST(tensor_construction_and_memory);
 
-bool integration(ostringstream &);
+TEST(integration);
 
-bool function_computation(ostringstream &);
-bool function_compilation_testing(ostringstream &);
+TEST(function_computation);
+TEST(function_compilation_testing);
 
-bool interval_construction(ostringstream &);
-bool interval_sampling(ostringstream &);
+TEST(interval_construction);
+TEST(interval_sampling);
+
+TEST(diag_matrix);
+TEST(qr_decomp);
+TEST(qr_alg);
 
 #endif

@@ -43,13 +43,14 @@ bool is_vector_type()
  * */
 template <class T>
 class Vector : public Matrix <T> {
-public:	
+public:
+	Vector(size_t);
 	Vector(const std::vector <T> &);
 	Vector(const std::initializer_list <T> &);
 	
 	// Cross-type operations
 	template <class A>
-	explicit Vector(const A &);
+	explicit Vector(const Vector <A> &);
 
 	// The three major components
 	T &x();
@@ -140,8 +141,6 @@ public:
 	Vector remove_top();
 	Vector remove_bottom();
 	
-	T norm() const;
-	
 #else
 	
 	__host__ __device__
@@ -230,6 +229,9 @@ public:
 };
 
 template <class T>
+Vector <T> ::Vector(size_t len) : Matrix <T> (len, 1) {}
+
+template <class T>
 Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
 
 template <class T>
@@ -238,7 +240,7 @@ Vector <T> ::Vector(const std::initializer_list <T> &ref)
 
 template <class T>
 template <class A>
-Vector <T> ::Vector(const A &other)
+Vector <T> ::Vector(const Vector <A> &other)
 {
 	if (is_vector_type <A> ()) {
 		// Add a new function for this
@@ -372,7 +374,7 @@ size_t Vector <T> ::imax() const
 template <class T>
 void Vector <T> ::normalize()
 {
-	T dt = norm();
+	T dt = this->norm();
 
 	for (size_t i = 0; i < size(); i++)
 		(*this)[i] /= dt;
@@ -381,9 +383,9 @@ void Vector <T> ::normalize()
 template <class T>
 Vector <T> Vector <T> ::normalized() const
 {
-	::std::vector <T> out;
+	std::vector <T> out;
 
-	T dt = norm();
+	T dt = this->norm();
 
 	for (size_t i = 0; i < size(); i++)
 		out.push_back((*this)[i]/dt);
@@ -736,12 +738,6 @@ Vector <T> Vector <T> ::remove_bottom()
 		total.push_back((*this)[i]);
 
 	return Vector(total);
-}
-
-template <class T>
-T Vector <T> ::norm() const
-{
-	return sqrt(inner(*this, *this));
 }
 
 #endif

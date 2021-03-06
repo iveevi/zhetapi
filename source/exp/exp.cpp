@@ -7,18 +7,15 @@ using namespace std;
 
 int main()
 {
-	Vector <double> a {1, 2, 3};
-	Vector <double> b {5, 4, 3};
-	Vector <double> c {7, 6, 3};
+	Matrix <double> A {{1, 1}, {1, 0}};
 
-	cout << Matrix <double> {a, b, c} << endl;
+	cout << linalg::qr_algorithm(A) << endl;
 
-	cout << linalg::proj(a, b) << endl;
+	Matrix <long double> B {{1, 1, 1}, {1, 1, 0}, {1, 0, 0}};
 
-	Matrix <double> A {a, b, c};
+	cout << linalg::qr_algorithm(B) << endl;
+	
+	Matrix <long double> C = linalg::diag(1.0L, 2.0L, 3.0L, 4.0L);
 
-	auto qr = linalg::qr_decompose(A);
-
-	cout << qr.first << endl;
-	cout << qr.second << endl;
+	cout << linalg::qr_algorithm(C) << endl;
 }

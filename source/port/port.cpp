@@ -5,18 +5,23 @@
 typedef pair <string, bool (*)(ostringstream &)> singlet;
 
 // Testing rig
-vector <pair <string, bool(*)(ostringstream &)>> rig {
-	{"gamma and factorial functions", &gamma_and_factorial},
-	{"vector construction and memory safety", &vector_construction_and_memory},
-	{"function general compilation", &function_compilation_testing},
-	{"matrix construction and memory safety", &matrix_construction_and_memory},
-	{"tensor construction and memory safety", &tensor_construction_and_memory},
-	{"integration techniques", &integration},
-	{"function computation", &function_computation},
-	{"vector operations", &vector_operations},
-	{"interval construction", &interval_construction},
-	{"interval sampling", &interval_sampling}
+vector <singlet> rig {
+	RIG(gamma_and_factorial),
+	RIG(vector_construction_and_memory),
+	RIG(function_compilation_testing),
+	RIG(matrix_construction_and_memory),
+	RIG(tensor_construction_and_memory),
+	RIG(integration),
+	RIG(function_computation),
+	RIG(vector_operations),
+	RIG(interval_construction),
+	RIG(interval_sampling),
+	RIG(diag_matrix),
+	RIG(qr_decomp),
+	RIG(qr_alg)
 };
+
+vector <singlet> failed;
 
 // Segfault handler
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
@@ -50,6 +55,7 @@ int main()
 
 	mutex io_mtx;	// I/O mutex
 	mutex tk_mtx;	// Task acquisition mutex
+	mutex fl_mtx;	// Task failure mutex
 
 	int count = 0;
 	int task = 0;
@@ -59,16 +65,28 @@ int main()
 		ostringstream oss;
 		
 		oss << string(100, '=') << endl;
-		oss << mark << "Running \"" << s.first << "\" test: [" << t << "/" << size << "]\n" << endl;
+		oss << mark << "Running \"" << s.first
+			<< "\" test [" << t << "/"
+			<< size << "]:\n" << endl;
 
 		oss << string(100, '-') << endl;
 		bool tmp = s.second(oss);	
 		oss << string(100, '-') << endl;
 
-		if (tmp)
-			oss << endl << "\"" << s.first << "\" test PASSED." << endl;
-		else
-			oss << endl << "\"" << s.first << "\" test FAILED." << endl;
+		if (tmp) {
+			oss << endl << "\"" << s.first
+				<< "\" test PASSED." << endl;
+		} else {
+			// Add to list of failed tasks
+			fl_mtx.lock();
+
+			failed.push_back(s);
+
+			fl_mtx.unlock();
+
+			oss << endl << "\"" << s.first
+				<< "\" test FAILED." << endl;
+		}
 		
 		oss << string(100, '=') << endl;
 		
@@ -108,5 +126,20 @@ int main()
 	for (size_t i = 0; i < THREADS; i++)
 		army[i].join();
 
-	cout << endl << mark << "Summary: passed " << count << "/" << rig.size() << " tests." << endl;
+	cout << endl << mark << "Summary: passed "
+		<< count << "/" << rig.size()
+		<< " tests." << endl;
+
+	if (failed.size()) {
+		cout << endl << string(100, '=') << endl;
+
+		cout << "Failed tests [" << failed.size() 
+			<< "/" << rig.size() << "]:" << endl;
+
+		for (auto task : failed) {
+			cout << "\t" << task.first << endl;
+		}
+
+		cout << string(100, '=') << endl;
+	}
 }

@@ -8,3 +8,4 @@ add_executable(czhp
 )
 
 target_link_libraries(czhp PUBLIC zhp-static)
+target_link_libraries(czhp PUBLIC ${CMAKE_DL_LIBS})

@@ -8,9 +8,32 @@
 #include <matrix.hpp>
 #include <vector.hpp>
 
+#include <core/common.hpp>
+
 namespace zhetapi {
 
 namespace linalg {
+
+template <class T>
+Matrix <T> diag(const std::vector <T> &cs)
+{
+	return Matrix <T> (cs.size(), cs.size(),
+		[&](size_t i, size_t j) {
+			return (i == j) ? cs[i] : 0;
+		}
+	);
+}
+
+// TODO: Fix bug with this one
+template <class T, class ... U>
+Matrix <T> diag(T x, U ... args)
+{
+	std::vector <T> bin {x};
+
+	collect(bin, args...);
+
+	return diag(bin);
+}
 
 /**
  * @brief Projects one vector onto another.
@@ -75,6 +98,50 @@ std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
 	}
 
 	return {Q, R};
+}
+
+/**
+ * @brief Performs the QR algorithm to compute the eigenvalues of a square
+ * matrix.
+ *
+ * @param A The matrix whos eigenvalues are to be computed.
+ * @param epsilon The precision threshold; when all values not in the diagonal
+ * of the matrix are less than or equal to epsilon, the algorithm terminates.
+ * @param limit The maximum number of iterations to perform.
+ *
+ * @return A vector of the diagonal elements of the matrix after termination. If
+ * the algorithm is successful, this should contain the (real) eigenvalues of A.
+ */
+template <class T>
+Vector <T> qr_algorithm(
+		const Matrix <T> &A,
+		T epsilon = T(1e-10),
+		size_t limit = 1000)
+{
+	// Assume that A is square for now
+	size_t n = A.get_rows();
+
+	Matrix <T> U = A;
+	for (size_t i = 0; i < limit; i++) {
+		auto qr = qr_decompose(U);
+
+		U = qr.second * qr.first;
+
+		bool terminate = true;
+		for (size_t i = 0; i < n * n; i++) {
+			if (*(U[i]) > epsilon)
+				terminate = false;
+		}
+
+		if (terminate)
+			break;
+	}
+
+	Vector <T> eigenvalues(n);
+	for (size_t i = 0; i < n; i++)
+		eigenvalues[i] = U[i][i];
+
+	return eigenvalues;
 }
 
 Vector <long long int> pslq(const Vector <long double> &);

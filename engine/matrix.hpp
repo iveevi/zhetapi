@@ -87,8 +87,10 @@ public:
 	Matrix(const std::vector <std::vector <T>> &);
 	Matrix(const std::initializer_list <std::initializer_list <T>> &);
 
-	template <class A>
-	Matrix(A);
+	/* template <class A>
+	Matrix(A); */
+	
+	T norm() const;
 
 	void resize(size_t, size_t);
 
@@ -189,8 +191,8 @@ public:
 	Matrix(size_t, size_t, std::function <T (size_t)>);
 	Matrix(size_t, size_t, std::function <T *(size_t)>);
 	
-	Matrix(size_t, size_t, ::std::function <T (size_t, size_t)>);
-	Matrix(size_t, size_t, ::std::function <T *(size_t, size_t)>);
+	Matrix(size_t, size_t, std::function <T (size_t, size_t)>);
+	Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
 
 	const Matrix &operator=(const Matrix &);
 
@@ -404,7 +406,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 }
 
 template <class T>
-Matrix <T> ::Matrix(const ::std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
+Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
 {
 	__rows = ref.size();
 
@@ -417,7 +419,7 @@ Matrix <T> ::Matrix(const ::std::vector <T> &ref) : Tensor <T> ({ref.size(), 1},
 }
 
 template <class T>
-Matrix <T> ::Matrix(const ::std::vector <::std::vector <T>> &ref) : Tensor <T> ({ref.size(), ref[0].size()}, T())
+Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref) : Tensor <T> ({ref.size(), ref[0].size()}, T())
 {
 	__rows = ref.size();
 
@@ -437,7 +439,7 @@ Matrix <T> ::Matrix(const ::std::vector <::std::vector <T>> &ref) : Tensor <T> (
 }
 
 template <class T>
-Matrix <T> ::Matrix(const ::std::initializer_list <::std::initializer_list <T>> &sq) : Tensor <T> ({sq.size(), sq.begin()->size()}, T())
+Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq) : Tensor <T> ({sq.size(), sq.begin()->size()}, T())
 {
 	__rows = sq.size();
 
@@ -462,22 +464,25 @@ Matrix <T> ::Matrix(const ::std::initializer_list <::std::initializer_list <T>> 
 }
 
 template <class T>
-template <class A>
-Matrix <T> ::Matrix(A x) : Tensor <T> ({1, 1}, T())
+T Matrix <T> ::norm() const
 {
-	// if (typeid(A) == typeid(T))
-	//        *this = Matrix(1, 1, (T) x);
+	T sum = 0;
+
+	for (size_t i = 0; i < this->__size; i++)
+		sum += this->__array[i] * this->__array[i];
+
+	return sqrt(sum);
 }
 
 template <class T>
-::std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
+std::pair <size_t, size_t> Matrix <T> ::get_dimensions() const
 {
 	return {__rows, __cols};
 }
 
 template <class T>
-Matrix <T> Matrix <T> ::slice(const ::std::pair <size_t, size_t> &start,
-		const ::std::pair <size_t, size_t> &end) const
+Matrix <T> Matrix <T> ::slice(const std::pair <size_t, size_t> &start,
+		const std::pair <size_t, size_t> &end) const
 {
 	/* The following asserts make sure the pairs
 	 * are in bounds of the Matrix and that they
@@ -542,9 +547,9 @@ Matrix <T> Matrix <T> ::append_above(const Matrix &m)
 	size_t t_rows = __rows;
 	size_t m_rows = m.__rows;
 
-	::std::vector <::std::vector <T>> row;
+	std::vector <std::vector <T>> row;
 
-	::std::vector <T> total;
+	std::vector <T> total;
 
 	for (size_t i = 0; i < m_rows; i++) {
 		total.clear();
@@ -608,7 +613,7 @@ Matrix <T> Matrix <T> ::append_left(const Matrix &m)
 	size_t t_cols = __cols;
 	size_t m_cols = m.__cols;
 
-	std::vector <::std::vector <T>> row;
+	std::vector <std::vector <T>> row;
 
 	std::vector <T> total;
 
@@ -637,9 +642,9 @@ Matrix <T> Matrix <T> ::append_right(const Matrix &m)
 	size_t t_cols = __cols;
 	size_t m_cols = m.__cols;
 
-	::std::vector <::std::vector <T>> row;
+	std::vector <std::vector <T>> row;
 
-	::std::vector <T> total;
+	std::vector <T> total;
 
 	for (size_t i = 0; i < __rows; i++) {
 		total.clear();
@@ -709,7 +714,7 @@ T Matrix <T> ::determinant() const
 }
 
 template <class T>
-T Matrix <T> ::minor(const ::std::pair <size_t, size_t> &pr) const
+T Matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
 {
 	Matrix <T> out(__rows - 1, __cols - 1);
 
@@ -740,7 +745,7 @@ T Matrix <T> ::minor(size_t i, size_t j) const
 }
 
 template <class T>
-T Matrix <T> ::cofactor(const ::std::pair <size_t, size_t> &pr) const
+T Matrix <T> ::cofactor(const std::pair <size_t, size_t> &pr) const
 {
 	return (((pr.first + pr.second) % 2) ? -1 : 1) * minor(pr);
 }
@@ -774,9 +779,9 @@ Matrix <T> Matrix <T> ::cofactor() const
 }
 
 template <class T>
-::std::string dims(const Matrix <T> &a)
+std::string dims(const Matrix <T> &a)
 {
-	return ::std::to_string(a.get_rows()) + " x " + ::std::to_string(a.get_cols());
+	return std::to_string(a.get_rows()) + " x " + std::to_string(a.get_cols());
 }
 
 template <class T>
@@ -912,7 +917,7 @@ Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
 		: __rows(other.__rows), __cols(other.__cols),
-		Tensor <T> ({other.__rows, other.__cols}, T())
+		Tensor <T> ({other.__rows, other.__cols})
 {
 	for (int i = 0; i < this->__size; i++)
 		this->__array[i] = other.__array[i];
@@ -961,7 +966,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val) : Tensor <T> ({rs, cs}, T())
 }
 
 template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
+Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen) : Tensor <T> ({rs, cs}, T())
 {
 	__rows = rs;
 	__cols = cs;
@@ -973,7 +978,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t)> gen) : Te
 }
 
 template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
+Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen) : Tensor <T> ({rs, cs}, T())
 {
 	__rows = rs;
 	__cols = cs;
@@ -985,7 +990,8 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t)> gen) : T
 }
 
 template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
+		: Tensor <T> ({rs, cs})
 {
 	__rows = rs;
 	__cols = cs;
@@ -997,7 +1003,8 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T (size_t, size_t)> g
 }
 
 template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, ::std::function <T *(size_t, size_t)> gen) : Tensor <T> ({rs, cs}, T())
+Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen)
+		: Tensor <T> ({rs, cs})
 {
 	__rows = rs;
 	__cols = cs;
@@ -1013,29 +1020,22 @@ template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
-		/* using namespace std;
-		cout << "cpy-other = " << other << endl; */
-
 		this->clear();
+		
+		__rows = other.__rows;
+		__cols = other.__cols;
 
-		this->__array = new T[other.__size];
-		this->__rows = other.__rows;
-		this->__cols = other.__cols;
+		this->__size = __rows * __cols;
 
-		this->__size = other.__size;
-		for (size_t i = 0; i < this->__size; i++) {
-			// cout << "\tother = " << other.__array[i] << endl;
+		this->__array = new T[this->__size];
+		for (size_t i = 0; i < this->__size; i++)
 			this->__array[i] = other.__array[i];
-			// cout << "\tarr = " << this->__array[i] << endl;
-		}
 		
 		this->__dims = 2;
 		this->__dim = new size_t[2];
 
-		this->__dim[0] = this->__rows;
-		this->__dim[1] = this->__cols;
-		
-		// cout << "cpy-this = " << *this << endl;
+		this->__dim[0] = __rows;
+		this->__dim[1] = __cols;
 	}
 
 	return *this;
