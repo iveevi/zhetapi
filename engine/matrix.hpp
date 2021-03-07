@@ -520,9 +520,11 @@ const T &Matrix <T> ::get(size_t row, size_t col) const
 template <class T>
 Vector <T> Matrix <T> ::get_column(size_t r) const
 {
-	return Vector <T> (__rows, [&](size_t i) {
-		return this->__array[__cols * i + r];
-	});
+	return Vector <T> (__rows,
+		[&](size_t i) {
+			return this->__array[__cols * i + r];
+		}
+	);
 }
 
 template <class T>
@@ -680,7 +682,12 @@ void Matrix <T> ::add_rows(size_t a, size_t b, T k)
 template <class T>
 void Matrix <T> ::swap_rows(size_t a, size_t b)
 {
-	std::swap(this->__array[a], this->__array[b]);
+	// Assumes that a and b are in bounds
+	T *arr = &(this->__array[a * __cols]);
+	T *brr = &(this->__array[b * __cols]);
+
+	for (size_t i = 0; i < __cols; i++)
+		std::swap(arr[i], brr[i]);
 }
 
 template <class T>
@@ -729,7 +736,7 @@ T Matrix <T> ::minor(const std::pair <size_t, size_t> &pr) const
 			if (j == pr.second)
 				continue;
 
-			out[a][b++] = this->__array[i][j];
+			out[a][b++] = this->__array[i * __cols + j];
 		}
 
 		a++;
@@ -860,12 +867,11 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 template <class T>
 Matrix <T> Matrix <T> ::identity(size_t dim)
 {
-	return Matrix {dim, dim, [](size_t i, size_t j) {
-		if (i == j)
-			return T(1);
-
-		return T(0);
-	}};
+	return Matrix(dim, dim,
+		[](size_t i, size_t j) {
+			return (i == j) ? 1 : 0;
+		}
+	);
 }
 
 // Private helper methods
@@ -1091,10 +1097,11 @@ size_t Matrix <T> ::get_cols() const
 template <class T>
 Matrix <T> Matrix <T> ::transpose() const
 {
-	return Matrix <T> (__cols, __rows,
+	return Matrix(__cols, __rows,
 		[&](size_t i, size_t j) {
 			return this->__array[j * __cols + i];
-	});
+		}
+	);
 }
 
 template <class T>

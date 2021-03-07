@@ -97,7 +97,29 @@ std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
 			R[i][j] = inner(es[i], A.get_column(j));
 	}
 
+	// Make a structure for matrix
+	// factorization of a general form
+	// 
+	// A * B * C * ...
 	return {Q, R};
+}
+
+/**
+ * @brief Performs LQ factorization, where L is a lower triangular matrix and Q
+ * is an orthogonal matrix/
+ *
+ * @param A The matrix to be factorized.
+ *
+ * @return A pair containing the matrices L and Q, in that order
+ */
+template <class T>
+std::pair <Matrix <T>, Matrix <T>> lq_decompose(const Matrix <T> &A)
+{
+	// Use a more verbose method for better
+	// accuracy and efficiency
+	auto qr = qr_decompose(A);
+
+	return {qr.second.transpose(), qr.first.transpose()};
 }
 
 /**
@@ -144,7 +166,13 @@ Vector <T> qr_algorithm(
 	return eigenvalues;
 }
 
-Vector <long long int> pslq(const Vector <long double> &);
+typedef Vector <long double> Vec;
+typedef Matrix <long double> Mat;
+
+extern const long double GAMMA;
+extern const long double EPSILON;
+
+Vec pslq(const Vec &, long double = GAMMA, long double = EPSILON);
 
 }
 

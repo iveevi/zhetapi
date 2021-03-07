@@ -7,15 +7,52 @@ using namespace std;
 
 int main()
 {
-	Matrix <double> A {{1, 1}, {1, 0}};
+	using namespace zhetapi::linalg;
 
-	cout << linalg::qr_algorithm(A) << endl;
+	Matrix <double> A {{1, 1, 1}, {1, 0, 1}, {2, 4, 5}};
 
-	Matrix <long double> B {{1, 1, 1}, {1, 1, 0}, {1, 0, 0}};
+	auto qr = qr_decompose(A);
 
-	cout << linalg::qr_algorithm(B) << endl;
+	cout << "Q = " << qr.first << endl;
+	cout << "R = " << qr.second << endl;
+
+	auto lq = lq_decompose(A);
 	
-	Matrix <long double> C = linalg::diag(1.0L, 2.0L, 3.0L, 4.0L);
+	cout << "L = " << lq.first << endl;
+	cout << "Q = " << lq.second << endl;
 
-	cout << linalg::qr_algorithm(C) << endl;
+	cout << "A = " << A << endl;
+
+	A.swap_rows(0, 1);
+
+	cout << "A = " << A << endl;
+
+	Matrix <double> A_inv = A.inverse();
+
+	cout << "A_inv = " << A_inv << endl;
+
+	cout << "I3 = " << A * A_inv << endl;
+
+	// Testing PSLQ
+	Vector <long double> a = {3.14159265358, acos(-1)};
+
+	auto rel1 = pslq(a);
+
+	cout << string(50, '=') << endl;
+	cout << "a = " << a << endl;
+	cout << "rel1 = " << rel1 << endl;
+
+	cout << "check = " << inner(a, rel1) << endl;
+
+	long double phi = 1.61803398874989484820458683436;
+
+	Vector <long double> b = {phi, phi * phi, 1};
+
+	auto rel2 = pslq(b);
+
+	cout << string(50, '=') << endl;
+	cout << "b = " << b << endl;
+	cout << "rel2 = " << rel2 << endl;
+
+	cout << "check = " << inner(b, rel2) << endl;
 }
