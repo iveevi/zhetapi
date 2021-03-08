@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <utility>
+#include <iomanip>
 
 // Engine headers
 #include <matrix.hpp>
@@ -51,7 +52,60 @@ public:
 		
 		return prod;
 	}
+};
+
+// Separate matrix/vector methods from algorithms
+template <class T>
+std::ostream &pretty(std::ostream &os, const Matrix <T> &mat)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		os << "|";
+
+		for (size_t j = 0; j < c; j++) {
+			os << std::setw(8) << std::fixed
+				<< std::setprecision(4) << mat[i][j];
+
+			if (j < c - 1)
+				os << "\t";
+		}
+
+		os << "|";
+		if (i < r - 1)
+			os << "\n";
+	}
+
+	return os;
 }
+
+// Reshaping functions
+template <class T>
+Vector <T> flatten(const Matrix <T> &mat)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	return Vector <T> (r * c,
+		[&](size_t i) {
+			return mat[i / c][i % c];
+		}
+	);
+}
+
+template <class T>
+Matrix <T> fold(const Vector <T> &vec, size_t r, size_t c)
+{
+	return Matrix <T> (r, c,
+		[&](size_t i, size_t j) {
+			return vec[i * c + j];
+		}
+	);
+}
+
+template <class T>
+Tensor <T> reshape(const Vector <T> &);
 
 // Create a diagonal matrix
 template <class T>
@@ -92,15 +146,15 @@ Vector <T> proj(const Vector <T> &u, const Vector <T> &v)
 template <class T>
 class QR : public Factorization <T, 2> {
 public:
-	QR(const Matrix &Q, const Matrix <T> &R)
+	QR(const Matrix <T> &Q, const Matrix <T> &R)
 			: Factorization <T, 2> (Q, R) {}
 	
 	Matrix <T> q() const {
-		return this->__term[0];
+		return this->__terms[0];
 	}
 
 	Matrix <T> r() const {
-		return this->__term[1];
+		return this->__terms[1];
 	}
 };
 
@@ -108,15 +162,15 @@ public:
 template <class T>
 class LQ : public Factorization <T, 2> {
 public:
-	LQ(const Matrix &L, const Matrix <T> &Q)
+	LQ(const Matrix <T> &L, const Matrix <T> &Q)
 			: Factorization <T, 2> (L, Q) {}
 	
 	Matrix <T> l() const {
-		return this->__term[0];
+		return this->__terms[0];
 	}
 
 	Matrix <T> q() const {
-		return this->__term[1];
+		return this->__terms[1];
 	}
 };
 
@@ -129,7 +183,7 @@ public:
  * @return A QR factorization object containing the matrices Q and R.
  */
 template <class T>
-QR qr_decompose(const Matrix <T> &A)
+QR <T> qr_decompose(const Matrix <T> &A)
 {
 	// Assume that A is square for now
 	//
@@ -184,13 +238,13 @@ QR qr_decompose(const Matrix <T> &A)
  * @return A pair containing the matrices L and Q, in that order
  */
 template <class T>
-LQ lq_decompose(const Matrix <T> &A)
+LQ <T> lq_decompose(const Matrix <T> &A)
 {
 	// Use a more verbose method for better
 	// accuracy and efficiency
 	auto qr = qr_decompose(A);
 
-	return LQ(qr.second.transpose(), qr.first.transpose());
+	return LQ(qr.q().transpose(), qr.r().transpose());
 }
 
 /**

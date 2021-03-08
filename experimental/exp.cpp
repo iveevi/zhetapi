@@ -13,13 +13,13 @@ int main()
 
 	auto qr = qr_decompose(A);
 
-	cout << "Q = " << qr.first << endl;
-	cout << "R = " << qr.second << endl;
+	cout << "Q = " << qr.q() << endl;
+	cout << "R = " << qr.r() << endl;
 
 	auto lq = lq_decompose(A);
 	
-	cout << "L = " << lq.first << endl;
-	cout << "Q = " << lq.second << endl;
+	cout << "L = " << lq.l() << endl;
+	cout << "Q = " << lq.q() << endl;
 
 	cout << "A = " << A << endl;
 

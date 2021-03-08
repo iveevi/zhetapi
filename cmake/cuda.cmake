@@ -3,7 +3,7 @@ find_package(CUDA)
 if (CUDA_FOUND)
 	project(cuda LANGUAGES CXX CUDA)
 	
-	add_executable(cuda source/cuda/main.cu)
+	add_executable(cuda experimental/main.cu)
 
 	target_link_libraries(cuda PUBLIC zhp-shared)
 	target_link_libraries(cuda PUBLIC ${CUDA_LIBRARIES})

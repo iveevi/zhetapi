@@ -1,15 +1,16 @@
 # Compile portability tests
 add_executable(port
-	source/port/port-calculus.cpp
-	source/port/port-function.cpp
-	source/port/port-interval.cpp
-	source/port/port-linalg.cpp
-	source/port/port-matrix.cpp
-	source/port/port-special.cpp
-	source/port/port-tensor.cpp
-	source/port/port-vector.cpp
-	source/port/port.cpp
-	source/port/timers.cpp)
+	testing/port/port-calculus.cpp
+	testing/port/port-function.cpp
+	testing/port/port-interval.cpp
+	testing/port/port-linalg.cpp
+	testing/port/port-matrix.cpp
+	testing/port/port-special.cpp
+	testing/port/port-tensor.cpp
+	testing/port/port-vector.cpp
+	testing/port/port.cpp
+	testing/port/timers.cpp
+)
 
 target_link_libraries(port PUBLIC zhp-shared)
 target_link_libraries(port PUBLIC ${CMAKE_DL_LIBS})

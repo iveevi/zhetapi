@@ -1,30 +1,33 @@
 set(ZHETAPI_SOURCE 
-	source/algorithm.cpp
 	source/barn.cpp
-	source/class.cpp
 	source/complex.cpp
 	source/display.cpp
 	source/function.cpp
 	source/image.cpp
-	source/interval.cpp
-	source/label.cpp
-	source/linalg.cpp
-	source/lvalue.cpp
-	source/node.cpp
-	source/node_differential.cpp
-	source/node_differentiation.cpp
-	source/node_manager.cpp
-	source/node_reference.cpp
-	source/operation.cpp
-	source/operation_holder.cpp
 	source/registration.cpp
-	source/rvalue.cpp
-	source/token.cpp
-	source/types.cpp
 	source/variable.cpp
-	source/variable_cluster.cpp
-	source/std_functions.cpp
-	source/shader.cpp
+	source/token.cpp
+
+	source/core/algorithm.cpp
+	source/core/class.cpp
+	source/core/label.cpp
+	source/core/lvalue.cpp
+	source/core/node.cpp
+	source/core/node_differential.cpp
+	source/core/node_differentiation.cpp
+	source/core/node_manager.cpp
+	source/core/node_reference.cpp
+	source/core/operation.cpp
+	source/core/operation_holder.cpp
+	source/core/rvalue.cpp
+	source/core/shader.cpp
+	source/core/types.cpp
+	source/core/variable_cluster.cpp
+
+	source/std/functions.cpp
+	source/std/interval.cpp
+	source/std/linalg.cpp
+	
 	glad/glad.c
 )
 

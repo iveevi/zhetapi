@@ -38,9 +38,41 @@ static inline string __get_dir(string file)
 	return file.substr(0, i + 1);
 }
 
+// Inline kernel
+static int inline_interpret()
+{
+	// Register builtin symbols (put into another function)
+	barn.put(Registrable("print", &bt_print));
+	barn.put(Registrable("println", &bt_println));
+
+	barn.put(Variable(op_true->copy(), "true"));
+	barn.put(Variable(op_false->copy(), "false"));
+
+	while (true) {
+		cout << "> ";
+
+		string str;
+		getline(cin, str);
+
+		if (!cin) {
+			cout << endl;
+			
+			exit(0);
+		}
+
+		if (str.empty())
+			continue;
+
+		parse(str);
+	}
+}
+
 // Interpretation kernel
 static int interpreter(string infile)
 {
+	if (infile.empty())
+		inline_interpret();
+	
 	if (!freopen(infile.c_str(), "r", stdin)) {
 		printf("Fatal error: failed to open file '%s'.\n", infile.c_str());
 

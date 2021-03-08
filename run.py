@@ -46,12 +46,12 @@ post = {
 def install(args):
 	print("Installing...")
 
-	make_target(args.threads, 'czhp zhp-shared zhp-static')
+	make_target(args.threads, 'zhetapi zhp-shared zhp-static')
 	# make_target(args.threads, 'zhp-shared')
 	# make_target(args.threads, 'zhp-static')
 
 	os.system('mkdir -p bin')
-	os.system('mv czhp bin/')
+	os.system('mv zhetapi bin/')
 	os.system('mv libzhp.* bin/')
 
 	os.system('mkdir -p include')
@@ -74,31 +74,31 @@ def install(args):
 	if (ret1 != 0) or (ret2 != 0):
 		exit(-1)
 
-def czhp(args):
-    make_target(args.threads, 'czhp', args.mode)
+def zhetapi(args):
+    make_target(args.threads, 'zhetapi', args.mode)
 
     file = 'samples/zhp/simple.zhp'
 
     ret = 0
     if args.mode == '':
-        ret = os.system('{exe}czhp {file} -L include'.format(
+        ret = os.system('{exe}zhetapi {file} -L include'.format(
             exe=modes[args.mode],
             file=file
         ))
     else:
-        ret = os.system('{exe}czhp'.format(
+        ret = os.system('{exe}zhetapi'.format(
             exe=modes[args.mode]
         ))
 
     os.system('mkdir -p debug/')
-    os.system('mv czhp debug/')
+    os.system('mv zhetapi debug/')
 
     if (ret != 0):
         exit(-1)
 
 special = {
 	'install': install,
-	'czhp': czhp
+	'zhetapi': zhetapi
 }
 
 # Preprocessing
