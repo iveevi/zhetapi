@@ -14,6 +14,46 @@ namespace zhetapi {
 
 namespace linalg {
 
+// Factorization class
+template <class T, size_t N>
+class Factorization {
+protected:
+	Matrix <T>	__terms[N];
+public:
+	Factorization(const std::vector <Matrix <T>> &terms) {
+		for (size_t i = 0; i < N; i++)
+			__terms[i] = terms[i];
+	}
+	
+	// Variadic constructor
+	template <class ... U>
+	Factorization(const Matrix <T> &A, U ... args) {
+		std::vector <Matrix <T>> terms {A};
+
+		collect(terms, args...);
+
+		// Skip overhead of std::vector
+		// by adding a collect function
+		// for pointer arrays
+		for (size_t i = 0; i < N; i++)
+			__terms[i] = terms[i];
+	}
+
+	Matrix <T> product() const {
+		// Check for appropriate number
+		if (N <= 0)
+			return Matrix <T> ::indentity(1);
+		
+		Matrix <T> prod = __terms[0];
+
+		for (size_t i = 1; i < N; i++)
+			prod *= __terms[i];
+		
+		return prod;
+	}
+}
+
+// Create a diagonal matrix
 template <class T>
 Matrix <T> diag(const std::vector <T> &cs)
 {
@@ -24,7 +64,6 @@ Matrix <T> diag(const std::vector <T> &cs)
 	);
 }
 
-// TODO: Fix bug with this one
 template <class T, class ... U>
 Matrix <T> diag(T x, U ... args)
 {
@@ -49,16 +88,48 @@ Vector <T> proj(const Vector <T> &u, const Vector <T> &v)
 	return (inner(u, v) / inner(u, u)) * u;
 }
 
+// QR factorization class
+template <class T>
+class QR : public Factorization <T, 2> {
+public:
+	QR(const Matrix &Q, const Matrix <T> &R)
+			: Factorization <T, 2> (Q, R) {}
+	
+	Matrix <T> q() const {
+		return this->__term[0];
+	}
+
+	Matrix <T> r() const {
+		return this->__term[1];
+	}
+};
+
+// LQ factorization class
+template <class T>
+class LQ : public Factorization <T, 2> {
+public:
+	LQ(const Matrix &L, const Matrix <T> &Q)
+			: Factorization <T, 2> (L, Q) {}
+	
+	Matrix <T> l() const {
+		return this->__term[0];
+	}
+
+	Matrix <T> q() const {
+		return this->__term[1];
+	}
+};
+
 /**
  * @brief Performs QR decomposition, where Q is an orthogonal matrix and R is
  * an upper triangular matrix.
  *
  * @param A The matrix to be decomposed.
  *
- * @return A pair containing the matrices Q and R.
+ * @return A QR factorization object containing the matrices Q and R.
  */
 template <class T>
-std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
+QR qr_decompose(const Matrix <T> &A)
 {
 	// Assume that A is square for now
 	//
@@ -101,7 +172,7 @@ std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
 	// factorization of a general form
 	// 
 	// A * B * C * ...
-	return {Q, R};
+	return QR(Q, R);
 }
 
 /**
@@ -113,13 +184,13 @@ std::pair <Matrix <T>, Matrix <T>> qr_decompose(const Matrix <T> &A)
  * @return A pair containing the matrices L and Q, in that order
  */
 template <class T>
-std::pair <Matrix <T>, Matrix <T>> lq_decompose(const Matrix <T> &A)
+LQ lq_decompose(const Matrix <T> &A)
 {
 	// Use a more verbose method for better
 	// accuracy and efficiency
 	auto qr = qr_decompose(A);
 
-	return {qr.second.transpose(), qr.first.transpose()};
+	return LQ(qr.second.transpose(), qr.first.transpose());
 }
 
 /**
@@ -173,6 +244,23 @@ extern const long double GAMMA;
 extern const long double EPSILON;
 
 Vec pslq(const Vec &, long double = GAMMA, long double = EPSILON);
+
+template <class T>
+Matrix <T> exp(const Matrix <T> &A, size_t pow)
+{
+	// Base cases
+	if (pow == 0)
+		return Matrix <T> ::indentity(A.get_rows());
+	
+	if (pow == 1)
+		return A;
+	
+	// Use recusion
+	if (pow % 2)
+		return A * pow(A, (pow - 1)/2);
+	
+	return pow(A, pow/2);
+}
 
 }
 
