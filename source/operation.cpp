@@ -2,62 +2,49 @@
 
 namespace zhetapi {
 
-	operation::operation() : __input(""), __output(""), ops(0) {}
+operation::operation() {}
 
-	operation::operation(const operation &other)
-	{
-		__input = other.__input;
-		__output = other.__output;
-		ops = other.ops;
-		__opn = other.__opn;
-	}
+operation::operation(
+		const std::string &in,
+		const std::string &out,
+		std::size_t opers,
+		mapper fopn)
+		: __input(in), __output(out),
+		__ops(opers), __opn(fopn) {}
 
-	operation::operation(const ::std::string &in, const ::std::string &out, ::std::size_t
-			opers, mapper fopn) : __input(in), __output(out), ops(opers),
-			__opn(fopn) {}
+Token *operation::compute(const std::vector <Token *> &ins) const
+{
+	if (ins.size() != __ops)
+		throw bad_input_size();
 
-	Token *operation::operator()(const ::std::vector <Token *> &ins) const
-	{
-		if (ins.size() != ops)
-			throw count_mismatch();
-		return __opn(ins);
-	}
+	return __opn(ins);
+}
 
-	::std::string operation::fmt() const
-	{
-		return __input;
-	}
+std::string operation::str() const
+{
+	return "[" + __input + "](" + std::to_string(__ops)
+		+ ") - [" + __output + "]";
+}
 
-	::std::string operation::str() const
-	{
-		return "[" + __input + "](" + ::std::to_string(ops)
-			+ ") - [" + __output + "]";
-	}
+Token::type operation::caller() const
+{
+	return Token::opn;
+}
 
-	::std::size_t operation::inputs() const
-	{
-		return ops;
-	}
+Token *operation::copy() const
+{
+	return new operation(*this);
+}
 
-	Token::type operation::caller() const
-	{
-		return opn;
-	}
+bool operation::operator==(Token *t) const
+{
+	operation *optr = dynamic_cast <operation *> (t);
+	if (optr == nullptr)
+		return false;
 
-	Token *operation::copy() const
-	{
-		return new operation(*this);
-	}
-
-	bool operation::operator==(Token *t) const
-	{
-		operation *optr = dynamic_cast <operation *> (t);
-		if (optr == nullptr)
-			return false;
-
-		return (ops == optr->ops)
-			&& (__input == optr->__input)
-			&& (__output == optr->__output);
-	}
+	return (__ops == optr->__ops)
+		&& (__input == optr->__input)
+		&& (__output == optr->__output);
+}
 
 }

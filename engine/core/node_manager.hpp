@@ -19,8 +19,6 @@ class Barn;
 class Function;
 
 class node_manager {
-public:
-	__TYPEDEFS__
 private:
 	Barn *				__barn		= nullptr;
 	node				__tree		= node();

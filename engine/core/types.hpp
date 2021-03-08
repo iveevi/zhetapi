@@ -11,67 +11,65 @@
 #include <matrix.hpp>
 #include <vector.hpp>
 
-#define __TYPEDEFS__						\
-		typedef int Z;					\
-		typedef double R;				\
-		typedef bool B;					\
-		typedef std::string S;				\
-		typedef Rational <Z> Q;				\
-								\
-		typedef Complex <Z> CZ;				\
-		typedef Complex <Q> CQ;				\
-		typedef Complex <R> CR;				\
-								\
-		typedef Vector <Z> VZ;				\
-		typedef Vector <Q> VQ;				\
-		typedef Vector <R> VR;				\
-								\
-		typedef Vector <CZ> VCZ;			\
-		typedef Vector <CQ> VCQ;			\
-		typedef Vector <CR> VCR;			\
-								\
-		typedef Matrix <Z> MZ;				\
-		typedef Matrix <Q> MQ;				\
-		typedef Matrix <R> MR;				\
-								\
-		typedef Matrix <CZ> MCZ;			\
-		typedef Matrix <CQ> MCQ;			\
-		typedef Matrix <CR> MCR;			\
-								\
-		typedef zhetapi::Operand <Z> opd_z;      	\
-		typedef zhetapi::Operand <Q> opd_q;      	\
-		typedef zhetapi::Operand <R> opd_r;      	\
-								\
-		typedef zhetapi::Operand <CZ> opd_cz;		\
-		typedef zhetapi::Operand <CQ> opd_cq;		\
-		typedef zhetapi::Operand <CR> opd_cr;		\
-								\
-		typedef zhetapi::Operand <VZ> opd_v_z;		\
-		typedef zhetapi::Operand <VQ> opd_v_q;		\
-		typedef zhetapi::Operand <VR> opd_v_r;		\
-								\
-		typedef zhetapi::Operand <VCZ> opd_v_cz;	\
-		typedef zhetapi::Operand <VCQ> opd_v_cq;	\
-		typedef zhetapi::Operand <VCR> opd_v_cr;	\
-								\
-		typedef zhetapi::Operand <MZ> opd_m_z;		\
-		typedef zhetapi::Operand <MQ> opd_m_q;		\
-		typedef zhetapi::Operand <MR> opd_m_r;		\
-								\
-		typedef zhetapi::Operand <MCZ> opd_m_cz;	\
-		typedef zhetapi::Operand <MCQ> opd_m_cq;	\
-		typedef zhetapi::Operand <MCR> opd_m_cr;	\
-								\
-		typedef zhetapi::Operand <B> opd_b;		\
-		typedef zhetapi::Operand <S> opd_s;
+namespace zhetapi {
+	
+typedef int Z;					
+typedef double R;				
+typedef bool B;					
+typedef std::string S;				
+typedef Rational <Z> Q;				
+						
+typedef Complex <Z> CZ;				
+typedef Complex <Q> CQ;				
+typedef Complex <R> CR;				
+						
+typedef Vector <Z> VZ;				
+typedef Vector <Q> VQ;				
+typedef Vector <R> VR;				
+						
+typedef Vector <CZ> VCZ;			
+typedef Vector <CQ> VCQ;			
+typedef Vector <CR> VCR;			
+						
+typedef Matrix <Z> MZ;				
+typedef Matrix <Q> MQ;				
+typedef Matrix <R> MR;				
+						
+typedef Matrix <CZ> MCZ;			
+typedef Matrix <CQ> MCQ;			
+typedef Matrix <CR> MCR;			
+						
+typedef Operand <Z> opd_z;      	
+typedef Operand <Q> opd_q;      	
+typedef Operand <R> opd_r;      	
+	       			
+typedef Operand <CZ> opd_cz;		
+typedef Operand <CQ> opd_cq;		
+typedef Operand <CR> opd_cr;		
+	       			
+typedef Operand <VZ> opd_v_z;		
+typedef Operand <VQ> opd_v_q;		
+typedef Operand <VR> opd_v_r;		
+	       			
+typedef Operand <VCZ> opd_v_cz;	
+typedef Operand <VCQ> opd_v_cq;	
+typedef Operand <VCR> opd_v_cr;	
+	       			
+typedef Operand <MZ> opd_m_z;		
+typedef Operand <MQ> opd_m_q;		
+typedef Operand <MR> opd_m_r;		
+	       			
+typedef Operand <MCZ> opd_m_cz;	
+typedef Operand <MCQ> opd_m_cq;	
+typedef Operand <MCR> opd_m_cr;	
+	       			
+typedef Operand <B> opd_b;		
+typedef Operand <S> opd_s;
 
 #define	ONE	1
 
-namespace zhetapi {
 
 struct types {
-	__TYPEDEFS__
-	
 	/////////////////////
 	// Token factories
 	/////////////////////

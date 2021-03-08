@@ -48,8 +48,6 @@ using namespace boost::phoenix;
 // Parser
 struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 
-	__TYPEDEFS__
-
 	parser() : parser::base_type(__start) {
 		__esc.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
 			("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')

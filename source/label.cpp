@@ -102,51 +102,51 @@ bool is_variable(lbl type)
 lbl constant_label(Token *tptr)
 {
 	// Complex numbers
-	if (dynamic_cast <types::opd_z *> (tptr))
+	if (dynamic_cast <opd_z *> (tptr))
 		return l_constant_integer;
-	if (dynamic_cast <types::opd_q *> (tptr))
+	if (dynamic_cast <opd_q *> (tptr))
 		return l_constant_rational;
-	if (dynamic_cast <types::opd_r *> (tptr))
+	if (dynamic_cast <opd_r *> (tptr))
 		return l_constant_real;
-	if (dynamic_cast <types::opd_cz *> (tptr))
+	if (dynamic_cast <opd_cz *> (tptr))
 		return l_constant_complex_integer;
-	if (dynamic_cast <types::opd_cq *> (tptr))
+	if (dynamic_cast <opd_cq *> (tptr))
 		return l_constant_complex_rational;
-	if (dynamic_cast <types::opd_cr *> (tptr))
+	if (dynamic_cast <opd_cr *> (tptr))
 		return l_constant_complex_real;
 	
 	// Vectors
-	if (dynamic_cast <types::opd_v_z *> (tptr))
+	if (dynamic_cast <opd_v_z *> (tptr))
 		return l_constant_vector_integer;
-	if (dynamic_cast <types::opd_v_q *> (tptr))
+	if (dynamic_cast <opd_v_q *> (tptr))
 		return l_constant_vector_rational;
-	if (dynamic_cast <types::opd_v_r *> (tptr))
+	if (dynamic_cast <opd_v_r *> (tptr))
 		return l_constant_vector_real;
-	if (dynamic_cast <types::opd_v_cz *> (tptr))
+	if (dynamic_cast <opd_v_cz *> (tptr))
 		return l_constant_vector_complex_integer;
-	if (dynamic_cast <types::opd_v_cq *> (tptr))
+	if (dynamic_cast <opd_v_cq *> (tptr))
 		return l_constant_vector_complex_rational;
-	if (dynamic_cast <types::opd_v_cr *> (tptr))
+	if (dynamic_cast <opd_v_cr *> (tptr))
 		return l_constant_vector_complex_real;
 	
 	// Matrices
-	if (dynamic_cast <types::opd_m_z *> (tptr))
+	if (dynamic_cast <opd_m_z *> (tptr))
 		return l_constant_matrix_integer;
-	if (dynamic_cast <types::opd_m_q *> (tptr))
+	if (dynamic_cast <opd_m_q *> (tptr))
 		return l_constant_matrix_rational;
-	if (dynamic_cast <types::opd_m_r *> (tptr))
+	if (dynamic_cast <opd_m_r *> (tptr))
 		return l_constant_matrix_real;
-	if (dynamic_cast <types::opd_m_cz *> (tptr))
+	if (dynamic_cast <opd_m_cz *> (tptr))
 		return l_constant_matrix_complex_integer;
-	if (dynamic_cast <types::opd_m_cq *> (tptr))
+	if (dynamic_cast <opd_m_cq *> (tptr))
 		return l_constant_matrix_complex_rational;
-	if (dynamic_cast <types::opd_m_cr *> (tptr))
+	if (dynamic_cast <opd_m_cr *> (tptr))
 		return l_constant_matrix_complex_real;
 	
 	// Other
-	if (dynamic_cast <types::opd_b *> (tptr))
+	if (dynamic_cast <opd_b *> (tptr))
 		return l_constant_boolean;
-	if (dynamic_cast <types::opd_s *> (tptr))
+	if (dynamic_cast <opd_s *> (tptr))
 		return l_constant_string;
 
 	return l_none;
@@ -154,7 +154,7 @@ lbl constant_label(Token *tptr)
 
 Token *true_token(Token *tptr)
 {
-	types::opd_z *oz = dynamic_cast <types::opd_z *> (tptr);
+	opd_z *oz = dynamic_cast <opd_z *> (tptr);
 	if (oz != nullptr)
 		return oz;
 

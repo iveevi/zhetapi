@@ -205,6 +205,10 @@ namespace zhetapi {
 class Function;
 class algorithm;
 
+// TODO: Inherit barn from another structure which contains all the overloads.
+// The reaoning for this is that when new stacks need to be push/popped, only
+// the overloads are copied.
+
 /**
  * @brief Represents the working space of a [zhetapi] function or
  * application; the sets of integer, real, complex, rational, vector and
@@ -217,9 +221,6 @@ class algorithm;
  */
 class Barn {
 public:
-	// Just include, no need for macro
-	__TYPEDEFS__
-	
 	using signature = std::vector <std::type_index>;
 	using opid = std::pair <std::pair <std::string, signature>, Token *>;
 
@@ -228,30 +229,35 @@ public:
 
 	using overloads = std::vector <std::pair <signature, Token *>>;
 private:
-	// Upper scope
-	Barn *				__upper = nullptr;
-
-	// std::vector <opid>		ops;
+	// Stack on below
+	Barn *			__stack = nullptr;
 
 	// TODO: Replace __var table with a string to token table
 	// (is Variable even necessary?)
 	//
 	// Are any of these other tables needed (instead of a string to token
 	// table?)
-	symtab <Variable>		__var_table;
-	symtab <Function>		__ftr_table;
+	symtab <Variable>	__var_table;
+	symtab <Function>	__ftr_table;
 
-	symtab <Registrable>		__reg_table;
-	symtab <algorithm>		__alg_table;
+	symtab <Registrable>	__reg_table;
+	symtab <algorithm>	__alg_table;
 
-	symtab <overloads>		__table;
+	// Always copied
+	symtab <overloads>	__table;
+
+	// Private methods
+	void set_origin_stack(Barn *);
 public:
 	Barn();
 	Barn(const Barn &);
 
+	Barn &operator=(const Barn &);
+
 	~Barn();
 
-	Barn &operator=(const Barn &);
+	// Actions
+	Barn *pop_stack();
 
 	bool present(const std::string &) const;
 

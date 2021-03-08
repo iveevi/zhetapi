@@ -251,47 +251,22 @@ Barn::Barn()
 }
 
 Barn::Barn(const Barn &other)
-		: __upper(other.__upper),
+		: __stack(other.__stack),
 		__reg_table(other.__reg_table),
 		__alg_table(other.__alg_table),
 		__ftr_table(other.__ftr_table),
 		__var_table(other.__var_table),
-		__table(other.__table)
-{
-	/* for (auto pr : other.ops)
-		ops.push_back({pr.first, pr.second->copy()});
-	
-	for (auto pr : ops) {
-		operation *opn = dynamic_cast <operation *> (pr.second);
-
-		if (table.count(pr.first.first))
-			table[pr.first.first].push_back({pr.first.second, pr.second});
-		else
-			table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
-	} */
-}
+		__table(other.__table) {}
 
 Barn &Barn::operator=(const Barn &other)
 {
 	if (this != &other) {
-		__upper = other.__upper;
+		__stack = other.__stack;
 		__var_table = other.__var_table;
 		__ftr_table = other.__ftr_table;
 		__reg_table = other.__reg_table;
 		__alg_table = other.__alg_table;
 		__table = other.__table;
-
-		/* for (auto pr : other.ops)
-			ops.push_back({pr.first, pr.second->copy()});
-		
-		for (auto pr : ops) {
-			operation *opn = dynamic_cast <operation *> (pr.second);
-
-			if (table.count(pr.first.first))
-				table[pr.first.first].push_back({pr.first.second, pr.second});
-			else
-				table.insert(std::pair <std::string, std::vector <std::pair <signature, Token *>>> {pr.first.first, std::vector <std::pair <signature, Token *>> {{pr.first.second, pr.second}}});
-		} */
 	}
 
 	return *this;
@@ -303,6 +278,22 @@ Barn::~Barn()
 		for (auto id : overload_list.second)
 			delete id.second;
 	}
+}
+
+// Actions
+Barn *Barn::pop_stack()
+{
+	Barn *barn = new Barn();
+
+	barn->set_origin_stack(this);
+
+	return barn;
+}
+
+// Private methods
+void Barn::set_origin_stack(Barn *barn)
+{
+	__stack = barn;
 }
 
 bool Barn::present(const std::string &str) const
@@ -406,7 +397,7 @@ Token *Barn::compute(const std::string &str, const std::vector <Token *> &vals)
 	if (tptr) {
 		operation *optr = dynamic_cast <operation *> (tptr);
 
-		return (*optr)(vals);
+		return optr->compute(vals);
 	} else {
 		std::ostringstream oss;
 

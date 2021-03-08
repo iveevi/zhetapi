@@ -25,3 +25,9 @@ foo(65, 10)
 
 println("tmp = ", tmp)
 println("inside = ", inside)
+
+if (true) {
+	k = 100
+}
+
+println("k = ", k)
