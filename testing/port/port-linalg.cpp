@@ -41,13 +41,13 @@ TEST(qr_decomp)
 
 	auto qr = qr_decompose(A);
 
-	oss << "\tQ = " << qr.first << endl;
-	oss << "\tR = " << qr.second << endl;
-	oss << "\tQR = " << qr.first * qr.second << endl;
+	oss << "\tQ = " << qr.q() << endl;
+	oss << "\tR = " << qr.r() << endl;
+	oss << "\tQR = " << qr.product() << endl;
 
-	oss << "Error = " << (qr.first * qr.second - A).norm() << endl;
+	oss << "Error = " << (qr.product() - A).norm() << endl;
 
-	if ((qr.first * qr.second - A).norm() > 1e-10) {
+	if ((qr.product() - A).norm() > 1e-10) {
 		oss << "Failure: A != QR" << endl;
 
 		return false;

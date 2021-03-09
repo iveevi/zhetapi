@@ -29,6 +29,8 @@ public:
 
 	__cuda_dual_prefix
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
+		Erf <T> ::assert_size(comp, in);
+		
 		T sum = 0;
 
 		for (size_t i = 0; i < comp.size(); i++)
@@ -54,6 +56,8 @@ public:
 
 	__cuda_dual_prefix
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
+		Erf <T> ::assert_size(comp, in);
+		
 		T sum = 0;
 
 		for (size_t i = 0; i < comp.size(); i++)

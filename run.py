@@ -57,19 +57,19 @@ def install(args):
 	os.system('mkdir -p include')
 
 	print(50 * '=' + "\nCompiling libraries...\n" + 50 * '=')
-	ret1 = os.system('./bin/czhp -v -c	\
+	ret1 = os.system('./bin/zhetapi -v -c	\
 		lib/io/io.cpp		\
 		lib/io/formatted.cpp	\
 		lib/io/file.cpp		\
 		-o include/io.zhplib')
 
-	ret2 = os.system('./bin/czhp -v -c	\
+	ret2 = os.system('./bin/zhetapi -v -c	\
 		lib/math/math.cpp	\
 		-o include/math.zhplib')
 
 	print("\n" + 50 * '=' + "\nDisplaying symbols\n" + 50 * '=')
-	os.system('./bin/czhp -d include/io.zhplib')
-	os.system('./bin/czhp -d include/math.zhplib')
+	os.system('./bin/zhetapi -d include/io.zhplib')
+	os.system('./bin/zhetapi -d include/math.zhplib')
 
 	if (ret1 != 0) or (ret2 != 0):
 		exit(-1)

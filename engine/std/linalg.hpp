@@ -43,7 +43,7 @@ public:
 	Matrix <T> product() const {
 		// Check for appropriate number
 		if (N <= 0)
-			return Matrix <T> ::indentity(1);
+			return Matrix <T> ::identity(1);
 		
 		Matrix <T> prod = __terms[0];
 
@@ -272,7 +272,7 @@ Vector <T> qr_algorithm(
 	for (size_t i = 0; i < limit; i++) {
 		auto qr = qr_decompose(U);
 
-		U = qr.second * qr.first;
+		U = qr.r() * qr.q();
 
 		bool terminate = true;
 		for (size_t i = 0; i < n * n; i++) {

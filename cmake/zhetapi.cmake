@@ -1,10 +1,10 @@
-# Compile czhp file
+# Compile zhetapi file
 add_executable(zhetapi
-	czhp/czhp.cpp
-	czhp/parser.cpp
-	czhp/library.cpp
-	czhp/execute.cpp
-	czhp/builtin/basic_io.cpp
+	interpreter/main.cpp
+	interpreter/parser.cpp
+	interpreter/library.cpp
+	interpreter/execute.cpp
+	interpreter/builtin/basic_io.cpp
 )
 
 target_link_libraries(zhetapi PUBLIC zhp-static)

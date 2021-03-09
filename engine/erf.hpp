@@ -51,9 +51,21 @@ public:
 	template <class U>
 	__cuda_dual_prefix
 	friend Erf <U> *copy(Erf <U> *);
+
+	// Exceptions
+	class dimension_mismatch {};
 protected:
+	static void assert_size(const Vector <T> &, const Vector <T> &);
+
 	erf_type kind;
 };
+
+template <class T>
+void Erf <T> ::assert_size(const Vector <T> &a, const Vector <T> &b)
+{
+	if (a.size() != b.size())
+		throw dimension_mismatch();
+}
 
 #ifndef ZHP_CUDA
 
