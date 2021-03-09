@@ -7,6 +7,9 @@
 #include <vector>
 #include <cmath>
 
+// Engine headers
+#include <vector.hpp>
+
 namespace zhetapi {
 		
 /**
@@ -16,10 +19,12 @@ namespace zhetapi {
 */
 template <class T>
 class Polynomial {
+protected:
 	std::vector <T> coeffs;		// Represents the coefficients of
 					// the polynomial
 public:
 	// Constructor
+	explicit Polynomial(const Vector <T> &);
 	explicit Polynomial(const std::vector <T> &);
 	explicit Polynomial(const std::initializer_list <T> &);
 
@@ -47,6 +52,16 @@ public:
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Polynomial <U> &);
 };
+
+template <class T>
+Polynomial <T> ::Polynomial(const Vector <T> &ref)
+{
+	if (ref.size() == 0)
+		coeffs = {0};
+	
+	for (size_t i = 0; i < ref.size(); i++)
+		coeffs.push_back(ref[i]);
+}
 
 /**
  * @brief Construct a polyomial from an array of coefficients. The degree of the
