@@ -19,6 +19,7 @@
 #include <vector.hpp>
 #include <matrix.hpp>
 #include <tensor.hpp>
+#include <fourier.hpp>
 
 #include <std/calculus.hpp>
 #include <std/functions.hpp>
@@ -69,6 +70,10 @@ TEST(interval_sampling);
 
 TEST(diag_matrix);
 TEST(qr_decomp);
+TEST(lq_decomp);
 TEST(qr_alg);
+TEST(matrix_props);
+
+TEST(fourier_series);
 
 #endif

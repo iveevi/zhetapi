@@ -15,20 +15,26 @@ namespace zhetapi {
 
 namespace linalg {
 
-// Factorization class
+typedef Vector <long double> Vec;
+typedef Matrix <long double> Mat;
+
+extern const long double GAMMA;
+extern const long double EPSILON;
+
+// MatrixFactorization class
 template <class T, size_t N>
-class Factorization {
+class MatrixFactorization {
 protected:
 	Matrix <T>	__terms[N];
 public:
-	Factorization(const std::vector <Matrix <T>> &terms) {
+	MatrixFactorization(const std::vector <Matrix <T>> &terms) {
 		for (size_t i = 0; i < N; i++)
 			__terms[i] = terms[i];
 	}
 	
 	// Variadic constructor
 	template <class ... U>
-	Factorization(const Matrix <T> &A, U ... args) {
+	MatrixFactorization(const Matrix <T> &A, U ... args) {
 		std::vector <Matrix <T>> terms {A};
 
 		collect(terms, args...);
@@ -78,6 +84,84 @@ std::ostream &pretty(std::ostream &os, const Matrix <T> &mat)
 	}
 
 	return os;
+}
+
+// Checks
+template <class T>
+bool is_diagonal(const Matrix <T> &mat, const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if ((i != j) && mat[i][j] > epsilon)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+template <class T>
+bool is_identity(const Matrix <T> &mat, const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	if (r != c)
+		return false;
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if (i == j) {
+				if (fabs(1 - mat[i][j]) > epsilon)
+					return false;
+			} else if (mat[i][j] > epsilon) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+template <class T>
+bool is_orthogonal(const Matrix <T> &mat, const T &epsilon = EPSILON)
+{
+	return is_identity(mat * mat.transpose());
+}
+
+template <class T>
+bool is_lower_triangular(const Matrix <T> &mat, const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if ((i > j) && mat[i][j] > epsilon)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+template <class T>
+bool is_right_triangular(const Matrix <T> &mat, const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if ((i < j) && mat[i][j] > epsilon)
+				return false;
+		}
+	}
+
+	return true;
 }
 
 // Reshaping functions
@@ -144,10 +228,10 @@ Vector <T> proj(const Vector <T> &u, const Vector <T> &v)
 
 // QR factorization class
 template <class T>
-class QR : public Factorization <T, 2> {
+class QR : public MatrixFactorization <T, 2> {
 public:
 	QR(const Matrix <T> &Q, const Matrix <T> &R)
-			: Factorization <T, 2> (Q, R) {}
+			: MatrixFactorization <T, 2> (Q, R) {}
 	
 	Matrix <T> q() const {
 		return this->__terms[0];
@@ -160,10 +244,10 @@ public:
 
 // LQ factorization class
 template <class T>
-class LQ : public Factorization <T, 2> {
+class LQ : public MatrixFactorization <T, 2> {
 public:
 	LQ(const Matrix <T> &L, const Matrix <T> &Q)
-			: Factorization <T, 2> (L, Q) {}
+			: MatrixFactorization <T, 2> (L, Q) {}
 	
 	Matrix <T> l() const {
 		return this->__terms[0];
@@ -290,12 +374,6 @@ Vector <T> qr_algorithm(
 
 	return eigenvalues;
 }
-
-typedef Vector <long double> Vec;
-typedef Matrix <long double> Mat;
-
-extern const long double GAMMA;
-extern const long double EPSILON;
 
 Vec pslq(const Vec &, long double = GAMMA, long double = EPSILON);
 

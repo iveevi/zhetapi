@@ -18,7 +18,10 @@ vector <singlet> rig {
 	RIG(interval_sampling),
 	RIG(diag_matrix),
 	RIG(qr_decomp),
-	RIG(qr_alg)
+	RIG(lq_decomp),
+	RIG(qr_alg),
+	RIG(matrix_props),
+	RIG(fourier_series)
 };
 
 vector <singlet> failed;

@@ -56,6 +56,32 @@ TEST(qr_decomp)
 	return true;
 }
 
+TEST(lq_decomp)
+{
+	using namespace zhetapi;
+	using namespace zhetapi::linalg;
+
+	Matrix <double> A = diag(1.0, 4.0, 1.0, 5.0);
+
+	oss << "A = " << A << endl;
+
+	auto lq = lq_decompose(A);
+
+	oss << "\tL = " << lq.l() << endl;
+	oss << "\tQ = " << lq.q() << endl;
+	oss << "\tLQ = " << lq.product() << endl;
+
+	oss << "Error = " << (lq.product() - A).norm() << endl;
+
+	if ((lq.product() - A).norm() > 1e-10) {
+		oss << "Failure: A != LQ" << endl;
+
+		return false;
+	}
+
+	return true;
+}
+
 TEST(qr_alg)
 {
 	using namespace zhetapi;
@@ -95,6 +121,55 @@ TEST(qr_alg)
 	oss << "G = " << G << endl;
 
 	oss << "\nError = " << (E - G).norm() << endl;
+
+	return true;
+}
+
+TEST(matrix_props)
+{
+	using namespace zhetapi;
+	using namespace zhetapi::linalg;
+
+	Matrix <double> A = diag(1.0, 2.0, 3.0, 4.0);
+	Matrix <double> I = Matrix <double> ::identity(4);
+
+	auto qr = qr_decompose(A);
+	auto lq = lq_decompose(A);
+
+	oss << "Is A diagonal? " << (is_diagonal(A) ? "yes" : "no") << endl;
+	if (!is_diagonal(A)) {
+		oss << "\tWrong answer..." << endl;
+
+		return false;
+	}
+	
+	oss << "Is I identity? " << (is_identity(I) ? "yes" : "no") << endl;
+	if (!is_identity(I)) {
+		oss << "\tWrong answer..." << endl;
+
+		return false;
+	}
+	
+	oss << "Is Q orthogonal? " << (is_orthogonal(qr.q()) ? "yes" : "no") << endl;
+	if (!is_orthogonal(qr.q())) {
+		oss << "\tWrong answer..." << endl;
+
+		return false;
+	}
+	
+	oss << "Is R right triangular? " << (is_right_triangular(qr.r()) ? "yes" : "no") << endl;
+	if (!is_right_triangular(qr.r())) {
+		oss << "\tWrong answer..." << endl;
+
+		return false;
+	}
+	
+	oss << "Is L lower triangular? " << (is_lower_triangular(lq.l()) ? "yes" : "no") << endl;
+	if (!is_lower_triangular(lq.l())) {
+		oss << "\tWrong answer..." << endl;
+
+		return false;
+	}
 
 	return true;
 }

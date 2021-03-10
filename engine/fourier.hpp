@@ -22,25 +22,32 @@ public:
 };
 
 // TODO: Fix indices
+//
+// a0, a1, b1, a2, b2, ...
 template <class T>
 FourierSeries <T> ::FourierSeries(const Vector <T> &coeffs)
 {
-	size_t n = coeffs.size();
+	// Remove vector middle operation
+	std::vector <T> a;
+	std::vector <T> b;
 
-	__bsize = n/2;
-	__asize = n - __bsize;
+	size_t n = coeffs.size();
 
 	size_t i = 0;
 
-	if (n % 2)
-		__a[i] = coeffs[i++];
-	
+	a.push_back(coeffs[i++]);	
 	while(i < n) {
-		__a[i/2] = coeffs[i];
-		__b[i/2] = ceoffs[i + 1];
+		a.push_back(coeffs[i]);
+		b.push_back(coeffs[i + 1]);
 
-		i++;
+		i += 2;
 	}
+
+	__asize = a.size();
+	__bsize = b.size();
+
+	__a = Vector <T> (a);
+	__b = Vector <T> (b);
 }
 
 template <class T>

@@ -8,6 +8,7 @@ add_executable(port
 	testing/port/port-special.cpp
 	testing/port/port-tensor.cpp
 	testing/port/port-vector.cpp
+	testing/port/port-fourier.cpp
 	testing/port/port.cpp
 	testing/port/timers.cpp
 )
