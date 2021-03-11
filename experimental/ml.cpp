@@ -18,45 +18,6 @@ using namespace zhetapi::utility;
 using namespace zhetapi::ml;
 using namespace zhetapi::linalg;
 
-#define N 5
-
-typedef Matrix <long double> Mat;
-
-Mat update(const Mat &H, long double dt)
-{
-	static int dx[] = {1, -1, 0, 0};
-	static int dy[] = {0, 0, 1, -1};
-	static int DIRS = 4;
-
-	Mat copy = H;
-
-	auto valid = [&](int i, int j) {
-		if ((i < 0) || (i >= H.get_rows())
-			|| (j < 0) || (j >= H.get_cols()))
-			return false;
-		
-		return true;
-	};
-
-	// Add method for performance per cell computation
-	// (Kernels that can be multithreaded, must save the
-	// state of the matrix before hand)
-	for (int i = 0; i < H.get_rows(); i++) {
-		for (int j = 0; j < H.get_cols(); j++) {
-			long double sum = H[i][j];
-
-			for (size_t k = 0; k < DIRS; k++) {
-				if (valid(i + dx[k], j + dy[k]))
-					sum += dt * (H[i + dx[k]][j + dy[k]] - H[i][j]);
-			}
-			
-			copy[i][j] = sum;
-		}
-	}
-
-	return copy;
-}
-
 int main()
 {
 	string input;

@@ -34,8 +34,8 @@ class Function : public Token {
 	size_t				__threads;
 public:
 	Function();
-	Function(const char *);
-	Function(const std::string &);
+	explicit Function(const char *);
+	explicit Function(const std::string &);
 	Function(const std::string &, Barn *);
 
 	Function(const std::string &,

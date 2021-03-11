@@ -10,6 +10,7 @@ set(ZHETAPI_SOURCE
 
 	source/core/algorithm.cpp
 	source/core/class.cpp
+	source/core/engine_base.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp
 	source/core/node.cpp
@@ -20,6 +21,7 @@ set(ZHETAPI_SOURCE
 	source/core/node_reference.cpp
 	source/core/operation.cpp
 	source/core/operation_holder.cpp
+	source/core/parser.cpp
 	source/core/rvalue.cpp
 	source/core/shader.cpp
 	source/core/types.cpp
