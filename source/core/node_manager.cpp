@@ -108,107 +108,17 @@ Token *node_manager::value() const
 	return value(__tree);
 }
 
-Token *node_manager::value(Barn *ext) const
-{
-	return value(__tree, ext);
-}
-
 // Sequential value (returns null for now)
-Token *node_manager::sequential_value(Barn *ext) const
+Token *node_manager::sequential_value() const
 {
 	// Assumes that the top node is a sequential
 	for (node nd : __tree.__leaves)
-		value(nd, ext);
+		value(nd);
 	
 	return nullptr;
 }
 
 Token *node_manager::value(node tree) const
-{
-	std::vector <Token *> values;
-
-	node *unrefd;
-
-	Token *tptr;
-	Token *vptr;
-
-	Variable v;
-
-	std::string ident;
-
-	algorithm *aptr;
-
-	// If null token, resort to special execution modes
-	// (Use this instead of sequential_value for
-	// algorithms; dont remove it though)
-	if (!tree.__tptr) {
-		if (tree.__label == l_assignment_chain) {
-			std::cout << "Assigning..." << std::endl;
-		} else {
-			throw std::runtime_error("Unknown execution mode #" + strlabs[tree.__label]);
-		}
-	}
-	
-	switch (tree.__tptr->caller()) {
-	case Token::opd:
-		return tree.__tptr->copy();
-	case Token::oph:	
-		// size = tree.__leaves.size();
-		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
-
-		tptr = __barn->compute((dynamic_cast <operation_holder *>
-						(tree.__tptr))->rep, values);
-
-		return tptr->copy();
-	case Token::var:
-		tptr = (dynamic_cast <Variable *> (tree.__tptr))->get();
-
-		return tptr->copy();
-	case Token::ftn:
-		if (tree.__leaves.empty())
-			return tree.__tptr->copy();
-		
-		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
-
-		tptr = (*(dynamic_cast <Function *> (tree.__tptr)))(values);
-
-		return tptr->copy();
-	case Token::ndr:
-		unrefd = (dynamic_cast <node_reference *>
-				(tree.__tptr))->get();
-
-		return unrefd->__tptr->copy();
-	case Token::reg:
-		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
-
-		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr)))(values);
-
-		if (tptr)
-			return tptr->copy();
-	case Token::alg:
-		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf));
-
-		aptr = dynamic_cast <algorithm *> (tree.__tptr);
-		tptr = aptr->execute(__barn, values);
-
-		// Do this outside the switch
-		if (tptr)
-			return tptr->copy();
-	}
-
-	return nullptr;
-}
-
-// There really should not be separate value methods,
-// just add exceptions to if the external context is null
-//
-// TODO: This method should really not exist: usually (cant remember when this
-// isnt true) ext is the exact same as __barn
-Token *node_manager ::value(node tree, Barn *ext) const
 {
 	std::vector <Token *> values;
 
@@ -232,7 +142,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	if (tree.null()) {
 		if (tree.label() == l_assignment_chain) {
 			// Evaluate first node
-			Token *tmp = value(tree[0], ext);
+			Token *tmp = value(tree[0]);
 
 			// Assign for the other nodes
 
@@ -265,7 +175,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	case Token::oph:	
 		size = tree.__leaves.size();
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf, ext));
+			values.push_back(value(leaf));
 
 		tptr = __barn->compute((dynamic_cast <operation_holder *>
 						(tree.__tptr))->rep, values);
@@ -279,7 +189,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 			
 			v = Variable(tptr, ident);
 
-			ext->put(v);
+			__barn->put(v);
 
 			tptr = vp->get();
 
@@ -294,7 +204,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 			
 			v = Variable(tptr, ident);
 
-			ext->put(v);
+			__barn->put(v);
 		}
 
 		return tptr->copy();
@@ -305,21 +215,20 @@ Token *node_manager ::value(node tree, Barn *ext) const
 	case Token::ndr:
 		return (tree.cast <node_reference> ())->get()->copy_token();
 	case Token::token_node_list:
-		std::cout << "Evaluating node_list..." << std::endl;
 		return (tree.cast <node_list> ())->evaluate(__barn);
 	case Token::ftn:
 		if (tree.__leaves.empty())
 			return tree.__tptr->copy();
 		
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf, ext));
+			values.push_back(value(leaf));
 
 		tptr = (*(dynamic_cast <Function *> (tree.__tptr)))(values);
 
 		return tptr->copy();
 	case Token::reg:
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf, ext));
+			values.push_back(value(leaf));
 
 		tptr = (*(dynamic_cast <Registrable *> (tree.__tptr)))(values);
 
@@ -329,7 +238,7 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		break;
 	case Token::alg:
 		for (node leaf : tree.__leaves)
-			values.push_back(value(leaf, ext));
+			values.push_back(value(leaf));
 		
 		aptr = dynamic_cast <algorithm *> (tree.__tptr);
 		tptr = aptr->execute(__barn, values);
@@ -366,7 +275,7 @@ Token *node_manager::substitute_and_seq_compute(Barn *ext,
 		label(__refs[i]);
 	}
 
-	return sequential_value(ext);
+	return sequential_value();
 }
 
 void node_manager::append(const node &n)

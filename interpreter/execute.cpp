@@ -13,7 +13,6 @@ Token *execute(string str)
 	
 	size_t tsize = tmp.size();
 
-	cout << "STR = " << str << endl;
 	if (tsize > 1) {
 		zhetapi::Token *tptr = nullptr;
 		
@@ -23,13 +22,7 @@ Token *execute(string str)
 		try {
 			zhetapi::node_manager mg(tmp[tsize - 1], &barn);
 
-			cout << "rvalue:" << endl;
-			mg.print();
-
-			tptr = mg.value(&barn);
-
-			cout << "tptr = " << tptr << endl;
-			cout << "\tstr = " << tptr->str() << endl;
+			tptr = mg.value();
 		} catch (const Barn::unknown_operation_overload &e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
@@ -68,7 +61,7 @@ Token *execute(string str)
 		try {
 			mg = node_manager(str, &barn);
 			
-			tptr = mg.value(&barn);
+			tptr = mg.value();
 		} catch (const Barn::unknown_operation_overload &e)  {
 			cout << "err evaluating \'" << str << "\'" << e.what() << endl;
 			exit(-1);

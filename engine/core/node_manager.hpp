@@ -41,8 +41,7 @@ public:
 	void set_barn(Barn *);
 
 	Token *value() const;
-	Token *value(Barn *) const;
-	Token *sequential_value(Barn *) const;
+	Token *sequential_value() const;
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
 	Token *substitute_and_seq_compute(Barn *, const std::vector <Token *> &, size_t = 1);
@@ -80,7 +79,6 @@ public:
 	static bool loose_match(const node_manager &, const node_manager &);
 private:
 	Token *value(node) const;
-	Token *value(node, Barn *) const;
 
 	size_t count_up(node &);
 	

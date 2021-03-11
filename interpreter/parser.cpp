@@ -31,6 +31,40 @@ Operand <bool> *op_false = new Operand <bool> (false);
 size_t line = 1;
 string file = "";
 
+static int split_for_statement(string condition, string &variable, string &expression)
+{
+	size_t i = 0;
+	size_t i_in = -1;
+
+	size_t len = condition.size();
+
+	// Find the position of 'in'
+	while (i < len - 1) {
+		if (condition[i] == 'i'
+			&& condition[i + 1] == 'n') {
+			i_in = i;
+
+			break;
+		}
+
+		i++;
+	}
+
+	for (size_t i = 0; i < i_in; i++) {
+		if (isspace(condition[i]))
+			break;
+		
+		variable += condition[i];
+	}
+
+	expression = condition.substr(i_in + 2);
+
+	if (expression.empty())
+		return 1;
+
+	return (i_in == -1);
+}
+
 static int parse_parenthesized(string &parenthesized)
 {
 	char c;
@@ -259,6 +293,44 @@ void check(string &keyword)
 			t = execute(parenthesized);
 		}
 		
+		keyword.clear();
+	}
+
+	if (keyword == "for") {
+		if (parse_parenthesized(parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after a for\n", line);
+			exit(-1);
+		}
+
+		string var;
+		string expr;
+		
+		if (split_for_statement(parenthesized, var, expr)) {
+			printf("Syntax error at line %lu: unexpected condition in for loop\n", line);
+			exit(-1);
+		}
+		
+		if (extract_block(block)) {
+			printf("Syntax error at line %lu: missing statement after a for\n", line);
+			exit(-1);
+		}
+
+		node_manager nm(expr, &barn);
+
+		Token *tptr = nm.value();
+
+		// For the love of God make this cleaner
+		Operand <std::vector <Token *>> *op = dynamic_cast <Operand <std::vector <Token *>> *> (tptr);
+
+		std::vector <Token *> tok_list = op->get();
+
+		// Push in a new scope
+		for (Token *t : tok_list) {
+			barn.put(Variable(t, var));
+
+			parse(block);
+		}
+
 		keyword.clear();
 	}
 
