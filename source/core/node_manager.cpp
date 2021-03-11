@@ -12,8 +12,19 @@ node_manager::node_manager(const node_manager &other)
 	rereference(__tree);
 }
 
+node_manager::node_manager(const node &tree, Barn *barn)
+		: __barn(barn), __tree(tree)
+{
+	// Unpack variable clusters
+	expand(__tree);
+
+	// Label the tree
+	label(__tree);
+	count_up(__tree);
+}
+
 node_manager::node_manager(const std::string &str, Barn *barn)
-		: __barn(barn) 
+		: __barn(barn)
 {
 	zhetapi::parser pr;
 
@@ -293,6 +304,9 @@ Token *node_manager ::value(node tree, Barn *ext) const
 		return (tree.cast <rvalue> ())->get()->copy();
 	case Token::ndr:
 		return (tree.cast <node_reference> ())->get()->copy_token();
+	case Token::token_node_list:
+		std::cout << "Evaluating node_list..." << std::endl;
+		return (tree.cast <node_list> ())->evaluate(__barn);
 	case Token::ftn:
 		if (tree.__leaves.empty())
 			return tree.__tptr->copy();

@@ -27,8 +27,9 @@ private:
 public:
 	node_manager();
 	node_manager(const node_manager &);
-	node_manager(const std::string &, Barn * = nullptr);
-	node_manager(const std::string &, const std::vector <std::string> &, Barn * = nullptr);
+	node_manager(const node &, Barn *);
+	node_manager(const std::string &, Barn *);
+	node_manager(const std::string &, const std::vector <std::string> &, Barn *);
 
 	node_manager &operator=(const node_manager &);
 

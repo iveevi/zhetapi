@@ -335,9 +335,9 @@ int parse(char ex)
 		if (!quoted) {
 			if (c == '\"')
 				quoted = true;
-			if (c == '(')
+			if (c == '(' || c == '{')
 				paren++;
-			if (c == ')')
+			if (c == ')' || c == '}')
 				paren--;
 			
 			if (c == '\n' || (!paren && c == ',')) {
@@ -386,9 +386,9 @@ int parse(string str)
 		if (!quoted) {
 			if (c == '\"')
 				quoted = true;
-			if (c == '(')
+			if (c == '(' || c == '{')
 				paren++;
-			if (c == ')' && paren)
+			if ((c == ')' || c == '}') && paren)
 				paren--;
 			
 			if (c == '\n' || (!paren && c == ',')) {

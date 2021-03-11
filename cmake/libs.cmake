@@ -15,6 +15,7 @@ set(ZHETAPI_SOURCE
 	source/core/node.cpp
 	source/core/node_differential.cpp
 	source/core/node_differentiation.cpp
+	source/core/node_list.cpp
 	source/core/node_manager.cpp
 	source/core/node_reference.cpp
 	source/core/operation.cpp

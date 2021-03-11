@@ -31,3 +31,7 @@ if (true) {
 }
 
 println("k = ", k)
+
+list = {1, 3, 4}
+
+println("list = ", list)

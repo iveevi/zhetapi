@@ -2,7 +2,9 @@
 #define TOKEN_H_
 
 // C/C++ headers
+#include <iostream>
 #include <string>
+#include <vector>
 
 namespace zhetapi {
 
@@ -47,7 +49,8 @@ public:
 		reg,
 		wld,
 		token_lvalue,
-		token_rvalue
+		token_rvalue,
+		token_node_list
 	};
 
 	bool operator!=(Token *) const;
@@ -81,6 +84,9 @@ public:
 
 // Comparing tokens
 bool tokcmp(Token *, Token *);
+
+// Printing a list of tokens
+std::ostream &operator<<(std::ostream &, const std::vector <Token *> &);
 	
 }
 

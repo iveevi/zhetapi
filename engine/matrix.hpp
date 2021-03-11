@@ -414,7 +414,7 @@ Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T
 
 	__cols = 1;
 	
-	for (int i = 0; i < __rows; i++)
+	for (size_t i = 0; i < __rows; i++)
 		this->__array[i] = ref[i];
 }
 
@@ -840,11 +840,11 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 {
 	os << "[";
 
-	for (int i = 0; i < mat.__rows; i++) {
+	for (size_t i = 0; i < mat.__rows; i++) {
 		if (mat.__cols > 1) {
 			os << '[';
 
-			for (int j = 0; j < mat.__cols; j++) {
+			for (size_t j = 0; j < mat.__cols; j++) {
 				os << mat[i][j];
 				if (j != mat.__cols - 1)
 					os << ", ";

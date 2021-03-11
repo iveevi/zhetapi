@@ -21,6 +21,7 @@
 #include <operand.hpp>
 
 #include <core/node.hpp>
+#include <core/node_list.hpp>
 #include <core/operation_holder.hpp>
 #include <core/variable_cluster.hpp>
 
@@ -374,6 +375,10 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 
 		__node_pack = __start % ',';
 
+		__collection = ('{' >> __node_pack >> '}') [
+			_val = phoenix::new_ <node_list> (_1)
+		];
+
 		/*
 		 * Pure numerical Operands, representing the 18
 		 * primitive types of computation. The exceptions are
@@ -453,6 +458,8 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 						(::std::string("*")),
 						_val, _1)]
 				)
+
+				| __collection [_val = _1]
 			);
 
 		/*
@@ -726,6 +733,8 @@ struct parser : qi::grammar <siter, zhetapi::node (), qi::space_type> {
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__divide;
 	
 	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__power;
+
+	qi::rule <siter, zhetapi::Token *(), qi::space_type>			__collection;
 
 	// Operands
 
