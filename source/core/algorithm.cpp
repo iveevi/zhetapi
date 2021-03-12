@@ -73,8 +73,7 @@ void algorithm::compile(Engine *engine)
 	__compiled.set_label(l_sequential);
 	__compiled.set_engine(engine);
 
-	/*
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
 	__compiled.print(); */
 }

@@ -32,13 +32,18 @@ Engine &Engine::operator=(const Engine &other)
 }
 
 // Actions
-Engine *Engine::pop_stack()
+Engine *Engine::new_stack()
 {
 	Engine *engine = new Engine();
 
 	engine->set_origin_stack(this);
 
 	return engine;
+}
+
+Engine *Engine::get_stack()
+{
+	return __stack;
 }
 
 // Private methods
@@ -112,6 +117,9 @@ Token *Engine::get(const std::string &str)
 	if (__ftr_table.count(str))
 		return __ftr_table[str].copy();
 	
+	if (__stack)
+		return __stack->get(str);
+	
 	return nullptr;
 }
 
@@ -135,6 +143,21 @@ void Engine::list_registered(std::string file) const
 		std::cout << "\t" << spr.second.str() << std::endl;
 	for (auto spr : __ftr_table)
 		std::cout << "\t" << spr.second.str() << std::endl;
+}
+
+// Non-member functions
+Engine *push_and_ret_stack(Engine *engine)
+{
+	return engine->new_stack();
+}
+
+Engine *pop_and_del_stack(Engine *engine)
+{
+	Engine *popped = engine->get_stack();
+
+	delete engine;
+
+	return popped;
 }
 
 }

@@ -21,7 +21,7 @@ extern string file;
 extern vector <string> global;
 extern vector <string> idirs;
 
-extern Engine engine;
+extern Engine *engine;
 
 extern Operand <bool> *op_true;
 extern Operand <bool> *op_false;

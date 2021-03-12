@@ -121,7 +121,7 @@ int import_library(string file)
 		return -1;
 	}
 
-	exprt(&engine);
+	exprt(engine);
 
 	return 0;
 }

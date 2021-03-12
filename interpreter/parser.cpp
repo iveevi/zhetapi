@@ -134,8 +134,11 @@ static int parse_block(string &str)
 	}
 
 	if (c == '{') {
-		while ((c = getchar()) != '}')
+		while ((c = getchar()) != '}') {
 			str += c;
+
+			__lineup(c);
+		}
 	} else {
 		fseek(stdin, -1, SEEK_CUR);
 
@@ -221,7 +224,11 @@ void check(string &keyword)
 		if (*t == op_true) {
 			if_true = true;
 
+			engine = push_and_ret_stack(engine);
+
 			parse_block();
+
+			engine = pop_and_del_stack(engine);
 		} else {
 			if_true = false;
 
@@ -248,7 +255,11 @@ void check(string &keyword)
 		if (*t == op_true) {
 			if_true = true;
 
+			engine = push_and_ret_stack(engine);
+
 			parse_block();
+
+			engine = pop_and_del_stack(engine);
 		} else {
 			if_true = false;
 
@@ -286,12 +297,16 @@ void check(string &keyword)
 			exit(-1);
 		}
 
+		engine = push_and_ret_stack(engine);
+
 		Token *t = execute(parenthesized);
 		while (*t == op_true) {
 			parse(block);
 			
 			t = execute(parenthesized);
 		}
+		
+		engine = pop_and_del_stack(engine);
 		
 		keyword.clear();
 	}
@@ -315,7 +330,7 @@ void check(string &keyword)
 			exit(-1);
 		}
 
-		node_manager nm(expr, &engine);
+		node_manager nm(expr, engine);
 
 		Token *tptr = nm.value();
 
@@ -325,11 +340,16 @@ void check(string &keyword)
 		std::vector <Token *> tok_list = op->get();
 
 		// Push in a new scope
+		engine = push_and_ret_stack(engine);
+
 		for (Token *t : tok_list) {
-			engine.put(Variable(t, var));
+			engine->put(Variable(t, var));
 
 			parse(block);
 		}
+
+		// Pop scope
+		engine = pop_and_del_stack(engine);
 
 		keyword.clear();
 	}
@@ -338,8 +358,6 @@ void check(string &keyword)
 		cin >> lname;
 
 		string library = lname + ".zhplib";
-
-
 
 		// Check current dir
 		string current_dir = "./" + library;
@@ -369,6 +387,7 @@ void check(string &keyword)
 	}
 
 	if (keyword == "alg") {
+		// cout << "ALG begin@ " << line << endl;
 		string ident;
 
 		vector <string> params;
@@ -385,12 +404,14 @@ void check(string &keyword)
 
 			// Create and compile the algorithm structure
 			algorithm alg(ident, block, params);
-			alg.compile(&engine);
+			alg.compile(engine);
 
-			engine.put(alg);
+			engine->put(alg);
 		}
 
 		keyword.clear();
+
+		// cout << "ALG end@ " << line << endl;
 	}
 }
 

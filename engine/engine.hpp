@@ -30,7 +30,8 @@ public:
 	Engine &operator=(const Engine &);
 
 	// Actions
-	Engine *pop_stack();
+	Engine *new_stack();
+	Engine *get_stack();
 
 	void put(Variable);
 	void put(Function);
@@ -48,6 +49,9 @@ public:
 	void list() const;
 	void list_registered(std::string) const;
 };
+
+Engine *push_and_ret_stack(Engine *);
+Engine *pop_and_del_stack(Engine *);
 
 }
 

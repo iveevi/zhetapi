@@ -1,13 +1,15 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-Engine engine;
+Engine *engine = new Engine();
 
 Token *execute(string str)
 {
 	// Skip comments
 	if (str[0] == '#')
 		return nullptr;
+	
+	// cout << "line = " << line << ", STR = " << str << endl;
 
 	vector <string> tmp = split(str);
 	
@@ -20,7 +22,7 @@ Token *execute(string str)
 		bool pe = false;
 
 		try {
-			zhetapi::node_manager mg(tmp[tsize - 1], &engine);
+			zhetapi::node_manager mg(tmp[tsize - 1], engine);
 
 			tptr = mg.value();
 		} catch (const Engine::unknown_op_overload &e)  {
@@ -35,16 +37,16 @@ Token *execute(string str)
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];
 
 			try {
-				zhetapi::Function f(ftr, &engine);
+				zhetapi::Function f(ftr, engine);
 
-				engine.put(f);
+				engine->put(f);
 			} catch (...) {
 				if (pe) {
 					cout << "err:" << us.what() << endl;
 					exit(-1);
 				}
 
-				engine.put(tmp[i], tptr);
+				engine->put(tmp[i], tptr);
 			}
 		}
 		
@@ -59,7 +61,7 @@ Token *execute(string str)
 		Token *tptr = nullptr;
 
 		try {
-			mg = node_manager(str, &engine);
+			mg = node_manager(str, engine);
 			
 			tptr = mg.value();
 		} catch (const Engine::unknown_op_overload &e)  {
@@ -67,8 +69,9 @@ Token *execute(string str)
 			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
 			cout << "Error at line " << line
-				<< ": undefined symbol \""
-				<< e.what() << "\"" << endl;
+				<< ": the symbol \""
+				<< e.what() << "\" was not defined "
+				"in this scope" << endl;
 
 			exit(-1);
 		}
