@@ -42,11 +42,11 @@ static inline string __get_dir(string file)
 static int inline_interpret()
 {
 	// Register builtin symbols (put into another function)
-	barn.put(Registrable("print", &bt_print));
-	barn.put(Registrable("println", &bt_println));
+	engine.put(Registrable("print", &bt_print));
+	engine.put(Registrable("println", &bt_println));
 
-	barn.put(Variable(op_true->copy(), "true"));
-	barn.put(Variable(op_false->copy(), "false"));
+	engine.put(Variable(op_true->copy(), "true"));
+	engine.put(Variable(op_false->copy(), "false"));
 
 	while (true) {
 		cout << "> ";
@@ -82,11 +82,11 @@ static int interpreter(string infile)
 	file = infile;
 	
 	// Register builtin symbols
-	barn.put(Registrable("print", &bt_print));
-	barn.put(Registrable("println", &bt_println));
+	engine.put(Registrable("print", &bt_print));
+	engine.put(Registrable("println", &bt_println));
 
-	barn.put(Variable(op_true->copy(), "true"));
-	barn.put(Variable(op_false->copy(), "false"));
+	engine.put(Variable(op_true->copy(), "true"));
+	engine.put(Variable(op_false->copy(), "false"));
 
 	return parse();
 }

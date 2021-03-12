@@ -11,15 +11,15 @@
 namespace zhetapi {
 
 // Forward declaration
-class Barn;
+class Engine;
 
 class lvalue : public Token {
 protected:
 	std::string	__symbol	= "";		// The actual symbol
-	Barn *		__context	= nullptr;	// Acts as the scope
+	Engine *		__context	= nullptr;	// Acts as the scope
 public:
 	lvalue();
-	lvalue(const std::string &, Barn *);
+	lvalue(const std::string &, Engine *);
 
 	void assign(Token *);
 

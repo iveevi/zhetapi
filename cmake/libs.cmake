@@ -1,7 +1,7 @@
 set(ZHETAPI_SOURCE 
-	source/barn.cpp
 	source/complex.cpp
 	source/display.cpp
+	source/engine.cpp
 	source/function.cpp
 	source/image.cpp
 	source/registration.cpp

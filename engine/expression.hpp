@@ -11,7 +11,7 @@
 #include <string>
 
 // Engine headers
-#include <barn.hpp>
+#include <engine.hpp>
 
 #include <core/node_manager.hpp>
 
@@ -24,12 +24,12 @@ class type_mismatch {};
 class invalid_expr {};
 
 template <class O = int, class T = double, class U = int>
-O expr(std::string str, Barn <T, U> barn = Barn <T, U> ())
+O expr(std::string str, Engine <T, U> engine = Engine <T, U> ())
 {
 	if (str.empty())
 		throw invalid_expr();
 
-	node_manager <T, U> out(str, barn);
+	node_manager <T, U> out(str, engine);
 
 	Token *tptr = out.value();
 	
@@ -43,12 +43,12 @@ O expr(std::string str, Barn <T, U> barn = Barn <T, U> ())
 }
 
 template <class T = double, class U = int>
-::std::string expr_str(::std::string str, Barn <T, U> barn = Barn <T, U> ())
+::std::string expr_str(::std::string str, Engine <T, U> engine = Engine <T, U> ())
 {
 	if (str.empty())
 		throw invalid_expr();
 
-	node_manager <T, U> out(str, barn);
+	node_manager <T, U> out(str, engine);
 
 	Token *tptr = out.value();
 

@@ -242,6 +242,25 @@ engine_base::engine_base()
 	}
 }
 
+engine_base::engine_base(const engine_base &other)
+		: __overloads(other.__overloads) {}
+
+engine_base &engine_base::operator=(const engine_base &other)
+{
+	if (this != &other)
+		__overloads = other.__overloads;
+
+	return *this;
+}
+
+engine_base::~engine_base()
+{
+	for (auto overload_list : __overloads) {
+		for (auto id : overload_list.second)
+			delete id.second;
+	}
+}
+
 Token *engine_base::compute(
 		const std::string &str,
 		const std::vector <Token *> &vals)

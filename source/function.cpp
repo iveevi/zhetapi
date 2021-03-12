@@ -1,10 +1,10 @@
 #include <function.hpp>
-#include <barn.hpp>
+#include <engine.hpp>
 
 namespace zhetapi {
 
 // Static variables
-Barn Function::barn = Barn();
+Engine Function::engine = Engine();
 
 double Function::h = 0.0001;
 
@@ -87,13 +87,13 @@ Function::Function(const std::string &str) : __threads(1)
 	__symbol = __symbol.substr(0, start);
 
 	// Construct the tree manager
-	__manager = node_manager(str.substr(++index), __params, &barn);
+	__manager = node_manager(str.substr(++index), __params, &engine);
 
 	__manager.simplify();
 }
 
 // Symbolic constructor with external symbol table
-Function::Function(const std::string &str, Barn *bptr) : __threads(1)
+Function::Function(const std::string &str, Engine *bptr) : __threads(1)
 {
 	std::string pack;
 	std::string tmp;
@@ -226,7 +226,7 @@ Token *Function::derivative(const std::string &str, A ... args)
 	// Right
 	Token *right;
 
-	Tokens[i] = barn.compute("+", {Tokens[i], new Operand <double> (h)});
+	Tokens[i] = engine.compute("+", {Tokens[i], new Operand <double> (h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
@@ -238,7 +238,7 @@ Token *Function::derivative(const std::string &str, A ... args)
 	// Left
 	Token *left;
 
-	Tokens[i] = barn.compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
+	Tokens[i] = engine.compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
@@ -248,9 +248,9 @@ Token *Function::derivative(const std::string &str, A ... args)
 	left = __manager.substitute_and_compute(Tokens);
 
 	// Compute
-	Token *diff = barn.compute("-", {right, left});
+	Token *diff = engine.compute("-", {right, left});
 
-	diff = barn.compute("/", {diff, new Operand <double> (2.0 * h)});
+	diff = engine.compute("/", {diff, new Operand <double> (2.0 * h)});
 
 	return diff;
 }
@@ -427,20 +427,6 @@ size_t Function::index(const std::string &str) const
 		return -1;
 
 	return std::distance(__params.begin(), itr);
-}
-
-// External classes
-void Barn::put(Function ftr)
-{
-	if (__ftr_table.count(ftr.symbol()))
-		__ftr_table[ftr.symbol()] = ftr;
-	else
-		__ftr_table.insert(std::make_pair(ftr.symbol(), ftr));
-}
-
-Function &Barn::retrieve_function(const std::string &str)
-{
-	return __ftr_table[str];
 }
 
 }

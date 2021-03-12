@@ -11,7 +11,7 @@
 
 namespace zhetapi {
 
-class Barn;
+class Engine;
 
 class node_list : public Token {
 protected:
@@ -19,7 +19,7 @@ protected:
 public:
 	node_list(const std::vector <node> &);
 
-	Token *evaluate(Barn *barn) const;
+	Token *evaluate(Engine *engine) const;
 
 	type caller() const override;
 	Token *copy() const override;

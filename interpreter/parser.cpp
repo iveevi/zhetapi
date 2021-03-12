@@ -315,7 +315,7 @@ void check(string &keyword)
 			exit(-1);
 		}
 
-		node_manager nm(expr, &barn);
+		node_manager nm(expr, &engine);
 
 		Token *tptr = nm.value();
 
@@ -326,7 +326,7 @@ void check(string &keyword)
 
 		// Push in a new scope
 		for (Token *t : tok_list) {
-			barn.put(Variable(t, var));
+			engine.put(Variable(t, var));
 
 			parse(block);
 		}
@@ -385,9 +385,9 @@ void check(string &keyword)
 
 			// Create and compile the algorithm structure
 			algorithm alg(ident, block, params);
-			alg.compile(&barn);
+			alg.compile(&engine);
 
-			barn.put(alg);
+			engine.put(alg);
 		}
 
 		keyword.clear();

@@ -39,3 +39,5 @@ println("list = ", list)
 for (i in list) {
 	println("\ti = ", i)
 }
+
+println("i = ", i)

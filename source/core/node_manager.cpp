@@ -1,19 +1,19 @@
 #include <core/node_manager.hpp>
-#include <barn.hpp>
+#include <engine.hpp>
 
 namespace zhetapi {
 
 node_manager::node_manager() {}
 
 node_manager::node_manager(const node_manager &other)
-		: __barn(other.__barn), __tree(other.__tree),
+		: __engine(other.__engine), __tree(other.__tree),
 		__refs(other.__refs), __params(other.__params)
 {
 	rereference(__tree);
 }
 
-node_manager::node_manager(const node &tree, Barn *barn)
-		: __barn(barn), __tree(tree)
+node_manager::node_manager(const node &tree, Engine *engine)
+		: __engine(engine), __tree(tree)
 {
 	// Unpack variable clusters
 	expand(__tree);
@@ -23,8 +23,8 @@ node_manager::node_manager(const node &tree, Barn *barn)
 	count_up(__tree);
 }
 
-node_manager::node_manager(const std::string &str, Barn *barn)
-		: __barn(barn)
+node_manager::node_manager(const std::string &str, Engine *engine)
+		: __engine(engine)
 {
 	zhetapi::parser pr;
 
@@ -43,8 +43,8 @@ node_manager::node_manager(const std::string &str, Barn *barn)
 
 node_manager::node_manager(const std::string &str,
 		const std::vector <std::string> &params,
-		Barn *barn) 
-		: __params(params), __barn(barn) 
+		Engine *engine) 
+		: __params(params), __engine(engine) 
 {
 	parser pr;
 
@@ -74,7 +74,7 @@ node_manager::node_manager(const std::string &str,
 node_manager &node_manager::operator=(const node_manager &other)
 {
 	if (this != &other) {
-		__barn = other.__barn;
+		__engine = other.__engine;
 		__tree = other.__tree;
 		__refs = other.__refs;
 		__params = other.__params;
@@ -97,9 +97,9 @@ void node_manager::set_label(lbl label)
 	__tree.__label = label;
 }
 
-void node_manager::set_barn(Barn *barn)
+void node_manager::set_engine(Engine *engine)
 {
-	__barn = barn;
+	__engine = engine;
 }
 
 // Value finding methods
@@ -177,7 +177,7 @@ Token *node_manager::value(node tree) const
 		for (node leaf : tree.__leaves)
 			values.push_back(value(leaf));
 
-		tptr = __barn->compute((dynamic_cast <operation_holder *>
+		tptr = __engine->compute((dynamic_cast <operation_holder *>
 						(tree.__tptr))->rep, values);
 		
 		if (tree.__label == l_post_modifier) {
@@ -189,7 +189,7 @@ Token *node_manager::value(node tree) const
 			
 			v = Variable(tptr, ident);
 
-			__barn->put(v);
+			__engine->put(v);
 
 			tptr = vp->get();
 
@@ -204,7 +204,7 @@ Token *node_manager::value(node tree) const
 			
 			v = Variable(tptr, ident);
 
-			__barn->put(v);
+			__engine->put(v);
 		}
 
 		return tptr->copy();
@@ -215,7 +215,7 @@ Token *node_manager::value(node tree) const
 	case Token::ndr:
 		return (tree.cast <node_reference> ())->get()->copy_token();
 	case Token::token_node_list:
-		return (tree.cast <node_list> ())->evaluate(__barn);
+		return (tree.cast <node_list> ())->evaluate(__engine);
 	case Token::ftn:
 		if (tree.__leaves.empty())
 			return tree.__tptr->copy();
@@ -241,7 +241,7 @@ Token *node_manager::value(node tree) const
 			values.push_back(value(leaf));
 		
 		aptr = dynamic_cast <algorithm *> (tree.__tptr);
-		tptr = aptr->execute(__barn, values);
+		tptr = aptr->execute(__engine, values);
 
 		if (tptr)
 			return tptr->copy();
@@ -265,7 +265,7 @@ Token *node_manager::substitute_and_compute(std::vector <Token *>
 	return value(__tree);
 }
 
-Token *node_manager::substitute_and_seq_compute(Barn *ext,
+Token *node_manager::substitute_and_seq_compute(Engine *ext,
 		const std::vector <Token *> &toks, size_t total_threads)
 {
 	assert(__refs.size() == toks.size());
@@ -355,7 +355,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 	contexts.push_back({{}, ""});
 
 	// Check once for differential
-	Token *dtok = __barn->get("d");
+	Token *dtok = __engine->get("d");
 	auto ditr = std::find(__params.begin(), __params.end(), "d");
 
 	for (size_t i = 0; i < str.length(); i++) {
@@ -368,7 +368,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 			size_t index = std::distance(__params.begin(), itr);
 
-			Token *tptr = __barn->get(pr.second);
+			Token *tptr = __engine->get(pr.second);
 
 			// Potential differential node
 			Token *dptr = nullptr;
@@ -378,7 +378,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				&& (ditr == __params.end())) {
 				// Priority on parameters
 				diff = find(__params.begin(), __params.end(), pr.second.substr(1));
-				dptr = __barn->get(pr.second.substr(1));
+				dptr = __engine->get(pr.second.substr(1));
 			}
 
 			size_t dindex = std::distance(__params.begin(), diff);
@@ -386,7 +386,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 			bool matches = true;
 
 			node t;
-			if (__barn->present(pr.second)) {
+			if (__engine->present(pr.second)) {
 				t = node(new operation_holder(pr.second), {});
 			} else if (itr != __params.end()) {
 				t = node(new node_reference(&__refs[index], pr.second, index, true), {});
@@ -405,11 +405,11 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				//
 				// Only use rvalue for variables
 				if (tptr->caller() == Token::var) {
-					rvalue *rv = new rvalue((dynamic_cast <Variable *> (tptr))->symbol(), __barn);
+					rvalue *rv = new rvalue((dynamic_cast <Variable *> (tptr))->symbol(), __engine);
 
 					t = node(rv);
 				} else {
-					// t = node(new rvalue(pr.second, __barn), {});
+					// t = node(new rvalue(pr.second, __engine), {});
 					t = node(tptr);
 				}
 			} else if (diff != __params.end()) {
@@ -558,7 +558,7 @@ void node_manager::simplify_separable(node &ref)
 	for (auto sep : sums) {
 		// Includes variable_constant; remove this exception
 		if (is_constant(sep.__label))
-			opd = __barn->compute("+", {opd, value(sep)});
+			opd = __engine->compute("+", {opd, value(sep)});
 		else
 			rest.push_back(sep);
 	}
@@ -705,7 +705,7 @@ void node_manager::generate(std::string &name) const
 
 	fout << "extern \"C\" {\n";
 	// Make more robust to T and U
-	fout << "\tzhetapi::Barn " << name << "_barn;\n";
+	fout << "\tzhetapi::Engine " << name << "_engine;\n";
 
 	fout << "\n";
 	fout << "\tzhetapi::Token *" << name << "(";
@@ -757,7 +757,7 @@ std::string node_manager::generate(std::string name, node ref,
 		operation_holder *ophtr = dynamic_cast <operation_holder *> (ref.__tptr);
 
 		fout << "\t\tzhetapi::Token *inter" << inter_count++ <<
-			" = " << name << "_barn.compute(\"" <<
+			" = " << name << "_engine.compute(\"" <<
 			ophtr->rep << "\", {";
 
 		for (size_t i = 0; i < idents.size(); i++) {

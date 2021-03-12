@@ -1,7 +1,7 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-Barn barn;
+Barn engine;
 
 Token *execute(string str)
 {
@@ -20,7 +20,7 @@ Token *execute(string str)
 		bool pe = false;
 
 		try {
-			zhetapi::node_manager mg(tmp[tsize - 1], &barn);
+			zhetapi::node_manager mg(tmp[tsize - 1], &engine);
 
 			tptr = mg.value();
 		} catch (const Barn::unknown_operation_overload &e)  {
@@ -35,31 +35,31 @@ Token *execute(string str)
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];
 
 			try {
-				zhetapi::Function f(ftr, &barn);
+				zhetapi::Function f(ftr, &engine);
 
-				barn.put(f);
+				engine.put(f);
 			} catch (...) {
 				if (pe) {
 					cout << "err:" << us.what() << endl;
 					exit(-1);
 				}
 
-				barn.put(tptr, tmp[i]);
+				engine.put(tptr, tmp[i]);
 			}
 		}
 		
 		delete tptr;
 	} else {		
-		// All functions and algorithms are stored in barn
+		// All functions and algorithms are stored in engine
 		node_manager mg;
 	
 		/* cout << "BARN:" << endl;
-		barn.print(); */
+		engine.print(); */
 
 		Token *tptr = nullptr;
 
 		try {
-			mg = node_manager(str, &barn);
+			mg = node_manager(str, &engine);
 			
 			tptr = mg.value();
 		} catch (const Barn::unknown_operation_overload &e)  {

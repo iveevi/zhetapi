@@ -362,7 +362,7 @@ parser::parser() : parser::base_type(__start)
 	 * A variable cluster, which is just a string of
 	 * characters. The expansion/unpakcing of this variable
 	 * cluster is done in the higher node_manager class,
-	 * where access to the barn object is present.
+	 * where access to the engine object is present.
 	 */
 	__node_var = (
 			(__ident >> '(' >> __node_pack >> ')') [_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), _2)]

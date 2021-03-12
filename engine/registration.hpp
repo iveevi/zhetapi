@@ -10,20 +10,20 @@
 #include <token.hpp>
 
 /**
- * This file contains functions that aid the creation of Barn-registrable
+ * This file contains functions that aid the creation of Engine-registrable
  * functions.
  *
  * ======================
  * SUMARY OF REGISTRATION
  * ======================
  *
- * Any function that is to be registered in a barn must have the signature
+ * Any function that is to be registered in a engine must have the signature
  * 
  * 	zhetapi::Token *(const std::vector <Token *> &).
  *
- * Register the function into a Barn with the register method, as follows
+ * Register the function into a Engine with the register method, as follows
  *
- * 	barn.register <[argument types]> (&[function]);
+ * 	engine.register <[argument types]> (&[function]);
  *
  * where [argument types] is the variadic list of types representing the
  * overload of the function that is begin registered, and [function] is
@@ -36,16 +36,16 @@ namespace zhetapi {
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
 #define ZHETAPI_LIBRARY()				\
-	extern "C" void zhetapi_export_symbols(zhetapi::Barn *barn)
+	extern "C" void zhetapi_export_symbols(zhetapi::Engine *engine)
 
 #define ZHETAPI_EXPORT(symbol)			\
-	barn->put(zhetapi::Registrable(#symbol, &symbol));
+	engine->put(zhetapi::Registrable(#symbol, &symbol));
 
 #define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)	\
-	barn->put(zhetapi::Registrable(#symbol, &ftr));
+	engine->put(zhetapi::Registrable(#symbol, &ftr));
 
 #define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
-	barn->put(zhetapi::Variable(new zhetapi::Operand <type> (op), #symbol));
+	engine->put(zhetapi::Variable(new zhetapi::Operand <type> (op), #symbol));
 
 class Registrable : public Token {
 public:

@@ -31,7 +31,7 @@ public:
 	 * 	ftn - function
 	 * 	ndr - node reference
 	 *	ndd - node differential
-	 *	reg - barn registrable
+	 *	reg - engine registrable
 	 * 	wld - wildcard
 	 */
 	enum type {
@@ -71,7 +71,7 @@ public:
 
 	/*
 	 * Returns a heap allocated copy of the Token. Used in copy
-	 * constructors for nodes and barns.
+	 * constructors for nodes and engines.
 	 */
 	virtual Token *copy() const = 0;
 

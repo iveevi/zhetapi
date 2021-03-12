@@ -1,12 +1,12 @@
 #include <core/lvalue.hpp>
 
-#include <barn.hpp>
+#include <engine.hpp>
 
 namespace zhetapi {
 
 lvalue::lvalue() {}
 
-lvalue::lvalue(const std::string &symbol, Barn *context)
+lvalue::lvalue(const std::string &symbol, Engine *context)
 		: __symbol(symbol), __context(context) {}
 
 void lvalue::assign(Token *tptr)

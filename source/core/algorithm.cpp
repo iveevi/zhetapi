@@ -1,5 +1,5 @@
 #include <core/algorithm.hpp>
-#include <barn.hpp>
+#include <engine.hpp>
 #include <function.hpp>
 
 #include <core/lvalue.hpp>
@@ -29,7 +29,7 @@ algorithm::algorithm(
 		: __ident(ident), __args(args),
 		__alg(alg), __compiled(compiled) {}
 
-void algorithm::compile(Barn *barn)
+void algorithm::compile(Engine *engine)
 {
 	// Use the definition line number
 	bool quoted = false;
@@ -53,7 +53,7 @@ void algorithm::compile(Barn *barn)
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
-					generate(barn, tmp, __compiled);
+					generate(engine, tmp, __compiled);
 
 					tmp.clear();
 				}
@@ -71,7 +71,7 @@ void algorithm::compile(Barn *barn)
 	// Use .set_label instead
 	__compiled.add_args(__args);
 	__compiled.set_label(l_sequential);
-	__compiled.set_barn(barn);
+	__compiled.set_engine(engine);
 
 	/*
 	using namespace std;
@@ -79,7 +79,7 @@ void algorithm::compile(Barn *barn)
 	__compiled.print(); */
 }
 
-void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
+void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 {
 	using namespace std;
 
@@ -96,34 +96,34 @@ void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 		// Assume that right terms are r-value
 		for (size_t i = 0; i < tsize - 1; i++) {
 			// TODO:
-			// If the symbol is not in the barn already
+			// If the symbol is not in the engine already
 			// then add it (needs to prioritize the
 			// possibility of a function over this)
-			if (!barn->get(tmp[i])) {
+			if (!engine->get(tmp[i])) {
 				// Default initialize the value to 0
-				barn->put(Variable(new Operand <int> (0), tmp[i]));
+				engine->put(Variable(new Operand <int> (0), tmp[i]));
 			}
 
-			Token *tptr = barn->get(tmp[i]);
+			Token *tptr = engine->get(tmp[i]);
 
 			// Check if tptr is assignable (ie. variable or function)
 			if (tptr)
-				eq.append(node(new lvalue(tmp[i], barn), l_lvalue));
+				eq.append(node(new lvalue(tmp[i], engine), l_lvalue));
 		}
 
 		// Only node to actually be computed (as an l-value)
-		node_manager nm(tmp[tsize - 1], __args, barn);
+		node_manager nm(tmp[tsize - 1], __args, engine);
 
 		eq.append_front(nm);
 		eq.set_label(l_assignment_chain);
 
 		rnm.append(eq);
 	} else {		
-		// All functions and algorithms are stored in barn
+		// All functions and algorithms are stored in engine
 		node_manager mg;
 		
 		try {
-			mg = node_manager(str, __args, barn);
+			mg = node_manager(str, __args, engine);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""
@@ -135,24 +135,24 @@ void algorithm::generate(Barn *barn, std::string str, node_manager &rnm)
 		rnm.append(mg);
 
 		// "Execute" the statement
-		// return mg.value(barn);
+		// return mg.value(engine);
 	}
 
 	// return nullptr;
 }
 
 // Executing the function
-Token *algorithm::execute(Barn *barn, const std::vector <Token *> &args)
+Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 {
 	// Ignore arguments for now
 	if (__compiled.empty())
-		compile(barn);
+		compile(engine);
 
 	/* using namespace std;
 	cout << "Pre eval:" << endl;
 	__compiled.print(); */
 
-	return __compiled.substitute_and_seq_compute(barn, args);
+	return __compiled.substitute_and_seq_compute(engine, args);
 }
 
 // Splitting equalities

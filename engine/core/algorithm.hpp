@@ -10,7 +10,7 @@
 
 namespace zhetapi {
 
-class Barn;
+class Engine;
 class node_manager;
 
 // Algorithm class
@@ -22,7 +22,7 @@ class algorithm : public Token {
 
 	node_manager			__compiled	= node_manager();
 	
-	void generate(Barn *, std::string str, node_manager &);
+	void generate(Engine *, std::string str, node_manager &);
 public:
 	algorithm();
 	algorithm(const algorithm &);
@@ -34,9 +34,9 @@ public:
 		const std::vector <std::string> &,
 		const node_manager &);
 	
-	void compile(Barn *);	
+	void compile(Engine *);	
 	
-	Token *execute(Barn *, const std::vector <Token *> &);
+	Token *execute(Engine *, const std::vector <Token *> &);
 
 	// Put somewhere else
 	std::vector <std::string> split(std::string str);

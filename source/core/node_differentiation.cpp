@@ -1,5 +1,5 @@
 #include <core/node_manager.hpp>
-#include <barn.hpp>
+#include <engine.hpp>
 
 namespace zhetapi {
 
@@ -28,7 +28,7 @@ void node_manager::differentiate_mul(node &ref)
 void node_manager::differentiate_pow(node &ref)
 {
 	Token *mul = ref.__leaves[1].__tptr->copy();
-	Token *exp = __barn->compute("-", {mul, new opd_z(1)});
+	Token *exp = __engine->compute("-", {mul, new opd_z(1)});
 
 	node diffed(ref.__leaves[0]);
 	differentiate(diffed);
@@ -68,7 +68,7 @@ void node_manager::differentiate_lg(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__barn->compute("ln", {new opd_z(2)}), l_none, {}),
+			node(__engine->compute("ln", {new opd_z(2)}), l_none, {}),
 			node(ref.__leaves[0])
 		})
 	});
@@ -84,7 +84,7 @@ void node_manager::differentiate_const_log(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__barn->compute("ln", {value(ref.__leaves[0])}), l_none, {}),
+			node(__engine->compute("ln", {value(ref.__leaves[0])}), l_none, {}),
 			node(ref.__leaves[1])
 		})
 	});

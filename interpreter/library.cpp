@@ -1,6 +1,6 @@
 #include "global.hpp"
 
-typedef void (*exporter)(Barn *);
+typedef void (*exporter)(Engine *);
 
 static int assess_library(string);
 
@@ -42,7 +42,7 @@ int assess_libraries(vector <string> files)
 
 static int assess_library(string file)
 {
-	Barn tmp;
+	Engine tmp;
 
 	const char *dlsymerr = nullptr;
 
@@ -121,7 +121,7 @@ int import_library(string file)
 		return -1;
 	}
 
-	exprt(&barn);
+	exprt(&engine);
 
 	return 0;
 }

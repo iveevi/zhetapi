@@ -202,6 +202,11 @@ class engine_base {
 	signature gen_signature(const std::vector <Token *> &);
 public:
 	engine_base();
+	engine_base(const engine_base &);
+
+	engine_base &operator=(const engine_base &);
+
+	~engine_base();
 
 	Token *compute(const std::string &, const std::vector <Token *> &);
 

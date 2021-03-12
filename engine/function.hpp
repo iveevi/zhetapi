@@ -34,9 +34,9 @@ class Function : public Token {
 	size_t				__threads;
 public:
 	Function();
-	explicit Function(const char *);
-	explicit Function(const std::string &);
-	Function(const std::string &, Barn *);
+	Function(const char *);
+	Function(const std::string &);
+	Function(const std::string &, Engine *);
 
 	Function(const std::string &,
 		const std::vector <std::string> &,
@@ -96,7 +96,7 @@ public:
 	class invalid_definition {};
 
 	// Static variables
-	static Barn barn;
+	static Engine engine;
 
 	static double h;
 };

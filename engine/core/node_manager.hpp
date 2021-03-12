@@ -15,21 +15,21 @@
 
 namespace zhetapi {
 
-class Barn;
+class Engine;
 class Function;
 
 class node_manager {
 private:
-	Barn *				__barn		= nullptr;
+	Engine *				__engine		= nullptr;
 	node				__tree		= node();
 	std::vector <node>		__refs		= {};
 	std::vector <std::string>	__params	= {};
 public:
 	node_manager();
 	node_manager(const node_manager &);
-	node_manager(const node &, Barn *);
-	node_manager(const std::string &, Barn *);
-	node_manager(const std::string &, const std::vector <std::string> &, Barn *);
+	node_manager(const node &, Engine *);
+	node_manager(const std::string &, Engine *);
+	node_manager(const std::string &, const std::vector <std::string> &, Engine *);
 
 	node_manager &operator=(const node_manager &);
 
@@ -38,13 +38,13 @@ public:
 
 	// Setters
 	void set_label(lbl);
-	void set_barn(Barn *);
+	void set_engine(Engine *);
 
 	Token *value() const;
 	Token *sequential_value() const;
 
 	Token *substitute_and_compute(std::vector <Token *> &, size_t = 1);
-	Token *substitute_and_seq_compute(Barn *, const std::vector <Token *> &, size_t = 1);
+	Token *substitute_and_seq_compute(Engine *, const std::vector <Token *> &, size_t = 1);
 
 	void append_front(const node &);
 	void append_front(const node_manager &);
