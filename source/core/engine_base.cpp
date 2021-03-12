@@ -276,7 +276,7 @@ Token *engine_base::compute(
 
 	size_t len = sig.size();
 	for (auto itr = ovlds->begin(); itr != ovlds->end(); itr++) {
-		if (itr->first.size() == len)
+		if (itr->first.size() != len)
 			continue;
 
 		bool ps = true;
@@ -302,6 +302,10 @@ Token *engine_base::compute(
 	throw unknown_op_overload(gen_overload_msg(sig, str));
 }
 
+bool engine_base::present(const std::string &str) const
+{
+	return __overloads.find(str) != __overloads.end();
+}
 
 std::string engine_base::overload_catalog(const std::string &str)
 {
@@ -341,10 +345,10 @@ std::string engine_base::gen_overload_msg(const signature &sig, const std::strin
 			msg += ", ";
 	}
 
-	return msg + ") for operation \"" + str + "\"." + overload_catalog(str);
+	return msg + ") for operation \"" + str + "\". " + overload_catalog(str);
 }
 
-signature gen_signature(const std::vector <Token *> &vals)
+signature engine_base::gen_signature(const std::vector <Token *> &vals)
 {
 	signature sig;
 

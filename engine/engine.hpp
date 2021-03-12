@@ -32,8 +32,6 @@ public:
 	// Actions
 	Engine *pop_stack();
 
-	bool present(const std::string &) const;
-
 	void put(Variable);
 	void put(Function);
 	void put(Registrable);

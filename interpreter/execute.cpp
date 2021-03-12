@@ -1,7 +1,7 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-Barn engine;
+Engine engine;
 
 Token *execute(string str)
 {
@@ -23,7 +23,7 @@ Token *execute(string str)
 			zhetapi::node_manager mg(tmp[tsize - 1], &engine);
 
 			tptr = mg.value();
-		} catch (const Barn::unknown_operation_overload &e)  {
+		} catch (const Engine::unknown_op_overload &e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
@@ -44,7 +44,7 @@ Token *execute(string str)
 					exit(-1);
 				}
 
-				engine.put(tptr, tmp[i]);
+				engine.put(tmp[i], tptr);
 			}
 		}
 		
@@ -62,8 +62,8 @@ Token *execute(string str)
 			mg = node_manager(str, &engine);
 			
 			tptr = mg.value();
-		} catch (const Barn::unknown_operation_overload &e)  {
-			cout << "err evaluating \'" << str << "\'" << e.what() << endl;
+		} catch (const Engine::unknown_op_overload &e)  {
+			cout << "err evaluating \'" << str << "\'\n" << e.what() << endl;
 			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
 			cout << "Error at line " << line

@@ -210,6 +210,8 @@ public:
 
 	Token *compute(const std::string &, const std::vector <Token *> &);
 
+	bool present(const std::string &) const;
+
 	std::string overload_catalog(const std::string &);
 	
 	// Exceptions
