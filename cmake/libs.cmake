@@ -2,6 +2,7 @@ set(ZHETAPI_SOURCE
 	source/complex.cpp
 	source/display.cpp
 	source/engine.cpp
+	source/equation.cpp
 	source/function.cpp
 	source/image.cpp
 	source/registration.cpp

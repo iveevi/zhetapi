@@ -1,58 +1,43 @@
-#include <vector.hpp>
-
-#include <std/linalg.hpp>
+#include <engine.hpp>
 
 using namespace zhetapi;
 using namespace std;
 
+node_manager equation_side(const string &str)
+{
+	Engine *engine = new Engine();
+
+	std::vector <std::string> args;
+	while (true) {
+		try {
+			node_manager nm(str, args, engine);
+
+			return nm;
+		} catch (const node_manager::undefined_symbol &e) {
+			args.push_back(e.what());
+		}
+	}
+
+	return node_manager();
+}
+
 int main()
 {
-	using namespace zhetapi::linalg;
+	string str1 = "sin(x)^2 + cos(x)^2";
+	string str2 = "1";
 
-	Matrix <double> A {{1, 1, 1}, {1, 0, 1}, {2, 4, 5}};
+	Function ftr = "f(x) = sin(x)^2";
 
-	auto qr = qr_decompose(A);
+	cout << ftr << endl;
 
-	cout << "Q = " << qr.q() << endl;
-	cout << "R = " << qr.r() << endl;
+	Engine *engine = new Engine();
 
-	auto lq = lq_decompose(A);
-	
-	cout << "L = " << lq.l() << endl;
-	cout << "Q = " << lq.q() << endl;
+	node_manager left = equation_side(str1);
+	node_manager right = equation_side(str2);
 
-	cout << "A = " << A << endl;
+	cout << "left:" << endl;
+	left.print();
 
-	A.swap_rows(0, 1);
-
-	cout << "A = " << A << endl;
-
-	Matrix <double> A_inv = A.inverse();
-
-	cout << "A_inv = " << A_inv << endl;
-
-	cout << "I3 = " << A * A_inv << endl;
-
-	// Testing PSLQ
-	Vector <long double> a = {3.14159265358, acos(-1)};
-
-	auto rel1 = pslq(a);
-
-	cout << string(50, '=') << endl;
-	cout << "a = " << a << endl;
-	cout << "rel1 = " << rel1 << endl;
-
-	cout << "check = " << inner(a, rel1) << endl;
-
-	long double phi = 1.61803398874989484820458683436;
-
-	Vector <long double> b = {phi, phi * phi, 1};
-
-	auto rel2 = pslq(b);
-
-	cout << string(50, '=') << endl;
-	cout << "b = " << b << endl;
-	cout << "rel2 = " << rel2 << endl;
-
-	cout << "check = " << inner(b, rel2) << endl;
+	cout << "right:" << endl;
+	right.print();
 }
