@@ -88,6 +88,11 @@ public:
 	void save(const std::string &);
 	void load(const std::string &);
 	// void load_json(const std::string &);
+	
+	// Properties
+	size_t size() const;
+	size_t input_size() const;
+	size_t output_size() const;
 
 	// Setters
 	void set_cost(Erf <T> *);
@@ -102,9 +107,13 @@ public:
 	Vector <T> compute(const Vector <T> &);
 	
 	void fit(const Vector <T> &, const Vector <T> &);
-	void fit(const DataSet <T> &, const DataSet <T> &);	
-	
+	void fit(const DataSet <T> &, const DataSet <T> &);
+
 	void multithreaded_fit(const DataSet <T> &, const DataSet <T> &, size_t = 1);
+	
+	void apply_gradient(Matrix <T> *);
+
+	Matrix <T> *get_gradient(const Vector <T> &);
 };
 
 // Constructors and other memory related operations
@@ -213,6 +222,25 @@ void DNN <T> ::load(const std::string &file)
 	__layers = new Layer <T> [__size];
 	for (size_t i = 0; i < __size; i++)
 		__layers[i].read(fin);
+}
+
+// Properties
+template <class T>
+size_t DNN <T> ::size() const
+{
+	return __size;
+}
+
+template <class T>
+size_t DNN <T> ::input_size() const
+{
+	return __isize;
+}
+
+template <class T>
+size_t DNN <T> ::output_size() const
+{
+	return __osize;
 }
 
 /*
@@ -375,6 +403,31 @@ void DNN <T> ::multithreaded_fit(
 	delete[] J;
 }
 
+template <class T>
+Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in)
+{
+	if (in.size() != __isize)
+		throw bad_io_dimensions();
+
+	Vector <T> *a = new Vector <T> [__size + 1];
+	Vector <T> *z = new Vector <T> [__size];
+
+	Matrix <T> *J = jacobian(__layers, __size, __osize, a, z, in);
+
+	delete[] a;
+	delete[] z;
+
+	return J;
+}
+
+template <class T>
+void DNN <T> ::apply_gradient(Matrix <T> *J)
+{
+	for (size_t i = 0; i < __size; i++)
+		__layers[i].apply_gradient(J[i]);
+}
+
+// Miscellaneous
 template <class T>
 void DNN <T> ::diagnose() const
 {

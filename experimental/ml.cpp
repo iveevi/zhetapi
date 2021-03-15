@@ -1,136 +1,64 @@
 #include <iostream>
-#include <thread>
+#include <iomanip>
 
-#include <matrix.hpp>
 #include <dnn.hpp>
 
 #include <std/interval.hpp>
-#include <std/linalg.hpp>
 
-#include <std/erfs.hpp>
 #include <std/activations.hpp>
+#include <std/erfs.hpp>
 #include <std/optimizers.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
-using namespace zhetapi::utility;
 using namespace zhetapi::ml;
-using namespace zhetapi::linalg;
+using namespace zhetapi::utility;
 
+const size_t ITERS = 100;
+const double GAMMA = 0;
+
+// GOAL: Return 1, based on actions 1 and 0
 int main()
 {
-	string input;
+	Interval <> i = 1_I;
 
-	Erf <long double> *cost = new MeanSquaredError <long double> ();
-	Optimizer <long double> *opt = new Adam <long double> ();
+	auto rvec = [&]() -> Vector <double> {
+		return {
+			i.uniform(),
+			i.uniform()
+		};
+	};
 
-	DNN <long double> model(N * N, {
-		Layer <long double> (2 * N * N, new ml::Sigmoid <long double> ()),
-		Layer <long double> (2 * N * N, new ml::ReLU <long double> ()),
-		Layer <long double> (2 * N * N, new ml::Sigmoid <long double> (), RandomInitializer <long double> (), 0.1),
-		Layer <long double> (N * N, new ml::Linear <long double> ())
+	srand(clock());
+	DNN <> model(2, {
+		Layer <> (6, new ReLU <double> ()),
+		Layer <> (6, new ReLU <double> ()),
+		Layer <> (1, new Sigmoid <double> ()),
 	});
 
-	model.set_cost(cost);
-	model.set_optimizer(opt);
+	for (size_t k = 0; k < ITERS; k++) {
+		Vector <double> S = rvec();
+		Vector <double> P = model(S);
 
-	Mat heat_0(N, N,
-		[&](size_t i, size_t j) {
-			return 10 * (1_I).uniform();
-		}
-	);
+		bool A = (i.uniform() <= P[0]) ? 1 : 0;
 
-	Mat heat = heat_0;
+		double R = (A ? 1 : -1);
 
-	for (size_t i = 0; i < 1000; i++) {
-		// Generate the actual input
-		Vec input = flatten(heat);
+		// Output
+		cout << boolalpha << S << "\t -> "
+			<< setw(8) << P[0] << "\t-> "
+			<< setw(8) << R
+			<< endl;
 
-		// Predicted update
-		cout << "Prediction:" << endl;
+		// Use cached version instead
+		Matrix <double> *matptr = model.get_gradient(S);
 
-		Vec pred = model(input);
+		for (size_t i = 0; i < model.size(); i++)
+			matptr[i] *= R;
 
-		pretty(cout, fold(pred, N, N)) << "\n" << endl;
-		
-		// Real update
-		cout << "Real:" << endl;
+		model.apply_gradient(matptr);
 
-		heat = update(heat, 0.0001);
-
-		pretty(cout, heat) << "\n" << endl;
-
-		cout << "Error: " << (cost->compute(pred, input))[0] << endl;
-		
-		cout << string(100, '=') << endl;
-
-		model.fit(input, flatten(heat));
-
-		this_thread::sleep_for(10ms);
-	}
-
-	cout << "Post training, starting over with same sequence:";
-	getline(cin, input);
-
-	heat = heat_0;
-	
-	for (size_t i = 0; i < 1000; i++) {
-		// Generate the actual input
-		Vec input = flatten(heat);
-
-		// Predicted update
-		cout << "Prediction:" << endl;
-
-		Vec pred = model(input);
-
-		pretty(cout, fold(pred, N, N)) << "\n" << endl;
-		
-		// Real update
-		cout << "Real:" << endl;
-
-		heat = update(heat, 0.0001);
-
-		pretty(cout, heat) << "\n" << endl;
-
-		cout << "Error: " << (cost->compute(pred, input))[0] << endl;
-		
-		cout << string(100, '=') << endl;
-
-		this_thread::sleep_for(10ms);
-	}
-	
-	cout << "Post training, starting over with new sequence:";
-	getline(cin, input);
-	
-	heat = Mat(N, N,
-		[&](size_t i, size_t j) {
-			return 10 * (1_I).uniform();
-		}
-	);
-	
-	for (size_t i = 0; i < 1000; i++) {
-		// Generate the actual input
-		Vec input = flatten(heat);
-
-		// Predicted update
-		cout << "Prediction:" << endl;
-
-		Vec pred = model(input);
-
-		pretty(cout, fold(pred, N, N)) << "\n" << endl;
-		
-		// Real update
-		cout << "Real:" << endl;
-
-		heat = update(heat, 0.0001);
-
-		pretty(cout, heat) << "\n" << endl;
-
-		cout << "Error: " << (cost->compute(pred, input))[0] << endl;
-		
-		cout << string(100, '=') << endl;
-
-		this_thread::sleep_for(10ms);
+		delete[] matptr;
 	}
 }

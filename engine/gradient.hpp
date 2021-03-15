@@ -56,6 +56,37 @@ Vector <T> simple_compute_cached(
 	return tmp;
 }
 
+// Jacobian during the processing of input to output
+template <class T>
+Matrix <T> *jacobian(
+		Layer <T> *layers,
+		size_t size,
+		size_t osize,
+		Vector <T> *a,
+		Vector <T> *z,
+		const Vector <T> &in)
+{
+	// Compute the actual value
+	Vector <T> actual = simple_compute_cached(layers, size, a, z, in);
+
+	// Construction the Jacobian using backpropogation
+	Matrix <T> *J = new Matrix <T> [size];
+
+	Vector <T> delta(osize, 1);
+	
+	for (int i = size - 1; i >= 0; i--) {
+		if (i < size - 1)
+			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
+
+		delta.stable_shur(z[i]);
+
+		J[i] = std::move(vvt_mult(delta, a[i]));
+	}
+
+	// Return the gradient
+	return J;
+}
+
 template <class T>
 Matrix <T> *simple_gradient(
 		Layer <T> *layers,
@@ -92,6 +123,7 @@ Matrix <T> *simple_gradient(
 	// Return the gradient
 	return J;
 }
+
 template <class T>
 Matrix <T> *simple_batch_gradient(
 		Layer <T> *layers,

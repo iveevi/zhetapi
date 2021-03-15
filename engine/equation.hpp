@@ -13,6 +13,8 @@ class Equation {
 	Engine *			__engine	= nullptr;
 public:
 	Equation(const std::vector <std::string> &);
+
+	std::string representation() const;
 };
 
 }
