@@ -21,7 +21,10 @@ vector <singlet> rig {
 	RIG(lq_decomp),
 	RIG(qr_alg),
 	RIG(matrix_props),
-	RIG(fourier_series)
+	RIG(fourier_series),
+	RIG(polynomial_construction),
+	RIG(polynomial_comparison),
+	RIG(polynomial_arithmetic)
 };
 
 vector <singlet> failed;

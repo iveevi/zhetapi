@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include <random>
 
 #include <dnn.hpp>
 
@@ -18,10 +19,17 @@ using namespace zhetapi::utility;
 const size_t ITERS = 100;
 const double GAMMA = 0;
 
+template <class T = double>
+using Gaussian = normal_distribution <T>;
+
 // GOAL: Return 1, based on actions 1 and 0
 int main()
 {
 	Interval <> i = 1_I;
+
+	// Generators
+	random_device rd {};
+	mt19937 gen {rd()};
 
 	auto rvec = [&]() -> Vector <double> {
 		return {
@@ -34,28 +42,36 @@ int main()
 	DNN <> model(2, {
 		Layer <> (6, new ReLU <double> ()),
 		Layer <> (6, new ReLU <double> ()),
-		Layer <> (1, new Sigmoid <double> ()),
+		Layer <> (1, new Linear <double> ()),
 	});
 
+	const double V = 0.2;
 	for (size_t k = 0; k < ITERS; k++) {
 		Vector <double> S = rvec();
 		Vector <double> P = model(S);
 
-		bool A = (i.uniform() <= P[0]) ? 1 : 0;
+		double Mu = P[0];
 
-		double R = (A ? 1 : -1);
+		Gaussian <> g(Mu, V);
 
+		double A = g(gen);
+		double R = (A > 0 ? 1 : -1);
+		double C = (A - Mu)/(2 * V);
+		
 		// Output
 		cout << boolalpha << S << "\t -> "
-			<< setw(8) << P[0] << "\t-> "
-			<< setw(8) << R
+			<< setw(8) << Mu << "\t-> "
+			<< setw(8) << A << "\t-> "
+			<< setw(8) << R << "\t-> "
+			<< setw(8) << R * C
 			<< endl;
+
 
 		// Use cached version instead
 		Matrix <double> *matptr = model.get_gradient(S);
 
 		for (size_t i = 0; i < model.size(); i++)
-			matptr[i] *= R;
+			matptr[i] *= R * C;
 
 		model.apply_gradient(matptr);
 

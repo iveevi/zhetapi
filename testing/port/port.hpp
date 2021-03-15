@@ -20,6 +20,7 @@
 #include <matrix.hpp>
 #include <tensor.hpp>
 #include <fourier.hpp>
+#include <polynomial.hpp>
 
 #include <std/calculus.hpp>
 #include <std/functions.hpp>
@@ -75,5 +76,9 @@ TEST(qr_alg);
 TEST(matrix_props);
 
 TEST(fourier_series);
+
+TEST(polynomial_construction);
+TEST(polynomial_comparison);
+TEST(polynomial_arithmetic);
 
 #endif

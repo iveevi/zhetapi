@@ -11,7 +11,10 @@
 #include <vector.hpp>
 
 namespace zhetapi {
-		
+
+// Next power of 2
+size_t npow2(size_t);
+
 /**
 * @brief Represents a Polynomial, with respect to some single variable x:
 *
@@ -20,18 +23,32 @@ namespace zhetapi {
 template <class T>
 class Polynomial {
 protected:
-	std::vector <T> coeffs;		// Represents the coefficients of
-					// the polynomial
+	T *	__coeffs	= nullptr;
+	size_t	__degree	= 0;
+	size_t	__size		= 0;
+
+	template <class C>
+	void indexed_constructor(const C &, size_t);
+
+	void clear();
 public:
-	// Constructor
+	// Constructors
+	Polynomial();
+	Polynomial(const Polynomial &);
 	explicit Polynomial(const Vector <T> &);
 	explicit Polynomial(const std::vector <T> &);
-	explicit Polynomial(const std::initializer_list <T> &);
+	Polynomial(const std::initializer_list <T> &);
+	Polynomial(T *, size_t);
+
+	Polynomial &operator=(const Polynomial &);
+
+	~Polynomial();
 
 	// Getters
 	size_t degree() const;
 
-	T coefficient(size_t) const;
+	T &operator[](size_t);
+	const T &operator[](size_t) const;
 
 	// Functional Methods
 	Polynomial integrate() const;
@@ -48,19 +65,47 @@ public:
 	T evaluate(const T &) const;
 	T operator()(const T &) const;
 
-	// Output Methods
+	// Operations
 	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const Polynomial <U> &);
+	friend Polynomial <U> operator+(
+			const Polynomial <U> &,
+			const Polynomial <U> &);
+	
+	template <class U>
+	friend Polynomial <U> operator-(
+			const Polynomial <U> &,
+			const Polynomial <U> &);
+	
+	template <class U>
+	friend Polynomial <U> operator*(
+			const Polynomial <U> &,
+			const Polynomial <U> &);
+
+	// Comparison
+	template <class U>
+	friend bool operator==(
+			const Polynomial <U> &,
+			const Polynomial <U> &);
+	
+	template <class U>
+	friend bool operator!=(
+			const Polynomial <U> &,
+			const Polynomial <U> &);
 };
+
+template <class T>
+Polynomial <T> ::Polynomial() {}
+
+template <class T>
+Polynomial <T> ::Polynomial(const Polynomial <T> &other)
+{
+	indexed_constructor(other, other.__degree + 1);
+}
 
 template <class T>
 Polynomial <T> ::Polynomial(const Vector <T> &ref)
 {
-	if (ref.size() == 0)
-		coeffs = {0};
-	
-	for (size_t i = 0; i < ref.size(); i++)
-		coeffs.push_back(ref[i]);
+	indexed_constructor(ref, ref.size());
 }
 
 /**
@@ -70,10 +115,9 @@ Polynomial <T> ::Polynomial(const Vector <T> &ref)
  * @param ref The array of coefficients.
  */
 template <class T>
-Polynomial <T> ::Polynomial(const std::vector <T> &ref) : coeffs(ref)
+Polynomial <T> ::Polynomial(const std::vector <T> &ref)
 {
-	if (coeffs.size() == 0)
-		coeffs = {0};
+	indexed_constructor(ref, ref.size());
 }
 
 /**
@@ -86,6 +130,69 @@ template <class T>
 Polynomial <T> ::Polynomial(const std::initializer_list <T> &ref)
 	: Polynomial(std::vector <T> {ref}) {}
 
+template <class T>
+Polynomial <T> ::Polynomial(T *coeffs, size_t size)
+{
+	__size = npow2(size);
+	__degree = __size - 1;
+
+	// Walk down to the last non-zero
+	while (__degree >= 0 && !coeffs[__degree])
+		__degree--;
+	
+	__coeffs = new T[__size];
+
+	memcpy(__coeffs, coeffs, sizeof(T) * __size);
+}
+
+template <class T>
+Polynomial <T> &Polynomial <T> ::operator=(const Polynomial <T> &other)
+{
+	if (this != &other) {
+		clear();
+
+		indexed_constructor(other, other.__degree + 1);
+	}
+
+	return *this;
+}
+
+template <class T>
+Polynomial <T> ::~Polynomial()
+{
+	clear();
+}
+
+template <class T>
+template <class C>
+void Polynomial <T> ::indexed_constructor(const C &container, size_t size)
+{
+	__degree = size - 1;
+
+	if (__degree < 0)
+		return;
+
+	__size = npow2(__degree + 1);
+	__coeffs = new T[__size];
+
+	memset(__coeffs, 0, sizeof(T) * __size);
+	for (size_t i = 0; i <= __degree; i++)
+		__coeffs[i] = container[i];
+}
+
+template <class T>
+void Polynomial <T> ::clear()
+{
+	if (__coeffs) {
+		delete[] __coeffs;
+
+		__coeffs = nullptr;
+	}
+
+	__size = 0;
+	__degree = 0;
+}
+
 /**
  * @brief Get the degree of the polynomial.
  *
@@ -94,7 +201,13 @@ Polynomial <T> ::Polynomial(const std::initializer_list <T> &ref)
 template <class T>
 size_t Polynomial <T> ::degree() const
 {
-	return coeffs.size() - 1;
+	return __degree;
+}
+
+template <class T>
+T &Polynomial <T> ::operator[](size_t i)
+{
+	return __coeffs[i];
 }
 
 /**
@@ -105,9 +218,9 @@ size_t Polynomial <T> ::degree() const
  * @return The value \f$a_n\f$
  */
 template <class T>
-T Polynomial <T> ::coefficient(size_t deg) const
+const T &Polynomial <T> ::operator[](size_t i) const
 {
-	return coeffs[deg];
+	return __coeffs[i];
 }
 
 /**
@@ -121,8 +234,8 @@ Polynomial <T> Polynomial <T> ::differentiate() const
 {
 	std::vector <T> out;
 
-	for (size_t i = 0; i < coeffs.size() - 1; i++)
-		out.push_back((coeffs.size() - (i + 1)) * coeffs[i]);
+	for (size_t i = 0; i < __size - 1; i++)
+		out.push_back((__size - (i + 1)) * __coeffs[i]);
 
 	return Polynomial(out);
 }
@@ -142,8 +255,8 @@ Polynomial <T> Polynomial <T> ::integrate() const
 {
 	std::vector <T> out;
 
-	for (size_t i = 0; i < coeffs.size(); i++)
-		out.push_back(coeffs[i] / T(coeffs.size() - i));
+	for (size_t i = 0; i < __size; i++)
+		out.push_back(__coeffs[i] / T(__size - i));
 
 	out.push_back(0);
 
@@ -162,22 +275,22 @@ template <class T>
 std::vector <T> Polynomial <T> ::roots() const
 {
 	switch (degree()) {
-	
+		// TODO: Fill this part out later
 	};
 }
 
 /**
-* @brief Solves the roots of the representative
-* Polynomial using the Durand-Kerner method.
-*
-* @param rounds The number of iteration to be
-* performed by the method.
-*
-* @param eps The precision threshold; when the
-* sum of the squared difference between the roots
-* of successive iterations is below eps, the method
-* will exit early.
-*/
+ * @brief Solves the roots of the representative
+ * Polynomial using the Durand-Kerner method.
+ *
+ * @param rounds The number of iteration to be
+ * performed by the method.
+ *
+ * @param eps The precision threshold; when the
+ * sum of the squared difference between the roots
+ * of successive iterations is below eps, the method
+ * will exit early.
+ */
 template <class T>
 std::vector <T> Polynomial <T> ::roots(
 		size_t rounds,
@@ -221,14 +334,14 @@ std::vector <T> Polynomial <T> ::roots(
 template <class T>
 std::pair <Polynomial <T>, T> Polynomial <T> ::synthetic_divide(const T &root) const
 {
-	std::vector <T> qs {coeffs[0]};
+	std::vector <T> qs {__coeffs[0]};
 
-	T rem = coeffs[0];
-	for (size_t i = 1; i < coeffs.size(); i++) {
-		if (i < coeffs.size() - 1)
-			qs.push_back(coeffs[i] + root * rem);
+	T rem = __coeffs[0];
+	for (size_t i = 1; i < __size; i++) {
+		if (i < __size - 1)
+			qs.push_back(__coeffs[i] + root * rem);
 
-		rem = coeffs[i] + rem * root;
+		rem = __coeffs[i] + rem * root;
 	}
 
 	return {Polynomial(qs), rem};
@@ -239,8 +352,8 @@ T Polynomial <T> ::evaluate(const T &in) const
 {
 	T acc = 0;
 
-	for (auto c : coeffs)
-		acc = in * acc + c;
+	for (size_t i = 0; i <= __degree; i++)
+		acc = in * acc + __coeffs[i];
 
 	return acc;
 }
@@ -248,12 +361,92 @@ T Polynomial <T> ::evaluate(const T &in) const
 template <class T>
 T Polynomial <T> ::operator()(const T &in) const
 {
-	T acc = 0;
+	return evaluate(in);
+}
 
-	for (auto c : coeffs)
-		acc = in * acc + c;
+template <class T>
+bool operator==(const Polynomial <T> &f, const Polynomial <T> &g)
+{
+	if (f.__degree != g.__degree)
+		return false;
 
-	return acc;
+	for (size_t i = 0; i <= f.__degree; i++) {
+		if (f[i] != g[i])
+			return false;
+	}
+
+	return true;
+}
+
+template <class T>
+bool operator!=(const Polynomial <T> &f, const Polynomial <T> &g)
+{
+	return !(f == g);
+}
+
+// Arithmetic
+template <class T>
+Polynomial <T> operator+(const Polynomial <T> &f, const Polynomial <T> &g)
+{
+	const T *ptr = f.__coeffs;
+	const T *optr = g.__coeffs;
+
+	size_t size = f.__size;
+	size_t ldeg = f.__degree;
+
+	if (g.__size > size) {
+		size = g.__size;
+		ldeg = g.__degree;
+
+		std::swap(ptr, optr);
+	}
+
+	T *coeffs = new T[size];
+
+	memcpy(coeffs, ptr, size * sizeof(T));
+	for (size_t i = 0; i <= ldeg; i++)
+		coeffs[i] += optr[i];
+
+	Polynomial <T> out(coeffs, size);
+
+	delete[] coeffs;
+
+	return out;
+}
+
+template <class T>
+Polynomial <T> operator-(const Polynomial <T> &f, const Polynomial <T> &g)
+{
+	const T *ptr = f.__coeffs;
+	const T *optr = g.__coeffs;
+
+	size_t size = f.__size;
+	size_t ldeg = f.__degree;
+
+	T sign = 1;
+	if (g.__size > size) {
+		size = g.__size;
+		ldeg = g.__degree;
+
+		std::swap(ptr, optr);
+
+		sign = -1;
+	}
+
+	T *coeffs = new T[size];
+
+	memcpy(coeffs, ptr, size * sizeof(T));
+	for (size_t i = 0; i <= ldeg; i++) {
+		coeffs[i] -= optr[i];
+
+		coeffs[i] *= sign;
+	}
+
+	Polynomial <T> out(coeffs, size);
+
+	delete[] coeffs;
+
+	return out;
 }
 
 /**
@@ -262,39 +455,25 @@ T Polynomial <T> ::operator()(const T &in) const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Polynomial <T> &p)
 {
-	if (p.coeffs[0]) {
-		if (p.coeffs[0] != 1)
-			os << p.coeffs[0];
+	size_t degree = p.degree();
 
-		if (p.degree() > 0)
-			os << "x";
+	for (size_t i = 0; i <= p.degree(); i++) {
+		T x = p[i];
 
-		if (p.degree() > 1)
-			os << "^" << p.degree();
-	}
+		if (x) {
+			os << x;
 
-	size_t i = 1;
-	while (i <= p.degree()) {
-		T c = p.coeffs[i];
+			if (i > 0)
+				os << "x";
 
-		if (c == 0) {
-			i++;
-			continue;
+			if (i > 1)
+				os << "^" << i;
+
+			if (i < degree)
+				os << " + ";
 		}
-
-		os << " + ";
-		if (c != 1)
-			os << c;
-
-		if (p.degree() - i > 0)
-			os << "x";
-
-		if (p.degree() - i > 1)
-			os << "^" << (p.degree() - i);
-
-		i++;
 	}
-	
+
 	return os;
 }
 

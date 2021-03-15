@@ -122,9 +122,9 @@ Complex <T> Complex <T> ::normalize() const
 // Output Methods
 //////////////////////////////////////////
 template <class T>
-::std::string to_string(const Complex <T> &z)
+std::string to_string(const Complex <T> &z)
 {
-	::std::string str;
+	std::string str;
 
 	bool pl = false;
 
@@ -143,7 +143,7 @@ template <class T>
 }
 
 template <class T>
-::std::ostream &operator<<(::std::ostream &os, const Complex <T> &z)
+std::ostream &operator<<(std::ostream &os, const Complex <T> &z)
 {
 	bool pl = false;
 

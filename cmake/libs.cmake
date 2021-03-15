@@ -5,6 +5,7 @@ set(ZHETAPI_SOURCE
 	source/equation.cpp
 	source/function.cpp
 	source/image.cpp
+	source/polynomial.cpp
 	source/registration.cpp
 	source/variable.cpp
 	source/token.cpp
