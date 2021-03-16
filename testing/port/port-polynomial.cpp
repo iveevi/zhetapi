@@ -15,7 +15,7 @@ TEST(polynomial_construction)
 	oss << "\tf(1) = " << f(1) << endl;
 	oss << "\tf(1) = " << f.evaluate(1) << endl;
 	
-	if (f.degree() != 5) {
+	if (f.degree() != 4) {
 		oss << "INCORRECT DEGREE (for f)" << endl;
 
 		return false;

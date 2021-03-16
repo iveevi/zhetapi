@@ -134,15 +134,15 @@ template <class T>
 Polynomial <T> ::Polynomial(T *coeffs, size_t size)
 {
 	__size = npow2(size);
-	__degree = __size - 1;
+	__degree = size - 1;
 
 	// Walk down to the last non-zero
-	while (__degree >= 0 && !coeffs[__degree])
+	while (__degree >= 0 && coeffs[__degree] == T(0))
 		__degree--;
-	
+
 	__coeffs = new T[__size];
 
-	memcpy(__coeffs, coeffs, sizeof(T) * __size);
+	memcpy(__coeffs, coeffs, sizeof(T) * (__degree + 1));
 }
 
 template <class T>
