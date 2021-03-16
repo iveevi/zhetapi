@@ -91,6 +91,11 @@ bool node_manager::empty() const
 	return __tree.empty();
 }
 
+node node_manager::get_tree() const
+{
+	return __tree;
+}
+
 // Setters
 void node_manager::set_label(lbl label)
 {
@@ -518,7 +523,8 @@ void node_manager::simplify(node &ref)
 	operation_holder *ophptr = ref.cast <operation_holder> ();
 
 	if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
-		simplify_separable(ref);
+		// Fix subtraction and what not
+		// simplify_separable(ref);
 	} else if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
 		simplify_mult_div(ref, ophptr->code);
 	} else {

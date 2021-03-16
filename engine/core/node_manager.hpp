@@ -35,6 +35,7 @@ public:
 
 	// Properties
 	bool empty() const;	// Is the __tree node empty?
+	node get_tree() const;
 
 	// Setters
 	void set_label(lbl);

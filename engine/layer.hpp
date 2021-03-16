@@ -104,6 +104,17 @@ public:
 		Vector <U> *,
 		const Vector <U> &
 	);
+
+	template <class U>
+	friend Matrix <U> *jacobian(
+		Layer <U> *,
+		size_t,
+		size_t,
+		Vector <U> *,
+		Vector <U> *,
+		const Vector <U> &,
+		const Vector <U> &
+	);
 	
 	template <class U>
 	friend Matrix <U> *simple_gradient(

@@ -50,8 +50,9 @@ public:
 
 	// Properties
 	lbl label() const;
-	bool empty() const;
 	bool null() const;
+	Token *ptr() const;
+	bool empty() const;
 	size_t child_count() const;
 	Token::type caller() const;
 	
@@ -78,6 +79,9 @@ T *node::cast() const
 {
 	return dynamic_cast <T *> (__tptr);
 }
+
+// Forward declarations
+node factorize(const node &, const node &);
 
 }
 

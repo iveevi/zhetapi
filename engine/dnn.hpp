@@ -114,6 +114,7 @@ public:
 	void apply_gradient(Matrix <T> *);
 
 	Matrix <T> *get_gradient(const Vector <T> &);
+	Matrix <T> *get_gradient(const Vector <T> &, const Vector <T> &);
 };
 
 // Constructors and other memory related operations
@@ -413,6 +414,23 @@ Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in)
 	Vector <T> *z = new Vector <T> [__size];
 
 	Matrix <T> *J = jacobian(__layers, __size, __osize, a, z, in);
+
+	delete[] a;
+	delete[] z;
+
+	return J;
+}
+
+template <class T>
+Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in, const Vector <T> &delta)
+{
+	if (in.size() != __isize || delta.size() != __osize)
+		throw bad_io_dimensions();
+
+	Vector <T> *a = new Vector <T> [__size + 1];
+	Vector <T> *z = new Vector <T> [__size];
+
+	Matrix <T> *J = jacobian(__layers, __size, __osize, a, z, in, delta);
 
 	delete[] a;
 	delete[] z;

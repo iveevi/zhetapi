@@ -1,4 +1,7 @@
+#include <stack>
+
 #include <core/node.hpp>
+#include <core/operation_holder.hpp>
 
 namespace zhetapi {
 
@@ -94,6 +97,11 @@ const node &node::operator[](size_t i) const
 	return __leaves[i];
 }
 
+bool node::null() const
+{
+	return (__tptr == nullptr);
+}
+
 lbl node::label() const
 {
 	return __label;
@@ -104,9 +112,9 @@ bool node::empty() const
 	return (__tptr == nullptr) && __leaves.empty();
 }
 
-bool node::null() const
+Token *node::ptr() const
 {
-	return (__tptr == nullptr);
+	return __tptr;
 }
 
 size_t node::child_count() const
@@ -218,22 +226,116 @@ std::string node::display(int num, int lev) const
 bool node::loose_match(const node &a, const node &b)
 {
 	// Check the Token
-	if (*(a.__tptr) != b.__tptr)
+	if (!tokcmp(a.ptr(), b.ptr()))
 		return false;
 	
 	// Check the leaves
-	if (a.__leaves.size() != b.__leaves.size())
+	if (a.child_count() != b.child_count())
 		return false;
 
-	for (size_t i = 0; i < a.__leaves.size(); i++) {
-		if (!loose_match(a.__leaves[i], b.__leaves[i]))
+	for (size_t i = 0; i < a.child_count(); i++) {
+		if (!loose_match(a[i], b[i]))
 			return false;
 	}
 
 	return true;
 }
 
-::std::ostream &operator<<(::std::ostream &os, const node &tree)
+// Non-member functions
+node factorize(const node &ref, const node &factor)
+{
+	using namespace std;
+	// First check equality
+	//
+	// TODO: Create a nodecmp function (refactor loose_match)
+	if (node::loose_match(ref, factor)) {
+		cout << "\tRETURN UNIT" << endl;
+		return node(new opd_z(1));
+	}
+	
+	// Proceed normally
+	std::vector <node> factors;
+	std::stack <node> process;
+
+	process.push(ref);
+
+	node top;
+	while (!process.empty()) {
+		top = process.top();
+
+		process.pop();
+
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr);
+
+		if (ophptr && (ophptr->code == mul)) {
+			process.push(top[0]);
+			process.push(top[1]);
+		} else {
+			factors.push_back(top);
+		}
+	}
+
+	using namespace std;
+	cout << "Factors:" << endl;
+	for (auto nd : factors)
+		nd.print();
+	
+	std::vector <node> remaining;
+	bool factorable = false;
+
+	for (node nd : factors) {
+		if (factorable) {
+			remaining.push_back(nd);
+			cout << "pushing" << endl;
+			nd.print();
+
+			continue;
+		}
+
+		if (node::loose_match(factor, nd)) {
+			factorable = true;
+		} else {
+			remaining.push_back(nd);
+			cout << "pushing" << endl;
+			nd.print();
+		}
+	}
+
+	if (!factorable)
+		return node(nullptr);
+	
+	cout << "rem.size = " << remaining.size() << endl;
+
+	// Fold into multiplication
+	while (remaining.size() > 1) {
+		std::vector <node> tmp;
+
+		size_t n = remaining.size();
+
+		for (size_t i = 0; i < n/2; i++) {
+			tmp.push_back(
+				node(new operation_holder("*"),
+					{
+						remaining[i],
+						remaining[i + 1]
+					}
+				)
+			);
+		}
+
+		if (n % 2)
+			tmp.push_back(remaining[n - 1]);
+	
+		remaining = tmp;
+	}
+
+	cout << "RET rem.size = " << remaining.size() << endl;
+	remaining[0].print();
+
+	return remaining[0];
+}
+
+std::ostream &operator<<(std::ostream &os, const node &tree)
 {
 	os << tree.display();
 
