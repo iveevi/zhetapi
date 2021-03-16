@@ -515,21 +515,22 @@ void node_manager::simplify(node &ref)
 		return;
 	}
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
+	operation_holder *ophptr = ref.cast <operation_holder> ();
 
-	// if (ophptr && (ophptr->code == add || ophptr->code == sub))
-	//	simplify_separable(ref);
-
-	if (ophptr && (ophptr->code == mul || ophptr->code == dvs))
+	if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
+		simplify_separable(ref);
+	} else if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
 		simplify_mult_div(ref, ophptr->code);
-
-	for (auto &child : ref.__leaves)
-		simplify(child);
+	} else {
+		for (auto &child : ref.__leaves)
+			simplify(child);
+	}
 }
 
 void node_manager::simplify_separable(node &ref)
 {
 	Token *opd = new opd_z(0);
+	Token *zero = new opd_z(0);
 
 	std::stack <node> process;
 
@@ -546,43 +547,61 @@ void node_manager::simplify_separable(node &ref)
 		operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr);
 
 		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
-			process.push(top.__leaves[0]);
-			process.push(top.__leaves[1]);
+			process.push(top[0]);
+			process.push(top[1]);
 		} else {
 			sums.push_back(top);
 		}
 	}
 
-	// Make copies, not address copies
-	std::vector <node> rest;
-	for (auto sep : sums) {
-		// Includes variable_constant; remove this exception
-		if (is_constant(sep.__label))
-			opd = __engine->compute("+", {opd, value(sep)});
+	std::vector <node> variables;
+	
+	std::stack <node> constants;
+	for (auto nm : sums) {
+		if (is_constant(nm.label()))
+			constants.push(nm);
 		else
-			rest.push_back(sep);
+			variables.push_back(nm);
+	}
+	
+	while (!constants.empty()) {
+		node nd = constants.top();
+
+		constants.pop();
+
+		opd = __engine->compute("+", {opd, nd.__tptr});
 	}
 
-	if (!types::is_zero(opd))
-		rest.push_back(node(opd, {}));
+	// Still needs to deal with variables
+	std::vector <node> all = variables;
 
-	while (rest.size() > 1) {
+	if (!tokcmp(opd, zero))
+		all.push_back(node(opd));
+
+	// Next step is to fold the vector
+	while (all.size() > 1) {
 		std::vector <node> tmp;
 
-		size_t n = rest.size();
+		size_t n = all.size();
 
-		for (size_t i = 0; i < n - 1; i += 2) {
-			tmp.push_back(node(new operation_holder("+"),
-						{rest[i], rest[i + 1]}));
+		for (size_t i = 0; i < n/2; i++) {
+			tmp.push_back(
+				node(new operation_holder("+"),
+					{
+						all[i],
+						all[i + 1]
+					}
+				)
+			);
 		}
 
 		if (n % 2)
-			tmp.push_back(rest[n - 1]);
+			tmp.push_back(all[n - 1]);
 	
-		rest = tmp;
+		all = tmp;
 	}
 
-	ref.transfer(rest[0]);
+	ref.transfer(all[0]);
 }
 
 void node_manager::simplify_mult_div(node &ref, codes c)
