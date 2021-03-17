@@ -9,6 +9,8 @@ engine_base::engine_base()
 	//////////////////////////////////////////
 	// Real Scalar Arithemtic
 	//////////////////////////////////////////
+
+	// TODO: Really shorten the macros
 	
 	// Addition and Subtraction
 	__add_binary_operation_set(+);
@@ -83,8 +85,13 @@ engine_base::engine_base()
 	__add_binary_operation_ftr(^, R, R, R, pow(a->get(), b->get()));
 	__add_binary_operation_ftr(^, R, Z, R, pow(a->get(), b->get()));
 	__add_binary_operation_ftr(^, Q, Q, R, pow((R) a->get(), (R) b->get()));
+
+	// FIXME: Wrong values
 	__add_binary_operation_ftr(^, CR, CR, CR, 1);
 	__add_binary_operation_ftr(^, CQ, CQ, CQ, Q(1));
+	
+	// TODO: Preserve rationality for this overload
+	__add_heterogenous_binary_operation_ftr(^, Q, Z, R, pow((R) a->get(), (R) b->get()));
 
 	// Trigonometry
 	__add_unary_operation_ftr(sin, Z, R, std::sin(R (in->get())));
@@ -223,10 +230,15 @@ engine_base::engine_base()
 	// Add a "variant" type
 	__add_binary_operation(==, Z, Z, B);
 	__add_binary_operation(!=, Z, Z, B);
+
 	__add_binary_operation(>, Z, Z, B);
+	__add_binary_operation(>, R, R, B);
+	
 	__add_binary_operation(>=, Z, Z, B);
 	__add_binary_operation(<, Z, Z, B);
 	__add_binary_operation(<=, Z, Z, B);
+	
+	__add_heterogenous_binary_operation(>, R, Z, B);
 
 	//////////////////////////////////////////
 	// Transfer into table

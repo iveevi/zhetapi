@@ -1,6 +1,9 @@
 #ifndef COMMON_H_
 #define COMMON_H_
 
+// C/C++ heaaders
+#include <vector>
+
 // This file contains miscellaneous functions that
 // do not really fit into any other header
 template <class T>
@@ -16,5 +19,9 @@ void collect(std::vector <T> &bin, T x, U ... rest)
 
 	collect(bin, rest...);
 }
+
+using Args = std::vector <std::string>;
+
+Args args_union(const Args &, const Args &);
 
 #endif

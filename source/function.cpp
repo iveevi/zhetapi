@@ -11,7 +11,7 @@ double Function::h = 0.0001;
 // Constructors
 Function::Function() : __threads(1) {}
 
-Function::Function(const char *str) : Function(::std::string
+Function::Function(const char *str) : Function(std::string
 		(str)) {}
 
 // Symbolic construction
@@ -95,6 +95,7 @@ Function::Function(const std::string &str) : __threads(1)
 // Symbolic constructor with external symbol table
 Function::Function(const std::string &str, Engine *bptr) : __threads(1)
 {
+	// TODO: Remove this (duplication)
 	std::string pack;
 	std::string tmp;
 
@@ -171,7 +172,7 @@ Function::Function(const std::string &str, Engine *bptr) : __threads(1)
 }
 
 // Member-wise construction
-Function::Function(const ::std::string &symbol, const ::std::vector
+Function::Function(const std::string &symbol, const std::vector
 		<std::string> &params, const node_manager &manager) :
 		__symbol(symbol), __params(params),
 		__manager(manager), __threads(1) {}
@@ -304,7 +305,7 @@ void *Function::compile_general() const
 
 	void *handle = dlopen(("./gen/" + file + ".so").c_str(), RTLD_NOW);
 
-	// ::std::cout << "handle @ " << file << ": " << handle << ::std::endl;
+	// std::cout << "handle @ " << file << ": " << handle << std::endl;
 
 	const char *dlsym_error = dlerror();
 
@@ -318,13 +319,13 @@ void *Function::compile_general() const
 
 	void *ptr = dlsym(handle, file.c_str());
 
-	// ::std::cout << "\tptr: " << ptr << ::std::endl;
-	// ::std::cout << "\tfile: " << file << ::std::endl;
+	// std::cout << "\tptr: " << ptr << std::endl;
+	// std::cout << "\tfile: " << file << std::endl;
 
 	// dlsym_error = dlerror();
 
 	if (dlsym_error) {
-		::std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
+		std::cerr << "Cannot load symbol '" << file << "': " << dlsym_error << '\n';
 		
 		// dlclose(handle);
 		

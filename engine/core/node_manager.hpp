@@ -20,7 +20,8 @@ class Function;
 
 class node_manager {
 private:
-	Engine *				__engine		= nullptr;
+	// TODO: refactor params to args
+	Engine *			__engine	= nullptr;
 	node				__tree		= node();
 	std::vector <node>		__refs		= {};
 	std::vector <std::string>	__params	= {};
@@ -28,6 +29,7 @@ public:
 	node_manager();
 	node_manager(const node_manager &);
 	node_manager(const node &, Engine *);
+	node_manager(const node &, const std::vector <std::string> &, Engine *);
 	node_manager(const std::string &, Engine *);
 	node_manager(const std::string &, const std::vector <std::string> &, Engine *);
 
@@ -35,7 +37,8 @@ public:
 
 	// Properties
 	bool empty() const;	// Is the __tree node empty?
-	node get_tree() const;
+	size_t num_args() const;
+	const node &get_tree() const;
 
 	// Setters
 	void set_label(lbl);
@@ -75,6 +78,14 @@ public:
 	std::string display() const;
 
 	void print(bool = false) const;
+
+	// Arithmetic
+	friend node_manager operator+(
+			const node_manager &,
+			const node_manager &);
+	friend node_manager operator-(
+			const node_manager &,
+			const node_manager &);
 
 	// Static methods
 	static bool loose_match(const node_manager &, const node_manager &);

@@ -1,5 +1,7 @@
-#include <core/node_manager.hpp>
 #include <engine.hpp>
+
+#include <core/common.hpp>
+#include <core/node_manager.hpp>
 
 namespace zhetapi {
 
@@ -21,6 +23,31 @@ node_manager::node_manager(const node &tree, Engine *engine)
 	// Label the tree
 	label(__tree);
 	count_up(__tree);
+}
+
+node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
+		: __engine(engine), __tree(tree), __params(args)
+{
+	// TODO: Put this in a method
+	//
+	// Fill references
+	node tmp;
+	for (std::string str : args) {
+		tmp = nf_zero();
+
+		tmp.__label = l_variable;
+
+		__refs.push_back(tmp);
+	}
+
+	// Unpack variable clusters
+	expand(__tree);
+
+	// Label the tree
+	label(__tree);
+	count_up(__tree);
+	
+	rereference(__tree);
 }
 
 node_manager::node_manager(const std::string &str, Engine *engine)
@@ -91,7 +118,12 @@ bool node_manager::empty() const
 	return __tree.empty();
 }
 
-node node_manager::get_tree() const
+size_t node_manager::num_args() const
+{
+	return __params.size();
+}
+
+const node &node_manager::get_tree() const
 {
 	return __tree;
 }
@@ -126,8 +158,6 @@ Token *node_manager::sequential_value() const
 Token *node_manager::value(node tree) const
 {
 	std::vector <Token *> values;
-
-	node *unrefd;
 
 	Token *tptr;
 	Token *vptr;
@@ -251,6 +281,8 @@ Token *node_manager::value(node tree) const
 		if (tptr)
 			return tptr->copy();
 
+		break;
+	default:
 		break;
 	}
 
@@ -697,6 +729,8 @@ void node_manager::differentiate(node &ref)
 	case l_variable:
 		ref.transfer(nf_one());
 		break;
+	default:
+		break;
 	}
 }
 
@@ -816,6 +850,8 @@ std::string node_manager::display(node ref) const
 			return (dynamic_cast <node_reference *> (ref.__tptr))->symbol();
 		
 		return display(*(dynamic_cast <node_reference *> (ref.__tptr)->get()));
+	default:
+		break;
 	}
 
 	return "?";
@@ -860,6 +896,8 @@ std::string node_manager::display_operation(node ref) const
 		// Fix bug with single/double argument overload
 		return str + "(" + display_pemdas(ref, ref.__leaves[0])
 			+ ", " + display_pemdas(ref, ref.__leaves[1]) + ")";
+	default:
+		break;
 	}
 
 	return str;
@@ -956,6 +994,8 @@ void node_manager::label(node &ref)
 
 		ref.__label = l_registrable;
 		break;
+	default:
+		break;
 	}
 }
 
@@ -1027,6 +1067,8 @@ void node_manager::label_operation(node &ref)
 	case rde:
 		ref.__label = l_pre_modifier;
 		break;
+	default:
+		break;
 	}
 }
 
@@ -1045,6 +1087,33 @@ void node_manager::rereference(node &ref)
 
 	for (node &leaf : ref.__leaves)
 		rereference(leaf);
+}
+
+// Arithmetic
+node_manager operator+(const node_manager &a, const node_manager &b)
+{
+	// TODO: Add a union operation for Engines
+	return node_manager(
+		node(new operation_holder("+"), {
+			a.get_tree(),
+			b.get_tree()
+		}),
+		args_union(a.__params, b.__params),
+		a.__engine
+	);
+}
+
+node_manager operator-(const node_manager &a, const node_manager &b)
+{
+	// TODO: Add a method to make this a one-liner
+	return node_manager(
+		node(new operation_holder("-"), {
+			a.get_tree(),
+			b.get_tree()
+		}),
+		args_union(a.__params, b.__params),
+		a.__engine
+	);
 }
 
 // Static methods

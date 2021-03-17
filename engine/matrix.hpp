@@ -925,7 +925,7 @@ Matrix <T> ::Matrix(const Matrix <T> &other)
 		: __rows(other.__rows), __cols(other.__cols),
 		Tensor <T> ({other.__rows, other.__cols})
 {
-	for (int i = 0; i < this->__size; i++)
+	for (size_t i = 0; i < this->__size; i++)
 		this->__array[i] = other.__array[i];
 }
 
@@ -935,7 +935,7 @@ Matrix <T> ::Matrix(const Vector <T> &other)
 		: __rows(other.__rows), __cols(1),
 		Tensor <T> ({other.__rows, 1}, T())
 {
-	for (int i = 0; i < __rows; i++)
+	for (size_t i = 0; i < __rows; i++)
 		this->__array[i] = other.__array[i];
 }
 
