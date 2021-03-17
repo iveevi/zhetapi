@@ -15,6 +15,8 @@ namespace zhetapi {
 // Next power of 2
 size_t npow2(size_t);
 
+// TODO: Sparse polynomials such as x^100 + x
+
 /**
 * @brief Represents a Polynomial, with respect to some single variable x:
 *
@@ -130,19 +132,23 @@ template <class T>
 Polynomial <T> ::Polynomial(const std::initializer_list <T> &ref)
 	: Polynomial(std::vector <T> {ref}) {}
 
+// Add slicing constructor
 template <class T>
 Polynomial <T> ::Polynomial(T *coeffs, size_t size)
 {
 	__size = npow2(size);
-	__degree = size - 1;
+
+	int d = size - 1;
 
 	// Walk down to the last non-zero
-	while (__degree >= 0 && coeffs[__degree] == T(0))
-		__degree--;
+	while (d >= 0 && coeffs[d] == T(0))
+		d--;
+
+	__degree = (d > 0) ? d : 0;
 
 	__coeffs = new T[__size];
 
-	memcpy(__coeffs, coeffs, sizeof(T) * (__degree + 1));
+	memcpy(__coeffs, coeffs, sizeof(T) * __size);
 }
 
 template <class T>
@@ -388,24 +394,16 @@ bool operator!=(const Polynomial <T> &f, const Polynomial <T> &g)
 template <class T>
 Polynomial <T> operator+(const Polynomial <T> &f, const Polynomial <T> &g)
 {
-	const T *ptr = f.__coeffs;
-	const T *optr = g.__coeffs;
-
-	size_t size = f.__size;
-	size_t ldeg = f.__degree;
-
-	if (g.__size > size) {
-		size = g.__size;
-		ldeg = g.__degree;
-
-		std::swap(ptr, optr);
-	}
-
+	size_t size = std::max(f.__size, g.__size);
+	
 	T *coeffs = new T[size];
 
-	memcpy(coeffs, ptr, size * sizeof(T));
-	for (size_t i = 0; i <= ldeg; i++)
-		coeffs[i] += optr[i];
+	memset(coeffs, 0, size * sizeof(T));
+	for (size_t i = 0; i <= f.degree(); i++)
+		coeffs[i] = f[i];
+
+	for (size_t i = 0; i <= g.degree(); i++)
+		coeffs[i] += g[i];
 
 	Polynomial <T> out(coeffs, size);
 
@@ -417,30 +415,16 @@ Polynomial <T> operator+(const Polynomial <T> &f, const Polynomial <T> &g)
 template <class T>
 Polynomial <T> operator-(const Polynomial <T> &f, const Polynomial <T> &g)
 {
-	const T *ptr = f.__coeffs;
-	const T *optr = g.__coeffs;
-
-	size_t size = f.__size;
-	size_t ldeg = f.__degree;
-
-	T sign = 1;
-	if (g.__size > size) {
-		size = g.__size;
-		ldeg = g.__degree;
-
-		std::swap(ptr, optr);
-
-		sign = -1;
-	}
-
+	size_t size = std::max(f.__size, g.__size);
+	
 	T *coeffs = new T[size];
 
-	memcpy(coeffs, ptr, size * sizeof(T));
-	for (size_t i = 0; i <= ldeg; i++) {
-		coeffs[i] -= optr[i];
+	memset(coeffs, 0, size * sizeof(T));
+	for (size_t i = 0; i <= f.degree(); i++)
+		coeffs[i] = f[i];
 
-		coeffs[i] *= sign;
-	}
+	for (size_t i = 0; i <= g.degree(); i++)
+		coeffs[i] -= g[i];
 
 	Polynomial <T> out(coeffs, size);
 
