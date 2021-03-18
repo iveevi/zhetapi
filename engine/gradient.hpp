@@ -57,9 +57,8 @@ Vector <T> simple_compute_cached(
 }
 
 // Jacobian during the processing of input to output
-// TODO: Remove this specific function
 template <class T>
-Matrix <T> *jacobian(
+Matrix <T> *jacobian_kernel(
 		Layer <T> *layers,
 		size_t size,
 		size_t osize,
@@ -90,14 +89,14 @@ Matrix <T> *jacobian(
 
 // Jacobian during the processing of input to output
 template <class T>
-Matrix <T> *jacobian(
+Matrix <T> *jacobian_kernel(
 		Layer <T> *layers,
 		size_t size,
 		size_t osize,
 		Vector <T> *a,
 		Vector <T> *z,
 		const Vector <T> &in,
-		const Vector <T> &del)
+		Vector <T> &delta)
 {
 	// Compute the actual value
 	Vector <T> actual = simple_compute_cached(layers, size, a, z, in);
@@ -105,7 +104,6 @@ Matrix <T> *jacobian(
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [size];
 	
-	Vector <T> delta = del;
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
 			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));

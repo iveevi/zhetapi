@@ -82,7 +82,6 @@ public:
 	void apply_gradient(const Matrix <T> &);
 
 	// Diagnosing methods
-	void diagnose() const;
 	void print() const;
 
 	// Friend functions
@@ -96,7 +95,7 @@ public:
 	);
 	
 	template <class U>
-	friend Matrix <U> *jacobian(
+	friend Matrix <U> *jacobian_kernel(
 		Layer <U> *,
 		size_t,
 		size_t,
@@ -106,7 +105,7 @@ public:
 	);
 
 	template <class U>
-	friend Matrix <U> *jacobian(
+	friend Matrix <U> *jacobian_kernel(
 		Layer <U> *,
 		size_t,
 		size_t,
@@ -289,21 +288,6 @@ template <class T>
 inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 {
 	__mat += J;
-}
-
-// Diagnosing
-template <class T>
-void Layer <T> ::diagnose() const
-{
-	using namespace std;
-	cout << "__mat = " << __mat << endl;
-	for (size_t i = 0; i < __mat.get_rows(); i++) {
-		for (size_t j = 0; j < __mat.get_cols(); j++) {
-			cout << "__mat[" << i << "][" << j << "] = " << __mat[i][j] << endl;
-			if (__mat[i][j] == 0)
-				cout << "\t[!] element " << endl;
-		}
-	}
 }
 
 template <class T>

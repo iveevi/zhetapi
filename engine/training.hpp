@@ -5,6 +5,8 @@
 #include <dataset.hpp>
 #include <display.hpp>
 #include <dnn.hpp>
+#include <erf.hpp>
+#include <optimizer.hpp>
 
 namespace zhetapi {
 
@@ -35,6 +37,98 @@ struct PerformanceStatistics {
 	size_t	__passed	= 0;
 	double	__kernel_time	= 0;
 };
+
+// Fitting a single I/O pair
+template <class T>
+void fit(
+		DNN <T> &dnn,
+		const Vector <T> &in,
+		const Vector <T> &out,
+		Erf <T> *erf,
+		Optimizer <T> *opt)
+{
+	Erf <T> *derf = erf->derivative();
+
+	// Use cached compute later
+	Vector <T> actual = dnn(in);
+
+	Matrix <T> *J;
+	
+	J = dnn.jacobian(in, derf->(actual, out));
+	J = opt->update(J);
+
+	dnn.apply_gradient(J);
+
+	delete[] J;
+	delete derf;
+}
+
+template <class T>
+void fit(
+		DNN <T> &dnn,
+		const DataSet <T> &in,
+		const DataSet <T> &out,
+		Erf <T> *erf,
+		Optimizer <T> *opt)
+{
+	/* if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
+		throw bad_io_dimensions();
+
+	if (!__opt)
+		throw null_optimizer();
+	
+	if (!__cost)
+		throw null_loss_function(); */
+
+	Matrix <T> *J;
+	
+	J = simple_batch_gradient(dnn.layers(), dnn.size(), ins, outs, erf);
+	J = opt->update(J);
+
+	dnn.apply_gradient(J);
+
+	delete[] J;
+}
+
+template <class T>
+void multithreaded_fit(
+		DNN <T> &dnn,
+		const DataSet <T> &in,
+		const DataSet <T> &out,
+		Erf <T> *erf,
+		Optimizer <T> *opt,
+		size_t threads)
+{
+	/* if (ins.size() != outs.size())
+		throw bad_io_dimensions();
+
+	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
+		throw bad_io_dimensions();
+
+	if (!__opt)
+		throw null_optimizer();
+	
+	if (!__cost)
+		throw null_loss_function(); */
+
+	Matrix <T> *J;
+	
+	J = simple_multithreaded_batch_gradient(
+			dnn.layers(),
+			dnn.size(),
+			ins,
+			outs,
+			erf,
+			threads);
+	J = opt->update(J);
+
+	dnn.apply_gradient(J);
+
+	delete[] J;
+}
 
 // Non-statistical methods (without performance statistics)
 template <class T>

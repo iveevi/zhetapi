@@ -16,7 +16,7 @@ using namespace zhetapi;
 using namespace zhetapi::ml;
 using namespace zhetapi::utility;
 
-const size_t ITERS = 100;
+const size_t ITERS = 1000;
 const double GAMMA = 0;
 
 template <class T = double>
@@ -45,6 +45,9 @@ int main()
 		Layer <> (1, new Linear <double> ()),
 	});
 
+	// Accumulated reward
+	double accumulated = 0;
+
 	const double V = 0.2;
 	for (size_t k = 0; k < ITERS; k++) {
 		Vector <double> S = rvec();
@@ -57,6 +60,8 @@ int main()
 		double A = g(gen);
 		double R = (A > 0 ? 1 : -1);
 		double C = (A - Mu)/(2 * V);
+
+		accumulated += R;
 		
 		// Output
 		cout << boolalpha << S << "\t -> "
@@ -68,7 +73,7 @@ int main()
 
 
 		// Use cached version instead
-		Matrix <double> *matptr = model.get_gradient(S);
+		Matrix <double> *matptr = model.jacobian(S);
 
 		for (size_t i = 0; i < model.size(); i++)
 			matptr[i] *= R * C;
@@ -77,4 +82,6 @@ int main()
 
 		delete[] matptr;
 	}
+
+	cout << "\nAverage Reward: " << accumulated/ITERS << endl;
 }

@@ -70,11 +70,12 @@ private:
 	size_t			__isize		= 0;
 	size_t			__osize		= 0;
 
-	// Remove erf and optimizer later
-	Erf <T> *		__cost		= nullptr; // Safe to copy
-	Optimizer <T> *         __opt		= nullptr;
+	Vector <T> *		__acache	= nullptr;
+	Vector <T> *		__zcache	= nullptr;
 
 	void clear();
+	void clear_cache();
+	void init_cache();
 public:
 	DNN();
 	DNN(const DNN &);
@@ -94,11 +95,9 @@ public:
 	size_t input_size() const;
 	size_t output_size() const;
 
-	// Setters
-	void set_cost(Erf <T> *);
-	void set_optimizer(Optimizer <T> *);
+	Layer <T> *layers();
 
-	void diagnose() const;
+	// Miscellaneous
 	void print() const;
 
 	// Computation
@@ -106,15 +105,10 @@ public:
 
 	Vector <T> compute(const Vector <T> &);
 	
-	void fit(const Vector <T> &, const Vector <T> &);
-	void fit(const DataSet <T> &, const DataSet <T> &);
-
-	void multithreaded_fit(const DataSet <T> &, const DataSet <T> &, size_t = 1);
-	
 	void apply_gradient(Matrix <T> *);
 
-	Matrix <T> *get_gradient(const Vector <T> &);
-	Matrix <T> *get_gradient(const Vector <T> &, const Vector <T> &);
+	Matrix <T> *jacobian(const Vector <T> &);
+	Matrix <T> *jacobian_delta(const Vector <T> &, Vector <T> &);
 };
 
 // Constructors and other memory related operations
@@ -124,8 +118,7 @@ DNN <T> ::DNN() {}
 template <class T>
 DNN <T> ::DNN(const DNN &other) :
 		__size(other.__size), __isize(other.__isize),
-		__osize(other.__osize), __cost(other.__cost),
-		__opt(other.__opt)
+		__osize(other.__osize)
 {
 	__layers = new Layer <T> [__size];
 
@@ -177,9 +170,6 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 		__isize = other.__isize;
 		__osize = other.__osize;
 
-		__cost = other.__cost;
-		__opt = other.__opt;
-
 		__layers = new Layer <T> [__size];
 		for (size_t i = 0; i < __size; i++)
 			__layers[i] = other.__layers[i];
@@ -191,7 +181,26 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 template <class T>
 void DNN <T> ::clear()
 {
-	delete[] __layers;
+	if (__layers)
+		delete[] __layers;
+}
+
+template <class T>
+void DNN <T> ::clear_cache()
+{
+	if (__acache)
+		delete[] __acache;
+	if (__zcache)
+		delete[] __zcache;
+}
+
+template <class T>
+void DNN <T> ::init_cache()
+{
+	clear_cache();
+
+	__acache = new Vector <T> [__size + 1];
+	__zcache = new Vector <T> [__size];
 }
 
 // Saving and loading
@@ -242,6 +251,12 @@ template <class T>
 size_t DNN <T> ::output_size() const
 {
 	return __osize;
+}
+
+template <class T>
+Layer <T> *DNN <T> ::layers()
+{
+	return __layers;
 }
 
 /*
@@ -298,19 +313,6 @@ void DNN <T> ::load_json(const std::string &file)
 	__cmp = default_comparator;
 } */
 
-// Property managers and viewers
-template <class T>
-void DNN <T> ::set_cost(Erf <T> *cost)
-{
-	__cost = cost;
-}
-
-template <class T>
-void DNN <T> ::set_optimizer(Optimizer <T> *opt)
-{
-	__opt = opt;
-}
-
 // Computation
 template <class T>
 Vector <T> DNN <T> ::operator()(const Vector <T> &in)
@@ -330,82 +332,7 @@ Vector <T> DNN <T> ::compute(const Vector <T> &in)
 }
 
 template <class T>
-void DNN <T> ::fit(const Vector <T> &in, const Vector <T> &out)
-{
-	if ((in.size() != __isize) || (out.size() != __osize))
-		throw bad_io_dimensions();
-
-	if (!__opt)
-		throw null_optimizer();
-	
-	if (!__cost)
-		throw null_loss_function();
-
-	Matrix <T> *J = __opt->gradient(__layers, __size, in, out, __cost);
-
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].apply_gradient(J[i]);
-
-	delete[] J;
-}
-
-template <class T>
-void DNN <T> ::fit(const DataSet <T> &ins, const DataSet <T> &outs)
-{
-	if (ins.size() != outs.size())
-		throw bad_io_dimensions();
-
-	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
-		throw bad_io_dimensions();
-
-	if (!__opt)
-		throw null_optimizer();
-	
-	if (!__cost)
-		throw null_loss_function();
-
-	Matrix <T> *J = __opt->batch_gradient(__layers, __size, ins, outs, __cost);
-
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].apply_gradient(J[i]);
-
-	delete[] J;
-}
-
-template <class T>
-void DNN <T> ::multithreaded_fit(
-		const DataSet <T> &ins,
-		const DataSet <T> &outs,
-		size_t threads)
-{
-	if (ins.size() != outs.size())
-		throw bad_io_dimensions();
-
-	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
-		throw bad_io_dimensions();
-
-	if (!__opt)
-		throw null_optimizer();
-	
-	if (!__cost)
-		throw null_loss_function();
-
-	Matrix <T> *J = __opt->multithreaded_batch_gradient(
-			__layers,
-			__size,
-			ins,
-			outs,
-			__cost,
-			threads);
-
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].apply_gradient(J[i]);
-
-	delete[] J;
-}
-
-template <class T>
-Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in)
+Matrix <T> *DNN <T> ::jacobian(const Vector <T> &in)
 {
 	if (in.size() != __isize)
 		throw bad_io_dimensions();
@@ -413,7 +340,7 @@ Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in)
 	Vector <T> *a = new Vector <T> [__size + 1];
 	Vector <T> *z = new Vector <T> [__size];
 
-	Matrix <T> *J = jacobian(__layers, __size, __osize, a, z, in);
+	Matrix <T> *J = jacobian_kernel(__layers, __size, __osize, a, z, in);
 
 	delete[] a;
 	delete[] z;
@@ -422,7 +349,7 @@ Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in)
 }
 
 template <class T>
-Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in, const Vector <T> &delta)
+Matrix <T> *DNN <T> ::jacobian_delta(const Vector <T> &in, Vector <T> &delta)
 {
 	if (in.size() != __isize || delta.size() != __osize)
 		throw bad_io_dimensions();
@@ -430,7 +357,7 @@ Matrix <T> *DNN <T> ::get_gradient(const Vector <T> &in, const Vector <T> &delta
 	Vector <T> *a = new Vector <T> [__size + 1];
 	Vector <T> *z = new Vector <T> [__size];
 
-	Matrix <T> *J = jacobian(__layers, __size, __osize, a, z, in, delta);
+	Matrix <T> *J = jacobian_kernel(__layers, __size, __osize, a, z, in, delta);
 
 	delete[] a;
 	delete[] z;
@@ -446,13 +373,6 @@ void DNN <T> ::apply_gradient(Matrix <T> *J)
 }
 
 // Miscellaneous
-template <class T>
-void DNN <T> ::diagnose() const
-{
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].diagnose();
-}
-
 template <class T>
 void DNN <T> ::print() const
 {
