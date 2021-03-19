@@ -86,9 +86,7 @@ public:
 	// Dimension mismatch exception
 	class dimension_mismatch {};
 	class bad_dimensions {};
-
-#ifndef ZHP_CUDA
-
+	
 	// Construction and memory
 	Tensor();
 	Tensor(const Tensor &);
@@ -106,39 +104,6 @@ public:
 	// Indexing
 	T &operator[](const std::vector <size_t> &);
 	const T &operator[](const std::vector <size_t> &) const;
-
-#else
-
-	__host__ __device__
-	Tensor();
-
-	__host__ __device__
-	Tensor(bool);
-
-	__host__ __device__
-	Tensor(const Tensor &);
-	
-	__host__ __device__
-	Tensor(size_t, size_t, const T &);
-
-	__host__ __device__
-	Tensor(const std::vector <T> &);
-
-	__host__ __device__
-	Tensor(const std::vector <std::size_t> &, const T & = T());
-
-	__host__ __device__
-	~Tensor();
-
-	__host__ __device__
-	Tensor &operator=(const Tensor &);
-
-	template <class U>
-	__host__ __device__
-	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
-
-#endif
-
 };
 
 template <class T>
@@ -146,7 +111,7 @@ Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
 		: __dims(dim.size())
 {
 
-#ifdef ZHP_CUDA
+#ifdef __CUDA_ARCH__
 
 	__on_device = false;
 
