@@ -77,7 +77,7 @@ int main()
 
 	// Create the model
 	ml::DNN <double> model(784, {
-		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784), 0.2),
+		ml::Layer <double> (30, new ml::Sigmoid <double> (), ml::Xavier <double> (784)),
 		ml::Layer <double> (10, new ml::Softmax <double> (), ml::Xavier <double> (30))
 	});
 
@@ -138,16 +138,22 @@ int main()
 		valid_exps.push_back(exp);
 	}
 
-	ml::Erf <double> *cost = new ml::MeanSquaredError <double> ();
+	ml::Erf <double> *erf = new ml::MeanSquaredError <double> ();
 	ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
-	model.set_cost(cost);
-	model.set_optimizer(opt);
-
-	for (int i = 0; i < 100; i++)
-		train_dataset_perf(model, train_imgs, train_exps, 128, cost, Display::batch, 8, match);
+	for (int i = 0; i < 100; i++) {
+		train_dataset_perf(model,
+				train_imgs,
+				train_exps,
+				128,
+				erf,
+				opt,
+				Display::batch,
+				8,
+				match);
+	}
 
 	// Free resources
-	delete cost;
+	delete erf;
 	delete opt;
 }

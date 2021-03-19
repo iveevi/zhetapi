@@ -28,6 +28,7 @@ struct RandomInitializer {
 	}
 };
 
+// FIXME: Dropout should not be active during inference phase
 template <class T = double>
 class Layer {
 	size_t			__fan_in	= 0;

@@ -14,10 +14,13 @@ template <class T>
 class Optimizer {
 protected:
 	T		__eta		= 0;
+	size_t		__size		= 0;
+	bool		__switch	= false;
 
 	// Functions
 	Optimizer(T);
 public:
+	void register_size(size_t);
 	void set_learning_rate(T);
 	
 	virtual Matrix <T> *update(
@@ -27,6 +30,17 @@ public:
 
 template <class T>
 Optimizer <T> ::Optimizer(T lr) : __eta(lr) {}
+
+template <class T>
+void Optimizer <T> ::register_size(size_t size)
+{
+	if (__size != size) {
+		__size = size;
+		__switch = true;
+	} else {
+		__switch = false;
+	}
+}
 
 template <class T>
 void Optimizer <T> ::set_learning_rate(T lr)

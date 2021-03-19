@@ -166,8 +166,14 @@ Matrix <T> *simple_batch_gradient(
 {
 	size_t ds = ins.size();
 
-	Matrix <T> *J = simple_gradient(layers, size, a,
-					z, ins[0], outs[0], cost);
+	Matrix <T> *J = simple_gradient(
+			layers,
+			size,
+			a,
+			z,
+			ins[0],
+			outs[0],
+			cost);
 
 	for (size_t i = 1; i < ds; i++) {
 		Matrix <T> *Q = nullptr;
@@ -191,14 +197,16 @@ template <class T>
 Matrix <T> *simple_multithreaded_batch_gradient(
 		Layer <T> *layers,
 		size_t size,
-		Vector <T> *ta,
-		Vector <T> *tz,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		Erf <T> *cost,
 		size_t threads)
 {
 	size_t ds = ins.size();
+
+
+	Vector <T> *ta = new Vector <T> [size + 1];
+	Vector <T> *tz = new Vector <T> [size];
 
 	Matrix <T> *J = simple_gradient(layers, size, ta,
 			tz, ins[0], outs[0], cost);
@@ -256,6 +264,9 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 
 	for (size_t i = 0; i < size; i++)
 		J[i] /= T(ds);
+	
+	delete[] ta;
+	delete[] tz;
 
 	return J;
 }

@@ -25,6 +25,7 @@ public:
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		for (size_t i = 0; i < size; i++)
 			J[i] *= -1 * this->__eta;
 		
@@ -52,6 +53,7 @@ public:
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		if (this->__switch) {
 			delete[] __M;
 
@@ -74,7 +76,10 @@ public:
 	}
 };
 
+// TODO: Fix the whole raw gradient requirement with Nesterov
+
 // TODO: Inherit Nesterov from Momentum
+/*
 template <class T>
 class Nesterov : public Optimizer <T> {
 	T		__mu;
@@ -156,6 +161,7 @@ public:
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		if (this->__switch) {
 			delete[] __M;
 
@@ -176,7 +182,7 @@ public:
 
 		return Jo;
 	}
-};
+}; */
 
 template <class T>
 class AdaGrad : public Optimizer <T> {
@@ -191,6 +197,7 @@ public:
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		if (this->__switch) {
 			delete[] __S;
 
@@ -241,6 +248,7 @@ public:
 
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		if (this->__switch) {
 			delete[] __S;
 
@@ -304,6 +312,7 @@ public:
 	// from the cashed pointer
 	Matrix <T> *update(Matrix <T> *J, size_t size)
 	{
+		this->register_size(size);
 		using namespace std;
 		if (this->__switch)
 			reset(size);

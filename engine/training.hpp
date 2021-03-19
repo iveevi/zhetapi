@@ -54,7 +54,7 @@ void fit(
 
 	Matrix <T> *J;
 	
-	J = dnn.jacobian(in, derf->(actual, out));
+	J = dnn.jacobian(in, derf->compute(actual, out));
 	J = opt->update(J);
 
 	dnn.apply_gradient(J);
@@ -66,8 +66,8 @@ void fit(
 template <class T>
 void fit(
 		DNN <T> &dnn,
-		const DataSet <T> &in,
-		const DataSet <T> &out,
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
 		Erf <T> *erf,
 		Optimizer <T> *opt)
 {
@@ -85,8 +85,9 @@ void fit(
 
 	Matrix <T> *J;
 	
-	J = simple_batch_gradient(dnn.layers(), dnn.size(), ins, outs, erf);
-	J = opt->update(J);
+	// Put batch gradient (multithread and etc) in dnn method (batch jacobian)
+	J = simple_batch_gradient(dnn.layers(), dnn.size(), dnn.acache(), dnn.zcache(), ins, outs, erf);
+	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);
 
@@ -96,8 +97,8 @@ void fit(
 template <class T>
 void multithreaded_fit(
 		DNN <T> &dnn,
-		const DataSet <T> &in,
-		const DataSet <T> &out,
+		const DataSet <T> &ins,
+		const DataSet <T> &outs,
 		Erf <T> *erf,
 		Optimizer <T> *opt,
 		size_t threads)
@@ -123,7 +124,7 @@ void multithreaded_fit(
 			outs,
 			erf,
 			threads);
-	J = opt->update(J);
+	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);
 
@@ -161,7 +162,8 @@ PerformanceStatistics <T> train_mini_batch_perf(
 		DNN <T> &dnn,
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
-		Erf <T> *cost,
+		Erf <T> *erf,
+		Optimizer <T> *opt,
 		Comparator <T> cmp = __def_cmp <T>,
 		Display::type display = 0,
 		size_t threads = 1)
@@ -179,16 +181,16 @@ PerformanceStatistics <T> train_mini_batch_perf(
 	// Performance statistics first
 	for (size_t i = 0; i < n; i++) {
 		to = dnn(ins[i]);
-		ns.__cost += (*cost)(to, outs[i])[0];
-		ns.__passed += (cmp(to, outs[i]));
+		ns.__cost += erf->compute(to, outs[i]).x();
+		ns.__passed += cmp(to, outs[i]);
 
 		perr += fabs((to - outs[i]).norm() / outs[i].norm());
 	}
 
 	if (threads > 1)
-		dnn.multithreaded_fit(ins, outs, threads);
+		multithreaded_fit(dnn, ins, outs, erf, opt, threads);
 	else
-		dnn.fit(ins, outs);
+		fit(dnn, ins, outs, erf, opt);
 
 	perr /= n;
 	if (display & Display::batch) {
@@ -208,7 +210,8 @@ PerformanceStatistics <T> train_dataset_perf(
 		const DataSet <T> &ins,
 		const DataSet <T> &outs,
 		size_t batch_size,
-		Erf <T> *cost,
+		Erf <T> *erf,
+		Optimizer <T> *opt,
 		Display::type display = 0,
 		size_t threads = 1,
 		Comparator <T> cmp = __def_cmp <T>)
@@ -227,7 +230,8 @@ PerformanceStatistics <T> train_dataset_perf(
 		bs = train_mini_batch_perf(dnn,
 				input_batches[i],
 				output_batches[i],
-				cost,
+				erf,
+				opt,
 				cmp,
 				display,
 				threads);

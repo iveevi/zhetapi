@@ -53,6 +53,10 @@ namespace zhetapi {
 
 namespace ml {
 
+// Type aliases
+template <class T>
+using DNNGrad = Vector <Matrix <T>>;
+
 /**
  * @brief Neural network class
  */
@@ -72,6 +76,9 @@ private:
 
 	Vector <T> *		__acache	= nullptr;
 	Vector <T> *		__zcache	= nullptr;
+
+	Matrix <T> *		__Acache	= nullptr;
+	Matrix <T> *		__Zcache	= nullptr;
 
 	void clear();
 	void clear_cache();
@@ -94,6 +101,9 @@ public:
 	size_t size() const;
 	size_t input_size() const;
 	size_t output_size() const;
+	
+	Vector <T> *acache() const;
+	Vector <T> *zcache() const;
 
 	Layer <T> *layers();
 
@@ -124,6 +134,8 @@ DNN <T> ::DNN(const DNN &other) :
 
 	for (size_t i = 0; i < __size; i++)
 		__layers[i] = other.__layers[i];
+	
+	init_cache();
 }
 
 /*
@@ -152,6 +164,8 @@ DNN <T> ::DNN(size_t isize, const std::vector <Layer <T>> &layers)
 	}
 
 	__osize = tmp;
+
+	init_cache();
 }
 
 template <class T>
@@ -173,6 +187,8 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 		__layers = new Layer <T> [__size];
 		for (size_t i = 0; i < __size; i++)
 			__layers[i] = other.__layers[i];
+		
+		init_cache();
 	}
 
 	return *this;
@@ -183,6 +199,8 @@ void DNN <T> ::clear()
 {
 	if (__layers)
 		delete[] __layers;
+	
+	clear_cache();
 }
 
 template <class T>
@@ -192,6 +210,11 @@ void DNN <T> ::clear_cache()
 		delete[] __acache;
 	if (__zcache)
 		delete[] __zcache;
+	
+	if (__Acache)
+		delete[] __Acache;
+	if (__Zcache)
+		delete[] __Zcache;
 }
 
 template <class T>
@@ -201,6 +224,9 @@ void DNN <T> ::init_cache()
 
 	__acache = new Vector <T> [__size + 1];
 	__zcache = new Vector <T> [__size];
+
+	__Acache = new Matrix <T> [__size + 1];
+	__Zcache = new Matrix <T> [__size];
 }
 
 // Saving and loading
@@ -257,6 +283,18 @@ template <class T>
 Layer <T> *DNN <T> ::layers()
 {
 	return __layers;
+}
+
+template <class T>
+Vector <T> *DNN <T> ::acache() const
+{
+	return __acache;
+}
+
+template <class T>
+Vector <T> *DNN <T> ::zcache() const
+{
+	return __zcache;
 }
 
 /*
@@ -337,13 +375,13 @@ Matrix <T> *DNN <T> ::jacobian(const Vector <T> &in)
 	if (in.size() != __isize)
 		throw bad_io_dimensions();
 
-	Vector <T> *a = new Vector <T> [__size + 1];
-	Vector <T> *z = new Vector <T> [__size];
-
-	Matrix <T> *J = jacobian_kernel(__layers, __size, __osize, a, z, in);
-
-	delete[] a;
-	delete[] z;
+	Matrix <T> *J = jacobian_kernel(
+		__layers,
+		__size,
+		__osize,
+		__acache,
+		__zcache,
+		in);
 
 	return J;
 }
@@ -354,13 +392,14 @@ Matrix <T> *DNN <T> ::jacobian_delta(const Vector <T> &in, Vector <T> &delta)
 	if (in.size() != __isize || delta.size() != __osize)
 		throw bad_io_dimensions();
 
-	Vector <T> *a = new Vector <T> [__size + 1];
-	Vector <T> *z = new Vector <T> [__size];
-
-	Matrix <T> *J = jacobian_kernel(__layers, __size, __osize, a, z, in, delta);
-
-	delete[] a;
-	delete[] z;
+	Matrix <T> *J = jacobian_kernel(
+		__layers,
+		__size,
+		__osize,
+		__acache,
+		__zcache,
+		in,
+		delta);
 
 	return J;
 }
