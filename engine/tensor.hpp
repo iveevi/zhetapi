@@ -23,6 +23,9 @@ using utility::Interval;
 template <class T>
 class Tensor;
 
+template <class T>
+class Vector;
+
 // Tensor_type operations
 template <class T>
 struct Tensor_type : std::false_type {};
@@ -56,7 +59,7 @@ protected:
 #endif
 
 public:
-	Tensor(const std::vector <std::size_t> &, const ::std::vector <T> &);
+	Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
 
 	// TODO: remove size term from vector and matrix classes
 	size_t size() const;
@@ -104,6 +107,9 @@ public:
 	// Indexing
 	T &operator[](const std::vector <size_t> &);
 	const T &operator[](const std::vector <size_t> &) const;
+
+	// TODO: Re-organize the methods
+	Vector <T> cast_to_vector() const;
 };
 
 template <class T>

@@ -6,6 +6,12 @@
 
 namespace zhetapi {
 
+namespace ml {
+
+// Type aliases
+template <class T>
+using Pipe = std::vector <Tensor <T> *>;
+
 template <class T = double>
 class Filter {
 public:
@@ -15,9 +21,13 @@ public:
 	 * specified by the second vector of pointers. Notes that the inputs
 	 * are also passed as a list of pointers.
 	 */
-	virtual void process(const std::vector <Tensor <T> *> &,
-			const std::vector <Tensor <T> *> &) const = 0;
+	virtual void forward_propogate(const Pipe <T> &, Pipe <T> &) = 0;
+
+	// Is this the right type?
+	// virtual const std::vector <Tensor <T> *> &back_propogate(const Pipe &) const = 0;
 };
+
+}
 
 }
 

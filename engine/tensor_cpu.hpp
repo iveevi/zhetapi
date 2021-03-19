@@ -122,7 +122,7 @@ void Tensor <T> ::nullify(long double p, const Interval <1> &i)
 
 // Index
 template <class T>
-T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices)
+T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
 {
 	size_t full = 0;
 

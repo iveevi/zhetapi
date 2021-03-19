@@ -5,23 +5,54 @@
 #include <filter.hpp>
 #include <matrix.hpp>
 #include <vector.hpp>
+#include <image.hpp>
+
+#include <std/initializers.hpp>
 
 namespace zhetapi {
 
 namespace ml {
 
 template <class T = double>
-class FeedForward : public Filter {
+class FeedForward : public Filter <T> {
 	Matrix <T>	__weight	= Matrix <T> ();
+
 	Activation <T> *__act		= nullptr;
 	Activation <T> *__dact		= nullptr;
+
 	long double	__dropout	= 0;
+
+	Vector <T>	__acache	= Vector <T> ();
+	Vector <T>	__zcache	= Vector <T> ();
+
+	// For batch inputs
+	// Matrix <T>	__Acache;
+	// Matrix <T>	__Zcache;
 public:
+	// Input size, output size
+	FeedForward(size_t isize, size_t osize, Activation <T> *act, std::function <T ()> init = RandomInitializer <T> ())
+			: __weight(isize, osize + 1),	// +1 for bias
+			__act(act->copy()),
+			__dact(act->derivative())
+	{
+		__weight.randomize(init);
+	}
+
+	void forward_propogate(const Pipe <T> &in, Pipe <T> &out)
+	{
+		// Slice the input (+1 for bias)
+		Vector <T> vin = (in[0]->cast_to_vector()).append_above(1);
+
+		__acache = vin;
+
+		Vector <T> mul = __weight * vin;
+
+		__zcache = __dact->compute(mul);
+
+		// Send to output pipe
+		*out[0] = __act->compute(mul);
+	}
 };
-
-}
-
-namespace image {
 
 #define for_img(i, j, w, h)		\
 	for (int i = 0; i < w; i++) {	\
@@ -29,23 +60,23 @@ namespace image {
 
 // Assumes that the input tensor is an image
 template <class T>
-class Convolution : public Filter {
+class Convolution : public Filter <T> {
 	Matrix <T>	__filter;
 	size_t		__dim;
 	
 	// Type aliases
-	using mbyte = Matrix <Image::byte>;
-	using vbyte = Vector <Image::byte>;
+	using byte = image::byte;
+	using mbyte = Matrix <byte>;
+	using vbyte = Vector <byte>;
 	using vfilt = Vector <T>;
-
-	using byte = Image::byte;
 public:
-	Convolution(const Matrix <T> &filter) : __filter(filter), 
+	Convolution(const Matrix <T> &filter)
+			: __filter(filter), 
 			__dim(filter.get_rows()) {}
 
 	// Assume equal padding for now
-	Image process(const Image &in, int depth = -1) {
-		Image out = in;
+	image::Image process(const image::Image &in, int depth = -1) {
+		image::Image out = in;
 
 		int w = in.width();
 		int h = in.height();

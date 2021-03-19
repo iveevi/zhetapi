@@ -10,6 +10,14 @@ namespace zhetapi {
 namespace ml {
 
 template <class T>
+struct RandomInitializer {
+	// Use interval later
+	T operator()() {
+		return T (0.5 - rand()/((double) RAND_MAX));
+	}
+};
+
+template <class T>
 struct LeCun {
 	std::default_random_engine		__gen;
 	std::normal_distribution <double>	__dbt;	

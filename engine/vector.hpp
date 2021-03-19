@@ -742,6 +742,14 @@ Vector <T> Vector <T> ::remove_bottom()
 
 #endif
 
+// Externally defined methods
+template <class T>
+Vector <T> Tensor <T> ::cast_to_vector() const
+{
+	// Return a slice-vector
+	return Vector <T> (__size, __array);
+}
+
 }
 
 #endif

@@ -9,6 +9,7 @@
 #include <activation.hpp>
 
 #include <std/interval.hpp>
+#include <std/initializers.hpp>
 
 namespace zhetapi {
 
@@ -19,14 +20,6 @@ using utility::Interval;
 
 template <class T>
 class Erf;
-
-// Move a separate file with standard initializers
-template <class T>
-struct RandomInitializer {
-	T operator()() {
-		return T (0.5 - rand()/((double) RAND_MAX));
-	}
-};
 
 // FIXME: Dropout should not be active during inference phase
 template <class T = double>
