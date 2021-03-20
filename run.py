@@ -42,7 +42,18 @@ post = {
         'profile': 'kcachegrind callgrind.out && rm callgrind.out'
 }
 
+# Feature testing
+features = {
+        'imv': 'image view test'
+}
+
 # Special targets
+def list(args):
+        print('The following are avaiable feature tests to run:')
+
+        for key in features.keys():
+            print('\t' + key + ': ' + features[key])
+
 def install(args):
 	print("Installing...")
 
@@ -98,11 +109,12 @@ def zhetapi(args):
 
 special = {
 	'install': install,
-	'zhetapi': zhetapi
+	'zhetapi': zhetapi,
+        'list': list
 }
 
 # Preprocessing
-targets = []
+targets = [key for key in features.keys()]
 
 for filename in os.listdir("cmake"):
     if filename.endswith(".cmake"):

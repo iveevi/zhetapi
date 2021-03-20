@@ -3,6 +3,9 @@
 
 #define ZHP_CUDA
 
+// Engine headers
+#include <cuda/essentials.cuh>
+
 namespace zhetapi {
 
 // A memory pool class

@@ -11,8 +11,6 @@ if (CUDA_FOUND)
 		NAMES zhpcuda
 		PATHS .)
 
-	message("ZHP_CUDA_LIB = ${ZHP_CUDA_LIBS}")
-
 	target_link_libraries(cuda PUBLIC zhp-shared)
 	target_link_libraries(cuda PUBLIC ${ZHP_CUDA_LIBS})
 
@@ -26,6 +24,6 @@ if (CUDA_FOUND)
 			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -g -G>)
 	else()
 		target_compile_options(cuda PRIVATE
-			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda -O3>)
+			$<$<COMPILE_LANGUAGE:CUDA>:--expt-extended-lambda>)
 	endif()
 endif()

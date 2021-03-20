@@ -310,7 +310,7 @@ QR <T> qr_decompose(const Matrix <T> &A)
 	// factorization of a general form
 	// 
 	// A * B * C * ...
-	return QR(Q, R);
+	return QR <T> (Q, R);
 }
 
 /**
@@ -328,7 +328,7 @@ LQ <T> lq_decompose(const Matrix <T> &A)
 	// accuracy and efficiency
 	auto qr = qr_decompose(A);
 
-	return LQ(qr.q().transpose(), qr.r().transpose());
+	return LQ <T> (qr.q().transpose(), qr.r().transpose());
 }
 
 /**

@@ -3,6 +3,7 @@
 
 // C/C++ heaaders
 #include <vector>
+#include <string>
 
 // This file contains miscellaneous functions that
 // do not really fit into any other header

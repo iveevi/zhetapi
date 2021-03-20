@@ -1,7 +1,7 @@
 #ifndef ESSENTIALS_H_
 #define ESSENTIALS_H_
 
-#ifdef ZHP_CUDA
+#ifdef ZHP_CUDA // Cuda active
 
 #define __cuda_dual_prefix __host__ __device__
 
@@ -9,6 +9,24 @@
 
 #define __cuda_dual_prefix
 
-#endif
+#endif // Cuda active
+
+// Use when we want to define a new variable cudaError_t error
+#define __cuda_check_error()					\
+	cudaError_t error = cudaGetLastError();			\
+	if (error != cudaSuccess) {				\
+		printf("CUDA error: %s\n",			\
+				cudaGetErrorString(error));	\
+		exit(-1);					\
+	}
+
+// Use when cudaError_t error has already been defined
+#define __cuda_check_perror()					\
+	error = cudaGetLastError();				\
+	if (error != cudaSuccess) {				\
+		printf("CUDA error: %s\n",			\
+				cudaGetErrorString(error));	\
+		exit(-1);					\
+	}
 
 #endif

@@ -11,7 +11,7 @@ image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a
 ---
 
 # Introduction
-Zhetapi is a `C++17` computation library that was built in the hopes of
+Zhetapi is a `C++14` computation library that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to the
 users.
 

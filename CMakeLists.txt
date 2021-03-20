@@ -13,13 +13,15 @@ project(ml)
 project(cuda)
 project(port)
 
+project(imv)
+
 # Source for projects
 include(cmake/zhetapi.cmake)
 include(cmake/deps.cmake)
 include(cmake/libs.cmake)
 include(cmake/exp.cmake)
-include(cmake/gui.cmake)
 include(cmake/ml.cmake)
 include(cmake/cuda.cmake)
 include(cmake/port.cmake)
 include(cmake/dirs.cmake)
+include(cmake/features.cmake)

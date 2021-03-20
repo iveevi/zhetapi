@@ -1,7 +1,8 @@
 # Set the right flags
-set(CMAKE_CXX_FLAGS "-pthread -std=c++17")
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_FLAGS "-pthread")
 if (${CMAKE_BUILD_TYPE} MATCHES Debug)
-	set(CMAKE_CXX_FLAGS "-pthread -g -std=c++17 -Wall")
+	set(CMAKE_CXX_FLAGS "-pthread -g -Wall")
 endif ()
 
 # Allow dynamic linking
