@@ -70,11 +70,6 @@ public:
 
 	void refactor_reference(const std::string &, Token *);
 
-	/*
-	 * Code generator. Requires the specification of an output file.
-	 */
-	void generate(std::string &) const;
-
 	std::string display() const;
 
 	void print(bool = false) const;
@@ -115,8 +110,6 @@ private:
 	void differentiate_hyp(node &);
 	
 	void refactor_reference(node &, const std::string &, Token *);
-
-	std::string generate(std::string, node, std::ofstream &, size_t &, size_t &) const;
 
 	std::string display(node) const;
 	std::string display_operation(node) const;

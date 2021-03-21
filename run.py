@@ -11,6 +11,15 @@ parser.add_argument("target", help="Database name")
 parser.add_argument("-m", "--mode", help="Execution mode", default='')
 parser.add_argument("-j", "--threads", help="Number of concurrent threads", type=int, default=8)
 
+# Cleaning
+def clean():
+    os.system('[ -f libzhp.* ] && mv libzhp.* debug/')
+
+def clean_and_exit(sig):
+    clean()
+
+    exit(sig)
+
 # Compilation
 def make_target(threads, target, mode=''):
 	if mode in ['gdb', 'valgrind', 'profile']:
@@ -19,7 +28,7 @@ def make_target(threads, target, mode=''):
 		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
 
 	if ret != 0:
-		exit(-1)
+		clean_and_exit(-1)
 
 	ret = os.system('make -j{threads} {target}'.format(
 		threads=threads,
@@ -27,7 +36,7 @@ def make_target(threads, target, mode=''):
 	))
 
 	if ret != 0:
-		exit(-1)
+		clean_and_exit(-1)
 
 # Execution modes
 modes = {
@@ -83,7 +92,7 @@ def install(args):
 	os.system('./bin/zhetapi -d include/math.zhplib')
 
 	if (ret1 != 0) or (ret2 != 0):
-		exit(-1)
+		clean_and_exit(-1)
 
 def zhetapi(args):
     make_target(args.threads, 'zhetapi', args.mode)
@@ -105,7 +114,7 @@ def zhetapi(args):
     os.system('mv zhetapi debug/')
 
     if (ret != 0):
-        exit(-1)
+        clean_and_exit(-1)
 
 special = {
 	'install': install,
@@ -145,7 +154,6 @@ elif args.target in targets:
     ))
 
     if (ret1 != 0) or (ret2 != 0):
-        exit(-1)
+        clean_and_exit(-1)
 
-os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
-os.system('[ -f libzhp.so ] && mv libzhp.so debug/')
+clean()

@@ -64,7 +64,6 @@ TEST(tensor_construction_and_memory);
 TEST(integration);
 
 TEST(function_computation);
-TEST(function_compilation_testing);
 
 TEST(interval_construction);
 TEST(interval_sampling);

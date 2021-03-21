@@ -8,7 +8,6 @@ typedef pair <string, bool (*)(ostringstream &)> singlet;
 vector <singlet> rig {
 	RIG(gamma_and_factorial),
 	RIG(vector_construction_and_memory),
-	RIG(function_compilation_testing),
 	RIG(matrix_construction_and_memory),
 	RIG(tensor_construction_and_memory),
 	RIG(integration),

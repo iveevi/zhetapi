@@ -8,22 +8,8 @@
 #include <dlfcn.h>
 
 // Engine headers
+#include <core/common.hpp>
 #include <core/node_manager.hpp>
-
-// Undefine compilation flag
-#ifdef ZHP_FUNCTION_COMPILE_GENERAL
-
-#undef ZHP_FUNCTION_COMPILE_GENERAL
-
-#endif
-
-// Set the correct compilation mode
-#ifdef __linux__
-
-#define ZHP_FUNCTION_COMPILE_GENERAL
-#define ZHP_COMPILE_LINUX
-
-#endif
 
 namespace zhetapi {
 
@@ -67,10 +53,6 @@ public:
 	friend bool operator<(const Function &, const Function &);
 	friend bool operator>(const Function &, const Function &);
 
-	std::string generate_general() const;
-
-	void *compile_general() const;
-
 	// Virtual overloads
 	Token::type caller() const override;
 	std::string str() const override;
@@ -104,13 +86,13 @@ public:
 template <class ... A>
 Token *Function::operator()(A ... args)
 {
-	std::vector <Token *> Tokens;
+	std::vector <Token *> tokens;
 
-	gather(Tokens, args...);
+	gather(tokens, args...);
 
-	assert(Tokens.size() == __params.size());
+	assert(tokens.size() == __params.size());
 
-	return __manager.substitute_and_compute(Tokens, __threads);
+	return __manager.substitute_and_compute(tokens, __threads);
 }
 
 // Gathering facilities
