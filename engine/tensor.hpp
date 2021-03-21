@@ -24,6 +24,9 @@ template <class T>
 class Tensor;
 
 template <class T>
+class Matrix;
+
+template <class T>
 class Vector;
 
 // Tensor_type operations
@@ -110,6 +113,23 @@ public:
 
 	// TODO: Re-organize the methods
 	Vector <T> cast_to_vector() const;
+	Matrix <T> cast_to_matrix(size_t, size_t) const;
+	
+	// Arithmetic
+	void operator*=(const T &);
+	void operator/=(const T &);
+	
+	template <class U>
+	friend Matrix <U> operator*(const Matrix <U> &, const U &);
+	
+	template <class U>
+	friend Matrix <U> operator*(const U &, const Matrix <U> &);
+	
+	template <class U>
+	friend Matrix <U> operator/(const Matrix <U> &, const U &);
+	
+	template <class U>
+	friend Matrix <U> operator/(const U &, const Matrix <U> &);
 };
 
 template <class T>

@@ -38,7 +38,7 @@ public:
 		__weight.randomize(init);
 	}
 
-	void forward_propogate(const Pipe <T> &in, Pipe <T> &out)
+	void propogate(const Pipe <T> &in, Pipe <T> &out)
 	{
 		// Slice the input (+1 for bias)
 		Vector <T> vin = (in[0]->cast_to_vector()).append_above(1);
@@ -51,6 +51,29 @@ public:
 
 		// Send to output pipe
 		*out[0] = __act->compute(mul);
+	}
+
+	void gradient(const Pipe <T> &delin, Pipe <T> &grads)
+	{
+		// TODO: Check sizes later
+
+		// Move shur/stable shur to tensor base
+		*delin[0] = shur(delin[0]->cast_to_vector(), __zcache);
+
+		Matrix <T> J = delin[0]->cast_to_vector() * __acache.transpose();
+
+		// Use the kernel function here
+		*grads[0] = J;
+	}
+
+	void apply_gradient(const Pipe <T> &grads)
+	{
+		// TODO: check with gradeint checking
+		Matrix <T> J = grads[0]->cast_to_matrix(
+				__weight.get_rows(),
+				__weight.get_cols());
+
+		__weight += J;
 	}
 };
 

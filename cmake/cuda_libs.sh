@@ -1,5 +1,3 @@
-echo COMPILING CUDA LIBS
-
 SOURCES='source/cuda/nvarena.cu'
 # SOURCES=$SOURCES' source/cuda/essentials.cu'
 

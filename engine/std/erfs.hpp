@@ -20,10 +20,10 @@ namespace ml {
 */
 
 template <class T>
-class SquaredError : public Erf <T> {
+class SE : public Erf <T> {
 public:
 	__cuda_dual_prefix
-	SquaredError() {
+	SE() {
 		this->kind = Erf <T> ::OPT_SE; 
 	}
 
@@ -42,15 +42,15 @@ public:
 	__cuda_dual_prefix
 	Erf <T> *derivative() const
 	{
-		return new __DSquaredError <T> ();
+		return new __DSE <T> ();
 	}
 };
 
 template <class T>
-class MeanSquaredError : public Erf <T> {
+class MSE : public Erf <T> {
 public:
 	__cuda_dual_prefix
-	MeanSquaredError() {
+	MSE() {
 		this->kind = Erf <T> ::OPT_MSE;
 	}
 
@@ -68,7 +68,7 @@ public:
 
 	__cuda_dual_prefix
 	Erf <T> *derivative() const {
-		return new __DMeanSquaredError <T> ();
+		return new __DMSE <T> ();
 	}
 };
 
@@ -81,9 +81,9 @@ Erf <T> *copy(Erf <T> *opt)
 	case Erf <T> ::OPT_Default:
 		return new Erf <T> ();
 	case Erf <T> ::OPT_SE:
-		return new SquaredError <T> ();
+		return new SE <T> ();
 	case Erf <T> ::OPT_MSE:
-		return new MeanSquaredError <T> ();
+		return new MSE <T> ();
 	}
 
 	return nullptr;

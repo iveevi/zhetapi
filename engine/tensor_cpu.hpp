@@ -3,11 +3,12 @@
 
 // Constructors and memory relevant functions
 template <class T>
-Tensor <T> ::Tensor() : __dim(nullptr), __dims(0), __array(nullptr),
-		__size(0) {}
+Tensor <T> ::Tensor() {}
 
 template <class T>
-Tensor <T> ::Tensor(const Tensor <T> &other) : __dims(other.__dims), __size(other.__size)
+Tensor <T> ::Tensor(const Tensor <T> &other)
+		: __dims(other.__dims),
+		__size(other.__size)
 {
 	__dim = new size_t[__dims];
 	for (size_t i = 0; i < __dims; i++)
@@ -143,6 +144,21 @@ const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
 		full += indices[i] * __dim[__dims - (i + 1)];
 	
 	return __array[full];
+}
+
+// Arithmetic
+template <class T>
+void Tensor <T> ::operator*=(const T &x)
+{
+	for (size_t i = 0; i < __size; i++)
+		__array[i] *= x;
+}
+
+template <class T>
+void Tensor <T> ::operator/=(const T &x)
+{
+	for (size_t i = 0; i < __size; i++)
+		__array[i] /= x;
 }
 
 #endif

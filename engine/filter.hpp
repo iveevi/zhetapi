@@ -21,10 +21,9 @@ public:
 	 * specified by the second vector of pointers. Notes that the inputs
 	 * are also passed as a list of pointers.
 	 */
-	virtual void forward_propogate(const Pipe <T> &, Pipe <T> &) = 0;
-
-	// Is this the right type?
-	// virtual const std::vector <Tensor <T> *> &back_propogate(const Pipe &) const = 0;
+	virtual void propogate(const Pipe <T> &, Pipe <T> &) = 0;
+	virtual void gradient(const Pipe <T> &, Pipe <T> &) = 0;
+	virtual void apply_gradient(const Pipe <T> &) = 0;
 };
 
 }

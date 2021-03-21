@@ -37,6 +37,7 @@
 							\
 	mat.__rows = rs;				\
 	mat.__cols = cs;				\
+	mat.__size = rs * cs;				\
 							\
 	mat.__array = new T[rs * cs];			\
 							\
@@ -1159,6 +1160,7 @@ void Matrix <T> ::operator-=(const Matrix <T> &other)
 	}
 }
 
+// TODO: Remove as it is done in tensor already
 template <class T>
 void Matrix <T> ::operator*=(const T &x)
 {
@@ -1230,8 +1232,6 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
 	if (A.__cols != B.__rows)
                 throw typename Matrix <T> ::dimension_mismatch();
-
-        using namespace std;
 
         size_t rs = A.__rows;
         size_t cs = B.__cols;
@@ -1399,6 +1399,14 @@ Matrix <T> fmak(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C, T
 }
 
 #endif
+
+// Externally defined methods
+template <class T>
+Matrix <T> Tensor <T> ::cast_to_matrix(size_t r, size_t c) const
+{
+	// Return a slice-vector
+	return Matrix <T> (r, c, __array);
+}
 
 }
 
