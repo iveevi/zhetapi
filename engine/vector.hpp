@@ -2,12 +2,12 @@
 #define ELEMENT_H_
 
 // C/C++ headers
-#ifndef __AVR		// AVR support
+#ifndef __AVR	// AVR support
 
 #include <cmath>
 #include <functional>
 
-#endif			// AVR support
+#endif		// AVR support
 
 // Engine headers
 #ifdef ZHP_CUDA
@@ -21,12 +21,15 @@
 #endif
 
 #include <cuda/essentials.cuh>
+#include <avr/essentials.hpp>
 
 namespace zhetapi {
 
 // Forward declarations
 template <class T>
 class Vector;
+
+#ifndef __AVR	// AVR support
 
 // Tensor_type operations
 template <class T>
@@ -41,6 +44,8 @@ bool is_vector_type()
 	return Vector_type <T> ::value;
 }
 
+#endif		// AVR support
+
 /**
  * @brief Represents a vector in mathematics, on the scalar field corresponding
  * to T. Derived from the matrix class.
@@ -49,8 +54,16 @@ template <class T>
 class Vector : public Matrix <T> {
 public:
 	Vector(size_t);
+
+	#ifndef __AVR
 	Vector(const std::vector <T> &);
 	Vector(const std::initializer_list <T> &);
+	#endif
+
+	__avr_switch(
+	Vector(const std::vector <T> &);
+	Vector(const std::initializer_list <T> &);
+	)
 	
 	// Cross-type operations
 	template <class A>
@@ -116,8 +129,6 @@ public:
 	// Exceptions (put in matrix later)
 	class index_out_of_bounds {};
 	
-#ifndef ZHP_CUDA
-	
 	Vector();
 	Vector(const Vector &);
 	Vector(const Matrix <T> &);
@@ -144,103 +155,21 @@ public:
 
 	Vector remove_top();
 	Vector remove_bottom();
-	
-#else
-	
-	__host__ __device__
-	Vector();
-	
-	__host__ __device__
-	Vector(const Vector &);
-	
-	__host__ __device__
-	Vector(const Matrix <T> &);
-	
-	__host__ __device__
-	Vector(size_t, T);
-	
-	__host__ __device__
-	Vector(size_t, T *, bool = false);
-	
-	template <class F>
-	__host__ __device__
-	Vector(size_t, F);
-
-	__host__ __device__
-	Vector &operator=(const Vector &);
-	
-	__host__ __device__
-	Vector &operator=(const Matrix <T> &);
-	
-	// Other memory concerned operations
-	void copy_to_device(const Vector <T> &);
-
-	void transfer_from_device(Vector <T> &);
-
-	__cuda_dual_prefix
-	T *whole() const {
-		return this->__array;
-	}
-
-	__host__ __device__
-	T &operator[](size_t);
-
-	__host__ __device__
-	const T &operator[](size_t) const;
-	
-	__host__ __device__
-	size_t size() const;
-
-	__host__ __device__
-	void operator+=(const Vector &);
-	
-	__host__ __device__
-	void operator-=(const Vector &);
-	
-	__host__ __device__
-	Vector append_above(const T &) const;
-	
-	__host__ __device__
-	Vector append_below(const T &);
-
-	__host__ __device__
-	Vector remove_top();
-	
-	__host__ __device__
-	Vector remove_bottom();
-
-	__host__ __device__
-	T norm() const;
-
-	template <class U>
-	__host__ __device__
-	friend Vector <U> operator-(const Vector <U> &, const Vector <U> &);
-
-	template <class U>
-	__host__ __device__
-	friend Vector <U> operator*(const Vector <U> &, const U &);
-
-	template <class U>
-	__host__ __device__
-	friend Vector <U> operator*(const U &, const Vector <U> &);
-	
-	template <class U>
-	__host__ __device__
-	friend U inner(const Vector <U> &, const Vector <U> &);
-
-#endif
-
 };
 
 template <class T>
-Vector <T> ::Vector(size_t len) : Matrix <T> (len, 1) {}
+Vector <T> ::Vector(size_t len)
+		: Matrix <T> (len, 1) {}
 
+__avr_switch(	// AVR support
 template <class T>
-Vector <T> ::Vector(const std::vector <T> &ref) : Matrix <T> (ref) {}
+Vector <T> ::Vector(const std::vector <T> &ref)
+		: Matrix <T> (ref) {}
 
 template <class T>
 Vector <T> ::Vector(const std::initializer_list <T> &ref)
-	: Vector(std::vector <T> (ref)) {}
+		: Vector(std::vector <T> (ref)) {}
+)		// AVR support
 
 template <class T>
 template <class A>
@@ -593,156 +522,7 @@ T inner(const Vector <T> &a, const Vector <U> &b)
 
 #ifndef ZHP_CUDA
 
-template <class T>
-Vector <T> ::Vector() : Matrix <T> () {}
-
-template <class T>
-Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())
-{
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] = other.__array[i];
-}
-
-template <class T>
-Vector <T> ::Vector(const Matrix <T> &other) : Matrix <T> (other.get_rows(), 1, T())
-{
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] = other[0][i];
-}
-
-template <class T>
-Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
-
-// FIXME: Delegate Matrix constructor
-template <class T>
-Vector <T> ::Vector(size_t rs, T *ref, bool slice) : Matrix <T> (rs, 1, ref, slice) {}
-
-template <class T>
-Vector <T> ::Vector(size_t rs, ::std::function <T (size_t)> gen)
-	: Matrix <T> (rs, 1, gen) {}
-
-template <class T>
-Vector <T> ::Vector(size_t rs, ::std::function <T *(size_t)> gen)
-	: Matrix <T> (rs, 1, gen) {}
-
-template <class T>
-Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
-{
-	if (this != &other) {
-		this->clear();
-
-		this->__array = new T[other.__size];
-		this->__rows = other.__rows;
-		this->__cols = other.__cols;
-
-		this->__size = other.__size;
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = other.__array[i];
-		
-		this->__dims = 1;
-		this->__dim = new size_t[1];
-
-		this->__dim[0] = this->__size;
-	}
-
-	return *this;
-}
-
-template <class T>
-Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
-{
-	if (this != &other) {
-		*this = Vector(other.get_rows(), T());
-
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = other[0][i];
-	}
-
-	return *this;
-}
-
-template <class T>
-T &Vector <T> ::operator[](size_t i)
-{
-	return this->__array[i];
-}
-
-template <class T>
-const T &Vector <T> ::operator[](size_t i) const
-{
-	return this->__array[i];
-}
-
-template <class T>
-size_t Vector <T> ::size() const
-{
-	return this->__size;
-}
-
-template <class T>
-void Vector <T> ::operator+=(const Vector <T> &a)
-{
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] += a.__array[i];
-}
-
-template <class T>
-void Vector <T> ::operator-=(const Vector <T> &a)
-{
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] -= a.__array[i];
-}
-
-template <class T>
-Vector <T> Vector <T> ::append_above(const T &x) const
-{
-	size_t t_sz = size();
-
-	std::vector <T> total {x};
-	for (size_t i = 0; i < t_sz; i++)
-		total.push_back((*this)[i]);
-
-	return Vector(total);
-}
-
-template <class T>
-Vector <T> Vector <T> ::append_below(const T &x)
-{
-	size_t t_sz = size();
-
-	::std::vector <T> total;
-
-	for (size_t i = 0; i < t_sz; i++)
-		total.push_back((*this)[i]);
-
-	total.push_back(x);
-
-	return Vector(total);
-}
-
-template <class T>
-Vector <T> Vector <T> ::remove_top()
-{
-	size_t t_sz = size();
-
-	::std::vector <T> total;
-	for (size_t i = 1; i < t_sz; i++)
-		total.push_back((*this)[i]);
-
-	return Vector(total);
-}
-
-template <class T>
-Vector <T> Vector <T> ::remove_bottom()
-{
-	size_t t_sz = size();
-
-	::std::vector <T> total;
-	for (size_t i = 0; i < t_sz - 1; i++)
-		total.push_back((*this)[i]);
-
-	return Vector(total);
-}
+#include <vector_cpu.hpp>
 
 #endif
 

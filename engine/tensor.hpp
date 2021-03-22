@@ -2,6 +2,8 @@
 #define TENSOR_H_
 
 // C/C++ headers
+#ifndef __AVR			// AVR support
+
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
@@ -11,6 +13,9 @@
 #include <vector>
 
 #include <std/interval.hpp>
+
+#endif					// AVR support
+
 
 #include <cuda/essentials.cuh>
 
@@ -221,6 +226,8 @@ std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 	return out + "]";
 }
 
+#ifndef __AVR
+
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
@@ -228,6 +235,8 @@ std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 
 	return os;
 }
+
+#endif
 
 #ifndef ZHP_CUDA
 

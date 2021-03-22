@@ -2,6 +2,8 @@
 #define MATRIX_H_
 
 // C/C++ headers
+#ifndef __AVR			// AVR support
+
 #include <cassert>
 #include <cmath>
 #include <fstream>
@@ -10,6 +12,8 @@
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#endif					// AVR support
 
 // Engine headers
 #ifdef ZHP_CUDA
