@@ -97,6 +97,7 @@ const node &node::operator[](size_t i) const
 	return __leaves[i];
 }
 
+// Properties
 bool node::null() const
 {
 	return (__tptr == nullptr);
@@ -128,6 +129,17 @@ Token::type node::caller() const
 		return __tptr->caller();
 
 	return Token::undefined;
+}
+
+// Setters
+void node::relabel(lbl label)
+{
+	__label = label;
+}
+
+void node::retoken(Token *tptr)
+{
+	__tptr = tptr;
 }
 
 void node::transfer(const node &ref)

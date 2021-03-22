@@ -55,6 +55,10 @@ public:
 	bool empty() const;
 	size_t child_count() const;
 	Token::type caller() const;
+
+	// Setters
+	void relabel(lbl);
+	void retoken(Token *);
 	
 	// Member functions
 	void transfer(const node &);

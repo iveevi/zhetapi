@@ -48,6 +48,7 @@ std::string strlabs[] = {
 	"function",
 	"registrable",
 	"operation constant",
+	"wildcard",
 
 	// Operations
 	"dot",
@@ -55,6 +56,7 @@ std::string strlabs[] = {
 	"multiplied",
 	"divided",
 	"power",
+	"miscellaneous power",
 	"trigonometric",
 	"hyperbolic",
 	"natural logarithm",

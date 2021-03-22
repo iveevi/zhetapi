@@ -57,6 +57,7 @@ enum lbl {
 	l_function,
 	l_registrable,
 	l_operation_constant,
+	l_wildcard,
 
 	// Operations
 	l_dot,
@@ -64,6 +65,7 @@ enum lbl {
 	l_multiplied,
 	l_divided,
 	l_power,
+	l_power_misc,
 	l_trigonometric,
 	l_hyperbolic,
 	l_natural_log,

@@ -2,8 +2,12 @@
 #define ELEMENT_H_
 
 // C/C++ headers
+#ifndef __AVR		// AVR support
+
 #include <cmath>
 #include <functional>
+
+#endif			// AVR support
 
 // Engine headers
 #ifdef ZHP_CUDA

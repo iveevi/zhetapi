@@ -368,6 +368,11 @@ void node_manager::add_args(const std::vector <std::string> &args)
 void node_manager::unpack()
 {
 	unpack(__tree);
+
+	// TODO: only relable those that were unpacked
+	// needs a separate method to label singletons
+	// without dfs-ing
+	label(__tree);
 }
 
 void node_manager::unpack(node &ref)
@@ -897,11 +902,15 @@ void node_manager::print(bool address) const
 // Labeling utilities
 void node_manager::label(node &ref)
 {
-	switch (ref.__tptr->caller()) {
+	switch (ref.caller()) {
 	case Token::opd:
-		ref.__label = constant_label(ref.__tptr);
+		ref.relabel(constant_label(ref.ptr()));
+		break;
+	case Token::token_wildcard:
+		ref.relabel(l_wildcard);
 		break;
 	case Token::oph:
+		// TODO: Method
 		for (node &leaf : ref.__leaves)
 			label(leaf);
 
@@ -941,18 +950,18 @@ void node_manager::label(node &ref)
 
 void node_manager::label_operation(node &ref)
 {
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
+	operation_holder *ophptr = ref.cast <operation_holder> ();
 
 	bool constant = true;
 	for (auto child : ref.__leaves) {
-		if (!is_constant(child.__label)) {
+		if (!is_constant(child.label())) {
 			constant = false;
 			break;
 		}
 	}
 
 	if (constant) {
-		ref.__label = l_operation_constant;
+		ref.relabel(l_operation_constant);
 		return;
 	}
 
@@ -960,7 +969,7 @@ void node_manager::label_operation(node &ref)
 	switch (ophptr->code) {
 	case add:
 	case sub:
-		ref.__label = l_separable;
+		ref.relabel(l_separable);
 		break;
 	case mul:
 		ref.__label = l_multiplied;
@@ -969,9 +978,11 @@ void node_manager::label_operation(node &ref)
 		ref.__label = l_divided;
 		break;
 	case pwr:
-		if ((ref.__leaves[0].__label == l_variable)
-			&& (is_constant(ref.__leaves[1].__label)))
-			ref.__label = l_power;
+		if ((ref[0].label() == l_variable)
+			&& (is_constant(ref[1].label())))
+			ref.relabel(l_power);
+		else
+			ref.relabel(l_power_misc);
 		break;
 	case xln:
 		ref.__label = l_natural_log;
