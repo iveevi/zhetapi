@@ -47,7 +47,7 @@ public:
 		ndr,
 		ndd,
 		reg,
-		wld,
+		token_wildcard,
 		token_lvalue,
 		token_rvalue,
 		token_node_list

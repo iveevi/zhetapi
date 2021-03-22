@@ -4,13 +4,18 @@
 // Engine headers
 #include <token.hpp>
 
+#include <core/label.hpp>
+
 namespace zhetapi {
 
 class wildcard : public Token {
-	node *		__ref		= nullptr;
-	std::string	__symbol	= "";
 public:
-	wildcard();
+	using predicate = bool (*)(lbl);
+private:
+	std::string	__symbol	= "";
+	predicate	__pred		= nullptr;
+public:
+	wildcard(const std::string &, predicate);
 
 	type caller() const override;
 	Token *copy() const override;
@@ -18,33 +23,6 @@ public:
 
 	virtual bool operator==(Token *) const override;
 };
-
-wildcard::wildcard() {}
-
-Token::type wildcard::caller() const
-{
-	return Token::wld;
-}
-
-Token *wildcard::copy() const
-{
-	return new wildcard();
-}
-
-std::string wildcard::str() const
-{
-	return "wildcard";
-}
-
-bool wildcard::operator==(Token *tptr) const
-{
-	wildcard *wld = dynamic_cast <wildcard *> (tptr);
-
-	if (wld == nullptr)
-		return false;
-
-	return true;
-}
 
 }
 

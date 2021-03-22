@@ -44,6 +44,9 @@ public:
 	void set_label(lbl);
 	void set_engine(Engine *);
 
+	// Methods
+	void unpack();
+
 	Token *value() const;
 	Token *sequential_value() const;
 
@@ -86,6 +89,8 @@ public:
 	static bool loose_match(const node_manager &, const node_manager &);
 private:
 	Token *value(node) const;
+
+	void unpack(node &);
 
 	size_t count_up(node &);
 	

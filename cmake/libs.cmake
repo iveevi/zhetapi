@@ -28,6 +28,7 @@ set(ZHETAPI_SOURCE
 	source/core/rvalue.cpp
 	source/core/shader.cpp
 	source/core/types.cpp
+	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
 
 	source/std/functions.cpp

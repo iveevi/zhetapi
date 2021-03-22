@@ -364,6 +364,24 @@ void node_manager::add_args(const std::vector <std::string> &args)
 	rereference(__tree);
 }
 
+// Unpacking methods
+void node_manager::unpack()
+{
+	unpack(__tree);
+}
+
+void node_manager::unpack(node &ref)
+{
+	if (ref.caller() == Token::token_rvalue) {
+		// TODO: make a method for assigning tokens to trees
+		ref.__tptr = (ref.cast <rvalue> ())->get();
+	}
+
+	// Add a foreach method in nodes (with ref)
+	for (node &nd : ref.__leaves)
+		unpack(nd);
+}
+
 // Expansion methods
 void node_manager::expand(node &ref)
 {
@@ -938,6 +956,7 @@ void node_manager::label_operation(node &ref)
 		return;
 	}
 
+	// Add relabelling method
 	switch (ophptr->code) {
 	case add:
 	case sub:
