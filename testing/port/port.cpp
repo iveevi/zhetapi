@@ -109,7 +109,7 @@ int main()
 
 			tk_mtx.lock();
 
-			if (task < size) {
+			if (task < (int) size) {
 				t = task;
 
 				task++;

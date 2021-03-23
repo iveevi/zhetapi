@@ -45,7 +45,7 @@ uint32_t Color::value() const
 	uint32_t ug = g;
 	uint32_t ub = b;
 
-	return (((ur << 8) + ug) << 8 + ub);
+	return (((ur << 8) + ug) << 8) + ub;
 }
 
 // Standard colors
@@ -141,6 +141,13 @@ Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size
 		memcpy(__array + i * rbytes, data[i], rbytes);
 }
 
+Image::Image(const Vector <double> &values, size_t width, size_t height)
+		: Tensor <unsigned char> ({width, height, 1})
+{
+	for (size_t i = 0; i < this->__size; i++)
+		__array[i] = (unsigned char) values[i];
+}
+
 Vector <size_t> Image::size() const
 {
 	return {
@@ -212,7 +219,7 @@ uint32_t Image::color(const pixel &px) const
 	uint32_t ug = __array[index + 1];
 	uint32_t ub = __array[index + 2];
 	
-	return (((ur << 8) + ug) << 8 + ub);
+	return (((ur << 8) + ug) << 8) + ub;
 }
 
 // Extract a single channel
@@ -516,13 +523,25 @@ void save_png(const Image &img, const char *path)
 	png_init_io(png, file);
 
 	// Output is 8bit depth, RGBA format.
+	size_t color = -1;
+
+	// TODO: Needs to be changed (store in Image)
+	switch (img.channels()) {
+	case 4:
+		color = PNG_COLOR_TYPE_RGBA;
+		break;
+	default:
+		color = PNG_COLOR_TYPE_GRAY;
+		break;
+	}
+
 	png_set_IHDR(
 		png,
 		info,
 		img.width(),
 		img.height(),
 		8,
-		PNG_COLOR_TYPE_RGBA,	// Needs to be changed (store in Image)
+		color,
 		PNG_INTERLACE_NONE,
 		PNG_COMPRESSION_TYPE_DEFAULT,
 		PNG_FILTER_TYPE_DEFAULT

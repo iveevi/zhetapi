@@ -86,39 +86,30 @@ Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen)
-                : Tensor <T> (rs, cs)
-{
-	__rows = rs;
-	__cols = cs;
-	
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
+                : __rows(rs), __cols(cs), Tensor <T> (rs, cs)
+{	
+	for (size_t i = 0; i < __rows; i++) {
+		for (size_t j = 0; j < __cols; j++)
 			this->__array[__cols * i + j] = gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
-                : Tensor <T> (rs, cs)
+                : __rows(rs), __cols(cs), Tensor <T> (rs, cs)
 {
-	__rows = rs;
-	__cols = cs;
-	
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
+	for (size_t i = 0; i < __rows; i++) {
+		for (size_t j = 0; j < __cols; j++)
 			this->__array[__cols * i + j] = *gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
-		: Tensor <T> (rs, cs)
+		: __rows(rs), __cols(cs), Tensor <T> (rs, cs)
 {
-	__rows = rs;
-	__cols = cs;
-
-	for (int i = 0; i < __rows; i++) {
-		for (int j = 0; j < __cols; j++)
+	for (size_t i = 0; i < __rows; i++) {
+		for (size_t j = 0; j < __cols; j++)
 			this->__array[__cols * i + j] = gen(i, j);
 	}
 }

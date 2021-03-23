@@ -11,6 +11,8 @@
 
 namespace zhetapi {
 
+class node;
+
 enum lbl {
 	// Default
 	l_none,
@@ -97,8 +99,9 @@ bool is_constant(lbl);
 bool is_constant_operand(lbl);
 bool is_variable(lbl);
 
+bool is_commutative(const node &);
+
 lbl constant_label(Token *);
-Token *true_token(Token *);
 
 }
 

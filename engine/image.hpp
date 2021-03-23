@@ -107,6 +107,8 @@ public:
 	Image(byte **, size_t, size_t, size_t);			// List of rows
 	Image(png_bytep *, size_t, size_t, size_t, size_t);	// (Pretty much the same as above)
 
+	Image(const Vector <double> &, size_t, size_t);		// Grayscale from vector
+
 	Vector <size_t> size() const;
 
 	size_t width() const;

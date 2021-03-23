@@ -1,4 +1,6 @@
 #include <core/label.hpp>
+#include <core/node.hpp>
+#include <core/operation_holder.hpp>
 
 namespace zhetapi {
 
@@ -78,27 +80,31 @@ std::string strlabs[] = {
 
 bool is_constant(lbl type)
 {
-	if ((type >= l_constant_integer)
-			&& (type <= l_constant_matrix_complex_real)
+	return ((type >= l_constant_integer)
+			&& (type <= l_constant_matrix_complex_real))
 			|| (type == l_operation_constant)
-			|| (type == l_variable_constant))
-		return true;
-
-	return false;
+			|| (type == l_variable_constant);
 }
 
 bool is_constant_operand(lbl type)
 {
-	if ((type >= l_constant_integer)
-			&& (type <= l_constant_matrix_complex_real))
-		return true;
-
-	return false;
+	return (type >= l_constant_integer)
+			&& (type <= l_constant_matrix_complex_real);
 }
 
 bool is_variable(lbl type)
 {
 	return !is_constant(type);
+}
+
+bool is_commutative(const node &tree)
+{
+	operation_holder *ophptr = tree.cast <operation_holder> ();
+
+	if (!ophptr)
+		return false;
+	
+	return (ophptr->code == mul || ophptr->code == add);
 }
 
 lbl constant_label(Token *tptr)
@@ -152,15 +158,6 @@ lbl constant_label(Token *tptr)
 		return l_constant_string;
 
 	return l_none;
-}
-
-Token *true_token(Token *tptr)
-{
-	opd_z *oz = dynamic_cast <opd_z *> (tptr);
-	if (oz != nullptr)
-		return oz;
-
-	return nullptr;
 }
 
 }

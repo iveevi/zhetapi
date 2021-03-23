@@ -15,6 +15,43 @@ void fit(const node &a, const node &fitter)
 	if (tokcmp(a.ptr(), fitter.ptr())) {
 		cout << "Matched " << fitter.ptr()->str() << endl;
 	}
+
+	// Use this approach for commutative operations
+	if (!is_commutative(fitter)) {
+		cout << "Non commutative comparison, skip for now" << endl;
+
+		return;
+	}
+
+	vector <node> not_wcs;
+
+	// Add a begin and end method for nodes
+	for (node nd : fitter.__leaves) {
+		if (nd.caller() != Token::token_wildcard)
+			not_wcs.push_back(nd);
+	}
+
+	// Check the rest of the nodes
+	vector <node> current = a.__leaves;
+
+	cout << "Current - before reducing:" << endl;
+	for (node nd : current)
+		nd.print();
+
+	for (node rule : not_wcs) {
+		vector <node> unresolved;
+
+		for (node nd : current) {
+			if (!node::loose_match(rule, nd))
+				unresolved.push_back(nd);
+		}
+
+		current = unresolved;
+	}
+
+	cout << "Current - after reducing:" << endl;
+	for (node nd : current)
+		nd.print();
 }
 
 int main()
@@ -23,8 +60,8 @@ int main()
 
 	engine->put("x", new wildcard("x", var_pred));
 
-	node_manager nm("x^2", engine);
-	node_manager nm2("y^2", {"y"}, engine);
+	node_manager nm("2x", engine);
+	node_manager nm2("2y", {"y"}, engine);
 
 	nm.unpack();
 	nm.print();
