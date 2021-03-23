@@ -55,15 +55,8 @@ class Vector : public Matrix <T> {
 public:
 	Vector(size_t);
 
-	#ifndef __AVR
-	Vector(const std::vector <T> &);
-	Vector(const std::initializer_list <T> &);
-	#endif
-
-	__avr_switch(
-	Vector(const std::vector <T> &);
-	Vector(const std::initializer_list <T> &);
-	)
+	__avr_switch(Vector(const std::vector <T> &);)
+	__avr_switch(Vector(const std::initializer_list <T> &);)
 	
 	// Cross-type operations
 	template <class A>
@@ -161,15 +154,17 @@ template <class T>
 Vector <T> ::Vector(size_t len)
 		: Matrix <T> (len, 1) {}
 
-__avr_switch(	// AVR support
+__avr_switch(	// Does not support AVR
 template <class T>
 Vector <T> ::Vector(const std::vector <T> &ref)
 		: Matrix <T> (ref) {}
+)
 
+__avr_switch(	// Does not support AVR
 template <class T>
 Vector <T> ::Vector(const std::initializer_list <T> &ref)
 		: Vector(std::vector <T> (ref)) {}
-)		// AVR support
+)
 
 template <class T>
 template <class A>

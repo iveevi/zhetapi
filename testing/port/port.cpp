@@ -147,4 +147,6 @@ int main()
 
 		cout << string(100, '=') << endl;
 	}
+
+	return (failed.size() == 0) ? 0 : 1;
 }
