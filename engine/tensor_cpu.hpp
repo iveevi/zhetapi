@@ -1,22 +1,35 @@
-#ifndef TENSOR_CPU_H_
-#define TENSOR_CPU_H_
-
-// Constructors and memory relevant functions
 template <class T>
-Tensor <T> ::Tensor() {}
-
-template <class T>
-Tensor <T> ::Tensor(const Tensor <T> &other)
-		: __dims(other.__dims),
-		__size(other.__size)
+Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
+		: __dims(dim.size())
 {
-	__dim = new size_t[__dims];
-	for (size_t i = 0; i < __dims; i++)
-		__dim[i] = other.__dim[i];
 
-	__array = new T[__size];
-	for (size_t i = 0; i < __size; i++)
-		__array[i] = other.__array[i];
+#ifdef __CUDA_ARCH__
+
+	__on_device = false;
+
+#endif
+
+	__dim = new size_t[__dims];
+
+	size_t prod = 1;
+	for (size_t i = 0; i < __dims; i++) {
+		prod *= dim[i];
+
+		__dim[i] = dim[i];
+	}
+
+	__size = prod;
+
+	if (__size <= 0)
+		throw bad_dimensions();
+
+	if (arr.size() != __size)
+		throw dimension_mismatch();
+
+	__array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		__array[i] = arr[i];
 }
 
 template <class T>
@@ -65,50 +78,9 @@ Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
 }
 
 template <class T>
-Tensor <T> ::~Tensor()
-{
-	clear();
-}
-
-template <class T>
-void Tensor <T> ::clear()
-{
-	if (!__array && !__dim)
-		return;
-
-	if (__dim)
-		delete[] __dim;
-
-	if (__array && !__sliced)
-		delete[] __array;
-
-	__array = nullptr;
-	__dim = nullptr;
-}
-
-template <class T>
 bool Tensor <T> ::good() const
 {
 	return __array != nullptr;
-}
-
-template <class T>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
-{
-	if (this != &other) {
-		__dims = other.__dims;
-		__size = other.__size;
-	
-		__dim = new size_t[__dims];
-		for (size_t i = 0; i < __dims; i++)
-			__dim[i] = other.__dim[i];
-
-		__array = new T[__size];
-		for (size_t i = 0; i < __size; i++)
-			__array[i] = other.__array[i];
-	}
-
-	return *this;
 }
 
 // Actions
@@ -161,4 +133,38 @@ void Tensor <T> ::operator/=(const T &x)
 		__array[i] /= x;
 }
 
-#endif
+// Printing functions
+template <class T>
+std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
+{
+	if (size == 0)
+		return "[]";
+	
+	std::string out = "[";
+
+	// Size of each dimension
+	size_t dsize = size / ds[dn];
+
+	T *current = arr;
+	for (size_t i = 0; i < ds[dn]; i++) {
+		if (dn == dmax)
+			out += std::to_string(*current);
+		else
+			out += print(current, dsize, ds, dn + 1, dmax);
+
+		if (i < ds[dn] - 1)
+			out += ", ";
+
+		current += dsize;
+	}
+
+	return out + "]";
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
+{
+	os << print(ts.__array, ts.__size, ts.__dim, 0, ts.__dims - 1);
+
+	return os;
+}
