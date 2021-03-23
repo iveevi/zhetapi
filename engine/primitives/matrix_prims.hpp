@@ -1,3 +1,8 @@
+template <class T>
+Matrix <T> ::Matrix()
+		: __rows(0), __cols(0),
+		Tensor <T> () {}
+
 // Owner implies that the vector object will take care of the deallocation
 template <class T>
 __cuda_dual_prefix
@@ -239,12 +244,10 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 }
 
 template <class T>
-Matrix <T> ::Matrix() : __rows(0), __cols(0), Tensor <T> () {}
-
-template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
-		: __rows(other.__rows), __cols(other.__cols),
-		Tensor <T> ({other.__rows, other.__cols})
+		: __rows(other.__rows),
+		__cols(other.__cols),
+		Tensor <T> (other.__rows, other.__cols)
 {
 	for (size_t i = 0; i < this->__size; i++)
 		this->__array[i] = other.__array[i];
@@ -254,7 +257,7 @@ Matrix <T> ::Matrix(const Matrix <T> &other)
 template <class T>
 Matrix <T> ::Matrix(const Vector <T> &other)
 		: __rows(other.__rows), __cols(1),
-		Tensor <T> ({other.__rows, 1}, T())
+		Tensor <T> (other.__rows, 1)
 {
 	for (size_t i = 0; i < __rows; i++)
 		this->__array[i] = other.__array[i];
@@ -262,7 +265,8 @@ Matrix <T> ::Matrix(const Vector <T> &other)
 
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other, T k)
-		: __rows(other.__rows), __cols(other.__cols)
+		: __rows(other.__rows),
+		__cols(other.__cols)
 {
 	if (this != &other) {
 		// Use a macro
@@ -284,7 +288,7 @@ Matrix <T> ::Matrix(const Matrix <T> &other, T k)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
-		: Tensor <T> ({rs, cs})
+		: Tensor <T> (rs, cs)
 {
 	__rows = rs;
 	__cols = cs;

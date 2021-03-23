@@ -24,6 +24,8 @@ def clean_and_exit(sig):
 def make_target(threads, target, mode=''):
 	if mode in ['gdb', 'valgrind', 'profile']:
 		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
+	elif mode in ['warn']:
+		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Warn .')
 	else:
 		ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
 
@@ -42,6 +44,7 @@ def make_target(threads, target, mode=''):
 modes = {
 	'': './',
 	'gdb': 'gdb ',
+	'warn': './',
 	'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
         'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
 }

@@ -158,16 +158,15 @@ public:
 };
 
 // Primitive operations for all systems (including embedded)
-#include <vector_primitives.hpp>
+#include <primitives/vector_prims.hpp>
 
 // Additional operations for common systems
 #ifndef __AVR
 
-#include <vector_basic.hpp>
+#include <vector_cpu.hpp>
 
 #endif
 
-#include <vector_cpu.hpp>
 
 }
 

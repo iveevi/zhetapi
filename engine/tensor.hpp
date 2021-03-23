@@ -76,7 +76,7 @@ public:
 	Tensor(const Tensor &);
 	
 	Tensor(size_t, size_t);
-	__avr_ignore(Tensor(const std::vector <std::size_t> &);)
+	__avr_ignore(explicit Tensor(const std::vector <std::size_t> &);)
 	__avr_ignore(Tensor(const std::vector <std::size_t> &, const T &);)
 	__avr_ignore(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
 
@@ -147,7 +147,7 @@ public:
 	friend Matrix <U> operator/(const U &, const Matrix <U> &);
 };
 
-#include <tensor_primitives.hpp>
+#include <primitives/tensor_prims.hpp>
 
 #ifndef __AVR
 

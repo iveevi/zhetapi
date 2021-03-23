@@ -39,7 +39,7 @@ Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T
 
 template <class T>
 Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref)
-		: Tensor <T> ({ref.size(), ref[0].size()})
+		: Tensor <T> (ref.size(), ref[0].size())
 {
 	__rows = ref.size();
 
@@ -60,7 +60,7 @@ Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref)
 
 template <class T>
 Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
-                : Tensor <T> ({sq.size(), sq.begin()->size()})
+                : Tensor <T> (sq.size(), sq.begin()->size())
 {
 	__rows = sq.size();
 
@@ -86,7 +86,7 @@ Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen)
-                : Tensor <T> ({rs, cs})
+                : Tensor <T> (rs, cs)
 {
 	__rows = rs;
 	__cols = cs;
@@ -99,7 +99,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
-                : Tensor <T> ({rs, cs})
+                : Tensor <T> (rs, cs)
 {
 	__rows = rs;
 	__cols = cs;
@@ -112,7 +112,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
-		: Tensor <T> ({rs, cs})
+		: Tensor <T> (rs, cs)
 {
 	__rows = rs;
 	__cols = cs;
@@ -125,7 +125,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen)
-		: Tensor <T> ({rs, cs})
+		: Tensor <T> (rs, cs)
 {
 	__rows = rs;
 	__cols = cs;

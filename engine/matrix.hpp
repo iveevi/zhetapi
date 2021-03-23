@@ -250,7 +250,7 @@ public:
 };
 
 // TODO use __CUDACC__ instead of __zhp_cuda and make _cuda files
-#include <matrix_primitives.hpp>
+#include <primitives/matrix_prims.hpp>
 
 #ifndef __AVR
 
