@@ -3,11 +3,11 @@
 
 #ifdef ZHP_CUDA // Cuda active
 
-#define __cuda_dual_prefix __host__ __device__
+#define __cuda_dual__ __host__ __device__
 
 #else
 
-#define __cuda_dual_prefix
+#define __cuda_dual__
 
 #endif // Cuda active
 
