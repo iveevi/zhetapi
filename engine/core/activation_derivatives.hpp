@@ -9,57 +9,27 @@ template <class T>
 class _DLinear : public Activation <T> {
 	T	_alpha;
 public:
+	__cuda_dual__
+	explicit _DLinear(const T &alpha = T(1)) : _alpha(alpha) {}
 
-#ifndef ZHP_CUDA
-
-	_DLinear(const T &alpha = T(1)) : _alpha(alpha) {}
-
+	__cuda_dual__
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), _alpha);
 	}
-
-#else
-
-	_host_ _device_
-	_DLinear(const T &alpha = T(1)) : _alpha(alpha) {}
-	
-	_host_ _device_
-	Vector <T> compute(const Vector <T> &x) const {
-		return Vector <T> (x.size(), _alpha);
-	}
-
-#endif
-
 };
 
 // ReLU activation class
 template <class T>
 class _DReLU : public Activation <T> {
 public:
-
-#ifndef ZHP_CUDA
-
+	__cuda_dual__
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
-			[&](size_t i) { 
+			[x] __cuda_dual__ (size_t i) {
 				return (x[i] > 0) ? 1 : 0;
 			}
 		);
 	}
-
-#else
-
-	_host_ _device_
-	Vector <T> compute(const Vector <T> &x) const {
-		return Vector <T> (x.size(),
-			[x] _host_ _device_ (size_t i) {
-				return (x[i] > 0) ? 1 : 0;
-			}
-		);
-	}
-
-#endif
-
 };
 
 // Leaky ReLU activation class

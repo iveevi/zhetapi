@@ -1,7 +1,7 @@
 #ifndef ESSENTIALS_H_
 #define ESSENTIALS_H_
 
-#ifdef ZHP_CUDA // Cuda active
+#ifdef __CUDACC__
 
 #define __cuda_dual__ __host__ __device__
 

@@ -26,13 +26,13 @@ void fit(const node &a, const node &fitter)
 	vector <node> not_wcs;
 
 	// Add a begin and end method for nodes
-	for (node nd : fitter.__leaves) {
+	for (node nd : fitter._leaves) {
 		if (nd.caller() != Token::token_wildcard)
 			not_wcs.push_back(nd);
 	}
 
 	// Check the rest of the nodes
-	vector <node> current = a.__leaves;
+	vector <node> current = a._leaves;
 
 	cout << "Current - before reducing:" << endl;
 	for (node nd : current)
@@ -56,7 +56,7 @@ void fit(const node &a, const node &fitter)
 
 int main()
 {
-	Engine *engine = new Engine();
+	/* Engine *engine = new Engine();
 
 	engine->put("x", new wildcard("x", var_pred));
 
@@ -69,5 +69,20 @@ int main()
 	cout << "nm2:" << endl;
 	nm2.print();
 
-	fit(nm2.get_tree(), nm.get_tree());
+	fit(nm2.get_tree(), nm.get_tree()); */
+
+	Engine *engine = new Engine();
+
+	Function f = "f(x) = x^2";
+
+	f.print();
+
+	engine->put(f);
+
+	node_manager nm("df/dx", {}, engine);
+
+	cout << "nm:" << endl;
+	nm.print();
+
+	cout << "display: " << nm.display() << endl;
 }

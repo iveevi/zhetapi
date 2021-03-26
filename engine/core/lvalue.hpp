@@ -21,6 +21,10 @@ public:
 	lvalue();
 	lvalue(const std::string &, Engine *);
 
+	// Properties
+	const std::string &symbol() const;
+	bool is_dummy() const;
+
 	void assign(Token *);
 
 	type caller() const override;

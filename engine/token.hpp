@@ -69,6 +69,8 @@ public:
 	 */
 	virtual std::string str() const = 0;
 
+	// Add a virtual display method
+
 	/*
 	 * Returns a heap allocated copy of the Token. Used in copy
 	 * constructors for nodes and engines.

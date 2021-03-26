@@ -23,6 +23,9 @@ node_manager::node_manager(const node &tree, Engine *engine)
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
+
+	// Simplify
+	simplify(_tree);
 }
 
 node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
@@ -48,6 +51,9 @@ node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
 	count_up(_tree);
 	
 	rereference(_tree);
+
+	// Simplify
+	simplify(_tree);
 }
 
 node_manager::node_manager(const std::string &str, Engine *engine)
@@ -66,6 +72,9 @@ node_manager::node_manager(const std::string &str, Engine *engine)
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
+	
+	// Simplify
+	simplify(_tree);
 }
 
 node_manager::node_manager(const std::string &str,
@@ -96,6 +105,9 @@ node_manager::node_manager(const std::string &str,
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
+
+	// Simplify
+	simplify(_tree);
 }
 
 node_manager &node_manager::operator=(const node_manager &other)
@@ -430,6 +442,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 			Token *tptr = _engine->get(pr.second);
 
+			// TODO: get the alias of pr.second (clean this code ;-;)
 			// Potential differential node
 			Token *dptr = nullptr;
 			auto diff = _params.end();
@@ -439,6 +452,10 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				// Priority on parameters
 				diff = find(_params.begin(), _params.end(), pr.second.substr(1));
 				dptr = _engine->get(pr.second.substr(1));
+
+				// Second chance for differential
+				if (!dptr && !_engine->get(pr.second))
+					dptr = new lvalue(pr.second.substr(1), nullptr);
 			}
 
 			size_t dindex = std::distance(_params.begin(), diff);
@@ -684,9 +701,12 @@ void node_manager::simplify_mult_div(node &ref, codes c)
 			if (t1->caller() == Token::ftn)
 				ftn = dynamic_cast <Function *> (t1);
 			
+			// TODO: add a token base for tokens with a .symbol() method
 			if (t2->caller() == Token::ndr)
 				var = (dynamic_cast <node_reference *> (t2))->symbol();
-
+			else if (t2->caller() == Token::token_lvalue)
+				var = (dynamic_cast <lvalue *> (t2))->symbol();
+			
 			if (ftn && ftn->is_variable(var)) {
 				Function f = ftn->differentiate(var);
 
@@ -972,10 +992,10 @@ void node_manager::label_operation(node &ref)
 		ref.relabel(l_separable);
 		break;
 	case mul:
-		ref._label = l_multiplied;
+		ref.relabel(l_multiplied);
 		break;
 	case dvs:
-		ref._label = l_divided;
+		ref.relabel(l_divided);
 		break;
 	case pwr:
 		if ((ref[0].label() == l_variable)
@@ -985,15 +1005,15 @@ void node_manager::label_operation(node &ref)
 			ref.relabel(l_power_misc);
 		break;
 	case xln:
-		ref._label = l_natural_log;
+		ref.relabel(l_natural_log);
 		break;
 	case xlg:
-		ref._label = l_binary_log;
+		ref.relabel(l_binary_log);
 		break;
 	case lxg:
 		if (is_constant(ref._leaves[0]._label) &&
 			!is_constant(ref._leaves[1]._label))
-			ref._label = l_constant_base_log;
+			ref.relabel(l_constant_base_log);
 		break;
 	case sxn:
 	case cxs:
@@ -1001,7 +1021,7 @@ void node_manager::label_operation(node &ref)
 	case sec:
 	case csc:
 	case cot:
-		ref._label = l_trigonometric;
+		ref.relabel(l_trigonometric);
 		break;
 	case snh:
 	case csh:
@@ -1009,15 +1029,15 @@ void node_manager::label_operation(node &ref)
 	case cch:
 	case sch:
 	case cth:
-		ref._label = l_hyperbolic;
+		ref.relabel(l_hyperbolic);
 		break;
 	case pin:
 	case pde:
-		ref._label = l_post_modifier;
+		ref.relabel(l_post_modifier);
 		break;
 	case rin:
 	case rde:
-		ref._label = l_pre_modifier;
+		ref.relabel(l_pre_modifier);
 		break;
 	default:
 		break;

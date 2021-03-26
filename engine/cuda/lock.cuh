@@ -1,6 +1,7 @@
 #ifndef LOCK_CUH_
 #define LOCK_CUH_
 
+// Support (construction) on both device and host
 struct Lock {
 	int *mutex;
 
@@ -9,6 +10,7 @@ struct Lock {
 
 	~Lock();
 
+	// Only (un)lock-able from the GPU
 	__device__ void lock();
 	__device__ void unlock();
 };

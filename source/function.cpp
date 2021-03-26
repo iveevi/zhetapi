@@ -88,8 +88,6 @@ Function::Function(const std::string &str) : _threads(1)
 
 	// Construct the tree manager
 	_manager = node_manager(str.substr(++index), _params, &engine);
-
-	_manager.simplify();
 }
 
 // Symbolic constructor with external symbol table
@@ -167,8 +165,6 @@ Function::Function(const std::string &str, Engine *bptr) : _threads(1)
 
 	// Construct the tree manager
 	_manager = node_manager(str.substr(++index), _params, bptr);
-
-	_manager.simplify();
 }
 
 // Member-wise construction

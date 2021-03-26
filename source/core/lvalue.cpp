@@ -9,12 +9,23 @@ lvalue::lvalue() {}
 lvalue::lvalue(const std::string &symbol, Engine *context)
 		: _symbol(symbol), _context(context) {}
 
+const std::string &lvalue::symbol() const
+{
+	return _symbol;
+}
+
+// Is this lvalue simply a place holder?
+bool lvalue::is_dummy() const
+{
+	return _context == nullptr;
+}
+
 void lvalue::assign(Token *tptr)
 {
 	Token *self = _context->get(_symbol);
 
 	// Assumes either function or variable (variable for now)
-	if (self->caller() == var)
+	if (self->caller() == var && _context)
 		_context->put(Variable(tptr, _symbol));
 }
 

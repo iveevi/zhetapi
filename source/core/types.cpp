@@ -132,7 +132,7 @@ std::string types::symbol(const std::type_index &type)
 	if (type == typeid(Operand <MCR>))
 		return "MCR";
 
-	return "?";
+	return type.name();
 }
 
 std::string types::proper_symbol(const std::type_index &type)
