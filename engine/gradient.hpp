@@ -48,7 +48,7 @@ Vector <T> simple_compute_cached(
 
 		layers[i].forward_propogate(tmp, prv);
 		
-		z[i++] = layers[i].__dact->compute(prv);
+		z[i++] = layers[i]._dact->compute(prv);
 	}
 
 	a[i] = tmp;
@@ -76,7 +76,7 @@ Matrix <T> *jacobian_kernel(
 	
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
+			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
 
 		delta.stable_shur(z[i]);
 
@@ -106,7 +106,7 @@ Matrix <T> *jacobian_kernel(
 	
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
+			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
 
 		delta.stable_shur(z[i]);
 
@@ -140,7 +140,7 @@ Matrix <T> *simple_gradient(
 	
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1].__mat, delta));
+			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
 
 		delta.stable_shur(z[i]);
 

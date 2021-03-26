@@ -10,7 +10,7 @@
 namespace zhetapi {
 
 class collection : public Token {
-	std::vector <Token *>	__arr;
+	std::vector <Token *>	_arr;
 public:
 	collection();
 	collection(const std::vector <Token *> &);

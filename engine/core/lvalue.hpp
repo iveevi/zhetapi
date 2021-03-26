@@ -15,8 +15,8 @@ class Engine;
 
 class lvalue : public Token {
 protected:
-	std::string	__symbol	= "";		// The actual symbol
-	Engine *	__context	= nullptr;	// Acts as the scope
+	std::string	_symbol	= "";		// The actual symbol
+	Engine *	_context	= nullptr;	// Acts as the scope
 public:
 	lvalue();
 	lvalue(const std::string &, Engine *);

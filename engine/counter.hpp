@@ -5,11 +5,11 @@ namespace zhetapi {
 
 template <class T>
 class Counter {
-	T	__min;
-	T	__max;
-	T	__alpha;
+	T	_min;
+	T	_max;
+	T	_alpha;
 
-	T	__count;
+	T	_count;
 public:
 	Counter(T, T, T);
 
@@ -17,13 +17,13 @@ public:
 };
 
 template <class T>
-Counter <T> ::Counter(T mn, T mx, T alpha) : __min(mn), __max(mx),
-		__alpha(alpha) {}
+Counter <T> ::Counter(T mn, T mx, T alpha) : _min(mn), _max(mx),
+		_alpha(alpha) {}
 
 template <class T>
 T Counter <T> ::operator()() const
 {
-	return (__count = min(max(__count + __alpha, __min), __max);
+	return (_count = min(max(_count + _alpha, _min), _max);
 }
 
 }

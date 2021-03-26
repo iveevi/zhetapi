@@ -1,10 +1,10 @@
 #ifndef AVR_ESSENTIALS_H_
 #define AVR_ESSENTIALS_H_
 
-#ifdef __AVR
+#ifdef _AVR
 
-#define __avr_ignore(code)
-#define __avr_switch(code1, code2)      code1
+#define __avr_ignore__(code)
+#define __avr_switch__(code1, code2)      code1
 
 #define assert(condition)                                               \
         if (!(condition)) {                                               \
@@ -15,17 +15,17 @@
 
 // Pair structure
 template <class T, class U>
-struct __avr_pair {
+struct _avr_pair {
 	T	first;
 	U	second;
 };
 
-using psize_t = __avr_pair <size_t, size_t>;
+using psize_t = _avr_pair <size_t, size_t>;
 
 #else
 
-#define __avr_ignore(code)              code
-#define __avr_switch(code1, code2)      code2
+#define __avr_ignore__(code)              code
+#define __avr_switch__(code1, code2)      code2
 
 using psize_t = std::pair <size_t, size_t>;
 

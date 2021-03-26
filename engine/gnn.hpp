@@ -22,8 +22,8 @@ namespace ml {
  */
 template <class T = double>
 class GNN {
-	std::vector <NetNode <T> *>	__ins	= {};
-	std::vector <NetNode <T> *>	__outs	= {};
+	std::vector <NetNode <T> *>	_ins	= {};
+	std::vector <NetNode <T> *>	_outs	= {};
 
 	// Variadic constructor helpers
 	void init(NetNode <T> *);
@@ -58,14 +58,14 @@ template <class T>
 GNN <T> ::GNN() {}
 
 template <class T>
-GNN <T> ::GNN(NetNode <T> *nnptr) : __ins({nnptr})
+GNN <T> ::GNN(NetNode <T> *nnptr) : _ins({nnptr})
 {
 	getouts();
 }
 
 template <class T>
 GNN <T> ::GNN(const std::vector <NetNode <T> *> &ins)
-		: __ins(ins) {}
+		: _ins(ins) {}
 
 template <class T>
 template <class ... U>
@@ -77,7 +77,7 @@ GNN <T> ::GNN(U ... args)
 template <class T>
 void GNN <T> ::init(NetNode <T> *nnptr)
 {
-	__ins.push_back(nnptr);
+	_ins.push_back(nnptr);
 
 	getouts();
 }
@@ -86,7 +86,7 @@ template <class T>
 template <class ... U>
 void GNN <T> ::init(NetNode <T> *nnptr, U ... args)
 {
-	__ins.push_back(nnptr);
+	_ins.push_back(nnptr);
 
 	init(args...);
 }
@@ -100,7 +100,7 @@ void GNN <T> ::getouts()
 	// BFS queue
 	std::queue <NetNode <T> *> queue;
 
-	for (NetNode <T> *nnptr : __ins)
+	for (NetNode <T> *nnptr : _ins)
 		queue.emplace(nnptr);
 	
 	while (!queue.empty()) {
@@ -113,10 +113,10 @@ void GNN <T> ::getouts()
 
 		auto vfrw = cptr->forward();
 		if (vfrw.empty()) {
-			__outs.push_back(cptr);
+			_outs.push_back(cptr);
 		} else {
 			for (auto frw : vfrw)
-				queue.push(frw->__fr);
+				queue.push(frw->_fr);
 		}
 	}
 }
@@ -128,7 +128,7 @@ void GNN <T> ::getouts()
 template <class T>
 NetNode <T> &GNN <T> ::operator[](size_t i)
 {
-	return *(__ins[i]);
+	return *(_ins[i]);
 }
 
 /**
@@ -138,7 +138,7 @@ NetNode <T> &GNN <T> ::operator[](size_t i)
 template <class T>
 const NetNode <T> &GNN <T> ::operator[](size_t i) const
 {
-	return *(__outs[i]);
+	return *(_outs[i]);
 }
 
 // Passing
@@ -146,8 +146,8 @@ template <class T>
 void GNN <T> ::pass(std::vector <Tensor <T>> &args) const
 {
 	size_t i = 0;
-	while (!args.empty() && i < __ins.size()) {
-		__ins[i].pass(args);
+	while (!args.empty() && i < _ins.size()) {
+		_ins[i].pass(args);
 
 		i++;
 	}
@@ -164,7 +164,7 @@ void GNN <T> ::pass(std::vector <Tensor <T>> &&rargs) const
 template <class T>
 void GNN <T> ::trace() const
 {
-	for (NetNode <T> *nn : __ins)
+	for (NetNode <T> *nn : _ins)
 		nn->trace();
 }
 

@@ -11,7 +11,7 @@ Equation::Equation(const std::vector <std::string> &exprs)
 	assert(exprs.size() > 1);
 
 	// Rest
-	__engine = new Engine();
+	_engine = new Engine();
 
 	std::set <std::string> excl;
 	for (const std::string &str : exprs) {
@@ -20,9 +20,9 @@ Equation::Equation(const std::vector <std::string> &exprs)
 		bool success = false;
 		do {
 			try {
-				node_manager nm(str, args, __engine);
+				node_manager nm(str, args, _engine);
 
-				__expressions.push_back(nm);
+				_expressions.push_back(nm);
 
 				success = true;
 			} catch (const node_manager::undefined_symbol &e) {
@@ -35,13 +35,13 @@ Equation::Equation(const std::vector <std::string> &exprs)
 	}
 
 	for (std::string str : excl)
-		__args.push_back(str);
+		_args.push_back(str);
 }
 
 // Properties
 size_t Equation::args() const
 {
-	return __args.size();
+	return _args.size();
 }
 
 // Methods
@@ -54,9 +54,9 @@ Solutions Equation::solve() const
 	using namespace std;
 	cout << "dealing with first two equations only..." << endl;
 
-	node_manager nm = __expressions[0] - __expressions[1];
+	node_manager nm = _expressions[0] - _expressions[1];
 
-	Function f("f", __args, nm);
+	Function f("f", _args, nm);
 	Function df = f.differentiate("x");
 
 	// Solve with a hybrid of Newton-Raphsons and Bisection
@@ -88,14 +88,14 @@ Solutions Equation::solve() const
 		// FIXME: Why cant we pass {x0}?
 		ft = f({x0->copy()});
 
-		st = __engine->compute(">", {eps, ft});
+		st = _engine->compute(">", {eps, ft});
 		if (tokcmp(st, true_tok))
 			break;
 
 		dft = df({x0->copy()});
 
-		qt = __engine->compute("/", {ft, dft});
-		x0 = __engine->compute("-", {x0, qt});
+		qt = _engine->compute("/", {ft, dft});
+		x0 = _engine->compute("-", {x0, qt});
 	}
 
 	return {{x0}};
@@ -105,9 +105,9 @@ std::string Equation::representation() const
 {
 	std::string out = "";
 
-	size_t n = __expressions.size();
+	size_t n = _expressions.size();
 	for (size_t i = 0; i < n; i++) {
-		out += __expressions[i].display();
+		out += _expressions[i].display();
 
 		if (i < n - 1)
 			out += " = ";

@@ -7,12 +7,12 @@ namespace ads {
 
 template <class T, class F>
 class SlidingBuffer {
-	T *	__array	= nullptr;
+	T *	_array	= nullptr;
 
-	T	__avg	= 0;
+	T	_avg	= 0;
 
-	size_t	__size	= 0;
-	size_t	__index	= 0;
+	size_t	_size	= 0;
+	size_t	_index	= 0;
 public:
 	SlidingBuffer();
 	SlidingBuffer(const SlidingBuffer &);
@@ -38,19 +38,19 @@ SlidingBuffer <T, F> ::SlidingBuffer() {}
 
 template <class T, class F>
 SlidingBuffer <T, F> ::SlidingBuffer(const SlidingBuffer &other)
-		: __size(other.__size), __index(other.__index),
-		__avg(other.__avg)
+		: _size(other._size), _index(other._index),
+		_avg(other._avg)
 {
-	__array = new T[__size];
+	_array = new T[_size];
 
-	memcpy(__array, other.__array, sizeof(T) * __size);
+	memcpy(_array, other._array, sizeof(T) * _size);
 }
 
 template <class T, class F>
 SlidingBuffer <T, F> ::SlidingBuffer(size_t buffer_size)
-	: __size(buffer_size)
+	: _size(buffer_size)
 {
-	__array = new T[__size];
+	_array = new T[_size];
 }
 
 template <class T, class F>
@@ -58,16 +58,16 @@ SlidingBuffer <T, F> &SlidingBuffer <T, F>
 		::operator=(const SlidingBuffer &other)
 {
 	if (this != &other) {
-		if (__array)
-			delete[] __array;
+		if (_array)
+			delete[] _array;
 
-		__size = other.__size;
-		__index = other.__index;
-		__avg = other.__index;
+		_size = other._size;
+		_index = other._index;
+		_avg = other._index;
 
-		__array = new T[__size];
+		_array = new T[_size];
 
-		memcpy(__array, other.__array, sizeof(T) * __size);
+		memcpy(_array, other._array, sizeof(T) * _size);
 	}
 
 	return *this;
@@ -76,7 +76,7 @@ SlidingBuffer <T, F> &SlidingBuffer <T, F>
 template <class T, class F>
 SlidingBuffer <T, F> ::~SlidingBuffer()
 {
-	delete[] __array;
+	delete[] _array;
 }
 
 template <class T, class F>
@@ -84,24 +84,24 @@ void SlidingBuffer <T, F> ::resize(size_t size)
 {
 	T tmp = new T[size];
 
-	memcpy(tmp, __array, std::min(size, __size) * sizeof(T));
+	memcpy(tmp, _array, std::min(size, _size) * sizeof(T));
 
-	for (size_t i = __size; i < __size - size; i++)
-		__Avg -= F(__array[i]);
+	for (size_t i = _size; i < _size - size; i++)
+		_Avg -= F(_array[i]);
 
 	index %= size;
 
-	__size = size;
+	_size = size;
 }
 
 template <class T, class F>
 void SlidingBuffer <T, F> ::insert(const T &x)
 {
-	__avg += F(x) - F(__array[i]);
+	_avg += F(x) - F(_array[i]);
 
-	__array[__index] = x;
+	_array[_index] = x;
 
-	__index = (__index + 1) % __size;
+	_index = (_index + 1) % _size;
 }
 
 template <class T, class F>
@@ -109,19 +109,19 @@ const T &SlidingBuffer <T, F> ::iavg(const T &x) const
 {
 	insert(x);
 
-	return __avg;
+	return _avg;
 }
 
 template <class T, class F>
 T SlidingBuffer <T, F> ::ipop(const T &x)
 {
-	T tmp = __avg[i];
+	T tmp = _avg[i];
 
-	__avg += F(x) - F(tmp);
+	_avg += F(x) - F(tmp);
 
-	__array[__index] = x;
+	_array[_index] = x;
 
-	__index = (__index + 1) % __size;
+	_index = (_index + 1) % _size;
 
 	return tmp;
 }
@@ -129,7 +129,7 @@ T SlidingBuffer <T, F> ::ipop(const T &x)
 template <class T, class F>
 const T &SlidingBuffer <T, F> ::avg() const
 {
-	return __avg;
+	return _avg;
 }
 
 }

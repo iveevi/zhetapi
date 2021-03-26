@@ -25,7 +25,7 @@ using Comparator = bool (*)(const Vector <T> &, const Vector <T> &);
 
 // Default diagnoser
 template <class T>
-bool __def_cmp(const Vector <T> &a, const Vector <T> &e)
+bool _def_cmp(const Vector <T> &a, const Vector <T> &e)
 {
 	return a == e;
 };
@@ -33,9 +33,9 @@ bool __def_cmp(const Vector <T> &a, const Vector <T> &e)
 // Training statistics
 template <class T>
 struct PerformanceStatistics {
-	T	__cost		= T(0);
-	size_t	__passed	= 0;
-	double	__kernel_time	= 0;
+	T	_cost		= T(0);
+	size_t	_passed	= 0;
+	double	_kernel_time	= 0;
 };
 
 // Fitting a single I/O pair
@@ -74,13 +74,13 @@ void fit(
 	/* if (ins.size() != outs.size())
 		throw bad_io_dimensions();
 
-	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
+	if ((ins[0].size() != _isize) || (outs[0].size() != _osize))
 		throw bad_io_dimensions();
 
-	if (!__opt)
+	if (!_opt)
 		throw null_optimizer();
 	
-	if (!__cost)
+	if (!_cost)
 		throw null_loss_function(); */
 
 	Matrix <T> *J;
@@ -106,13 +106,13 @@ void multithreaded_fit(
 	/* if (ins.size() != outs.size())
 		throw bad_io_dimensions();
 
-	if ((ins[0].size() != __isize) || (outs[0].size() != __osize))
+	if ((ins[0].size() != _isize) || (outs[0].size() != _osize))
 		throw bad_io_dimensions();
 
-	if (!__opt)
+	if (!_opt)
 		throw null_optimizer();
 	
-	if (!__cost)
+	if (!_cost)
 		throw null_loss_function(); */
 
 	Matrix <T> *J;
@@ -164,7 +164,7 @@ PerformanceStatistics <T> train_mini_batch_perf(
 		const DataSet <T> &outs,
 		Erf <T> *erf,
 		Optimizer <T> *opt,
-		Comparator <T> cmp = __def_cmp <T>,
+		Comparator <T> cmp = _def_cmp <T>,
 		Display::type display = 0,
 		size_t threads = 1)
 {
@@ -181,8 +181,8 @@ PerformanceStatistics <T> train_mini_batch_perf(
 	// Performance statistics first
 	for (size_t i = 0; i < n; i++) {
 		to = dnn(ins[i]);
-		ns.__cost += erf->compute(to, outs[i]).x();
-		ns.__passed += cmp(to, outs[i]);
+		ns._cost += erf->compute(to, outs[i]).x();
+		ns._passed += cmp(to, outs[i]);
 
 		perr += fabs((to - outs[i]).norm() / outs[i].norm());
 	}
@@ -196,8 +196,8 @@ PerformanceStatistics <T> train_mini_batch_perf(
 	if (display & Display::batch) {
 		std::cout << "Batch done:"
 			<< " %-err = " << 100 * perr << "%"
-			<< " %-passed = " << (100.0 * ns.__passed)/n << "%"
-			<< " #passed = " << ns.__passed
+			<< " %-passed = " << (100.0 * ns._passed)/n << "%"
+			<< " #passed = " << ns._passed
 			<< std::endl;
 	}
 
@@ -214,7 +214,7 @@ PerformanceStatistics <T> train_dataset_perf(
 		Optimizer <T> *opt,
 		Display::type display = 0,
 		size_t threads = 1,
-		Comparator <T> cmp = __def_cmp <T>)
+		Comparator <T> cmp = _def_cmp <T>)
 {
 	assert(ins.size() == outs.size());
 
@@ -236,8 +236,8 @@ PerformanceStatistics <T> train_dataset_perf(
 				display,
 				threads);
 
-		ns.__cost += bs.__cost;
-		ns.__passed += bs.__cost;
+		ns._cost += bs._cost;
+		ns._passed += bs._cost;
 	}
 
 	return ns;

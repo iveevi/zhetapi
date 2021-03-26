@@ -18,8 +18,8 @@ class Engine;
 
 class rvalue : public Token {
 protected:
-	std::string	__symbol	= "";		// The actual symbol
-	Engine *	__context	= nullptr;	// Acts as the scope
+	std::string	_symbol	= "";		// The actual symbol
+	Engine *	_context	= nullptr;	// Acts as the scope
 public:
 	rvalue();
 	rvalue(const std::string &, Engine *);

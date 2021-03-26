@@ -19,19 +19,19 @@ namespace zhetapi {
 template <class T>
 Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 {
-	size_t rs = M.__rows;
-	size_t cs = M.__cols;
+	size_t rs = M._rows;
+	size_t cs = M._cols;
 
 	Vector <T> out(rs, T(0));
 
-	size_t k = V.__size;
+	size_t k = V._size;
 	for (size_t i = 0; i < rs; i++) {
-		T acc = M.__array[i * cs];
+		T acc = M._array[i * cs];
 
 		for (size_t j = 0; j < k; j++)
-			acc += M.__array[i * cs + 1 + j] * V.__array[j];
+			acc += M._array[i * cs + 1 + j] * V._array[j];
 
-		out.__array[i] = acc;
+		out._array[i] = acc;
 	}
 
 	return out;
@@ -44,26 +44,26 @@ Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 template <class T>
 Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 {
-	size_t rs = M.__rows;
-	size_t cs = M.__cols;
+	size_t rs = M._rows;
+	size_t cs = M._cols;
 
 	Vector <T> out(cs - 1, T(0));
 	/* for (size_t i = 1; i < cs; i++) {
 		T acc = 0;
 
 		for (size_t k = 0; k < rs; k++)
-			acc += M.__array[k * cs + i] * V.__array[k];
+			acc += M._array[k * cs + i] * V._array[k];
 
-		out.__array[i - 1] = acc;
+		out._array[i - 1] = acc;
 	} */
 
 	// Reverse loops
 	for (size_t k = 0; k < rs; k++) {
-		const T *arr = &(M.__array[k * cs]);
-		T v = V.__array[k];
+		const T *arr = &(M._array[k * cs]);
+		T v = V._array[k];
 
 		for (size_t i = 1; i < cs; i++)
-			out.__array[i - 1] = arr[i] * v;
+			out._array[i - 1] = arr[i] * v;
 	}
 
 	return out;
@@ -76,14 +76,14 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 template <class T>
 Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 {
-	size_t rs = V.__size;
-	size_t cs = Vt.__size;
+	size_t rs = V._size;
+	size_t cs = Vt._size;
 	
 	size_t n = rs * cs;
 
 	T *tmp = new T[n];
 	for (size_t i = 0; i < n; i++)
-		tmp[i] = V.__array[i / cs] * Vt.__array[i % cs];
+		tmp[i] = V._array[i / cs] * Vt._array[i % cs];
 
 	return Matrix <T> (rs, cs, tmp, false);
 }

@@ -25,11 +25,11 @@ extern const long double EPSILON;
 template <class T, size_t N>
 class MatrixFactorization {
 protected:
-	Matrix <T>	__terms[N];
+	Matrix <T>	_terms[N];
 public:
 	MatrixFactorization(const std::vector <Matrix <T>> &terms) {
 		for (size_t i = 0; i < N; i++)
-			__terms[i] = terms[i];
+			_terms[i] = terms[i];
 	}
 	
 	// Variadic constructor
@@ -43,7 +43,7 @@ public:
 		// by adding a collect function
 		// for pointer arrays
 		for (size_t i = 0; i < N; i++)
-			__terms[i] = terms[i];
+			_terms[i] = terms[i];
 	}
 
 	Matrix <T> product() const {
@@ -51,10 +51,10 @@ public:
 		if (N <= 0)
 			return Matrix <T> ::identity(1);
 		
-		Matrix <T> prod = __terms[0];
+		Matrix <T> prod = _terms[0];
 
 		for (size_t i = 1; i < N; i++)
-			prod *= __terms[i];
+			prod *= _terms[i];
 		
 		return prod;
 	}
@@ -234,11 +234,11 @@ public:
 			: MatrixFactorization <T, 2> (Q, R) {}
 	
 	Matrix <T> q() const {
-		return this->__terms[0];
+		return this->_terms[0];
 	}
 
 	Matrix <T> r() const {
-		return this->__terms[1];
+		return this->_terms[1];
 	}
 };
 
@@ -250,11 +250,11 @@ public:
 			: MatrixFactorization <T, 2> (L, Q) {}
 	
 	Matrix <T> l() const {
-		return this->__terms[0];
+		return this->_terms[0];
 	}
 
 	Matrix <T> q() const {
-		return this->__terms[1];
+		return this->_terms[1];
 	}
 };
 

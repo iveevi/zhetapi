@@ -12,18 +12,18 @@ Vector <T> ::Vector(const Vector <A> &other)
 {
 	if (is_vector_type <A> ()) {
 		// Add a new function for this
-		this->__array = new T[other.size()];
-		this->__rows = other.get_rows();
-		this->__cols = other.get_cols();
+		this->_array = new T[other.size()];
+		this->_rows = other.get_rows();
+		this->_cols = other.get_cols();
 
-		this->__size = other.size();
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = other[i];
+		this->_size = other.size();
+		for (size_t i = 0; i < this->_size; i++)
+			this->_array[i] = other[i];
 		
-		this->__dims = 1;
-		this->__dim = new size_t[1];
+		this->_dims = 1;
+		this->_dim = new size_t[1];
 
-		this->__dim[0] = this->__size;
+		this->_dim[0] = this->_size;
 	}
 }
 
@@ -46,15 +46,15 @@ Vector <T> ::Vector() : Matrix <T> () {}
 template <class T>
 Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())
 {
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] = other.__array[i];
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = other._array[i];
 }
 
 template <class T>
 Vector <T> ::Vector(const Matrix <T> &other) : Matrix <T> (other.get_rows(), 1, T())
 {
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] = other[0][i];
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = other[0][i];
 }
 
 template <class T>
@@ -70,18 +70,18 @@ Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 	if (this != &other) {
 		this->clear();
 
-		this->__array = new T[other.__size];
-		this->__rows = other.__rows;
-		this->__cols = other.__cols;
+		this->_array = new T[other._size];
+		this->_rows = other._rows;
+		this->_cols = other._cols;
 
-		this->__size = other.__size;
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = other.__array[i];
+		this->_size = other._size;
+		for (size_t i = 0; i < this->_size; i++)
+			this->_array[i] = other._array[i];
 		
-		this->__dims = 1;
-		this->__dim = new size_t[1];
+		this->_dims = 1;
+		this->_dim = new size_t[1];
 
-		this->__dim[0] = this->__size;
+		this->_dim[0] = this->_size;
 	}
 
 	return *this;
@@ -93,8 +93,8 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	if (this != &other) {
 		*this = Vector(other.get_rows(), T());
 
-		for (size_t i = 0; i < this->__size; i++)
-			this->__array[i] = other[0][i];
+		for (size_t i = 0; i < this->_size; i++)
+			this->_array[i] = other[0][i];
 	}
 
 	return *this;
@@ -103,33 +103,33 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 template <class T>
 T &Vector <T> ::operator[](size_t i)
 {
-	return this->__array[i];
+	return this->_array[i];
 }
 
 template <class T>
 const T &Vector <T> ::operator[](size_t i) const
 {
-	return this->__array[i];
+	return this->_array[i];
 }
 
 template <class T>
 size_t Vector <T> ::size() const
 {
-	return this->__size;
+	return this->_size;
 }
 
 template <class T>
 void Vector <T> ::operator+=(const Vector <T> &a)
 {
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] += a.__array[i];
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] += a._array[i];
 }
 
 template <class T>
 void Vector <T> ::operator-=(const Vector <T> &a)
 {
-	for (size_t i = 0; i < this->__size; i++)
-		this->__array[i] -= a.__array[i];
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] -= a._array[i];
 }
 
 template <class T>

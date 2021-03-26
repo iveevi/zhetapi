@@ -21,10 +21,10 @@ class Function;
 class node_manager {
 private:
 	// TODO: refactor params to args
-	Engine *			__engine	= nullptr;
-	node				__tree		= node();
-	std::vector <node>		__refs		= {};
-	std::vector <std::string>	__params	= {};
+	Engine *			_engine	= nullptr;
+	node				_tree		= node();
+	std::vector <node>		_refs		= {};
+	std::vector <std::string>	_params	= {};
 public:
 	node_manager();
 	node_manager(const node_manager &);
@@ -36,7 +36,7 @@ public:
 	node_manager &operator=(const node_manager &);
 
 	// Properties
-	bool empty() const;	// Is the __tree node empty?
+	bool empty() const;	// Is the _tree node empty?
 	size_t num_args() const;
 	const node &get_tree() const;
 

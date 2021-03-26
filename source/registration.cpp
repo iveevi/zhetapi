@@ -2,24 +2,24 @@
 
 namespace zhetapi {
 
-Registrable::Registrable() : __ident(""), __ftn(0) {}
+Registrable::Registrable() : _ident(""), _ftn(0) {}
 
 Registrable::Registrable(const Registrable &other)
 {
-	__ftn = other.__ftn;
-	__ident = other.__ident;
+	_ftn = other._ftn;
+	_ident = other._ident;
 }
 
-Registrable::Registrable(const ::std::string &ident, mapper ftn) : __ident(ident), __ftn(ftn) {}
+Registrable::Registrable(const ::std::string &ident, mapper ftn) : _ident(ident), _ftn(ftn) {}
 
 Token *Registrable::operator()(const ::std::vector <Token *> &ins) const
 {
-	return __ftn(ins);
+	return _ftn(ins);
 }
 
 ::std::string Registrable::str() const
 {
-	return __ident;
+	return _ident;
 }
 
 Token::type Registrable::caller() const
@@ -38,7 +38,7 @@ bool Registrable::operator==(Token *t) const
 	if (reg == nullptr)
 		return false;
 
-	return __ident == reg->__ident;
+	return _ident == reg->_ident;
 }
 
 }

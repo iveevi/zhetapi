@@ -24,21 +24,21 @@ class Erf;
 // FIXME: Dropout should not be active during inference phase
 template <class T = double>
 class Layer {
-	size_t			__fan_in	= 0;
-	size_t			__fan_out	= 0;
+	size_t			_fan_in	= 0;
+	size_t			_fan_out	= 0;
 
-	Matrix <T>		__mat		= Matrix <T> ();
+	Matrix <T>		_mat		= Matrix <T> ();
 
-	Activation <T> *	__act		= nullptr;
-	Activation <T> *	__dact		= nullptr;
+	Activation <T> *	_act		= nullptr;
+	Activation <T> *	_dact		= nullptr;
 
-	std::function <T ()>	__initializer;
+	std::function <T ()>	_initializer;
 
-	long double		__dropout	= 0;
+	long double		_dropout	= 0;
 
 	void clear();
 
-	static Interval <1>	__unit;
+	static Interval <1>	_unit;
 public:
 	// Memory operations
 	Layer();
@@ -52,7 +52,7 @@ public:
 
 	~Layer();
 
-	Matrix <T> &mat() {return __mat;}
+	Matrix <T> &mat() {return _mat;}
 
 	// Getters and setters
 	size_t get_fan_in() const;
@@ -131,7 +131,7 @@ public:
 
 // Static variables
 template <class T>
-Interval <1> Layer <T> ::__unit(1.0L);
+Interval <1> Layer <T> ::_unit(1.0L);
 
 // Memory operations
 template <class T>
@@ -141,24 +141,24 @@ template <class T>
 Layer <T> ::Layer(size_t fan_out, Activation <T> *act,
 		std::function <T ()> init,
 		long double dropout) :
-		__fan_out(fan_out),
-		__act(act),
-		__initializer(RandomInitializer <T> ()),
-		__dropout(dropout)
+		_fan_out(fan_out),
+		_act(act),
+		_initializer(RandomInitializer <T> ()),
+		_dropout(dropout)
 {
-	__dact = __act->derivative();
+	_dact = _act->derivative();
 }
 
 template <class T>
 Layer <T> ::Layer(const Layer <T> &other) :
-		__fan_in(other.__fan_in),
-		__fan_out(other.__fan_out),
-		__act(other.__act->copy()),
-		__mat(other.__mat),
-		__initializer(other.__initializer),
-		__dropout(other.__dropout)
+		_fan_in(other._fan_in),
+		_fan_out(other._fan_out),
+		_act(other._act->copy()),
+		_mat(other._mat),
+		_initializer(other._initializer),
+		_dropout(other._dropout)
 {
-	__dact = __act->derivative();
+	_dact = _act->derivative();
 }
 
 template <class T>
@@ -167,18 +167,18 @@ Layer <T> &Layer <T> ::operator=(const Layer <T> &other)
 	if (this != &other) {
 		clear();
 
-		__fan_in = other.__fan_in;
-		__fan_out = other.__fan_out;
+		_fan_in = other._fan_in;
+		_fan_out = other._fan_out;
 
-		__mat = other.__mat;
+		_mat = other._mat;
 
-		__initializer = other.__initializer;
+		_initializer = other._initializer;
 
-		__dropout = other.__dropout;
+		_dropout = other._dropout;
 
-		if (other.__act) {
-			__act = other.__act->copy();
-			__dact = __act->derivative();
+		if (other._act) {
+			_act = other._act->copy();
+			_dact = _act->derivative();
 		}
 	}
 
@@ -194,47 +194,47 @@ Layer <T> ::~Layer()
 template <class T>
 void Layer <T> ::clear()
 {
-	if (__act)
-		delete __act;
+	if (_act)
+		delete _act;
 
-	if (__dact)
-		delete __dact;
+	if (_dact)
+		delete _dact;
 }
 
 // Getters and setters
 template <class T>
 size_t Layer <T> ::get_fan_in() const
 {
-	return __fan_in;
+	return _fan_in;
 }
 
 template <class T>
 size_t Layer <T> ::get_fan_out() const
 {
-	return __fan_out;
+	return _fan_out;
 }
 
 template <class T>
 void Layer <T> ::set_fan_in(size_t fan_in)
 {
-	__fan_in = fan_in;
+	_fan_in = fan_in;
 	
-	if (__fan_in * __fan_out > 0)
-		__mat = Matrix <T> (__fan_out, __fan_in + 1);
+	if (_fan_in * _fan_out > 0)
+		_mat = Matrix <T> (_fan_out, _fan_in + 1);
 }
 
 // Reading and writing
 template <class T>
 void Layer <T> ::write(std::ofstream &fout) const
 {
-	size_t r = __mat.get_rows();
-	size_t c = __mat.get_cols();
+	size_t r = _mat.get_rows();
+	size_t c = _mat.get_cols();
 
 	fout.write((char *) &r, sizeof(size_t));
 	fout.write((char *) &c, sizeof(size_t));
 
-	__mat.write(fout);
-	__act->write(fout);
+	_mat.write(fout);
+	_act->write(fout);
 }
 
 template <class T>
@@ -246,54 +246,54 @@ void Layer <T> ::read(std::ifstream &fin)
 	fin.read((char *) &r, sizeof(size_t));
 	fin.read((char *) &c, sizeof(size_t));
 
-	__mat = Matrix <T> (r, c, T(0));
+	_mat = Matrix <T> (r, c, T(0));
 
-	__mat.read(fin);
+	_mat.read(fin);
 
-	__act = Activation <T> ::load(fin);
+	_act = Activation <T> ::load(fin);
 }
 
 // Initializer
 template <class T>
 void Layer <T> ::initialize()
 {
-	__mat.randomize(__initializer);
+	_mat.randomize(_initializer);
 }
 
 // Computation
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 {
-	return __act->compute(__mat * in.append_above(T (1)));
+	return _act->compute(_mat * in.append_above(T (1)));
 }
 
 template <class T>
 inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 {
-	in2 = apt_and_mult(__mat, in1);
-	in1 = __act->compute(in2);
+	in2 = apt_and_mult(_mat, in1);
+	in1 = _act->compute(in2);
 
 	// Apply dropout (only if necessary)
-	if (__dropout > 0)
-		in1.nullify(__dropout, __unit);
+	if (_dropout > 0)
+		in1.nullify(_dropout, _unit);
 }
 
 template <class T>
 inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 {
-	__mat += J;
+	_mat += J;
 }
 
 template <class T>
 void Layer <T> ::print() const
 {
-	std::cout << "W = " << __mat << std::endl;
+	std::cout << "W = " << _mat << std::endl;
 }
 
 template <class T>
 Layer <T> &Layer <T> ::operator+=(const Matrix <T> &M)
 {
-	__mat += M;
+	_mat += M;
 
 	return *this;
 }
@@ -304,7 +304,7 @@ Layer <T> operator+(const Layer <T> &L, const Matrix <T> &M)
 {
 	Layer <T> out = L;
 
-	out.__mat += M;
+	out._mat += M;
 
 	return out;
 }
@@ -314,7 +314,7 @@ Layer <T> operator-(const Layer <T> &L, const Matrix <T> &M)
 {
 	Layer <T> out = L;
 
-	out.__mat -= M;
+	out._mat -= M;
 
 	return out;
 }

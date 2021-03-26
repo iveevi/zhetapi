@@ -8,7 +8,7 @@ namespace zhetapi {
 
 	struct variable_cluster : public Token {
 
-		::std::string __cluster;
+		::std::string _cluster;
 
 		variable_cluster(const ::std::string & = "");
 

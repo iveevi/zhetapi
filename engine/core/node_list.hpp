@@ -15,7 +15,7 @@ class Engine;
 
 class node_list : public Token {
 protected:
-	std::vector <node>	__nodes;
+	std::vector <node>	_nodes;
 public:
 	node_list(const std::vector <node> &);
 

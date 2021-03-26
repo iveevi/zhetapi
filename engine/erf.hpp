@@ -33,23 +33,23 @@ public:
 	};
 
 	// TODO: Add a vector <double> constructor for JSON
-	__cuda_dual_prefix
+	__cuda_dual__
 	Erf();
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> compute(const Vector <T> &, const Vector <T> &) const;
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	virtual Vector <T> operator()(const Vector <T> &, const Vector <T> &) const;
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	virtual Erf *derivative() const;
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	int get_erf_type() const;
 
 	template <class U>
-	__cuda_dual_prefix
+	__cuda_dual__
 	friend Erf <U> *copy(Erf <U> *);
 
 	// Exceptions

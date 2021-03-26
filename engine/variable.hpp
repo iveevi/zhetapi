@@ -13,8 +13,8 @@
 namespace zhetapi {
 
 class Variable : public Token {
-	std::string	__symbol	= "";
-	Token *		__tptr		= nullptr;
+	std::string	_symbol	= "";
+	Token *		_tptr		= nullptr;
 public:
 	// Memory and initialization
 	Variable();

@@ -76,14 +76,14 @@ extern const Color GREY;
  */
 
 class Gradient {
-	Color		__base;
+	Color		_base;
 
-	long double	__dr	= 0;
-	long double	__dg	= 0;
-	long double	__db	= 0;
+	long double	_dr	= 0;
+	long double	_dg	= 0;
+	long double	_db	= 0;
 
-	long double	__start	= 0;
-	long double	__end	= 0;
+	long double	_start	= 0;
+	long double	_end	= 0;
 public:
 	Gradient(const Color &, const Color &,
 			long double = 0, long double = 1);

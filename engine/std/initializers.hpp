@@ -19,40 +19,40 @@ struct RandomInitializer {
 
 template <class T>
 struct LeCun {
-	std::default_random_engine		__gen;
-	std::normal_distribution <double>	__dbt;	
+	std::default_random_engine		_gen;
+	std::normal_distribution <double>	_dbt;	
 public:
-	explicit LeCun(size_t fan_in) : __gen(),
-			__dbt(0, sqrt(T(1) / fan_in)) {}
+	explicit LeCun(size_t fan_in) : _gen(),
+			_dbt(0, sqrt(T(1) / fan_in)) {}
 	
 	T operator()() {
-		return __dbt(__gen);
+		return _dbt(_gen);
 	}
 };
 
 template <class T>
 struct He {
-	std::default_random_engine		__gen;
-	std::normal_distribution <double>	__dbt;	
+	std::default_random_engine		_gen;
+	std::normal_distribution <double>	_dbt;	
 public:
-	explicit He(size_t fan_in) : __gen(),
-			__dbt(0, sqrt(T(2) / fan_in)) {}
+	explicit He(size_t fan_in) : _gen(),
+			_dbt(0, sqrt(T(2) / fan_in)) {}
 	
 	T operator()() {
-		return __dbt(__gen);
+		return _dbt(_gen);
 	}
 }; 
 
 template <class T>
 struct Xavier {
-	std::default_random_engine		__gen;
-	std::normal_distribution <double>	__dbt;	
+	std::default_random_engine		_gen;
+	std::normal_distribution <double>	_dbt;	
 public:
-	explicit Xavier(size_t fan_avg) : __gen(),
-			__dbt(0, sqrt(T(1) / fan_avg)) {}
+	explicit Xavier(size_t fan_avg) : _gen(),
+			_dbt(0, sqrt(T(1) / fan_avg)) {}
 	
 	T operator()() {
-		return __dbt(__gen);
+		return _dbt(_gen);
 	}
 }; 
 

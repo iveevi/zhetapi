@@ -8,7 +8,7 @@ namespace zhetapi {
 
 	struct variable_holder : public Token {
 
-		::std::string __symbol;
+		::std::string _symbol;
 
 		variable_holder(const ::std::string & = "");
 
@@ -20,7 +20,7 @@ namespace zhetapi {
 	};
 
 	variable_holder::variable_holder(const ::std::string &str) :
-		__symbol(str) {}
+		_symbol(str) {}
 
 	Token::type variable_holder::caller() const
 	{
@@ -29,12 +29,12 @@ namespace zhetapi {
 
 	Token *variable_holder::copy() const
 	{
-		return new variable_holder(__symbol);
+		return new variable_holder(_symbol);
 	}
 
 	::std::string variable_holder::str() const
 	{
-		return "\"" + __symbol + "\"";
+		return "\"" + _symbol + "\"";
 	}
 
 	bool variable_holder::operator==(Token *tptr) const
@@ -44,7 +44,7 @@ namespace zhetapi {
 		if (vcl == nullptr)
 			return false;
 
-		return vcl->__symbol == __symbol;
+		return vcl->_symbol == _symbol;
 	}
 
 }

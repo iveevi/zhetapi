@@ -20,11 +20,11 @@
 #include <cuda/essentials.cuh>
 
 // A is class name, T is the type (template), L is the loader function
-#define __zhp_register_activation(A, T, L)			\
+#define _zhp_register_activation(A, T, L)			\
 	zhetapi::ml::Activation <T>				\
-	::__act_loaders_id[typeid(A <T>).name()] = L;		\
+	::_act_loaders_id[typeid(A <T>).name()] = L;		\
 	zhetapi::ml::Activation <T>				\
-	::__act_loaders_name[#A] = L;
+	::_act_loaders_name[#A] = L;
 
 namespace zhetapi {
 
@@ -52,25 +52,25 @@ public:
 		AT_Sigmoid
 	};
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation();						// Default constructor
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation(activation_type);				// Type constructor
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation(const std::vector <T> &);			// Argument constructor
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation(activation_type, const std::vector <T> &);	// Type and argument constructor
 
 	virtual Activation *copy() const;
 	
 	// Computation
-	__cuda_dual_prefix
+	__cuda_dual__
 	virtual Vector <T> compute(const Vector <T> &) const;
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &) const;
 
 	// Saving
@@ -83,52 +83,52 @@ public:
 	static Activation <T> *load(std::ifstream &);
 	static Activation <T> *load(const std::string &, const std::vector <T> &);
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	virtual Activation *derivative() const;
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	int get_activation_type() const;
 
 	template <class U>
-	__cuda_dual_prefix
+	__cuda_dual__
 	friend Activation <U> *copy(Activation <U> *);
 
 	// Global list of all registered activations
-	static std::map <std::string, Loader <T>> __act_loaders_id;
-	static std::map <std::string, Loader <T>> __act_loaders_name;
+	static std::map <std::string, Loader <T>> _act_loaders_id;
+	static std::map <std::string, Loader <T>> _act_loaders_name;
 
 	// Exceptions
 	class undefined_loader {};
 protected:
 	// Arguments, empty by default
-	std::vector <T>	__args = {};
+	std::vector <T>	_args = {};
 
-	activation_type	__kind = AT_Default;
+	activation_type	_kind = AT_Default;
 };
 
 
 template <class T>
-std::map <std::string, Loader <T>> Activation <T> ::__act_loaders_id;
+std::map <std::string, Loader <T>> Activation <T> ::_act_loaders_id;
 
 template <class T>
-std::map <std::string, Loader <T>> Activation <T> ::__act_loaders_name;
+std::map <std::string, Loader <T>> Activation <T> ::_act_loaders_name;
 
 #ifndef ZHP_CUDA
 
 // Constructors
 template <class T>
-Activation <T> ::Activation() : __kind(AT_Default) {}
+Activation <T> ::Activation() : _kind(AT_Default) {}
 
 template <class T>
-Activation <T> ::Activation(activation_type kind) : __kind(kind) {}
+Activation <T> ::Activation(activation_type kind) : _kind(kind) {}
 
 template <class T>
-Activation <T> ::Activation(const std::vector <T> &args) : __args(args),
-		__kind(AT_Default) {}
+Activation <T> ::Activation(const std::vector <T> &args) : _args(args),
+		_kind(AT_Default) {}
 
 template <class T>
 Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
-		: __args(args), __kind(kind) {}
+		: _args(args), _kind(kind) {}
 
 template <class T>
 Activation <T> *Activation <T> ::copy() const
@@ -168,12 +168,12 @@ void Activation <T> ::write_type(std::ofstream &fout) const
 template <class T>
 void Activation <T> ::write_args(std::ofstream &fout) const
 {
-	size_t argc = __args.size();
+	size_t argc = _args.size();
 
 	fout.write((char *) &argc, sizeof(size_t));
 	
 	for (size_t i = 0; i < argc; i++)
-		fout.write((char *) &(__args[i]), sizeof(T));
+		fout.write((char *) &(_args[i]), sizeof(T));
 }
 
 template <class T>
@@ -210,10 +210,10 @@ Activation <T> *Activation <T> ::load(std::ifstream &fin)
 		args.push_back(t);
 	}
 
-	if (__act_loaders_id.find(name) == __act_loaders_id.end())
+	if (_act_loaders_id.find(name) == _act_loaders_id.end())
 		throw undefined_loader();
 
-	Loader <T> loader = __act_loaders_id[name];
+	Loader <T> loader = _act_loaders_id[name];
 
 	delete[] aname;
 
@@ -223,10 +223,10 @@ Activation <T> *Activation <T> ::load(std::ifstream &fin)
 template <class T>
 Activation <T> *Activation <T> ::load(const std::string &name, const std::vector <T> &args)
 {
-	if (__act_loaders_name.find(name) == __act_loaders_name.end())
+	if (_act_loaders_name.find(name) == _act_loaders_name.end())
 		throw undefined_loader();
 	
-	Loader <T> loader = __act_loaders_name[name];
+	Loader <T> loader = _act_loaders_name[name];
 
 	return loader(args);
 }
@@ -241,7 +241,7 @@ Activation <T> *Activation <T> ::derivative() const
 template <class T>
 int Activation <T> ::get_activation_type() const
 {
-	return __kind;
+	return _kind;
 }
 
 #endif

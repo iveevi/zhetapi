@@ -11,10 +11,10 @@ namespace zhetapi {
 
 class node_reference : public Token {
 protected:
-	node *		__ref;
-	std::string	__symbol;
-	size_t		__index;
-	bool		__var;
+	node *		_ref;
+	std::string	_symbol;
+	size_t		_index;
+	bool		_var;
 public:
 	node_reference(node *, const ::std::string &, size_t, bool = false);
 

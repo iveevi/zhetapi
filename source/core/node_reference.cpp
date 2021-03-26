@@ -5,32 +5,32 @@ namespace zhetapi {
 bool node_reference::address = true;
 
 node_reference::node_reference(node *ref, const ::std::string &str, size_t
-		idx, bool var) : __ref(ref), __symbol(str),
-	__index(idx), __var(var) {}
+		idx, bool var) : _ref(ref), _symbol(str),
+	_index(idx), _var(var) {}
 
 node *node_reference::get()
 {
-	return __ref;
+	return _ref;
 }
 
 const node &node_reference::get() const
 {
-	return *__ref;
+	return *_ref;
 }
 
 size_t node_reference::index() const
 {
-	return __index;
+	return _index;
 }
 
 const ::std::string &node_reference::symbol() const
 {
-	return __symbol;
+	return _symbol;
 }
 
 bool node_reference::is_variable() const
 {
-	return __var;
+	return _var;
 }
 
 Token::type node_reference::caller() const
@@ -40,7 +40,7 @@ Token::type node_reference::caller() const
 
 Token *node_reference::copy() const
 {
-	return new node_reference(__ref, __symbol, __index, __var);
+	return new node_reference(_ref, _symbol, _index, _var);
 }
 
 std::string node_reference::str() const
@@ -48,9 +48,9 @@ std::string node_reference::str() const
 	std::ostringstream oss;
 
 	if (address)
-		oss << "ndr-\"" << __symbol << "\" points to " << __ref;
+		oss << "ndr-\"" << _symbol << "\" points to " << _ref;
 	else
-		oss << "ndr-\"" << __symbol << "\"";
+		oss << "ndr-\"" << _symbol << "\"";
 
 	return oss.str();
 }
@@ -62,7 +62,7 @@ bool node_reference::operator==(Token *tptr) const
 	if (ndr == nullptr)
 		return false;
 
-	return (ndr->__symbol == __symbol);
+	return (ndr->_symbol == _symbol);
 }
 
 }

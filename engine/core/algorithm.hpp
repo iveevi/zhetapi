@@ -15,12 +15,12 @@ class node_manager;
 
 // Algorithm class
 class algorithm : public Token {
-	std::string			__ident		= "";
-	std::string			__alg		= "";
+	std::string			_ident		= "";
+	std::string			_alg		= "";
 
-	std::vector <std::string>	__args		= {};
+	std::vector <std::string>	_args		= {};
 
-	node_manager			__compiled	= node_manager();
+	node_manager			_compiled	= node_manager();
 	
 	void generate(Engine *, std::string str, node_manager &);
 public:

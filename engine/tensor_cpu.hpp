@@ -1,95 +1,95 @@
 template <class T>
 Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
-		: __dims(dim.size())
+		: _dims(dim.size())
 {
 
-#ifdef __CUDA_ARCH__
+#ifdef _CUDA_ARCH_
 
-	__on_device = false;
+	_on_device = false;
 
 #endif
 
-	__dim = new size_t[__dims];
+	_dim = new size_t[_dims];
 
 	size_t prod = 1;
-	for (size_t i = 0; i < __dims; i++) {
+	for (size_t i = 0; i < _dims; i++) {
 		prod *= dim[i];
 
-		__dim[i] = dim[i];
+		_dim[i] = dim[i];
 	}
 
-	__size = prod;
+	_size = prod;
 
-	if (__size <= 0)
+	if (_size <= 0)
 		throw bad_dimensions();
 
-	if (arr.size() != __size)
+	if (arr.size() != _size)
 		throw dimension_mismatch();
 
-	__array = new T[prod];
+	_array = new T[prod];
 
 	for (size_t i = 0; i < prod; i++)
-		__array[i] = arr[i];
+		_array[i] = arr[i];
 }
 
 template <class T>
 Tensor <T> ::Tensor(const std::vector <size_t> &dim)
-		: __dims(dim.size())
+		: _dims(dim.size())
 {
-	__dim = new size_t[__dims];
+	_dim = new size_t[_dims];
 
 	size_t prod = 1;
-	for (size_t i = 0; i < __dims; i++) {
+	for (size_t i = 0; i < _dims; i++) {
 		prod *= dim[i];
 
-		__dim[i] = dim[i];
+		_dim[i] = dim[i];
 	}
 
-	__size = prod;
+	_size = prod;
 
-	if (!__size)
+	if (!_size)
 		return;
 
-	__array = new T[prod];
+	_array = new T[prod];
 }
 
 template <class T>
 Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
-		: __dims(dim.size())
+		: _dims(dim.size())
 {
-	__dim = new size_t[__dims];
+	_dim = new size_t[_dims];
 
 	size_t prod = 1;
-	for (size_t i = 0; i < __dims; i++) {
+	for (size_t i = 0; i < _dims; i++) {
 		prod *= dim[i];
 
-		__dim[i] = dim[i];
+		_dim[i] = dim[i];
 	}
 
-	__size = prod;
+	_size = prod;
 
-	if (!__size)
+	if (!_size)
 		return;
 
-	__array = new T[prod];
+	_array = new T[prod];
 
 	for (size_t i = 0; i < prod; i++)
-		__array[i] = def;
+		_array[i] = def;
 }
 
 template <class T>
 bool Tensor <T> ::good() const
 {
-	return __array != nullptr;
+	return _array != nullptr;
 }
 
 // Actions
 template <class T>
 void Tensor <T> ::nullify(long double p, const Interval <1> &i)
 {
-	for (size_t k = 0; k < __size; k++) {
+	for (size_t k = 0; k < _size; k++) {
 		if (p > i.uniform())
-			__array[k] = T(0);
+			_array[k] = T(0);
 	}
 }
 
@@ -99,11 +99,11 @@ T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
 {
 	size_t full = 0;
 
-	assert(indices.size() == __dims);
-	for (size_t i = 0; i < __dims; i++)
-		full += indices[i] * __dim[__dims - (i + 1)];
+	assert(indices.size() == _dims);
+	for (size_t i = 0; i < _dims; i++)
+		full += indices[i] * _dim[_dims - (i + 1)];
 	
-	return __array[full];
+	return _array[full];
 }
 
 template <class T>
@@ -111,26 +111,26 @@ const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
 {
 	size_t full = 0;
 
-	assert(indices.size() == __dims);
-	for (size_t i = 0; i < __dims; i++)
-		full += indices[i] * __dim[__dims - (i + 1)];
+	assert(indices.size() == _dims);
+	for (size_t i = 0; i < _dims; i++)
+		full += indices[i] * _dim[_dims - (i + 1)];
 	
-	return __array[full];
+	return _array[full];
 }
 
 // Arithmetic
 template <class T>
 void Tensor <T> ::operator*=(const T &x)
 {
-	for (size_t i = 0; i < __size; i++)
-		__array[i] *= x;
+	for (size_t i = 0; i < _size; i++)
+		_array[i] *= x;
 }
 
 template <class T>
 void Tensor <T> ::operator/=(const T &x)
 {
-	for (size_t i = 0; i < __size; i++)
-		__array[i] /= x;
+	for (size_t i = 0; i < _size; i++)
+		_array[i] /= x;
 }
 
 // Printing functions
@@ -164,7 +164,7 @@ std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
-	os << print(ts.__array, ts.__size, ts.__dim, 0, ts.__dims - 1);
+	os << print(ts._array, ts._size, ts._dim, 0, ts._dims - 1);
 
 	return os;
 }

@@ -15,9 +15,9 @@
 #include <core/operation.hpp>
 #include <core/types.hpp>
 
-// TODO: Fix these macros to accomodate for __table instead of ops
+// TODO: Fix these macros to accomodate for _table instead of ops
 // Instead of a macro use a private method (clearner code and header)
-#define __add_binary_operation(str, A, B, O)							\
+#define _add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -43,11 +43,11 @@
 			}									\
 	});
 
-#define __add_heterogenous_binary_operation(str, A, B, O)					\
-	__add_binary_operation(str, A, B, O)							\
-	__add_binary_operation(str, B, A, O)
+#define _add_heterogenous_binary_operation(str, A, B, O)					\
+	_add_binary_operation(str, A, B, O)							\
+	_add_binary_operation(str, B, A, O)
 
-#define __add_binary_operation_ftr(str, A, B, O, ftr)						\
+#define _add_binary_operation_ftr(str, A, B, O, ftr)						\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -71,7 +71,7 @@
 			}									\
 	});
 
-#define __add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)				\
+#define _add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)				\
 	ops.push_back({										\
 			{									\
 				::std::string(#str),						\
@@ -118,32 +118,32 @@
 			}									\
 	});
 
-#define __add_binary_operation_set(str)								\
-	__add_binary_operation(str, Z, Z, Z);							\
-	__add_binary_operation(str, R, R, R);							\
-	__add_binary_operation(str, Q, Q, Q);							\
-	__add_binary_operation(str, CR, CR, CR);						\
-	__add_binary_operation(str, CQ, CQ, CQ);						\
+#define _add_binary_operation_set(str)								\
+	_add_binary_operation(str, Z, Z, Z);							\
+	_add_binary_operation(str, R, R, R);							\
+	_add_binary_operation(str, Q, Q, Q);							\
+	_add_binary_operation(str, CR, CR, CR);						\
+	_add_binary_operation(str, CQ, CQ, CQ);						\
 												\
-	__add_heterogenous_binary_operation(str, R, Z, R);					\
-	__add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
-	__add_heterogenous_binary_operation(str, R, Q, R);					\
-	__add_heterogenous_binary_operation(str, R, CR, CR);					\
-	__add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str			\
+	_add_heterogenous_binary_operation(str, R, Z, R);					\
+	_add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
+	_add_heterogenous_binary_operation(str, R, Q, R);					\
+	_add_heterogenous_binary_operation(str, R, CR, CR);					\
+	_add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str			\
 				R(b->get().real()), R(b->get().imag())));			\
-	__add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	__add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	__add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get())			\
+	_add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get())			\
 				str b->get().real(), b->get().imag()));				\
-	__add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	__add_heterogenous_binary_operation_ftr(str, CR, CQ, CR,				\
+	_add_heterogenous_binary_operation_ftr(str, CR, CQ, CR,				\
 			CR(a->get().real() str (R) b->get().real(),				\
 				a->get().imag() str (R) b->get().imag()));
 
-#define __add_unary_operation(str, I, O)							\
+#define _add_unary_operation(str, I, O)							\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -163,7 +163,7 @@
 			}									\
 	});
 
-#define __add_unary_operation_ftr(str, I, O, ftr)						\
+#define _add_unary_operation_ftr(str, I, O, ftr)						\
 	ops.push_back({										\
 			{									\
 				std::string(#str),						\
@@ -195,7 +195,7 @@ using overloads = std::vector <std::pair <signature, Token *>>;
 
 // Class for storing overloads
 class engine_base {
-	symtab <overloads>	__overloads;
+	symtab <overloads>	_overloads;
 
 	// Private methods
 	std::string gen_overload_msg(const signature &, const std::string &);

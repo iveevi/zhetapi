@@ -12,8 +12,8 @@ class wildcard : public Token {
 public:
 	using predicate = bool (*)(lbl);
 private:
-	std::string	__symbol	= "";
-	predicate	__pred		= nullptr;
+	std::string	_symbol	= "";
+	predicate	_pred		= nullptr;
 public:
 	wildcard(const std::string &, predicate);
 

@@ -7,15 +7,15 @@ namespace zhetapi {
 lvalue::lvalue() {}
 
 lvalue::lvalue(const std::string &symbol, Engine *context)
-		: __symbol(symbol), __context(context) {}
+		: _symbol(symbol), _context(context) {}
 
 void lvalue::assign(Token *tptr)
 {
-	Token *self = __context->get(__symbol);
+	Token *self = _context->get(_symbol);
 
 	// Assumes either function or variable (variable for now)
 	if (self->caller() == var)
-		__context->put(Variable(tptr, __symbol));
+		_context->put(Variable(tptr, _symbol));
 }
 
 Token::type lvalue::caller() const
@@ -25,12 +25,12 @@ Token::type lvalue::caller() const
 
 Token *lvalue::copy() const
 {
-	return new lvalue(__symbol, __context);
+	return new lvalue(_symbol, _context);
 }
 
 std::string lvalue::str() const
 {
-	return "lvalue-\"" + __symbol + "\"";
+	return "lvalue-\"" + _symbol + "\"";
 }
 
 bool lvalue::operator==(Token *tptr) const
@@ -40,8 +40,8 @@ bool lvalue::operator==(Token *tptr) const
 	if (lv == nullptr)
 		return false;
 
-	return (lv->__symbol == __symbol)
-		&& (lv->__context == __context);
+	return (lv->_symbol == _symbol)
+		&& (lv->_context == _context);
 }
 
 }

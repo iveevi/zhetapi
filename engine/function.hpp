@@ -14,10 +14,10 @@
 namespace zhetapi {
 
 class Function : public Token {
-	std::string			__symbol;
-	std::vector <std::string>	__params;
-	node_manager			__manager;
-	size_t				__threads;
+	std::string			_symbol;
+	std::vector <std::string>	_params;
+	node_manager			_manager;
+	size_t				_threads;
 public:
 	Function();
 	Function(const char *);
@@ -90,9 +90,9 @@ Token *Function::operator()(A ... args)
 
 	gather(tokens, args...);
 
-	assert(tokens.size() == __params.size());
+	assert(tokens.size() == _params.size());
 
-	return __manager.substitute_and_compute(tokens, __threads);
+	return _manager.substitute_and_compute(tokens, _threads);
 }
 
 // Gathering facilities

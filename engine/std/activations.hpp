@@ -34,16 +34,16 @@ namespace ml {
 // Linear activation class
 template <class T>
 class Linear : public Activation <T> {
-	T	__alpha;
+	T	_alpha;
 public:
 	
-	__cuda_dual_prefix
-	Linear(const T &alpha = T(1)) : __alpha(alpha),
+	__cuda_dual__
+	Linear(const T &alpha = T(1)) : _alpha(alpha),
 			Activation <T> (Activation <T> ::AT_Linear, {alpha}) {}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation <T> *copy() const {
-		return new Linear <T> (__alpha);
+		return new Linear <T> (_alpha);
 	}
 
 #ifndef ZHP_CUDA
@@ -51,29 +51,29 @@ public:
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
-				return x[i] * __alpha;
+				return x[i] * _alpha;
 			}
 		);
 	}
 
 	Activation <T> *derivative() const {
-		return new __DLinear <T> (__alpha);
+		return new _DLinear <T> (_alpha);
 	}
 
 #else
 	
-	__host__ __device__
+	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
-			[x, this] __host__ __device__ (size_t i) {
-				return x[i] * __alpha;
+			[x, this] _host_ _device_ (size_t i) {
+				return x[i] * _alpha;
 			}
 		);
 	}
 
-	__host__ __device__
+	_host_ _device_
 	Activation <T> *derivative() const {
-		return new __DLinear <T> (__alpha);
+		return new _DLinear <T> (_alpha);
 	}
 
 #endif
@@ -84,10 +84,10 @@ template <class T>
 class ReLU : public Activation <T> {
 public:
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	ReLU() : Activation <T> (Activation <T> ::AT_ReLU, {}) {}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation <T> *copy() const {
 		return new ReLU();
 	}
@@ -103,23 +103,23 @@ public:
 	}
 
 	Activation <T> *derivative() const {
-		return new __DReLU <T> ();
+		return new _DReLU <T> ();
 	}
 
 #else
 	
-	__host__ __device__
+	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
-			[x] __host__ __device__ (size_t i) {
+			[x] _host_ _device_ (size_t i) {
 				return (x[i] > 0) ? x[i] : 0;
 			}
 		);
 	}
 
-	__host__ __device__
+	_host_ _device_
 	Activation <T> *derivative() const {
-		return new __DReLU <T> ();
+		return new _DReLU <T> ();
 	}
 
 #endif
@@ -128,27 +128,27 @@ public:
 
 template <class T>
 class LeakyReLU : public Activation <T> {
-	T	__alpha;
+	T	_alpha;
 public:
-	__cuda_dual_prefix
+	__cuda_dual__
 	LeakyReLU(const T &alpha = 1) :
 			Activation <T> (Activation <T> ::AT_ReLU, {alpha}) {}
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation <T> *copy() const {
-		return new LeakyReLU <T> (__alpha);
+		return new LeakyReLU <T> (_alpha);
 	}
 
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
 			[&](size_t i) {
-				return (x[i] > 0) ? x[i] : __alpha * x[i];
+				return (x[i] > 0) ? x[i] : _alpha * x[i];
 			}
 		);
 	}
 
 	Activation <T> *derivative() const {
-		return new __DLeakyReLU <T> (__alpha);
+		return new _DLeakyReLU <T> (_alpha);
 	}
 };
 
@@ -156,10 +156,10 @@ template <class T>
 class Sigmoid : public Activation <T> {
 public:
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Sigmoid() : Activation <T> (Activation <T> ::AT_Sigmoid, {}) {}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation <T> *copy() const {
 		return new Sigmoid();
 	}
@@ -175,23 +175,23 @@ public:
 	}
 
 	Activation <T> *derivative() const {
-		return new __DSigmoid <T> ();
+		return new _DSigmoid <T> ();
 	}
 
 #else
 
-	__host__ __device__
+	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
-			[x] __host__ __device__ (size_t i) { 
+			[x] _host_ _device_ (size_t i) { 
 				return 1/(1 + exp(-x[i]));
 			}
 		);
 	}
 
-	__host__ __device__
+	_host_ _device_
 	Activation <T> *derivative() const {
-		return new __DSigmoid <T> ();
+		return new _DSigmoid <T> ();
 	}
 
 #endif
@@ -200,17 +200,17 @@ public:
 
 template <class T>
 class ScaledSigmoid : public Activation <T> {
-	T	__alpha;
+	T	_alpha;
 public:
-	ScaledSigmoid(const T &alpha) : __alpha(alpha) {}
+	ScaledSigmoid(const T &alpha) : _alpha(alpha) {}
 
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(), [&](size_t i) {return
-				__scaled_sigmoid(x[i], __alpha);});
+				_scaled_sigmoid(x[i], _alpha);});
 	}
 
 	Activation <T> *derivative() const {
-		return new __DScaledSigmoid <T> (__alpha);
+		return new _DScaledSigmoid <T> (_alpha);
 	}
 };
 
@@ -219,7 +219,7 @@ class Softmax : public Activation <T> {
 public:
 	Softmax() : Activation <T> ({}) {}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Activation <T> *copy() const {
 		return new Softmax();
 	}
@@ -242,7 +242,7 @@ public:
 	}
 
 	Activation <T> *derivative() const {
-		return new __DSoftmax <T> ();
+		return new _DSoftmax <T> ();
 	}
 };
 
@@ -272,32 +272,32 @@ public:
 #warning "The derivative for the SoftmaxInterval activation has not yet been properly configured."
 
 	Activation <T> *derivative() const {
-		return new __DSoftmax <T> ();
+		return new _DSoftmax <T> ();
 	}
 };
 
 template <class T>
 void ZhetapiInit()
 {
-	__zhp_register_activation(Linear, T, load_linear <T>);
-	__zhp_register_activation(ReLU, T, load_relu <T>);
-	__zhp_register_activation(Sigmoid, T, load_sigmoid <T>);
-	__zhp_register_activation(Softmax, T, load_softmax <T>);
+	_zhp_register_activation(Linear, T, load_linear <T>);
+	_zhp_register_activation(ReLU, T, load_relu <T>);
+	_zhp_register_activation(Sigmoid, T, load_sigmoid <T>);
+	_zhp_register_activation(Softmax, T, load_softmax <T>);
 }
 
 // TODO: Make a more generalized version,
 // which will also work on the gpu (the issues is virtual
-// functions; maybe returning a __host__ __device__
+// functions; maybe returning a _host_ _device_
 // function pointer for computation will work)
 template <class T>
-__cuda_dual_prefix
+__cuda_dual__
 Activation <T> *copy(Activation <T> *act)
 {
-	switch (act->__kind) {
+	switch (act->_kind) {
 	case Activation <T> ::AT_Default:
 		return new Activation <T> ();
 	case Activation <T> ::AT_Linear:
-		// TODO: Try to transfer __alpha content
+		// TODO: Try to transfer _alpha content
 		return new Linear <T> ();
 	case Activation <T> ::AT_ReLU:
 		return new ReLU <T> ();

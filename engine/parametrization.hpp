@@ -11,14 +11,14 @@ namespace zhetapi {
 
 template <class T, class P, class F>
 class Parametrization {
-	T	__start;
-	T	__end;
+	T	_start;
+	T	_end;
 
-	T	__pos;			// Current position
-	T	__inc;			// Increment
+	T	_pos;			// Current position
+	T	_inc;			// Increment
 
-	P	__par;			// Single variable vector function
-	F	__ftn;			// Multivariable vector function
+	P	_par;			// Single variable vector function
+	F	_ftn;			// Multivariable vector function
 public:
 	Parametrization(F, P, T, T);
 
@@ -39,39 +39,39 @@ const size_t Parametrization <T, P, F> ::partition_size = 1000;
 // Constructors
 template <class T, class P, class F>
 Parametrization <T, P, F> ::Parametrization(F ftn, P par, T start, T end)
-		: __ftn(ftn), __par(par),
-		__start(start), __end(end),
-		__pos(start)
+		: _ftn(ftn), _par(par),
+		_start(start), _end(end),
+		_pos(start)
 {
-	__inc = (end - start) / (T) partition_size;
+	_inc = (end - start) / (T) partition_size;
 }
 
 template <class T, class P, class F>
 Vector <T> Parametrization <T, P, F> ::value() const
 {
-	return __ftn(__par(__pos));
+	return _ftn(_par(_pos));
 }
 
 template <class T, class P, class F>
 Vector <T> Parametrization <T, P, F> ::pos() const
 {
-	return __par(__pos);
+	return _par(_pos);
 }
 
 template <class T, class P, class F>
 Vector <T> Parametrization <T, P, F> ::dpos() const
 {
-	return (__par(__pos + __inc) - __par(__pos))/__inc;
+	return (_par(_pos + _inc) - _par(_pos))/_inc;
 }
 
 template <class T, class P, class F>
 bool Parametrization <T, P, F> ::step()
 {
-	__pos += __inc;
+	_pos += _inc;
 
 	// Cycle back to the start;
-	if (__pos > __end) {
-		__pos = __start;
+	if (_pos > _end) {
+		_pos = _start;
 
 		return true;
 	}
@@ -82,7 +82,7 @@ bool Parametrization <T, P, F> ::step()
 template <class T, class P, class F>
 void Parametrization <T, P, F> ::reset()
 {
-	__pos = __start;
+	_pos = _start;
 }
 
 }

@@ -3,40 +3,40 @@ Tensor <T> ::Tensor() {}
 
 template <class T>
 Tensor <T> ::Tensor(const Tensor <T> &other)
-		: __size(other.__size),
-		__dims(other.__dims)
+		: _size(other._size),
+		_dims(other._dims)
 {
-	__dim = new size_t[__dims];
-	memcpy(__dim, other.__dim, sizeof(size_t) * __dims);
+	_dim = new size_t[_dims];
+	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
 
-	__array = new T[__size];
-	memcpy(__array, other.__array, sizeof(T) * __size);
+	_array = new T[_size];
+	memcpy(_array, other._array, sizeof(T) * _size);
 }
 
 template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
-		: __size(rows * cols),
-		__dims(2)
+		: _size(rows * cols),
+		_dims(2)
 {
-	__dim = new size_t[2];
-	__dim[0] = rows;
-	__dim[1] = cols;
+	_dim = new size_t[2];
+	_dim[0] = rows;
+	_dim[1] = cols;
 
-	__array = new T[__size];
+	_array = new T[_size];
 }
 
 template <class T>
 Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 {
 	if (this != &other) {
-		__dims = other.__dims;
-		__size = other.__size;
+		_dims = other._dims;
+		_size = other._size;
 		
-		__dim = new size_t[__dims];
-		memcpy(__dim, other.__dim, sizeof(size_t) * __dims);
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
 
-		__array = new T[__size];
-		memcpy(__array, other.__array, sizeof(T) * __size);
+		_array = new T[_size];
+		memcpy(_array, other._array, sizeof(T) * _size);
 	}
 
 	return *this;
@@ -51,23 +51,23 @@ Tensor <T> ::~Tensor()
 template <class T>
 void Tensor <T> ::clear()
 {
-	if (!__array && !__dim)
+	if (!_array && !_dim)
 		return;
 
-	if (__dim)
-		delete[] __dim;
+	if (_dim)
+		delete[] _dim;
 
-	if (__array && !__sliced)
-		delete[] __array;
+	if (_array && !_sliced)
+		delete[] _array;
 
-	__array = nullptr;
-	__dim = nullptr;
+	_array = nullptr;
+	_dim = nullptr;
 }
 
 template <class T>
 size_t Tensor <T> ::size() const
 {
-	return __size;
+	return _size;
 }
 
 
@@ -75,11 +75,11 @@ size_t Tensor <T> ::size() const
 template <class T>
 bool operator==(const Tensor <T> &a, const Tensor <T> &b)
 {
-	if (a.__size != b.__size)
+	if (a._size != b._size)
 		return false;
 
-	for (size_t i = 0; i < a.__size; i++) {
-		if (a.__array[i] != b.__array[i])
+	for (size_t i = 0; i < a._size; i++) {
+		if (a._array[i] != b._array[i])
 			return false;
 	}
 

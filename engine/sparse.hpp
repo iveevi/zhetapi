@@ -12,11 +12,11 @@ namespace zhetapi {
 template <class T>
 class SparseMatrix {
 	struct elem {
-		elem *	__next = nullptr;	// Next element
-		size_t	__ci = 0;		// Column index
+		elem *	_next = nullptr;	// Next element
+		size_t	_ci = 0;		// Column index
 	};
 
-	elem **	__rows = nullptr;
+	elem **	_rows = nullptr;
 public:
 	SparseMatrix();
 	SparseMatrix(const Matrix <T> &, T);
@@ -31,9 +31,9 @@ SparseMatrix <T> ::SparseMatrix(const Matrix <T> &mat, T exc)
 	size_t rs = mat.get_rows();
 	size_t cs = mat.get_cols();
 
-	__rows = new elem[rs];
+	_rows = new elem[rs];
 	for (size_t i = 0; i < rs; i++) {
-		__rows[i] = new elem;
+		_rows[i] = new elem;
 
 		for (size_t i = 0; i < cs; i++) {
 

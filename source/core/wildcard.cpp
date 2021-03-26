@@ -3,7 +3,7 @@
 namespace zhetapi {
 
 wildcard::wildcard(const std::string &str, predicate pred)
-		: __symbol(str), __pred(pred) {}
+		: _symbol(str), _pred(pred) {}
 
 Token::type wildcard::caller() const
 {
@@ -12,12 +12,12 @@ Token::type wildcard::caller() const
 
 Token *wildcard::copy() const
 {
-	return new wildcard(__symbol, __pred);
+	return new wildcard(_symbol, _pred);
 }
 
 std::string wildcard::str() const
 {
-	return "w-\"" + __symbol + "\"";
+	return "w-\"" + _symbol + "\"";
 }
 
 bool wildcard::operator==(Token *tptr) const

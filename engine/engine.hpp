@@ -13,13 +13,13 @@ namespace zhetapi {
 
 class Engine : public engine_base {
 	// Broader scope
-	Engine *		__stack = nullptr;
+	Engine *		_stack = nullptr;
 
-	symtab <Variable>	__var_table;
-	symtab <Function>	__ftr_table;
+	symtab <Variable>	_var_table;
+	symtab <Function>	_ftr_table;
 
-	symtab <Registrable>	__reg_table;
-	symtab <algorithm>	__alg_table;
+	symtab <Registrable>	_reg_table;
+	symtab <algorithm>	_alg_table;
 
 	// Private methods
 	void set_origin_stack(Engine *);

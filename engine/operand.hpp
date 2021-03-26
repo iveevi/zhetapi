@@ -12,7 +12,7 @@ namespace zhetapi {
 // Operand class
 template <class T>
 class Operand : public Token {
-	T	__val = T();
+	T	_val = T();
 public:
 	Operand();
 	Operand(const T &);
@@ -38,16 +38,16 @@ template <class T>
 Operand <T> ::Operand () {}
 
 template <class T>
-Operand <T> ::Operand(const T &data) : __val(data) {}
+Operand <T> ::Operand(const T &data) : _val(data) {}
 
 template <class T>
-Operand <T> ::Operand(const Operand &other) : __val(other.__val) {}
+Operand <T> ::Operand(const Operand &other) : _val(other._val) {}
 
 template <class T>
 Operand <T> &Operand <T> ::operator=(const Operand &other)
 {
 	if (this != &other)
-		__val = other.__val;
+		_val = other._val;
 
 	return *this;
 }
@@ -56,19 +56,19 @@ Operand <T> &Operand <T> ::operator=(const Operand &other)
 template <class T>
 T &Operand <T> ::get()
 {
-	return __val;
+	return _val;
 }
 
 template <class T>
 const T &Operand <T> ::get() const
 {
-	return __val;
+	return _val;
 }
 
 template <class T>
 void Operand <T> ::set(const T &x)
 {
-	__val = x;
+	_val = x;
 }
 
 // Virtual overrides
@@ -83,7 +83,7 @@ std::string Operand <T> ::str() const
 {
 	std::ostringstream oss;
 
-	oss << __val;
+	oss << _val;
 
 	return oss.str();
 }
@@ -91,7 +91,7 @@ std::string Operand <T> ::str() const
 template <class T>
 Token *Operand <T> ::copy() const
 {
-	return new Operand(__val);
+	return new Operand(_val);
 }
 
 template <class T>
@@ -102,7 +102,7 @@ bool Operand <T> ::operator==(Token *tptr) const
 	if (opd == nullptr)
 		return false;
 
-	return (opd->__val == __val);
+	return (opd->_val == _val);
 }
 
 }

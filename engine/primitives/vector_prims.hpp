@@ -5,55 +5,55 @@ Vector <T> ::Vector(size_t len)
 template <class T>
 T &Vector <T> ::x()
 {
-	if (this->__size < 1)
+	if (this->_size < 1)
 		throw index_out_of_bounds();
 
-	return this->__array[0];
+	return this->_array[0];
 }
 
 template <class T>
 T &Vector <T> ::y()
 {
-	if (this->__size < 2)
+	if (this->_size < 2)
 		throw index_out_of_bounds();
 
-	return this->__array[1];
+	return this->_array[1];
 }
 
 template <class T>
 T &Vector <T> ::z()
 {
-	if (this->__size < 3)
+	if (this->_size < 3)
 		throw index_out_of_bounds();
 
-	return this->__array[2];
+	return this->_array[2];
 }
 
 template <class T>
 const T &Vector <T> ::x() const
 {
-	if (this->__size < 1)
+	if (this->_size < 1)
 		throw index_out_of_bounds();
 
-	return this->__array[0];
+	return this->_array[0];
 }
 
 template <class T>
 const T &Vector <T> ::y() const
 {
-	if (this->__size < 2)
+	if (this->_size < 2)
 		throw index_out_of_bounds();
 
-	return this->__array[1];
+	return this->_array[1];
 }
 
 template <class T>
 const T &Vector <T> ::z() const
 {
-	if (this->__size < 3)
+	if (this->_size < 3)
 		throw index_out_of_bounds();
 
-	return this->__array[2];
+	return this->_array[2];
 }
 
 template <class T>
@@ -65,11 +65,11 @@ T Vector <T> ::arg() const
 template <class T>
 T Vector <T> ::min() const
 {
-	T mn = this->__array[0];
+	T mn = this->_array[0];
 
-	for (size_t j = 1; j < this->__size; j++) {
-		if (mn > this->__array[j])
-			mn = this->__array[j];
+	for (size_t j = 1; j < this->_size; j++) {
+		if (mn > this->_array[j])
+			mn = this->_array[j];
 	}
 
 	return mn;
@@ -78,11 +78,11 @@ T Vector <T> ::min() const
 template <class T>
 T Vector <T> ::max() const
 {
-	T mx = this->__array[0];
+	T mx = this->_array[0];
 
-	for (size_t j = 1; j < this->__size; j++) {
-		if (mx < this->__array[j])
-			mx = this->__array[j];
+	for (size_t j = 1; j < this->_size; j++) {
+		if (mx < this->_array[j])
+			mx = this->_array[j];
 	}
 
 	return mx;
@@ -93,8 +93,8 @@ size_t Vector <T> ::imin() const
 {
 	size_t i = 0;
 
-	for (size_t j = 1; j < this->__size; j++) {
-		if (this->__array[i] > this->__array[j])
+	for (size_t j = 1; j < this->_size; j++) {
+		if (this->_array[i] > this->_array[j])
 			i = j;
 	}
 
@@ -106,8 +106,8 @@ size_t Vector <T> ::imax() const
 {
 	size_t i = 0;
 
-	for (size_t j = 1; j < this->__size; j++) {
-		if (this->__array[i] < this->__array[j])
+	for (size_t j = 1; j < this->_size; j++) {
+		if (this->_array[i] < this->_array[j])
 			i = j;
 	}
 
@@ -264,7 +264,7 @@ template <class T>
 Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
 {
 	// Switch between 2 and 3
-	assert((a.__size == 3) && (a.__size == 3));
+	assert((a._size == 3) && (a._size == 3));
 
 	return Vector <T> {
 		a[1] * b[2] - a[2] * b[1],
@@ -276,7 +276,7 @@ Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
 template <class T>
 Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 {
-	T *arr = new T[a.__dim[0] + b.__dim[0]];
+	T *arr = new T[a._dim[0] + b._dim[0]];
 
 	for (size_t i = 0; i < a.size(); i++)
 		arr[i] = a[i];
@@ -299,7 +299,7 @@ T inner(const Vector <T> &a, const Vector <T> &b)
 	T acc = 0;
 
 	assert(a.size() == b.size());
-	for (size_t i = 0; i < a.__size; i++)
+	for (size_t i = 0; i < a._size; i++)
 		acc += a[i] * b[i];
 
 	return acc;
@@ -311,7 +311,7 @@ T inner(const Vector <T> &a, const Vector <U> &b)
 	T acc = 0;
 
 	assert(a.size() == b.size());
-	for (size_t i = 0; i < a.__size; i++)
+	for (size_t i = 0; i < a._size; i++)
 		acc += (T) (a[i] * b[i]);	// Cast the result
 
 	return acc;
@@ -322,5 +322,5 @@ template <class T>
 Vector <T> Tensor <T> ::cast_to_vector() const
 {
 	// Return a slice-vector
-	return Vector <T> (__size, __array);
+	return Vector <T> (_size, _array);
 }

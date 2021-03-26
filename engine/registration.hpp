@@ -51,9 +51,9 @@ class Registrable : public Token {
 public:
 	using mapper = std::function <Token *(const std::vector <Token *> &)>;
 private:
-	mapper		__ftn;
+	mapper		_ftn;
 
-	std::string	__ident;
+	std::string	_ident;
 public:
 	Registrable();
 	Registrable(const Registrable &);

@@ -2,7 +2,7 @@
 #define MATRIX_H_
 
 // C/C++ headers
-#ifndef __AVR			// AVR support
+#ifndef _AVR			// AVR support
 
 #include <cassert>
 #include <cmath>
@@ -39,20 +39,20 @@
 #define inline_init_mat(mat, rs, cs)			\
 	Matrix <T> mat;					\
 							\
-	mat.__rows = rs;				\
-	mat.__cols = cs;				\
-	mat.__size = rs * cs;				\
+	mat._rows = rs;				\
+	mat._cols = cs;				\
+	mat._size = rs * cs;				\
 							\
-	mat.__array = new T[rs * cs];			\
+	mat._array = new T[rs * cs];			\
 							\
-	memset(mat.__array, 0, rs * cs * sizeof(T));	\
+	memset(mat._array, 0, rs * cs * sizeof(T));	\
 							\
-	mat.__dims = 2;					\
+	mat._dims = 2;					\
 							\
-	mat.__dim = new size_t[2];			\
+	mat._dim = new size_t[2];			\
 							\
-	mat.__dim[0] = rs;				\
-	mat.__dim[1] = cs;
+	mat._dim[0] = rs;				\
+	mat._dim[1] = cs;
 
 namespace zhetapi {
 template <class T>
@@ -68,32 +68,32 @@ template <class T>
 class Matrix : public Tensor <T> {
 protected:
 	// Remove later
-	size_t  __rows	= 0;
-	size_t  __cols	= 0;
+	size_t  _rows	= 0;
+	size_t  _cols	= 0;
 public:
-	__cuda_dual_prefix Matrix();
-	__cuda_dual_prefix Matrix(const Matrix &);
-	__cuda_dual_prefix Matrix(const Vector <T> &);
+	__cuda_dual__ Matrix();
+	__cuda_dual__ Matrix(const Matrix &);
+	__cuda_dual__ Matrix(const Vector <T> &);
 
 	// Scaled
-	__cuda_dual_prefix Matrix(const Matrix &, T);
+	__cuda_dual__ Matrix(const Matrix &, T);
 
-	__cuda_dual_prefix Matrix(size_t, size_t, T = T());
+	__cuda_dual__ Matrix(size_t, size_t, T = T());
 
 	// Cuda and avr ignore
-	__avr_ignore(Matrix(size_t, size_t, std::function <T (size_t)>);)
-	__avr_ignore(Matrix(size_t, size_t, std::function <T *(size_t)>);)
+	__avr_ignore__(Matrix(size_t, size_t, std::function <T (size_t)>);)
+	__avr_ignore__(Matrix(size_t, size_t, std::function <T *(size_t)>);)
 	
-	__avr_ignore(Matrix(size_t, size_t, std::function <T (size_t, size_t)>);)
-	__avr_ignore(Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);)
+	__avr_ignore__(Matrix(size_t, size_t, std::function <T (size_t, size_t)>);)
+	__avr_ignore__(Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);)
 
-	__avr_ignore(Matrix(const std::vector <T> &);)
-	__avr_ignore(Matrix(const std::vector <Vector <T>> &);)
-	__avr_ignore(Matrix(const std::vector <std::vector <T>> &);)
-	__avr_ignore(Matrix(const std::initializer_list <Vector <T>> &);)
-	__avr_ignore(Matrix(const std::initializer_list <std::initializer_list <T>> &);)
+	__avr_ignore__(Matrix(const std::vector <T> &);)
+	__avr_ignore__(Matrix(const std::vector <Vector <T>> &);)
+	__avr_ignore__(Matrix(const std::vector <std::vector <T>> &);)
+	__avr_ignore__(Matrix(const std::initializer_list <Vector <T>> &);)
+	__avr_ignore__(Matrix(const std::initializer_list <std::initializer_list <T>> &);)
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Matrix(size_t, size_t, T *, bool = true);
 
 	/* template <class A>
@@ -114,8 +114,8 @@ public:
 	Vector <T> get_column(size_t) const;
 
 	// Rading from a binary file (TODO: unignore later)
-	__avr_ignore(void write(std::ofstream &) const;)
-	__avr_ignore(void read(std::ifstream &);)
+	__avr_ignore__(void write(std::ofstream &) const;)
+	__avr_ignore__(void read(std::ifstream &);)
 
 	// Concatenating matrices
 	Matrix append_above(const Matrix &);
@@ -137,15 +137,15 @@ public:
 	void pow(const T &);
 
 	// Miscellanious opertions
-	__avr_ignore(void randomize(std::function <T ()>);)
+	__avr_ignore__(void randomize(std::function <T ()>);)
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	void row_shur(const Vector <T> &);
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	void stable_shur(const Matrix <T> &);
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	void stable_shur_relaxed(const Matrix <T> &);
 
 	// Values
@@ -163,9 +163,9 @@ public:
 
 	bool symmetric() const;
 
-	__avr_ignore(std::string display() const;)
+	__avr_ignore__(std::string display() const;)
 	
-#ifndef __AVR
+#ifndef _AVR
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
@@ -249,10 +249,10 @@ public:
 	friend Matrix <A> fmak(const Matrix <A> &, const Matrix <B> &, const Matrix <C> &, A, A);
 };
 
-// TODO use __CUDACC__ instead of __zhp_cuda and make _cuda files
+// TODO use _CUDACC_ instead of _zhp_cuda and make _cuda files
 #include <primitives/matrix_prims.hpp>
 
-#ifndef __AVR
+#ifndef _AVR
 
 #include <matrix_cpu.hpp>
 

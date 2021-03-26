@@ -2,7 +2,7 @@
 #define VECTOR_H_
 
 // C/C++ headers
-#ifdef __AVR	// AVR support
+#ifdef _AVR	// AVR support
 
 #ifdef max
 #undef max
@@ -36,7 +36,7 @@ namespace zhetapi {
 template <class T>
 class Vector;
 
-#ifndef __AVR	// Does not support AVR
+#ifndef _AVR	// Does not support AVR
 
 // Tensor_type operations
 template <class T>
@@ -62,8 +62,8 @@ class Vector : public Matrix <T> {
 public:
 	Vector(size_t);
 
-	__avr_ignore(Vector(const std::vector <T> &);)
-	__avr_ignore(Vector(const std::initializer_list <T> &);)
+	__avr_ignore__(Vector(const std::vector <T> &);)
+	__avr_ignore__(Vector(const std::initializer_list <T> &);)
 	
 	// Cross-type operations
 	template <class A>
@@ -136,8 +136,8 @@ public:
 	Vector(size_t, T);
 	Vector(size_t, T *, bool = true);
 
-	__avr_ignore(Vector(size_t, std::function <T (size_t)>));
-	__avr_ignore(Vector(size_t, std::function <T *(size_t)>));
+	__avr_ignore__(Vector(size_t, std::function <T (size_t)>));
+	__avr_ignore__(Vector(size_t, std::function <T *(size_t)>));
 
 	Vector &operator=(const Vector &);
 	Vector &operator=(const Matrix <T> &);
@@ -161,7 +161,7 @@ public:
 #include <primitives/vector_prims.hpp>
 
 // Additional operations for common systems
-#ifndef __AVR
+#ifndef _AVR
 
 #include <vector_cpu.hpp>
 

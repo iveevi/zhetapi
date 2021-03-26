@@ -29,7 +29,7 @@ namespace zhetapi {
 
 	Token *variable_reference::copy() const
 	{
-		return new variable_reference(__ref, __symbol);
+		return new variable_reference(_ref, _symbol);
 	}
 
 	bool variable_reference::operator==(Token *tptr) const
@@ -39,7 +39,7 @@ namespace zhetapi {
 		if (vbr == nullptr)
 			return false;
 
-		return vbr->__ref == __ref;
+		return vbr->_ref == _ref;
 	}
 
 }

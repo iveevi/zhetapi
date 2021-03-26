@@ -22,12 +22,12 @@ namespace ml {
 template <class T>
 class SE : public Erf <T> {
 public:
-	__cuda_dual_prefix
+	__cuda_dual__
 	SE() {
 		this->kind = Erf <T> ::OPT_SE; 
 	}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		Erf <T> ::assert_size(comp, in);
 		
@@ -39,22 +39,22 @@ public:
 		return Vector <T> (1, sum);
 	}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Erf <T> *derivative() const
 	{
-		return new __DSE <T> ();
+		return new _DSE <T> ();
 	}
 };
 
 template <class T>
 class MSE : public Erf <T> {
 public:
-	__cuda_dual_prefix
+	__cuda_dual__
 	MSE() {
 		this->kind = Erf <T> ::OPT_MSE;
 	}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		Erf <T> ::assert_size(comp, in);
 		
@@ -66,15 +66,15 @@ public:
 		return Vector <T> (1, sum / T(comp.size()));
 	}
 
-	__cuda_dual_prefix
+	__cuda_dual__
 	Erf <T> *derivative() const {
-		return new __DMSE <T> ();
+		return new _DMSE <T> ();
 	}
 };
 
 // Copy base activations
 template <class T>
-__cuda_dual_prefix
+__cuda_dual__
 Erf <T> *copy(Erf <T> *opt)
 {
 	switch (opt->kind) {

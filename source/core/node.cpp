@@ -8,64 +8,64 @@ namespace zhetapi {
 node::node() {}
 
 node::node(const node &other)
-		: __label(other.__label), __class(other.__class),
-		__nodes(other.__nodes), __leaves(other.__leaves)
+		: _label(other._label), _class(other._class),
+		_nodes(other._nodes), _leaves(other._leaves)
 {
-	if (other.__tptr)
-		__tptr = other.__tptr->copy();
+	if (other._tptr)
+		_tptr = other._tptr->copy();
 }
 
 node::node(Token *tptr)
-		: __tptr(tptr) {}
+		: _tptr(tptr) {}
 
 node::node(Token *tptr, lbl label)
-		: __tptr(tptr), __label(label) {}
+		: _tptr(tptr), _label(label) {}
 
 node::node(Token *tptr, const node &a, bool bl)
-		: __leaves({a})
+		: _leaves({a})
 {
 	if (tptr)
-		__tptr = tptr->copy();
+		_tptr = tptr->copy();
 }
 
 node::node(Token *tptr, const node &a, const node &b)
-		: __leaves({a, b})
+		: _leaves({a, b})
 {
 	if (tptr)
-		__tptr = tptr->copy();
+		_tptr = tptr->copy();
 }
 
 node::node(Token *tptr, const std::vector <node> &leaves)
-		: __leaves(leaves)
+		: _leaves(leaves)
 {
 	if (tptr)
-		__tptr = tptr->copy();
+		_tptr = tptr->copy();
 }
 
 node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
-		: __label(label), __leaves(leaves)
+		: _label(label), _leaves(leaves)
 {
 	if (tptr)
-		__tptr = tptr->copy();
+		_tptr = tptr->copy();
 }
 
 node &node::operator=(const node &other)
 {
 	if (this != &other) {
 		// Separate clear() method?
-		if (__tptr) {
-			delete __tptr;
+		if (_tptr) {
+			delete _tptr;
 
-			__tptr = nullptr;
+			_tptr = nullptr;
 		}
 		
-		if (other.__tptr)
-			__tptr = other.__tptr->copy();
+		if (other._tptr)
+			_tptr = other._tptr->copy();
 		
-		__label = other.__label;
-		__class = other.__class;
-		__nodes = other.__nodes;
-		__leaves = other.__leaves;
+		_label = other._label;
+		_class = other._class;
+		_nodes = other._nodes;
+		_leaves = other._leaves;
 	}
 
 	return *this;
@@ -73,60 +73,60 @@ node &node::operator=(const node &other)
 
 node::~node()
 {
-	if (__tptr)
-		delete __tptr;
+	if (_tptr)
+		delete _tptr;
 	
-	__tptr = nullptr;
+	_tptr = nullptr;
 }
 
 Token *node::copy_token() const
 {
-	if (__tptr)
-		return __tptr->copy();
+	if (_tptr)
+		return _tptr->copy();
 
 	return nullptr;
 }
 
 node &node::operator[](size_t i)
 {
-	return __leaves[i];
+	return _leaves[i];
 }
 
 const node &node::operator[](size_t i) const
 {
-	return __leaves[i];
+	return _leaves[i];
 }
 
 // Properties
 bool node::null() const
 {
-	return (__tptr == nullptr);
+	return (_tptr == nullptr);
 }
 
 lbl node::label() const
 {
-	return __label;
+	return _label;
 }
 
 bool node::empty() const
 {
-	return (__tptr == nullptr) && __leaves.empty();
+	return (_tptr == nullptr) && _leaves.empty();
 }
 
 Token *node::ptr() const
 {
-	return __tptr;
+	return _tptr;
 }
 
 size_t node::child_count() const
 {
-	return __leaves.size();
+	return _leaves.size();
 }
 
 Token::type node::caller() const
 {
-	if (__tptr)
-		return __tptr->caller();
+	if (_tptr)
+		return _tptr->caller();
 
 	return Token::undefined;
 }
@@ -134,38 +134,38 @@ Token::type node::caller() const
 // Setters
 void node::relabel(lbl label)
 {
-	__label = label;
+	_label = label;
 }
 
 void node::retoken(Token *tptr)
 {
-	__tptr = tptr;
+	_tptr = tptr;
 }
 
 void node::transfer(const node &ref)
 {
-	if (ref.__tptr) {
-		if (__tptr)
-			delete __tptr;
+	if (ref._tptr) {
+		if (_tptr)
+			delete _tptr;
 		
-		__tptr = ref.__tptr->copy();
+		_tptr = ref._tptr->copy();
 	}
 
-	__label = ref.__label;
-	__class = ref.__class;
-	__nodes = ref.__nodes;
-	__leaves = ref.__leaves;
+	_label = ref._label;
+	_class = ref._class;
+	_nodes = ref._nodes;
+	_leaves = ref._leaves;
 }
 
 void node::append(const node &ref)
 {
-	__leaves.push_back(ref);
+	_leaves.push_back(ref);
 }
 
 // Needs a better name
 void node::append_front(const node &ref)
 {
-	__leaves.insert(__leaves.begin(), ref);
+	_leaves.insert(_leaves.begin(), ref);
 }
 
 void node::print(int num, int lev) const
@@ -177,18 +177,18 @@ void node::print(int num, int lev) const
 		counter--;
 	}
 
-	if (__tptr) {
-		std::cout << "#" << num << ": " << __tptr->str()
-			<< " (" << __tptr << ", " << strlabs[__label]
+	if (_tptr) {
+		std::cout << "#" << num << ": " << _tptr->str()
+			<< " (" << _tptr << ", " << strlabs[_label]
 			<< ") @ " << this << std::endl;	
 	} else {
 		std::cout << "#" << num << ": null ("
-			<< __tptr << ", " << strlabs[__label] << ") @ "
+			<< _tptr << ", " << strlabs[_label] << ") @ "
 			<< this << std::endl;
 	}
 
 	counter = 0;
-	for (node itr : __leaves)
+	for (node itr : _leaves)
 		itr.print(++counter, lev + 1);
 }
 
@@ -200,16 +200,16 @@ void node::print_no_address(int num, int lev) const
 		counter--;
 	}
 
-	if (__tptr) {
-		std::cout << "#" << num << ": " << __tptr->str() << " (" <<
-			strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
+	if (_tptr) {
+		std::cout << "#" << num << ": " << _tptr->str() << " (" <<
+			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
 	} else {
 		std::cout << "#" << num << ": null (" <<
-			strlabs[__label] << ") " << __nodes << " nodes" << ::std::endl;
+			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
 	}
 
 	counter = 0;
-	for (node itr : __leaves)
+	for (node itr : _leaves)
 		itr.print_no_address(++counter, lev + 1);
 }
 
@@ -225,11 +225,11 @@ std::string node::display(int num, int lev) const
 		counter--;
 	}
 
-	oss << "#" << num << ": " << __tptr->str() << " (" << __tptr << ") @ "
-		<< this << " "  << __nodes << " nodes" << ::std::endl;
+	oss << "#" << num << ": " << _tptr->str() << " (" << _tptr << ") @ "
+		<< this << " "  << _nodes << " nodes" << ::std::endl;
 
 	counter = 0;
-	for (node itr : __leaves)
+	for (node itr : _leaves)
 		oss << itr.display(++counter, lev + 1);
 
 	return oss.str();
@@ -277,7 +277,7 @@ node factorize(const node &ref, const node &factor)
 
 		process.pop();
 
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (top.__tptr);
+		operation_holder *ophptr = dynamic_cast <operation_holder *> (top._tptr);
 
 		if (ophptr && (ophptr->code == mul)) {
 			process.push(top[0]);

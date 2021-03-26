@@ -11,23 +11,23 @@ namespace zhetapi {
 algorithm::algorithm() {}
 
 algorithm::algorithm(const algorithm &other)
-		: __ident(other.__ident), __alg(other.__alg),
-		__args(other.__args), __compiled(other.__compiled) {}
+		: _ident(other._ident), _alg(other._alg),
+		_args(other._args), _compiled(other._compiled) {}
 
 algorithm::algorithm(
 		const std::string &ident,
 		const std::string &alg,
 		const std::vector <std::string> &args)
-		: __ident(ident), __args(args),
-		__alg(alg) {}
+		: _ident(ident), _args(args),
+		_alg(alg) {}
 
 algorithm::algorithm(
 		const std::string &ident,
 		const std::string &alg,
 		const std::vector <std::string> &args,
 		const node_manager &compiled)
-		: __ident(ident), __args(args),
-		__alg(alg), __compiled(compiled) {}
+		: _ident(ident), _args(args),
+		_alg(alg), _compiled(compiled) {}
 
 void algorithm::compile(Engine *engine)
 {
@@ -39,10 +39,10 @@ void algorithm::compile(Engine *engine)
 
 	size_t i = 0;
 	
-	size_t n = __alg.length();
+	size_t n = _alg.length();
 
 	char c;
-	while ((i < n) && (c = __alg[i++])) {
+	while ((i < n) && (c = _alg[i++])) {
 		if (!quoted) {
 			if (c == '\"')
 				quoted = true;
@@ -53,7 +53,7 @@ void algorithm::compile(Engine *engine)
 			
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
-					generate(engine, tmp, __compiled);
+					generate(engine, tmp, _compiled);
 
 					tmp.clear();
 				}
@@ -69,13 +69,13 @@ void algorithm::compile(Engine *engine)
 	}
 
 	// Use .set_label instead
-	__compiled.add_args(__args);
-	__compiled.set_label(l_sequential);
-	__compiled.set_engine(engine);
+	_compiled.add_args(_args);
+	_compiled.set_label(l_sequential);
+	_compiled.set_engine(engine);
 
 	/* using namespace std;
 	cout << "compiled:" << endl;
-	__compiled.print(); */
+	_compiled.print(); */
 }
 
 void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
@@ -111,7 +111,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		}
 
 		// Only node to actually be computed (as an l-value)
-		node_manager nm(tmp[tsize - 1], __args, engine);
+		node_manager nm(tmp[tsize - 1], _args, engine);
 
 		eq.append_front(nm);
 		eq.set_label(l_assignment_chain);
@@ -122,7 +122,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		node_manager mg;
 		
 		try {
-			mg = node_manager(str, __args, engine);
+			mg = node_manager(str, _args, engine);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""
@@ -144,14 +144,14 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 {
 	// Ignore arguments for now
-	if (__compiled.empty())
+	if (_compiled.empty())
 		compile(engine);
 
 	/* using namespace std;
 	cout << "Pre eval:" << endl;
-	__compiled.print(); */
+	_compiled.print(); */
 
-	return __compiled.substitute_and_seq_compute(engine, args);
+	return _compiled.substitute_and_seq_compute(engine, args);
 }
 
 // Splitting equalities
@@ -211,7 +211,7 @@ std::vector <std::string> algorithm::split(std::string str)
 // Symbol
 const std::string &algorithm::symbol() const
 {
-	return __ident;
+	return _ident;
 }
 
 // Virtual functions
@@ -222,12 +222,12 @@ Token::type algorithm::caller() const
 
 Token *algorithm::copy() const
 {
-	return new algorithm(__ident, __alg, __args, __compiled);
+	return new algorithm(_ident, _alg, _args, _compiled);
 }
 
 std::string algorithm::str() const
 {
-	return __ident;
+	return _ident;
 }
 
 bool algorithm::operator==(Token *tptr) const
@@ -237,7 +237,7 @@ bool algorithm::operator==(Token *tptr) const
 	if (alg == nullptr)
 		return false;
 
-	return alg->__ident == __ident;
+	return alg->_ident == _ident;
 }
 
 }

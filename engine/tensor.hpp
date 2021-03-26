@@ -2,7 +2,7 @@
 #define TENSOR_H_
 
 // C/C++ headers
-#ifndef __AVR			// AVR support
+#ifndef _AVR			// AVR support
 
 #include <cassert>
 #include <cstddef>
@@ -22,7 +22,7 @@
 namespace zhetapi {
 
 // Type aliases
-__avr_ignore(using utility::Interval;)
+__avr_ignore__(using utility::Interval;)
 
 // Forward declarations
 template <class T>
@@ -34,7 +34,7 @@ class Matrix;
 template <class T>
 class Vector;
 
-#ifndef __AVR
+#ifndef _AVR
 
 // Tensor_type operations
 template <class T>
@@ -55,18 +55,18 @@ bool is_tensor_type()
 template <class T>
 class Tensor {
 protected:
-	T	*__array = nullptr;
-	size_t	__size = 0;
+	T	*_array = nullptr;
+	size_t	_size = 0;
 
 	// Variables for printing
-	size_t	*__dim = nullptr;
-	size_t	__dims = 0;
+	size_t	*_dim = nullptr;
+	size_t	_dims = 0;
 
-	bool	__sliced = false;	// Flag for no deallocation
+	bool	_sliced = false;	// Flag for no deallocation
 
-#ifdef __zhp_cuda
+#ifdef _zhp_cuda
 
-	bool	__on_device = false;	// Flag for device allocation
+	bool	_on_device = false;	// Flag for device allocation
 
 #endif
 
@@ -76,21 +76,21 @@ public:
 	Tensor(const Tensor &);
 	
 	Tensor(size_t, size_t);
-	__avr_ignore(explicit Tensor(const std::vector <std::size_t> &);)
-	__avr_ignore(Tensor(const std::vector <std::size_t> &, const T &);)
-	__avr_ignore(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
+	__avr_ignore__(explicit Tensor(const std::vector <std::size_t> &);)
+	__avr_ignore__(Tensor(const std::vector <std::size_t> &, const T &);)
+	__avr_ignore__(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
 
 	// TODO: remove size term from vector and matrix classes
 	size_t size() const;
 	
-	__cuda_dual_prefix
+	__cuda_dual__
 	void clear();
 
 	// Properties
 	bool good() const;
 
 	// Actions
-	__avr_ignore(void nullify(long double, const Interval <1> &));
+	__avr_ignore__(void nullify(long double, const Interval <1> &));
 
 	// Boolean operators (generalize with prefix)
 	template <class U>
@@ -100,9 +100,9 @@ public:
 	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
 	
 	// Printing functions
-	__avr_ignore(std::string print() const;)
+	__avr_ignore__(std::string print() const;)
 
-	__avr_ignore(template <class U>
+	__avr_ignore__(template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);)
 
 	// Dimension mismatch exception
@@ -110,7 +110,7 @@ public:
 	class bad_dimensions {};
 
 	// Cross-type operations
-#ifndef __AVR
+#ifndef _AVR
 
 	template <class A>
 	std::enable_if <is_tensor_type <A> (), Tensor &>
@@ -123,8 +123,8 @@ public:
 	~Tensor();
 
 	// Indexing (add size_t operator[])
-	__avr_ignore(T &operator[](const std::vector <size_t> &);)
-	__avr_ignore(const T &operator[](const std::vector <size_t> &) const;)
+	__avr_ignore__(T &operator[](const std::vector <size_t> &);)
+	__avr_ignore__(const T &operator[](const std::vector <size_t> &) const;)
 
 	// TODO: Re-organize the methods
 	Vector <T> cast_to_vector() const;
@@ -149,7 +149,7 @@ public:
 
 #include <primitives/tensor_prims.hpp>
 
-#ifndef __AVR
+#ifndef _AVR
 
 #include <tensor_cpu.hpp>
 

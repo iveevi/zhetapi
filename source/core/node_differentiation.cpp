@@ -5,19 +5,19 @@ namespace zhetapi {
 
 void node_manager::differentiate_mul(node &ref)
 {
-	node ldif(ref.__leaves[0]);
+	node ldif(ref._leaves[0]);
 	differentiate(ldif);
 
-	node rdif(ref.__leaves[1]);
+	node rdif(ref._leaves[1]);
 	differentiate(rdif);
 
 	node tmp(new operation_holder("+"), l_multiplied, {
 		node(new operation_holder("*"), l_multiplied, {
 			ldif,
-			node(ref.__leaves[1])
+			node(ref._leaves[1])
 		}),
 		node(new operation_holder("*"), l_multiplied, {
-			node(ref.__leaves[0]),
+			node(ref._leaves[0]),
 			rdif
 		})
 	});
@@ -27,17 +27,17 @@ void node_manager::differentiate_mul(node &ref)
 
 void node_manager::differentiate_pow(node &ref)
 {
-	Token *mul = ref.__leaves[1].__tptr->copy();
-	Token *exp = __engine->compute("-", {mul, new opd_z(1)});
+	Token *mul = ref._leaves[1]._tptr->copy();
+	Token *exp = _engine->compute("-", {mul, new opd_z(1)});
 
-	node diffed(ref.__leaves[0]);
+	node diffed(ref._leaves[0]);
 	differentiate(diffed);
 
 	node tmp(new operation_holder("*"), l_multiplied, {
 		node(new operation_holder("*"), l_multiplied, {
 			node(mul, l_none, {}),
 			node(new operation_holder("^"), l_power, {
-				node(ref.__leaves[0]),
+				node(ref._leaves[0]),
 				node(exp, l_power, {})
 			})
 		}),
@@ -49,12 +49,12 @@ void node_manager::differentiate_pow(node &ref)
 
 void node_manager::differentiate_ln(node &ref)
 {
-	node diffed(ref.__leaves[0]);
+	node diffed(ref._leaves[0]);
 	differentiate(diffed);
 
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
-		node(ref.__leaves[0])
+		node(ref._leaves[0])
 	});
 
 	ref.transfer(tmp);
@@ -62,14 +62,14 @@ void node_manager::differentiate_ln(node &ref)
 
 void node_manager::differentiate_lg(node &ref)
 {
-	node diffed(ref.__leaves[0]);
+	node diffed(ref._leaves[0]);
 	differentiate(diffed);
 
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__engine->compute("ln", {new opd_z(2)}), l_none, {}),
-			node(ref.__leaves[0])
+			node(_engine->compute("ln", {new opd_z(2)}), l_none, {}),
+			node(ref._leaves[0])
 		})
 	});
 
@@ -78,14 +78,14 @@ void node_manager::differentiate_lg(node &ref)
 
 void node_manager::differentiate_const_log(node &ref)
 {
-	node diffed(ref.__leaves[1]);
+	node diffed(ref._leaves[1]);
 	differentiate(diffed);
 
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(__engine->compute("ln", {value(ref.__leaves[0])}), l_none, {}),
-			node(ref.__leaves[1])
+			node(_engine->compute("ln", {value(ref._leaves[0])}), l_none, {}),
+			node(ref._leaves[1])
 		})
 	});
 
@@ -94,22 +94,22 @@ void node_manager::differentiate_const_log(node &ref)
 
 void node_manager::differentiate_trig(node &ref)
 {
-	node diffed(ref.__leaves[0]);
+	node diffed(ref._leaves[0]);
 	differentiate(diffed);
 
 	node op;
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref._tptr);
 	switch (ophptr->code) {
 	case sxn:
 		op = node(new operation_holder("cos"), l_trigonometric, {
-			node(ref.__leaves[0])
+			node(ref._leaves[0])
 		});
 		break;
 	case cxs:
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("sin"), l_trigonometric, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new opd_z(-1), l_constant_integer, {})
 		});
@@ -117,7 +117,7 @@ void node_manager::differentiate_trig(node &ref)
 	case txn:
 		op = node(new operation_holder("^"), l_power, {
 			node(new operation_holder("sec"), l_trigonometric, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new opd_z(2), l_constant_integer, {})	
 		});
@@ -125,10 +125,10 @@ void node_manager::differentiate_trig(node &ref)
 	case sec:
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("sec"), l_trigonometric, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new operation_holder("tan"), l_trigonometric, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 		});
 		break;
@@ -136,10 +136,10 @@ void node_manager::differentiate_trig(node &ref)
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("*"), l_trigonometric, {
 				node(new operation_holder("csc"), l_trigonometric, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 				node(new operation_holder("cot"), l_trigonometric, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 			}),
 			node(new opd_z(-1), l_constant_integer, {})
@@ -149,7 +149,7 @@ void node_manager::differentiate_trig(node &ref)
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("^"), l_power, {
 				node(new operation_holder("cot"), l_trigonometric, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 				node(new opd_z(2), l_constant_integer, {})	
 			}),
@@ -170,22 +170,22 @@ void node_manager::differentiate_trig(node &ref)
 
 void node_manager::differentiate_hyp(node &ref)
 {
-	node diffed(ref.__leaves[0]);
+	node diffed(ref._leaves[0]);
 	differentiate(diffed);
 
 	node op;
 
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref.__tptr);
+	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref._tptr);
 	switch (ophptr->code) {
 	case snh:
 		op = node(new operation_holder("cosh"), l_hyperbolic, {
-			node(ref.__leaves[0])
+			node(ref._leaves[0])
 		});
 		break;
 	case csh:
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("sinh"), l_hyperbolic, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new opd_z(-1), l_constant_integer, {})
 		});
@@ -193,7 +193,7 @@ void node_manager::differentiate_hyp(node &ref)
 	case tnh:
 		op = node(new operation_holder("^"), l_power, {
 			node(new operation_holder("sech"), l_hyperbolic, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new opd_z(2), l_constant_integer, {})	
 		});
@@ -201,10 +201,10 @@ void node_manager::differentiate_hyp(node &ref)
 	case sch:
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("sech"), l_hyperbolic, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 			node(new operation_holder("tanh"), l_hyperbolic, {
-				node(ref.__leaves[0])
+				node(ref._leaves[0])
 			}),
 		});
 		break;
@@ -212,10 +212,10 @@ void node_manager::differentiate_hyp(node &ref)
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("*"), l_multiplied, {
 				node(new operation_holder("csch"), l_hyperbolic, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 				node(new operation_holder("coth"), l_hyperbolic, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 			}),
 			node(new opd_z(-1), l_constant_integer, {})
@@ -225,7 +225,7 @@ void node_manager::differentiate_hyp(node &ref)
 		op = node(new operation_holder("*"), l_multiplied, {
 			node(new operation_holder("^"), l_power, {
 				node(new operation_holder("coth"), l_hyperbolic, {
-					node(ref.__leaves[0])
+					node(ref._leaves[0])
 				}),
 				node(new opd_z(2), l_constant_integer, {})	
 			}),

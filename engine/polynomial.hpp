@@ -25,9 +25,9 @@ size_t npow2(size_t);
 template <class T>
 class Polynomial {
 protected:
-	T *	__coeffs	= nullptr;
-	size_t	__degree	= 0;
-	size_t	__size		= 0;
+	T *	_coeffs	= nullptr;
+	size_t	_degree	= 0;
+	size_t	_size		= 0;
 
 	template <class C>
 	void indexed_constructor(const C &, size_t);
@@ -101,7 +101,7 @@ Polynomial <T> ::Polynomial() {}
 template <class T>
 Polynomial <T> ::Polynomial(const Polynomial <T> &other)
 {
-	indexed_constructor(other, other.__degree + 1);
+	indexed_constructor(other, other._degree + 1);
 }
 
 template <class T>
@@ -136,7 +136,7 @@ Polynomial <T> ::Polynomial(const std::initializer_list <T> &ref)
 template <class T>
 Polynomial <T> ::Polynomial(T *coeffs, size_t size)
 {
-	__size = npow2(size);
+	_size = npow2(size);
 
 	int d = size - 1;
 
@@ -144,11 +144,11 @@ Polynomial <T> ::Polynomial(T *coeffs, size_t size)
 	while (d >= 0 && coeffs[d] == T(0))
 		d--;
 
-	__degree = (d > 0) ? d : 0;
+	_degree = (d > 0) ? d : 0;
 
-	__coeffs = new T[__size];
+	_coeffs = new T[_size];
 
-	memcpy(__coeffs, coeffs, sizeof(T) * __size);
+	memcpy(_coeffs, coeffs, sizeof(T) * _size);
 }
 
 template <class T>
@@ -157,7 +157,7 @@ Polynomial <T> &Polynomial <T> ::operator=(const Polynomial <T> &other)
 	if (this != &other) {
 		clear();
 
-		indexed_constructor(other, other.__degree + 1);
+		indexed_constructor(other, other._degree + 1);
 	}
 
 	return *this;
@@ -173,30 +173,30 @@ template <class T>
 template <class C>
 void Polynomial <T> ::indexed_constructor(const C &container, size_t size)
 {
-	__degree = size - 1;
+	_degree = size - 1;
 
-	if (__degree < 0)
+	if (_degree < 0)
 		return;
 
-	__size = npow2(__degree + 1);
-	__coeffs = new T[__size];
+	_size = npow2(_degree + 1);
+	_coeffs = new T[_size];
 
-	memset(__coeffs, 0, sizeof(T) * __size);
-	for (size_t i = 0; i <= __degree; i++)
-		__coeffs[i] = container[i];
+	memset(_coeffs, 0, sizeof(T) * _size);
+	for (size_t i = 0; i <= _degree; i++)
+		_coeffs[i] = container[i];
 }
 
 template <class T>
 void Polynomial <T> ::clear()
 {
-	if (__coeffs) {
-		delete[] __coeffs;
+	if (_coeffs) {
+		delete[] _coeffs;
 
-		__coeffs = nullptr;
+		_coeffs = nullptr;
 	}
 
-	__size = 0;
-	__degree = 0;
+	_size = 0;
+	_degree = 0;
 }
 
 /**
@@ -207,13 +207,13 @@ void Polynomial <T> ::clear()
 template <class T>
 size_t Polynomial <T> ::degree() const
 {
-	return __degree;
+	return _degree;
 }
 
 template <class T>
 T &Polynomial <T> ::operator[](size_t i)
 {
-	return __coeffs[i];
+	return _coeffs[i];
 }
 
 /**
@@ -226,7 +226,7 @@ T &Polynomial <T> ::operator[](size_t i)
 template <class T>
 const T &Polynomial <T> ::operator[](size_t i) const
 {
-	return __coeffs[i];
+	return _coeffs[i];
 }
 
 /**
@@ -240,8 +240,8 @@ Polynomial <T> Polynomial <T> ::differentiate() const
 {
 	std::vector <T> out;
 
-	for (size_t i = 0; i < __size - 1; i++)
-		out.push_back((__size - (i + 1)) * __coeffs[i]);
+	for (size_t i = 0; i < _size - 1; i++)
+		out.push_back((_size - (i + 1)) * _coeffs[i]);
 
 	return Polynomial(out);
 }
@@ -261,8 +261,8 @@ Polynomial <T> Polynomial <T> ::integrate() const
 {
 	std::vector <T> out;
 
-	for (size_t i = 0; i < __size; i++)
-		out.push_back(__coeffs[i] / T(__size - i));
+	for (size_t i = 0; i < _size; i++)
+		out.push_back(_coeffs[i] / T(_size - i));
 
 	out.push_back(0);
 
@@ -340,14 +340,14 @@ std::vector <T> Polynomial <T> ::roots(
 template <class T>
 std::pair <Polynomial <T>, T> Polynomial <T> ::synthetic_divide(const T &root) const
 {
-	std::vector <T> qs {__coeffs[0]};
+	std::vector <T> qs {_coeffs[0]};
 
-	T rem = __coeffs[0];
-	for (size_t i = 1; i < __size; i++) {
-		if (i < __size - 1)
-			qs.push_back(__coeffs[i] + root * rem);
+	T rem = _coeffs[0];
+	for (size_t i = 1; i < _size; i++) {
+		if (i < _size - 1)
+			qs.push_back(_coeffs[i] + root * rem);
 
-		rem = __coeffs[i] + rem * root;
+		rem = _coeffs[i] + rem * root;
 	}
 
 	return {Polynomial(qs), rem};
@@ -358,8 +358,8 @@ T Polynomial <T> ::evaluate(const T &in) const
 {
 	T acc = 0;
 
-	for (size_t i = 0; i <= __degree; i++)
-		acc = in * acc + __coeffs[i];
+	for (size_t i = 0; i <= _degree; i++)
+		acc = in * acc + _coeffs[i];
 
 	return acc;
 }
@@ -373,10 +373,10 @@ T Polynomial <T> ::operator()(const T &in) const
 template <class T>
 bool operator==(const Polynomial <T> &f, const Polynomial <T> &g)
 {
-	if (f.__degree != g.__degree)
+	if (f._degree != g._degree)
 		return false;
 
-	for (size_t i = 0; i <= f.__degree; i++) {
+	for (size_t i = 0; i <= f._degree; i++) {
 		if (f[i] != g[i])
 			return false;
 	}
@@ -394,7 +394,7 @@ bool operator!=(const Polynomial <T> &f, const Polynomial <T> &g)
 template <class T>
 Polynomial <T> operator+(const Polynomial <T> &f, const Polynomial <T> &g)
 {
-	size_t size = std::max(f.__size, g.__size);
+	size_t size = std::max(f._size, g._size);
 	
 	T *coeffs = new T[size];
 
@@ -415,7 +415,7 @@ Polynomial <T> operator+(const Polynomial <T> &f, const Polynomial <T> &g)
 template <class T>
 Polynomial <T> operator-(const Polynomial <T> &f, const Polynomial <T> &g)
 {
-	size_t size = std::max(f.__size, g.__size);
+	size_t size = std::max(f._size, g._size);
 	
 	T *coeffs = new T[size];
 

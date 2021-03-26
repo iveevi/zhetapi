@@ -3,7 +3,7 @@
 namespace zhetapi {
 	
 variable_cluster::variable_cluster(const std::string &str)
-		: __cluster(str) {}
+		: _cluster(str) {}
 
 Token::type variable_cluster::caller() const
 {
@@ -12,12 +12,12 @@ Token::type variable_cluster::caller() const
 
 Token *variable_cluster::copy() const
 {
-	return new variable_cluster(__cluster);
+	return new variable_cluster(_cluster);
 }
 
 std::string variable_cluster::str() const
 {
-	return "vcl-\"" + __cluster + "\"";
+	return "vcl-\"" + _cluster + "\"";
 }
 
 bool variable_cluster::operator==(Token *tptr) const
@@ -27,7 +27,7 @@ bool variable_cluster::operator==(Token *tptr) const
 	if (vcl == nullptr)
 		return false;
 
-	return vcl->__cluster == __cluster;
+	return vcl->_cluster == _cluster;
 }
 
 }

@@ -18,11 +18,11 @@ namespace zhetapi {
 class node {
 public:
 	// Members
-	Token *			__tptr		= nullptr;
-	lbl			__label		= l_none;
-	cls			__class		= c_none;
-	size_t			__nodes		= 0;
-	std::vector <node>	__leaves	= {};
+	Token *			_tptr		= nullptr;
+	lbl			_label		= l_none;
+	cls			_class		= c_none;
+	size_t			_nodes		= 0;
+	std::vector <node>	_leaves	= {};
 
 	// Constructors
 	node();
@@ -81,7 +81,7 @@ public:
 template <class T>
 T *node::cast() const
 {
-	return dynamic_cast <T *> (__tptr);
+	return dynamic_cast <T *> (_tptr);
 }
 
 // Forward declarations

@@ -16,10 +16,10 @@ Interval <1> operator|(const Interval <1> &a, const Interval <1> &b)
 
 std::ostream &operator<<(std::ostream &os, const Interval <1> &itv)
 {
-	size_t sz = itv.__union.size();
+	size_t sz = itv._union.size();
 
 	for (size_t i = 0; i < sz; i++) {
-		auto itr = itv.__union.begin();
+		auto itr = itv._union.begin();
 
 		std::advance(itr, i);
 

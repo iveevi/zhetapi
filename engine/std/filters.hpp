@@ -15,27 +15,27 @@ namespace ml {
 
 template <class T = double>
 class FeedForward : public Filter <T> {
-	Matrix <T>	__weight	= Matrix <T> ();
+	Matrix <T>	_weight	= Matrix <T> ();
 
-	Activation <T> *__act		= nullptr;
-	Activation <T> *__dact		= nullptr;
+	Activation <T> *_act		= nullptr;
+	Activation <T> *_dact		= nullptr;
 
-	long double	__dropout	= 0;
+	long double	_dropout	= 0;
 
-	Vector <T>	__acache	= Vector <T> ();
-	Vector <T>	__zcache	= Vector <T> ();
+	Vector <T>	_acache	= Vector <T> ();
+	Vector <T>	_zcache	= Vector <T> ();
 
 	// For batch inputs
-	// Matrix <T>	__Acache;
-	// Matrix <T>	__Zcache;
+	// Matrix <T>	_Acache;
+	// Matrix <T>	_Zcache;
 public:
 	// Input size, output size
 	FeedForward(size_t isize, size_t osize, Activation <T> *act, std::function <T ()> init = RandomInitializer <T> ())
-			: __weight(isize, osize + 1),	// +1 for bias
-			__act(act->copy()),
-			__dact(act->derivative())
+			: _weight(isize, osize + 1),	// +1 for bias
+			_act(act->copy()),
+			_dact(act->derivative())
 	{
-		__weight.randomize(init);
+		_weight.randomize(init);
 	}
 
 	void propogate(const Pipe <T> &in, Pipe <T> &out)
@@ -43,14 +43,14 @@ public:
 		// Slice the input (+1 for bias)
 		Vector <T> vin = (in[0]->cast_to_vector()).append_above(1);
 
-		__acache = vin;
+		_acache = vin;
 
-		Vector <T> mul = __weight * vin;
+		Vector <T> mul = _weight * vin;
 
-		__zcache = __dact->compute(mul);
+		_zcache = _dact->compute(mul);
 
 		// Send to output pipe
-		*out[0] = __act->compute(mul);
+		*out[0] = _act->compute(mul);
 	}
 
 	void gradient(const Pipe <T> &delin, Pipe <T> &grads)
@@ -58,9 +58,9 @@ public:
 		// TODO: Check sizes later
 
 		// Move shur/stable shur to tensor base
-		*delin[0] = shur(delin[0]->cast_to_vector(), __zcache);
+		*delin[0] = shur(delin[0]->cast_to_vector(), _zcache);
 
-		Matrix <T> J = delin[0]->cast_to_vector() * __acache.transpose();
+		Matrix <T> J = delin[0]->cast_to_vector() * _acache.transpose();
 
 		// Use the kernel function here
 		*grads[0] = J;
@@ -70,10 +70,10 @@ public:
 	{
 		// TODO: check with gradeint checking
 		Matrix <T> J = grads[0]->cast_to_matrix(
-				__weight.get_rows(),
-				__weight.get_cols());
+				_weight.get_rows(),
+				_weight.get_cols());
 
-		__weight += J;
+		_weight += J;
 	}
 };
 
@@ -84,8 +84,8 @@ public:
 // Assumes that the input tensor is an image
 template <class T>
 class Convolution : public Filter <T> {
-	Matrix <T>	__filter;
-	size_t		__dim;
+	Matrix <T>	_filter;
+	size_t		_dim;
 	
 	// Type aliases
 	using byte = image::byte;
@@ -94,8 +94,8 @@ class Convolution : public Filter <T> {
 	using vfilt = Vector <T>;
 public:
 	Convolution(const Matrix <T> &filter)
-			: __filter(filter), 
-			__dim(filter.get_rows()) {}
+			: _filter(filter), 
+			_dim(filter.get_rows()) {}
 
 	// Assume equal padding for now
 	image::Image process(const image::Image &in, int depth = -1) {
@@ -110,9 +110,9 @@ public:
 		if (depth < 0)
 			depth = (c > 1) ? c - 1 : c;
 
-		int n = (__dim - 1)/2;
+		int n = (_dim - 1)/2;
 
-		byte *data = in.__array;
+		byte *data = in._array;
 
 		using namespace std;
 		for_img(x, y, w, h) {
@@ -125,14 +125,14 @@ public:
 			int xmax = x + n;
 
 			Vector <T> tmp(depth, T(0));
-			for (int k = 0; k < __dim; k++) {
+			for (int k = 0; k < _dim; k++) {
 				size_t ti = x + k - n;
 
 				if (xmin + k < 0 || xmin + k >= h)
 					continue;
 
 				size_t off = ymin;
-				size_t len = __dim;
+				size_t len = _dim;
 
 				if (ymin < 0) {
 					off = 0;
@@ -145,7 +145,7 @@ public:
 				size_t i = c * ((x + k - n) * w + off);
 
 				byte *img = &(data[i]);
-				T *flt = &(__filter[k][off - ymin]);
+				T *flt = &(_filter[k][off - ymin]);
 				
 				for (size_t ch = 0; ch < depth; ch++) {
 					T s = 0;

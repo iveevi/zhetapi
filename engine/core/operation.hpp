@@ -16,10 +16,10 @@ public:
 	// Aliases
 	using mapper = std::function <Token *(const std::vector <Token *> &)>;
 protected:
-	std::string	__input		= "";
-	std::string	__output	= "";
-	std::size_t	__ops		= 0;
-	mapper		__opn;
+	std::string	_input		= "";
+	std::string	_output	= "";
+	std::size_t	_ops		= 0;
+	mapper		_opn;
 public:
 	operation();
 	operation(const std::string &, const std::string &,

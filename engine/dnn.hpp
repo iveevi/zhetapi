@@ -68,17 +68,17 @@ public:
 	class null_optimizer {};
 	class null_loss_function {};
 private:
-	Layer <T> *		__layers	= nullptr;
+	Layer <T> *		_layers	= nullptr;
 
-	size_t			__size		= 0;
-	size_t			__isize		= 0;
-	size_t			__osize		= 0;
+	size_t			_size		= 0;
+	size_t			_isize		= 0;
+	size_t			_osize		= 0;
 
-	Vector <T> *		__acache	= nullptr;
-	Vector <T> *		__zcache	= nullptr;
+	Vector <T> *		_acache	= nullptr;
+	Vector <T> *		_zcache	= nullptr;
 
-	Matrix <T> *		__Acache	= nullptr;
-	Matrix <T> *		__Zcache	= nullptr;
+	Matrix <T> *		_Acache	= nullptr;
+	Matrix <T> *		_Zcache	= nullptr;
 
 	void clear();
 	void clear_cache();
@@ -127,13 +127,13 @@ DNN <T> ::DNN() {}
 
 template <class T>
 DNN <T> ::DNN(const DNN &other) :
-		__size(other.__size), __isize(other.__isize),
-		__osize(other.__osize)
+		_size(other._size), _isize(other._isize),
+		_osize(other._osize)
 {
-	__layers = new Layer <T> [__size];
+	_layers = new Layer <T> [_size];
 
-	for (size_t i = 0; i < __size; i++)
-		__layers[i] = other.__layers[i];
+	for (size_t i = 0; i < _size; i++)
+		_layers[i] = other._layers[i];
 	
 	init_cache();
 }
@@ -148,22 +148,22 @@ DNN <T> ::DNN(const DNN &other) :
  */
 template <class T>
 DNN <T> ::DNN(size_t isize, const std::vector <Layer <T>> &layers)
-		: __size(layers.size()), __isize(isize)
+		: _size(layers.size()), _isize(isize)
 {
-	__layers = new Layer <T> [__size];
+	_layers = new Layer <T> [_size];
 
 	size_t tmp = isize;
-	for (int i = 0; i < __size; i++) {
-		__layers[i] = layers[i];
+	for (int i = 0; i < _size; i++) {
+		_layers[i] = layers[i];
 
-		__layers[i].set_fan_in(tmp);
+		_layers[i].set_fan_in(tmp);
 
-		__layers[i].initialize();
+		_layers[i].initialize();
 
-		tmp = __layers[i].get_fan_out();
+		tmp = _layers[i].get_fan_out();
 	}
 
-	__osize = tmp;
+	_osize = tmp;
 
 	init_cache();
 }
@@ -180,13 +180,13 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 	if (this != &other) {
 		clear();
 
-		__size = other.__size;
-		__isize = other.__isize;
-		__osize = other.__osize;
+		_size = other._size;
+		_isize = other._isize;
+		_osize = other._osize;
 
-		__layers = new Layer <T> [__size];
-		for (size_t i = 0; i < __size; i++)
-			__layers[i] = other.__layers[i];
+		_layers = new Layer <T> [_size];
+		for (size_t i = 0; i < _size; i++)
+			_layers[i] = other._layers[i];
 		
 		init_cache();
 	}
@@ -197,8 +197,8 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 template <class T>
 void DNN <T> ::clear()
 {
-	if (__layers)
-		delete[] __layers;
+	if (_layers)
+		delete[] _layers;
 	
 	clear_cache();
 }
@@ -206,15 +206,15 @@ void DNN <T> ::clear()
 template <class T>
 void DNN <T> ::clear_cache()
 {
-	if (__acache)
-		delete[] __acache;
-	if (__zcache)
-		delete[] __zcache;
+	if (_acache)
+		delete[] _acache;
+	if (_zcache)
+		delete[] _zcache;
 	
-	if (__Acache)
-		delete[] __Acache;
-	if (__Zcache)
-		delete[] __Zcache;
+	if (_Acache)
+		delete[] _Acache;
+	if (_Zcache)
+		delete[] _Zcache;
 }
 
 template <class T>
@@ -222,11 +222,11 @@ void DNN <T> ::init_cache()
 {
 	clear_cache();
 
-	__acache = new Vector <T> [__size + 1];
-	__zcache = new Vector <T> [__size];
+	_acache = new Vector <T> [_size + 1];
+	_zcache = new Vector <T> [_size];
 
-	__Acache = new Matrix <T> [__size + 1];
-	__Zcache = new Matrix <T> [__size];
+	_Acache = new Matrix <T> [_size + 1];
+	_Zcache = new Matrix <T> [_size];
 }
 
 // Saving and loading
@@ -235,12 +235,12 @@ void DNN <T> ::save(const std::string &file)
 {
 	std::ofstream fout(file);
 
-	fout.write((char *) &__size, sizeof(size_t));
-	fout.write((char *) &__isize, sizeof(size_t));
-	fout.write((char *) &__osize, sizeof(size_t));
+	fout.write((char *) &_size, sizeof(size_t));
+	fout.write((char *) &_isize, sizeof(size_t));
+	fout.write((char *) &_osize, sizeof(size_t));
 
-	for (int i = 0; i < __size; i++)
-		__layers[i].write(fout);
+	for (int i = 0; i < _size; i++)
+		_layers[i].write(fout);
 }
 
 template <class T>
@@ -251,50 +251,50 @@ void DNN <T> ::load(const std::string &file)
 
 	std::ifstream fin(file);
 
-	fin.read((char *) &__size, sizeof(size_t));
-	fin.read((char *) &__isize, sizeof(size_t));
-	fin.read((char *) &__osize, sizeof(size_t));
+	fin.read((char *) &_size, sizeof(size_t));
+	fin.read((char *) &_isize, sizeof(size_t));
+	fin.read((char *) &_osize, sizeof(size_t));
 
-	__layers = new Layer <T> [__size];
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].read(fin);
+	_layers = new Layer <T> [_size];
+	for (size_t i = 0; i < _size; i++)
+		_layers[i].read(fin);
 }
 
 // Properties
 template <class T>
 size_t DNN <T> ::size() const
 {
-	return __size;
+	return _size;
 }
 
 template <class T>
 size_t DNN <T> ::input_size() const
 {
-	return __isize;
+	return _isize;
 }
 
 template <class T>
 size_t DNN <T> ::output_size() const
 {
-	return __osize;
+	return _osize;
 }
 
 template <class T>
 Layer <T> *DNN <T> ::layers()
 {
-	return __layers;
+	return _layers;
 }
 
 template <class T>
 Vector <T> *DNN <T> ::acache() const
 {
-	return __acache;
+	return _acache;
 }
 
 template <class T>
 Vector <T> *DNN <T> ::zcache() const
 {
-	return __zcache;
+	return _zcache;
 }
 
 /*
@@ -310,21 +310,21 @@ void DNN <T> ::load_json(const std::string &file)
 	auto layers = structure["Layers"];
 
 	// Allocate size information
-	__size = layers.size();
-	__isize = layers[0]["Neurons"];
-	__osize = layers[__size - 1]["Neurons"];
+	_size = layers.size();
+	_isize = layers[0]["Neurons"];
+	_osize = layers[_size - 1]["Neurons"];
 
 	// Allocate matrices and activations
-	__weights = new Matrix <T> [__size - 1];
-	__momentum = new Matrix <T> [__size - 1];
-	__layers = new Layer <T> [__size];
+	_weights = new Matrix <T> [_size - 1];
+	_momentum = new Matrix <T> [_size - 1];
+	_layers = new Layer <T> [_size];
 
 	// Allocate caches
-	__a = std::vector <Vector <T>> (__size);
-	__z = std::vector <Vector <T>> (__size - 1);
+	_a = std::vector <Vector <T>> (_size);
+	_z = std::vector <Vector <T>> (_size - 1);
 
 	std::vector <size_t> sizes;
-	for (size_t i = 0; i < __size; i++) {
+	for (size_t i = 0; i < _size; i++) {
 		auto layer = layers[i];
 
 		auto activation = layer["Activation"];
@@ -339,16 +339,16 @@ void DNN <T> ::load_json(const std::string &file)
 
 		sizes.push_back(layer["Neurons"]);
 
-		__layers[i].second = Activation <T> ::load(name, args);
+		_layers[i].second = Activation <T> ::load(name, args);
 	}
 
-	for (size_t i = 1; i < __size; i++) {
-		__weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
-		__momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
+	for (size_t i = 1; i < _size; i++) {
+		_weights[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
+		_momentum[i - 1] = Matrix <T> (sizes[i], sizes[i - 1] + 1, T(0));
 	}
 
-	__random = default_initializer <T> {};
-	__cmp = default_comparator;
+	_random = default_initializer <T> {};
+	_cmp = default_comparator;
 } */
 
 // Computation
@@ -363,8 +363,8 @@ Vector <T> DNN <T> ::compute(const Vector <T> &in)
 {
 	Vector <T> tmp = in;
 
-	for (size_t i = 0; i < __size; i++)
-		tmp = __layers[i].forward_propogate(tmp);
+	for (size_t i = 0; i < _size; i++)
+		tmp = _layers[i].forward_propogate(tmp);
 
 	return tmp;
 }
@@ -372,15 +372,15 @@ Vector <T> DNN <T> ::compute(const Vector <T> &in)
 template <class T>
 Matrix <T> *DNN <T> ::jacobian(const Vector <T> &in)
 {
-	if (in.size() != __isize)
+	if (in.size() != _isize)
 		throw bad_io_dimensions();
 
 	Matrix <T> *J = jacobian_kernel(
-		__layers,
-		__size,
-		__osize,
-		__acache,
-		__zcache,
+		_layers,
+		_size,
+		_osize,
+		_acache,
+		_zcache,
 		in);
 
 	return J;
@@ -389,15 +389,15 @@ Matrix <T> *DNN <T> ::jacobian(const Vector <T> &in)
 template <class T>
 Matrix <T> *DNN <T> ::jacobian_delta(const Vector <T> &in, Vector <T> &delta)
 {
-	if (in.size() != __isize || delta.size() != __osize)
+	if (in.size() != _isize || delta.size() != _osize)
 		throw bad_io_dimensions();
 
 	Matrix <T> *J = jacobian_kernel(
-		__layers,
-		__size,
-		__osize,
-		__acache,
-		__zcache,
+		_layers,
+		_size,
+		_osize,
+		_acache,
+		_zcache,
 		in,
 		delta);
 
@@ -407,16 +407,16 @@ Matrix <T> *DNN <T> ::jacobian_delta(const Vector <T> &in, Vector <T> &delta)
 template <class T>
 void DNN <T> ::apply_gradient(Matrix <T> *J)
 {
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].apply_gradient(J[i]);
+	for (size_t i = 0; i < _size; i++)
+		_layers[i].apply_gradient(J[i]);
 }
 
 // Miscellaneous
 template <class T>
 void DNN <T> ::print() const
 {
-	for (size_t i = 0; i < __size; i++)
-		__layers[i].print();
+	for (size_t i = 0; i < _size; i++)
+		_layers[i].print();
 }
 
 }

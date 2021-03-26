@@ -13,9 +13,9 @@ namespace ml {
 template <class T>
 class Optimizer {
 protected:
-	T		__eta		= 0;
-	size_t		__size		= 0;
-	bool		__switch	= false;
+	T		_eta		= 0;
+	size_t		_size		= 0;
+	bool		_switch	= false;
 
 	// Functions
 	Optimizer(T);
@@ -29,23 +29,23 @@ public:
 };
 
 template <class T>
-Optimizer <T> ::Optimizer(T lr) : __eta(lr) {}
+Optimizer <T> ::Optimizer(T lr) : _eta(lr) {}
 
 template <class T>
 void Optimizer <T> ::register_size(size_t size)
 {
-	if (__size != size) {
-		__size = size;
-		__switch = true;
+	if (_size != size) {
+		_size = size;
+		_switch = true;
 	} else {
-		__switch = false;
+		_switch = false;
 	}
 }
 
 template <class T>
 void Optimizer <T> ::set_learning_rate(T lr)
 {
-	__eta = lr;
+	_eta = lr;
 }
 
 }

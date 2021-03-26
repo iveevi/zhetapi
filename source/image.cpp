@@ -62,33 +62,33 @@ const Color	GREY	= "#808080";
 // Gradient constructor
 Gradient::Gradient(const Color &A, const Color &B,
 		long double start, long double end)
-		: __base(A), __start(start), __end(end)
+		: _base(A), _start(start), _end(end)
 {
-	__dr = B.r - A.r;
-	__dg = B.g - A.g;
-	__db = B.b - A.b;
+	_dr = B.r - A.r;
+	_dg = B.g - A.g;
+	_db = B.b - A.b;
 }
 
 Gradient::Gradient(const std::string &hexs_a, const std::string &hexs_b,
 		long double start, long double end)
-		: __base(hexs_a), __start(start), __end(end)
+		: _base(hexs_a), _start(start), _end(end)
 {
 	Color B = hexs_b;
 
-	__dr = B.r - __base.r;
-	__dg = B.g - __base.g;
-	__db = B.b - __base.b;
+	_dr = B.r - _base.r;
+	_dg = B.g - _base.g;
+	_db = B.b - _base.b;
 }
 
 // Gradient getter
 Color Gradient::get(long double x)
 {
-	long double k = (x - __start)/(__start - __end);
+	long double k = (x - _start)/(_start - _end);
 
 	return Color {
-		(byte) (__base.r + __dr * k),
-		(byte) (__base.g + __dg * k),
-		(byte) (__base.b + __db * k)
+		(byte) (_base.r + _dr * k),
+		(byte) (_base.g + _dg * k),
+		(byte) (_base.b + _db * k)
 	};
 }
 
@@ -122,7 +122,7 @@ Image::Image(byte *data, size_t width, size_t height, size_t channels)
 		: Tensor <unsigned char> ({width, height, channels})
 {
 	size_t nbytes = width * height * channels;
-	memcpy(__array, data, nbytes);
+	memcpy(_array, data, nbytes);
 }
 
 Image::Image(byte **data, size_t width, size_t height, size_t channels)
@@ -130,7 +130,7 @@ Image::Image(byte **data, size_t width, size_t height, size_t channels)
 {
 	size_t rbytes = width * channels;
 	for (size_t i = 0; i < height; i++)
-		memcpy(__array + i * rbytes, data[i], rbytes);
+		memcpy(_array + i * rbytes, data[i], rbytes);
 }
 
 // TODO: Resolve the similarity between this and the above constructor
@@ -138,62 +138,62 @@ Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size
 		: Tensor <unsigned char> ({width, height, channels})
 {
 	for (size_t i = 0; i < height; i++)
-		memcpy(__array + i * rbytes, data[i], rbytes);
+		memcpy(_array + i * rbytes, data[i], rbytes);
 }
 
 Image::Image(const Vector <double> &values, size_t width, size_t height)
 		: Tensor <unsigned char> ({width, height, 1})
 {
-	for (size_t i = 0; i < this->__size; i++)
-		__array[i] = (unsigned char) values[i];
+	for (size_t i = 0; i < this->_size; i++)
+		_array[i] = (unsigned char) values[i];
 }
 
 Vector <size_t> Image::size() const
 {
 	return {
-		__dim[0],
-		__dim[1]
+		_dim[0],
+		_dim[1]
 	};
 }
 
 size_t Image::width() const
 {
-	return __dim[0];
+	return _dim[0];
 }
 
 size_t Image::height() const
 {
-	return __dim[1];
+	return _dim[1];
 }
 
 size_t Image::channels() const
 {
-	return __dim[2];
+	return _dim[2];
 }
 
 void Image::set(const pixel &px, const Color &c)
 {
-	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
 
-	__array[index] = c.r;
-	__array[index + 1] = c.g;
-	__array[index + 2] = c.b;
+	_array[index] = c.r;
+	_array[index + 1] = c.g;
+	_array[index + 2] = c.b;
 }
 
 void Image::set(const pixel &px, size_t channel, byte bt)
 {
-	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
 
-	__array[index + channel] = bt;
+	_array[index + channel] = bt;
 }
 
 void Image::set(const pixel &px, const Vector <byte> &bytes)
 {
-	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
 
 	size_t nbytes = bytes.size();
-	for (size_t i = 0; i < nbytes && i + index < __size; i++)
-		__array[i + index] = bytes[i];
+	for (size_t i = 0; i < nbytes && i + index < _size; i++)
+		_array[i + index] = bytes[i];
 }
 
 void Image::set_hex(const pixel &px, size_t hexc)
@@ -213,11 +213,11 @@ void Image::set_hex(const pixel &px, const std::string &hexs)
 // Pixel value getter (same value as Color::value)
 uint32_t Image::color(const pixel &px) const
 {
-	size_t index = __dim[2] * (px.first * __dim[1] + px.second);
+	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
 
-	uint32_t ur = __array[index];
-	uint32_t ug = __array[index + 1];
-	uint32_t ub = __array[index + 2];
+	uint32_t ur = _array[index];
+	uint32_t ug = _array[index + 1];
+	uint32_t ub = _array[index + 2];
 	
 	return (((ur << 8) + ug) << 8) + ub;
 }
@@ -225,13 +225,13 @@ uint32_t Image::color(const pixel &px) const
 // Extract a single channel
 Image Image::channel(size_t channels) const
 {
-	size_t len = __dim[0] * __dim[1];
+	size_t len = _dim[0] * _dim[1];
 
 	byte *data = new byte[len];
 	for (size_t i = 0; i < len; i++)
-		data[i] = __array[i * __dim[2] + channels];
+		data[i] = _array[i * _dim[2] + channels];
 
-	Image out(data, __dim[0], __dim[1]);
+	Image out(data, _dim[0], _dim[1]);
 
 	// Free memory
 	delete[] data;
@@ -248,19 +248,19 @@ Image Image::crop(const pixel &tr, const pixel &bl) const
 	if (!in_bounds(tr) || !in_bounds(bl))
 		throw out_of_bounds();
 
-	size_t s_index = tr.first * __dim[1] + tr.second;
-	// size_t e_index = bl.first * __dim[1] + bl.second;
+	size_t s_index = tr.first * _dim[1] + tr.second;
+	// size_t e_index = bl.first * _dim[1] + bl.second;
 
 	size_t n_width = bl.first - tr.first + 1;
 	size_t n_height = bl.second - tr.second + 1;
 
 	byte **rows = new byte *[n_height];
 	for (size_t i = 0; i < n_height; i++) {
-		size_t k = __dim[2] * (s_index + i * __dim[1]);
-		rows[i] = &(__array[k]);
+		size_t k = _dim[2] * (s_index + i * _dim[1]);
+		rows[i] = &(_array[k]);
 	}
 
-	Image out(rows, n_width, n_height, __dim[2]);
+	Image out(rows, n_width, n_height, _dim[2]);
 
 	// Free the memory
 	delete[] rows;
@@ -270,24 +270,24 @@ Image Image::crop(const pixel &tr, const pixel &bl) const
 
 const unsigned char *const Image::raw() const
 {
-	return __array;
+	return _array;
 }
 
 unsigned char **Image::row_bytes() const
 {
-	unsigned char **rows = new unsigned char *[__dim[0]];
+	unsigned char **rows = new unsigned char *[_dim[0]];
 
-	size_t stride = __dim[1] * __dim[2];
-	for (size_t i = 0; i < __dim[0]; i++)
-		rows[i] = &(__array[stride * i]);
+	size_t stride = _dim[1] * _dim[2];
+	for (size_t i = 0; i < _dim[0]; i++)
+		rows[i] = &(_array[stride * i]);
 
 	return rows;
 }
 
 bool Image::in_bounds(const pixel &px) const
 {
-	return (px.first >= 0 && px.first < __dim[0])
-		&& (px.second >= 0 && px.second < __dim[1]);
+	return (px.first >= 0 && px.first < _dim[0])
+		&& (px.second >= 0 && px.second < _dim[1]);
 }
 
 #ifndef ZHP_NO_GUI
@@ -300,7 +300,7 @@ int Image::show() const
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(__dim[0], __dim[1], "Zhetapi Image Viewer", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(_dim[0], _dim[1], "Zhetapi Image Viewer", NULL, NULL);
 
 	if (!window) {
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -363,9 +363,9 @@ int Image::show() const
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	int width, height, nrChannels;
 	
-	const unsigned char *data = __array;
+	const unsigned char *data = _array;
 	if (data) {
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, __dim[0], __dim[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _dim[0], _dim[1], 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glGenerateMipmap(GL_TEXTURE_2D);
 	} else {
 		std::cout << "Failed to load texture" << std::endl;

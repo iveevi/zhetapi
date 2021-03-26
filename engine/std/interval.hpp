@@ -96,14 +96,14 @@ class Interval <1> {
 	};
 
 	// Should always contain disjoint intervals
-	std::set <disjoint>	__union;
+	std::set <disjoint>	_union;
 
 	// Assumes that the intervals in un are disjoint
-	explicit Interval(const std::set <disjoint> &un) : __union(un) {}
+	explicit Interval(const std::set <disjoint> &un) : _union(un) {}
 
 	// Checks that the new 'disjoint' interval is indeed disjoint
 	bool is_disjoint(const disjoint &djx) const {
-		for (const disjoint &dj : __union) {
+		for (const disjoint &dj : _union) {
 			if (!dj.is_disjoint(djx))
 				return false;
 		}
@@ -123,14 +123,14 @@ public:
 	Interval(double left, double right, bool closed = true) {
 		disjoint dj {left, right, closed};
 
-		__union.insert(__union.begin(), dj);
+		_union.insert(_union.begin(), dj);
 	}
 
 	// Properties
 	double size() const {
 		double len = 0;
 
-		for (disjoint dj : __union)
+		for (disjoint dj : _union)
 			len += dj.length();
 		
 		return len;
@@ -145,12 +145,12 @@ public:
 		// TODO: Cover case where the interval is not closed
 		double len = size();
 
-		double *db = new double[__union.size() + 1];
+		double *db = new double[_union.size() + 1];
 
 		size_t i = 0;
 
 		db[i++] = 0;
-		for (disjoint dj : __union) {
+		for (disjoint dj : _union) {
 			db[i] = db[i - 1] + dj.length()/len;
 
 			i++;
@@ -158,14 +158,14 @@ public:
 
 		double rnd = distro(gen);
 
-		for (i = 0; i < __union.size(); i++) {
+		for (i = 0; i < _union.size(); i++) {
 			if ((rnd > db[i]) && (rnd < db[i + 1]))
 				break;
 		}
 
 		delete[] db;
 
-		auto itr = __union.begin();
+		auto itr = _union.begin();
 
 		std::advance(itr, i);
 
@@ -174,14 +174,14 @@ public:
 
 	// Operations
 	Interval &operator|=(const Interval &itv) {
-		auto iset = itv.__union;
+		auto iset = itv._union;
 
 		using namespace std;
 
 		// Check for disjointed-ness
 		for (const disjoint &dj : iset) {
 			if (is_disjoint(dj))
-				__union.insert(__union.begin(), dj);
+				_union.insert(_union.begin(), dj);
 			else
 				cout << "Adding a non-disjoint interval" << endl;
 		}

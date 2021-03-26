@@ -11,7 +11,7 @@ namespace zhetapi {
 
 class node_differential : public Token {
 protected:
-	Token *		__ref;
+	Token *		_ref;
 public:
 	explicit node_differential(Token *);
 

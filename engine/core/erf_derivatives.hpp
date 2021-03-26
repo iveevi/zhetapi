@@ -7,9 +7,9 @@ namespace ml {
 
 // Squared error
 template <class T>
-class __DSE : public Erf <T> {
+class _DSE : public Erf <T> {
 public:
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		return -T(2) * (comp - in);
 	}
@@ -17,9 +17,9 @@ public:
 
 // M squared error
 template <class T>
-class __DMSE : public Erf <T> {
+class _DMSE : public Erf <T> {
 public:
-	__cuda_dual_prefix
+	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		return -T(2)/T(comp.size()) * (comp - in);
 	}
