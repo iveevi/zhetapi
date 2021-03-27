@@ -231,17 +231,13 @@ Token *node_manager::value(node tree) const
 		if (tree._label == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
 			
-			v = Variable(tptr, rv->symbol());
-
-			_engine->put(v);
+			_engine->put(rv->symbol(), tptr);
 
 			return rv->get()->copy();
 		} else if (tree._label == l_pre_modifier) {
 			rv= tree[0].cast <rvalue> ();
-			
-			v = Variable(tptr, rv->symbol());
 
-			_engine->put(v);
+			_engine->put(rv->symbol(), tptr);
 		}
 
 		return tptr->copy();

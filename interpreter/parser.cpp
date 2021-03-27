@@ -343,7 +343,7 @@ void check(string &keyword)
 		engine = push_and_ret_stack(engine);
 
 		for (Token *t : tok_list) {
-			engine->put(Variable(t, var));
+			engine->put(var, t);
 
 			parse(block);
 		}

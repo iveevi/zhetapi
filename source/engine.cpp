@@ -52,12 +52,12 @@ void Engine::set_origin_stack(Engine *engine)
 	_stack = engine;
 }
 
-void Engine::put(Variable var)
+void Engine::put(const std::string &str, Token *tptr)
 {
-	if (_var_table.count(var.symbol()))
-		_var_table[var.symbol()] = var;
+	if (_var_table.count(str))
+		_var_table[str] = tptr->copy();
 	else
-		_var_table.insert(std::make_pair(var.symbol(), var));
+		_var_table.insert(std::make_pair(str, tptr->copy()));
 }
 
 void Engine::put(Function ftr)
@@ -84,19 +84,6 @@ void Engine::put(algorithm alg)
 		_alg_table.insert(std::make_pair(alg.symbol(), alg));
 }
 
-void Engine::put(const std::string &str, Token *tptr)
-{
-	// TODO: should this be so?
-	//
-	// "Leave the passed pointer alone, and copy it instead"
-	put(Variable(tptr->copy(), str));
-}
-
-Variable &Engine::retrieve_variable(const std::string &str)
-{
-	return _var_table[str];
-}
-
 Function &Engine::retrieve_function(const std::string &str)
 {
 	return _ftr_table[str];
@@ -112,7 +99,7 @@ Token *Engine::get(const std::string &str)
 		return _reg_table[str].copy();
 	
 	if (_var_table.count(str))
-		return _var_table[str].copy();
+		return _var_table[str]->copy();
 	
 	if (_ftr_table.count(str))
 		return _ftr_table[str].copy();
@@ -126,8 +113,10 @@ Token *Engine::get(const std::string &str)
 void Engine::list() const
 {
 	std::cout << "\tVariables:" << std::endl;
-	for (auto spr : _var_table)
-		std::cout << "\t\t" << spr.second.str() << std::endl;
+	for (auto spr : _var_table) {
+		std::cout << "\t\t" << spr.first << " ["
+			<< spr.second->str() << "]" << std::endl;
+	}
 	
 	std::cout << "\tFunctions:" << std::endl;
 	for (auto spr : _ftr_table)
@@ -140,7 +129,7 @@ void Engine::list_registered(std::string file) const
 	for (auto spr : _reg_table)
 		std::cout << "\t" << spr.second.str() << std::endl;
 	for (auto spr : _var_table)
-		std::cout << "\t" << spr.second.str() << std::endl;
+		std::cout << "\t" << spr.second->str() << std::endl;
 	for (auto spr : _ftr_table)
 		std::cout << "\t" << spr.second.str() << std::endl;
 }

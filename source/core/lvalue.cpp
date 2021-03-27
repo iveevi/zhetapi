@@ -26,7 +26,7 @@ void lvalue::assign(Token *tptr)
 
 	// Assumes either function or variable (variable for now)
 	if (self->caller() == var && _context)
-		_context->put(Variable(tptr, _symbol));
+		_context->put(_symbol, tptr);
 }
 
 Token::type lvalue::caller() const

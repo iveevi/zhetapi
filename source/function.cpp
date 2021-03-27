@@ -91,7 +91,8 @@ Function::Function(const std::string &str) : _threads(1)
 }
 
 // Symbolic constructor with external symbol table
-Function::Function(const std::string &str, Engine *bptr) : _threads(1)
+Function::Function(const std::string &str, Engine *engine)
+		: _threads(1)
 {
 	// TODO: Remove this (duplication)
 	std::string pack;
@@ -164,7 +165,11 @@ Function::Function(const std::string &str, Engine *bptr) : _threads(1)
 	_symbol = _symbol.substr(0, start);
 
 	// Construct the tree manager
-	_manager = node_manager(str.substr(++index), _params, bptr);
+	_manager = node_manager(str.substr(++index), _params, engine);
+
+	/* using namespace std;
+	cout << "manager:" << endl;
+	print(); */
 }
 
 // Member-wise construction

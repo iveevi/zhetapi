@@ -31,6 +31,9 @@ algorithm::algorithm(
 
 void algorithm::compile(Engine *engine)
 {
+	// Push stack
+	engine = push_and_ret_stack(engine);
+	
 	// Use the definition line number
 	bool quoted = false;
 	int paren = 0;
@@ -76,6 +79,9 @@ void algorithm::compile(Engine *engine)
 	/* using namespace std;
 	cout << "compiled:" << endl;
 	_compiled.print(); */
+	
+	// Pop stack
+	engine = pop_and_del_stack(engine);
 }
 
 void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
@@ -100,7 +106,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 			// possibility of a function over this)
 			if (!engine->get(tmp[i])) {
 				// Default initialize the value to 0
-				engine->put(Variable(new Operand <int> (0), tmp[i]));
+				engine->put(tmp[i], new Operand <int> (0));
 			}
 
 			Token *tptr = engine->get(tmp[i]);
@@ -146,12 +152,21 @@ Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 	// Ignore arguments for now
 	if (_compiled.empty())
 		compile(engine);
+	
+	using namespace std;
+	cout << "pre-engine:" << endl;
+	engine->list();
 
-	/* using namespace std;
-	cout << "Pre eval:" << endl;
-	_compiled.print(); */
+	engine = push_and_ret_stack(engine);
 
-	return _compiled.substitute_and_seq_compute(engine, args);
+	Token *tptr = _compiled.substitute_and_seq_compute(engine, args);
+
+	engine = pop_and_del_stack(engine);
+
+	cout << "POST-engine:" << endl;
+	engine->list();
+
+	return tptr;
 }
 
 // Splitting equalities

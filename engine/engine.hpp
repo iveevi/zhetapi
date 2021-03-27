@@ -15,7 +15,7 @@ class Engine : public engine_base {
 	// Broader scope
 	Engine *		_stack = nullptr;
 
-	symtab <Variable>	_var_table;
+	symtab <Token *>	_var_table;
 	symtab <Function>	_ftr_table;
 
 	symtab <Registrable>	_reg_table;
@@ -33,7 +33,6 @@ public:
 	Engine *new_stack();
 	Engine *get_stack();
 
-	void put(Variable);
 	void put(Function);
 	void put(Registrable);
 	void put(algorithm);
@@ -41,7 +40,6 @@ public:
 	void put(const std::string &, Token *);
 
 	// Are these necessary?
-	Variable &retrieve_variable(const std::string &);
 	Function &retrieve_function(const std::string &);
 
 	Token *get(const std::string &);

@@ -42,17 +42,19 @@ for (i in list) {
 
 # println("i = ", i)
 
-fx = df/dx
+# valid syntaxes: fx = df/dx and fx(x) = df/dx(x) (or at least (df/dx)(x))
+fx = f
 
 println("f: ", fx)
+println("df/dx at x = 1: ", fx(1))
 
 r = 1
 
-i = 0
-while (i < 10) {
-	println("current guess: ", r)
-
-	r = r - f(r)/r
-
-	i++
-}
+# i = 0
+# while (i < 10) {
+#	println("current guess: ", r)
+#
+#	r = r - f(r)/r
+#
+#	i++
+#}
