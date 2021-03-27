@@ -175,7 +175,8 @@ Token *node_manager::value(node tree) const
 	Token *vptr;
 
 	Variable v;
-	Variable *vp;
+
+	rvalue *rv;
 
 	algorithm *aptr;
 
@@ -228,28 +229,17 @@ Token *node_manager::value(node tree) const
 						(tree._tptr))->rep, values);
 		
 		if (tree._label == l_post_modifier) {
-			vptr = tree._leaves[0]._tptr;
-
-			vp = dynamic_cast <Variable *> (vptr);
-
-			ident = vp->symbol();
+			rv = tree[0].cast <rvalue> ();
 			
-			v = Variable(tptr, ident);
+			v = Variable(tptr, rv->symbol());
 
 			_engine->put(v);
 
-			tptr = vp->get();
-
-			return tptr->copy();
+			return rv->get()->copy();
 		} else if (tree._label == l_pre_modifier) {
-			vptr = tree._leaves[0]._tptr;
-
-			// zhetapi_cast({vptr}, vp);
-			vp = dynamic_cast <Variable *> (vptr);
-
-			ident = vp->symbol();
+			rv= tree[0].cast <rvalue> ();
 			
-			v = Variable(tptr, ident);
+			v = Variable(tptr, rv->symbol());
 
 			_engine->put(v);
 		}

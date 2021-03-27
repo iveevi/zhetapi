@@ -9,6 +9,11 @@ rvalue::rvalue() {}
 rvalue::rvalue(const std::string &symbol, Engine *context)
 		: _symbol(symbol), _context(context) {}
 
+const std::string &rvalue::symbol() const
+{
+	return _symbol;
+}
+
 Token *rvalue::get() const
 {
 	// TODO: Maybe warn for null?

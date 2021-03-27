@@ -24,6 +24,10 @@ public:
 	rvalue();
 	rvalue(const std::string &, Engine *);
 
+
+	// Properties
+	const std::string &symbol() const;
+
 	// Different from lvalue (the only difference)
 	Token *get() const;
 

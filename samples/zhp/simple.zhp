@@ -1,4 +1,4 @@
-f(x) = x^2
+f(x) = x^2 - x - 1
 g(x) = ln(x)
 
 println("f(x) = ", f)
@@ -54,5 +54,5 @@ while (i < 10) {
 
 	r = r - f(r)/r
 
-	#i++ (seg faults)
+	i++
 }
