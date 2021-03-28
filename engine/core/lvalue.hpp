@@ -16,16 +16,14 @@ class Engine;
 class lvalue : public Token {
 protected:
 	std::string	_symbol	= "";		// The actual symbol
-	Engine *	_context	= nullptr;	// Acts as the scope
 public:
 	lvalue();
-	lvalue(const std::string &, Engine *);
+	lvalue(const std::string &);
 
 	// Properties
 	const std::string &symbol() const;
-	bool is_dummy() const;
 
-	void assign(Token *);
+	void assign(Token *, Engine *);
 
 	type caller() const override;
 	Token *copy() const override;

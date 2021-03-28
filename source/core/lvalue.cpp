@@ -4,29 +4,23 @@
 
 namespace zhetapi {
 
-lvalue::lvalue() {}
-
-lvalue::lvalue(const std::string &symbol, Engine *context)
-		: _symbol(symbol), _context(context) {}
+lvalue::lvalue(const std::string &symbol)
+		: _symbol(symbol) {}
 
 const std::string &lvalue::symbol() const
 {
 	return _symbol;
 }
 
-// Is this lvalue simply a place holder?
-bool lvalue::is_dummy() const
+void lvalue::assign(Token *tptr, Engine *context)
 {
-	return _context == nullptr;
-}
-
-void lvalue::assign(Token *tptr)
-{
-	Token *self = _context->get(_symbol);
-
-	// Assumes either function or variable (variable for now)
-	if (self->caller() == var && _context)
-		_context->put(_symbol, tptr);
+	using namespace std;
+	cout << "LVALUE ASSIGNMENT:" << endl;
+	context->list();
+	if (context)
+		context->put(_symbol, tptr);
+	cout << "post:" << endl;
+	context->list();
 }
 
 Token::type lvalue::caller() const
@@ -36,7 +30,7 @@ Token::type lvalue::caller() const
 
 Token *lvalue::copy() const
 {
-	return new lvalue(_symbol, _context);
+	return new lvalue(_symbol);
 }
 
 std::string lvalue::str() const
@@ -51,8 +45,7 @@ bool lvalue::operator==(Token *tptr) const
 	if (lv == nullptr)
 		return false;
 
-	return (lv->_symbol == _symbol)
-		&& (lv->_context == _context);
+	return lv->_symbol == _symbol;
 }
 
 }

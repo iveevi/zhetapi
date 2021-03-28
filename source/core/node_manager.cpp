@@ -204,7 +204,7 @@ Token *node_manager::value(node tree) const
 				
 				lvalue *lv = tree[i].cast <lvalue> ();
 
-				lv->assign(tmp);
+				lv->assign(tmp, _engine);
 			}
 
 			return nullptr;
@@ -441,7 +441,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 				// Second chance for differential
 				if (!dptr && !_engine->get(pr.second))
-					dptr = new lvalue(pr.second.substr(1), nullptr);
+					dptr = new lvalue(pr.second.substr(1));
 			}
 
 			size_t dindex = std::distance(_params.begin(), diff);

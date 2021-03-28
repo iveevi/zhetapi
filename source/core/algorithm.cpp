@@ -76,9 +76,9 @@ void algorithm::compile(Engine *engine)
 	_compiled.set_label(l_sequential);
 	_compiled.set_engine(engine);
 
-	/* using namespace std;
+	using namespace std;
 	cout << "compiled:" << endl;
-	_compiled.print(); */
+	_compiled.print();
 	
 	// Pop stack
 	engine = pop_and_del_stack(engine);
@@ -113,7 +113,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 
 			// Check if tptr is assignable (ie. variable or function)
 			if (tptr)
-				eq.append(node(new lvalue(tmp[i], engine), l_lvalue));
+				eq.append(node(new lvalue(tmp[i]), l_lvalue));
 		}
 
 		// Only node to actually be computed (as an l-value)
@@ -153,18 +153,11 @@ Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 	if (_compiled.empty())
 		compile(engine);
 	
-	using namespace std;
-	cout << "pre-engine:" << endl;
-	engine->list();
-
 	engine = push_and_ret_stack(engine);
 
 	Token *tptr = _compiled.substitute_and_seq_compute(engine, args);
 
 	engine = pop_and_del_stack(engine);
-
-	cout << "POST-engine:" << endl;
-	engine->list();
 
 	return tptr;
 }
