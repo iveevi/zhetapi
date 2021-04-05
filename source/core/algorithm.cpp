@@ -32,7 +32,7 @@ algorithm::algorithm(
 void algorithm::compile(Engine *engine)
 {
 	// Push stack
-	engine = push_and_ret_stack(engine);
+	// engine = push_and_ret_stack(engine);
 	
 	// Use the definition line number
 	bool quoted = false;
@@ -76,12 +76,12 @@ void algorithm::compile(Engine *engine)
 	_compiled.set_label(l_sequential);
 	_compiled.set_engine(engine);
 
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
-	_compiled.print();
+	_compiled.print(); */
 	
 	// Pop stack
-	engine = pop_and_del_stack(engine);
+	// engine = pop_and_del_stack(engine);
 }
 
 void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)

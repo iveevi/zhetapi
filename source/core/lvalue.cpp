@@ -14,13 +14,8 @@ const std::string &lvalue::symbol() const
 
 void lvalue::assign(Token *tptr, Engine *context)
 {
-	using namespace std;
-	cout << "LVALUE ASSIGNMENT:" << endl;
-	context->list();
 	if (context)
 		context->put(_symbol, tptr);
-	cout << "post:" << endl;
-	context->list();
 }
 
 Token::type lvalue::caller() const

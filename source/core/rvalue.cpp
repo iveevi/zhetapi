@@ -6,24 +6,18 @@ namespace zhetapi {
 
 rvalue::rvalue() {}
 
-rvalue::rvalue(const std::string &symbol, Engine *context)
-		: _symbol(symbol), _context(context) {}
+rvalue::rvalue(const std::string &symbol)
+		: _symbol(symbol) {}
 
 const std::string &rvalue::symbol() const
 {
 	return _symbol;
 }
 
-Token *rvalue::get() const
+Token *rvalue::get(Engine *context) const
 {
 	// TODO: Maybe warn for null?
-	Token *tptr = _context->get(_symbol);
-
-	// Only constant for now
-	if (tptr->caller() == Token::var)
-		return (dynamic_cast <Variable *> (tptr))->get();
-
-	return nullptr;
+	return context->get(_symbol);
 }
 
 Token::type rvalue::caller() const
@@ -33,7 +27,7 @@ Token::type rvalue::caller() const
 
 Token *rvalue::copy() const
 {
-	return new rvalue(_symbol, _context);
+	return new rvalue(_symbol);
 }
 
 std::string rvalue::str() const
@@ -48,8 +42,7 @@ bool rvalue::operator==(Token *tptr) const
 	if (rv == nullptr)
 		return false;
 
-	return (rv->_symbol == _symbol)
-		&& (rv->_context == _context);
+	return rv->_symbol == _symbol;
 }
 
 }

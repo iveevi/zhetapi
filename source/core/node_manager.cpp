@@ -233,7 +233,7 @@ Token *node_manager::value(node tree) const
 			
 			_engine->put(rv->symbol(), tptr);
 
-			return rv->get()->copy();
+			return rv->get(_engine)->copy();
 		} else if (tree._label == l_pre_modifier) {
 			rv= tree[0].cast <rvalue> ();
 
@@ -244,7 +244,7 @@ Token *node_manager::value(node tree) const
 	case Token::var:
 		return (tree.cast <Variable> ())->get()->copy();
 	case Token::token_rvalue:
-		return (tree.cast <rvalue> ())->get()->copy();
+		return (tree.cast <rvalue> ())->get(_engine)->copy();
 	case Token::ndr:
 		return (tree.cast <node_reference> ())->get()->copy_token();
 	case Token::token_node_list:
@@ -357,6 +357,9 @@ void node_manager::add_args(const std::vector <std::string> &args)
 
 		_refs.push_back(tmp);
 	}
+	
+	// Add the arguments
+	_params.insert(_params.end(), args.begin(), args.end());
 
 	// Fix broken variable references
 	rereference(_tree);
@@ -377,7 +380,7 @@ void node_manager::unpack(node &ref)
 {
 	if (ref.caller() == Token::token_rvalue) {
 		// TODO: make a method for assigning tokens to trees
-		ref._tptr = (ref.cast <rvalue> ())->get();
+		ref._tptr = (ref.cast <rvalue> ())->get(_engine);
 	}
 
 	// Add a foreach method in nodes (with ref)
@@ -465,10 +468,10 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				//
 				// TODO: Add a block class (maybe oversees
 				// the algorithm class as well)
-				//
-				// Only use rvalue for variables
-				if (tptr->caller() == Token::var) {
-					rvalue *rv = new rvalue((dynamic_cast <Variable *> (tptr))->symbol(), _engine);
+				
+				// For now only operands are allowed as rvalues
+				if (tptr->caller() == Token::opd) {
+					rvalue *rv = new rvalue(pr.second);
 
 					t = node(rv);
 				} else {
@@ -1037,6 +1040,10 @@ void node_manager::rereference(node &ref)
 
 		auto itr = find(_params.begin(), _params.end(), tmp);
 
+		if (itr == _params.end())
+			throw std::runtime_error("could not find param " + tmp);
+
+		// TODO: throw if index is at the end
 		size_t index = std::distance(_params.begin(), itr);
 
 		// Need a new method to clear/reset

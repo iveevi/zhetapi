@@ -19,17 +19,15 @@ class Engine;
 class rvalue : public Token {
 protected:
 	std::string	_symbol	= "";		// The actual symbol
-	Engine *	_context	= nullptr;	// Acts as the scope
 public:
 	rvalue();
-	rvalue(const std::string &, Engine *);
-
+	rvalue(const std::string &);
 
 	// Properties
 	const std::string &symbol() const;
 
 	// Different from lvalue (the only difference)
-	Token *get() const;
+	Token *get(Engine *) const;
 
 	type caller() const override;
 	Token *copy() const override;

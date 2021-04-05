@@ -4,7 +4,7 @@ g(x) = ln(x)
 println("f(x) = ", f)
 println("g(x) = ", g)
 
-tmp = 0
+tmp = 3.14 * 45
 
 println("tmp = ", tmp)
 
