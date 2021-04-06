@@ -4,18 +4,17 @@
 namespace zhetapi {
 
 // Static variables
-Engine Function::engine = Engine();
+Engine *Function::shared_context = new Engine();
 
 double Function::h = 0.0001;
 
 // Constructors
 Function::Function() : _threads(1) {}
 
-Function::Function(const char *str) : Function(std::string
-		(str)) {}
+Function::Function(const char *str) : Function(std::string(str)) {}
 
 // Symbolic construction
-Function::Function(const std::string &str) : _threads(1)
+/* Function::Function(const std::string &str) : _threads(1)
 {
 	std::string pack;
 	std::string tmp;
@@ -87,11 +86,13 @@ Function::Function(const std::string &str) : _threads(1)
 	_symbol = _symbol.substr(0, start);
 
 	// Construct the tree manager
-	_manager = node_manager(str.substr(++index), _params, &engine);
-}
+	_manager = node_manager(str.substr(++index), _params);
+} */
 
 // Symbolic constructor with external symbol table
-Function::Function(const std::string &str, Engine *engine)
+
+// TODO: Take an Engine as an input as well: there is no need to delay rvalue resolution
+Function::Function(const std::string &str)
 		: _threads(1)
 {
 	// TODO: Remove this (duplication)
@@ -165,7 +166,7 @@ Function::Function(const std::string &str, Engine *engine)
 	_symbol = _symbol.substr(0, start);
 
 	// Construct the tree manager
-	_manager = node_manager(str.substr(++index), _params, engine);
+	_manager = node_manager(shared_context, str.substr(++index), _params);
 
 	/* using namespace std;
 	cout << "manager:" << endl;
@@ -205,11 +206,13 @@ void Function::set_threads(size_t threads)
 }
 
 // Computational utilities
+
+// delete this
 Token *Function::operator()(std::vector <Token *> toks)
 {
 	assert(toks.size() == _params.size());
 
-	return _manager.substitute_and_compute(toks, _threads);
+	return _manager.substitute_and_compute(shared_context, toks);
 }
 
 template <class ... A>
@@ -228,31 +231,31 @@ Token *Function::derivative(const std::string &str, A ... args)
 	// Right
 	Token *right;
 
-	Tokens[i] = engine.compute("+", {Tokens[i], new Operand <double> (h)});
+	Tokens[i] = shared_context->compute("+", {Tokens[i], new Operand <double> (h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
 			Tokens[k] = Tokens[k]->copy();
 	}
 	
-	right = _manager.substitute_and_compute(Tokens);
+	right = _manager.substitute_and_compute(shared_context, Tokens);
 	
 	// Left
 	Token *left;
 
-	Tokens[i] = engine.compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
+	Tokens[i] = shared_context->compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
 			Tokens[k] = Tokens[k]->copy();
 	}
 
-	left = _manager.substitute_and_compute(Tokens);
+	left = _manager.substitute_and_compute(shared_context, Tokens);
 
 	// Compute
-	Token *diff = engine.compute("-", {right, left});
+	Token *diff = shared_context->compute("-", {right, left});
 
-	diff = engine.compute("/", {diff, new Operand <double> (2.0 * h)});
+	diff = shared_context->compute("/", {diff, new Operand <double> (2.0 * h)});
 
 	return diff;
 }

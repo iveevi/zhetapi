@@ -22,7 +22,6 @@ public:
 	Function();
 	Function(const char *);
 	Function(const std::string &);
-	Function(const std::string &, Engine *);
 
 	Function(const std::string &,
 		const std::vector <std::string> &,
@@ -78,7 +77,7 @@ public:
 	class invalid_definition {};
 
 	// Static variables
-	static Engine engine;
+	static Engine *shared_context;
 
 	static double h;
 };
@@ -92,7 +91,7 @@ Token *Function::operator()(A ... args)
 
 	assert(tokens.size() == _params.size());
 
-	return _manager.substitute_and_compute(tokens, _threads);
+	return _manager.substitute_and_compute(shared_context, tokens);
 }
 
 // Gathering facilities

@@ -22,9 +22,9 @@ Token *execute(string str)
 		bool pe = false;
 
 		try {
-			zhetapi::node_manager mg(tmp[tsize - 1], engine);
+			zhetapi::node_manager mg(engine, tmp[tsize - 1]);
 
-			tptr = mg.value();
+			tptr = mg.value(engine);
 		} catch (const Engine::unknown_op_overload &e)  {
 			cout << "err: " << e.what() << endl;
 			exit(-1);
@@ -37,7 +37,7 @@ Token *execute(string str)
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];
 
 			try {
-				zhetapi::Function f(ftr, engine);
+				zhetapi::Function f(ftr);
 
 				engine->put(f);
 			} catch (...) {
@@ -61,9 +61,9 @@ Token *execute(string str)
 		Token *tptr = nullptr;
 
 		try {
-			mg = node_manager(str, engine);
+			mg = node_manager(engine, str);
 			
-			tptr = mg.value();
+			tptr = mg.value(engine);
 		} catch (const Engine::unknown_op_overload &e)  {
 			cout << "err evaluating \'" << str << "\'\n" << e.what() << endl;
 			exit(-1);

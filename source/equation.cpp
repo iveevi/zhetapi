@@ -20,7 +20,7 @@ Equation::Equation(const std::vector <std::string> &exprs)
 		bool success = false;
 		do {
 			try {
-				node_manager nm(str, args, _engine);
+				node_manager nm(_engine, str, args);
 
 				_expressions.push_back(nm);
 

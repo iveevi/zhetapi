@@ -6,13 +6,13 @@ namespace zhetapi {
 node_list::node_list(const std::vector <node> &nodes)
 		: _nodes(nodes) {}
 
-Token *node_list::evaluate(Engine *engine) const
+Token *node_list::evaluate(Engine *context) const
 {
 	std::vector <Token *> toks;
 	for (node nd : _nodes) {
-		node_manager nm(nd, engine);
+		node_manager nm(context, nd);
 
-		toks.push_back(nm.value());
+		toks.push_back(nm.value(context));
 	}
 
 	return new Operand <std::vector <Token *>> (toks);

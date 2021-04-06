@@ -330,9 +330,9 @@ void check(string &keyword)
 			exit(-1);
 		}
 
-		node_manager nm(expr, engine);
+		node_manager nm(engine, expr);
 
-		Token *tptr = nm.value();
+		Token *tptr = nm.value(engine);
 
 		// For the love of God make this cleaner
 		Operand <std::vector <Token *>> *op = dynamic_cast <Operand <std::vector <Token *>> *> (tptr);

@@ -54,6 +54,14 @@ void Engine::set_origin_stack(Engine *engine)
 
 void Engine::put(const std::string &str, Token *tptr)
 {
+	// Check broader scope first
+	if (_stack && _stack->get(str)) {
+		_stack->put(str, tptr);
+
+		return;
+	}
+
+	// Insert appropriately
 	if (_var_table.count(str))
 		_var_table[str] = tptr->copy();
 	else

@@ -5,31 +5,34 @@
 
 namespace zhetapi {
 
+// Static variables
+Engine *node_manager::shared_context = new Engine();
+
 node_manager::node_manager() {}
 
 node_manager::node_manager(const node_manager &other)
-		: _engine(other._engine), _tree(other._tree),
-		_refs(other._refs), _params(other._params)
+		: _tree(other._tree), _refs(other._refs),
+		_params(other._params)
 {
 	rereference(_tree);
 }
 
-node_manager::node_manager(const node &tree, Engine *engine)
-		: _engine(engine), _tree(tree)
+node_manager::node_manager(Engine *context, const node &tree)
+		: _tree(tree)
 {
 	// Unpack variable clusters
-	expand(_tree);
+	expand(context, _tree);
 
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
 
 	// Simplify
-	simplify(_tree);
+	simplify(context, _tree);
 }
 
-node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
-		: _engine(engine), _tree(tree), _params(args)
+node_manager::node_manager(Engine *context, const node &tree, const Args &args)
+		: _tree(tree), _params(args)
 {
 	// TODO: Put this in a method
 	//
@@ -44,7 +47,7 @@ node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
 	}
 
 	// Unpack variable clusters
-	expand(_tree);
+	expand(context, _tree);
 
 	// Label the tree
 	label(_tree);
@@ -53,11 +56,10 @@ node_manager::node_manager(const node &tree, const Args &args, Engine *engine)
 	rereference(_tree);
 
 	// Simplify
-	simplify(_tree);
+	simplify(context, _tree);
 }
 
-node_manager::node_manager(const std::string &str, Engine *engine)
-		: _engine(engine)
+node_manager::node_manager(Engine *context, const std::string &str)
 {
 	zhetapi::parser pr;
 
@@ -67,20 +69,21 @@ node_manager::node_manager(const std::string &str, Engine *engine)
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
 	// Unpack variable clusters
-	expand(_tree);
+	expand(context, _tree);
 
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
 	
 	// Simplify
-	simplify(_tree);
+	simplify(context, _tree);
 }
 
-node_manager::node_manager(const std::string &str,
-		const std::vector <std::string> &params,
-		Engine *engine) 
-		: _params(params), _engine(engine) 
+node_manager::node_manager(
+		Engine *context,
+		const std::string &str,
+		const std::vector <std::string> &params) 
+		: _params(params)
 {
 	parser pr;
 
@@ -100,20 +103,20 @@ node_manager::node_manager(const std::string &str,
 	}
 
 	// Unpack variable clusters
-	expand(_tree);
+	expand(context, _tree);
 
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
 
 	// Simplify
-	simplify(_tree);
+	simplify(context, _tree);
 }
 
 node_manager &node_manager::operator=(const node_manager &other)
 {
 	if (this != &other) {
-		_engine = other._engine;
+		shared_context = other.shared_context;
 		_tree = other._tree;
 		_refs = other._refs;
 		_params = other._params;
@@ -146,28 +149,23 @@ void node_manager::set_label(lbl label)
 	_tree._label = label;
 }
 
-void node_manager::set_engine(Engine *engine)
-{
-	_engine = engine;
-}
-
 // Value finding methods
-Token *node_manager::value() const
+Token *node_manager::value(Engine *context) const
 {
-	return value(_tree);
+	return value(context, _tree);
 }
 
 // Sequential value (returns null for now)
-Token *node_manager::sequential_value() const
+Token *node_manager::sequential_value(Engine *context) const
 {
 	// Assumes that the top node is a sequential
 	for (node nd : _tree._leaves)
-		value(nd);
+		value(context, nd);
 	
 	return nullptr;
 }
 
-Token *node_manager::value(node tree) const
+Token *node_manager::value(Engine *context, node tree) const
 {
 	std::vector <Token *> values;
 
@@ -190,7 +188,7 @@ Token *node_manager::value(node tree) const
 	if (tree.null()) {
 		if (tree.label() == l_assignment_chain) {
 			// Evaluate first node
-			Token *tmp = value(tree[0]);
+			Token *tmp = value(context, tree[0]);
 
 			// Assign for the other nodes
 
@@ -204,7 +202,7 @@ Token *node_manager::value(node tree) const
 				
 				lvalue *lv = tree[i].cast <lvalue> ();
 
-				lv->assign(tmp, _engine);
+				lv->assign(tmp, context);
 			}
 
 			return nullptr;
@@ -223,45 +221,44 @@ Token *node_manager::value(node tree) const
 	case Token::oph:	
 		size = tree._leaves.size();
 		for (node leaf : tree._leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(context, leaf));
 
-		tptr = _engine->compute((dynamic_cast <operation_holder *>
-						(tree._tptr))->rep, values);
+		tptr = context->compute((tree.cast <operation_holder> ())->rep, values);
 		
 		if (tree._label == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
 			
-			_engine->put(rv->symbol(), tptr);
+			context->put(rv->symbol(), tptr);
 
-			return rv->get(_engine)->copy();
+			return rv->get(context)->copy();
 		} else if (tree._label == l_pre_modifier) {
 			rv= tree[0].cast <rvalue> ();
 
-			_engine->put(rv->symbol(), tptr);
+			context->put(rv->symbol(), tptr);
 		}
 
 		return tptr->copy();
 	case Token::var:
 		return (tree.cast <Variable> ())->get()->copy();
 	case Token::token_rvalue:
-		return (tree.cast <rvalue> ())->get(_engine)->copy();
+		return (tree.cast <rvalue> ())->get(context)->copy();
 	case Token::ndr:
 		return (tree.cast <node_reference> ())->get()->copy_token();
 	case Token::token_node_list:
-		return (tree.cast <node_list> ())->evaluate(_engine);
+		return (tree.cast <node_list> ())->evaluate(context);
 	case Token::ftn:
 		if (tree._leaves.empty())
 			return tree._tptr->copy();
 		
 		for (node leaf : tree._leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(context, leaf));
 
 		tptr = (*(dynamic_cast <Function *> (tree._tptr)))(values);
 
 		return tptr->copy();
 	case Token::reg:
 		for (node leaf : tree._leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(context, leaf));
 
 		tptr = (*(dynamic_cast <Registrable *> (tree._tptr)))(values);
 
@@ -271,10 +268,10 @@ Token *node_manager::value(node tree) const
 		break;
 	case Token::alg:
 		for (node leaf : tree._leaves)
-			values.push_back(value(leaf));
+			values.push_back(value(context, leaf));
 		
 		aptr = dynamic_cast <algorithm *> (tree._tptr);
-		tptr = aptr->execute(_engine, values);
+		tptr = aptr->execute(context, values);
 
 		if (tptr)
 			return tptr->copy();
@@ -287,8 +284,9 @@ Token *node_manager::value(node tree) const
 	return nullptr;
 }
 
-Token *node_manager::substitute_and_compute(std::vector <Token *>
-		&toks, size_t total_threads)
+Token *node_manager::substitute_and_compute(
+		Engine *context,
+		std::vector <Token *> &toks)
 {
 	assert(_refs.size() == toks.size());
 	for (size_t i = 0; i < _refs.size(); i++) {
@@ -297,11 +295,12 @@ Token *node_manager::substitute_and_compute(std::vector <Token *>
 		label(_refs[i]);
 	}
 
-	return value(_tree);
+	return value(context, _tree);
 }
 
-Token *node_manager::substitute_and_seq_compute(Engine *ext,
-		const std::vector <Token *> &toks, size_t total_threads)
+Token *node_manager::substitute_and_seq_compute(
+		Engine *context,
+		const std::vector <Token *> &toks)
 {
 	assert(_refs.size() == toks.size());
 	for (size_t i = 0; i < _refs.size(); i++) {
@@ -310,7 +309,7 @@ Token *node_manager::substitute_and_seq_compute(Engine *ext,
 		label(_refs[i]);
 	}
 
-	return sequential_value();
+	return sequential_value(context);
 }
 
 void node_manager::append(const node &n)
@@ -380,7 +379,7 @@ void node_manager::unpack(node &ref)
 {
 	if (ref.caller() == Token::token_rvalue) {
 		// TODO: make a method for assigning tokens to trees
-		ref._tptr = (ref.cast <rvalue> ())->get(_engine);
+		ref._tptr = (ref.cast <rvalue> ())->get(shared_context);
 	}
 
 	// Add a foreach method in nodes (with ref)
@@ -389,7 +388,7 @@ void node_manager::unpack(node &ref)
 }
 
 // Expansion methods
-void node_manager::expand(node &ref)
+void node_manager::expand(Engine *context, node &ref)
 {
 	if (ref._tptr->caller() == Token::vcl) {
 		/*
@@ -400,14 +399,14 @@ void node_manager::expand(node &ref)
 		variable_cluster *vclptr = dynamic_cast
 			<variable_cluster *> (ref._tptr);
 
-		ref = expand(vclptr->_cluster, ref._leaves);
+		ref = expand(context, vclptr->_cluster, ref._leaves);
 	}
 
 	for (node &leaf : ref._leaves)
-		expand(leaf);
+		expand(context, leaf);
 }
 
-node node_manager::expand(const std::string &str, const std::vector <node> &leaves)
+node node_manager::expand(Engine *context, const std::string &str, const std::vector <node> &leaves)
 {
 	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
 		
@@ -416,7 +415,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 	contexts.push_back({{}, ""});
 
 	// Check once for differential
-	Token *dtok = _engine->get("d");
+	Token *dtok = context->get("d");
 	auto ditr = std::find(_params.begin(), _params.end(), "d");
 
 	for (size_t i = 0; i < str.length(); i++) {
@@ -429,7 +428,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 			size_t index = std::distance(_params.begin(), itr);
 
-			Token *tptr = _engine->get(pr.second);
+			Token *tptr = context->get(pr.second);
 
 			// TODO: get the alias of pr.second (clean this code ;-;)
 			// Potential differential node
@@ -440,10 +439,10 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 				&& (ditr == _params.end())) {
 				// Priority on parameters
 				diff = find(_params.begin(), _params.end(), pr.second.substr(1));
-				dptr = _engine->get(pr.second.substr(1));
+				dptr = context->get(pr.second.substr(1));
 
 				// Second chance for differential
-				if (!dptr && !_engine->get(pr.second))
+				if (!dptr && !context->get(pr.second))
 					dptr = new lvalue(pr.second.substr(1));
 			}
 
@@ -452,7 +451,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 			bool matches = true;
 
 			node t;
-			if (_engine->present(pr.second)) {
+			if (context->present(pr.second)) {
 				t = node(new operation_holder(pr.second), {});
 			} else if (itr != _params.end()) {
 				t = node(new node_reference(&_refs[index], pr.second, index, true), {});
@@ -475,7 +474,7 @@ node node_manager::expand(const std::string &str, const std::vector <node> &leav
 
 					t = node(rv);
 				} else {
-					// t = node(new rvalue(pr.second, _engine), {});
+					// t = node(new rvalue(pr.second, shared_context), {});
 					t = node(tptr);
 				}
 			} else if (diff != _params.end()) {
@@ -568,15 +567,15 @@ size_t node_manager::count_up(node &ref)
 }
 
 // Simplication methods
-void node_manager::simplify()
+void node_manager::simplify(Engine *context)
 {
-	simplify(_tree);
+	simplify(context, _tree);
 }
 
-void node_manager::simplify(node &ref)
+void node_manager::simplify(Engine *context, node &ref)
 {
 	if (ref._label == l_operation_constant) {
-		ref.transfer(node(value(ref), l_constant, {}));
+		ref.transfer(node(value(context, ref), l_constant, {}));
 
 		return;
 	}
@@ -587,14 +586,14 @@ void node_manager::simplify(node &ref)
 		// Fix subtraction and what not
 		// simplify_separable(ref);
 	} else if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
-		simplify_mult_div(ref, ophptr->code);
+		simplify_mult_div(context, ref, ophptr->code);
 	} else {
 		for (auto &child : ref._leaves)
-			simplify(child);
+			simplify(context, child);
 	}
 }
 
-void node_manager::simplify_separable(node &ref)
+void node_manager::simplify_separable(Engine *context, node &ref)
 {
 	Token *opd = new opd_z(0);
 	Token *zero = new opd_z(0);
@@ -611,7 +610,7 @@ void node_manager::simplify_separable(node &ref)
 
 		process.pop();
 
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (top._tptr);
+		operation_holder *ophptr = top.cast <operation_holder> ();
 
 		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
 			process.push(top[0]);
@@ -636,7 +635,7 @@ void node_manager::simplify_separable(node &ref)
 
 		constants.pop();
 
-		opd = _engine->compute("+", {opd, nd._tptr});
+		opd = context->compute("+", {opd, nd._tptr});
 	}
 
 	// Still needs to deal with variables
@@ -671,7 +670,7 @@ void node_manager::simplify_separable(node &ref)
 	ref.transfer(all[0]);
 }
 
-void node_manager::simplify_mult_div(node &ref, codes c)
+void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 {
 	if (c == dvs) {
 		lbl l1 = ref._leaves[0]._label;
@@ -720,7 +719,7 @@ void node_manager::differentiate(const std::string &str)
 
 	differentiate(_tree);
 
-	simplify();
+	simplify(shared_context);
 }
 
 // Post-label usage
@@ -1059,12 +1058,12 @@ node_manager operator+(const node_manager &a, const node_manager &b)
 {
 	// TODO: Add a union operation for Engines
 	return node_manager(
+		node_manager::shared_context,
 		node(new operation_holder("+"), {
 			a.get_tree(),
 			b.get_tree()
 		}),
-		args_union(a._params, b._params),
-		a._engine
+		args_union(a._params, b._params)
 	);
 }
 
@@ -1072,12 +1071,12 @@ node_manager operator-(const node_manager &a, const node_manager &b)
 {
 	// TODO: Add a method to make this a one-liner
 	return node_manager(
+		node_manager::shared_context,
 		node(new operation_holder("-"), {
 			a.get_tree(),
 			b.get_tree()
 		}),
-		args_union(a._params, b._params),
-		a._engine
+		args_union(a._params, b._params)
 	);
 }
 

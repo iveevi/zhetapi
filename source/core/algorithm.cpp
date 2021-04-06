@@ -74,7 +74,7 @@ void algorithm::compile(Engine *engine)
 	// Use .set_label instead
 	_compiled.add_args(_args);
 	_compiled.set_label(l_sequential);
-	_compiled.set_engine(engine);
+	// _compiled.set_engine(engine);
 
 	/* using namespace std;
 	cout << "compiled:" << endl;
@@ -117,7 +117,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		}
 
 		// Only node to actually be computed (as an l-value)
-		node_manager nm(tmp[tsize - 1], _args, engine);
+		node_manager nm(engine, tmp[tsize - 1], _args);
 
 		eq.append_front(nm);
 		eq.set_label(l_assignment_chain);
@@ -128,7 +128,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		node_manager mg;
 		
 		try {
-			mg = node_manager(str, _args, engine);
+			mg = node_manager(engine, str, _args);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "Error at line " << 0
 				<< ": undefined symbol \""

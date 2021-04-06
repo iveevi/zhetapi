@@ -28,7 +28,7 @@ void node_manager::differentiate_mul(node &ref)
 void node_manager::differentiate_pow(node &ref)
 {
 	Token *mul = ref._leaves[1]._tptr->copy();
-	Token *exp = _engine->compute("-", {mul, new opd_z(1)});
+	Token *exp = shared_context->compute("-", {mul, new opd_z(1)});
 
 	node diffed(ref._leaves[0]);
 	differentiate(diffed);
@@ -68,7 +68,7 @@ void node_manager::differentiate_lg(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(_engine->compute("ln", {new opd_z(2)}), l_none, {}),
+			node(shared_context->compute("ln", {new opd_z(2)}), l_none, {}),
 			node(ref._leaves[0])
 		})
 	});
@@ -84,7 +84,9 @@ void node_manager::differentiate_const_log(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(_engine->compute("ln", {value(ref._leaves[0])}), l_none, {}),
+			node(shared_context->compute("ln", {
+				value(shared_context, ref._leaves[0])
+			}), l_none, {}),
 			node(ref._leaves[1])
 		})
 	});
