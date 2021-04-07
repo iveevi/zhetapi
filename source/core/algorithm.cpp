@@ -76,9 +76,9 @@ void algorithm::compile(Engine *engine)
 	_compiled.set_label(l_sequential);
 	// _compiled.set_engine(engine);
 
-	/* using namespace std;
+	using namespace std;
 	cout << "compiled:" << endl;
-	_compiled.print(); */
+	_compiled.print();
 	
 	// Pop stack
 	// engine = pop_and_del_stack(engine);
@@ -86,38 +86,28 @@ void algorithm::compile(Engine *engine)
 
 void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 {
-	using namespace std;
-
 	// Skip comments
 	if (str[0] == '#')
 		return;
 
 	std::vector <std::string> tmp = split(str);
 	
-	size_t tsize = tmp.size();
-	if (tsize > 1) {
+	size_t split_size = tmp.size();
+	if (split_size > 1) {
 		node_manager eq;
 
-		// Assume that right terms are r-value
-		for (size_t i = 0; i < tsize - 1; i++) {
-			// TODO:
-			// If the symbol is not in the engine already
-			// then add it (needs to prioritize the
-			// possibility of a function over this)
-			if (!engine->get(tmp[i])) {
-				// Default initialize the value to 0
-				engine->put(tmp[i], new Operand <int> (0));
-			}
+		// Right terms are all l-values
+		for (size_t i = 0; i < split_size - 1; i++) {
+			// Keep track of new variables
+			if (!engine->get(tmp[i]))
+				_pardon.insert(_pardon.begin(), tmp[i]);
 
-			Token *tptr = engine->get(tmp[i]);
-
-			// Check if tptr is assignable (ie. variable or function)
-			if (tptr)
-				eq.append(node(new lvalue(tmp[i]), l_lvalue));
+			// Add lvalue to the chain regardless of its previous presence
+			eq.append(node(new lvalue(tmp[i]), l_lvalue));
 		}
 
 		// Only node to actually be computed (as an l-value)
-		node_manager nm(engine, tmp[tsize - 1], _args);
+		node_manager nm(engine, tmp[split_size - 1], _args);
 
 		eq.append_front(nm);
 		eq.set_label(l_assignment_chain);
@@ -128,9 +118,10 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		node_manager mg;
 		
 		try {
-			mg = node_manager(engine, str, _args);
+			mg = node_manager(engine, str, _args, _pardon);
 		} catch (const node_manager::undefined_symbol &e) {
-			std::cout << "Error at line " << 0
+			// TODO: get line number
+			std::cerr << "Error at line " << 0
 				<< ": undefined symbol \""
 				<< e.what() << "\"" << std::endl;
 
@@ -138,12 +129,7 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		}
 
 		rnm.append(mg);
-
-		// "Execute" the statement
-		// return mg.value(engine);
 	}
-
-	// return nullptr;
 }
 
 // Executing the function

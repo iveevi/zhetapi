@@ -2,6 +2,7 @@
 #define ALGORITHM_H_
 
 // C++ headers
+#include <set>
 #include <string>
 #include <vector>
 
@@ -18,6 +19,7 @@ class algorithm : public Token {
 	std::string			_ident		= "";
 	std::string			_alg		= "";
 
+	std::set <std::string>		_pardon;
 	std::vector <std::string>	_args		= {};
 
 	node_manager			_compiled	= node_manager();

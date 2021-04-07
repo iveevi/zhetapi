@@ -4,6 +4,8 @@
 // C/C++ headers
 #include <fstream>
 #include <stack>
+#include <set>
+#include <vector>
 
 // Engine headers
 #include <core/node_reference.hpp>
@@ -29,9 +31,14 @@ public:
 	node_manager();
 	node_manager(const node_manager &);
 	node_manager(Engine *, const node &);
-	node_manager(Engine *, const node &, const std::vector <std::string> &);
+	node_manager(Engine *, const node &,
+			const std::vector <std::string> &);
 	node_manager(Engine *, const std::string &);
-	node_manager(Engine *, const std::string &, const std::vector <std::string> &);
+
+	// TODO: try to merge these two constructors with def. args
+	node_manager(Engine *, const std::string &,
+			const std::vector <std::string> &,
+			const std::set <std::string> & = std::set <std::string> ());
 
 	node_manager &operator=(const node_manager &);
 
@@ -66,7 +73,8 @@ public:
 	 *
 	 * TODO: make private
 	 */
-	void expand(Engine *, node &);
+	void expand(Engine *, node &,
+			const std::set <std::string> & = std::set <std::string> ());
 
 	void simplify(Engine *);
 
@@ -101,7 +109,8 @@ private:
 	
 	void rereference(node &);
 
-	node expand(Engine *, const std::string &, const std::vector <node> &);
+	node expand(Engine *, const std::string &, const std::vector <node> &,
+			const std::set <std::string> & = std::set <std::string> ());
 
 	void simplify(Engine *, node &);
 	void simplify_separable(Engine *, node &);

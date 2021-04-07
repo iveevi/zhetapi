@@ -21,18 +21,18 @@ alg foo(x, y) {
 
 foo(12, -5)
 
-println("tmp = ", tmp)
+# println("tmp = ", tmp)
 
-foo(65, 10)
+# foo(65, 10)
 
 println("tmp = ", tmp)
-println("inside = ", inside)
+# println("inside = ", inside)
 
 if (true) {
 	k = 100
 }
 
-#println("k = ", k)
+# println("k = ", k)
 
 list = {1, 3, 4}
 
@@ -59,4 +59,4 @@ r = 1
 #	r = r - f(r)/r
 #
 #	i++
-#}
+# }

@@ -82,7 +82,8 @@ node_manager::node_manager(Engine *context, const std::string &str)
 node_manager::node_manager(
 		Engine *context,
 		const std::string &str,
-		const std::vector <std::string> &params) 
+		const std::vector <std::string> &params,
+		const std::set <std::string> &pardon)
 		: _params(params)
 {
 	parser pr;
@@ -103,7 +104,7 @@ node_manager::node_manager(
 	}
 
 	// Unpack variable clusters
-	expand(context, _tree);
+	expand(context, _tree, pardon);
 
 	// Label the tree
 	label(_tree);
@@ -388,7 +389,8 @@ void node_manager::unpack(node &ref)
 }
 
 // Expansion methods
-void node_manager::expand(Engine *context, node &ref)
+void node_manager::expand(Engine *context, node &ref,
+		const std::set <std::string> &pardon)
 {
 	if (ref._tptr->caller() == Token::vcl) {
 		/*
@@ -399,14 +401,16 @@ void node_manager::expand(Engine *context, node &ref)
 		variable_cluster *vclptr = dynamic_cast
 			<variable_cluster *> (ref._tptr);
 
-		ref = expand(context, vclptr->_cluster, ref._leaves);
+		ref = expand(context, vclptr->_cluster, ref._leaves, pardon);
 	}
 
 	for (node &leaf : ref._leaves)
-		expand(context, leaf);
+		expand(context, leaf, pardon);
 }
 
-node node_manager::expand(Engine *context, const std::string &str, const std::vector <node> &leaves)
+node node_manager::expand(Engine *context, const std::string &str,
+		const std::vector <node> &leaves,
+		const std::set <std::string> &pardon)
 {
 	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
 		
@@ -478,9 +482,12 @@ node node_manager::expand(Engine *context, const std::string &str, const std::ve
 					t = node(tptr);
 				}
 			} else if (diff != _params.end()) {
-				t = node(new node_differential(new node_reference(&_refs[dindex], pr.second.substr(1), dindex, true)), {});
+				t = node(new node_differential(new node_reference(&_refs[dindex], pr.second.substr(1), dindex, true)));
 			} else if (dptr != nullptr) {
-				t = node(new node_differential(dptr), {});
+				t = node(new node_differential(dptr));
+			} else if (pardon.find(pr.second) != pardon.end()) {
+				// Use the pardon set as a last resort
+				t = node(new rvalue(pr.second));
 			} else {
 				matches = false;
 			}
