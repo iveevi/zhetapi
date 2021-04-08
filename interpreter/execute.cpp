@@ -76,8 +76,8 @@ Token *execute(string str)
 			exit(-1);
 		}
 
-		/* cout << "mg:" << endl;
-		mg.print(); */
+		cout << "mg:" << endl;
+		mg.print();
 
 		// "Execute" the statement
 		return tptr;

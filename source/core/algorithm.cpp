@@ -76,9 +76,9 @@ void algorithm::compile(Engine *engine)
 	_compiled.set_label(l_sequential);
 	// _compiled.set_engine(engine);
 
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
-	_compiled.print();
+	_compiled.print(); */
 	
 	// Pop stack
 	// engine = pop_and_del_stack(engine);

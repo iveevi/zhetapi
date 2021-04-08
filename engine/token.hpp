@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <iostream>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -15,6 +16,13 @@ namespace zhetapi {
  */
 class Token {
 public:
+	// Maybe differentiate between const vector & and vector & methods
+	using method = Token *(*)(const std::vector <Token *> &);
+protected:
+	std::map <std::string, Token *>	_attributes;
+	std::map <std::string, method>	_methods;
+public:
+	// Token()
 	virtual ~Token();
 	
 	/*
@@ -82,6 +90,8 @@ public:
 	 * matching.
 	 */
 	virtual bool operator==(Token *) const = 0;
+
+	// virtual Token *value()?
 };
 
 // Comparing tokens
