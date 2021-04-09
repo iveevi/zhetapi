@@ -364,8 +364,11 @@ signature engine_base::gen_signature(const std::vector <Token *> &vals)
 {
 	signature sig;
 
-	for (Token *tptr : vals)
+	for (Token *tptr : vals) {
+		if (!tptr)
+			throw gensig_nullptr();
 		sig.push_back(typeid(*tptr));
+	}
 
 	return sig;
 }

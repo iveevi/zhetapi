@@ -2,7 +2,7 @@
 
 namespace zhetapi {
 
-::std::string strcodes[] = {
+std::string strcodes[] = {
 	"add",
 	"subtract",
 	"multiply",
@@ -34,7 +34,10 @@ namespace zhetapi {
 	"geq",
 	"leq",
 	"post incr",
-	"post decr"
+	"post decr",
+	"pre incr",
+	"pre decr",
+	"attribute/method"
 };
 
 operation_holder::operation_holder(const ::std::string &str) : rep(str)
@@ -54,7 +57,7 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = fct;
 	else if (str == "^")
 		code = pwr;
-	else if (str == ".")
+	else if (str == "@")
 		code = dot;
 	else if (str == "%")
 		code = mod;
@@ -108,6 +111,8 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = rin;
 	else if (str == "r--")
 		code = rde;
+	else if (str == ".")
+		code = atm;
 }
 
 Token::type operation_holder::caller() const

@@ -44,6 +44,7 @@ enum codes {
 	pde,	// Post decrement
 	rde,	// Pre incremeny
 	rin,	// Pre decrement
+	atm
 };
 
 extern std::string strcodes[];

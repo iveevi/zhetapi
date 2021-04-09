@@ -7,14 +7,13 @@
 namespace zhetapi {
 
 	struct variable_cluster : public Token {
-
-		::std::string _cluster;
+		std::string _cluster;
 
 		variable_cluster(const ::std::string & = "");
 
 		type caller() const override;
 		Token *copy() const override;
-		::std::string str() const override;
+		std::string str() const override;
 
 		virtual bool operator==(Token *) const override;
 	};

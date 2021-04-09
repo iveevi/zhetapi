@@ -68,6 +68,10 @@ node_manager::node_manager(Engine *context, const std::string &str)
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
+	/* using namespace std;
+	cout << "TREE PRE PROCESSED:" << endl;
+	_tree.print(); */
+
 	// Unpack variable clusters
 	expand(context, _tree);
 
@@ -186,6 +190,8 @@ Token *node_manager::value(Engine *context, node tree) const
 	// If null token, resort to special execution modes
 	// (Use this instead of sequential_value for
 	// algorithms; dont remove it though)
+	//
+	// Special nodes!
 	if (tree.null()) {
 		if (tree.label() == l_assignment_chain) {
 			// Evaluate first node
@@ -210,6 +216,16 @@ Token *node_manager::value(Engine *context, node tree) const
 		} else {
 			throw std::runtime_error("Unknown execution mode \'" + strlabs[tree._label] + "\'");
 		}
+	}
+
+	operation_holder *ophptr = tree.cast <operation_holder> ();
+
+	if (ophptr->code == atm) {
+		using namespace std;
+		cout << "ATM!!!" << endl;
+		tree.print();
+
+		return nullptr;
 	}
 
 	// else: this func
@@ -389,17 +405,65 @@ void node_manager::unpack(node &ref)
 }
 
 // Expansion methods
-void node_manager::expand(Engine *context, node &ref,
+void attribute_invert(node &ref)
+{
+	std::vector <node> unfolded;
+
+	node current = ref;
+	while (true) {
+		if (current.caller() == Token::oph) {
+			operation_holder *ophptr = current.cast <operation_holder> ();
+
+			if (ophptr->code == atm) {
+				unfolded.push_back(current[0]);
+
+				// Modify the attribute to an rvalue
+				if (current[1].caller() == l_differential) {
+					
+				}
+
+				current = current[1];
+			}
+		} else {
+			unfolded.push_back(current);
+
+			break;
+		}
+	}
+
+	operation_holder *atmptr = new operation_holder(".");
+
+	while (unfolded.size() > 1) {
+		unfolded[0] = node(atmptr->copy(), {
+			unfolded[0],
+			unfolded[1]
+		});
+
+		unfolded.erase(std::next(unfolded.begin()));
+	}
+
+	ref = unfolded[0];
+
+	// Free resources
+	delete atmptr;
+}
+
+void node_manager::expand(
+		Engine *context,
+		node &ref,
 		const std::set <std::string> &pardon)
 {
+	operation_holder *ophptr = ref.cast <operation_holder> ();
+	if (ophptr && ophptr->code == atm)
+		attribute_invert(ref);
+
 	if (ref._tptr->caller() == Token::vcl) {
 		/*
 		 * Excluding the parameters, the variable cluster should
 		 * always be a leaf of the tree.
 		 */
 
-		variable_cluster *vclptr = dynamic_cast
-			<variable_cluster *> (ref._tptr);
+		variable_cluster *vclptr = ref.cast <variable_cluster> ()
 
 		ref = expand(context, vclptr->_cluster, ref._leaves, pardon);
 	}
@@ -408,7 +472,9 @@ void node_manager::expand(Engine *context, node &ref,
 		expand(context, leaf, pardon);
 }
 
-node node_manager::expand(Engine *context, const std::string &str,
+node node_manager::expand(
+		Engine *context,
+		const std::string &str,
 		const std::vector <node> &leaves,
 		const std::set <std::string> &pardon)
 {

@@ -1,4 +1,6 @@
-f(x) = x^2 - 1
+g(x) = x^2 - 1
 
-println(f)
-println(f.derivative())
+# g.f.h
+# g.derivative().derivative(2)
+
+g.derivative(2).derivative(25).derivative(45)

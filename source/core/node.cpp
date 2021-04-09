@@ -21,6 +21,7 @@ node::node(Token *tptr)
 node::node(Token *tptr, lbl label)
 		: _tptr(tptr), _label(label) {}
 
+// TODO: Remove this bool
 node::node(Token *tptr, const node &a, bool bl)
 		: _leaves({a})
 {

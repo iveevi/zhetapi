@@ -17,13 +17,12 @@ parser::parser() : parser::base_type(_start)
 	_str = +(_esc | (qi::char_ - '\"'));
 
 	// Operation parsers
-
 	_add_operation_symbol(_plus, +);
 	_add_operation_symbol(_minus, -);
 	_add_operation_symbol(_times, *);
 	_add_operation_symbol(_divide, /);
 	_add_operation_symbol(_power, ^);
-	_add_operation_symbol(_dot, .);
+	_add_operation_symbol(_dot, @);
 	_add_operation_symbol(_mod, %);
 	
 	// Binary comparison
@@ -40,6 +39,9 @@ parser::parser() : parser::base_type(_start)
 	
 	_add_operation_heter_symbol(_pre_incr, ++, r++);
 	_add_operation_heter_symbol(_pre_decr, --, r--);
+
+	// Miscellaenous
+	_add_operation_symbol(_attribute, .);
 
 	/*
 	 * Represents a binary operation of lowest priotrity.
@@ -63,7 +65,7 @@ parser::parser() : parser::base_type(_start)
 	 * higher than that of _t1_bin. Examples are the
 	 * exponentiation operation.
 	 */
-	_t2_bin = _power;
+	_t2_bin = _attribute | _power;
 
 	_t_post = _post_incr | _post_decr;
 	_t_pre = _pre_incr | _pre_decr;
@@ -365,7 +367,13 @@ parser::parser() : parser::base_type(_start)
 	 * where access to the engine object is present.
 	 */
 	_node_var = (
-			(_ident >> '(' >> _node_pack >> ')') [_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), _2)]
+			(_ident >> '(' >> _node_pack >> ')') [
+				_val = phoenix::construct <zhetapi::node> (
+					phoenix::new_ <variable_cluster> (_1),
+					_2
+				)
+			]
+
 			| _ident [_val = phoenix::construct
 				<zhetapi::node> (phoenix::new_
 					<variable_cluster> (_1),
@@ -405,16 +413,23 @@ parser::parser() : parser::base_type(_start)
 			_node_prep [_val = _1]
 
 			| _node_opd [_val = _1] >> *(
-				(_node_rept) [_val =
-				phoenix::construct
-				<zhetapi::node> (phoenix::new_
-					<operation_holder>
-					(::std::string("*")),
-					_val, _1)]
+				(_node_rept) [
+					_val = phoenix::construct <zhetapi::node> (
+						phoenix::new_ <operation_holder> (std::string("*")),
+						_val,
+						_1
+					)
+				]
 			)
 
 			| _collection [_val = _1]
 		);
+	
+	_attr = _ident [
+		_val = phoenix::construct <zhetapi::node> (
+			phoenix::new_ <variable_cluster> (_1)
+		)
+	];
 
 	/*
 	 * Represents a term as in any mathematical expression.
@@ -422,7 +437,12 @@ parser::parser() : parser::base_type(_start)
 	 * unless in parenthesis.
 	 */
 	_node_term = (
+			// TODO: must rearrange attribute chains
 			(_node_factor >> _power >> _node_term) [
+				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+			]
+
+			| (_node_factor >> _attribute >> _node_term) [
 				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 			]
 			
@@ -439,7 +459,6 @@ parser::parser() : parser::base_type(_start)
 				[_val = phoenix::construct
 				<zhetapi::node> (_1, _val, _2)]
 			)
-
 		);
 
 	/*
@@ -462,10 +481,11 @@ parser::parser() : parser::base_type(_start)
 	_node_opd.name("node Operand");
 
 	_plus.name("addition");
-	_minus.name("substraction");
+	_minus.name("subtraction");
 	_times.name("multiplication");
 	_divide.name("division");
 	_power.name("exponentiation");
+	_attribute.name("attribute/method");
 	
 	_o_str.name("literal operand");
 

@@ -220,6 +220,12 @@ public:
 		explicit unknown_op_overload(const std::string &str)
 				: std::runtime_error(str) {}
 	};
+
+	class gensig_nullptr : public std::runtime_error {
+	public:
+		explicit gensig_nullptr()
+				: std::runtime_error("") {}
+	};
 };
 
 }

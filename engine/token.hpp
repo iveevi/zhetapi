@@ -6,6 +6,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <exception>
 
 namespace zhetapi {
 
@@ -24,6 +25,8 @@ protected:
 public:
 	// Token()
 	virtual ~Token();
+
+	Token *attr(const std::string &, const std::vector <Token *> &);
 	
 	/*
 	 * Codes used to identify the Token, more on the is presented
@@ -92,6 +95,12 @@ public:
 	virtual bool operator==(Token *) const = 0;
 
 	// virtual Token *value()?
+
+	class unknown_attribute : std::runtime_error {
+	public:
+		unknown_attribute(const std::string &msg)
+				: std::runtime_error(msg) {}
+	};
 };
 
 // Comparing tokens
