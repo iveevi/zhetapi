@@ -3,4 +3,4 @@ g(x) = x^2 - 1
 # g.f.h
 # g.derivative().derivative(2)
 
-g.derivative(2).derivative(25).derivative(45)
+println("value: ", g.derivative(2))

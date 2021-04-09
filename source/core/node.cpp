@@ -138,9 +138,13 @@ void node::relabel(lbl label)
 	_label = label;
 }
 
-void node::retoken(Token *tptr)
+void node::retokenize(Token *tptr)
 {
-	_tptr = tptr;
+	// Delete the current token
+	if (_tptr)
+		delete _tptr;
+	
+	_tptr = tptr->copy();
 }
 
 void node::transfer(const node &ref)

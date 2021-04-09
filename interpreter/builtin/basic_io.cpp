@@ -5,10 +5,18 @@
 using namespace zhetapi;
 using namespace std;
 
+void cprint(Token *tptr)
+{
+	if (tptr)
+		cout << tptr->str();
+	else
+		cout << "<Null>";
+}
+
 ZHETAPI_REGISTER(bt_print)
 {
 	for (Token *tptr : inputs)
-		cout << tptr->str();
+		cprint(tptr);
 	
 	return nullptr;
 }
@@ -16,7 +24,7 @@ ZHETAPI_REGISTER(bt_print)
 ZHETAPI_REGISTER(bt_println)
 {
 	for (Token *tptr : inputs)
-		cout << tptr->str();
+		cprint(tptr);
 	
 	cout << "\n";
 	

@@ -58,7 +58,7 @@ public:
 
 	// Setters
 	void relabel(lbl);
-	void retoken(Token *);
+	void retokenize(Token *);
 	
 	// Member functions
 	void transfer(const node &);

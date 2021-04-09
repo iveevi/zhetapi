@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <typeinfo>
+#include <typeindex>
 
 namespace zhetapi {
 
@@ -96,10 +98,19 @@ public:
 
 	// virtual Token *value()?
 
-	class unknown_attribute : std::runtime_error {
+	class unknown_attribute {
+		std::type_index _ti;
+		std::string	_msg;
 	public:
-		unknown_attribute(const std::string &msg)
-				: std::runtime_error(msg) {}
+		unknown_attribute(const std::type_info &ti, const std::string &msg)
+				: _ti(ti), _msg(msg) {}
+		
+		std::string what() const {
+			// TODO: use the actual name instead of mangled
+			return std::string(_ti.name())
+				+ " has no attribute \""
+				+ _msg + "\"";
+		}
 	};
 };
 

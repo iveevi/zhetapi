@@ -220,10 +220,30 @@ Token *node_manager::value(Engine *context, node tree) const
 
 	operation_holder *ophptr = tree.cast <operation_holder> ();
 
-	if (ophptr->code == atm) {
+	if (ophptr && ophptr->code == atm) {
 		using namespace std;
 		cout << "ATM!!!" << endl;
 		tree.print();
+
+		lvalue *lv = tree[1].cast <lvalue> ();
+
+		// TODO: throw on nullptr
+		std::string at = lv->symbol();
+		cout << "attr = " << at << endl;
+
+		std::vector <Token *> args;
+
+		for (node leaf : tree[1]._leaves)
+			args.push_back(value(context, leaf));
+		
+		cout << "args:" << endl;
+		for (auto tok : args)
+			cout << "\t" << tok->str() << endl;
+		
+		cout << "tree[1]:" << endl;
+		tree[1].print();
+
+		tree[0]._tptr->attr(at, args);
 
 		return nullptr;
 	}
@@ -237,6 +257,8 @@ Token *node_manager::value(Engine *context, node tree) const
 		return tree.copy_token();
 	case Token::oph:	
 		size = tree._leaves.size();
+
+		// TODO: add begin and end for trees
 		for (node leaf : tree._leaves)
 			values.push_back(value(context, leaf));
 
@@ -407,29 +429,47 @@ void node_manager::unpack(node &ref)
 // Expansion methods
 void attribute_invert(node &ref)
 {
-	std::vector <node> unfolded;
+	std::vector <node> unfolded {ref[0]};
 
-	node current = ref;
+	node current = ref[1];
 	while (true) {
-		if (current.caller() == Token::oph) {
-			operation_holder *ophptr = current.cast <operation_holder> ();
+		operation_holder *ophptr = current.cast <operation_holder> ();
 
-			if (ophptr->code == atm) {
-				unfolded.push_back(current[0]);
+		if (ophptr && ophptr->code == atm) {
+			// Reduce variable clusters immediately
+			if (current[0].caller() == Token::vcl) {
+				variable_cluster *vclptr = current[0].cast <variable_cluster> ();
+				lvalue *lv = new lvalue(vclptr->_cluster);
+				current[0].retokenize(lv);
 
-				// Modify the attribute to an rvalue
-				if (current[1].caller() == l_differential) {
-					
-				}
-
-				current = current[1];
+				delete lv;
 			}
+
+			unfolded.push_back(current[0]);
+
+			current = current[1];
 		} else {
+			// Reduce variable clusters immediately
+			if (current.caller() == Token::vcl) {
+				variable_cluster *vclptr = current.cast <variable_cluster> ();
+				lvalue *lv = new lvalue(vclptr->_cluster);
+				current.retokenize(lv);
+
+				delete lv;
+			}
+
 			unfolded.push_back(current);
 
 			break;
 		}
 	}
+
+	/* using namespace std;
+	cout << string(50, '=') << endl;
+	cout << "UNFODLED:" << endl;
+	for (auto nd : unfolded)
+		nd.print();
+	cout << string(50, '=') << endl; */
 
 	operation_holder *atmptr = new operation_holder(".");
 
@@ -463,7 +503,7 @@ void node_manager::expand(
 		 * always be a leaf of the tree.
 		 */
 
-		variable_cluster *vclptr = ref.cast <variable_cluster> ()
+		variable_cluster *vclptr = ref.cast <variable_cluster> ();
 
 		ref = expand(context, vclptr->_cluster, ref._leaves, pardon);
 	}

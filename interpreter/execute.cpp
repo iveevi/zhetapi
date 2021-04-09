@@ -74,6 +74,11 @@ Token *execute(string str)
 				"in this scope" << endl;
 
 			exit(-1);
+		} catch (const Token::unknown_attribute &e) {
+			cout << "Error at line " << line
+				<< ": " << e.what() << endl;
+			
+			exit(-1);
 		}
 
 		cout << "mg:" << endl;

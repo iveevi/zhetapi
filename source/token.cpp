@@ -8,12 +8,12 @@ Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 {
 	if (args.size() == 0) {
 		if (_attributes.find(id) == _attributes.end())
-			throw unknown_attribute(id);
+			throw unknown_attribute(typeid(*this), id);
 		
 		return _attributes[id];
 	} else {
 		if (_methods.find(id) == _methods.end())
-			throw unknown_attribute(id);
+			throw unknown_attribute(typeid(*this), id);
 		
 		return (_methods[id])(args);
 	}
