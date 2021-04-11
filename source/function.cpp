@@ -9,91 +9,31 @@ Engine *Function::shared_context = new Engine();
 double Function::h = 0.0001;
 
 // Constructors
-Function::Function() : _threads(1) {}
+
+// TODO: use macro
+Token *ftn_deriv_attr(Token *tptr, const std::vector <Token *> &args)
+{
+	// TODO: remove assert (and use a special one that throw mistch errs)
+	assert(args.size() == 0);
+	
+	Function *fptr = dynamic_cast <Function *> (tptr);
+
+	// Differentiate on first arg by default
+	return fptr->differentiate(fptr->_params[0]).copy();
+}
+
+Function::Function()
+		: _threads(1), Token({
+			{"derivative", ftn_deriv_attr}
+		}) {}
 
 Function::Function(const char *str) : Function(std::string(str)) {}
 
-// Symbolic construction
-/* Function::Function(const std::string &str) : _threads(1)
-{
-	std::string pack;
-	std::string tmp;
-
-	size_t count;
-	size_t index;
-	size_t start;
-	size_t end;
-	size_t i;
-
-	bool valid;
-	bool sb;
-	bool eb;
-
-	count = 0;
-
-	valid = false;
-	sb = false;
-	eb = false;
-
-	// Split string into expression and symbols
-	for (i = 0; i < str.length(); i++) {
-		if (str[i] == '=') {
-			valid = true;
-			index = i;
-
-			++count;
-		}
-	}
-
-	if (!valid || count != 1)
-		throw invalid_definition();
-
-	_symbol = str.substr(0, index);
-
-
-	// Determine parameters' symbols
-	for (start = -1, i = 0; i < _symbol.length(); i++) {
-		if (str[i] == '(' && start == -1) {
-			start = i;
-			sb = true;
-		}
-
-		if (str[i] == ')') {
-			end = i;
-			eb = true;
-		}
-	}
-
-	if (!sb || !eb)
-		throw invalid_definition();
-
-	pack = _symbol.substr(start + 1, end - start - 1);
-
-	for (i = 0; i < pack.length(); i++) {
-		if (pack[i] == ',' && !tmp.empty()) {
-			_params.push_back(tmp);
-			
-			tmp.clear();
-		} else if (!isspace(pack[i])) {
-			tmp += pack[i];
-		}
-	}
-
-	if (!tmp.empty())
-		_params.push_back(tmp);
-	
-	// Determine function's symbol
-	_symbol = _symbol.substr(0, start);
-
-	// Construct the tree manager
-	_manager = node_manager(str.substr(++index), _params);
-} */
-
-// Symbolic constructor with external symbol table
-
 // TODO: Take an Engine as an input as well: there is no need to delay rvalue resolution
 Function::Function(const std::string &str)
-		: _threads(1)
+		: _threads(1), Token({
+			{"derivative", ftn_deriv_attr}
+		})
 {
 	// TODO: Remove this (duplication)
 	std::string pack;
@@ -177,11 +117,15 @@ Function::Function(const std::string &str)
 Function::Function(const std::string &symbol, const std::vector
 		<std::string> &params, const node_manager &manager) :
 		_symbol(symbol), _params(params),
-		_manager(manager), _threads(1) {}
+		_manager(manager), _threads(1), Token({
+			{"derivative", ftn_deriv_attr}
+		}) {}
 
 Function::Function(const Function &other) :
 		_symbol(other._symbol), _params(other._params),
-		_manager(other._manager), _threads(1) {}
+		_manager(other._manager), _threads(1), Token({
+			{"derivative", ftn_deriv_attr}
+		}) {}
 
 // Getters
 bool Function::is_variable(const std::string &str) const

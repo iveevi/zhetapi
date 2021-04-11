@@ -221,31 +221,22 @@ Token *node_manager::value(Engine *context, node tree) const
 	operation_holder *ophptr = tree.cast <operation_holder> ();
 
 	if (ophptr && ophptr->code == atm) {
-		using namespace std;
-		cout << "ATM!!!" << endl;
-		tree.print();
-
 		lvalue *lv = tree[1].cast <lvalue> ();
 
 		// TODO: throw on nullptr
 		std::string at = lv->symbol();
-		cout << "attr = " << at << endl;
 
 		std::vector <Token *> args;
 
 		for (node leaf : tree[1]._leaves)
 			args.push_back(value(context, leaf));
-		
-		cout << "args:" << endl;
-		for (auto tok : args)
-			cout << "\t" << tok->str() << endl;
-		
-		cout << "tree[1]:" << endl;
-		tree[1].print();
 
-		tree[0]._tptr->attr(at, args);
+		Token *callee = tree[0]._tptr;
 
-		return nullptr;
+		if (tree[0].child_count() > 0)
+			callee = value(context, tree[0]);
+
+		return callee->attr(at, args);
 	}
 
 	// else: this func

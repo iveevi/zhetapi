@@ -1,22 +1,25 @@
 #include <token.hpp>
 
+#include <core/types.hpp>
+
 namespace zhetapi {
+
+Token::Token() {}
+
+Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
+{
+	for (auto attr_pr : attrs)
+		this->_attributes[attr_pr.first] = attr_pr.second;
+}
 
 Token::~Token() {}
 
 Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 {
-	if (args.size() == 0) {
-		if (_attributes.find(id) == _attributes.end())
-			throw unknown_attribute(typeid(*this), id);
+	if (_attributes.find(id) == _attributes.end())
+		throw unknown_attribute(typeid(*this), id);
 		
-		return _attributes[id];
-	} else {
-		if (_methods.find(id) == _methods.end())
-			throw unknown_attribute(typeid(*this), id);
-		
-		return (_methods[id])(args);
-	}
+	return _attributes[id](this, args);
 }
 
 bool Token::operator!=(Token *tptr) const
@@ -46,5 +49,13 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 	return os;
 }
 
+// Unknown attribute exception
+ std::string Token::unknown_attribute::what() const
+ {
+	// TODO: use the actual name instead of mangled
+	return "<" + type_name(_ti) + ">"
+		+ " has no attribute \""
+		+ _msg + "\"";
+}
 
 }

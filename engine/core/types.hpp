@@ -68,7 +68,6 @@ typedef Operand <S> opd_s;
 
 #define	ONE	1
 
-
 struct types {
 	/////////////////////
 	// Token factories
@@ -87,8 +86,9 @@ struct types {
 	static bool is_one(Token *);
 
 	static std::string symbol(const ::std::type_index &);
-	static std::string proper_symbol(const ::std::type_index &);
 };
+
+std::string type_name(const std::type_index &);
 
 }
 

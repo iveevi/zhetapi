@@ -63,6 +63,9 @@ public:
 
 	std::string display() const;
 
+	// Friends
+	friend Token *ftn_deriv_attr(Token *, const std::vector <Token *> &);
+
 	friend std::ostream &operator<<(std::ostream &, const Function &);
 private:
 	template <class A>

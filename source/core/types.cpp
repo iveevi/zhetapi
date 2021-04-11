@@ -1,5 +1,7 @@
 #include <core/types.hpp>
 
+#include <function.hpp>
+
 namespace zhetapi {
 
 // Factories
@@ -135,7 +137,7 @@ std::string types::symbol(const std::type_index &type)
 	return type.name();
 }
 
-std::string types::proper_symbol(const std::type_index &type)
+std::string type_name(const std::type_index &type)
 {
 	// Complex numbers
 
@@ -181,8 +183,9 @@ std::string types::proper_symbol(const std::type_index &type)
 	if (type == typeid(Operand <MCR>))
 		return "Matrix <Complex <double>>";
 	
-	std::cout << "TYPE: " << type.name() << ::std::endl;
-	std::cout << "int: " << typeid(Operand <Z>).name() << ::std::endl;
+	// Miscelleanous
+	if (type == typeid(Function))
+		return "Function";
 
 	return "?";
 }

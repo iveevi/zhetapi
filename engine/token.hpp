@@ -20,12 +20,13 @@ namespace zhetapi {
 class Token {
 public:
 	// Maybe differentiate between const vector & and vector & methods
-	using method = Token *(*)(const std::vector <Token *> &);
+	using method = Token *(*)(Token *, const std::vector <Token *> &);
 protected:
-	std::map <std::string, Token *>	_attributes;
-	std::map <std::string, method>	_methods;
+	std::map <std::string, method>	_attributes;
 public:
-	// Token()
+	Token();
+	Token(const std::vector <std::pair <std::string, method>> &);
+
 	virtual ~Token();
 
 	Token *attr(const std::string &, const std::vector <Token *> &);
@@ -105,12 +106,7 @@ public:
 		unknown_attribute(const std::type_info &ti, const std::string &msg)
 				: _ti(ti), _msg(msg) {}
 		
-		std::string what() const {
-			// TODO: use the actual name instead of mangled
-			return std::string(_ti.name())
-				+ " has no attribute \""
-				+ _msg + "\"";
-		}
+		std::string what() const;
 	};
 };
 
