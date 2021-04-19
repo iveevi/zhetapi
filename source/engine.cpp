@@ -4,9 +4,20 @@
 
 #include <cmath>
 
+#include <builtin/basic_io.hpp>
+
 namespace zhetapi {
 
-Engine::Engine() : engine_base() {}
+Engine::Engine() : engine_base()
+{
+	// Default present
+	put("true", new Operand <bool> (true));
+	put("false", new Operand <bool> (false));
+	put("null", new Operand <Token *> (nullptr));
+
+	put(Registrable("print", &bt_print));
+	put(Registrable("println", &bt_println));
+}
 
 Engine::Engine(const Engine &other)
 		: engine_base(other),
@@ -52,6 +63,7 @@ void Engine::set_origin_stack(Engine *engine)
 	_stack = engine;
 }
 
+// Just copy the token address-wise
 void Engine::put(const std::string &str, Token *tptr)
 {
 	// Check broader scope first

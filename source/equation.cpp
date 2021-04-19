@@ -5,13 +5,33 @@
 
 namespace zhetapi {
 
+// Put in another file
+const std::string netwon_algorithm = R"(
+less = 0
+more = 0
+
+fp = f.derivative()
+
+println("LESS: ", less)
+println("r: ", r)
+println("FUNC: ", f)
+println("FUNC-p: ", fp)
+)";
+
+algorithm newton_full("newton_full", netwon_algorithm, {"r", "f"});
+
 Equation::Equation(const std::vector <std::string> &exprs)
 {
-	// For now use an assert
-	assert(exprs.size() > 1);
+	if (exprs.size() <= 1)
+		throw bad_input_size();
 
 	// Rest
 	_engine = new Engine();
+
+	if (newton_full.empty())
+		newton_full.compile(_engine);
+	
+	newton_full.print();
 
 	std::set <std::string> excl;
 	for (const std::string &str : exprs) {
@@ -74,6 +94,8 @@ Solutions Equation::solve() const
 	Token *dft;
 	Token *qt;
 	Token *st;
+
+	newton_full.execute(_engine, {x0, f.copy()});
 
 	// Make a singleton of this
 	Token *true_tok = new opd_b(true);

@@ -21,6 +21,7 @@ algorithm::algorithm(
 		: _ident(ident), _args(args),
 		_alg(alg) {}
 
+// TODO: remove the alg parameter
 algorithm::algorithm(
 		const std::string &ident,
 		const std::string &alg,
@@ -107,7 +108,14 @@ void algorithm::generate(Engine *engine, std::string str, node_manager &rnm)
 		}
 
 		// Only node to actually be computed (as an l-value)
-		node_manager nm(engine, tmp[split_size - 1], _args);
+		node_manager nm;
+		try {
+			nm = node_manager(engine, tmp[split_size - 1], _args);
+		} catch (const node_manager::undefined_symbol &e) {
+			std::cerr << "[LINE] Unknown symbol \"" << e.what() << "\"" << std::endl;
+
+			exit(-1);
+		}
 
 		eq.append_front(nm);
 		eq.set_label(l_assignment_chain);
@@ -206,6 +214,17 @@ std::vector <std::string> algorithm::split(std::string str)
 const std::string &algorithm::symbol() const
 {
 	return _ident;
+}
+
+void algorithm::print() const
+{
+	std::cout << "COMPILED:" << std::endl;
+	_compiled.print();
+}
+
+bool algorithm::empty() const
+{
+	return _compiled.empty();
 }
 
 // Virtual functions

@@ -1,10 +1,9 @@
-#include <engine.hpp>
-
-#include <core/wildcard.hpp>
+#include <equation.hpp>
 
 using namespace std;
 using namespace zhetapi;
 
+/*
 bool var_pred(lbl label)
 {
 	return (label == l_variable);
@@ -52,7 +51,7 @@ void fit(const node &a, const node &fitter)
 	cout << "Current - after reducing:" << endl;
 	for (node nd : current)
 		nd.print();
-}
+} */
 
 int main()
 {
@@ -69,7 +68,7 @@ int main()
 	cout << "nm2:" << endl;
 	nm2.print();
 
-	fit(nm2.get_tree(), nm.get_tree()); */
+	fit(nm2.get_tree(), nm.get_tree());
 
 	Engine *engine = new Engine();
 
@@ -84,5 +83,12 @@ int main()
 	cout << "nm:" << endl;
 	nm.print();
 
-	cout << "display: " << nm.display() << endl;
+	cout << "display: " << nm.display() << endl; */
+
+	Equation eq({
+		"x^2 - x",
+		"6"
+	});
+
+	eq.solve();
 }

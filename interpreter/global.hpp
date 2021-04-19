@@ -39,8 +39,7 @@ Token *execute(string);
 
 vector <string> split(string);
 
-// Builtin functions
-Token *bt_print(const vector <Token *> &);
-Token *bt_println(const vector <Token *> &);
+// Include builtin
+#include "builtin/basic_io.hpp"
 
 #endif

@@ -231,10 +231,7 @@ Token *node_manager::value(Engine *context, node tree) const
 		for (node leaf : tree[1]._leaves)
 			args.push_back(value(context, leaf));
 
-		Token *callee = tree[0]._tptr;
-
-		if (tree[0].child_count() > 0)
-			callee = value(context, tree[0]);
+		Token *callee = value(context, tree[0]);
 
 		return callee->attr(at, args);
 	}

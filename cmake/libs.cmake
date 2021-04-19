@@ -34,6 +34,8 @@ set(ZHETAPI_SOURCE
 	source/std/functions.cpp
 	source/std/interval.cpp
 	source/std/linalg.cpp
+
+	interpreter/builtin/basic_io.cpp
 	
 	glad/glad.c
 )

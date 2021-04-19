@@ -5,6 +5,8 @@
 using namespace zhetapi;
 using namespace std;
 
+namespace zhetapi {
+
 void cprint(Token *tptr)
 {
 	if (tptr)
@@ -29,4 +31,6 @@ ZHETAPI_REGISTER(bt_println)
 	cout << "\n";
 	
 	return nullptr;
+}
+
 }

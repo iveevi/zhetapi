@@ -187,7 +187,7 @@ std::string type_name(const std::type_index &type)
 	if (type == typeid(Function))
 		return "Function";
 
-	return "?";
+	return type.name();
 }
 
 }

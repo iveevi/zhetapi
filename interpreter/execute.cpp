@@ -42,7 +42,7 @@ Token *execute(string str)
 				engine->put(f);
 			} catch (...) {
 				if (pe) {
-					cout << "err:" << us.what() << endl;
+					cout << "[FIXERR] UNKNOWN SYMBOL:" << us.what() << endl;
 					exit(-1);
 				}
 
@@ -81,8 +81,8 @@ Token *execute(string str)
 			exit(-1);
 		}
 
-		cout << "mg:" << endl;
-		mg.print();
+		/* cout << "mg:" << endl;
+		mg.print(); */
 
 		// "Execute" the statement
 		return tptr;

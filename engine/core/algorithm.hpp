@@ -45,6 +45,11 @@ public:
 	
 	const std::string &symbol() const;
 
+	// Debugging
+	void print() const;
+
+	bool empty() const;
+
 	// Virtual functions
 	type caller() const override;
 	Token *copy() const override;

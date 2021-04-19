@@ -11,6 +11,8 @@
 
 namespace zhetapi {
 
+struct NULLPTR {};
+
 class Engine : public engine_base {
 	// Broader scope
 	Engine *		_stack = nullptr;

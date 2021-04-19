@@ -1,6 +1,22 @@
-g(x) = x^2 - 1
+g(x) = x^2 - x - 6
 
-# g.f.h
-# g.derivative().derivative(2)
+x = null
 
-println("value: ", g.derivative(2))
+println("x = ", x)
+
+if (x == null)
+	println("X IS NULL!")
+else
+	println("X IS NOT NULL")
+
+alg newton(r, f)
+{
+	less = null
+	more = 0
+
+	y = f(r)
+
+	println("less = ", less)
+}
+
+newton(1, g)
