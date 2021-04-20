@@ -1,7 +1,7 @@
 #include "global.hpp"
 
 // Zhetapi API storage
-Engine *engine = new Engine();
+Engine *engine = new Engine(true);
 
 Token *execute(string str)
 {

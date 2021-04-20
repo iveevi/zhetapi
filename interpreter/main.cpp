@@ -41,13 +41,6 @@ static inline string __get_dir(string file)
 // Inline kernel
 static int inline_interpret()
 {
-	// Register builtin symbols (TODO: put into another function)
-	engine->put(Registrable("print", &bt_print));
-	engine->put(Registrable("println", &bt_println));
-	
-	engine->put("true", op_true->copy());
-	engine->put("false", op_false->copy());
-
 	while (true) {
 		cout << "> ";
 
@@ -80,13 +73,6 @@ static int interpreter(string infile)
 	}
 
 	file = infile;
-	
-	// Register builtin symbols
-	engine->put(Registrable("print", &bt_print));
-	engine->put(Registrable("println", &bt_println));
-
-	engine->put("true", op_true->copy());
-	engine->put("false", op_false->copy());
 
 	return parse();
 }

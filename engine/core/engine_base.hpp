@@ -197,6 +197,9 @@ using overloads = std::vector <std::pair <signature, Token *>>;
 class engine_base {
 	symtab <overloads>	_overloads;
 
+	// TODO: this doesn't really need to be Token *
+	symtab <Token *>	_universal;
+
 	// Private methods
 	std::string gen_overload_msg(const signature &, const std::string &);
 	signature gen_signature(const std::vector <Token *> &);

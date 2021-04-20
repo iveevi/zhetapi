@@ -8,15 +8,17 @@
 
 namespace zhetapi {
 
-Engine::Engine() : engine_base()
+Engine::Engine(bool defaults) : engine_base()
 {
-	// Default present
-	put("true", new Operand <bool> (true));
-	put("false", new Operand <bool> (false));
-	put("null", new Operand <Token *> (nullptr));
+	if (defaults) {
+		// Default present
+		put("true", new Operand <bool> (true));
+		put("false", new Operand <bool> (false));
+		put("null", new Operand <Token *> (nullptr));
 
-	put(Registrable("print", &bt_print));
-	put(Registrable("println", &bt_println));
+		put(Registrable("print", &bt_print));
+		put(Registrable("println", &bt_println));
+	}
 }
 
 Engine::Engine(const Engine &other)

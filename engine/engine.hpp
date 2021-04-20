@@ -26,7 +26,7 @@ class Engine : public engine_base {
 	// Private methods
 	void set_origin_stack(Engine *);
 public:
-	Engine();
+	Engine(bool = false);
 	Engine(const Engine &);
 
 	Engine &operator=(const Engine &);

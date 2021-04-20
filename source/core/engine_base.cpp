@@ -228,7 +228,21 @@ engine_base::engine_base()
 	//////////////////////////////////////////
 
 	// Add a "variant" type
+
+	// Do token cmp
+	_universal["=="] = new operation(
+		"==",
+		"$1 == $2",
+		2,
+		[](const std::vector <Token *> &ins) {
+			return new Operand <bool> (tokcmp(ins[0], ins[1]));
+		}
+	);
+
+	/*
 	_add_binary_operation(==, Z, Z, B);
+	_add_binary_operation(==, Token *, Token *, B); */
+
 	_add_binary_operation(!=, Z, Z, B);
 
 	_add_binary_operation(>, Z, Z, B);
@@ -275,13 +289,20 @@ engine_base::~engine_base()
 
 Token *engine_base::compute(
 		const std::string &str,
-		const std::vector <Token *> &vals)
+		const std::vector <Token *> &args)
 {
 	// The actual operation
 	operation *optr = nullptr;
+
+	// Check presence in universal operation sets
+	if (_universal.find(str) != _universal.end()) {
+		optr = dynamic_cast <operation *> (_universal[str]);
+
+		return optr->compute(args);
+	}
 	
 	// Generature the signature
-	signature sig = gen_signature(vals);
+	signature sig = gen_signature(args);
 
 	// Take address to avoid copy
 	overloads *ovlds = &_overloads[str];
@@ -309,7 +330,7 @@ Token *engine_base::compute(
 	}
 	
 	if (optr)
-		return optr->compute(vals);
+		return optr->compute(args);
 	
 	throw unknown_op_overload(gen_overload_msg(sig, str));
 }

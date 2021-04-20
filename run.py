@@ -69,15 +69,13 @@ def list(args):
 def install(args):
 	print("Installing...")
 
-	make_target(args.threads, 'zhetapi zhp-shared zhp-static')
-	# make_target(args.threads, 'zhp-shared')
-	# make_target(args.threads, 'zhp-static')
-
 	os.system('mkdir -p bin')
+	os.system('mkdir -p include')
+
+	make_target(args.threads, 'zhetapi zhp-shared zhp-static')
+
 	os.system('mv zhetapi bin/')
 	os.system('mv libzhp.* bin/')
-
-	os.system('mkdir -p include')
 
 	print(50 * '=' + "\nCompiling libraries...\n" + 50 * '=')
 	ret1 = os.system('./bin/zhetapi -v -c	\
