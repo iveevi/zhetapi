@@ -229,7 +229,7 @@ engine_base::engine_base()
 
 	// Add a "variant" type
 
-	// Do token cmp
+	// == and != operators
 	_universal["=="] = new operation(
 		"==",
 		"$1 == $2",
@@ -239,11 +239,14 @@ engine_base::engine_base()
 		}
 	);
 
-	/*
-	_add_binary_operation(==, Z, Z, B);
-	_add_binary_operation(==, Token *, Token *, B); */
-
-	_add_binary_operation(!=, Z, Z, B);
+	_universal["!="] = new operation(
+		"!=",
+		"$1 != $2",
+		2,
+		[](const std::vector <Token *> &ins) {
+			return new Operand <bool> (!tokcmp(ins[0], ins[1]));
+		}
+	);
 
 	_add_binary_operation(>, Z, Z, B);
 	_add_binary_operation(>, R, R, B);

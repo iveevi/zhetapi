@@ -7,6 +7,7 @@
 #include <vector>
 
 // Engine headers
+#include <core/common.hpp>
 #include <core/node_manager.hpp>
 
 namespace zhetapi {
@@ -20,11 +21,11 @@ class algorithm : public Token {
 	std::string			_alg		= "";
 
 	std::set <std::string>		_pardon;
-	std::vector <std::string>	_args		= {};
+	Args				_args		= {};
 
 	node_manager			_compiled	= node_manager();
 	
-	void generate(Engine *, std::string str, node_manager &);
+	// void generate(Engine *, std::string str, node_manager &);
 public:
 	algorithm();
 	algorithm(const algorithm &);
@@ -41,7 +42,7 @@ public:
 	Token *execute(Engine *, const std::vector <Token *> &);
 
 	// Put somewhere else
-	std::vector <std::string> split(std::string str);
+	// std::vector <std::string> split(std::string str);
 	
 	const std::string &symbol() const;
 
@@ -57,6 +58,8 @@ public:
 
 	virtual bool operator==(Token *) const override;
 };
+
+node_manager compile_block(Engine *, const std::string &, Args, Pardon &);
 
 }
 

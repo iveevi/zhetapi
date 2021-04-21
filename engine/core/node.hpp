@@ -66,6 +66,8 @@ public:
 	void append(const node &);
 	void append_front(const node &);
 
+	void remove_end();
+
 	// Printing
 	void print(int = 1, int = 0) const;
 	void print_no_address(int = 1, int = 0) const;

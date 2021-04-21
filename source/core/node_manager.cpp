@@ -163,8 +163,13 @@ Token *node_manager::value(Engine *context) const
 // Sequential value (returns null for now)
 Token *node_manager::sequential_value(Engine *context) const
 {
+	return sequential_value(context, _tree);
+}
+
+Token *node_manager::sequential_value(Engine *context, node tree) const
+{
 	// Assumes that the top node is a sequential
-	for (node nd : _tree._leaves)
+	for (node nd : tree._leaves)
 		value(context, nd);
 	
 	return nullptr;
@@ -187,9 +192,13 @@ Token *node_manager::value(Engine *context, node tree) const
 
 	int size;
 
+	node reffed;
+
 	// If null token, resort to special execution modes
 	// (Use this instead of sequential_value for
 	// algorithms; dont remove it though)
+	//
+	// TODO: Move to a helper function
 	//
 	// Special nodes!
 	if (tree.null()) {
@@ -213,7 +222,35 @@ Token *node_manager::value(Engine *context, node tree) const
 			}
 
 			return nullptr;
+		} else if (tree.label() == l_branch) {
+			using namespace std;
+			// Make static or something (as an operand)
+			Token *true_token = new Operand <bool> (true);
+
+			// TODO: Seriously, add a begin() and end() for nodes
+			for (size_t i = 0; i < tree.child_count(); i++) {
+				node predicate = tree[i][0];
+
+				Token *eval = value(context, predicate);
+				if (tokcmp(eval, true_token)) {
+					// Make sure to create a new scope (TODO: move outside the loop)
+					// context = push_and_ret_stack(context);
+
+					sequential_value(context, tree[i][1]);
+
+					// context = pop_and_del_stack(context);
+
+					break;
+				}
+
+				// Check for fallback
+			}
+
+			return nullptr;
 		} else {
+			/* using namespace std;
+			cout << "ERRROORROROOR" << endl;
+			tree.print(); */
 			throw std::runtime_error("Unknown execution mode \'" + strlabs[tree._label] + "\'");
 		}
 	}
@@ -270,7 +307,11 @@ Token *node_manager::value(Engine *context, node tree) const
 	case Token::token_rvalue:
 		return (tree.cast <rvalue> ())->get(context)->copy();
 	case Token::ndr:
-		return (tree.cast <node_reference> ())->get()->copy_token();
+		reffed = *((tree.cast <node_reference> ())->get());
+
+		tree.retokenize(value(context, reffed));
+
+		return value(context, tree);
 	case Token::token_node_list:
 		return (tree.cast <node_list> ())->evaluate(context);
 	case Token::ftn:
@@ -339,6 +380,67 @@ Token *node_manager::substitute_and_seq_compute(
 	return sequential_value(context);
 }
 
+// Branch compress/translation
+void node_manager::compress_branches()
+{
+	compress_branches(_tree);
+}
+
+void node_manager::create_branch(node &tree, size_t start, size_t end)
+{
+	node_manager branch;
+
+	// TODO: add a .begin() to nodes
+	auto itr = tree._leaves.begin() + start;
+	for (size_t i = start; i < end; i++) {
+		branch.append(tree[i]);
+
+		tree._leaves.erase(itr);
+	}
+
+	branch.set_label(l_branch);
+
+	tree._leaves.insert(itr, branch._tree);
+}
+
+// Make this non-method
+void node_manager::compress_branches(node &tree)
+{
+	using namespace std;
+	if (tree.label() != l_sequential)
+		return;
+	
+	// Add a dummy node to flush
+	tree.append(node());
+	
+	int n;
+	int start;
+
+	start = -1;
+	
+	n = tree.child_count();
+	for (size_t i = 0; i < n; i++) {
+		switch (tree[i].label()) {
+		case l_if_branch:
+			if (start != -1)
+				create_branch(tree, start, i);
+
+			start = i;
+			break;
+		// TODO: Add the rest of the branch types here
+		default:
+			if (start != -1)
+				create_branch(tree, start, i);
+
+			break;
+		}
+	}
+
+	// Remove the flushed
+	tree.remove_end();
+}
+
+// Appending nodes
 void node_manager::append(const node &n)
 {
 	_tree.append(n);
@@ -389,6 +491,11 @@ void node_manager::add_args(const std::vector <std::string> &args)
 
 	// Fix broken variable references
 	rereference(_tree);
+}
+
+void node_manager::remove_end()
+{
+	_tree.remove_end();
 }
 
 // Unpacking methods
@@ -485,7 +592,7 @@ void node_manager::expand(
 	if (ophptr && ophptr->code == atm)
 		attribute_invert(ref);
 
-	if (ref._tptr->caller() == Token::vcl) {
+	if (ref.caller() == Token::vcl) {
 		/*
 		 * Excluding the parameters, the variable cluster should
 		 * always be a leaf of the tree.

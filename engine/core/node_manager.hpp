@@ -59,11 +59,15 @@ public:
 	Token *substitute_and_compute(Engine *, std::vector <Token *> &);
 	Token *substitute_and_seq_compute(Engine *, const std::vector <Token *> &);
 
+	void compress_branches();
+
 	void append_front(const node &);
 	void append_front(const node_manager &);
 
 	void append(const node &);
 	void append(const node_manager &);
+
+	void remove_end();
 
 	void add_args(const std::vector <std::string> &);
 
@@ -99,6 +103,10 @@ public:
 private:
 	// TODO: take in node as a reference (const)
 	Token *value(Engine *, node) const;
+	Token *sequential_value(Engine *, node) const;
+
+	void compress_branches(node &);
+	void create_branch(node &, size_t, size_t);
 
 	void unpack(node &);
 

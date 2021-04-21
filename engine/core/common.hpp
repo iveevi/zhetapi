@@ -3,7 +3,12 @@
 
 // C/C++ heaaders
 #include <vector>
+#include <set>
 #include <string>
+
+// Type aliases
+using Args = std::vector <std::string>;
+using Pardon = std::set <std::string>;
 
 // This file contains miscellaneous functions that
 // do not really fit into any other header
@@ -20,8 +25,6 @@ void collect(std::vector <T> &bin, T x, U ... rest)
 
 	collect(bin, rest...);
 }
-
-using Args = std::vector <std::string>;
 
 Args args_union(const Args &, const Args &);
 

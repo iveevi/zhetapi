@@ -134,7 +134,17 @@ static int parse_block(string &str)
 	}
 
 	if (c == '{') {
-		while ((c = getchar()) != '}') {
+		int level = 0;
+		while ((c = getchar()) != EOF) {
+			if (c == '{')
+				level++;
+			else if (c == '}') {
+				if (!level)
+					break;
+				
+				level--;
+			}
+
 			str += c;
 
 			__lineup(c);
@@ -413,6 +423,8 @@ void check(string &keyword)
 
 		// cout << "ALG end@ " << line << endl;
 	}
+
+	// TODO: create a class for getting "return" keys, but do an error instead (in this scope)
 }
 
 // Parsing machine

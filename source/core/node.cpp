@@ -173,6 +173,12 @@ void node::append_front(const node &ref)
 	_leaves.insert(_leaves.begin(), ref);
 }
 
+void node::remove_end()
+{
+	if (_leaves.size() > 0)
+		_leaves.erase(_leaves.end());
+}
+
 void node::print(int num, int lev) const
 {
 	int counter = lev;
