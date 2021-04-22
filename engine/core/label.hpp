@@ -57,6 +57,9 @@ enum lbl {
 	l_else_branch,
 	l_elif_branch,
 	l_branch,
+	l_while_loop,
+	l_break_loop,
+	l_continue_loop,
 
 	// Miscellaneious
 	l_constant,

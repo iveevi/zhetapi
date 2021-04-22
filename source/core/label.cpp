@@ -48,6 +48,9 @@ std::string strlabs[] = {
 	"else",
 	"elif",
 	"branch",
+	"while loop",
+	"break loop",
+	"continue loop",
 
 	// Miscellaneious
 	"constant",

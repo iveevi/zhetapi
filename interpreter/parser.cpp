@@ -34,7 +34,7 @@ string file = "";
 static int split_for_statement(string condition, string &variable, string &expression)
 {
 	size_t i = 0;
-	size_t i_in = -1;
+	int i_in = -1;
 
 	size_t len = condition.size();
 
@@ -77,7 +77,7 @@ static int parse_parenthesized(string &parenthesized)
 		return -1;
 
 	int level = 0;
-	while (c = getchar()) {
+	while ((c = getchar())) {
 		if (c == '(') {
 			level++;
 		} else if (c == ')') {

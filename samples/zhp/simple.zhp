@@ -17,6 +17,21 @@ alg newton(r, f)
 	
 	println("more = ", more)
 	println("less = ", less)
+
+	i = 0
+	while (i < 10) {
+		println("LOOP, i = ", i)
+
+		if (i == 5) {
+			println("\tI == 5!!")
+
+			break
+		}
+		
+		i++
+
+		# break
+	}
 }
 
 newton(1, g)

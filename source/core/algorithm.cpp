@@ -284,6 +284,40 @@ static void check_keyword(
 		keyword.clear();
 	}
 
+	if (keyword == "while") {
+		if (parse_parenthesized(code, i, parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after an while\n", 0L);
+			exit(-1);
+		}
+
+		node_manager condition(engine, parenthesized, args, pardon);
+
+		extract_block(code, i, block);
+
+		node_manager nm_block = compile_block(engine, block + "\n", args, pardon);
+
+		node_manager nm_while;
+
+		nm_while.append(condition);
+		nm_while.append(nm_block);
+
+		nm_while.set_label(l_while_loop);
+
+		rnm.append(nm_while);
+		
+		keyword.clear();
+	}
+
+	if (keyword == "break") {
+		node_manager nm_break;
+
+		nm_break.set_label(l_break_loop);
+
+		rnm.append(nm_break);
+
+		keyword.clear();
+	}
+
 	// Acknowledge the "alg" keyword but throw an error
 }
 

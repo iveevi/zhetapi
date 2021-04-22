@@ -169,8 +169,16 @@ Token *node_manager::sequential_value(Engine *context) const
 Token *node_manager::sequential_value(Engine *context, node tree) const
 {
 	// Assumes that the top node is a sequential
-	for (node nd : tree._leaves)
-		value(context, nd);
+	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
+
+	Token *tptr;
+	for (node nd : tree._leaves) {
+		tptr = value(context, nd);
+
+		// Check value for special cases (early returns)
+		if (tokcmp(break_token, tptr))
+			return tptr;
+	}
 	
 	return nullptr;
 }
@@ -226,14 +234,20 @@ Token *node_manager::value(Engine *context, node tree) const
 			// Push new stack
 			context = push_and_ret_stack(context);
 
-			// Make static or something (as an operand)
+			// TODO: Make static or something (as an operand)
 			Token *true_token = new Operand <bool> (true);
+			Token *break_token = new Operand <Token *> ((Token *) 0x1);
 
 			// TODO: Seriously, add a begin() and end() for nodes
 			// TODO: Check returns
 			for (size_t i = 0; i < tree.child_count(); i++) {
 				if (tree[i].label() == l_else_branch) {
-					sequential_value(context, tree[i][0]);
+					Token *tptr = sequential_value(context, tree[i][0]);
+
+					// TODO: keep in another function
+					if (tokcmp(break_token, tptr))
+						return tptr;
+
 					break;
 				}
 
@@ -242,7 +256,10 @@ Token *node_manager::value(Engine *context, node tree) const
 
 				Token *eval = value(context, predicate);
 				if (tokcmp(eval, true_token)) {
-					sequential_value(context, tree[i][1]);
+					Token *tptr = sequential_value(context, tree[i][1]);
+
+					if (tokcmp(break_token, tptr))
+						return tptr;
 
 					break;
 				}
@@ -252,6 +269,37 @@ Token *node_manager::value(Engine *context, node tree) const
 			context = pop_and_del_stack(context);
 
 			return nullptr;
+		} else if (tree.label() == l_while_loop) {
+			// Push new stack
+			context = push_and_ret_stack(context);
+
+			// Make static or something (as an operand)
+			Token *true_token = new Operand <bool> (true);
+
+			// NOTE: All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
+			Token *break_token = new Operand <Token *> ((Token *) 0x1);
+
+			node predicate = tree[0];
+			while (true) {
+				Token *eval = value(context, predicate);
+
+				// TODO: Check returns (and for null)
+				if (tokcmp(eval, true_token)) {
+					eval = sequential_value(context, tree[1]);
+
+					if (eval && tokcmp(eval, break_token))
+						break;
+				} else {
+					break;
+				}
+			}
+
+			// Pop the stack
+			context = pop_and_del_stack(context);
+
+			return nullptr;
+		} else if (tree.label() == l_break_loop) {
+			return new Operand <Token *> ((Token *) 0x1);
 		} else {
 			/* using namespace std;
 			cout << "ERRROORROROOR" << endl;
