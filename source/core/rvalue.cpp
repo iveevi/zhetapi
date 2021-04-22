@@ -17,7 +17,13 @@ const std::string &rvalue::symbol() const
 Token *rvalue::get(Engine *context) const
 {
 	// TODO: Maybe warn for null?
-	return context->get(_symbol);
+	Token *tptr = context->get(_symbol);
+
+	// Get the right line number
+	if (!tptr)
+		throw node_manager::undefined_symbol(_symbol);
+
+	return tptr;
 }
 
 Token::type rvalue::caller() const

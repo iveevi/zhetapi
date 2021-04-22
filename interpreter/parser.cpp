@@ -76,8 +76,19 @@ static int parse_parenthesized(string &parenthesized)
 	if (c != '(')
 		return -1;
 
-	while ((c = getchar()) != ')')
+	int level = 0;
+	while (c = getchar()) {
+		if (c == '(') {
+			level++;
+		} else if (c == ')') {
+			if (!level)
+				break;
+			
+			level--;
+		}
+
 		parenthesized += c;
+	}
 
 	return 0;
 }

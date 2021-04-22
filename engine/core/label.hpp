@@ -54,6 +54,8 @@ enum lbl {
 	l_assignment_chain,			// Assignment statements
 	l_lvalue,
 	l_if_branch,
+	l_else_branch,
+	l_elif_branch,
 	l_branch,
 
 	// Miscellaneious

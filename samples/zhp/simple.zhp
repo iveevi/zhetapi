@@ -10,21 +10,13 @@ alg newton(r, f)
 	println("y = ", y)
 	println("g(1) = ", g(1))
 
-	if (less == null) {
-		x = 0
-		y = 0
-
-		println("LESS IS NULL")
-	}
-
-	if (more == null) {
-		x = 0
-		y = 0
-
-		println("MORE IS NULL")
-	}
-
-	# println("x = 0")
+	if (y > 0)
+		more = r
+	else
+		less = r
+	
+	println("more = ", more)
+	println("less = ", less)
 }
 
 newton(1, g)

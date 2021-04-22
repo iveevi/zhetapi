@@ -45,6 +45,8 @@ std::string strlabs[] = {
 	"assignment chain",
 	"lvalue",
 	"if",
+	"else",
+	"elif",
 	"branch",
 
 	// Miscellaneious

@@ -45,7 +45,7 @@ namespace zhetapi {
 	engine->put(zhetapi::Registrable(#symbol, &ftr));
 
 #define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
-	engine->put(zhetapi::Variable(new zhetapi::Operand <type> (op), #symbol));
+	engine->put(#symbol, new zhetapi::Operand <type> (op));
 
 class Registrable : public Token {
 public:

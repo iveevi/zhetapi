@@ -156,8 +156,19 @@ static int parse_parenthesized(const std::string &code, size_t &i, std::string &
 	if (c != '(')
 		return -1;
 
-	while ((i < n) && (c = code[i++]) != ')')
+	int level = 0;
+	while ((i < n) && (c = code[i++])) {
+		if (c == '(') {
+			level++;
+		} else if (c == ')') {
+			if (!level)
+				break;
+			
+			level--;
+		}
+
 		parenthesized += c;
+	}
 
 	return 0;
 }
@@ -173,9 +184,9 @@ static int extract_block(const std::string &code, size_t &i, std::string &block)
 	if (c == '{') {
 		int level = 0;
 		while ((i < n) && (c = code[i++])) {
-			if (c == '{')
+			if (c == '{') {
 				level++;
-			else if (c == '}') {
+			} else if (c == '}') {
 				if (!level)
 					break;
 				
@@ -219,20 +230,61 @@ static void check_keyword(
 
 		extract_block(code, i, block);
 
-		node_manager nmblock = compile_block(engine, block, args, pardon);
+		node_manager nmblock = compile_block(engine, block + "\n", args, pardon);
 
 		node_manager ifcond;
 
 		ifcond.append(condition);
 		ifcond.append(nmblock);
 
-		// This label actually belongs to a higher level
 		ifcond.set_label(l_if_branch);
 
 		rnm.append(ifcond);
 		
 		keyword.clear();
 	}
+
+	if (keyword == "elif") {
+		if (parse_parenthesized(code, i, parenthesized)) {
+			printf("Syntax error at line %lu: missing parenthesis after an elif\n", 0L);
+			exit(-1);
+		}
+
+		node_manager condition(engine, parenthesized, args, pardon);
+
+		extract_block(code, i, block);
+
+		node_manager nmblock = compile_block(engine, block + "\n", args, pardon);
+
+		node_manager elifcond;
+
+		elifcond.append(condition);
+		elifcond.append(nmblock);
+
+		elifcond.set_label(l_elif_branch);
+
+		rnm.append(elifcond);
+		
+		keyword.clear();
+	}
+
+	if (keyword == "else") {
+		extract_block(code, i, block);
+
+		node_manager nmblock = compile_block(engine, block + "\n", args, pardon);
+
+		node_manager elsecond;
+
+		elsecond.append(nmblock);
+
+		elsecond.set_label(l_else_branch);
+
+		rnm.append(elsecond);
+		
+		keyword.clear();
+	}
+
+	// Acknowledge the "alg" keyword but throw an error
 }
 
 node_manager compile_block(
@@ -290,9 +342,9 @@ node_manager compile_block(
 	compiled.set_label(l_sequential);
 	compiled.compress_branches();
 
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
-	compiled.print();
+	compiled.print(); */
 
 	return compiled;
 }

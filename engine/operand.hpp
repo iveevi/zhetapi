@@ -106,6 +106,10 @@ bool Operand <T> ::operator==(Token *tptr) const
 	return (opd->_val == _val);
 }
 
+// Forward declare specializations
+template <>
+std::string Operand <bool> ::str() const;
+
 }
 
 #endif

@@ -223,28 +223,33 @@ Token *node_manager::value(Engine *context, node tree) const
 
 			return nullptr;
 		} else if (tree.label() == l_branch) {
-			using namespace std;
+			// Push new stack
+			context = push_and_ret_stack(context);
+
 			// Make static or something (as an operand)
 			Token *true_token = new Operand <bool> (true);
 
 			// TODO: Seriously, add a begin() and end() for nodes
+			// TODO: Check returns
 			for (size_t i = 0; i < tree.child_count(); i++) {
+				if (tree[i].label() == l_else_branch) {
+					sequential_value(context, tree[i][0]);
+					break;
+				}
+
+				// Fallthrough if not else
 				node predicate = tree[i][0];
 
 				Token *eval = value(context, predicate);
 				if (tokcmp(eval, true_token)) {
-					// Make sure to create a new scope (TODO: move outside the loop)
-					// context = push_and_ret_stack(context);
-
 					sequential_value(context, tree[i][1]);
-
-					// context = pop_and_del_stack(context);
 
 					break;
 				}
-
-				// Check for fallback
 			}
+
+			// Pop the stack
+			context = pop_and_del_stack(context);
 
 			return nullptr;
 		} else {
@@ -393,7 +398,7 @@ void node_manager::create_branch(node &tree, size_t start, size_t end)
 	// TODO: add a .begin() to nodes
 	auto itr = tree._leaves.begin() + start;
 	for (size_t i = start; i < end; i++) {
-		branch.append(tree[i]);
+		branch.append(tree[start]);
 
 		tree._leaves.erase(itr);
 	}
@@ -406,7 +411,6 @@ void node_manager::create_branch(node &tree, size_t start, size_t end)
 // Make this non-method
 void node_manager::compress_branches(node &tree)
 {
-	using namespace std;
 	if (tree.label() != l_sequential)
 		return;
 	
@@ -427,11 +431,16 @@ void node_manager::compress_branches(node &tree)
 
 			start = i;
 			break;
+		case l_else_branch:
+		case l_elif_branch:
+			// Make sure that stsrt != -1
+			break;
 		// TODO: Add the rest of the branch types here
 		default:
 			if (start != -1)
 				create_branch(tree, start, i);
-
+			
+			start = -1;
 			break;
 		}
 	}
