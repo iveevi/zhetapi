@@ -29,7 +29,13 @@ int compile_library(vector <string> files, string output)
 	if (verbose)
 		cout << cmd << endl;
 
-	return system(cmd.c_str());
+	if (system(cmd.c_str())) {
+		printf("Fatal error: could not compile library \'%s\'\n", outlib.c_str());
+		
+                return -1;
+        }
+
+	return 0;
 }
 
 int assess_libraries(vector <string> files)
