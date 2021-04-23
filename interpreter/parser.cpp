@@ -70,9 +70,11 @@ static int parse_parenthesized(string &parenthesized)
 	char c;
 
 	while (isspace(c = getchar())) {
+		cout << "\t\'" << c << "\'" << endl;
 		__lineup(c);
 	}
 
+	cout << "c = \'" << c << "\'" << endl;
 	if (c != '(')
 		return -1;
 
@@ -93,6 +95,7 @@ static int parse_parenthesized(string &parenthesized)
 	return 0;
 }
 
+// TODO: Whats the difference between parse block and parse 
 static int extract_block(string &block)
 {
 	char c;
@@ -101,8 +104,19 @@ static int extract_block(string &block)
 	// while (isspace(c = getchar()));
 
 	if (c == '{') {
-		while ((c = getchar()) != '}')
+		int level = 0;
+		while ((c = getchar()) != EOF) {
+			if (c == '{') {
+				level++;
+			} else if (c == '}') {
+				if (!level)
+					break;
+				
+				level--;
+			}
+
 			block += c;
+		}
 	} else {
 		fseek(stdin, -1, SEEK_CUR);
 
@@ -147,9 +161,9 @@ static int parse_block(string &str)
 	if (c == '{') {
 		int level = 0;
 		while ((c = getchar()) != EOF) {
-			if (c == '{')
+			if (c == '{') {
 				level++;
-			else if (c == '}') {
+			} else if (c == '}') {
 				if (!level)
 					break;
 				
@@ -233,8 +247,10 @@ void check(string &keyword)
 	string lname;
 
 	if (keyword == "if") {
+		cout << "IF - EXTRACTING PAREN" << endl;
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an if\n", line);
+			cout << "\tparenthesized = \"" << parenthesized << "\"" << endl;
 			exit(-1);
 		}
 
@@ -308,6 +324,7 @@ void check(string &keyword)
 	}
 
 	if (keyword == "while") {
+		cout << "WHILE!" << endl;
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after a while\n", line);
 			exit(-1);
@@ -317,6 +334,8 @@ void check(string &keyword)
 			printf("Syntax error at line %lu: missing statement after a while\n", line);
 			exit(-1);
 		}
+
+		cout << "BLOCK = \"" << block << "\"" << endl;
 
 		engine = push_and_ret_stack(engine);
 
@@ -527,6 +546,7 @@ int parse(string str)
 		__lineup(c);
 
 		// cout << "tmp = " << tmp << endl;
+		// TODO: please simplify and correct this
 		check(tmp);
 	}
 

@@ -1,4 +1,12 @@
-g(x) = x^2 - x - 6
+g(x) = x^3 - x + 4
+
+alg newton_iter(r, f, fp)
+{
+	# println("f(r) = ", f(r))
+	# println("fp = ", fp)
+	# println("fp(r) = ", fp(r))
+	return r - f(r)/fp(r)
+}
 
 alg newton(r, f)
 {
@@ -20,46 +28,42 @@ alg newton(r, f)
 
 	i = 0
 	while ((more == null) || (less == null)) {
-		println("LOOP, i = ", i)
-
-		if (i == 8) {
-			println("\tI == 8!!")
-
-			break
-		} elif (i == 5) {
-			println("\tI == 5!!")
-
-			i++
-
-			continue
-		}
-
-		println("\tPOST LOOP")
+		println("\tLOOP")
 		
-		i++
+		if ((++i) == 5)
+			break
 	}
 }
 
 newton(1, g)
 
-alg returner() {
-	return 10
+i = 0
+x = 1
+while (i++ < 10) {
+	println("newton iter: ", x)
+
+	x = newton_iter(x, g, g.derivative())
 }
 
-println("returner = ", returner())
+# alg returner() {
+#	return 10
+# }
+#
+# println("returner = ", returner())
 
 # Fix the output of this
 # println("returner = ", returner)
 
-i = 0
-while (true) {
-	println("LOOP, i = ", i)
-
-	if (i == 5) {
-		println("\tI == 5!!")
-		
-		break
-	}
-		
-	i++
-}
+# TODO: fix parsing...
+# i = 0
+# while (true) {
+#	println("LOOP, i = ", i)
+#
+#	if (i == 5) {
+#		println("\tI == 5!!")
+#		
+#		break
+#	}
+#		
+#	i++
+# }

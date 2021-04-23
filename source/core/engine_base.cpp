@@ -256,6 +256,11 @@ engine_base::engine_base()
 	_add_binary_operation(<=, Z, Z, B);
 	
 	_add_heterogenous_binary_operation(>, R, Z, B);
+	_add_heterogenous_binary_operation(<, R, Z, B);
+	_add_heterogenous_binary_operation(>, Q, Z, B);
+	_add_heterogenous_binary_operation(<, Q, Z, B);
+	_add_heterogenous_binary_operation(>, R, Q, B);
+	_add_heterogenous_binary_operation(<, R, Q, B);
 
 	// Boolean operations
 	_add_binary_operation(||, B, B, B);

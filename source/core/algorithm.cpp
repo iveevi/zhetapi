@@ -310,10 +310,7 @@ static void check_keyword(
 			exit(-1);
 		}
 
-		cout << "WHILE CONDITION!" << endl;
-		cout << "cond = \"" << parenthesized << "\"" << endl;
 		node_manager condition(engine, parenthesized, args, pardon);
-		condition.print();
 
 		extract_block(code, i, block);
 
@@ -358,7 +355,7 @@ static void check_keyword(
 		// TODO: only one line returns
 		extract_line(code, i, line);
 		
-		node_manager nm_line(engine, line);
+		node_manager nm_line(engine, line, args, pardon);
 
 		nm_return.append(nm_line);
 		nm_return.set_label(l_return_alg);
@@ -426,9 +423,9 @@ node_manager compile_block(
 	compiled.set_label(l_sequential);
 	compiled.compress_branches();
 
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
-	compiled.print();
+	compiled.print(); */
 
 	return compiled;
 }
