@@ -303,13 +303,17 @@ static void check_keyword(
 		keyword.clear();
 	}
 
+	using namespace std;
 	if (keyword == "while") {
 		if (parse_parenthesized(code, i, parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an while\n", 0L);
 			exit(-1);
 		}
 
+		cout << "WHILE CONDITION!" << endl;
+		cout << "cond = \"" << parenthesized << "\"" << endl;
 		node_manager condition(engine, parenthesized, args, pardon);
+		condition.print();
 
 		extract_block(code, i, block);
 
@@ -333,6 +337,17 @@ static void check_keyword(
 		nm_break.set_label(l_break_loop);
 
 		rnm.append(nm_break);
+
+		keyword.clear();
+	}
+
+	if (keyword == "continue") {
+		// TODO: Make such things static
+		node_manager nm_continue;
+
+		nm_continue.set_label(l_continue_loop);
+
+		rnm.append(nm_continue);
 
 		keyword.clear();
 	}
@@ -411,9 +426,9 @@ node_manager compile_block(
 	compiled.set_label(l_sequential);
 	compiled.compress_branches();
 
-	/* using namespace std;
+	using namespace std;
 	cout << "compiled:" << endl;
-	compiled.print(); */
+	compiled.print();
 
 	return compiled;
 }

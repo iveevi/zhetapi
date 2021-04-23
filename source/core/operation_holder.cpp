@@ -37,12 +37,15 @@ std::string strcodes[] = {
 	"post decr",
 	"pre incr",
 	"pre decr",
-	"attribute/method"
+	"attribute/method",
+	"boolean or",
+	"boolean and"
 };
 
 operation_holder::operation_holder(const ::std::string &str) : rep(str)
 {
 	// Store information into some sort of structure
+	// TODO: store in a table
 	if (str == "+")
 		code = add;
 	else if (str == "-")
@@ -113,6 +116,10 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = rde;
 	else if (str == ".")
 		code = atm;
+	else if (str == "||")
+		code = bool_or;
+	else if (str == "&&")
+		code = bool_and;
 }
 
 Token::type operation_holder::caller() const

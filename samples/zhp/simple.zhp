@@ -22,15 +22,21 @@ alg newton(r, f)
 	while ((more == null) || (less == null)) {
 		println("LOOP, i = ", i)
 
-		if (i == 5) {
-			println("\tI == 5!!")
+		if (i == 8) {
+			println("\tI == 8!!")
 
 			break
+		} elif (i == 5) {
+			println("\tI == 5!!")
+
+			i++
+
+			continue
 		}
+
+		println("\tPOST LOOP")
 		
 		i++
-
-		# break
 	}
 }
 
@@ -44,3 +50,16 @@ println("returner = ", returner())
 
 # Fix the output of this
 # println("returner = ", returner)
+
+i = 0
+while (true) {
+	println("LOOP, i = ", i)
+
+	if (i == 5) {
+		println("\tI == 5!!")
+		
+		break
+	}
+		
+	i++
+}

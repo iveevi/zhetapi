@@ -170,6 +170,7 @@ Token *node_manager::sequential_value(Engine *context, node tree) const
 {
 	// Assumes that the top node is a sequential
 	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
+	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
 	Token *tptr;
 	for (node nd : tree._leaves) {
@@ -178,6 +179,8 @@ Token *node_manager::sequential_value(Engine *context, node tree) const
 		// Check value for special cases (early returns)
 		// TODO: helper func
 		if (tptr && tokcmp(break_token, tptr))
+			return tptr;
+		if (tptr && tokcmp(continue_token, tptr))
 			return tptr;
 		else if (dynamic_cast <Operand <Token *> *> (tptr))
 			return (dynamic_cast <Operand <Token *> *> (tptr))->get();
@@ -240,6 +243,7 @@ Token *node_manager::value(Engine *context, node tree) const
 			// TODO: Make static or something (as an operand)
 			Token *true_token = new Operand <bool> (true);
 			Token *break_token = new Operand <Token *> ((Token *) 0x1);
+			Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
 			// TODO: Seriously, add a begin() and end() for nodes
 			// TODO: Check returns
@@ -265,6 +269,8 @@ Token *node_manager::value(Engine *context, node tree) const
 
 					if (tptr && tokcmp(break_token, tptr))
 						return tptr;
+					if (tptr && tokcmp(continue_token, tptr))
+						return tptr;
 					else if (dynamic_cast <Operand <Token *> *> (tptr))
 						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 
@@ -283,8 +289,9 @@ Token *node_manager::value(Engine *context, node tree) const
 			// Make static or something (as an operand)
 			Token *true_token = new Operand <bool> (true);
 
-			// NOTE: All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
+			// NOTE: New struct (types) - All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
 			Token *break_token = new Operand <Token *> ((Token *) 0x1);
+			Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
 			node predicate = tree[0];
 			while (true) {
@@ -296,8 +303,10 @@ Token *node_manager::value(Engine *context, node tree) const
 
 					if (eval && tokcmp(eval, break_token))
 						break;
-					else if (dynamic_cast <Operand <Token *> *> (tptr))
-						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
+					else if (eval && tokcmp(eval, continue_token))
+						continue;
+					else if (dynamic_cast <Operand <Token *> *> (eval))
+						return (dynamic_cast <Operand <Token *> *> (eval))->get();
 				} else {
 					break;
 				}
@@ -310,6 +319,9 @@ Token *node_manager::value(Engine *context, node tree) const
 		} else if (tree.label() == l_break_loop) {
 			// TODO:: put in another header as a generator or something (and establish a code set)
 			return new Operand <Token *> ((Token *) 0x1);
+		} else if (tree.label() == l_continue_loop) {
+			// TODO:: put in another header as a generator or something (and establish a code set)
+			return new Operand <Token *> ((Token *) 0x2);
 		} else if (tree.label() == l_return_alg) {
 			return new Operand <Token *> (value(context, tree[0]));
 		} else {

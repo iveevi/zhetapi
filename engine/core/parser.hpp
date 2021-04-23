@@ -89,6 +89,9 @@ struct parser : qi::grammar <siter, node (), qi::space_type> {
 	qi::rule <siter, Token *(), qi::space_type>			_leq;
 	qi::rule <siter, Token *(), qi::space_type>			_geq;
 
+	qi::rule <siter, Token *(), qi::space_type>			_or;
+	qi::rule <siter, Token *(), qi::space_type>			_and;
+
 	qi::rule <siter, Token *(), qi::space_type>			_post_incr;
 	qi::rule <siter, Token *(), qi::space_type>			_post_decr;
 	

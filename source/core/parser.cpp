@@ -33,6 +33,10 @@ parser::parser() : parser::base_type(_start)
 	_add_operation_symbol(_geq, >=);
 	_add_operation_symbol(_leq, <=);
 
+	// Boolean ooperations
+	_add_operation_symbol(_or, ||);
+	_add_operation_symbol(_and, &&);
+
 	// Unary increment/decrement
 	_add_operation_heter_symbol(_post_incr, ++, p++);
 	_add_operation_heter_symbol(_post_decr, --, p--);
@@ -51,7 +55,8 @@ parser::parser() : parser::base_type(_start)
 	 */
 	_t0_bin = _plus | _minus | _dot | _mod
 			| _eq | _neq | _geq
-			| _leq | _ge | _le;
+			| _leq | _ge | _le
+			| _or | _and;
 
 	/*
 	 * Represents a binary operation of second to lowest

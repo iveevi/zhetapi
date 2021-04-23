@@ -257,6 +257,10 @@ engine_base::engine_base()
 	
 	_add_heterogenous_binary_operation(>, R, Z, B);
 
+	// Boolean operations
+	_add_binary_operation(||, B, B, B);
+	_add_binary_operation(&&, B, B, B);
+
 	//////////////////////////////////////////
 	// Transfer into table
 	//////////////////////////////////////////
