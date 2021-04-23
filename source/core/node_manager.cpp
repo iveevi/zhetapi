@@ -176,8 +176,11 @@ Token *node_manager::sequential_value(Engine *context, node tree) const
 		tptr = value(context, nd);
 
 		// Check value for special cases (early returns)
-		if (tokcmp(break_token, tptr))
+		// TODO: helper func
+		if (tptr && tokcmp(break_token, tptr))
 			return tptr;
+		else if (dynamic_cast <Operand <Token *> *> (tptr))
+			return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 	}
 	
 	return nullptr;
@@ -245,9 +248,11 @@ Token *node_manager::value(Engine *context, node tree) const
 					Token *tptr = sequential_value(context, tree[i][0]);
 
 					// TODO: keep in another function
-					if (tokcmp(break_token, tptr))
+					if (tptr && tokcmp(break_token, tptr))
 						return tptr;
-
+					else if (dynamic_cast <Operand <Token *> *> (tptr))
+						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
+					
 					break;
 				}
 
@@ -258,8 +263,10 @@ Token *node_manager::value(Engine *context, node tree) const
 				if (tokcmp(eval, true_token)) {
 					Token *tptr = sequential_value(context, tree[i][1]);
 
-					if (tokcmp(break_token, tptr))
+					if (tptr && tokcmp(break_token, tptr))
 						return tptr;
+					else if (dynamic_cast <Operand <Token *> *> (tptr))
+						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 
 					break;
 				}
@@ -289,6 +296,8 @@ Token *node_manager::value(Engine *context, node tree) const
 
 					if (eval && tokcmp(eval, break_token))
 						break;
+					else if (dynamic_cast <Operand <Token *> *> (tptr))
+						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 				} else {
 					break;
 				}
@@ -299,7 +308,10 @@ Token *node_manager::value(Engine *context, node tree) const
 
 			return nullptr;
 		} else if (tree.label() == l_break_loop) {
+			// TODO:: put in another header as a generator or something (and establish a code set)
 			return new Operand <Token *> ((Token *) 0x1);
+		} else if (tree.label() == l_return_alg) {
+			return new Operand <Token *> (value(context, tree[0]));
 		} else {
 			/* using namespace std;
 			cout << "ERRROORROROOR" << endl;
@@ -374,6 +386,7 @@ Token *node_manager::value(Engine *context, node tree) const
 		for (node leaf : tree._leaves)
 			values.push_back(value(context, leaf));
 
+		// TODO: shorten (cast)
 		tptr = (*(dynamic_cast <Function *> (tree._tptr)))(values);
 
 		return tptr->copy();

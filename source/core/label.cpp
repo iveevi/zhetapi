@@ -51,6 +51,7 @@ std::string strlabs[] = {
 	"while loop",
 	"break loop",
 	"continue loop",
+	"return",
 
 	// Miscellaneious
 	"constant",

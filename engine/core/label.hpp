@@ -60,6 +60,7 @@ enum lbl {
 	l_while_loop,
 	l_break_loop,
 	l_continue_loop,
+	l_return_alg,
 
 	// Miscellaneious
 	l_constant,

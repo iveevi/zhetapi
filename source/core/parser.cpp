@@ -374,10 +374,17 @@ parser::parser() : parser::base_type(_start)
 				)
 			]
 
+			// Empty call
+			| (_ident >> '(' >> ')') [
+				_val = phoenix::construct <zhetapi::node> (
+					phoenix::new_ <variable_cluster> (_1)
+				)
+			]
+
 			| _ident [_val = phoenix::construct
 				<zhetapi::node> (phoenix::new_
 					<variable_cluster> (_1),
-					::std::vector <zhetapi::node> {})]
+					std::vector <zhetapi::node> {})]
 		);
 
 	/*

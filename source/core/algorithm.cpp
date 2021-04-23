@@ -206,6 +206,23 @@ static int extract_block(const std::string &code, size_t &i, std::string &block)
 	return 0;
 }
 
+static int extract_line(const std::string &code, size_t &i, std::string &line)
+{
+	// TODO: extend by allowing multiline with '\'
+	char c;
+	
+	// __skip_space();
+	size_t n = code.length();
+	while ((i < n) && isspace(c = code[i++]));
+
+	// Back pedal
+	i--;
+	while ((i < n) && ((c = code[i++]) != '\n'))
+		line += c;
+
+	return 0;
+}
+
 // TODO: add a handler class
 static void check_keyword(
 		const std::string &code,
@@ -217,8 +234,10 @@ static void check_keyword(
 		std::set <std::string> &pardon)
 {
 	std::string parenthesized;
+	// std::string lname;
+
 	std::string block;
-	std::string lname;
+	std::string line;
 
 	if (keyword == "if") {
 		if (parse_parenthesized(code, i, parenthesized)) {
@@ -314,6 +333,22 @@ static void check_keyword(
 		nm_break.set_label(l_break_loop);
 
 		rnm.append(nm_break);
+
+		keyword.clear();
+	}
+
+	if (keyword == "return") {
+		node_manager nm_return;
+
+		// TODO: only one line returns
+		extract_line(code, i, line);
+		
+		node_manager nm_line(engine, line);
+
+		nm_return.append(nm_line);
+		nm_return.set_label(l_return_alg);
+
+		rnm.append(nm_return);
 
 		keyword.clear();
 	}

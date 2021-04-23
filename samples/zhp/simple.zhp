@@ -19,7 +19,7 @@ alg newton(r, f)
 	println("less = ", less)
 
 	i = 0
-	while (i < 10) {
+	while ((more == null) || (less == null)) {
 		println("LOOP, i = ", i)
 
 		if (i == 5) {
@@ -35,3 +35,12 @@ alg newton(r, f)
 }
 
 newton(1, g)
+
+alg returner() {
+	return 10
+}
+
+println("returner = ", returner())
+
+# Fix the output of this
+# println("returner = ", returner)
