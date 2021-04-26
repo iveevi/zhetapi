@@ -69,12 +69,9 @@ static int parse_parenthesized(string &parenthesized)
 {
 	char c;
 
-	while (isspace(c = getchar())) {
-		cout << "\t\'" << c << "\'" << endl;
+	while (isspace(c = getchar()))
 		__lineup(c);
-	}
 
-	cout << "c = \'" << c << "\'" << endl;
 	if (c != '(')
 		return -1;
 
@@ -334,8 +331,6 @@ void check(string &keyword)
 			printf("Syntax error at line %lu: missing statement after a while\n", line);
 			exit(-1);
 		}
-
-		cout << "BLOCK = \"" << block << "\"" << endl;
 
 		engine = push_and_ret_stack(engine);
 

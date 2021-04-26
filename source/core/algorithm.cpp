@@ -115,9 +115,10 @@ static void generate_statement(
 		// Only node to actually be computed (as an l-value)
 		node_manager nm;
 		try {
-			nm = node_manager(engine, tmp[split_size - 1], args);
+			nm = node_manager(engine, tmp[split_size - 1], args, pardon);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cerr << "[LINE] Unknown symbol \"" << e.what() << "\"" << std::endl;
+			std::cerr << "\tfrom \"" << tmp[split_size - 1] << "\"" << std::endl;
 
 			exit(-1);
 		}
@@ -423,9 +424,9 @@ node_manager compile_block(
 	compiled.set_label(l_sequential);
 	compiled.compress_branches();
 
-	/* using namespace std;
+	using namespace std;
 	cout << "compiled:" << endl;
-	compiled.print(); */
+	compiled.print();
 
 	return compiled;
 }
@@ -481,7 +482,7 @@ Token *algorithm::copy() const
 
 std::string algorithm::str() const
 {
-	return _ident;
+	return "alg-\"" + _ident + "\"";
 }
 
 bool algorithm::operator==(Token *tptr) const
