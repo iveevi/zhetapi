@@ -135,10 +135,17 @@ def zhetapi(args):
     if (ret != 0):
         clean_and_exit(-1)
 
+def clang(args):
+    ret = os.system('clang-tidy-8 engine/* source/* -- -I engine -I glad')
+
+    if (ret != 0):
+        clean_and_exit(-1)
+
 
 special = {
     'install': install,
     'zhetapi': zhetapi,
+    'clang' : clang,
     'list': list
 }
 

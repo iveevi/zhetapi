@@ -14,5 +14,6 @@ RUN apt-get -yq update \
 	&& apt-get install -yq texlive-fonts-extra \
 	&& apt-get install -yq texlive-latex-extra \
 	&& apt-get install -yq graphviz \
+	&& apt-get install -yq clang-tidy-8 \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
