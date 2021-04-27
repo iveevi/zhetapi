@@ -1,19 +1,6 @@
 g(x) = x^2 - 4
 
-# Make a operation for this
-alg abs(x)
-{
-	println("--------------------------------------")
-	println("ABS!")
-	if (x < 0) {
-		println("\tnegative!!")
-		return -1 * x
-	}
-
-	# check else later
-
-	println("CONTINuINg")
-	return x
-}
-
 println("Abs test: ", abs(-12))
+println("Abs test: ", abs(-12.43243))
+println("Abs test: ", abs(12))
+println("Abs test: ", abs(12.43243))

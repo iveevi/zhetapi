@@ -165,9 +165,9 @@ engine_base::engine_base()
 	_add_unary_operation_ftr(lg, R, R, log(R (in->get()))/log(2));
 
 	// Misc
-	// _add_unary_operation_ftr(abs, Z, Z, std::abs(in->get()));
-	// _add_unary_operation_ftr(abs, Q, R, std::abs(in->get()));
-	// _add_unary_operation_ftr(abs, R, R, std::abs(in->get()));
+	_add_unary_operation_ftr(abs, Z, Z, std::abs(in->get()));
+	_add_unary_operation_ftr(abs, Q, R, std::abs(in->get()));
+	_add_unary_operation_ftr(abs, R, R, std::abs(in->get()));
 	
 	//////////////////////////////////////////
 	// Vector operations
