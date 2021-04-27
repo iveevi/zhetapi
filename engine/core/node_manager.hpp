@@ -121,7 +121,7 @@ private:
 			const std::set <std::string> & = std::set <std::string> ());
 
 	void simplify(Engine *, node &);
-	void simplify_separable(Engine *, node &);
+	void simplify_separable(Engine *, node &, codes);
 	void simplify_mult_div(Engine *, node &, codes);
 
 	// TODO: Input an engine?

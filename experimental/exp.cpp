@@ -83,12 +83,18 @@ int main()
 	cout << "nm:" << endl;
 	nm.print();
 
-	cout << "display: " << nm.display() << endl; */
+	cout << "display: " << nm.display() << endl;
 
 	Equation eq({
 		"x^2 - x",
 		"6"
 	});
 
-	eq.solve();
+	eq.solve(); */
+
+	Function f = "f(x) = 2*x - 0";
+
+	cout << string(50, '=') << endl;
+	f.print();
+	cout << f.display() << endl;
 }

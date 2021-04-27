@@ -254,7 +254,9 @@ Token *node_manager::value(Engine *context, node tree) const
 					// TODO: keep in another function
 					if (tptr && tokcmp(break_token, tptr))
 						return tptr;
-					else if (dynamic_cast <Operand <Token *> *> (tptr))
+					if (tptr && tokcmp(continue_token, tptr))
+						return tptr;
+					if (dynamic_cast <Operand <Token *> *> (tptr))
 						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 					
 					break;
@@ -271,7 +273,7 @@ Token *node_manager::value(Engine *context, node tree) const
 						return tptr;
 					if (tptr && tokcmp(continue_token, tptr))
 						return tptr;
-					else if (dynamic_cast <Operand <Token *> *> (tptr))
+					if (dynamic_cast <Operand <Token *> *> (tptr))
 						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 
 					break;
@@ -874,7 +876,7 @@ void node_manager::simplify(Engine *context, node &ref)
 
 	if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
 		// Fix subtraction and what not
-		// simplify_separable(ref);
+		simplify_separable(context, ref, ophptr->code);
 	} else if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
 		simplify_mult_div(context, ref, ophptr->code);
 	} else {
@@ -883,81 +885,151 @@ void node_manager::simplify(Engine *context, node &ref)
 	}
 }
 
-void node_manager::simplify_separable(Engine *context, node &ref)
+void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 {
 	Token *opd = new opd_z(0);
-	Token *zero = new opd_z(0);
+	Token *zero = new opd_z(0);		// Make static or make a function is_zero
+	Token *true_token = new opd_b(true);
 
-	std::stack <node> process;
+	std::stack <std::pair <bool, node>> process;
 
-	std::vector <node> sums;
-	
-	process.push(ref);
+	std::vector <node> plus;
+	std::vector <node> minus;
 
-	node top;
+	process.push({true, ref});
+
+	std::pair <bool, node> top;
+	node topn;
+
 	while (!process.empty()) {
 		top = process.top();
+		topn = top.second;
 
 		process.pop();
 
-		operation_holder *ophptr = top.cast <operation_holder> ();
+		operation_holder *ophptr = topn.cast <operation_holder> ();
 
-		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
-			process.push(top[0]);
-			process.push(top[1]);
+		// Add is_separable code check
+		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {			
+			process.push({top.first, topn[0]});
+			process.push({
+				(ophptr->code == add) ? top.first : !top.first,
+				topn[1]
+			});
 		} else {
-			sums.push_back(top);
+			if (top.first)
+				plus.push_back(topn);
+			else
+				minus.push_back(topn);
 		}
 	}
 
-	std::vector <node> variables;
+	size_t i;
 	
-	std::stack <node> constants;
-	for (auto nm : sums) {
-		if (is_constant(nm.label()))
-			constants.push(nm);
+	i = 0;
+	while (i < plus.size()) {
+		if (is_constant(plus[i].label())) {
+			opd = context->compute("+", {
+				opd,
+				value(context, plus[i])
+			});
+
+			plus.erase(plus.begin() + i);
+		} else {
+			i++;
+		}
+	}
+
+	i = 0;
+	while (i < minus.size()) {
+		if (is_constant(minus[i].label())) {
+			opd = context->compute("-", {
+				opd,
+				value(context, minus[i])
+			});
+
+			minus.erase(minus.begin() + i);
+		} else {
+			i++;
+		}
+	}
+
+	if (!tokcmp(opd, zero)) {
+		Token *tptr = context->compute(">", {opd, zero});
+		Token *nopd = context->compute("*", {opd, new Operand <int> (-1)});
+
+		if (tokcmp(tptr, true_token))
+			plus.push_back(node(opd));
 		else
-			variables.push_back(nm);
-	}
-	
-	while (!constants.empty()) {
-		node nd = constants.top();
-
-		constants.pop();
-
-		opd = context->compute("+", {opd, nd._tptr});
+			minus.push_back(node(nopd));
 	}
 
-	// Still needs to deal with variables
-	std::vector <node> all = variables;
-
-	if (!tokcmp(opd, zero))
-		all.push_back(node(opd));
-
-	// Next step is to fold the vector
-	while (all.size() > 1) {
+	// Next step is to fold the vectors
+	while (plus.size() > 1) {
 		std::vector <node> tmp;
 
-		size_t n = all.size();
+		size_t n = plus.size();
 
 		for (size_t i = 0; i < n/2; i++) {
 			tmp.push_back(
 				node(new operation_holder("+"),
 					{
-						all[i],
-						all[i + 1]
+						plus[i],
+						plus[i + 1]
 					}
 				)
 			);
 		}
 
 		if (n % 2)
-			tmp.push_back(all[n - 1]);
+			tmp.push_back(plus[n - 1]);
 	
-		all = tmp;
+		plus = tmp;
 	}
 
-	ref.transfer(all[0]);
+	while (minus.size() > 1) {
+		std::vector <node> tmp;
+
+		size_t n = minus.size();
+
+		for (size_t i = 0; i < n/2; i++) {
+			tmp.push_back(
+				node(new operation_holder("+"),
+					{
+						minus[i],
+						minus[i + 1]
+					}
+				)
+			);
+		}
+
+		if (n % 2)
+			tmp.push_back(minus[n - 1]);
+	
+		minus = tmp;
+	}
+
+	node all;
+	
+	if (!plus.empty()) {
+		if (!minus.empty()) {
+			all.retokenize(new operation_holder("-"));
+
+			all.append(plus[0]);
+			all.append(minus[0]);
+		} else {
+			all = plus[0];
+		}
+	} else {
+		if (!minus.empty()) {
+			all.retokenize(new operation_holder("*"));
+
+			all.append(node(new Operand <int> (-1)));
+			all.append(minus[0]);
+		}
+	}
+	
+	ref.transfer(all);
 }
 
 void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
@@ -993,6 +1065,8 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 			}
 		}
 	}
+
+	// Add other simplifications
 }
 
 // Differentiation
@@ -1155,7 +1229,13 @@ std::string node_manager::display_pemdas(node ref, node child) const
 		return display(child);
 
 	switch (rophptr->code) {
+	case sub:
+		if (cophptr->code == add)
+			return "(" + display(child) + ")";
+		
+		return display(child); 
 	case mul:
+		// TODO: What is this?
 		if ((cophptr->code == add) || (cophptr->code == sub))
 			return display(child);
 		
