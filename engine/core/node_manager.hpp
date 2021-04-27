@@ -123,6 +123,7 @@ private:
 	void simplify(Engine *, node &);
 	void simplify_separable(Engine *, node &, codes);
 	void simplify_mult_div(Engine *, node &, codes);
+	void simplify_power(Engine *, node &);
 
 	// TODO: Input an engine?
 	void differentiate(node &);

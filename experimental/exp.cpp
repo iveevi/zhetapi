@@ -92,9 +92,7 @@ int main()
 
 	eq.solve(); */
 
-	Function f = "f(x) = 2*x - 0";
+	Function f = "f(x) = (2*x * sin(x))/(2/x) - 2 + 2 + x^1 + x^0";
 
-	cout << string(50, '=') << endl;
-	f.print();
-	cout << f.display() << endl;
+	cout << f << endl;
 }

@@ -866,7 +866,7 @@ void node_manager::simplify(Engine *context)
 
 void node_manager::simplify(Engine *context, node &ref)
 {
-	if (ref._label == l_operation_constant) {
+	if (ref.label() == l_operation_constant) {
 		ref.transfer(node(value(context, ref), l_constant, {}));
 
 		return;
@@ -879,6 +879,8 @@ void node_manager::simplify(Engine *context, node &ref)
 		simplify_separable(context, ref, ophptr->code);
 	} else if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
 		simplify_mult_div(context, ref, ophptr->code);
+	} else if (ophptr && (ophptr->code == pwr)) {
+		simplify_power(context, ref);
 	} else {
 		for (auto &child : ref._leaves)
 			simplify(context, child);
@@ -1030,6 +1032,16 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 	}
 	
 	ref.transfer(all);
+
+	// Simplify rest
+	operation_holder *ophptr = ref.cast <operation_holder> ();
+
+	if (ophptr->code == add || ophptr->code == sub) {
+		simplify(context, ref[0]);
+		simplify(context, ref[1]);
+	} else {
+		simplify(context, ref);
+	}
 }
 
 void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
@@ -1066,7 +1078,179 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		}
 	}
 
-	// Add other simplifications
+	// Mult/div simplification
+	Token *opd = new opd_z(1);
+	Token *onez = new opd_z(1);		// Make static or make a function is_one
+	Token *oneq = new opd_q(1);
+	Token *oner = new opd_r(1);
+	Token *true_token = new opd_b(true);
+
+	std::stack <std::pair <bool, node>> process;
+
+	std::vector <node> mult;
+	std::vector <node> divs;
+
+	process.push({true, ref});
+
+	std::pair <bool, node> top;
+	node topn;
+
+	while (!process.empty()) {
+		top = process.top();
+		topn = top.second;
+
+		process.pop();
+
+		operation_holder *ophptr = topn.cast <operation_holder> ();
+
+		// Add is_separable code check
+		if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {			
+			process.push({top.first, topn[0]});
+			process.push({
+				(ophptr->code == mul) ? top.first : !top.first,
+				topn[1]
+			});
+		} else {
+			if (top.first)
+				mult.push_back(topn);
+			else
+				divs.push_back(topn);
+		}
+	}
+
+	size_t i;
+	
+	i = 0;
+	while (i < mult.size()) {
+		if (is_constant(mult[i].label())) {
+			opd = context->compute("*", {
+				opd,
+				value(context, mult[i])
+			});
+
+			mult.erase(mult.begin() + i);
+		} else {
+			i++;
+		}
+	}
+
+	i = 0;
+	while (i < divs.size()) {
+		if (is_constant(divs[i].label())) {
+			opd = context->compute("/", {
+				opd,
+				value(context, divs[i])
+			});
+
+			divs.erase(divs.begin() + i);
+		} else {
+			i++;
+		}
+	}
+
+	if (!tokcmp(opd, onez)
+		&& !tokcmp(opd, oneq)
+		&& !tokcmp(opd, oner))
+		mult.push_back(node(opd));
+
+	// Next step is to fold the vectors
+	// TODO: make as a helper function, with central operation as 2nd input
+	while (mult.size() > 1) {
+		std::vector <node> tmp;
+
+		size_t n = mult.size();
+
+		for (size_t i = 0; i < n/2; i++) {
+			tmp.push_back(
+				node(new operation_holder("*"),
+					{
+						mult[i],
+						mult[i + 1]
+					}
+				)
+			);
+		}
+
+		if (n % 2)
+			tmp.push_back(mult[n - 1]);
+	
+		mult = tmp;
+	}
+
+	while (divs.size() > 1) {
+		std::vector <node> tmp;
+
+		size_t n = divs.size();
+
+		for (size_t i = 0; i < n/2; i++) {
+			tmp.push_back(
+				node(new operation_holder("*"),
+					{
+						divs[i],
+						divs[i + 1]
+					}
+				)
+			);
+		}
+
+		if (n % 2)
+			tmp.push_back(divs[n - 1]);
+	
+		divs = tmp;
+	}
+
+	node all;
+	
+	if (!mult.empty()) {
+		if (!divs.empty()) {
+			all.retokenize(new operation_holder("/"));
+
+			all.append(mult[0]);
+			all.append(divs[0]);
+		} else {
+			all = mult[0];
+		}
+	} else {
+		if (!divs.empty()) {
+			all.retokenize(new operation_holder("^"));
+
+			all.append(node(new Operand <int> (-1)));
+			all.append(divs[0]);
+		}
+	}
+	
+	ref.transfer(all);
+
+	// Simplify rest
+	operation_holder *ophptr = ref.cast <operation_holder> ();
+
+	if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
+		simplify(context, ref[0]);
+		simplify(context, ref[1]);
+	} else {
+		simplify(context, ref);
+	}
+}
+
+void node_manager::simplify_power(Engine *context, node &ref)
+{
+	Token *one = new opd_z(1);
+	Token *zero = new opd_z(0);
+
+	Token *tptr = ref[1].ptr();
+
+	if (tokcmp(tptr, one)) {
+		ref = ref[0];
+
+		simplify(context, ref);
+	} else if (tokcmp(tptr, zero)) {
+		ref = node(one->copy());
+
+		simplify(context, ref);
+	} else {
+		simplify(context, ref[0]);
+		simplify(context, ref[1]);
+	}
 }
 
 // Differentiation
