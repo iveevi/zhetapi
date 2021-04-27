@@ -61,12 +61,9 @@ public:
 
 	Token *operator()(const std::vector <Token *> &) const;
 
-	std::string str() const override;
-
+	std::string dbg_str() const override;
 	type caller() const override;
-
 	Token *copy() const override;
-
 	bool operator==(Token *) const override;
 };
 

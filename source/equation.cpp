@@ -105,7 +105,7 @@ Solutions Equation::solve() const
 
 	for (size_t i = 0; i < MAX_ITERS; i++) {
 		cout << "x0 @ " << x0 << endl;
-		cout << "\t = " << x0->str() << endl;
+		cout << "\t = " << x0->dbg_str() << endl;
 		
 		// FIXME: Why cant we pass {x0}?
 		ft = f({x0->copy()});

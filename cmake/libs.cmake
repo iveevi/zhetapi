@@ -8,7 +8,6 @@ set(ZHETAPI_SOURCE
 	source/operand.cpp
 	source/polynomial.cpp
 	source/registration.cpp
-	source/variable.cpp
 	source/token.cpp
 
 	source/core/algorithm.cpp

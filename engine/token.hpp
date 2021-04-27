@@ -81,7 +81,7 @@ public:
 	 * Returns a representation of the Token, regardless of its
 	 * type.
 	 */
-	virtual std::string str() const = 0;
+	virtual std::string dbg_str() const = 0;
 
 	// Add a virtual display method
 

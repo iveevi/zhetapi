@@ -21,9 +21,9 @@ Token *node_differential::copy() const
 	return new node_differential(_ref->copy());
 }
 
-std::string node_differential::str() const
+std::string node_differential::dbg_str() const
 {
-	return "differential: " + _ref->str();
+	return "differential: " + _ref->dbg_str();
 }
 
 bool node_differential::operator==(Token *tptr) const

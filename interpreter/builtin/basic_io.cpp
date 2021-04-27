@@ -10,7 +10,7 @@ namespace zhetapi {
 void cprint(Token *tptr)
 {
 	if (tptr)
-		cout << tptr->str();
+		cout << tptr->dbg_str();
 	else
 		cout << "<Null>";
 }

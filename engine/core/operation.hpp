@@ -28,7 +28,7 @@ public:
 	Token *compute(const std::vector <Token *> &) const;
 
 	type caller() const override;
-	std::string str() const override;
+	std::string dbg_str() const override;
 	Token *copy() const override;
 	bool operator==(Token *) const override;
 

@@ -2,7 +2,6 @@
 #define BARN_H_
 
 // Engine headers
-#include <variable.hpp>
 #include <function.hpp>
 #include <registration.hpp>
 

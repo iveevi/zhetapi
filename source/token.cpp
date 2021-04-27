@@ -38,7 +38,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 
 	size_t n = toks.size();
 	for (size_t i = 0; i < n; i++) {
-		os << toks[i]->str();
+		os << toks[i]->dbg_str();
 
 		if (i < n - 1)
 			os << ", ";

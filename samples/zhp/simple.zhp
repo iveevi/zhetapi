@@ -1,109 +1,19 @@
 g(x) = x^2 - 4
 
-alg newton_iter(r, f, fp)
-{
-	return r - f(r)/fp(r)
-}
-
 # Make a operation for this
 alg abs(x)
 {
-	if (x < 0)
+	println("--------------------------------------")
+	println("ABS!")
+	if (x < 0) {
+		println("\tnegative!!")
 		return -1 * x
+	}
+
+	# check else later
+
+	println("CONTINuINg")
 	return x
 }
 
-alg newton(r, f)
-{
-	# Get the derivative
-	fp = f.derivative()
-
-	less = null
-	more = null
-
-	y = f(r)
-
-	# TODO: Yp caching is not working figure out why
-	# TODO: Also cannot put commas in comments
-	# yp = fp(r)
-
-	println("Y = ", y, " X = ", r)
-
-	if (y > 0)
-		more = r
-	else
-		less = r
-	
-	println("more = ", more)
-	println("less = ", less)
-
-	x = r
-
-	i = 0
-	while ((more == null) || (less == null)) {
-		println("ITERATION:")
-		if ((++i) == 5)
-			break
-
-		# Make sure that arguments are immutable unless allowed to ref
-		x = newton_iter(x, f, fp)
-
-		# TODO: need to show error when (condition) after else
-
-		y = f(x)
-		println("Y = ", y, " X = ", x)
-		if ((y > 0) && (more == null))
-			more = x
-		elif ((y < 0) && (less == null))
-			less = x
-		
-		println("\tmore = ", more)
-		println("\tless = ", less)
-	}
-
-	# TODO: try adding static variables
-	eps = 1e-20
-
-	println("MAIN LOOP, eps = ", eps)
-
-	i = 0
-	while (++i < 10) {
-		x = newton_iter(x, f, fp)
-
-		println("Root: ", x)
-		println("\tvalue = ", f(x))
-		println("\tvalue = ", abs(f(x)))
-
-		# TODO: error handling for "if ()"
-
-		# Check abs
-		if (abs(f(x)) < eps) {
-			break
-		}
-	}
-}
-
-newton(1, g)
-
-# alg returner() {
-#	return 10
-# }
-#
-# println("returner = ", returner())
-
-# Fix the output of this
-# println("returner = ", returner)
-
-# TODO: fix parsing...
-# i = 0
-# while (true) {
-#	println("LOOP, i = ", i)
-#
-#	if (i == 5) {
-#		println("\tI == 5!!")
-#		
-#		break
-#	}
-#		
-#	i++
-# }
+println("Abs test: ", abs(-12))

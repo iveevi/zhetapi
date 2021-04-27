@@ -17,7 +17,7 @@ Token *Registrable::operator()(const ::std::vector <Token *> &ins) const
 	return _ftn(ins);
 }
 
-::std::string Registrable::str() const
+std::string Registrable::dbg_str() const
 {
 	return _ident;
 }

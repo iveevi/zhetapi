@@ -20,7 +20,7 @@ Token *operation::compute(const std::vector <Token *> &ins) const
 	return _opn(ins);
 }
 
-std::string operation::str() const
+std::string operation::dbg_str() const
 {
 	return "[" + _input + "](" + std::to_string(_ops)
 		+ ") - [" + _output + "]";

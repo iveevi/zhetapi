@@ -28,7 +28,7 @@ Token *node_list::copy() const
 	return new node_list(_nodes);
 }
 
-std::string node_list::str() const
+std::string node_list::dbg_str() const
 {
 	return "node_list of " + std::to_string(_nodes.size()) + " nodes";
 }

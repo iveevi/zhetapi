@@ -15,7 +15,7 @@ Token *variable_cluster::copy() const
 	return new variable_cluster(_cluster);
 }
 
-std::string variable_cluster::str() const
+std::string variable_cluster::dbg_str() const
 {
 	return "vcl-\"" + _cluster + "\"";
 }

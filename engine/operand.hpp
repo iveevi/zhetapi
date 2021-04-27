@@ -27,7 +27,7 @@ public:
 
 	// Virtual functionss
 	type caller() const override;
-	std::string str() const override;
+	std::string dbg_str() const override;
 	Token *copy() const override;
 
 	bool operator==(Token *) const override;
@@ -79,7 +79,7 @@ Token::type Operand <T> ::caller() const
 }
 
 template <class T>
-std::string Operand <T> ::str() const
+std::string Operand <T> ::dbg_str() const
 {
 	std::ostringstream oss;
 
@@ -108,7 +108,7 @@ bool Operand <T> ::operator==(Token *tptr) const
 
 // Forward declare specializations
 template <>
-std::string Operand <bool> ::str() const;
+std::string Operand <bool> ::dbg_str() const;
 
 }
 

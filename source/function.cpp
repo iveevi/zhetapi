@@ -224,7 +224,7 @@ Token::type Function::caller() const
 	return Token::ftn;
 }
 
-std::string Function::str() const
+std::string Function::dbg_str() const
 {
 	return display();
 }

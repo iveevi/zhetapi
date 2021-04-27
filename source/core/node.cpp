@@ -189,7 +189,7 @@ void node::print(int num, int lev) const
 	}
 
 	if (_tptr) {
-		std::cout << "#" << num << ": " << _tptr->str()
+		std::cout << "#" << num << ": " << _tptr->dbg_str()
 			<< " (" << _tptr << ", " << strlabs[_label]
 			<< ") @ " << this << std::endl;	
 	} else {
@@ -212,7 +212,7 @@ void node::print_no_address(int num, int lev) const
 	}
 
 	if (_tptr) {
-		std::cout << "#" << num << ": " << _tptr->str() << " (" <<
+		std::cout << "#" << num << ": " << _tptr->dbg_str() << " (" <<
 			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
 	} else {
 		std::cout << "#" << num << ": null (" <<
@@ -236,7 +236,7 @@ std::string node::display(int num, int lev) const
 		counter--;
 	}
 
-	oss << "#" << num << ": " << _tptr->str() << " (" << _tptr << ") @ "
+	oss << "#" << num << ": " << _tptr->dbg_str() << " (" << _tptr << ") @ "
 		<< this << " "  << _nodes << " nodes" << ::std::endl;
 
 	counter = 0;

@@ -36,7 +36,7 @@ Token *rvalue::copy() const
 	return new rvalue(_symbol);
 }
 
-std::string rvalue::str() const
+std::string rvalue::dbg_str() const
 {
 	return "rvalue-\"" + _symbol + "\"";
 }

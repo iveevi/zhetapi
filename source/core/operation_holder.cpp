@@ -134,7 +134,7 @@ Token *operation_holder::copy() const
 	return new operation_holder(rep);
 }
 
-::std::string operation_holder::str() const
+::std::string operation_holder::dbg_str() const
 {
 	return rep + " [" + strcodes[code] + "]";
 }

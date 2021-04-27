@@ -54,7 +54,7 @@ public:
 	// Virtual functions
 	type caller() const override;
 	Token *copy() const override;
-	std::string str() const override;
+	std::string dbg_str() const override;
 
 	virtual bool operator==(Token *) const override;
 };

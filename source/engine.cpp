@@ -92,10 +92,10 @@ void Engine::put(Function ftr)
 
 void Engine::put(Registrable reg)
 {
-	if (_reg_table.find(reg.str()) != _reg_table.end())
-		_reg_table[reg.str()] = reg;
+	if (_reg_table.find(reg.dbg_str()) != _reg_table.end())
+		_reg_table[reg.dbg_str()] = reg;
 	else
-		_reg_table.insert(std::make_pair(reg.str(), reg));
+		_reg_table.insert(std::make_pair(reg.dbg_str(), reg));
 }
 
 void Engine::put(algorithm alg)
@@ -137,23 +137,23 @@ void Engine::list() const
 	std::cout << "\tVariables:" << std::endl;
 	for (auto spr : _var_table) {
 		std::cout << "\t\t" << spr.first << " ["
-			<< spr.second->str() << "]" << std::endl;
+			<< spr.second->dbg_str() << "]" << std::endl;
 	}
 	
 	std::cout << "\tFunctions:" << std::endl;
 	for (auto spr : _ftr_table)
-		std::cout << "\t\t" << spr.second.str() << std::endl;
+		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
 }
 
 void Engine::list_registered(std::string file) const
 {
 	printf("Symbols recorded in %s:\n", file.c_str());
 	for (auto spr : _reg_table)
-		std::cout << "\t" << spr.second.str() << std::endl;
+		std::cout << "\t" << spr.second.dbg_str() << std::endl;
 	for (auto spr : _var_table)
-		std::cout << "\t" << spr.second->str() << std::endl;
+		std::cout << "\t" << spr.second->dbg_str() << std::endl;
 	for (auto spr : _ftr_table)
-		std::cout << "\t" << spr.second.str() << std::endl;
+		std::cout << "\t" << spr.second.dbg_str() << std::endl;
 }
 
 // Non-member functions

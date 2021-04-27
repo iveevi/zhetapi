@@ -449,7 +449,11 @@ Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 
 	engine = pop_and_del_stack(engine);
 
-	return tptr;
+	// Check returns
+	if (dynamic_cast <Operand <Token *> *> (tptr))
+		return (dynamic_cast <Operand <Token *> *> (tptr))->get();
+
+	return nullptr;
 }
 
 // Symbol
@@ -480,7 +484,7 @@ Token *algorithm::copy() const
 	return new algorithm(_ident, _alg, _args, _compiled);
 }
 
-std::string algorithm::str() const
+std::string algorithm::dbg_str() const
 {
 	return "alg-\"" + _ident + "\"";
 }

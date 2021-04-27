@@ -43,7 +43,7 @@ Token *node_reference::copy() const
 	return new node_reference(_ref, _symbol, _index, _var);
 }
 
-std::string node_reference::str() const
+std::string node_reference::dbg_str() const
 {
 	std::ostringstream oss;
 

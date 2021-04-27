@@ -15,7 +15,7 @@ Token *wildcard::copy() const
 	return new wildcard(_symbol, _pred);
 }
 
-std::string wildcard::str() const
+std::string wildcard::dbg_str() const
 {
 	return "w-\"" + _symbol + "\"";
 }

@@ -6,7 +6,6 @@
 
 // Engine headers
 #include <token.hpp>
-#include <variable.hpp>
 
 // Create as middle class inheriter
 // ('reference', then branch into rvalue and lvalue)
@@ -31,8 +30,7 @@ public:
 
 	type caller() const override;
 	Token *copy() const override;
-	std::string str() const override;
-
+	std::string dbg_str() const override;
 	virtual bool operator==(Token *) const override;
 };
 

@@ -28,7 +28,7 @@ Token *lvalue::copy() const
 	return new lvalue(_symbol);
 }
 
-std::string lvalue::str() const
+std::string lvalue::dbg_str() const
 {
 	return "lvalue-\"" + _symbol + "\"";
 }

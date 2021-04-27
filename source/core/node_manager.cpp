@@ -169,6 +169,7 @@ Token *node_manager::sequential_value(Engine *context) const
 Token *node_manager::sequential_value(Engine *context, node tree) const
 {
 	// Assumes that the top node is a sequential
+	using namespace std;
 	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
 	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
@@ -182,8 +183,8 @@ Token *node_manager::sequential_value(Engine *context, node tree) const
 			return tptr;
 		if (tptr && tokcmp(continue_token, tptr))
 			return tptr;
-		else if (dynamic_cast <Operand <Token *> *> (tptr))
-			return (dynamic_cast <Operand <Token *> *> (tptr))->get();
+		if (dynamic_cast <Operand <Token *> *> (tptr))
+			return tptr;
 	}
 	
 	return nullptr;
@@ -196,7 +197,7 @@ Token *node_manager::value(Engine *context, node tree) const
 	Token *tptr;
 	Token *vptr;
 
-	Variable v;
+	// Variable v;
 
 	rvalue *rv;
 
@@ -215,6 +216,7 @@ Token *node_manager::value(Engine *context, node tree) const
 	// TODO: Move to a helper function
 	//
 	// Special nodes!
+	Token *output = nullptr;
 	if (tree.null()) {
 		if (tree.label() == l_assignment_chain) {
 			// Evaluate first node
@@ -252,14 +254,23 @@ Token *node_manager::value(Engine *context, node tree) const
 					Token *tptr = sequential_value(context, tree[i][0]);
 
 					// TODO: keep in another function
-					if (tptr && tokcmp(break_token, tptr))
-						return tptr;
-					if (tptr && tokcmp(continue_token, tptr))
-						return tptr;
-					if (dynamic_cast <Operand <Token *> *> (tptr))
-						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
-					
-					break;
+					if (tptr && tokcmp(break_token, tptr)) {
+						output =  tptr;
+
+						break;
+					}
+
+					if (tptr && tokcmp(continue_token, tptr)) {
+						output = tptr;
+
+						break;
+					}
+
+					if (dynamic_cast <Operand <Token *> *> (tptr)) {
+						output = tptr;
+
+						break;
+					}
 				}
 
 				// Fallthrough if not else
@@ -269,21 +280,31 @@ Token *node_manager::value(Engine *context, node tree) const
 				if (tokcmp(eval, true_token)) {
 					Token *tptr = sequential_value(context, tree[i][1]);
 
-					if (tptr && tokcmp(break_token, tptr))
-						return tptr;
-					if (tptr && tokcmp(continue_token, tptr))
-						return tptr;
-					if (dynamic_cast <Operand <Token *> *> (tptr))
-						return (dynamic_cast <Operand <Token *> *> (tptr))->get();
+					if (tptr && tokcmp(break_token, tptr)) {
+						output =  tptr;
 
-					break;
+						break;
+					}
+
+					if (tptr && tokcmp(continue_token, tptr)) {
+						output = tptr;
+
+						break;
+					}
+
+					if (dynamic_cast <Operand <Token *> *> (tptr)) {
+						output = tptr;
+
+						break;
+					}
 				}
 			}
 
 			// Pop the stack
 			context = pop_and_del_stack(context);
 
-			return nullptr;
+			// Keep special returns in mind
+			return output;
 		} else if (tree.label() == l_while_loop) {
 			// Push new stack
 			context = push_and_ret_stack(context);
@@ -307,8 +328,11 @@ Token *node_manager::value(Engine *context, node tree) const
 						break;
 					else if (eval && tokcmp(eval, continue_token))
 						continue;
-					else if (dynamic_cast <Operand <Token *> *> (eval))
-						return (dynamic_cast <Operand <Token *> *> (eval))->get();
+					else if (dynamic_cast <Operand <Token *> *> (eval)) {
+						output = eval;
+
+						break;
+					}
 				} else {
 					break;
 				}
@@ -317,7 +341,8 @@ Token *node_manager::value(Engine *context, node tree) const
 			// Pop the stack
 			context = pop_and_del_stack(context);
 
-			return nullptr;
+			// Keep special outputs in mind
+			return output;
 		} else if (tree.label() == l_break_loop) {
 			// TODO:: put in another header as a generator or something (and establish a code set)
 			return new Operand <Token *> ((Token *) 0x1);
@@ -381,8 +406,8 @@ Token *node_manager::value(Engine *context, node tree) const
 		}
 
 		return tptr->copy();
-	case Token::var:
-		return (tree.cast <Variable> ())->get()->copy();
+	/* case Token::var:
+		return (tree.cast <Variable> ())->get()->copy(); */
 	case Token::token_rvalue:
 		return (tree.cast <rvalue> ())->get(context)->copy();
 	case Token::ndr:
@@ -1264,9 +1289,8 @@ void node_manager::differentiate(const std::string &str)
 	}
 
 	label(_tree);
-
 	differentiate(_tree);
-
+	label(_tree);
 	simplify(shared_context);
 }
 
@@ -1343,7 +1367,7 @@ std::string node_manager::display(node ref) const
 {
 	switch (ref._tptr->caller()) {
 	case Token::opd:
-		return ref._tptr->str();
+		return ref._tptr->dbg_str();
 	case Token::oph:
 		return display_operation(ref);
 	case Token::ndr:
