@@ -256,9 +256,11 @@ engine_base::engine_base()
 	// Make these universal operations
 	_add_binary_operation(>, Z, Z, B);
 	_add_binary_operation(>, R, R, B);
+	_add_binary_operation(>, Q, Q, B);
 	
 	_add_binary_operation(<, Z, Z, B);
 	_add_binary_operation(<, R, R, B);
+	_add_binary_operation(<, Q, Q, B);
 
 	_add_binary_operation(>=, Z, Z, B);
 	_add_binary_operation(<=, Z, Z, B);

@@ -169,7 +169,7 @@ Token *node_manager::sequential_value(Engine *context) const
 Token *node_manager::sequential_value(Engine *context, node tree) const
 {
 	// Assumes that the top node is a sequential
-	using namespace std;
+	// TODO: dont make these static pointers (stupid)
 	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
 	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
@@ -254,23 +254,14 @@ Token *node_manager::value(Engine *context, node tree) const
 					Token *tptr = sequential_value(context, tree[i][0]);
 
 					// TODO: keep in another function
-					if (tptr && tokcmp(break_token, tptr)) {
+					if (tptr && tokcmp(break_token, tptr))
 						output =  tptr;
-
-						break;
-					}
-
-					if (tptr && tokcmp(continue_token, tptr)) {
+					if (tptr && tokcmp(continue_token, tptr))
 						output = tptr;
-
-						break;
-					}
-
-					if (dynamic_cast <Operand <Token *> *> (tptr)) {
+					if (dynamic_cast <Operand <Token *> *> (tptr))
 						output = tptr;
-
-						break;
-					}
+					
+					break;
 				}
 
 				// Fallthrough if not else
@@ -280,23 +271,14 @@ Token *node_manager::value(Engine *context, node tree) const
 				if (tokcmp(eval, true_token)) {
 					Token *tptr = sequential_value(context, tree[i][1]);
 
-					if (tptr && tokcmp(break_token, tptr)) {
+					if (tptr && tokcmp(break_token, tptr))
 						output =  tptr;
-
-						break;
-					}
-
-					if (tptr && tokcmp(continue_token, tptr)) {
+					if (tptr && tokcmp(continue_token, tptr))
 						output = tptr;
-
-						break;
-					}
-
-					if (dynamic_cast <Operand <Token *> *> (tptr)) {
+					if (dynamic_cast <Operand <Token *> *> (tptr))
 						output = tptr;
-
-						break;
-					}
+					
+					break;
 				}
 			}
 

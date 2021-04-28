@@ -39,13 +39,15 @@ std::string strcodes[] = {
 	"pre decr",
 	"attribute/method",
 	"boolean or",
-	"boolean and"
+	"boolean and",
+	"absolute value"
 };
 
 operation_holder::operation_holder(const ::std::string &str) : rep(str)
 {
 	// Store information into some sort of structure
-	// TODO: store in a table
+	// TODO: store in a STATIC table, reduces runtime overhead
+	// TODO: reorder (rn its based on history)
 	if (str == "+")
 		code = add;
 	else if (str == "-")
@@ -120,6 +122,10 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 		code = bool_or;
 	else if (str == "&&")
 		code = bool_and;
+	else if (str == "abs")
+		code = abs_val;
+	else
+		throw bad_operation();
 }
 
 Token::type operation_holder::caller() const

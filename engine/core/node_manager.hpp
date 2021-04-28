@@ -10,7 +10,7 @@
 // Engine headers
 #include <core/node_reference.hpp>
 #include <core/node_differential.hpp>
-#include <core/parser.hpp>
+#include <core/expr_parser.hpp>
 #include <core/types.hpp>
 #include <core/lvalue.hpp>
 #include <core/rvalue.hpp>

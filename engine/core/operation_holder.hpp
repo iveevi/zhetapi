@@ -46,11 +46,13 @@ enum codes {
 	rin,	// Pre decrement
 	atm,
 	bool_or,
-	bool_and
+	bool_and,
+	abs_val
 };
 
 extern std::string strcodes[];
 
+// TODO: turn in to a class
 struct operation_holder : public Token {
 	std::string rep;
 
@@ -61,7 +63,10 @@ struct operation_holder : public Token {
 	type caller() const override;
 	Token *copy() const override;
 	std::string dbg_str() const override;
-	virtual bool operator==(Token *) const override;
+	bool operator==(Token *) const override;
+
+	// Exceptions
+	class bad_operation {};
 };
 
 }
