@@ -42,7 +42,7 @@ Token *execute(string str)
 				engine->put(f);
 			} catch (...) {
 				if (pe) {
-					cout << "[FIXERR] UNKNOWN SYMBOL:" << us.what() << endl;
+					cout << "str = " << str << ", [FIXERR] UNKNOWN SYMBOL:" << us.what() << endl;
 					exit(-1);
 				}
 

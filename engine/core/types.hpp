@@ -13,8 +13,8 @@
 
 namespace zhetapi {
 	
-typedef int Z;					
-typedef double R;				
+typedef long long int Z;					
+typedef long double R;				
 typedef bool B;					
 typedef std::string S;				
 typedef Rational <Z> Q;				

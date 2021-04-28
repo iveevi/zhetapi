@@ -83,14 +83,12 @@ int main()
 	cout << "nm:" << endl;
 	nm.print();
 
-	cout << "display: " << nm.display() << endl;
+	cout << "display: " << nm.display() << endl; */
 
 	Equation eq({
 		"x^2 - x",
 		"6"
 	});
 
-	eq.solve(); */
-
-	Engine *context = new Engine();
+	eq.solve();
 }

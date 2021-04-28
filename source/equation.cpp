@@ -5,34 +5,89 @@
 
 namespace zhetapi {
 
-// Put in another file
-const std::string netwon_algorithm = R"(
-less = 0
-more = 0
-
-fp = f.derivative()
-
-println("LESS: ", less)
-println("r: ", r)
-println("FUNC: ", f)
-println("FUNC-p: ", fp)
+// Algorithm code (put in a separate file)
+const std::string alg_newton_iter = R"(
+        return r - f(r)/fp(r)
 )";
 
-algorithm newton_full("newton_full", netwon_algorithm, {"r", "f"});
+const std::string alg_newton = R"(
+        # Should be static
+	eps = 1e-10
 
+	# Get the derivative
+	fp = f.derivative()
+
+	less = null
+	more = null
+
+	y = f(r)
+	if (y > 0)
+		more = r
+	else
+		less = r
+	
+	x = r
+
+	while ((more == null) || (less == null)) {
+		x = newton_iter(x, f, fp)
+
+		y = f(x)
+		if ((y > 0) && (more == null))
+			more = x
+		elif ((y < 0) && (less == null))
+			less = x
+	}
+
+	while (true) {
+		x = newton_iter(x, f, fp)
+                
+		if ((x < less) || (x > more))
+			x = 0.5 * (more + less)
+
+		# Check for exit condition (interval or value)
+		y = f(x)
+		if ((abs(y) < eps) || (abs(more - less) < eps))
+			break
+
+                # Adjust boundaries
+                if (y < 0) {
+                        # Make sure we are actually closing the interval
+                        if (abs(more - less) > abs(more - x))
+                                less = x
+                } else {
+                        if (abs(more - less) > abs(more - x))
+                                more = x
+                }
+	}
+
+        return x
+)";
+
+// Algorithm objects
+algorithm A_newton("newton", alg_newton, {"r", "f"});
+algorithm A_newton_iter("newton_iter", alg_newton_iter, {"r", "f", "fp"});
+
+// TODO: Later, just parse algorithm code into Engines with parse::parse
+
+// Equation
 Equation::Equation(const std::vector <std::string> &exprs)
 {
+        // Size check
 	if (exprs.size() <= 1)
 		throw bad_input_size();
 
-	// Rest
-	_engine = new Engine();
+	// Initialize engine and algorithms
+	_engine = new Engine(true);
 
-	if (newton_full.empty())
-		newton_full.compile(_engine);
-	
-	newton_full.print();
+	if (A_newton_iter.empty())
+		A_newton_iter.compile(_engine);
+        _engine->put(A_newton_iter);
 
+	if (A_newton.empty())
+		A_newton.compile(_engine);
+        _engine->put(A_newton);
+
+        // Separating the sides of the equation
 	std::set <std::string> excl;
 	for (const std::string &str : exprs) {
 		std::vector <std::string> args;
@@ -95,30 +150,9 @@ Solutions Equation::solve() const
 	Token *qt;
 	Token *st;
 
-	newton_full.execute(_engine, {x0, f.copy()});
+	x0 = A_newton.execute(_engine, {x0, f.copy()});
 
-	// Make a singleton of this
-	Token *true_tok = new opd_b(true);
-
-	// Set maximum iteration through analysis later
-	const size_t MAX_ITERS = 1000;
-
-	for (size_t i = 0; i < MAX_ITERS; i++) {
-		cout << "x0 @ " << x0 << endl;
-		cout << "\t = " << x0->dbg_str() << endl;
-		
-		// FIXME: Why cant we pass {x0}?
-		ft = f({x0->copy()});
-
-		st = _engine->compute(">", {eps, ft});
-		if (tokcmp(st, true_tok))
-			break;
-
-		dft = df({x0->copy()});
-
-		qt = _engine->compute("/", {ft, dft});
-		x0 = _engine->compute("-", {x0, qt});
-	}
+        cout << "x0 = " << x0->dbg_str() << endl;
 
 	return {{x0}};
 }

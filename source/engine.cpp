@@ -143,6 +143,14 @@ void Engine::list() const
 	std::cout << "\tFunctions:" << std::endl;
 	for (auto spr : _ftr_table)
 		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
+	
+        std::cout << "\tRegistrables:" << std::endl;
+	for (auto spr : _reg_table)
+		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
+	
+        std::cout << "\tAlgorithms:" << std::endl;
+	for (auto spr : _alg_table)
+		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
 }
 
 void Engine::list_registered(std::string file) const

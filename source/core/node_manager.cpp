@@ -965,7 +965,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 
 	if (!tokcmp(opd, zero)) {
 		Token *tptr = context->compute(">", {opd, zero});
-		Token *nopd = context->compute("*", {opd, new Operand <int> (-1)});
+		Token *nopd = context->compute("*", {opd, new opd_z(-1)});
 
 		if (tokcmp(tptr, true_token))
 			plus.push_back(node(opd));
@@ -1033,7 +1033,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 		if (!minus.empty()) {
 			all.retokenize(new operation_holder("*"));
 
-			all.append(node(new Operand <int> (-1)));
+			all.append(node(new opd_z(-1)));
 			all.append(minus[0]);
 		}
 	}
@@ -1221,7 +1221,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		if (!divs.empty()) {
 			all.retokenize(new operation_holder("^"));
 
-			all.append(node(new Operand <int> (-1)));
+			all.append(node(new opd_z(-1)));
 			all.append(divs[0]);
 		}
 	}
