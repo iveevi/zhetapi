@@ -322,6 +322,23 @@ Token *engine_base::compute(
 
 		return optr->compute(args);
 	}
+        
+        if (str == ">") {
+                using namespace std;
+                cout << "GE --OPERATION!" << endl;
+                cout << "\tpointer type = " << typeid(Operand <Token *>).name() << endl;
+                cout << "args:" << endl;
+                for (auto tok : args)
+                        cout << "\t" << tok->dbg_str() << " is type " << type_name(typeid(*tok)) << endl;
+        }
+
+        if (str == "abs") {
+                using namespace std;
+                cout << "ABSOLUTE VALUE OPERATION!" << endl;
+                cout << "args:" << endl;
+                for (auto tok : args)
+                        cout << "\t" << tok->dbg_str() << " is type " << type_name(typeid(*tok)) << endl;
+        }
 	
 	// Generature the signature
 	signature sig = gen_signature(args);
@@ -350,6 +367,17 @@ Token *engine_base::compute(
 			break;
 		}
 	}
+        
+        if (str == "abs") {
+                using namespace std;
+                cout << "DId we find it? " << optr << endl;
+
+                if (optr) {
+                        Token *tptr = optr->compute(args);
+                        cout << "\tvalue = " << tptr << " or " << tptr->dbg_str() << endl;
+                        cout << "\ttype = " << typeid(*tptr).name() << endl;
+                }
+        }
 	
 	if (optr)
 		return optr->compute(args);

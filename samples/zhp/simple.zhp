@@ -18,7 +18,7 @@ alg newton_iter(r, f, fp)
 alg newton(r, f)
 {
         # Should be static
-	eps = 1e-10
+	eps = 1e-20
 
 	# Get the derivative
 	fp = f.derivative()
@@ -38,13 +38,20 @@ alg newton(r, f)
 		x = newton_iter(x, f, fp)
 
 		y = f(x)
+
+                # Check putting after elif
+                if (abs(y) < eps)
+                        break
+
 		if ((y > 0) && (more == null))
 			more = x
 		elif ((y < 0) && (less == null))
 			less = x
 	}
 
-	while (true) {
+        # Refine for a maximum number of steps
+        i = 0
+	while (i++ < 100) {
                 println("========================")
 		x = newton_iter(x, f, fp)
                 
@@ -67,17 +74,15 @@ alg newton(r, f)
                         if (abs(more - less) > abs(more - x))
                                 less = x
                 } else {
-                        if (abs(more - less) > abs(more - x))
+                        if (abs(more - less) > abs(x - less))
                                 more = x
                 }
 
                 println("x = ", x)
                 println("y = ", y)
-                println("more = ", more)
-                println("less = ", less)
-                println("more - less = ", abs(more - less))
-                println("\tge? ", (abs(more - less) < eps))
-                println("f' = ", x - f(x)/(2 * x - 1))
+                println("[more, less] = [", more, ", ", less, "]")
+                println("\tlength = ", abs(more - less))
+                println("x' = ", newton_iter(x, f, fp))
 	}
 
         return x

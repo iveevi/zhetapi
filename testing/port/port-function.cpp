@@ -12,15 +12,15 @@ bool function_computation(ostringstream &oss)
 
 	tb = bench();
 	for (int i = 0; i < iters; i++)
-		f(5, 4);
+		f(5ll, 4ll);
 	
 	oss << "Time for regular computation: " << tb << endl;
 
-	f.set_threads(8);
+	f.set_threads(8ll);
 
 	tb = bench();
 	for (int i = 0; i < iters; i++)
-		f(5, 4);
+		f(5ll, 4ll);
 	
 	oss << "Time for multi-threaded computation: " << tb << endl;
 

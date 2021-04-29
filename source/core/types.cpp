@@ -143,11 +143,11 @@ std::string type_name(const std::type_index &type)
 
 	// Stick to for testing
 	if (type == typeid(Operand <Z>))
-		return "int";
+		return "Integer";
 	if (type == typeid(Operand <Q>))
 		return "Rational <int>";
 	if (type == typeid(Operand <R>))
-		return "double";
+		return "Real";
 	if (type == typeid(Operand <CZ>))
 		return "Complex <int>";
 	if (type == typeid(Operand <CQ>))
