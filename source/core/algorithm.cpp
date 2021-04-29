@@ -1,9 +1,11 @@
-#include <core/algorithm.hpp>
 #include <engine.hpp>
 #include <function.hpp>
 
+#include <core/algorithm.hpp>
 #include <core/lvalue.hpp>
 #include <core/rvalue.hpp>
+
+#include <lang/error_handling.hpp>
 
 namespace zhetapi {
 
@@ -117,7 +119,8 @@ static void generate_statement(
 		try {
 			nm = node_manager(engine, tmp[split_size - 1], args, pardon);
 		} catch (const node_manager::undefined_symbol &e) {
-			std::cerr << "[LINE] Unknown symbol \"" << e.what() << "\"" << std::endl;
+			symbol_error_msg(e.what(), engine);
+
 			std::cerr << "\tfrom \"" << tmp[split_size - 1] << "\"" << std::endl;
 
 			exit(-1);

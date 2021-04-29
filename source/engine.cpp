@@ -45,6 +45,23 @@ Engine &Engine::operator=(const Engine &other)
 	return *this;
 }
 
+// Methods
+Args Engine::symbol_list() const
+{
+	Args syms;
+
+	for (const auto &p : _alg_table)
+		syms.push_back(p.first);
+	for (const auto &p : _ftr_table)
+		syms.push_back(p.first);
+	for (const auto &p : _reg_table)
+		syms.push_back(p.first);
+	for (const auto &p : _var_table)
+		syms.push_back(p.first);
+
+	return syms;
+}
+
 // Actions
 Engine *Engine::new_stack()
 {

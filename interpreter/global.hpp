@@ -11,6 +11,8 @@
 
 #include <core/algorithm.hpp>
 
+#include <lang/error_handling.hpp>
+
 // Namespaces
 using namespace std;
 using namespace zhetapi;

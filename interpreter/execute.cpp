@@ -42,7 +42,7 @@ Token *execute(string str)
 				engine->put(f);
 			} catch (...) {
 				if (pe) {
-					cout << "str = " << str << ", [FIXERR] UNKNOWN SYMBOL:" << us.what() << endl;
+					symbol_error_msg(us.what(), engine);
 					exit(-1);
 				}
 
@@ -68,10 +68,7 @@ Token *execute(string str)
 			cout << "err evaluating \'" << str << "\'\n" << e.what() << endl;
 			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
-			cout << "Error at line " << line
-				<< ": the symbol \""
-				<< e.what() << "\" was not defined "
-				"in this scope" << endl;
+			symbol_error_msg(e.what(), engine);
 
 			exit(-1);
 		} catch (const Token::unknown_attribute &e) {

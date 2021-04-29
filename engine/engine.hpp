@@ -7,6 +7,7 @@
 
 #include <core/algorithm.hpp>
 #include <core/engine_base.hpp>
+#include <core/common.hpp>
 
 namespace zhetapi {
 
@@ -16,11 +17,10 @@ class Engine : public engine_base {
 	// Broader scope
 	Engine *		_stack = nullptr;
 
-	symtab <Token *>	_var_table;
-	symtab <Function>	_ftr_table;
-
-	symtab <Registrable>	_reg_table;
 	symtab <algorithm>	_alg_table;
+	symtab <Function>	_ftr_table;
+	symtab <Registrable>	_reg_table;
+	symtab <Token *>	_var_table;
 
 	// Private methods
 	void set_origin_stack(Engine *);
@@ -30,6 +30,9 @@ public:
 
 	Engine &operator=(const Engine &);
 
+	// List all symbols
+	Args symbol_list() const;
+
 	// Actions
 	Engine *new_stack();
 	Engine *get_stack();
@@ -37,7 +40,6 @@ public:
 	void put(Function);
 	void put(Registrable);
 	void put(algorithm);
-
 	void put(const std::string &, Token *);
 
 	// Are these necessary?
