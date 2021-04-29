@@ -148,295 +148,16 @@ const node &node_manager::get_tree() const
 	return _tree;
 }
 
-// Setters
-void node_manager::set_label(lbl label)
-{
-	_tree._label = label;
-}
-
 // Value finding methods
 Token *node_manager::value(Engine *context) const
 {
-	return value(context, _tree);
+	return node_value(context, _tree);
 }
 
 // Sequential value (returns null for now)
 Token *node_manager::sequential_value(Engine *context) const
 {
-	return sequential_value(context, _tree);
-}
-
-Token *node_manager::sequential_value(Engine *context, node tree) const
-{
-	// Assumes that the top node is a sequential
-	// TODO: dont make these static pointers (stupid)
-	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
-	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
-
-	Token *tptr;
-	for (node nd : tree._leaves) {
-		tptr = value(context, nd);
-
-		// Check value for special cases (early returns)
-		// TODO: helper func
-		if (tptr && tokcmp(break_token, tptr))
-			return tptr;
-		if (tptr && tokcmp(continue_token, tptr))
-			return tptr;
-		if (dynamic_cast <Operand <Token *> *> (tptr))
-			return tptr;
-	}
-	
-	return nullptr;
-}
-
-Token *node_manager::value(Engine *context, node tree) const
-{
-	std::vector <Token *> values;
-
-	Token *tptr;
-	Token *vptr;
-
-	// Variable v;
-
-	rvalue *rv;
-
-	algorithm *aptr;
-
-	std::string ident;
-
-	int size;
-
-	node reffed;
-
-	// If null token, resort to special execution modes
-	// (Use this instead of sequential_value for
-	// algorithms; dont remove it though)
-	//
-	// TODO: Move to a helper function
-	//
-	// Special nodes!
-	Token *output = nullptr;
-	if (tree.null()) {
-		if (tree.label() == l_assignment_chain) {
-			// Evaluate first node
-			Token *tmp = value(context, tree[0]);
-
-			// Assign for the other nodes
-
-			// Add index operator for nodes
-			size_t nleaves = tree.child_count(); // Use a method instead
-
-			for (size_t i = 1; i < nleaves; i++) {
-				// Ensure that the node has type lvalue
-				if (tree[i].label() != l_lvalue)
-					throw std::runtime_error("Need an lvalue on the left side of an \'=\'");
-				
-				lvalue *lv = tree[i].cast <lvalue> ();
-
-				lv->assign(tmp, context);
-			}
-
-			return nullptr;
-		} else if (tree.label() == l_branch) {
-			// Push new stack
-			context = push_and_ret_stack(context);
-
-			// TODO: Make static or something (as an operand)
-			Token *true_token = new Operand <bool> (true);
-			Token *break_token = new Operand <Token *> ((Token *) 0x1);
-			Token *continue_token = new Operand <Token *> ((Token *) 0x2);
-
-			// TODO: Seriously, add a begin() and end() for nodes
-			// TODO: Check returns
-			for (size_t i = 0; i < tree.child_count(); i++) {
-				if (tree[i].label() == l_else_branch) {
-					Token *tptr = sequential_value(context, tree[i][0]);
-
-					// TODO: keep in another function
-					if (tptr && tokcmp(break_token, tptr))
-						output =  tptr;
-					if (tptr && tokcmp(continue_token, tptr))
-						output = tptr;
-					if (dynamic_cast <Operand <Token *> *> (tptr))
-						output = tptr;
-					
-					break;
-				}
-
-				// Fallthrough if not else
-				node predicate = tree[i][0];
-
-				Token *eval = value(context, predicate);
-				if (tokcmp(eval, true_token)) {
-					Token *tptr = sequential_value(context, tree[i][1]);
-
-					if (tptr && tokcmp(break_token, tptr))
-						output =  tptr;
-					if (tptr && tokcmp(continue_token, tptr))
-						output = tptr;
-					if (dynamic_cast <Operand <Token *> *> (tptr))
-						output = tptr;
-					
-					break;
-				}
-			}
-
-			// Pop the stack
-			context = pop_and_del_stack(context);
-
-			// Keep special returns in mind
-			return output;
-		} else if (tree.label() == l_while_loop) {
-			// Push new stack
-			context = push_and_ret_stack(context);
-
-			// Make static or something (as an operand)
-			Token *true_token = new Operand <bool> (true);
-
-			// NOTE: New struct (types) - All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
-			Token *break_token = new Operand <Token *> ((Token *) 0x1);
-			Token *continue_token = new Operand <Token *> ((Token *) 0x2);
-
-			node predicate = tree[0];
-			while (true) {
-				Token *eval = value(context, predicate);
-
-				// TODO: Check returns (and for null)
-				if (tokcmp(eval, true_token)) {
-					eval = sequential_value(context, tree[1]);
-
-					if (eval && tokcmp(eval, break_token))
-						break;
-					else if (eval && tokcmp(eval, continue_token))
-						continue;
-					else if (dynamic_cast <Operand <Token *> *> (eval)) {
-						output = eval;
-
-						break;
-					}
-				} else {
-					break;
-				}
-			}
-
-			// Pop the stack
-			context = pop_and_del_stack(context);
-
-			// Keep special outputs in mind
-			return output;
-		} else if (tree.label() == l_break_loop) {
-			// TODO:: put in another header as a generator or something (and establish a code set)
-			return new Operand <Token *> ((Token *) 0x1);
-		} else if (tree.label() == l_continue_loop) {
-			// TODO:: put in another header as a generator or something (and establish a code set)
-			return new Operand <Token *> ((Token *) 0x2);
-		} else if (tree.label() == l_return_alg) {
-			return new Operand <Token *> (value(context, tree[0]));
-		} else {
-			/* using namespace std;
-			cout << "ERRROORROROOR" << endl;
-			tree.print(); */
-			throw std::runtime_error("Unknown execution mode \'" + strlabs[tree._label] + "\'");
-		}
-	}
-
-	operation_holder *ophptr = tree.cast <operation_holder> ();
-
-	if (ophptr && ophptr->code == atm) {
-		lvalue *lv = tree[1].cast <lvalue> ();
-
-		// TODO: throw on nullptr
-		std::string at = lv->symbol();
-
-		std::vector <Token *> args;
-
-		for (node leaf : tree[1]._leaves)
-			args.push_back(value(context, leaf));
-
-		Token *callee = value(context, tree[0]);
-
-		return callee->attr(at, args);
-	}
-
-	// else: this func
-	
-	// TODO: Add a method for nodes to cast the token (ie. tree.cast <type> ())
-	
-	switch (tree.caller()) {
-	case Token::opd:
-		return tree.copy_token();
-	case Token::oph:	
-		size = tree._leaves.size();
-
-		// TODO: add begin and end for trees
-		for (node leaf : tree._leaves)
-			values.push_back(value(context, leaf));
-
-		tptr = context->compute((tree.cast <operation_holder> ())->rep, values);
-		
-		if (tree._label == l_post_modifier) {
-			rv = tree[0].cast <rvalue> ();
-			
-			context->put(rv->symbol(), tptr);
-
-			return rv->get(context)->copy();
-		} else if (tree._label == l_pre_modifier) {
-			rv= tree[0].cast <rvalue> ();
-
-			context->put(rv->symbol(), tptr);
-		}
-
-		return tptr->copy();
-	/* case Token::var:
-		return (tree.cast <Variable> ())->get()->copy(); */
-	case Token::token_rvalue:
-		return (tree.cast <rvalue> ())->get(context)->copy();
-	case Token::ndr:
-		reffed = *((tree.cast <node_reference> ())->get());
-
-		tree.retokenize(value(context, reffed));
-
-		return value(context, tree);
-	case Token::token_node_list:
-		return (tree.cast <node_list> ())->evaluate(context);
-	case Token::ftn:
-		if (tree._leaves.empty())
-			return tree._tptr->copy();
-		
-		for (node leaf : tree._leaves)
-			values.push_back(value(context, leaf));
-
-		// TODO: shorten (cast)
-		tptr = (*(dynamic_cast <Function *> (tree._tptr)))(values);
-
-		return tptr->copy();
-	case Token::reg:
-		for (node leaf : tree._leaves)
-			values.push_back(value(context, leaf));
-
-		tptr = (*(dynamic_cast <Registrable *> (tree._tptr)))(values);
-
-		if (tptr)
-			return tptr->copy();
-
-		break;
-	case Token::alg:
-		for (node leaf : tree._leaves)
-			values.push_back(value(context, leaf));
-		
-		aptr = dynamic_cast <algorithm *> (tree._tptr);
-		tptr = aptr->execute(context, values);
-
-		if (tptr)
-			return tptr->copy();
-
-		break;
-	default:
-		break;
-	}
-
-	return nullptr;
+	return node_sequential_value(context, _tree);
 }
 
 Token *node_manager::substitute_and_compute(
@@ -450,7 +171,7 @@ Token *node_manager::substitute_and_compute(
 		label(_refs[i]);
 	}
 
-	return value(context, _tree);
+	return node_value(context, _tree);
 }
 
 Token *node_manager::substitute_and_seq_compute(
@@ -465,6 +186,12 @@ Token *node_manager::substitute_and_seq_compute(
 	}
 
 	return sequential_value(context);
+}
+
+// Setters
+void node_manager::set_label(lbl label)
+{
+	_tree._label = label;
 }
 
 // Branch compress/translation
@@ -621,7 +348,7 @@ void attribute_invert(node &ref)
 	while (true) {
 		operation_holder *ophptr = current.cast <operation_holder> ();
 
-		if (ophptr && ophptr->code == atm) {
+		if (ophptr && ophptr->code == attribute) {
 			// Reduce variable clusters immediately
 			if (current[0].caller() == Token::vcl) {
 				variable_cluster *vclptr = current[0].cast <variable_cluster> ();
@@ -680,7 +407,7 @@ void node_manager::expand(
 		const std::set <std::string> &pardon)
 {
 	operation_holder *ophptr = ref.cast <operation_holder> ();
-	if (ophptr && ophptr->code == atm)
+	if (ophptr && ophptr->code == attribute)
 		attribute_invert(ref);
 
 	if (ref.caller() == Token::vcl) {
@@ -874,7 +601,7 @@ void node_manager::simplify(Engine *context)
 void node_manager::simplify(Engine *context, node &ref)
 {
 	if (ref.label() == l_operation_constant) {
-		ref.transfer(node(value(context, ref), l_constant, {}));
+		ref.transfer(node(node_value(context, ref), l_constant, {}));
 
 		return;
 	}
@@ -940,7 +667,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 		if (is_constant(plus[i].label())) {
 			opd = context->compute("+", {
 				opd,
-				value(context, plus[i])
+				node_value(context, plus[i])
 			});
 
 			plus.erase(plus.begin() + i);
@@ -954,7 +681,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 		if (is_constant(minus[i].label())) {
 			opd = context->compute("-", {
 				opd,
-				value(context, minus[i])
+				node_value(context, minus[i])
 			});
 
 			minus.erase(minus.begin() + i);
@@ -1132,7 +859,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		if (is_constant(mult[i].label())) {
 			opd = context->compute("*", {
 				opd,
-				value(context, mult[i])
+				node_value(context, mult[i])
 			});
 
 			mult.erase(mult.begin() + i);
@@ -1146,7 +873,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		if (is_constant(divs[i].label())) {
 			opd = context->compute("/", {
 				opd,
-				value(context, divs[i])
+				node_value(context, divs[i])
 			});
 
 			divs.erase(divs.begin() + i);

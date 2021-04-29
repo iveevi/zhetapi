@@ -101,10 +101,6 @@ public:
 	// Static methods
 	static bool loose_match(const node_manager &, const node_manager &);
 private:
-	// TODO: take in node as a reference (const)
-	Token *value(Engine *, node) const;
-	Token *sequential_value(Engine *, node) const;
-
 	void compress_branches(node &);
 	void create_branch(node &, size_t, size_t);
 
@@ -178,6 +174,12 @@ public:
 	// Use for computation specifically
 	static Engine *shared_context;
 };
+
+// Global functions
+
+// TODO: take in node as a reference (const)
+Token *node_value(Engine *, node);
+Token *node_sequential_value(Engine *, node);
 
 }
 

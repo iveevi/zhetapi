@@ -23,6 +23,7 @@ set(ZHETAPI_SOURCE
 	source/core/node_list.cpp
 	source/core/node_manager.cpp
 	source/core/node_reference.cpp
+	source/core/node_value.cpp
 	source/core/operation.cpp
 	source/core/operation_holder.cpp
 	source/core/rvalue.cpp
@@ -30,6 +31,8 @@ set(ZHETAPI_SOURCE
 	source/core/types.cpp
 	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
+
+	source/lang/error_handling.cpp
 
 	source/std/functions.cpp
 	source/std/interval.cpp

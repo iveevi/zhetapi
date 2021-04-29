@@ -43,7 +43,8 @@ std::string strcodes[] = {
 	"absolute value"
 };
 
-operation_holder::operation_holder(const ::std::string &str) : rep(str)
+// TODO: avoid overhead by using integer input (straight from the parser)
+operation_holder::operation_holder(const std::string &str) : rep(str)
 {
 	// Store information into some sort of structure
 	// TODO: store in a STATIC table, reduces runtime overhead
@@ -117,7 +118,7 @@ operation_holder::operation_holder(const ::std::string &str) : rep(str)
 	else if (str == "r--")
 		code = rde;
 	else if (str == ".")
-		code = atm;
+		code = attribute;
 	else if (str == "||")
 		code = bool_or;
 	else if (str == "&&")

@@ -3,21 +3,17 @@
 
 // C/C++ headers
 #include <string>
+#include <vector>
 
 // Engine headers
-#include <martix.hpp>
+#include <matrix.hpp>
+#include <core/common.hpp>
 
 namespace zhetapi {
 
 // TODO: string matching...
-size_t levenshtein(const std::string &a, const std::string &b)
-{
-	size_t rows = a.length() + 1;
-	size_t cols = b.length() + 1;
-
-	// Make the matrix
-	Matrix <size_t> (rows, cols, 0);
-}
+size_t levenshtein(const std::string &, const std::string &);
+Args suggestions(const std::string &, const Args &);
 
 }
 

@@ -85,7 +85,7 @@ void node_manager::differentiate_const_log(node &ref)
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
 			node(shared_context->compute("ln", {
-				value(shared_context, ref._leaves[0])
+				node_value(shared_context, ref._leaves[0])
 			}), l_none, {}),
 			node(ref._leaves[1])
 		})
