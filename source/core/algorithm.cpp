@@ -424,9 +424,9 @@ node_manager compile_block(
 	compiled.set_label(l_sequential);
 	compiled.compress_branches();
 
-	using namespace std;
+	/* using namespace std;
 	cout << "compiled:" << endl;
-	compiled.print();
+	compiled.print(); */
 
 	return compiled;
 }

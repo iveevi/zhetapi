@@ -160,7 +160,11 @@ std::ostream &operator<<(std::ostream &os, const Complex <T> &z)
 	if (z.imag()) {
 		if (pl)
 			os << " + ";
-		os << z.imag() << "i";
+		
+		if (z.imag() != T(1))
+			os << z.imag();
+		
+		os << "i";
 	}
 
 	return os;

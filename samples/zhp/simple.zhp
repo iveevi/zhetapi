@@ -1,5 +1,11 @@
 g(x) = x^2 - x - 6
 
+println("complex = ", 1 + i)
+
+println("g(3) = ", g(3))
+println("g(-2) = ", g(-2))
+println("g(7) = ", g(7))
+
 alg newton_iter(r, f, fp)
 {
 	return r - f(r)/fp(r)
@@ -34,14 +40,20 @@ alg newton(r, f)
 	
 	x = r
 
+	println("BOUNDARY LOOP:")
 	while ((more == null) || (less == null)) {
 		x = newton_iter(x, f, fp)
 
+		println("f(x) = ", f(7))
+
 		y = f(x)
+		println("y = ", y)
+		println("x = ", x)
+		println("f(x') = ", f(x))
 
                 # Check putting after elif
                 if (abs(y) < eps)
-                        break
+                       return x
 
 		if ((y > 0) && (more == null))
 			more = x

@@ -122,8 +122,8 @@
 	_add_binary_operation(str, Z, Z, Z);							\
 	_add_binary_operation(str, R, R, R);							\
 	_add_binary_operation(str, Q, Q, Q);							\
-	_add_binary_operation(str, CR, CR, CR);						\
-	_add_binary_operation(str, CQ, CQ, CQ);						\
+	_add_binary_operation(str, CR, CR, CR);							\
+	_add_binary_operation(str, CQ, CQ, CQ);							\
 												\
 	_add_heterogenous_binary_operation(str, R, Z, R);					\
 	_add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
