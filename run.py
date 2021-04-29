@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import time
 
 # Build the parser
 parser = argparse.ArgumentParser()
@@ -69,7 +70,7 @@ features = {
 # Special targets
 
 
-def list(args):
+def list_features(args):
     print('The following are avaiable feature tests to run:')
 
     for key in features.keys():
@@ -141,12 +142,69 @@ def clang(args):
     if (ret != 0):
         clean_and_exit(-1)
 
+def base_bench(args):
+    print('Installing interpreter...')
+
+    # Make directories and compile interpreter
+    os.system('mkdir -p bin')
+
+    make_target(args.threads, 'zhetapi zhp-shared zhp-static')
+
+    os.system('mv zhetapi bin/')
+    os.system('mv libzhp.* bin/')
+
+    # Run bench
+    start_t = time.time()
+
+    os.system('./bin/zhetapi testing/benchmarks/base_bench.zhp')
+
+    end_t = time.time()
+
+    print(f'\nEXECUTION TIME: {1000 * (end_t - start_t)} ms')
+
+def python_bench(args):
+    print('Installing interpreter...')
+
+    # Make directories and compile interpreter
+    os.system('mkdir -p bin')
+
+    make_target(args.threads, 'zhetapi zhp-shared zhp-static')
+
+    os.system('mv zhetapi bin/')
+    os.system('mv libzhp.* bin/')
+
+    # Run bench for zhetapi-lang
+    print('ZHEPATI-LANG:')
+
+    start_t = time.time()
+
+    os.system('./bin/zhetapi testing/benchmarks/relative_bench.zhp')
+
+    end_t = time.time()
+
+    zhp_t = end_t - start_t
+    
+    # Run bench for python
+    print('\nPYTHON:')
+
+    start_t = time.time()
+
+    os.system('python3 testing/benchmarks/relative_bench.py')
+
+    end_t = time.time()
+
+    py_t = end_t - start_t
+
+    print(f'\nZHETAPI-LANG EXECUTION TIME: {1000 * zhp_t} ms')
+    print(f'PYTHON EXECUTION TIME: {1000 * py_t} ms')
 
 special = {
     'install': install,
     'zhetapi': zhetapi,
     'clang' : clang,
-    'list': list
+    'list': list_features,
+    'base_bench' : base_bench,
+    'python_bench' : python_bench
 }
 
 # Preprocessing
@@ -182,5 +240,7 @@ elif args.target in targets:
 
     if (ret1 != 0) or (ret2 != 0):
         clean_and_exit(-1)
+else:
+    print(f'Unknown target \"{args.target}\"')
 
 clean()

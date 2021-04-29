@@ -1,6 +1,6 @@
 #include "io.hpp"
 
-ZHETAPI_REGISTER(__zhp_std_fprint)
+ZHETAPI_REGISTER(zhp_fprint)
 {
 	Operand <string> *file;
 
@@ -16,7 +16,7 @@ ZHETAPI_REGISTER(__zhp_std_fprint)
 }
 
 // TODO: change to str() later
-ZHETAPI_REGISTER(__zhp_std_fprintln)
+ZHETAPI_REGISTER(zhp_fprintln)
 {
 	Operand <string> *file;
 

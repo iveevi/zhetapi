@@ -6,3 +6,5 @@
 
 using namespace std;
 using namespace zhetapi;
+
+ZHETAPI_REGISTER(zhp_complex);

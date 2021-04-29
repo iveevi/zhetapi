@@ -1,0 +1,12 @@
+x = 0
+
+i = 0
+n = 0
+while (i < 1000) {
+	x = x + i * i
+	n = n + 3
+	i++
+}
+
+println("final x = ", x)
+println("~operation = ", n)

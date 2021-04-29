@@ -1,6 +1,6 @@
 #include "io.hpp"
 
-ZHETAPI_REGISTER(__zhp_std_printf)
+ZHETAPI_REGISTER(zhp_printf)
 {
 	cout << "Printf!" << endl;
 

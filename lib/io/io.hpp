@@ -7,8 +7,8 @@
 using namespace std;
 using namespace zhetapi;
 
-ZHETAPI_REGISTER(__zhp_std_printf);
+ZHETAPI_REGISTER(zhp_printf);
 
 // Basic file IO
-ZHETAPI_REGISTER(__zhp_std_fprint);
-ZHETAPI_REGISTER(__zhp_std_fprintln);
+ZHETAPI_REGISTER(zhp_fprint);
+ZHETAPI_REGISTER(zhp_fprintln);

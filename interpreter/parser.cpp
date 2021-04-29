@@ -321,7 +321,6 @@ void check(string &keyword)
 	}
 
 	if (keyword == "while") {
-		cout << "WHILE!" << endl;
 		if (parse_parenthesized(parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after a while\n", line);
 			exit(-1);
