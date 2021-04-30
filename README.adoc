@@ -98,7 +98,7 @@ Options:
  -h		Display the guide for the interpreter.
  -o <file>	Place the compiled library into <file>.
  -L <directory>	Add <directory> to the interpreter's library search path
- ```
+```
 
 # Features
 
