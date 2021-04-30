@@ -1,27 +1,30 @@
-= Zhetapi ℤHΠ
 :sectnums:
 :toc2:
 
 image::zhetapi-logo.png[]
 
 image:https://semaphoreci.com/api/v1/vedavamadathil/zhetapi/branches/master/badge.svg[Build, link=https://semaphoreci.com/vedavamadathil/zhetapi]
-
 image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a2[Quality, link=https://www.codacy.com/gh/vedavamadathil/zhetapi/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vedavamadathil/zhetapi&amp;utm_campaign=Badge_Grade]
 
 ---
 
 # Introduction
-Zhetapi is a `C++14` computation library that was built in the hopes of
-making mathematical computation and algorithmic research more convenient to the
-users.
 
-This project is being developed on Unix environments and has only been tested
-for them. It is a work in progress.
+Zhetapi is a `C++17` ML and numerical analysis API that was built in the hopes of
+making mathematical computation and algorithmic research more convenient to
+users. In the name of convenience and beginner-friendliness, the API comes with a
+scripting language, Zhetapi-lang.
 
-# Usage and Installation
+This project is being developed on Unix environments (MacOS and Linux) and has
+only been tested for them. It is a work in progress.
 
-All applications headers use the `g++-8` compiler and Boost 1.65.1 or later
-(for Spirit, Phoenix and Fusion). Additionally, CMake is used to build the applications.
+# Installation
+
+Most of the features of Zhetapi depend only on `C++17` and the Boost library
+(preferable version 1.65). CMake is used to compile the targets.
+
+We recommend that you use the `g++-8` compiler, as it is the only one tested
+so far.
 
 *macOS (High Sierra and later)*
 
@@ -35,30 +38,31 @@ $ brew install gcc@8 boost cmake
 $ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
 ```
 
-## Zhetapi CLI
+Additional dependencies for image processing are `libpng`, `OpenGL` and `GLFW3`.
+These are specifically used only for loading and displaying images.
 
-The Zhetapi CLI is a command-line calculator application, similar to GNU Octave,
-with additional abilities to store variables and define functions. The user can
-also enter special commands, by using a `#` before specifying the command name
-(ie. the `#list` command lists all available commands).
+To install the interpreter for Zhetapi-lang, run `./run.py install -j[THREADS=8]`
+in the home directory of this repository. This is also compile the API libraries
+(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default Zhetapi-lang
+libraries (`math` and `io` for now).
 
-To install the CLI (Unix systems only), change to the `zhetapi` directory and
-execute `./run install`. The command will build the CLI, along with other applications
-and make the `zhetapi` command globally available.
+# Zhetapi-lang
 
-To exit the CLI, simply enter `#q` or `#quit` from the CLI or terminate the
-program with `Ctrl-C`.
+Zhetapi-lang is a scripting language that on the surface appears to be very
+similar to Python. However, there is much more focus on the mathematical and
+notational aspects.
 
-## Zhetapi-lang
+Current features include declaring variables (these include constant and
+mathematical functions), looping (with `while` and `for`), importing libraries,
+and defining and using algorithms.
 
-Along with API and CLI application, Zhetapi provides a scripting language
-(currently in the process of development). Current features include declaring
-values (constants and functions), `while` loops and `if`-`elif`-`else` branching,
-as well as a very basic form of importing libraries. A sample script is presented
-below:
+A sample script is presented below:
 
 ```
 # Single-line comments are alike to Python and Bash
+
+# This is how you would import a library
+import math
 
 # Note the simplicity in defining mathematical functions
 f(x) = x^3 + x * sin(x)
@@ -71,15 +75,30 @@ else
 i = 0
 while (i++ < 10)
 	println("[i = ", i, "] f(i) = ", f(i))
+
+# Note the distinction between functions and algorithms
+# An algorithm is like the Python equivalent of a function,
+# and functions are like Python lambdas (but more convenient :))
+alg myalg()
+{
+	x = 42
+	println("x = ", x)
+}
 ```
 
-Zhetapi-lang is a scripting language intended to make the
-development of numerical and machine learning algorithms
-very simple.
+This scripting language is designed to make it easier to test and implement
+algorithms in ML and numerical analysis. Get started with the interpreter with
+`zhetapi -h`:
 
-To compile the interpreter, run the `./run install` command in the
-repository's home, and add its `bin` folder to your shell's `$PATH`
-variable. From there, use `czhp -h` to get started with the interpreter.
+```
+Usage: zhetapi [options] file...
+Options:
+ -c		Compiles the files into a single library.
+ -d		Displays exported symbols in the libraries specified.
+ -h		Display the guide for the interpreter.
+ -o <file>	Place the compiled library into <file>.
+ -L <directory>	Add <directory> to the interpreter's library search path
+ ```
 
 # Features
 
@@ -155,10 +174,10 @@ the advantage that one has a closed form for the derivative, but the
 disadvantage that it could be very complicated.
 
 ```cpp
-Function <double, int> f = "f(x) = x^2";
+Function f = "f(x) = x^2";
 
 // Compute df/dx
-Function <double, int> df = f.derivative();
+Function df = f.derivative();
 
 // Prints "f(x) = x^2"
 cout << f << endl;
@@ -299,158 +318,11 @@ For a more comprehensive and practical example, see the `samples/mnist`
 directory, in which we train a deep neural network to recognize hand written
 digits from the MNIST data set.
 
-## Code Generation and Dynamically Optimizing Functions
-
-In addition to being able to define and use functions, the user can generate
-source code for the function using the `Function::generate_general` method.
-The user should note that the code generated still uses the Zhetapi API.
-
-```cpp
-Function <double, int> f = "f(x) = x^2 + x * ln(x)";
-
-// Generates the source code for
-// f in the file __gen_f.cpp
-f.generate_general();
-```
-
-For the example function above, the source code generated would look like the
-following:
-
-```cpp
-#include <token.hpp>
-#include <function.hpp>
-
-extern "C" {
-	zhetapi::Barn <double, int> __gen_f_barn;
-
-	zhetapi::token *__gen_f(zhetapi::token *in1)
-	{
-		zhetapi::token *c1 = new zhetapi::operand <int> (2);
-		zhetapi::token *inter1 = __gen_f_barn.compute("^", {in1, c1});
-		zhetapi::token *inter2 = __gen_f_barn.compute("ln", {in1});
-		zhetapi::token *inter3 = __gen_f_barn.compute("*", {in1, inter2});
-		zhetapi::token *inter4 = __gen_f_barn.compute("+", {inter1, inter3});
-		return inter4;
-	}
-}
-```
-
-The user can also dynamically compile these generated files using the
-`Function::compile_general` method:
-
-```cpp
-// Initialize the Function object
-Function <double, int> fx = "f(x) = x^2 + x * ln(x)";
-
-// Prints "123.026"
-cout << fx(10)->str() << endl;
-
-// Cast the generated function
-typedef token *(*ftr)(token *);
-
-ftr gfx = (ftr) fx.compile_general();
-
-// Allocate the operands
-token *opd = new operand <int> (10);
-
-// Also prints "123.026"
-cout << gfx(opd)->str() << endl;
-
-// Free resources
-delete opd;
-```
-
-The method returns a pointer to the compiled and linked function, which the user
-should then cast to use. Note that because of the usage of the Zhetapi API in
-the generated source code, the user must pass pointers to tokens as operands of
-the casted function. It is guaranteed, however, that the pointers passed to the
-generated functions are not modified in any way. Thus, the user is responsible
-for freeing the memory allocated for performed the computations.
-
-The advantage of using the generated function is that it carries less overhead
-in computations when compared to objects of the `Function` class.
-
 ## Linear Algebra
 
 The library also provides ways in which the user can do linear algebra. The
 classes `Vector` and `Matrix` come with a variety of methods on their own, which
 include performing computation as well as manipulation of their representations.
-
-In addition to these classes, the library provides standard algorithms such as Gram
-Schmidt and LU Factorization (see below).
-
-## Standard Algorithms
-
-|===
-
-| Function | Description | Engine Header
-
-| `gram_schmidt` | Performs the Gram Schmidt process on the given
-set of vectors.	| `std/algorithm.h`
-
-| `gram_schmidt_normalized` | Same as `gram_schmidt` but returns a basis of
-normalized vectors. | `std/algorithm.h`
-
-| `lagrange_interpolate` | Performs Lagrange interpolation on the given set of
-points. Returns the appropriate polynomial. | `std/algorithm.h`
-
-| `lu_factorize` | Returns the LU factorization of a matrix. | `std/algorithm.h`
-
-| `solve_linear_equation` | Solves the linear equation `Ax = b` given `A` and
-`b`. | `std/algorithm.h`
-
-| `reduced_polynomial_fitting` | Returns a polynomial that goes through the
-given set of points. Differs from `lagrange_interpolate` in that it returns a
-simplified polynomial. | `std/algorithm.h`
-
-| `gradient_descent` | Applies gradient descent to a given function on the given
-set of data. | `std/algorithm.h`
-
-| `find_root` | Uses Newton's method to find the root of the given function. |
-`std/algorithm.h`
-
-| `solve_hlde_constant` | Solves the homogeneous linear differential equation
-with constant coefficients represented by the given polynomial. Returns a list
-of functions as a basis to the solution space. | `std/calculus.h`
-
-| `bernoulli_sequence_real` | Generates the first `n` terms of the Bernoulli
-sequence. | `std/combinatorial.h`
-
-| `bernoulli_sequence_rational` | Generates the first `n` terms of the Bernoulli
-sequence as rational numbers. | `std/combinatorial.h`
-
-| `bernoulli_number_real` | Generates the `n` th Bernoulli number.
-| `std/combinatorial.h`
-
-| `bernoulli_number_rational` | Generates the `n` th Bernoulli number as a
-rational number.
-| `std/combinatorial.h`
-
-|===
-
-# Overview of Usable Classes
-
-Below are the currently usable classes.
-
-|===
-
-| Class Name | Description | Engine Header
-
-| `Activation` | An activation in the standard machine learning context | `activations.hpp`
-| `Barn` | A class which contains settings for other classes like functions | `rational.hpp`
-| `Complex` | A complex number in mathematics | `complex.hpp`
-| `Erf` | A class which computes costs, in the standard machine learning
-context | `erf.hpp`
-| `Function` | A mathematical function | `function.hpp`
-| `Matrix` | A matrix in linear algebra | `matrix.hpp`
-| `NeuralNetwork` | A deep neural network in machine learning | `network.hpp`
-| `Polynomial` | A polynomial in algebra | `polynomial.hpp`
-| `Rational` | A rational number in algebra | `rational.hpp`
-| `Tensor` | Represents a tensor in algebra | `tensor.hpp`
-| `Vector` | A vector in linear algebra | `vector.hpp`
-
-|===
-
 
 # Modules
 
@@ -467,13 +339,11 @@ present in this module. It will later contain API functions.
 the scenes of the convenient features provided by the library.
 
 | engine/cuda | Contains CUDA headers for the CUDA functions provided by the
-library.
+library (Note: this has not been updated since around v0.2).
 
 | engine/graph | Contains python scripts to assist in graphing procedures.
 
 | engine/json | Contains nlohmann's single header C++ API for parsing JSON files.
-
-| data | Contains statistics regarding features of the library.
 
 | samples | Contains examples of library usage. Currently contains the `zhp`
 directory for scripts and library samples and the `mnist` directory for a showcase
@@ -493,9 +363,9 @@ their representations. Some of this functionality does already exist, such as
 the fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
 actions.
 
-As an example that is not yet featured, it is not yet possible to have the
-object recognize that `3xy + 5yx` is the same as `8xy`. This feature would also
-help reduce the complexity of derivatives of these objects.
+As an example, it is not yet possible to have the object recognize that `3xy +
+5yx` is the same as `8xy`. This feature would also help reduce the complexity of
+derivatives of these objects.
 
 ## Integration and Differentiation
 
@@ -511,12 +381,6 @@ One recognizes, simply by looking at the first few digits, that the number
 `3.141592` is most nearly pi, and that the number `2.7182817` is most nearly
 Euler's number. The hope is that at some point, the library will be able to
 reach similar conclusions, through the help of integer relations algorithms such
-as PSLQ.
-
-## More Algorithms in Linear Algebra
-
-Although there are a few standard linear algebra algorithms, the hope is that
-more will be added. These include QR factorization, SVD, diagonalization, etc.
 
 ## More Extensive Support for Machine Learning
 
@@ -524,32 +388,6 @@ Deep neural networks are already present in the Zhetapi library. The next steps
 would be implementing convolutional networks, recurrent networks, and other structures
 used in supervised learning. In addition, structures and algorithms used in unsupervised
 learning and other branches of AI shall also be added.
-
-## Primitive Code Generation
-
-The library already can generate, compile and link `Function`
-objects in runtime. However, as mentioned, the source generated uses the Zhetapi
-API. This is disadvantageous in that it takes much longer to compile than native
-programs, and the user also has the added responsibility of managing the
-resources for the computation of the generated function.
-
-The next step is to generate source code natively, using only native types that
-the user specifies. The only library functions that should be used are those in
-any of the headers in the `inc/std` directory (for example, if the function uses
-the binomial coefficient, then the source would include the
-`std_combinatorial.hpp` header).
-
-## Python Bindings
-
-Python is a very well supported scripting language, with many existing libraries
-and a large community. Adding bindings for certain library features, especially
-the machine learning facilities, would make it much easier to use and test them.
-
-## Improve Semantics
-
-The library aims to allow the user to perform mathematical tasks with
-ease. Thus, the notational convenience of library features is important and is a
-task that remains to be seen through.
 
 # References
 

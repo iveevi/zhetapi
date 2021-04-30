@@ -17,7 +17,7 @@ vector <string> idirs = {"."};
 // Display guide
 static int guide()
 {
-	printf("Usage: czhp [options] file...\n");
+	printf("Usage: zhetapi [options] file...\n");
 	printf("Options:\n");
 	printf(" -c\t\tCompiles the files into a single library.\n");
 	printf(" -d\t\tDisplays exported symbols in the libraries specified.\n");

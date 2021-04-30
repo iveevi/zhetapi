@@ -138,7 +138,7 @@ int main()
 		valid_exps.push_back(exp);
 	}
 
-	ml::Erf <double> *erf = new ml::MeanSquaredError <double> ();
+	ml::Erf <double> *erf = new ml::MSE <double> ();
 	ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
 	for (int i = 0; i < 100; i++) {
