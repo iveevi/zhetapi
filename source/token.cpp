@@ -4,6 +4,9 @@
 
 namespace zhetapi {
 
+// Static variables
+size_t Token::id_count = 0;
+
 Token::Token() {}
 
 Token::Token(const std::vector <std::pair <std::string, method>> &attrs)

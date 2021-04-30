@@ -9,6 +9,7 @@
 #include <exception>
 #include <typeinfo>
 #include <typeindex>
+#include <mutex>
 
 namespace zhetapi {
 
@@ -108,7 +109,30 @@ public:
 		
 		std::string what() const;
 	};
+
+	// New id system
+	static size_t		id_count;
+	static std::mutex	id_mutex;
+
+	// virtual size_t id() const = 0;
 };
+
+// Id function macro (it is the same for all sub-classes)
+#define id_system()				\
+	static size_t uid;			\
+						\
+	size_t id() const {			\
+		if (uid)			\
+			return uid;		\
+						\
+		Token::id_mutex.lock();		\
+						\
+		uid = ++id_count;		\
+						\
+		Token::id_mutex.unlock();	\
+						\
+		return uid;			\
+	}
 
 // Comparing tokens
 bool tokcmp(Token *, Token *);

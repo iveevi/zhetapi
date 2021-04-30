@@ -307,7 +307,6 @@ static void check_keyword(
 		keyword.clear();
 	}
 
-	using namespace std;
 	if (keyword == "while") {
 		if (parse_parenthesized(code, i, parenthesized)) {
 			printf("Syntax error at line %lu: missing parenthesis after an while\n", 0L);

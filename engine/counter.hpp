@@ -23,7 +23,7 @@ Counter <T> ::Counter(T mn, T mx, T alpha) : _min(mn), _max(mx),
 template <class T>
 T Counter <T> ::operator()() const
 {
-	return (_count = min(max(_count + _alpha, _min), _max);
+	return (_count = min(max(_count + _alpha, _min), _max));
 }
 
 }

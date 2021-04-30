@@ -33,6 +33,7 @@ set(ZHETAPI_SOURCE
 	source/core/variable_cluster.cpp
 
 	source/lang/error_handling.cpp
+	source/lang/feeder.cpp
 
 	source/std/functions.cpp
 	source/std/interval.cpp

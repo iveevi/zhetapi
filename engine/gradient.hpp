@@ -10,6 +10,7 @@
 #include <erf.hpp>
 #include <vector.hpp>
 #include <layer.hpp>
+#include <dataset.hpp>
 
 namespace zhetapi {
 

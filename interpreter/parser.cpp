@@ -239,6 +239,10 @@ bool if_true = false;
 
 void check(string &keyword)
 {
+	// Dummy
+	static Args args;
+	static Pardon pardon;
+
 	string parenthesized;
 	string block;
 	string lname;
@@ -325,20 +329,26 @@ void check(string &keyword)
 			printf("Syntax error at line %lu: missing parenthesis after a while\n", line);
 			exit(-1);
 		}
+
+		node_manager condition(engine, parenthesized, args, pardon);
 		
 		if (extract_block(block)) {
 			printf("Syntax error at line %lu: missing statement after a while\n", line);
 			exit(-1);
 		}
 
+		node_manager nm_block = compile_block(engine, block + "\n", args, pardon);
+
+		node_manager nm_while;
+
+		nm_while.append(condition);
+		nm_while.append(nm_block);
+
+		nm_while.set_label(l_while_loop);
+
 		engine = push_and_ret_stack(engine);
 
-		Token *t = execute(parenthesized);
-		while (*t == op_true) {
-			parse(block);
-			
-			t = execute(parenthesized);
-		}
+		nm_while.value(engine);
 		
 		engine = pop_and_del_stack(engine);
 		

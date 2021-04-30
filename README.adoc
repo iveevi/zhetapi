@@ -1,6 +1,3 @@
-:sectnums:
-:toc2:
-
 image::zhetapi-logo.png[]
 
 image:https://semaphoreci.com/api/v1/vedavamadathil/zhetapi/branches/master/badge.svg[Build, link=https://semaphoreci.com/vedavamadathil/zhetapi]
@@ -8,107 +5,16 @@ image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a
 
 ---
 
-# Introduction
+= Introduction
 
 Zhetapi is a `C++17` ML and numerical analysis API that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to
 users. In the name of convenience and beginner-friendliness, the API comes with a
 scripting language, Zhetapi-lang.
 
-This project is being developed on Unix environments (MacOS and Linux) and has
-only been tested for them. It is a work in progress.
+= Features
 
-# Installation
-
-Most of the features of Zhetapi depend only on `C++17` and the Boost library
-(preferable version 1.65). CMake is used to compile the targets.
-
-We recommend that you use the `g++-8` compiler, as it is the only one tested
-so far.
-
-*macOS (High Sierra and later)*
-
-```
-$ brew install gcc@8 boost cmake
-```
-
-*Ubuntu (18.04 and later)*
-
-```
-$ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
-```
-
-Additional dependencies for image processing are `libpng`, `OpenGL` and `GLFW3`.
-These are specifically used only for loading and displaying images.
-
-To install the interpreter for Zhetapi-lang, run `./run.py install -j[THREADS=8]`
-in the home directory of this repository. This is also compile the API libraries
-(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default Zhetapi-lang
-libraries (`math` and `io` for now).
-
-To use the C++ API in your own programs, include the `engine` directory (which
-includes all the headers) and link your program with the shared/static libraries.
-
-# Zhetapi-lang
-
-Zhetapi-lang is a scripting language that on the surface appears to be very
-similar to Python. However, there is much more focus on the mathematical and
-notational aspects.
-
-Current features include declaring variables (these include constant and
-mathematical functions), looping (with `while` and `for`), importing libraries,
-and defining and using algorithms.
-
-A sample script is presented below:
-
-```
-# Single-line comments are alike to Python and Bash
-
-# This is how you would import a library
-import math
-
-# Note the simplicity in defining mathematical functions
-f(x) = x^3 + x * sin(x)
-
-if (f(10) >= 0)
-	println("f(10) = ", f(10))
-else
-	println("f(10) is less than 0")
-
-i = 0
-while (i++ < 10)
-	println("[i = ", i, "] f(i) = ", f(i))
-
-# Note the distinction between functions and algorithms
-# An algorithm is like the Python equivalent of a function,
-# and functions are like Python lambdas (but more convenient :))
-alg myalg()
-{
-	x = 42
-	println("x = ", x)
-}
-
-# Prints "x = 42"
-myalg()
-```
-
-This scripting language is designed to make it easier to test and implement
-algorithms in ML and numerical analysis. Get started with the interpreter with
-`zhetapi -h`:
-
-```
-Usage: zhetapi [options] file...
-Options:
- -c		Compiles the files into a single library.
- -d		Displays exported symbols in the libraries specified.
- -h		Display the guide for the interpreter.
- -o <file>	Place the compiled library into <file>.
- -L <directory>	Add <directory> to the interpreter's library search path
-```
-
-# Features
-
-## Evaluation of Complex Expressions
+== Evaluation of Complex Expressions
 
 The library can evaluate complex expressions, which have operands of various
 types, such as integers, rational numbers, complex numbers, vectors and
@@ -131,7 +37,7 @@ f(x) = x^2 - x/2
 println(f(9))
 ```
 
-## User Defined Functions
+== User Defined Functions
 
 Users can create mathematical functions (distinct from algorithms),
 which can then be used as any other C++ functor object.
@@ -152,7 +58,6 @@ cout << f(5.0) << endl;
 In Zhetapi-lang, the code above translates to the following:
 
 ```
-# Wow, so easy!
 f(x) = x^2
 
 println(f(10))
@@ -160,7 +65,7 @@ println(f(3/4))
 println(f(5.0))
 ```
 
-## Calculus
+== Calculus
 
 An object of class `Function` can be differentiated in terms of any of its
 variables, to get its gradients and such. This process is symbolic, which has
@@ -201,13 +106,13 @@ println(df)
 println("df/dx(2) = ", df(2))
 ```
 
-## Machine Learning
+== Machine Learning
 
 Along with providing many mathematical utilities, Zhetapi also provides
 machine learning capabilities. Currently, Zhetapi provides a `DNN`
 class that user can use to train deep neural networks on data sets.
 
-### Construction of Models
+=== Construction of Models
 
 Deep neural networks are constructed in a very intuitive manner:
 
@@ -229,7 +134,7 @@ of layers. Each layer must specify the number of output neurons and the activati
 additionally specify an initializer like Xavier (see `engine/std/initializers.hpp`
 for the defaults) and the dropout rate.
 
-### Saving and loading models
+=== Saving and loading models
 
 Users can save and load DNNs with the simple `save` and `load` methods.
 
@@ -245,7 +150,7 @@ model.load("model-save.out");
 
 The save format is pure binary, and adheres to a specific order and format.
 
-### Using the Models
+=== Using the Models
 
 With C++ operator overloading, using the DNN is as simple as calling it
 as a functor:
@@ -255,7 +160,7 @@ cout << model({3, 5}) << endl;
 cout << model({4, 5}) << endl;
 ```
 
-### Training the Models
+=== Training the Models
 
 The DNN class itself does not have any methods for fitting; it can only return
 gradients and Jacobians. Instead, use function like `fit`:
@@ -295,7 +200,7 @@ For a more comprehensive and practical example, see the `samples/mnist`
 directory, in which we train a deep neural network to recognize hand written
 digits from the MNIST data set.
 
-## Linear Algebra
+== Linear Algebra
 
 Linear algebra can be done with the `Vector` and `Matrix` classes. These
 classes entail intuitive usage through a variety of applications.
@@ -306,7 +211,7 @@ and LQ factorization and others (see `engine/std/linalg.hpp`):
 ```cpp
 using namespace zhetapi;
 
-/* Note how easy it is to initialize a matrix.
+/* This is how to initialize a matrix from construction
  *
  * This allows one to perform many grid-based
  * algorithms (like dynamic programming) easily.
@@ -334,7 +239,114 @@ cout << "eigens = " << eigens << endl;
 Vector <double> fl = flatten(mat);
 ```
 
-# Modules
+== Standard Algorithms
+
+|===
+
+| Function | Description | Engine Header
+
+| `gram_schmidt` | Performs the Gram Schmidt process on the given set of
+vectors.	| `std/linalg.hpp`
+
+| `gram_schmidt_normalized` | Same as `gram_schmidt` but returns a basis of
+normalized vectors. | `std/linalg.hpp`
+
+| `lagrange_interpolate` | Performs Lagrange interpolation on the given set of
+points. Returns the appropriate polynomial. | `std/algorithm.hpp`
+
+| `lu_factorize` | Returns the LU factorization of a matrix. |
+`std/algorithm.hpp`
+
+| `solve_linear_equation` | Solves the linear equation `Ax = b` given `A` and
+`b`. | `std/algorithm.h`
+
+| `reduced_polynomial_fitting` | Returns a polynomial that goes through the
+given set of points. Differs from `lagrange_interpolate` in that it returns a
+simplified polynomial. | `std/algorithm.hpp`
+
+| `gradient_descent` | Applies gradient descent to a given function on the
+given set of data. (Deprecated) | `std/algorithm.hpp`
+
+| `find_root` | Uses Newton's method to find the root of the given function.
+(Deprecated) | `std/algorithm.hpp`
+
+| `solve_hlde_constant` | Solves the homogeneous linear differential equation
+with constant coefficients represented by the given polynomial. Returns a list
+of functions as a basis to the solution space. (Deprecated) |
+`std/calculus.hpp`
+
+| `bernoulli_sequence_real` | Generates the first `n` terms of the Bernoulli
+sequence. | `std/combinatorial.hpp`
+
+| `bernoulli_sequence_rational` | Generates the first `n` terms of the
+Bernoulli sequence as rational numbers. | `std/combinatorial.hpp`
+
+| `bernoulli_number_real` | Generates the `n` th Bernoulli number.  |
+`std/combinatorial.hpp`
+
+| `bernoulli_number_rational` | Generates the `n` th Bernoulli number as a
+rational number.  | `std/combinatorial.hpp`
+
+|===
+
+= Scripting Language
+
+Zhetapi-lang is a scripting language that on the surface appears to be very
+similar to Python. However, there is much more focus on the mathematical and
+notational aspects.
+
+Current features include declaring variables (these include constant and
+mathematical functions), looping (with `while` and `for`), importing libraries,
+and defining and using algorithms.
+
+A sample script is presented below:
+
+```
+# Single-line comments are alike to Python and Bash
+
+# This is how you would import a library
+import math
+
+# This is how to define a function
+f(x) = x^3 + x * sin(x)
+
+if (f(10) >= 0)
+	println("f(10) = ", f(10))
+else
+	println("f(10) is less than 0")
+
+i = 0
+while (i++ < 10)
+	println("[i = ", i, "] f(i) = ", f(i))
+
+# Note the distinction between functions and algorithms
+# An algorithm is like the Python equivalent of a function,
+# and functions are like Python lambdas
+alg myalg()
+{
+	x = 42
+	println("x = ", x)
+}
+
+# Prints "x = 42"
+myalg()
+```
+
+This scripting language is designed to make it easier to test and implement
+algorithms in ML and numerical analysis. Get started with the interpreter with
+`zhetapi -h`:
+
+```
+Usage: zhetapi [options] file...
+Options:
+ -c		Compiles the files into a single library.
+ -d		Displays exported symbols in the libraries specified.
+ -h		Display the guide for the interpreter.
+ -o <file>	Place the compiled library into <file>.
+ -L <directory>	Add <directory> to the interpreter's library search path
+```
+
+= Project Layout
 
 A description of each relevant directory is presented below:
 
@@ -368,9 +380,44 @@ directory for more information.
 
 |===
 
-# What Next?
 
-## Simplification of Functions
+= Building and Usage
+
+Most of the features of Zhetapi depend only on `C++17` and the Boost library
+(preferable version 1.65). CMake is used to compile the targets.
+
+We recommend that you use the `g++-8` compiler, as it is the only one tested
+so far.
+
+*macOS (High Sierra and later)*
+
+```
+$ brew install gcc@8 boost cmake
+```
+
+*Ubuntu (18.04 and later)*
+
+```
+$ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
+```
+
+Additional dependencies for image processing are `libpng`, `OpenGL` and `GLFW3`.
+These are specifically used only for loading and displaying images.
+
+To install the interpreter for Zhetapi-lang, run `./run.py install -j[THREADS=8]`
+in the home directory of this repository. This is also compile the API libraries
+(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default Zhetapi-lang
+libraries (`math` and `io` for now).
+
+To use the C++ API in your own programs, include the `engine` directory (which
+includes all the headers) and link your program with the shared/static libraries.
+
+This project is being developed on Unix environments (MacOS and Linux) and has
+only been tested for them. It is a work in progress.
+
+= What Next?
+
+== Simplification of Functions
 
 Currently, objects of the `Function` class lack the complete ability to simplify
 their representations. Some of this functionality does already exist, such as
@@ -381,7 +428,7 @@ As an example, it is not yet possible to have the object recognize that
 `3xy + 5yx` is the same as `8xy`. This feature would also help reduce the
 complexity of derivatives of these objects.
 
-## Integration and Differentiation
+== Integration and Differentiation
 
 Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
@@ -389,21 +436,25 @@ placed. The addition of other kinds of differentiation and integration, such as
 automatic differentiation, and different types of numerical integration
 (quadrature, etc.), is also something to look forward to.
 
-## Exact Forms of Numbers
+== Exact Forms of Numbers
 
 One recognizes, simply by looking at the first few digits, that the number
 `3.141592` is most nearly pi, and that the number `2.7182817` is most nearly
 Euler's number. The hope is that at some point, the library will be able to
 reach similar conclusions, through the help of integer relations algorithms such
 
-## More Extensive Support for Machine Learning
+== More Extensive Support for Machine Learning
 
 Deep neural networks are already present in the Zhetapi library. The next steps
 would be implementing convolutional networks, recurrent networks, and other structures
 used in supervised learning. In addition, structures and algorithms used in unsupervised
 learning and other branches of AI shall also be added.
 
-# References
+= Contact
+
+Contact: veskimo123@gmail.com
+
+= References
 
 Below is a list of resources used in the making of this project.
 
