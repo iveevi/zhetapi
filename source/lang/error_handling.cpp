@@ -15,21 +15,20 @@ size_t levenshtein(const std::string &a, const std::string &b)
 	// Make the matrix
 	Matrix <size_t> mat(rows, cols,
 		[&](size_t i, size_t j) -> size_t {
-			return std::min(i, j) ? 0 : std::max(i, j);
+			if (std::min(i, j)) {
+				bool neq = (a[i - 1] != b[j - 1]);
+				return std::min(
+					mat[i - 1][j] + 1,
+					std::min(
+						mat[i][j - 1] + 1,
+						mat[i - 1][j - 1] + neq
+					)
+				);
+			}
+
+			return std::max(i, j);
 		}
 	);
-
-	for (size_t i = 1; i < rows; i++) {
-		for (size_t j = 1; j < cols; j++) {
-			mat[i][j] = std::min(
-				mat[i - 1][j] + 1,
-				std::min(
-					mat[i][j - 1] + 1,
-					mat[i - 1][j - 1] + (a[i - 1] != b[j - 1])
-				)
-			);
-		}
-	}
 
 	return mat[rows - 1][cols - 1];
 }

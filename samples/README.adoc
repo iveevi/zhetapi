@@ -1,0 +1,11 @@
+# Samples
+
+This directory contains samples showcasing the abilities of the Zhetapi
+API and Zhetapi-lang. See the table below for a description of each directory.
+
+|===
+| Directory | Description
+| features | Showcases features of the Zhetapi API
+| mnist | Showcases the `DNN` class from Zhetapi's ML API
+| zhp | Showcases example Zhetapi-lang scripts
+|===

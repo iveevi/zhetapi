@@ -1,4 +1,4 @@
-alg tmp() {x = 0
+x = 0
 
 i = 0
 n = 0
@@ -10,6 +10,3 @@ while (i < 1000) {
 
 println("final x = ", x)
 println("~operation = ", n)
-}
-
-tmp()

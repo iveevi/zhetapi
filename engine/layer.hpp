@@ -274,6 +274,7 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 	in1 = _act->compute(in2);
 
 	// Apply dropout (only if necessary)
+	// TODO: add a toggle feature for dropout (only for testing)
 	if (_dropout > 0)
 		in1.nullify(_dropout, _unit);
 }

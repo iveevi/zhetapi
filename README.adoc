@@ -46,6 +46,9 @@ in the home directory of this repository. This is also compile the API libraries
 (`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default Zhetapi-lang
 libraries (`math` and `io` for now).
 
+To use the C++ API in your own programs, include the `engine` directory (which
+includes all the headers) and link your program with the shared/static libraries.
+
 # Zhetapi-lang
 
 Zhetapi-lang is a scripting language that on the surface appears to be very
@@ -84,6 +87,9 @@ alg myalg()
 	x = 42
 	println("x = ", x)
 }
+
+# Prints "x = 42"
+myalg()
 ```
 
 This scripting language is designed to make it easier to test and implement
@@ -115,46 +121,23 @@ division of two rational numbers stays rational, and the product of a matrix,
 whose components are integers, with a rational scalar, yields a matrix with
 rational components.
 
-The `expression.h` header contains `expr()` and `exprf()`, which return
-the value of the passed expression as a string. The difference in these two lies
-in the fact that `exprf()` takes in a formatted string, while `expr()`
-takes a string object.
-
-```cpp
-// Not formatted, prints "1.0"
-cout << expr("1 + 2!/2.0") << endl;
-
-// Formatted, also prints "1.0"
-cout << exprf("%d + %d!/2.0", 1, 2) << endl;
 ```
+# Prints 12/5, not 2.4
+println(3 * 4/5)
 
-## Usage and Declaration of Variables
+f(x) = x^2 - x/2
 
-The library provides constructs that allow the user to store variables and
-retrieve them in the scope of the `Barn` class. Users can then refer to these
-variables, and their values can be retrieved or changed.
-
-```cpp
-Variable <double> x {"x", 46};
-
-Barn <double, int> brn;
-
-brn.add(x);
-
-// Prints "[x] - 46"
-cout << brn.get("x") << endl;
-
-// Generates an exception
-cout << brn.get("y") << endl;
+# Prints 153/2
+println(f(9))
 ```
 
 ## User Defined Functions
 
-Users can create mathematical functions, which can then be used as any other C++
-functor object.
+Users can create mathematical functions (distinct from algorithms),
+which can then be used as any other C++ functor object.
 
 ```cpp
-Function <double, int> f = "f(x) = x^2";
+Function f = "f(x) = x^2";
 
 // Prints "10"
 cout << f(10) << endl;
@@ -166,12 +149,24 @@ cout << f(Rational <int> {3, 4}) << endl;
 cout << f(5.0) << endl;
 ```
 
+In Zhetapi-lang, the code above translates to the following:
+
+```
+# Wow, so easy!
+f(x) = x^2
+
+println(f(10))
+println(f(3/4))
+println(f(5.0))
+```
+
 ## Calculus
 
 An object of class `Function` can be differentiated in terms of any of its
 variables, to get its gradients and such. This process is symbolic, which has
 the advantage that one has a closed form for the derivative, but the
-disadvantage that it could be very complicated.
+disadvantage that it could be very complicated. Automatic differentiation is still
+being worked on.
 
 ```cpp
 Function f = "f(x) = x^2";
@@ -190,129 +185,111 @@ cout << "df/dx(2) = " << f.differentiate(2) << endl;
 cout << "df/dx(2) = " << df(2) << endl;
 ```
 
+The equivalent of this in Zhetapi-lang is the following:
+
+```
+f(x) = x^2
+
+# or df = df/dx
+df = f.derivative()
+
+println(f)
+println(df)
+
+# Currently no .derivative(...) overload
+# println("df/dx(2) = ", f.derivative(2))
+println("df/dx(2) = ", df(2))
+```
+
 ## Machine Learning
 
 Along with providing many mathematical utilities, Zhetapi also provides
-machine learning capabilities. Currently, Zhetapi provides a `NeuralNetwork`
+machine learning capabilities. Currently, Zhetapi provides a `DNN`
 class that user can use to train deep neural networks on data sets.
 
 ### Construction of Models
-Deep neural networks can be initialized in three ways. The first and canonical
-method is as follows:
+
+Deep neural networks are constructed in a very intuitive manner:
 
 ```cpp
-model = zhetapi::NeuralNetwork <double> ({
-	{2, new zhetapi::ml::Linear <double> ()},
-	{5, new zhetapi::ml::Sigmoid <double> ()},
-	{5, new zhetapi::ml::ReLU <double> ()},
-	{2, new zhetapi::ml::ReLU <double> ()}
-}, []() {return rand()/(double) RAND_MAX;});
+using namespace zhetapi;
+
+// 10 neurons inputs, rest of the layers is intuitive
+model = ml::DNN <double> (10, {
+	ml::Layer <double> (2, new zhetapi::ml::Linear <double> ()),
+	ml::Layer <double> (5, new zhetapi::ml::Sigmoid <double> ()),
+	ml::Layer <double> (5, new zhetapi::ml::ReLU <double> ()),
+	ml::Layer <double> (2, new zhetapi::ml::ReLU <double> ())
+});
 ```
 
-Users can customize the model by specifying the number of neurons in each
-layer and the activation to use.
+The first argument is the number of input features, and the second is a list
+of layers. Each layer must specify the number of output neurons and the activation
+(see `engine/std/activations.hpp` for the default set of activations). Users can
+additionally specify an initializer like Xavier (see `engine/std/initializers.hpp`
+for the defaults) and the dropout rate.
 
-Users can also load models from save files:
+### Saving and loading models
+
+Users can save and load DNNs with the simple `save` and `load` methods.
 
 ```cpp
+// Save the model to model-save.out
+old.save("model-save.out");
+
+// ....
+
+// Load the old model from model-save.out
 model.load("model-save.out");
 ```
 
-The file `model-save.out` must adhere to a specific binary format, that is
-automated with the `NeuralNetwork::save` method:
-
-```cpp
-old.save("model-save.out");
-```
-
-Finally, users can load the structure of a model using a JSON file:
-
-```cpp
-model.load_json("model.json");
-```
-
-The file `model.json` must be in a structure similar to the following:
-
-```json
-{
-    "Layers" : [
-			{
-            "Neurons": 784,
-            "Activation": {
-		    "Name": "Linear",
-		    "Arguments": [1]
-	    }
-        },
-
-        {
-            "Neurons": 30,
-            "Activation": {
-		    "Name": "Sigmoid",
-		    "Arguments": []
-	    }
-        },
-
-        {
-            "Neurons": 10,
-            "Activation": {
-		    "Name": "Softmax",
-		    "Arguments": []
-	    }
-        }
-    ]
-}
-```
+The save format is pure binary, and adheres to a specific order and format.
 
 ### Using the Models
 
-With C++ operator overloading, using the
-neural network is as easy as calling it as a function:
+With C++ operator overloading, using the DNN is as simple as calling it
+as a functor:
 
 ```cpp
-// Initialize weights randomly
-model.randomize();
-
 cout << model({3, 5}) << endl;
 cout << model({4, 5}) << endl;
 ```
 
 ### Training the Models
 
-Training is also very simple:
+The DNN class itself does not have any methods for fitting; it can only return
+gradients and Jacobians. Instead, use function like `fit`:
 
 ```cpp
-// Create the cost function
-zhetapi::ml::Erf <double> *opt = new zhetapi::ml::MeanSquaredError <double> ();
+using namespace zhetapi;
 
-model.set_cost(opt);
+ml::Erf <double> *erf = new ml::MSE <double> ();
+ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
-/* Run a training session of 10 epochs
- * with ins as the set of inputs and outs
- * as the set of ouputs, with batches of
- * size 250 and an initial learning rate of 0.1.
- *
- * Runs with 8 threads, as specified in the template
- * parameter.
- */
-model.train_epochs <8> (ins, outs, 10, 250, 0.1);
+Vector <double> in;
+Vector <double> out;
+
+// Initialize in and out...
+
+fit(model, in, out, erf, opt);
+
+// DataSet is an alias for std::vector <Vector <T>>
+DataSet <double> ins;
+DataSet <double> outs;
+
+// Initialize ins and outs...
+
+fit(model, ins, outs, erf, opt);
+
+// Last parameter specifies the desired number of threads
+multithreaded_fit(model, ins, outs, erf, opt, 8);
+
+// Find other methods at engine/training.hpp...
 ```
 
-Note that the `NeuralNetwork::train_epochs` method takes a template parameter.
-This parameter indicates how many threads are to be used to train the model.
-
-Support for NVIDIA GPUs is granted with the Zhetapi library's `cuda` branch.
-Training on these GPUs is as simple as follows:
-
-```cpp
-// The critique function: determines when two outputs are equivalent
-// Note that it must be defined on the device, using the __device__ attribute
-auto crit = [] __device__ (zhetapi::Vector <double> actual,
-	zhetapi::Vector <double> expected) {
-		return actual == expected;
-};
-
-model.cuda_epochs(ins, outs, 10, 250, 0.1, crit);
-```
+All the training functions are present in `engine/training.hpp`, and the
+default cost functions and optimizers can be found in `engine/std/erfs.hpp`
+and `engine/std/optimizers.hpp`.
 
 For a more comprehensive and practical example, see the `samples/mnist`
 directory, in which we train a deep neural network to recognize hand written
@@ -320,20 +297,52 @@ digits from the MNIST data set.
 
 ## Linear Algebra
 
-The library also provides ways in which the user can do linear algebra. The
-classes `Vector` and `Matrix` come with a variety of methods on their own, which
-include performing computation as well as manipulation of their representations.
+Linear algebra can be done with the `Vector` and `Matrix` classes. These
+classes entail intuitive usage through a variety of applications.
+
+Zhetapi provides standard linear algebra routines like Gram Shmit, QR
+and LQ factorization and others (see `engine/std/linalg.hpp`):
+
+```cpp
+using namespace zhetapi;
+
+/* Note how easy it is to initialize a matrix.
+ *
+ * This allows one to perform many grid-based
+ * algorithms (like dynamic programming) easily.
+ *
+ * For a relatively extreme example, see the
+ * implementation of the levenshtein algorithm
+ * in `source/lang/error_handling.cpp`
+ */
+Matrix <double> mat(5, 5,
+	[](size_t i, size_t j) -> double {
+		return (i == j) ? i + 1 : 0;
+	}
+);
+
+// Easy to understand names for properties
+cout << is_diag(mat) << endl;
+cout << is_identity(mat) << endl;
+
+Vector <double> eigens = qr_algorithm(mat);
+
+// Will print the diagonal elements of mat
+cout << "eigens = " << eigens << endl;
+
+// Flatten mat as a matrix
+Vector <double> fl = flatten(mat);
+```
 
 # Modules
 
-A description of each directory is presented below:
+A description of each relevant directory is presented below:
 
 |===
 
 | Directory | Description
 
-| engine | Contains the library template headers. All library features are
-present in this module. It will later contain API functions.
+| engine | Contains the library template headers. All features of Zhetapi are here.
 
 | engine/core | Contains the core API of the Zhetapi library, that runs behind
 the scenes of the convenient features provided by the library.
@@ -341,16 +350,21 @@ the scenes of the convenient features provided by the library.
 | engine/cuda | Contains CUDA headers for the CUDA functions provided by the
 library (Note: this has not been updated since around v0.2).
 
-| engine/graph | Contains python scripts to assist in graphing procedures.
+| engine/std | Contains standard implementation of algorithms and functions.
+This includes activation functions and optimizers for ML.
 
-| engine/json | Contains nlohmann's single header C++ API for parsing JSON files.
+| interpreter | Contains the source for the interpreter as well as builtin
+functions for the language.
 
-| samples | Contains examples of library usage. Currently contains the `zhp`
-directory for scripts and library samples and the `mnist` directory for a showcase
-of the `NeuralNetwork` class.
+| lib | Source for the default libraries for Zhetapi-lang. Currently only
+includes `math` and `io`.
 
-| source | Contains source code for the headers, CLI, tests and upcoming
-features of this library.
+| samples | Contains examples of library usage. See the README at that
+directory for more information.
+
+| source | Contains source code for the API.
+
+| testing | All resources used for testing.
 
 |===
 
@@ -363,9 +377,9 @@ their representations. Some of this functionality does already exist, such as
 the fact that adding/subtracting by 0 and multiplying/dividing by 1 are trivial
 actions.
 
-As an example, it is not yet possible to have the object recognize that `3xy +
-5yx` is the same as `8xy`. This feature would also help reduce the complexity of
-derivatives of these objects.
+As an example, it is not yet possible to have the object recognize that
+`3xy + 5yx` is the same as `8xy`. This feature would also help reduce the
+complexity of derivatives of these objects.
 
 ## Integration and Differentiation
 
