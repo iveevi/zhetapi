@@ -178,7 +178,7 @@ Vector <double> out;
 // Initialize in and out...
 
 fit(model, in, out, erf, opt);
-the
+
 // DataSet is an alias for std::vector <Vector <T>>
 DataSet <double> ins;
 DataSet <double> outs;
