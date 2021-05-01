@@ -10,7 +10,7 @@ image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a
 Zhetapi is a `C++17` ML and numerical analysis API that was built in the hopes of
 making mathematical computation and algorithmic research more convenient to
 users. In the name of convenience and beginner-friendliness, the API comes with a
-scripting language, Zhetapi-lang.
+scripting language, ZHP.
 
 = Features
 
@@ -55,7 +55,7 @@ cout << f(Rational <int> {3, 4}) << endl;
 cout << f(5.0) << endl;
 ```
 
-In Zhetapi-lang, the code above translates to the following:
+In ZHP, the code above translates to the following:
 
 ```
 f(x) = x^2
@@ -90,7 +90,7 @@ cout << "df/dx(2) = " << f.differentiate(2) << endl;
 cout << "df/dx(2) = " << df(2) << endl;
 ```
 
-The equivalent of this in Zhetapi-lang is the following:
+The equivalent of this in ZHP is the following:
 
 ```
 f(x) = x^2
@@ -177,7 +177,7 @@ Vector <double> out;
 // Initialize in and out...
 
 fit(model, in, out, erf, opt);
-
+the
 // DataSet is an alias for std::vector <Vector <T>>
 DataSet <double> ins;
 DataSet <double> outs;
@@ -197,8 +197,8 @@ default cost functions and optimizers can be found in `engine/std/erfs.hpp`
 and `engine/std/optimizers.hpp`.
 
 For a more comprehensive and practical example, see the `samples/mnist`
-directory, in which we train a deep neural network to recognize hand written
-digits from the MNIST data set.
+directory, in which a DNN is trained to recognize hand written digits from the
+MNIST data set.
 
 == Linear Algebra
 
@@ -218,7 +218,7 @@ using namespace zhetapi;
  *
  * For a relatively extreme example, see the
  * implementation of the levenshtein algorithm
- * in `source/lang/error_handling.cpp`
+ * in source/lang/error_handling.cpp
  */
 Matrix <double> mat(5, 5,
 	[](size_t i, size_t j) -> double {
@@ -226,7 +226,6 @@ Matrix <double> mat(5, 5,
 	}
 );
 
-// Easy to understand names for properties
 cout << is_diag(mat) << endl;
 cout << is_identity(mat) << endl;
 
@@ -289,11 +288,10 @@ rational number.  | `std/combinatorial.hpp`
 
 |===
 
-= Scripting Language
+= The Scripting Language (ZHP)
 
-Zhetapi-lang is a scripting language that on the surface appears to be very
-similar to Python. However, there is much more focus on the mathematical and
-notational aspects.
+ZHP on the surface appears to be very similar to Python. However, there is much
+more focus on the mathematical and notational aspects.
 
 Current features include declaring variables (these include constant and
 mathematical functions), looping (with `while` and `for`), importing libraries,
@@ -368,8 +366,8 @@ This includes activation functions and optimizers for ML.
 | interpreter | Contains the source for the interpreter as well as builtin
 functions for the language.
 
-| lib | Source for the default libraries for Zhetapi-lang. Currently only
-includes `math` and `io`.
+| lib | Source for the default libraries for ZHP. Currently only includes `math`
+and `io`.
 
 | samples | Contains examples of library usage. See the README at that
 directory for more information.
@@ -386,8 +384,8 @@ directory for more information.
 Most of the features of Zhetapi depend only on `C++17` and the Boost library
 (preferable version 1.65). CMake is used to compile the targets.
 
-We recommend that you use the `g++-8` compiler, as it is the only one tested
-so far.
+It is recommended that you use the `g++-8` compiler, as it is the only one that
+has been tested with so far.
 
 *macOS (High Sierra and later)*
 
@@ -404,10 +402,10 @@ $ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
 Additional dependencies for image processing are `libpng`, `OpenGL` and `GLFW3`.
 These are specifically used only for loading and displaying images.
 
-To install the interpreter for Zhetapi-lang, run `./run.py install -j[THREADS=8]`
-in the home directory of this repository. This is also compile the API libraries
-(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default Zhetapi-lang
-libraries (`math` and `io` for now).
+To install the interpreter for ZHP, run `./run.py install -j[THREADS=8]` in the
+home directory of this repository. This also compiles the API libraries
+(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default ZHP libraries
+(`math` and `io` for now).
 
 To use the C++ API in your own programs, include the `engine` directory (which
 includes all the headers) and link your program with the shared/static libraries.
@@ -417,7 +415,7 @@ only been tested for them. It is a work in progress.
 
 = What Next?
 
-== Simplification of Functions
+=== Simplification of functions
 
 Currently, objects of the `Function` class lack the complete ability to simplify
 their representations. Some of this functionality does already exist, such as
@@ -428,7 +426,7 @@ As an example, it is not yet possible to have the object recognize that
 `3xy + 5yx` is the same as `8xy`. This feature would also help reduce the
 complexity of derivatives of these objects.
 
-== Integration and Differentiation
+=== Integration and differentiation
 
 Symbolic differentiation is a current feature. However, integration is not. This
 feature will be implemented as soon as the current framework has been properly
@@ -436,14 +434,14 @@ placed. The addition of other kinds of differentiation and integration, such as
 automatic differentiation, and different types of numerical integration
 (quadrature, etc.), is also something to look forward to.
 
-== Exact Forms of Numbers
+=== Exact forms of numbers
 
 One recognizes, simply by looking at the first few digits, that the number
 `3.141592` is most nearly pi, and that the number `2.7182817` is most nearly
 Euler's number. The hope is that at some point, the library will be able to
 reach similar conclusions, through the help of integer relations algorithms such
 
-== More Extensive Support for Machine Learning
+=== More extensive support for machine learning
 
 Deep neural networks are already present in the Zhetapi library. The next steps
 would be implementing convolutional networks, recurrent networks, and other structures
@@ -452,7 +450,7 @@ learning and other branches of AI shall also be added.
 
 = Contact
 
-Contact: veskimo123@gmail.com
+veskimo123@gmail.com
 
 = References
 
