@@ -3,16 +3,7 @@
 
 namespace zhetapi {
 
-// File constructor: does not read the
-// entire file immediately and instead
-// loads into the string progressively
-Source::Source(const std::string &path)
-{
-	file = new std::ifstream(path);
-	src = new std::string;
-	count = new size_t(1);
-	lock = new std::mutex;
-}
+Source::Source() {}
 
 // Copy constructor: only updates count
 Source::Source(const Source &other)
@@ -29,6 +20,17 @@ Source::Source(const Source &other)
 	lock->unlock();
 }
 
+// File constructor: does not read the
+// entire file immediately and instead
+// loads into the string progressively
+Source::Source(const std::string &path)
+{
+	file = new std::ifstream(path);
+	src = new std::string;
+	count = new size_t(1);
+	lock = new std::mutex;
+}
+
 // Deconstructor: delete pointers only
 // if there are no other holders
 Source::~Source()
@@ -43,15 +45,15 @@ Source::~Source()
 
 // Source constructor
 Feeder::Feeder(const std::string &path)
-		: _src(path) {}
+		: _source(path) {}
 
 // Source and index constructor
-Feeder::Feeder(const Source &src, size_t i)
-		: _src(src), _index(i) {}
+Feeder::Feeder(const Source &source, size_t i)
+		: _source(source), _index(i) {}
 
 Feeder Feeder::split_at(size_t i) const
 {
-	return Feeder(_src, i);
+	return Feeder(_source, i);
 }
 
 }

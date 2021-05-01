@@ -1,6 +1,7 @@
 image::zhetapi-logo.png[]
 
 image:https://semaphoreci.com/api/v1/vedavamadathil/zhetapi/branches/master/badge.svg[Build, link=https://semaphoreci.com/vedavamadathil/zhetapi]
+[![Documentation Status](https://readthedocs.org/projects/zhetapi-docs/badge/?version=latest)](https://zhetapi-docs.readthedocs.io/en/latest/?badge=latest)
 image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a2[Quality, link=https://www.codacy.com/gh/vedavamadathil/zhetapi/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vedavamadathil/zhetapi&amp;utm_campaign=Badge_Grade]
 
 ---
@@ -45,7 +46,7 @@ which can then be used as any other C++ functor object.
 ```cpp
 Function f = "f(x) = x^2";
 
-// Prints "10"
+// Prints "100"
 cout << f(10) << endl;
 
 // Prints "9/16"
@@ -440,6 +441,7 @@ One recognizes, simply by looking at the first few digits, that the number
 `3.141592` is most nearly pi, and that the number `2.7182817` is most nearly
 Euler's number. The hope is that at some point, the library will be able to
 reach similar conclusions, through the help of integer relations algorithms such
+as PSLQ.
 
 === More extensive support for machine learning
 

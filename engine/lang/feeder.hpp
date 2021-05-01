@@ -15,8 +15,10 @@ struct Source {
 	size_t *	count	= nullptr;
 	std::mutex *	lock	= nullptr;
 
-	Source(const std::string &);
+        Source();
 	Source(const Source &);
+	
+        Source(const std::string &);
 
 	~Source();
 };
@@ -29,7 +31,7 @@ class Feeder {
 public:
 	Feeder(const std::string &);
 
-	Feeder &split_at(size_t i) const;
+	Feeder split_at(size_t i) const;
 };
 
 }
