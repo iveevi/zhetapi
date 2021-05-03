@@ -15,8 +15,8 @@
 #include <core/operation.hpp>
 #include <core/types.hpp>
 
-// TODO: Fix these macros to accomodate for _table instead of ops
-// Instead of a macro use a private method (clearner code and header)
+// TODO: Fix these maCmpRos to accomodate for _table instead of ops
+// Instead of a maCmpRo use a private method (clearner code and header)
 #define _add_binary_operation(str, A, B, O)							\
 	ops.push_back({										\
 			{									\
@@ -122,25 +122,25 @@
 	_add_binary_operation(str, Z, Z, Z);							\
 	_add_binary_operation(str, R, R, R);							\
 	_add_binary_operation(str, Q, Q, Q);							\
-	_add_binary_operation(str, CR, CR, CR);							\
-	_add_binary_operation(str, CQ, CQ, CQ);							\
+	_add_binary_operation(str, CmpR, CmpR, CmpR);							\
+	_add_binary_operation(str, CmpQ, CmpQ, CmpQ);							\
 												\
 	_add_heterogenous_binary_operation(str, R, Z, R);					\
 	_add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
 	_add_heterogenous_binary_operation(str, R, Q, R);					\
-	_add_heterogenous_binary_operation(str, R, CR, CR);					\
-	_add_heterogenous_binary_operation_ftr(str, R, CQ, CR, CR(a->get() str			\
+	_add_heterogenous_binary_operation(str, R, CmpR, CmpR);					\
+	_add_heterogenous_binary_operation_ftr(str, R, CmpQ, CmpR, CmpR(a->get() str			\
 				R(b->get().real()), R(b->get().imag())));			\
-	_add_heterogenous_binary_operation_ftr(str, Z, CR, CR, CR(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Z, CmpR, CmpR, CmpR(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	_add_heterogenous_binary_operation_ftr(str, Z, CQ, CQ, CQ(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Z, CmpQ, CmpQ, CmpQ(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	_add_heterogenous_binary_operation_ftr(str, Q, CR, CR, CR(R(a->get())			\
+	_add_heterogenous_binary_operation_ftr(str, Q, CmpR, CmpR, CmpR(R(a->get())			\
 				str b->get().real(), b->get().imag()));				\
-	_add_heterogenous_binary_operation_ftr(str, Q, CQ, CQ, CQ(a->get() str			\
+	_add_heterogenous_binary_operation_ftr(str, Q, CmpQ, CmpQ, CmpQ(a->get() str			\
 				b->get().real(), b->get().imag()));				\
-	_add_heterogenous_binary_operation_ftr(str, CR, CQ, CR,				\
-			CR(a->get().real() str (R) b->get().real(),				\
+	_add_heterogenous_binary_operation_ftr(str, CmpR, CmpQ, CmpR,				\
+			CmpR(a->get().real() str (R) b->get().real(),				\
 				a->get().imag() str (R) b->get().imag()));
 
 #define _add_unary_operation(str, I, O)							\

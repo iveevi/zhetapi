@@ -623,9 +623,9 @@ void node_manager::simplify(Engine *context, node &ref)
 
 void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 {
-	Token *opd = new opd_z(0);
-	Token *zero = new opd_z(0);		// Make static or make a function is_zero
-	Token *true_token = new opd_b(true);
+	Token *opd = new OpZ(0);
+	Token *zero = new OpZ(0);		// Make static or make a function is_zero
+	Token *true_token = new OpB(true);
 
 	std::stack <std::pair <bool, node>> process;
 
@@ -692,7 +692,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 
 	if (!tokcmp(opd, zero)) {
 		Token *tptr = context->compute(">", {opd, zero});
-		Token *nopd = context->compute("*", {opd, new opd_z(-1)});
+		Token *nopd = context->compute("*", {opd, new OpZ(-1)});
 
 		if (tokcmp(tptr, true_token))
 			plus.push_back(node(opd));
@@ -760,7 +760,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 		if (!minus.empty()) {
 			all.retokenize(new operation_holder("*"));
 
-			all.append(node(new opd_z(-1)));
+			all.append(node(new OpZ(-1)));
 			all.append(minus[0]);
 		}
 	}
@@ -813,11 +813,11 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 	}
 
 	// Mult/div simplification
-	Token *opd = new opd_z(1);
-	Token *onez = new opd_z(1);		// Make static or make a function is_one
-	Token *oneq = new opd_q(1);
-	Token *oner = new opd_r(1);
-	Token *true_token = new opd_b(true);
+	Token *opd = new OpZ(1);
+	Token *onez = new OpZ(1);		// TODO: Make static or make a function is_one
+	Token *oneq = new OpQ(1);
+	Token *oner = new OpR(1);
+	Token *true_token = new OpB(true);
 
 	std::stack <std::pair <bool, node>> process;
 
@@ -948,7 +948,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		if (!divs.empty()) {
 			all.retokenize(new operation_holder("^"));
 
-			all.append(node(new opd_z(-1)));
+			all.append(node(new OpZ(-1)));
 			all.append(divs[0]);
 		}
 	}
@@ -968,8 +968,8 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 
 void node_manager::simplify_power(Engine *context, node &ref)
 {
-	Token *one = new opd_z(1);
-	Token *zero = new opd_z(0);
+	Token *one = new OpZ(1);
+	Token *zero = new OpZ(0);
 
 	Token *tptr = ref[1].ptr();
 
@@ -1376,12 +1376,12 @@ bool node_manager::loose_match(const node_manager &a, const node_manager &b)
 // Node factories
 node node_manager::nf_one()
 {
-	return node(new opd_z(1), {});
+	return node(new OpZ(1), {});
 }
 
 node node_manager::nf_zero()
 {
-	return node(new opd_z(0), {});
+	return node(new OpZ(0), {});
 }
 
 }

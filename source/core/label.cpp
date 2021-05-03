@@ -117,52 +117,54 @@ bool is_commutative(const node &tree)
 
 lbl constant_label(Token *tptr)
 {
+	// TODO: Use static hash table later or smthing
+
 	// Complex numbers
-	if (dynamic_cast <opd_z *> (tptr))
+	if (dynamic_cast <OpZ *> (tptr))
 		return l_constant_integer;
-	if (dynamic_cast <opd_q *> (tptr))
+	if (dynamic_cast <OpQ *> (tptr))
 		return l_constant_rational;
-	if (dynamic_cast <opd_r *> (tptr))
+	if (dynamic_cast <OpR *> (tptr))
 		return l_constant_real;
-	if (dynamic_cast <opd_cz *> (tptr))
+	if (dynamic_cast <OpCmpZ *> (tptr))
 		return l_constant_complex_integer;
-	if (dynamic_cast <opd_cq *> (tptr))
+	if (dynamic_cast <OpCmpQ *> (tptr))
 		return l_constant_complex_rational;
-	if (dynamic_cast <opd_cr *> (tptr))
+	if (dynamic_cast <OpCmpR *> (tptr))
 		return l_constant_complex_real;
 	
 	// Vectors
-	if (dynamic_cast <opd_v_z *> (tptr))
+	if (dynamic_cast <OpVecZ *> (tptr))
 		return l_constant_vector_integer;
-	if (dynamic_cast <opd_v_q *> (tptr))
+	if (dynamic_cast <OpVecQ *> (tptr))
 		return l_constant_vector_rational;
-	if (dynamic_cast <opd_v_r *> (tptr))
+	if (dynamic_cast <OpVecR *> (tptr))
 		return l_constant_vector_real;
-	if (dynamic_cast <opd_v_cz *> (tptr))
+	if (dynamic_cast <OpVecCmpZ *> (tptr))
 		return l_constant_vector_complex_integer;
-	if (dynamic_cast <opd_v_cq *> (tptr))
+	if (dynamic_cast <OpVecCmpQ *> (tptr))
 		return l_constant_vector_complex_rational;
-	if (dynamic_cast <opd_v_cr *> (tptr))
+	if (dynamic_cast <OpVecCmpR *> (tptr))
 		return l_constant_vector_complex_real;
 	
 	// Matrices
-	if (dynamic_cast <opd_m_z *> (tptr))
+	if (dynamic_cast <OpMatZ *> (tptr))
 		return l_constant_matrix_integer;
-	if (dynamic_cast <opd_m_q *> (tptr))
+	if (dynamic_cast <OpMatQ *> (tptr))
 		return l_constant_matrix_rational;
-	if (dynamic_cast <opd_m_r *> (tptr))
+	if (dynamic_cast <OpMatR *> (tptr))
 		return l_constant_matrix_real;
-	if (dynamic_cast <opd_m_cz *> (tptr))
+	if (dynamic_cast <OpMatCmpZ *> (tptr))
 		return l_constant_matrix_complex_integer;
-	if (dynamic_cast <opd_m_cq *> (tptr))
+	if (dynamic_cast <OpMatCmpQ *> (tptr))
 		return l_constant_matrix_complex_rational;
-	if (dynamic_cast <opd_m_cr *> (tptr))
+	if (dynamic_cast <OpMatCmpR *> (tptr))
 		return l_constant_matrix_complex_real;
 	
 	// Other
-	if (dynamic_cast <opd_b *> (tptr))
+	if (dynamic_cast <OpB *> (tptr))
 		return l_constant_boolean;
-	if (dynamic_cast <opd_s *> (tptr))
+	if (dynamic_cast <OpS *> (tptr))
 		return l_constant_string;
 
 	return l_none;

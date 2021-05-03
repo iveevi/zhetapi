@@ -273,7 +273,7 @@ node factorize(const node &ref, const node &factor)
 	// TODO: Create a nodecmp function (refactor loose_match)
 	if (node::loose_match(ref, factor)) {
 		cout << "\tRETURN UNIT" << endl;
-		return node(new opd_z(1));
+		return node(new OpZ(1));
 	}
 	
 	// Proceed normally

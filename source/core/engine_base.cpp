@@ -10,13 +10,13 @@ engine_base::engine_base()
 	// Real Scalar Arithemtic
 	//////////////////////////////////////////
 
-	// TODO: Really shorten the macros
+	// TODO: Really shorten the maCmpRos
 	
 	// Addition and Subtraction
 	_add_binary_operation_set(+);
 	_add_binary_operation_set(-);
 
-	// Increment and decrement
+	// InCmpRement and deCmpRement
 	_add_unary_operation_ftr(p++, Z, Z, in->get() + 1);
 	_add_unary_operation_ftr(p--, Z, Z, in->get() - 1);
 	
@@ -30,33 +30,33 @@ engine_base::engine_base()
 	_add_binary_operation(*, Z, Z, Z);
 	_add_binary_operation(*, R, R, R);
 	_add_binary_operation(*, Q, Q, Q);
-	_add_binary_operation(*, CR, CR, CR);
-	_add_binary_operation(*, CQ, CQ, CQ);
+	_add_binary_operation(*, CmpR, CmpR, CmpR);
+	_add_binary_operation(*, CmpQ, CmpQ, CmpQ);
 
 	_add_heterogenous_binary_operation(*, R, Z, R);
 	_add_heterogenous_binary_operation(*, Z, Q, Q);
 	_add_heterogenous_binary_operation_ftr(*, R, Q, R, a->get() * (R)
 			b->get());
-	_add_heterogenous_binary_operation(*, R, CR, CR);
-	_add_heterogenous_binary_operation_ftr(*, R, CQ, CR, CR(a->get() * (R)
+	_add_heterogenous_binary_operation(*, R, CmpR, CmpR);
+	_add_heterogenous_binary_operation_ftr(*, R, CmpQ, CmpR, CmpR(a->get() * (R)
 				b->get().real(), a->get() * (R)
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(*, Z, CR, CR, CR(a->get() * (R)
+	_add_heterogenous_binary_operation_ftr(*, Z, CmpR, CmpR, CmpR(a->get() * (R)
 				b->get().real(), a->get() * (R)
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(*, Z, CQ, CQ, CQ((Q) a->get() *
+	_add_heterogenous_binary_operation_ftr(*, Z, CmpQ, CmpQ, CmpQ((Q) a->get() *
 				b->get().real(), (Q) a->get() *
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(*, Q, CR, CR, CR((R) a->get() *
+	_add_heterogenous_binary_operation_ftr(*, Q, CmpR, CmpR, CmpR((R) a->get() *
 				b->get().real(), (R) a->get() *
 				b->get().imag()));
-	_add_heterogenous_binary_operation(*, Q, CQ, CQ);
+	_add_heterogenous_binary_operation(*, Q, CmpQ, CmpQ);
 
 	// Division
 	_add_binary_operation(/, R, R, R);
 	_add_binary_operation(/, Q, Q, Q);
-	_add_binary_operation(/, CR, CR, CR);
-	_add_binary_operation(/, CQ, CQ, CQ);
+	_add_binary_operation(/, CmpR, CmpR, CmpR);
+	_add_binary_operation(/, CmpQ, CmpQ, CmpQ);
 	
 	_add_binary_operation_ftr(/, Z, Z, Q, ((Q) a->get()) / ((Q) b->get()));
 
@@ -65,20 +65,20 @@ engine_base::engine_base()
 				a->get()) / ((Q) b->get()));
 	_add_heterogenous_binary_operation_ftr(/, R, Q, R, a->get() * (R)
 			b->get());
-	_add_heterogenous_binary_operation(/, R, CR, CR);
-	_add_heterogenous_binary_operation_ftr(/, R, CQ, CR, CR(a->get() * (R)
+	_add_heterogenous_binary_operation(/, R, CmpR, CmpR);
+	_add_heterogenous_binary_operation_ftr(/, R, CmpQ, CmpR, CmpR(a->get() * (R)
 				b->get().real(), a->get() * (R)
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(/, Z, CR, CR, CR(a->get() * (R)
+	_add_heterogenous_binary_operation_ftr(/, Z, CmpR, CmpR, CmpR(a->get() * (R)
 				b->get().real(), a->get() * (R)
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(/, Z, CQ, CQ, CQ((Q) a->get() *
+	_add_heterogenous_binary_operation_ftr(/, Z, CmpQ, CmpQ, CmpQ((Q) a->get() *
 				b->get().real(), (Q) a->get() *
 				b->get().imag()));
-	_add_heterogenous_binary_operation_ftr(/, Q, CR, CR, CR((R) a->get() *
+	_add_heterogenous_binary_operation_ftr(/, Q, CmpR, CmpR, CmpR((R) a->get() *
 				b->get().real(), (R) a->get() *
 				b->get().imag()));
-	_add_heterogenous_binary_operation(/, Q, CQ, CQ);
+	_add_heterogenous_binary_operation(/, Q, CmpQ, CmpQ);
 
 	// Exponentiation
 	_add_binary_operation_ftr(^, Z, Z, Z, (Z) pow(a->get(), b->get()));
@@ -87,8 +87,8 @@ engine_base::engine_base()
 	_add_binary_operation_ftr(^, Q, Q, R, pow((R) a->get(), (R) b->get()));
 
 	// FIXME: Wrong values
-	_add_binary_operation_ftr(^, CR, CR, CR, 1);
-	_add_binary_operation_ftr(^, CQ, CQ, CQ, Q(1));
+	_add_binary_operation_ftr(^, CmpR, CmpR, CmpR, 1);
+	_add_binary_operation_ftr(^, CmpQ, CmpQ, CmpQ, Q(1));
 	
 	// TODO: Preserve rationality for this overload
 	_add_heterogenous_binary_operation_ftr(^, Q, Z, R, pow((R) a->get(), (R) b->get()));
@@ -174,51 +174,51 @@ engine_base::engine_base()
 	//////////////////////////////////////////
 
 	// Addition
-	_add_binary_operation(+, VZ, VZ, VZ);
-	_add_binary_operation(+, VQ, VQ, VQ);
-	_add_binary_operation(+, VR, VR, VR);
+	_add_binary_operation(+, VecZ, VecZ, VecZ);
+	_add_binary_operation(+, VecQ, VecQ, VecQ);
+	_add_binary_operation(+, VecR, VecR, VecR);
 	
 	// Subtraction
-	_add_binary_operation(-, VZ, VZ, VZ);
-	_add_binary_operation(-, VQ, VQ, VQ);
-	_add_binary_operation(-, VR, VR, VR);
+	_add_binary_operation(-, VecZ, VecZ, VecZ);
+	_add_binary_operation(-, VecQ, VecQ, VecQ);
+	_add_binary_operation(-, VecR, VecR, VecR);
 
 	// Scalar multiplication
-	_add_binary_operation_ftr(*, Z, VZ, VZ, (a->get()) * b->get());
-	_add_binary_operation_ftr(*, Z, VQ, VQ, ((Q) a->get()) * b->get());
+	_add_binary_operation_ftr(*, Z, VecZ, VecZ, (a->get()) * b->get());
+	_add_binary_operation_ftr(*, Z, VecQ, VecQ, ((Q) a->get()) * b->get());
 	
 	// Dot product
-	_add_binary_operation_ftr(., VZ, VZ, Z, inner(a->get(), b->get()));
-	_add_binary_operation_ftr(., VQ, VQ, Q, inner(a->get(), b->get()));
-	_add_binary_operation_ftr(., VR, VR, R, inner(a->get(), b->get()));
+	_add_binary_operation_ftr(., VecZ, VecZ, Z, inner(a->get(), b->get()));
+	_add_binary_operation_ftr(., VecQ, VecQ, Q, inner(a->get(), b->get()));
+	_add_binary_operation_ftr(., VecR, VecR, R, inner(a->get(), b->get()));
 	
 	// Shur product
-	_add_binary_operation_ftr(shur, VQ, VQ, VQ, shur(a->get(), b->get()));
-	_add_binary_operation_ftr(shur, VR, VR, VR, shur(a->get(), b->get()));
+	_add_binary_operation_ftr(shur, VecQ, VecQ, VecQ, shur(a->get(), b->get()));
+	_add_binary_operation_ftr(shur, VecR, VecR, VecR, shur(a->get(), b->get()));
 
 	// Transposition
-	_add_unary_operation_ftr(transpose, VQ, MQ, in->get().transpose());
-	_add_unary_operation_ftr(transpose, VR, MR, in->get().transpose());
+	_add_unary_operation_ftr(transpose, VecQ, MatQ, in->get().transpose());
+	_add_unary_operation_ftr(transpose, VecR, MatR, in->get().transpose());
 	
 	//////////////////////////////////////////
 	// Matrix operations
 	//////////////////////////////////////////
 
-	_add_binary_operation(+, MQ, MQ, MQ);
-	_add_binary_operation(+, MR, MR, MR);
+	_add_binary_operation(+, MatQ, MatQ, MatQ);
+	_add_binary_operation(+, MatR, MatR, MatR);
 	
-	_add_binary_operation(-, MQ, MQ, MQ);
-	_add_binary_operation(-, MR, MR, MR);
+	_add_binary_operation(-, MatQ, MatQ, MatQ);
+	_add_binary_operation(-, MatR, MatR, MatR);
 	
-	_add_binary_operation_ftr(shur, MQ, MQ, MQ, shur(a->get(), b->get()));
-	_add_binary_operation_ftr(shur, MR, MR, MR, shur(a->get(), b->get()));
+	_add_binary_operation_ftr(shur, MatQ, MatQ, MatQ, shur(a->get(), b->get()));
+	_add_binary_operation_ftr(shur, MatR, MatR, MatR, shur(a->get(), b->get()));
 
-	_add_unary_operation_ftr(transpose, MQ, MQ, in->get().transpose());
-	_add_unary_operation_ftr(transpose, MR, MR, in->get().transpose());
+	_add_unary_operation_ftr(transpose, MatQ, MatQ, in->get().transpose());
+	_add_unary_operation_ftr(transpose, MatR, MatR, in->get().transpose());
 
 	// Other Linear Algebra
-	_add_binary_operation(*, MQ, VQ, MQ);
-	_add_binary_operation(*, VQ, MQ, MQ);
+	_add_binary_operation(*, MatQ, VecQ, MatQ);
+	_add_binary_operation(*, VecQ, MatQ, MatQ);
 
 	//////////////////////////////////////////
 	// Combinatorial Operations

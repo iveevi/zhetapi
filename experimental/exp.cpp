@@ -98,4 +98,10 @@ int main()
         end_t = hrclk::now();
 
         cout << "New time is: " << (chrono::duration_cast <chrono::milliseconds> (end_t - start_t)).count() << " ms" << endl;
+
+	// const size_t id = zhp_id <OpZ> ();
+
+	cout << "ID OF OP Int = " << zhp_id <OpZ> () << endl;
+	cout << "ID OF OP Rat = " << zhp_id <OpQ> () << endl;
+	cout << "ID OF OP Real = " << zhp_id <OpR> () << endl;
 }

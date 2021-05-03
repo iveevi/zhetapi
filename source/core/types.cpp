@@ -4,40 +4,45 @@
 
 namespace zhetapi {
 
+// IDs
+
+
 // Factories
 Token *types::one()
 {
-	return new opd_z(int (ONE));
+	return new OpZ(int (ONE));
 }
 
+/*
 template <class A>
 Token *types::convert(A x)
 {
+	// TODO: is this even useful?
 	if (typeid(A) == typeid(Z))
-		return new opd_z((Z) x);
+		return new OpZ((Z) x);
 	if (typeid(A) == typeid(Q))
-		return new opd_q((Q) x);
+		return new OpQ((Q) x);
 	if (typeid(A) == typeid(R))
-		return new opd_r((R) x);
+		return new OpR((R) x);
 	if (typeid(A) == typeid(CZ))
-		return new opd_cz(CZ(x, true));
+		return new OpCmpZ(CcmpZ(x, true));	// TODO: what is this stupid constructor
 	if (typeid(A) == typeid(CQ))
-		return new opd_cq((CQ) x);
+		return new OpCmpQ((CcmpQ) x);
 	if (typeid(A) == typeid(CR))
-		return new opd_cr((CR) x);
+		return new OpCmpR((CmpR) x);
 	
-	if (typeid(A) == typeid(VZ))
-		return new opd_v_z((VZ) x);
-	if (typeid(A) == typeid(VQ))
-		return new opd_v_q((VQ) x);
-	if (typeid(A) == typeid(VR))
-		return new opd_v_r((VR) x);
-	if (typeid(A) == typeid(VCZ))
-		return new opd_v_cz((VCZ) x);
-	if (typeid(A) == typeid(VCQ))
-		return new opd_v_cq((VCQ) x);
-	if (typeid(A) == typeid(VCR))
-		return new opd_v_cr((VCR) x);
+	if (typeid(A) == typeid(VecZ))
+		return new OpVecZ((VecZ) x);
+	if (typeid(A) == typeid(VecQ))
+		return new OpVecQ((VecQ) x);
+	if (typeid(A) == typeid(VecR))
+		return new OpVecR((VecR) x);
+	if (typeid(A) == typeid(VecCZ))
+		return new OpVecCmpZ((VecCmpZ) x);
+	if (typeid(A) == typeid(VecCQ))
+		return new OpVecCmpQ((VecCmpQ) x);
+	if (typeid(A) == typeid(VecCR))
+		return new OpVecCmpR((VecCmpR) x);
 	
 	if (typeid(A) == typeid(MZ))
 		return new opd_m_z((MZ) x);
@@ -53,20 +58,20 @@ Token *types::convert(A x)
 		return new opd_m_cr((MCR) x);
 
 	return nullptr;
-}
+} */
 
 // Identifiers
 bool types::is_zero(Token *tptr)
 {
-	opd_z *_oz = dynamic_cast <opd_z *> (tptr);
+	OpZ *_oz = dynamic_cast <OpZ *> (tptr);
 	if (_oz != nullptr)
 		return (_oz->get() == 0);
 	
-	opd_q *_oq = dynamic_cast <opd_q *> (tptr);
+	OpQ *_oq = dynamic_cast <OpQ *> (tptr);
 	if (_oq != nullptr)
 		return (_oq->get() == 0);
 	
-	opd_r *_or = dynamic_cast <opd_r *> (tptr);
+	OpR *_or = dynamic_cast <OpR *> (tptr);
 	if (_or != nullptr)
 		return (_or->get() == 0);
 
@@ -75,63 +80,65 @@ bool types::is_zero(Token *tptr)
 
 bool types::is_one(Token *tptr)
 {
-	opd_z *_oz = dynamic_cast <opd_z *> (tptr);
+	OpZ *_oz = dynamic_cast <OpZ *> (tptr);
 	if (_oz != nullptr)
 		return (_oz->get() == 1);
 	
-	opd_q *_oq = dynamic_cast <opd_q *> (tptr);
+	OpQ *_oq = dynamic_cast <OpQ *> (tptr);
 	if (_oq != nullptr)
 		return (_oq->get() == 1);
 	
-	opd_r *_or = dynamic_cast <opd_r *> (tptr);
+	OpR *_or = dynamic_cast <OpR *> (tptr);
 	if (_or != nullptr)
 		return (_or->get() == 1);
 
 	return false;
 }
 
+// TODO: what is this?
 std::string types::symbol(const std::type_index &type)
 {
 	// Complex numbers
-	if (type == typeid(Operand <Z>))
+	// TODO: use ID and a hash table
+	if (type == typeid(OpZ))
 		return "Z";
-	if (type == typeid(Operand <Q>))
+	if (type == typeid(OpQ))
 		return "Q";
-	if (type == typeid(Operand <R>))
+	if (type == typeid(OpR))
 		return "R";
-	if (type == typeid(Operand <CZ>))
+	if (type == typeid(OpCmpZ))
 		return "CZ";
-	if (type == typeid(Operand <CQ>))
+	if (type == typeid(OpCmpQ))
 		return "CQ";
-	if (type == typeid(Operand <CR>))
+	if (type == typeid(OpCmpR))
 		return "CR";
 	
 	// Vectors
-	if (type == typeid(Operand <VZ>))
+	if (type == typeid(OpVecZ))
 		return "VZ";
-	if (type == typeid(Operand <VQ>))
+	if (type == typeid(OpVecQ))
 		return "VQ";
-	if (type == typeid(Operand <VR>))
+	if (type == typeid(OpVecR))
 		return "VR";
-	if (type == typeid(Operand <VCZ>))
+	if (type == typeid(OpVecCmpZ))
 		return "VCZ";
-	if (type == typeid(Operand <VCQ>))
+	if (type == typeid(OpVecCmpQ))
 		return "VCQ";
-	if (type == typeid(Operand <VCR>))
+	if (type == typeid(OpVecCmpR))
 		return "VCR";
 	
 	// Matrices
-	if (type == typeid(Operand <MZ>))
+	if (type == typeid(OpMatZ))
 		return "MZ";
-	if (type == typeid(Operand <MQ>))
+	if (type == typeid(OpMatQ))
 		return "MQ";
-	if (type == typeid(Operand <MR>))
+	if (type == typeid(OpMatR))
 		return "MR";
-	if (type == typeid(Operand <MCZ>))
+	if (type == typeid(OpMatCmpZ))
 		return "MCZ";
-	if (type == typeid(Operand <MCQ>))
+	if (type == typeid(OpMatCmpQ))
 		return "MCQ";
-	if (type == typeid(Operand <MCR>))
+	if (type == typeid(OpMatCmpR))
 		return "MCR";
 
 	return type.name();
@@ -140,50 +147,55 @@ std::string types::symbol(const std::type_index &type)
 std::string type_name(const std::type_index &type)
 {
 	// Complex numbers
+	// TODO: use id and hash table
 
 	// Stick to for testing
-	if (type == typeid(Operand <Z>))
+	if (type == typeid(OpZ))
 		return "Integer";
-	if (type == typeid(Operand <Q>))
+	if (type == typeid(OpQ))
 		return "Rational <int>";
-	if (type == typeid(Operand <R>))
+	if (type == typeid(OpR))
 		return "Real";
-	if (type == typeid(Operand <CZ>))
+	if (type == typeid(OpCmpZ))
 		return "Complex <int>";
-	if (type == typeid(Operand <CQ>))
+	if (type == typeid(OpCmpQ))
 		return "Complex <Rational <int>>";
-	if (type == typeid(Operand <CR>))
+	if (type == typeid(OpCmpR))
 		return "Complex <double>";
 	
 	// Vectors
-	if (type == typeid(Operand <VZ>))
+	if (type == typeid(OpVecZ))
 		return "Vector <int>";
-	if (type == typeid(Operand <VQ>))
+	if (type == typeid(OpVecQ))
 		return "Vector <Rational <int>>";
-	if (type == typeid(Operand <VR>))
+	if (type == typeid(OpVecR))
 		return "Vector <double>";
-	if (type == typeid(Operand <VCZ>))
+	if (type == typeid(OpVecCmpZ))
 		return "Vector <Complex <int>>";
-	if (type == typeid(Operand <VCQ>))
+	if (type == typeid(OpVecCmpQ))
 		return "Vector <Complex <Rational <int>>>";
-	if (type == typeid(Operand <VCR>))
+	if (type == typeid(OpVecCmpR))
 		return "Vector <Complex <Rational <int>>>";
 	
 	// Matrices
-	if (type == typeid(Operand <MZ>))
+	if (type == typeid(OpMatZ))
 		return "Matrix <int>";
-	if (type == typeid(Operand <MQ>))
+	if (type == typeid(OpMatQ))
 		return "Matrix <Rational <int>>";
-	if (type == typeid(Operand <MR>))
+	if (type == typeid(OpMatR))
 		return "Matrix <double>";
-	if (type == typeid(Operand <MCZ>))
+	if (type == typeid(OpMatCmpZ))
 		return "Matrix <Complex <int>>";
-	if (type == typeid(Operand <MCQ>))
+	if (type == typeid(OpMatCmpQ))
 		return "Matrix <Complex <Rational <int>>>";
-	if (type == typeid(Operand <MCR>))
+	if (type == typeid(OpMatCmpR))
 		return "Matrix <Complex <double>>";
 	
 	// Miscelleanous
+	if (type == typeid(OpB))
+		return "Bool";
+	if (type == typeid(OpS))
+		return "String";
 	if (type == typeid(Function))
 		return "Function";
 

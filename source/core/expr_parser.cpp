@@ -94,23 +94,23 @@ parser::parser() : parser::base_type(_start)
 	
 	// Complex
 	_cz = (_z >> 'i') [
-		_val = phoenix::construct <CZ> (0, _1)
+		_val = phoenix::construct <CmpZ> (0, _1)
 	];
 	
 	_cq = (_q >> 'i') [
-		_val = phoenix::construct <CQ> (0, _1)
+		_val = phoenix::construct <CmpQ> (0, _1)
 	];
 	
 	_cr = (_r >> 'i') [
-		_val = phoenix::construct <CR> (0, _1)
+		_val = phoenix::construct <CmpR> (0, _1)
 	];
 	
 	_cgq = (_gq >> 'i') [
-		_val = phoenix::construct <CQ> (0, _1)
+		_val = phoenix::construct <CmpQ> (0, _1)
 	];
 	
 	_cgr = (_gr >> 'i') [
-		_val = phoenix::construct <CR> (0, _1)
+		_val = phoenix::construct <CmpR> (0, _1)
 	];
 
 	// Vector
@@ -222,114 +222,115 @@ parser::parser() : parser::base_type(_start)
 
 	// Reals
 	_o_str = qi::lit('\"') >> _str [
-		_val = phoenix::new_ <opd_s> (_1)
+		_val = phoenix::new_ <OpS> (_1)
 	] >> qi::lit('\"');
 
 	_o_z = _z [
-		_val = phoenix::new_ <opd_z> (_1)
+		_val = phoenix::new_ <OpZ> (_1)
 	];
 	
 	_o_q = _q [
-		_val = phoenix::new_ <opd_q> (_1)
+		_val = phoenix::new_ <OpQ> (_1)
 	];
 
 	_o_r = _r [
-		_val = phoenix::new_ <opd_r> (_1)
+		_val = phoenix::new_ <OpR> (_1)
 	];
 	
 	// Complex
 	_o_cz = _cz [
-		_val = phoenix::new_ <opd_cz> (_1)
+		_val = phoenix::new_ <OpCmpZ> (_1)
 	];
 	
 	_o_cq = _cq [
-		_val = phoenix::new_ <opd_cq> (_1)
+		_val = phoenix::new_ <OpCmpQ> (_1)
 	];
 
 	_o_cr = _cr [
-		_val = phoenix::new_ <opd_cr> (_1)
+		_val = phoenix::new_ <OpCmpR> (_1)
 	];
 
-	// Vector
+	// Vector (whats all this mess??)
 	_o_vz = _vz [
-		_val = phoenix::new_ <opd_v_z> (_1)
+		_val = phoenix::new_ <OpVecZ> (_1)
 	];
 	
 	_o_vq = _vq [
-		_val = phoenix::new_ <opd_v_q> (_1)
+		_val = phoenix::new_ <OpVecQ> (_1)
 	];
 	
 	_o_vr = _vr [
-		_val = phoenix::new_ <opd_v_r> (_1)
+		_val = phoenix::new_ <OpVecR> (_1)
 	];
 	
 	_o_vgq = _vgq [
-		_val = phoenix::new_ <opd_v_q> (_1)
+		_val = phoenix::new_ <OpVecQ> (_1)
 	];
 	
 	_o_vgr = _vgr [
-		_val = phoenix::new_ <opd_v_r> (_1)
+		_val = phoenix::new_ <OpVecR> (_1)
 	];
 	
 	_o_vcz = _vcz [
-		_val = phoenix::new_ <opd_v_cz> (_1)
+		_val = phoenix::new_ <OpVecCmpZ> (_1)
 	];
 	
 	_o_vcq = _vcq [
-		_val = phoenix::new_ <opd_v_cq> (_1)
+		_val = phoenix::new_ <OpVecCmpQ> (_1)
 	];
 	
 	_o_vcr = _vcr [
-		_val = phoenix::new_ <opd_v_cr> (_1)
+		_val = phoenix::new_ <OpVecCmpR> (_1)
 	];
 	
+	// TODO: why all general??
 	_o_vcgq = _vcgq [
-		_val = phoenix::new_ <opd_v_cq> (_1)
+		_val = phoenix::new_ <OpVecCmpQ> (_1)
 	];
 	
 	_o_vcgr = _vcgr [
-		_val = phoenix::new_ <opd_v_cr> (_1)
+		_val = phoenix::new_ <OpVecCmpR> (_1)
 	];
 
 	// Matrix
 	_o_mz = _mz [
-		_val = phoenix::new_ <opd_m_z> (_1)
+		_val = phoenix::new_ <OpMatZ> (_1)
 	];
 	
 	_o_mq = _mq [
-		_val = phoenix::new_ <opd_m_q> (_1)
+		_val = phoenix::new_ <OpMatQ> (_1)
 	];
 	
 	_o_mr = _mr [
-		_val = phoenix::new_ <opd_m_r> (_1)
+		_val = phoenix::new_ <OpMatR> (_1)
 	];
 	
 	_o_mgq = _mgq [
-		_val = phoenix::new_ <opd_m_q> (_1)
+		_val = phoenix::new_ <OpMatQ> (_1)
 	];
 	
 	_o_mgr = _mgr [
-		_val = phoenix::new_ <opd_m_r> (_1)
+		_val = phoenix::new_ <OpMatR> (_1)
 	];
 	
 	_o_mcz = _mcz [
-		_val = phoenix::new_ <opd_m_cz> (_1)
+		_val = phoenix::new_ <OpMatCmpZ> (_1)
 	];
 	
 	_o_mcq = _mcq [
-		_val = phoenix::new_ <opd_m_cq> (_1)
+		_val = phoenix::new_ <OpMatCmpQ> (_1)
 	];
 	
 	_o_mcr = _mcr [
-		_val = phoenix::new_ <opd_m_cr> (_1)
+		_val = phoenix::new_ <OpMatCmpR> (_1)
 	];
 	
 	_o_mcgq = _mcgq [
-		_val = phoenix::new_ <opd_m_cq> (_1)
+		_val = phoenix::new_ <OpMatCmpQ> (_1)
 	];
 	
 	_o_mcgr = _mcgr [
-		_val = phoenix::new_ <opd_m_cr> (_1)
+		_val = phoenix::new_ <OpMatCmpR> (_1)
 	];
 
 	// Nodes

@@ -140,10 +140,10 @@ Solutions Equation::solve() const
 	cout << df << endl;
 
 	// Epsilon (accuracy)
-	Token *eps = new opd_r(1e-10);
+	Token *eps = new OpR(1e-10);
 	
 	// Initial guess (update heurestic)
-	Token *x0 = new opd_z(1);
+	Token *x0 = new OpZ(1);
 
 	Token *ft;
 	Token *dft;

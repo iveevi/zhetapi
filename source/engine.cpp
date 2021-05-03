@@ -12,10 +12,10 @@ Engine::Engine(bool defaults) : engine_base()
 {
 	if (defaults) {
 		// Default present
-		put("true", new opd_b(true));
-		put("false", new opd_b(false));
+		put("true", new OpB(true));
+		put("false", new OpB(false));
 		put("null", new Operand <Token *> (nullptr));	// TODO: typedef for this
-		put("i", new opd_cq(CQ(0, 1ll)));
+		put("i", new OpCmpQ(CmpQ(0, 1ll)));
 
 		put(Registrable("print", &bt_print));
 		put(Registrable("println", &bt_println));

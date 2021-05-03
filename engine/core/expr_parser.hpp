@@ -48,7 +48,6 @@ using namespace boost::phoenix;
 
 // Parser
 struct parser : qi::grammar <siter, node (), qi::space_type> {
-
 	parser();
 
 	qi::symbols <char const, char const>				_esc;
@@ -154,56 +153,57 @@ struct parser : qi::grammar <siter, node (), qi::space_type> {
 	qi::rule <siter, R (), qi::space_type>					_r;
 	qi::rule <siter, Q (), qi::space_type>					_gq;
 	qi::rule <siter, R (), qi::space_type>					_gr;
-	qi::rule <siter, CZ (), qi::space_type>					_cz;
-	qi::rule <siter, CQ (), qi::space_type>					_cq;
-	qi::rule <siter, CR (), qi::space_type>					_cr;
-	qi::rule <siter, CQ (), qi::space_type>					_cgq;
-	qi::rule <siter, CR (), qi::space_type>					_cgr;
+	qi::rule <siter, CmpZ (), qi::space_type>				_cz;
+	qi::rule <siter, CmpQ (), qi::space_type>				_cq;
+	qi::rule <siter, CmpR (), qi::space_type>				_cr;
+	qi::rule <siter, CmpQ (), qi::space_type>				_cgq;
+	qi::rule <siter, CmpR (), qi::space_type>				_cgr;
 	
 	qi::rule <siter, std::vector <Z> (), qi::space_type>			_vz;
 	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vq;
 	qi::rule <siter, std::vector <R> (), qi::space_type>			_vr;
 	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vgq;
 	qi::rule <siter, std::vector <R> (), qi::space_type>			_vgr;
-	qi::rule <siter, std::vector <CZ> (), qi::space_type>			_vcz;
-	qi::rule <siter, std::vector <CQ> (), qi::space_type>			_vcq;
-	qi::rule <siter, std::vector <CR> (), qi::space_type>			_vcr;
-	qi::rule <siter, std::vector <CQ> (), qi::space_type>			_vcgq;
-	qi::rule <siter, std::vector <CR> (), qi::space_type>			_vcgr;
+	qi::rule <siter, std::vector <CmpZ> (), qi::space_type>			_vcz;
+	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcq;
+	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcr;
+	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcgq;
+	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcgr;
 	
 	qi::rule <siter, std::vector <std::vector <Z>> (), qi::space_type>	_mz;
 	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mq;
 	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mr;
 	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mgq;
 	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mgr;
-	qi::rule <siter, std::vector <std::vector <CZ>> (), qi::space_type>	_mcz;
-	qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	_mcq;
-	qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	_mcr;
-	qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	_mcgq;
-	qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	_mcgr;
+	qi::rule <siter, std::vector <std::vector <CmpZ>> (), qi::space_type>	_mcz;
+	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcq;
+	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcr;
+	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcgq;
+	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcgr;
 
 	// Vector and matrix intermediates
+	// TODO: using typedef or alias for rule <siter> and space_type
 	qi::rule <siter, std::vector <Z> (), qi::space_type>			_vz_inter;
 	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vq_inter;
 	qi::rule <siter, std::vector <R> (), qi::space_type>			_vr_inter;
 	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vgq_inter;
 	qi::rule <siter, std::vector <R> (), qi::space_type>			_vgr_inter;
-	qi::rule <siter, std::vector <CZ> (), qi::space_type>			_vcz_inter;
-	qi::rule <siter, std::vector <CQ> (), qi::space_type>			_vcq_inter;
-	qi::rule <siter, std::vector <CR> (), qi::space_type>			_vcr_inter;
-	qi::rule <siter, std::vector <CQ> (), qi::space_type>			_vcgq_inter;
-	qi::rule <siter, std::vector <CR> (), qi::space_type>			_vcgr_inter;
+	qi::rule <siter, std::vector <CmpZ> (), qi::space_type>			_vcz_inter;
+	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcq_inter;
+	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcr_inter;
+	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcgq_inter;
+	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcgr_inter;
 	
 	qi::rule <siter, std::vector <std::vector <Z>> (), qi::space_type>	_mz_inter;
 	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mq_inter;
 	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mr_inter;
 	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mgq_inter;
 	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mgr_inter;
-	qi::rule <siter, std::vector <std::vector <CZ>> (), qi::space_type>	_mcz_inter;
-	qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	_mcq_inter;
-	qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	_mcr_inter;
-	qi::rule <siter, std::vector <std::vector <CQ>> (), qi::space_type>	_mcgq_inter;
-	qi::rule <siter, std::vector <std::vector <CR>> (), qi::space_type>	_mcgr_inter;
+	qi::rule <siter, std::vector <std::vector <CmpZ>> (), qi::space_type>	_mcz_inter;
+	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcq_inter;
+	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcr_inter;
+	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcgq_inter;
+	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcgr_inter;
 
 };
 
