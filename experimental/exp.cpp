@@ -104,4 +104,12 @@ int main()
 	cout << "ID OF OP Int = " << zhp_id <OpZ> () << endl;
 	cout << "ID OF OP Rat = " << zhp_id <OpQ> () << endl;
 	cout << "ID OF OP Real = " << zhp_id <OpR> () << endl;
+
+	Token *tptr1 = new OpZ(0);
+	Token *tptr2 = new OpQ(Q(0));
+	Token *tptr3 = new OpR(0);
+
+	cout << "ID #1 = " << tptr1->id() << endl;
+	cout << "ID #2 = " << tptr2->id() << endl;
+	cout << "ID #3 = " << tptr3->id() << endl;
 }

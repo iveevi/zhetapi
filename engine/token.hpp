@@ -99,6 +99,7 @@ public:
 	virtual bool operator==(Token *) const = 0;
 
 	// virtual Token *value()?
+	virtual size_t id() const;
 
 	class unknown_attribute {
 		std::type_index _ti;
@@ -110,6 +111,12 @@ public:
 		std::string what() const;
 	};
 };
+
+// Token id macro
+#define zhp_token_id(type)			\
+	size_t type::id() const {		\
+		return zhp_id <type> ();	\
+	}
 
 // Comparing tokens
 bool tokcmp(Token *, Token *);

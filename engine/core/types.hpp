@@ -6,10 +6,8 @@
 
 // Engine headers
 #include <operand.hpp>
-#include <rational.hpp>
-#include <complex.hpp>
-#include <matrix.hpp>
-#include <vector.hpp>
+
+#include <core/raw_types.hpp>
 
 namespace zhetapi {
 
@@ -17,32 +15,6 @@ namespace zhetapi {
 class Function;
 class algorithm;
 class Registrable;
-
-// All valid types
-using Z = long long int;
-using Q = Rational <Z>;
-using R = long double;
-
-using B = bool;
-using S = std::string;			
-
-using CmpZ = Complex <Z>;
-using CmpQ = Complex <Q>;
-using CmpR = Complex <R>;			
-
-using VecZ = Vector <Z>;
-using VecQ = Vector <Q>;
-using VecR = Vector <R>;
-using VecCmpZ = Vector <CmpZ>;
-using VecCmpQ = Vector <CmpQ>;
-using VecCmpR = Vector <CmpR>;
-
-using MatZ = Matrix <Z>;
-using MatQ = Matrix <Q>;
-using MatR = Matrix <R>;
-using MatCmpZ = Matrix <CmpZ>;
-using MatCmpQ = Matrix <CmpQ>;
-using MatCmpR = Matrix <CmpR>;			
 
 // All valid tokens
 // IDs are increasing in this order

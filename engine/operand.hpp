@@ -7,6 +7,13 @@
 // Engine headers
 #include <token.hpp>
 
+#include <core/raw_types.hpp>
+
+// Macros to taste
+#define forward_ids(type)			\
+	template <>				\
+	size_t Operand <type> ::id() const;
+
 namespace zhetapi {
 
 // Operand class
@@ -29,8 +36,8 @@ public:
 	type caller() const override;
 	std::string dbg_str() const override;
 	Token *copy() const override;
-
 	bool operator==(Token *) const override;
+	size_t id() const override;
 };
 
 // Constructors
@@ -106,9 +113,43 @@ bool Operand <T> ::operator==(Token *tptr) const
 	return (opd->_val == _val);
 }
 
+template <class T>
+size_t Operand <T> ::id() const
+{
+	return 0;
+}
+
 // Forward declare specializations
 template <>
 std::string Operand <bool> ::dbg_str() const;
+
+// Forward declare ID specializations
+forward_ids(Z);
+forward_ids(Q);
+forward_ids(R);
+
+forward_ids(B);
+forward_ids(S);
+
+forward_ids(CmpZ);
+forward_ids(CmpQ);
+forward_ids(CmpR);
+
+forward_ids(VecZ);
+forward_ids(VecQ);
+forward_ids(VecR);
+
+forward_ids(VecCmpZ);
+forward_ids(VecCmpQ);
+forward_ids(VecCmpR);
+
+forward_ids(MatZ);
+forward_ids(MatQ);
+forward_ids(MatR);
+
+forward_ids(MatCmpZ);
+forward_ids(MatCmpQ);
+forward_ids(MatCmpR);
 
 }
 

@@ -4,9 +4,6 @@
 
 namespace zhetapi {
 
-// IDs
-
-
 // Factories
 Token *types::one()
 {
