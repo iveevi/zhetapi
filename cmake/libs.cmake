@@ -34,6 +34,7 @@ set(ZHETAPI_SOURCE
 
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
+	source/lang/vm.cpp
 
 	source/std/functions.cpp
 	source/std/interval.cpp

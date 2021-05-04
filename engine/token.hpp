@@ -76,13 +76,14 @@ public:
 	 * Inspector function passed on to all derived classes, helps to
 	 * choose what to do with different Tokens from other classes.
 	 */
-	virtual type caller() const = 0;
+	virtual type caller() const;
+	virtual size_t id() const;
 
 	/*
 	 * Returns a representation of the Token, regardless of its
 	 * type.
 	 */
-	virtual std::string dbg_str() const = 0;
+	virtual std::string dbg_str() const;
 
 	// Add a virtual display method
 
@@ -99,7 +100,6 @@ public:
 	virtual bool operator==(Token *) const = 0;
 
 	// virtual Token *value()?
-	virtual size_t id() const;
 
 	class unknown_attribute {
 		std::type_index _ti;

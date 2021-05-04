@@ -63,4 +63,14 @@ size_t Token::id() const
 	return 0;
 }
 
+Token::type Token::caller() const
+{
+	return undefined;
+}
+
+std::string Token::dbg_str() const
+{
+	return "[?]";
+}
+
 }
