@@ -33,10 +33,35 @@ struct instruction {
 
 // Registers for temporaries
 template <class T>
-struct tregister {
-	Operand <T> regs[MAX_REG_OPS];
+class tmp_reg {
+	Operand <T>	reg[MAX_REG_OPS];
+	size_t		index = 0;
+public:
+	tmp_reg() {}
 
-	// Add some member functions
+	// Read, pop and cycle
+	Token *rpc(uint8_t *(&data)) {
+		T value;
+
+		memcpy(&value, data, sizeof(T));
+		data += sizeof(T);
+		
+		reg[index] = Operand <T> (value);
+		Token *tptr = &(reg[index]);
+
+		// Cycle
+		index = (index + 1) % MAX_REG_OPS;
+
+		// Pop
+		return tptr;
+	}
+
+	void content() {
+		std::cout << "TMP-REG for ID " << get_zhp_id(Operand <T>) << std::endl;
+		
+		for (size_t i = 0; i < MAX_REG_OPS; i++)
+			std::cout << "\t" << reg[i].dbg_str() << std::endl;
+	}
 };
 
 uint32_t overload_hash(Token **);
@@ -58,9 +83,9 @@ struct vm {
          * Maximum of 4 corresponds to the maximum number of operands for any
          * operation. There should not be any need for more.
          */
-        tregister <Z>			z_reg;
-        tregister <Q>			q_reg;
-        tregister <R>			r_reg;
+	tmp_reg <Z>			z_reg;
+
+	// reg_addr
 
 	void execute(const instruction &);
 

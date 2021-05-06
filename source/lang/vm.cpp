@@ -3,7 +3,7 @@
 namespace zhetapi {
 
 // Specific token readers
-using Handler = Token *(*)(uint8_t *(&));
+using Handler = Token *(*)(vm *, uint8_t *(&));
 
 // Overloads
 uint32_t overload_hash(Token **args)
@@ -17,21 +17,14 @@ uint32_t overload_hash(Token **args)
 	return t1 + (t2 << 8) + (t3 << 16) + (t4 << 24);
 }
 
-// Array of token handlers
-using namespace std;
-
 // After getting the right code
-Token *get_Z(uint8_t *(&data))
+Token *get_Z(vm *machine, uint8_t *(&data))
 {
-	Z value;
-	memcpy(&value, data, sizeof(Z));
-	data += sizeof(Z);
-	return new Operand <Z> (value);
+	return machine->z_reg.rpc(data);
 }
 
 // General
-
-Token *get_token(uint8_t *(&data))
+Token *get_token(vm *machine, uint8_t *(&data))
 {
 	// Lined up according to token ids
 	static size_t nhandlers = 2;
@@ -43,7 +36,7 @@ Token *get_token(uint8_t *(&data))
 	// Get the token id
 	uint8_t id = *(data++);
 	if ((id > 0) && (id < nhandlers))
-		return (handlers[id])(data);
+		return (handlers[id])(machine, data);
 
 	// Return nullptr on failure
 	return nullptr;
@@ -61,7 +54,7 @@ void vm::execute(const instruction &is)
 	// TODO: gotta check for nullptr
 	Token *args[MAX_REG_OPS];
 	for (size_t i = 0; i < nops; i++) {
-		Token *tptr = get_token(data);
+		Token *tptr = get_token(this, data);
 
 		if (!tptr)
 			throw null_token();
@@ -70,6 +63,16 @@ void vm::execute(const instruction &is)
 
 		args[i] = tptr;
 	}
+
+	if (code == op_set) {
+		cout << "SET OPERATION:" << endl;
+		cout << "args = {" << endl;
+		for (size_t i = 0; i < nops; i++)
+			cout << "\t" << args[i]->dbg_str() << endl;
+		cout << "}" << endl;
+	}
+
+	z_reg.content();
 }
 
 // Virtual address
