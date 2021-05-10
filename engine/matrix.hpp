@@ -81,17 +81,17 @@ public:
 	__cuda_dual__ Matrix(size_t, size_t, T = T());
 
 	// Cuda and avr ignore
-	__avr_ignore__(Matrix(size_t, size_t, std::function <T (size_t)>);)
-	__avr_ignore__(Matrix(size_t, size_t, std::function <T *(size_t)>);)
+	AVR_IGNORE(Matrix(size_t, size_t, std::function <T (size_t)>);)
+	AVR_IGNORE(Matrix(size_t, size_t, std::function <T *(size_t)>);)
 	
-	__avr_ignore__(Matrix(size_t, size_t, std::function <T (size_t, size_t)>);)
-	__avr_ignore__(Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);)
+	AVR_IGNORE(Matrix(size_t, size_t, std::function <T (size_t, size_t)>);)
+	AVR_IGNORE(Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);)
 
-	__avr_ignore__(Matrix(const std::vector <T> &);)
-	__avr_ignore__(Matrix(const std::vector <Vector <T>> &);)
-	__avr_ignore__(Matrix(const std::vector <std::vector <T>> &);)
-	__avr_ignore__(Matrix(const std::initializer_list <Vector <T>> &);)
-	__avr_ignore__(Matrix(const std::initializer_list <std::initializer_list <T>> &);)
+	AVR_IGNORE(Matrix(const std::vector <T> &);)
+	AVR_IGNORE(Matrix(const std::vector <Vector <T>> &);)
+	AVR_IGNORE(Matrix(const std::vector <std::vector <T>> &);)
+	AVR_IGNORE(Matrix(const std::initializer_list <Vector <T>> &);)
+	AVR_IGNORE(Matrix(const std::initializer_list <std::initializer_list <T>> &);)
 
 	__cuda_dual__
 	Matrix(size_t, size_t, T *, bool = true);
@@ -114,8 +114,8 @@ public:
 	Vector <T> get_column(size_t) const;
 
 	// Rading from a binary file (TODO: unignore later)
-	__avr_ignore__(void write(std::ofstream &) const;)
-	__avr_ignore__(void read(std::ifstream &);)
+	AVR_IGNORE(void write(std::ofstream &) const;)
+	AVR_IGNORE(void read(std::ifstream &);)
 
 	// Concatenating matrices
 	Matrix append_above(const Matrix &);
@@ -137,7 +137,7 @@ public:
 	void pow(const T &);
 
 	// Miscellanious opertions
-	__avr_ignore__(void randomize(std::function <T ()>);)
+	AVR_IGNORE(void randomize(std::function <T ()>);)
 	
 	__cuda_dual__
 	void row_shur(const Vector <T> &);
@@ -163,7 +163,7 @@ public:
 
 	bool symmetric() const;
 
-	__avr_ignore__(std::string display() const;)
+	AVR_IGNORE(std::string display() const;)
 	
 #ifndef _AVR
 

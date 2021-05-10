@@ -22,7 +22,7 @@
 namespace zhetapi {
 
 // Type aliases
-__avr_ignore__(using utility::Interval;)
+AVR_IGNORE(using utility::Interval;)
 
 // Forward declarations
 template <class T>
@@ -76,9 +76,9 @@ public:
 	Tensor(const Tensor &);
 	
 	Tensor(size_t, size_t);
-	__avr_ignore__(explicit Tensor(const std::vector <std::size_t> &);)
-	__avr_ignore__(Tensor(const std::vector <std::size_t> &, const T &);)
-	__avr_ignore__(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
+	AVR_IGNORE(explicit Tensor(const std::vector <std::size_t> &);)
+	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const T &);)
+	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
 
 	// TODO: remove size term from vector and matrix classes
 	size_t size() const;
@@ -90,7 +90,7 @@ public:
 	bool good() const;
 
 	// Actions
-	__avr_ignore__(void nullify(long double, const Interval <1> &));
+	AVR_IGNORE(void nullify(long double, const Interval <1> &));
 
 	// Boolean operators (generalize with prefix)
 	template <class U>
@@ -100,9 +100,9 @@ public:
 	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
 	
 	// Printing functions
-	__avr_ignore__(std::string print() const;)
+	AVR_IGNORE(std::string print() const;)
 
-	__avr_ignore__(template <class U>
+	AVR_IGNORE(template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);)
 
 	// Dimension mismatch exception
@@ -123,8 +123,8 @@ public:
 	~Tensor();
 
 	// Indexing (add size_t operator[])
-	__avr_ignore__(T &operator[](const std::vector <size_t> &);)
-	__avr_ignore__(const T &operator[](const std::vector <size_t> &) const;)
+	AVR_IGNORE(T &operator[](const std::vector <size_t> &);)
+	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const;)
 
 	// TODO: Re-organize the methods
 	Vector <T> cast_to_vector() const;

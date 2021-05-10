@@ -62,8 +62,8 @@ class Vector : public Matrix <T> {
 public:
 	Vector(size_t);
 
-	__avr_ignore__(Vector(const std::vector <T> &);)
-	__avr_ignore__(Vector(const std::initializer_list <T> &);)
+	AVR_IGNORE(Vector(const std::vector <T> &);)
+	AVR_IGNORE(Vector(const std::initializer_list <T> &);)
 	
 	// Cross-type operations
 	template <class A>
@@ -136,8 +136,8 @@ public:
 	Vector(size_t, T);
 	Vector(size_t, T *, bool = true);
 
-	__avr_ignore__(Vector(size_t, std::function <T (size_t)>));
-	__avr_ignore__(Vector(size_t, std::function <T *(size_t)>));
+	AVR_IGNORE(Vector(size_t, std::function <T (size_t)>));
+	AVR_IGNORE(Vector(size_t, std::function <T *(size_t)>));
 
 	Vector &operator=(const Vector &);
 	Vector &operator=(const Matrix <T> &);

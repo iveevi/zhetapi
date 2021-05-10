@@ -59,8 +59,6 @@ public:
 	virtual bool operator==(Token *) const override;
 };
 
-node_manager compile_block(Engine *, const std::string &, Args, Pardon &);
-
 }
 
 #endif

@@ -132,6 +132,17 @@ node_manager &node_manager::operator=(const node_manager &other)
 	return *this;
 }
 
+// Operators
+node &node_manager::operator[](size_t i)
+{
+	return _tree[i];
+}
+
+const node &node_manager::operator[](size_t i) const
+{
+	return _tree[i];
+}
+
 // Properties
 bool node_manager::empty() const
 {

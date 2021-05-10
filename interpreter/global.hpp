@@ -11,6 +11,7 @@
 
 #include <core/algorithm.hpp>
 
+#include <lang/compilation.hpp>
 #include <lang/error_handling.hpp>
 
 // Namespaces

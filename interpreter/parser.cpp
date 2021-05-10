@@ -337,7 +337,7 @@ void check(string &keyword)
 			exit(-1);
 		}
 
-		node_manager nm_block = compile_block(engine, block + "\n", args, pardon);
+		node_manager nm_block = lang::compile_block(engine, block + "\n", args, pardon);
 
 		node_manager nm_while;
 

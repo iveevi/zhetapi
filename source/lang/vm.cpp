@@ -1,11 +1,16 @@
 #include <lang/vm.hpp>
 
+#define TOKEN_HANDLER(name)				\
+	Token *name(vm *machine, uint8_t *(&data))
+
 namespace zhetapi {
 
 // Specific token readers
 using Handler = Token *(*)(vm *, uint8_t *(&));
 
 // Overloads
+
+// An overload of 0 is universal
 uint32_t overload_hash(Token **args)
 {
 	// Args should always have 4 elements
@@ -22,6 +27,8 @@ Token *get_Z(vm *machine, uint8_t *(&data))
 {
 	return machine->z_reg.rpc(data);
 }
+
+// Token *get_reg_addr(vm *machine, uint8_t)
 
 // General
 Token *get_token(vm *machine, uint8_t *(&data))
@@ -76,16 +83,16 @@ void vm::execute(const instruction &is)
 }
 
 // Virtual address
-vm_addr::vm_addr(size_t i) : index(i) {}
+gen_addr::gen_addr(size_t i) : index(i) {}
 
-Token *vm_addr::copy() const
+Token *gen_addr::copy() const
 {
-	return new vm_addr {index};
+	return new gen_addr {index};
 }
 
-bool vm_addr::operator==(Token *tptr) const
+bool gen_addr::operator==(Token *tptr) const
 {
-	vm_addr *vaptr = dynamic_cast <vm_addr *> (tptr);
+	gen_addr *vaptr = dynamic_cast <gen_addr *> (tptr);
 
 	return vaptr && (index == vaptr->index);
 }

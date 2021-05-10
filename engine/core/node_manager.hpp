@@ -42,6 +42,10 @@ public:
 
 	node_manager &operator=(const node_manager &);
 
+	// Operators
+	node &operator[](size_t);
+	const node &operator[](size_t) const;
+
 	// Properties
 	bool empty() const;	// Is the _tree node empty?
 	size_t num_args() const;

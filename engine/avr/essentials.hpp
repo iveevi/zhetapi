@@ -3,11 +3,11 @@
 
 #ifdef _AVR
 
-#define __avr_ignore__(code)
-#define __avr_switch__(code1, code2)      code1
+#define AVR_IGNORE(code)
+#define AVR_SWITCH(code1, code2)      code1
 
 #define assert(condition)                                               \
-        if (!(condition)) {                                               \
+        if (!(condition)) {                                             \
                 Serial.println("condtion: \"" #condition "\" failed."); \
                                                                         \
                 exit(-1);                                               \
@@ -24,8 +24,8 @@ using psize_t = _avr_pair <size_t, size_t>;
 
 #else
 
-#define __avr_ignore__(code)              code
-#define __avr_switch__(code1, code2)      code2
+#define AVR_IGNORE(code)              code
+#define AVR_SWITCH(code1, code2)      code2
 
 using psize_t = std::pair <size_t, size_t>;
 

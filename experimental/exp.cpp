@@ -1,23 +1,42 @@
-#include <lang/vm.hpp>
+#include <engine.hpp>
+
+#include <lang/compilation.hpp>
 
 // Namespaces
 using namespace std;
 using namespace zhetapi;
 
+void diagnose(const node &nd)
+{
+	// check for monotone conditions
+}
+
 int main()
 {
-	uint8_t data[] = {
-		0x00,
-		0x02,
-		0x01,
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x01,
-		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
+	// Setup
+	Engine *eng = new Engine;
 
-        instruction is {1, data};
+	const std::string code = R"(
+	x = 0
+	i = 0
 
-	vm machine;
+	while (i++ <= 10)
+		x = x + i * i
+	)";
 
-	machine.execute(is);
+	Args args;
+	Pardon pardon;
+
+	// Compiling
+	node_manager nm = lang::compile_block(eng, code, args, pardon);
+
+	nm.print();
+
+	nm[2].print();
+
+	nm.sequential_value(eng);
+
+	eng->list();
+
+	diagnose(nd);
 }

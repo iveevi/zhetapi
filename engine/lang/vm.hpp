@@ -96,9 +96,9 @@ struct vm {
 	};
 };
 
-// Address token
-struct vm_addr : public Token {
-	vm_addr(size_t);
+// General address token
+struct gen_addr : public Token {
+	gen_addr(size_t);
 	
 	size_t	index;
 
@@ -106,7 +106,26 @@ struct vm_addr : public Token {
 	virtual bool operator==(Token *) const;
 };
 
-set_zhp_id(vm_addr, 24);
+// Memory address
+struct mem_addr : public gen_addr {};
+
+// Argument address
+struct arg_addr : public gen_addr {};
+
+/* Register address token
+struct reg_addr : public Token {
+	reg_addr(size_t, size_t);
+	
+	size_t	type;
+	size_t	index;
+
+	virtual Token *copy() const;
+	virtual bool operator==(Token *) const;
+}; */
+
+// Setting zhp ids
+set_zhp_id(mem_addr, 24);
+set_zhp_id(arg_addr, 25);
 
 }
 

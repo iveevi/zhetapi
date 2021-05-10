@@ -32,6 +32,7 @@ set(ZHETAPI_SOURCE
 	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
 
+	source/lang/compilation.cpp
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
 	source/lang/vm.cpp
