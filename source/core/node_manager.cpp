@@ -215,8 +215,7 @@ void node_manager::create_branch(node &tree, size_t start, size_t end)
 {
 	node_manager branch;
 
-	// TODO: add a .begin() to nodes
-	auto itr = tree._leaves.begin() + start;
+	auto itr = tree.begin() + start;
 	for (size_t i = start; i < end; i++) {
 		branch.append(tree[start]);
 

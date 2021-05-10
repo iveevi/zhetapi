@@ -98,6 +98,26 @@ const node &node::operator[](size_t i) const
 	return _leaves[i];
 }
 
+std::vector <node> ::iterator node::begin()
+{
+	return _leaves.begin();
+}
+
+std::vector <node> ::iterator node::end()
+{
+	return _leaves.end();
+}
+
+std::vector <node> ::const_iterator node::begin() const
+{
+	return _leaves.begin();
+}
+
+std::vector <node> ::const_iterator node::end() const
+{
+	return _leaves.end();
+}
+
 // Properties
 bool node::null() const
 {

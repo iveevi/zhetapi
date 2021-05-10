@@ -10,53 +10,6 @@ Token *types::one()
 	return new OpZ(int (ONE));
 }
 
-/*
-template <class A>
-Token *types::convert(A x)
-{
-	// TODO: is this even useful?
-	if (typeid(A) == typeid(Z))
-		return new OpZ((Z) x);
-	if (typeid(A) == typeid(Q))
-		return new OpQ((Q) x);
-	if (typeid(A) == typeid(R))
-		return new OpR((R) x);
-	if (typeid(A) == typeid(CZ))
-		return new OpCmpZ(CcmpZ(x, true));	// TODO: what is this stupid constructor
-	if (typeid(A) == typeid(CQ))
-		return new OpCmpQ((CcmpQ) x);
-	if (typeid(A) == typeid(CR))
-		return new OpCmpR((CmpR) x);
-	
-	if (typeid(A) == typeid(VecZ))
-		return new OpVecZ((VecZ) x);
-	if (typeid(A) == typeid(VecQ))
-		return new OpVecQ((VecQ) x);
-	if (typeid(A) == typeid(VecR))
-		return new OpVecR((VecR) x);
-	if (typeid(A) == typeid(VecCZ))
-		return new OpVecCmpZ((VecCmpZ) x);
-	if (typeid(A) == typeid(VecCQ))
-		return new OpVecCmpQ((VecCmpQ) x);
-	if (typeid(A) == typeid(VecCR))
-		return new OpVecCmpR((VecCmpR) x);
-	
-	if (typeid(A) == typeid(MZ))
-		return new opd_m_z((MZ) x);
-	if (typeid(A) == typeid(MQ))
-		return new opd_m_q((MQ) x);
-	if (typeid(A) == typeid(MR))
-		return new opd_m_r((MR) x);
-	if (typeid(A) == typeid(MCZ))
-		return new opd_m_cz((MCZ) x);
-	if (typeid(A) == typeid(MCQ))
-		return new opd_m_cq((MCQ) (CQ(x, true)));
-	if (typeid(A) == typeid(MCR))
-		return new opd_m_cr((MCR) x);
-
-	return nullptr;
-} */
-
 // Identifiers
 bool types::is_zero(Token *tptr)
 {

@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 
 // Engine headers
@@ -47,6 +48,12 @@ public:
 
 	node &operator[](size_t);
 	const node &operator[](size_t) const;
+
+	std::vector <node> ::iterator begin();
+	std::vector <node> ::iterator end();
+
+	std::vector <node> ::const_iterator begin() const;
+	std::vector <node> ::const_iterator end() const;
 
 	// Properties
 	lbl label() const;

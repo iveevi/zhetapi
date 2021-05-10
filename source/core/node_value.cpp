@@ -40,11 +40,10 @@ static Token *branch_node(Engine *context, const node &tree)
 	Token *break_token = new Operand <Token *> ((Token *) 0x1);
 	Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
-	// TODO: Seriously, add a begin() and end() for nodes
 	// TODO: Check returns
-	for (size_t i = 0; i < tree.child_count(); i++) {
-		if (tree[i].label() == l_else_branch) {
-			Token *tptr = node_sequential_value(context, tree[i][0]);
+	for (const node &nd : tree) {
+		if (nd.label() == l_else_branch) {
+			Token *tptr = node_sequential_value(context, nd[0]);
 
 			// TODO: keep in another function
 			if (tptr && tokcmp(break_token, tptr))
@@ -58,11 +57,11 @@ static Token *branch_node(Engine *context, const node &tree)
 		}
 
 		// Fallthrough if not else
-		node predicate = tree[i][0];
+		node predicate = nd[0];
 
 		Token *eval = node_value(context, predicate);
 		if (tokcmp(eval, true_token)) {
-			Token *tptr = node_sequential_value(context, tree[i][1]);
+			Token *tptr = node_sequential_value(context, nd[1]);
 
 			if (tptr && tokcmp(break_token, tptr))
 				output =  tptr;
