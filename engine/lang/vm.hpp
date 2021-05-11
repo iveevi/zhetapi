@@ -112,17 +112,6 @@ struct mem_addr : public gen_addr {};
 // Argument address
 struct arg_addr : public gen_addr {};
 
-/* Register address token
-struct reg_addr : public Token {
-	reg_addr(size_t, size_t);
-	
-	size_t	type;
-	size_t	index;
-
-	virtual Token *copy() const;
-	virtual bool operator==(Token *) const;
-}; */
-
 // Setting zhp ids
 set_zhp_id(mem_addr, 24);
 set_zhp_id(arg_addr, 25);
