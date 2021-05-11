@@ -1,7 +1,7 @@
 #ifndef AVR_ESSENTIALS_H_
 #define AVR_ESSENTIALS_H_
 
-#ifdef _AVR
+#ifdef __AVR
 
 #define AVR_IGNORE(code)
 #define AVR_SWITCH(code1, code2)      code1

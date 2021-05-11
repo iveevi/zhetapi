@@ -57,9 +57,6 @@ Vector <T> ::Vector(const Matrix <T> &other) : Matrix <T> (other.get_rows(), 1, 
 		this->_array[i] = other[0][i];
 }
 
-template <class T>
-Vector <T> ::Vector(size_t rs, T def) : Matrix <T> (rs, 1, def) {}
-
 // FIXME: Delegate Matrix constructor
 template <class T>
 Vector <T> ::Vector(size_t rs, T *ref, bool slice) : Matrix <T> (rs, 1, ref, slice) {}
@@ -98,24 +95,6 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	}
 
 	return *this;
-}
-
-template <class T>
-T &Vector <T> ::operator[](size_t i)
-{
-	return this->_array[i];
-}
-
-template <class T>
-const T &Vector <T> ::operator[](size_t i) const
-{
-	return this->_array[i];
-}
-
-template <class T>
-size_t Vector <T> ::size() const
-{
-	return this->_size;
 }
 
 template <class T>

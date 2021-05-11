@@ -1,6 +1,19 @@
+// Constructors
 template <class T>
 Vector <T> ::Vector(size_t len)
 		: Matrix <T> (len, 1) {}
+
+template <class T>
+Vector <T> ::Vector(size_t rs, T def)
+		: Matrix <T> (rs, 1, def) {}
+
+template <class T>
+Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
+		: Matrix <T> (rs, 1, gen) {}
+
+template <class T>
+Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
+		: Matrix <T> (rs, 1, gen) {}
 
 template <class T>
 T &Vector <T> ::x()
@@ -54,6 +67,24 @@ const T &Vector <T> ::z() const
 		throw index_out_of_bounds();
 
 	return this->_array[2];
+}
+
+template <class T>
+T &Vector <T> ::operator[](size_t i)
+{
+	return this->_array[i];
+}
+
+template <class T>
+const T &Vector <T> ::operator[](size_t i) const
+{
+	return this->_array[i];
+}
+
+template <class T>
+size_t Vector <T> ::size() const
+{
+	return this->_size;
 }
 
 template <class T>

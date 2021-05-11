@@ -2,7 +2,7 @@
 #define VECTOR_H_
 
 // C/C++ headers
-#ifdef _AVR	// AVR support
+#ifdef __AVR	// AVR support
 
 #ifdef max
 #undef max
@@ -36,7 +36,7 @@ namespace zhetapi {
 template <class T>
 class Vector;
 
-#ifndef _AVR	// Does not support AVR
+#ifndef __AVR	// Does not support AVR
 
 // Tensor_type operations
 template <class T>
@@ -60,7 +60,24 @@ bool is_vector_type()
 template <class T>
 class Vector : public Matrix <T> {
 public:
+	Vector();
+	Vector(const Vector &);
+	Vector(const Matrix <T> &);
+
 	Vector(size_t);
+	Vector(size_t, T);
+	Vector(size_t, T *, bool = true);
+
+	// Lambda constructors
+	AVR_SWITCH(
+		Vector(size_t, T (*)(size_t)),
+		Vector(size_t, std::function <T (size_t)>)
+	);
+
+	AVR_SWITCH(
+		Vector(size_t, T *(*)(size_t)),
+		Vector(size_t, std::function <T *(size_t)>)
+	);
 
 	AVR_IGNORE(Vector(const std::vector <T> &);)
 	AVR_IGNORE(Vector(const std::initializer_list <T> &);)
@@ -68,6 +85,17 @@ public:
 	// Cross-type operations
 	template <class A>
 	explicit Vector(const Vector <A> &);
+
+	// Assignment
+	Vector &operator=(const Vector &);
+	Vector &operator=(const Matrix <T> &);
+
+	// Indexing
+	T &operator[](size_t);
+	const T &operator[](size_t) const;
+	
+	// Properties
+	size_t size() const;
 
 	// The three major components
 	T &x();
@@ -88,12 +116,27 @@ public:
 	// Min and max index
 	size_t imin() const;
 	size_t imax() const;
+	
+	// Modifiers
+	Vector append_above(const T &) const;
+	Vector append_below(const T &);
+
+	Vector remove_top();
+	Vector remove_bottom();
 
 	// Normalization
 	void normalize();
 
 	// Maybe a different name (is the similarity justifiable?)
 	Vector normalized() const;
+
+	// Arithmetic operators
+	void operator+=(const Vector &);
+	void operator-=(const Vector &);
+
+	// Static methods
+	static Vector one(size_t);
+	static Vector rarg(double, double);
 
 	// Vector operations	
 	template <class F, class U>
@@ -121,47 +164,16 @@ public:
 	// Heterogenous inner product (assumes first underlying type)
 	template <class U, class V>
 	friend U inner(const Vector <U> &, const Vector <V> &);
-	
-	// Static methods
-	static Vector one(size_t);
-	static Vector rarg(double, double);
 
 	// Exceptions (put in matrix later)
 	class index_out_of_bounds {};
-	
-	Vector();
-	Vector(const Vector &);
-	Vector(const Matrix <T> &);
-	
-	Vector(size_t, T);
-	Vector(size_t, T *, bool = true);
-
-	AVR_IGNORE(Vector(size_t, std::function <T (size_t)>));
-	AVR_IGNORE(Vector(size_t, std::function <T *(size_t)>));
-
-	Vector &operator=(const Vector &);
-	Vector &operator=(const Matrix <T> &);
-
-	T &operator[](size_t);
-	const T &operator[](size_t) const;
-	
-	size_t size() const;
-
-	void operator+=(const Vector &);
-	void operator-=(const Vector &);
-	
-	Vector append_above(const T &) const;
-	Vector append_below(const T &);
-
-	Vector remove_top();
-	Vector remove_bottom();
 };
 
 // Primitive operations for all systems (including embedded)
 #include <primitives/vector_prims.hpp>
 
 // Additional operations for common systems
-#ifndef _AVR
+#ifndef __AVR
 
 #include <vector_cpu.hpp>
 

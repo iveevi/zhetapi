@@ -2,13 +2,14 @@
 #define MATRIX_H_
 
 // C/C++ headers
-#ifndef _AVR			// AVR support
+#ifndef __AVR			// AVR support
 
 #include <cassert>
 #include <cmath>
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <ostream>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -80,18 +81,32 @@ public:
 
 	__cuda_dual__ Matrix(size_t, size_t, T = T());
 
-	// Cuda and avr ignore
-	AVR_IGNORE(Matrix(size_t, size_t, std::function <T (size_t)>);)
-	AVR_IGNORE(Matrix(size_t, size_t, std::function <T *(size_t)>);)
-	
-	AVR_IGNORE(Matrix(size_t, size_t, std::function <T (size_t, size_t)>);)
-	AVR_IGNORE(Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);)
+	// Lambda constructors
+	AVR_SWITCH(
+		Matrix(size_t, size_t, T (*)(size_t)),
+		Matrix(size_t, size_t, std::function <T (size_t)>)
+	);
 
-	AVR_IGNORE(Matrix(const std::vector <T> &);)
-	AVR_IGNORE(Matrix(const std::vector <Vector <T>> &);)
-	AVR_IGNORE(Matrix(const std::vector <std::vector <T>> &);)
-	AVR_IGNORE(Matrix(const std::initializer_list <Vector <T>> &);)
-	AVR_IGNORE(Matrix(const std::initializer_list <std::initializer_list <T>> &);)
+	AVR_SWITCH(
+		Matrix(size_t, size_t, T *(*)(size_t)),
+		Matrix(size_t, size_t, std::function <T *(size_t)>)
+	);
+	
+	AVR_SWITCH(
+		Matrix(size_t, size_t, T (*)(size_t, size_t)),
+		Matrix(size_t, size_t, std::function <T (size_t, size_t)>)
+	);
+
+	AVR_SWITCH(
+		Matrix(size_t, size_t, T *(*)(size_t, size_t)),
+		Matrix(size_t, size_t, std::function <T *(size_t, size_t)>)
+	);
+
+	AVR_IGNORE(Matrix(const std::vector <T> &));
+	AVR_IGNORE(Matrix(const std::vector <Vector <T>> &));
+	AVR_IGNORE(Matrix(const std::vector <std::vector <T>> &));
+	AVR_IGNORE(Matrix(const std::initializer_list <Vector <T>> &));
+	AVR_IGNORE(Matrix(const std::initializer_list <std::initializer_list <T>> &));
 
 	__cuda_dual__
 	Matrix(size_t, size_t, T *, bool = true);
@@ -163,9 +178,12 @@ public:
 
 	bool symmetric() const;
 
-	AVR_IGNORE(std::string display() const;)
+	AVR_SWITCH(
+		String display() const,
+		std::string display() const
+	);
 	
-#ifndef _AVR
+#ifndef __AVR
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
@@ -252,7 +270,7 @@ public:
 // TODO use _CUDACC_ instead of _zhp_cuda and make _cuda files
 #include <primitives/matrix_prims.hpp>
 
-#ifndef _AVR
+#ifndef __AVR
 
 #include <matrix_cpu.hpp>
 

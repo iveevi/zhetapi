@@ -2,7 +2,7 @@
 #define TENSOR_H_
 
 // C/C++ headers
-#ifndef _AVR			// AVR support
+#ifndef __AVR			// Does not support AVR
 
 #include <cassert>
 #include <cstddef>
@@ -14,7 +14,7 @@
 
 #include <std/interval.hpp>
 
-#endif					// AVR support
+#endif				// Does not support AVR
 
 #include <cuda/essentials.cuh>
 #include <avr/essentials.hpp>
@@ -34,7 +34,7 @@ class Matrix;
 template <class T>
 class Vector;
 
-#ifndef _AVR
+#ifndef __AVR
 
 // Tensor_type operations
 template <class T>
@@ -110,7 +110,7 @@ public:
 	class bad_dimensions {};
 
 	// Cross-type operations
-#ifndef _AVR
+#ifndef __AVR
 
 	template <class A>
 	std::enable_if <is_tensor_type <A> (), Tensor &>
@@ -149,7 +149,7 @@ public:
 
 #include <primitives/tensor_prims.hpp>
 
-#ifndef _AVR
+#ifndef __AVR
 
 #include <tensor_cpu.hpp>
 

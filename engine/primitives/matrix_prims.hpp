@@ -1,7 +1,48 @@
 template <class T>
 Matrix <T> ::Matrix()
-		: _rows(0), _cols(0),
-		Tensor <T> () {}
+		: _rows(0), _cols(0), Tensor <T> () {}
+
+// Lambda constructors
+template <class T>
+Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t))
+                : Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+{	
+	for (size_t i = 0; i < _rows; i++) {
+		for (size_t j = 0; j < _cols; j++)
+			this->_array[_cols * i + j] = gen(i);
+	}
+}
+
+template <class T>
+Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t))
+                : Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+{
+	for (size_t i = 0; i < _rows; i++) {
+		for (size_t j = 0; j < _cols; j++)
+			this->_array[_cols * i + j] = *gen(i);
+	}
+}
+
+template <class T>
+Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t, size_t))
+		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+{
+	for (size_t i = 0; i < _rows; i++) {
+		for (size_t j = 0; j < _cols; j++)
+			this->_array[_cols * i + j] = gen(i, j);
+	}
+}
+
+template <class T>
+Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t, size_t))
+		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+{
+	this->_array = new T[_rows * _cols];
+	for (int i = 0; i < _rows; i++) {
+		for (int j = 0; j < _cols; j++)
+			this->_array[_cols * i + j] = *gen(i, j);
+	}
+}
 
 // Owner implies that the vector object will take care of the deallocation
 template <class T>
@@ -671,6 +712,38 @@ Matrix <T> fmak(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C, T
 
 	return D;
 }
+
+#ifdef __AVR
+
+template <class T>
+String Matrix <T> ::display() const
+{
+	String out = "[";
+
+	for (size_t i = 0; i < _rows; i++) {
+		if (_cols > 1) {
+			out += '[';
+
+			for (size_t j = 0; j < _cols; j++) {
+				out += String(this->_array[i * _cols + j]);
+
+				if (j != _cols - 1)
+					out += ", ";
+			}
+
+			out += ']';
+		} else {
+			out += String(this->_array[i * _cols]);
+		}
+
+		if (i < _rows - 1)
+			out += ", ";
+	}
+
+	return out + "]";
+}
+
+#endif
 
 // Externally defined methods
 template <class T>

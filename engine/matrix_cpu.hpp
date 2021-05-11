@@ -309,12 +309,12 @@ std::string Matrix <T> ::display() const
 
 	oss << "[";
 
-	for (int i = 0; i < _rows; i++) {
+	for (size_t i = 0; i < _rows; i++) {
 		if (_cols > 1) {
 			oss << '[';
 
-			for (int j = 0; j < _cols; j++) {
-				oss << this->_array[i * _cols * j];
+			for (size_t j = 0; j < _cols; j++) {
+				oss << this->_array[i * _cols + j];
 				if (j != _cols - 1)
 					oss << ", ";
 			}
