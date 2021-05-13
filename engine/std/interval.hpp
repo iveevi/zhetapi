@@ -1,6 +1,12 @@
 #ifndef INTERVAL_H_
 #define INTERVAL_H_
 
+#ifdef __AVR	// Does not support AVR
+
+#include <avr/random.hpp>
+
+#else
+
 // C/C++ headers
 #include <iostream>
 #include <iterator>
@@ -8,93 +14,126 @@
 #include <set>
 #include <vector>
 
+#endif		// Does not support AVR
+
 namespace zhetapi {
 
 namespace utility {
+
+#ifdef __AVR
+
+// Blank dummy struct
+struct random_generator {};
+
+// Cite Ran from Numerical Recipes
+struct distro_engine {
+	long double operator()(const random_generator &rgen) {
+		static avr::RandomEngine reng(16183LL);
+
+		return reng.ldouble();
+	}
+};
+
+using dre = random_generator;
+using udb = distro_engine;
+
+#else
 
 // Typedefs for sanity
 using dre = std::default_random_engine;
 using udb = std::uniform_real_distribution <double>;
 
-// Some arbitrary random utils
-
-// Use an actual uniform distro
-auto runit = []() {
-	srand(clock());
-
-	return (rand() / ((double) RAND_MAX));
-};
+#endif
 
 // N is the number of dimensions
 template <size_t N = 1>
 class Interval {
-	template <size_t M>
-	friend std::ostream &operator<<(std::ostream &, const Interval <M> &);
+	AVR_IGNORE(
+		template <size_t M>
+		friend std::ostream &operator<<(std::ostream &, const Interval <M> &)
+	);
 };
+
+// Keep inlined here for header only purposes
+struct disjoint {
+	static dre gen;
+	static udb distro;
+
+#ifdef __AVR
+
+	using pflt = _avr_pair <double, double>;
+
+#else
+
+	using pflt = std::pair <double, double>;
+
+#endif
+
+	double left = 0;
+	double right = 0;
+	bool closed = true;
+
+	disjoint(double l, double r, bool c)
+			: left(l), right(r), closed(c) {}
+
+	double length() const
+	{
+		return right - left;
+	}
+
+	pflt approximate() const
+	{
+		static double epsilon = 1e-10;
+
+		if (closed)
+			return {left, right};
+
+		return {left + epsilon, right - epsilon};
+	}
+
+	// Use a real uniform distro later
+	double uniform() const
+	{
+		return left + distro(gen) * (right - left);
+	}
+
+	// Check disjointed-ness
+	bool is_disjoint(const disjoint &dj) const
+	{
+		// If either interval is greater,
+		// then it must be disjoint
+		return (*this > dj) || (*this < dj);
+	}
+
+	// The interval is completely to the left
+	bool operator<(const disjoint &dj) const
+	{
+		pflt tapp = approximate();
+		pflt oapp = dj.approximate();
+
+		return (tapp.second < oapp.first) && (tapp.first < oapp.first);
+	}
+
+	// The interval is completely to the right
+	bool operator>(const disjoint &dj) const
+	{
+		pflt tapp = approximate();
+		pflt oapp = dj.approximate();
+
+		return (tapp.second > oapp.second) && (tapp.first > oapp.second);
+	}
+
+	bool operator==(const disjoint &dj) const
+	{
+		return (left == dj.left) && (right == dj.right) && (closed == dj.closed);
+	}
+};
+
+#ifndef __AVR	// Does not support AVR
 
 // TODO: Switch from double to long double
 template <>
 class Interval <1> {
-	static dre gen;
-	static udb distro;
-
-	struct disjoint {
-		using pflt = std::pair <double, double>;
-
-		double	left	= 0;
-		double	right	= 0;
-		bool	closed	= true;
-
-		double length() const {
-			return right - left;
-		}
-
-		pflt approximate() const {
-			static double epsilon = 1e-10;
-
-			if (closed)
-				return {left, right};
-
-			return {left + epsilon, right - epsilon};
-		}
-
-		// Use a real uniform distro later
-		double uniform() const {
-			return left + distro(gen) * (right - left);
-		}
-
-		// Check disjointed-ness
-		bool is_disjoint(const disjoint &dj) const {
-			// If either interval is greater,
-			// then it must be disjoint
-			return (*this > dj) || (*this < dj);
-		}
-
-		// The interval is completely to the left
-		bool operator<(const disjoint &dj) const {
-			pflt tapp = approximate();
-			pflt oapp = dj.approximate();
-			
-			return (tapp.second < oapp.first)
-				&& (tapp.first < oapp.first);
-		}
-
-		// The interval is completely to the right
-		bool operator>(const disjoint &dj) const {
-			pflt tapp = approximate();
-			pflt oapp = dj.approximate();
-
-			return (tapp.second > oapp.second)
-				&& (tapp.first > oapp.second);
-		}
-
-		bool operator==(const disjoint &dj) const {
-			return (left == dj.left)
-				&& (right == dj.right)
-				&& (closed == dj.closed);
-		}
-	};
-
 	// Should always contain disjoint intervals
 	std::set <disjoint>	_union;
 
@@ -203,6 +242,38 @@ std::ostream &operator<<(std::ostream &, const Interval <1> &);
 // Literal constructor
 Interval <1> operator""_I(unsigned long long int);
 Interval <1> operator""_I(long double);
+
+#else		// AVR support
+
+#warning Zhetapi does not support the all of zhetapi::utility::Interval for AVR systems.
+
+// TODO: Add a singular disjoint
+template <>
+class Interval <1> {
+	disjoint dj;
+public:
+	// Defaults to [0, 1]
+	Interval() : Interval(1.0L) {}
+
+	explicit Interval(unsigned long long int x)
+			: Interval((long double) x) {}
+
+	explicit Interval(long double x)
+			: Interval(0, x) {}
+
+	Interval(double left, double right, bool closed = true)
+			: dj(left, right, closed) {}
+
+	double size() const {
+		return dj.length();
+	}
+
+	operator bool() const {
+		return size() > 0;
+	}
+};
+
+#endif		// AVR support switch
 
 }
 

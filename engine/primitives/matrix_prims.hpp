@@ -1,6 +1,6 @@
 template <class T>
 Matrix <T> ::Matrix()
-		: _rows(0), _cols(0), Tensor <T> () {}
+		: Tensor <T> (), _rows(0), _cols(0) {}
 
 // Lambda constructors
 template <class T>

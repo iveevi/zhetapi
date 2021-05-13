@@ -1,6 +1,8 @@
 #ifndef DATASET_H_
 #define DATASET_H_
 
+#ifndef __AVR
+
 // C/C++ headers
 #include <vector>
 
@@ -34,5 +36,11 @@ std::vector <DataSet <T>> split(const DataSet <T> &dset, size_t len)
 }
 	
 }
+
+#else
+
+#warning Zhetapi does not support zhetapi::Dataset for AVR systems.
+
+#endif
 
 #endif

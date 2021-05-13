@@ -1,6 +1,8 @@
 #ifndef LOADERS_H_
 #define LOADERS_H_
 
+#ifndef __AVR	// Does not support AVR
+
 namespace zhetapi {
 
 namespace ml {
@@ -46,5 +48,7 @@ Activation <T> *load_softmax(const std::vector <T> &args)
 }
 
 }
+
+#endif		// Does not support AVR
 
 #endif

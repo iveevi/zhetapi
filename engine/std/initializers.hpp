@@ -1,13 +1,31 @@
 #ifndef STD_INITIALIZERS_H_
 #define STD_INITIALIZERS_H_
 
+#ifdef __AVR	// Does not support AVR
+
+#include <avr/random.hpp>
+
+#else
+
 // C++ headers
-#include <cstdlib>
 #include <random>
+
+#endif		// Does not support AVR
 
 namespace zhetapi {
 
 namespace ml {
+
+#ifdef __AVR
+
+template <class T>
+T RandomInitializer() {
+	static avr::RandomEngine reng(16183);
+	
+	return reng.ldouble();
+}
+
+#else
 
 template <class T>
 struct RandomInitializer {
@@ -16,6 +34,10 @@ struct RandomInitializer {
 		return T (0.5 - rand()/((double) RAND_MAX));
 	}
 };
+
+#endif
+
+#ifndef __AVR	// Does not support AVR
 
 template <class T>
 struct LeCun {
@@ -54,7 +76,9 @@ public:
 	T operator()() {
 		return _dbt(_gen);
 	}
-}; 
+};
+
+#endif
 
 }
 

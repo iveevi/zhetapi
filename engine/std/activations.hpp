@@ -84,22 +84,32 @@ template <class T>
 class ReLU : public Activation <T> {
 public:
 
+#ifdef __AVR
+
+	__cuda_dual__
+	ReLU() : Activation <T> (Activation <T> ::AT_ReLU) {}
+
+#else
+
 	__cuda_dual__
 	ReLU() : Activation <T> (Activation <T> ::AT_ReLU, {}) {}
+
+#endif
 
 	__cuda_dual__
 	Activation <T> *copy() const {
 		return new ReLU();
 	}
 
+// TODO: reverse the order
 #ifndef ZHP_CUDA
 
 	Vector <T> compute(const Vector <T> &x) const {
-		return Vector <T> (x.size(),
-			[&](size_t i) {
-				return (x[i] > 0) ? x[i] : 0;
-			}
-		);
+		T *arr = new T[x.size()];
+		for (size_t i = 0; i < x.size(); i++) {
+			arr[i] = (x[i] > 0) ? x[i] : 0;
+		}
+		return Vector <T> (x.size(), arr);
 	}
 
 	Activation <T> *derivative() const {
@@ -276,6 +286,8 @@ public:
 	}
 };
 
+#ifndef __AVR
+
 template <class T>
 void ZhetapiInit()
 {
@@ -284,6 +296,8 @@ void ZhetapiInit()
 	_zhp_register_activation(Sigmoid, T, load_sigmoid <T>);
 	_zhp_register_activation(Softmax, T, load_softmax <T>);
 }
+
+#endif
 
 // TODO: Make a more generalized version,
 // which will also work on the gpu (the issues is virtual

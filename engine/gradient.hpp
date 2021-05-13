@@ -1,9 +1,13 @@
 #ifndef GRADIENT_H_
 #define GRADIENT_H_
 
+#ifndef __AVR	// Does not support AVR
+
 // C/C++ headers
 #include <mutex>
 #include <thread>
+
+#endif		// Does not support AVR
 
 // Engine headers
 #include <matrix.hpp>
@@ -76,12 +80,19 @@ Matrix <T> *jacobian_kernel(
 	Vector <T> delta(osize, 1);
 	
 	for (int i = size - 1; i >= 0; i--) {
-		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
+		if (i < size - 1) {
+			delta = AVR_SWITCH(
+				vvt_mult(delta, a[i]),
+				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
+			);
+		}
 
 		delta.stable_shur(z[i]);
 
-		J[i] = std::move(vvt_mult(delta, a[i]));
+		J[i] = AVR_SWITCH(
+			vvt_mult(delta, a[i]),
+			std::move(vvt_mult(delta, a[i]))
+		);
 	}
 
 	// Return the gradient
@@ -106,12 +117,19 @@ Matrix <T> *jacobian_kernel(
 	Matrix <T> *J = new Matrix <T> [size];
 	
 	for (int i = size - 1; i >= 0; i--) {
-		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
+		if (i < size - 1) {
+			delta = AVR_SWITCH(
+				rmt_and_mult(layers[i + 1]._mat, delta),
+				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
+			);
+		}
 
 		delta.stable_shur(z[i]);
 
-		J[i] = std::move(vvt_mult(delta, a[i]));
+		J[i] = AVR_SWITCH(
+			vvt_mult(delta, a[i]),
+			std::move(vvt_mult(delta, a[i]))
+		);
 	}
 
 	// Return the gradient
@@ -140,12 +158,19 @@ Matrix <T> *simple_gradient(
 	Vector <T> delta = dcost->compute(out, actual);
 	
 	for (int i = size - 1; i >= 0; i--) {
-		if (i < size - 1)
-			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
+		if (i < size - 1) {
+			delta = AVR_SWITCH(
+				rmt_and_mult(layers[i + 1]._mat, delta),
+				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
+			);
+		}
 
 		delta.stable_shur(z[i]);
 
-		J[i] = std::move(vvt_mult(delta, a[i]));
+		J[i] = AVR_SWITCH(
+			vvt_mult(delta, a[i]),
+			std::move(vvt_mult(delta, a[i]))
+		);
 	}
 
 	// Free resources
@@ -155,6 +180,9 @@ Matrix <T> *simple_gradient(
 	return J;
 }
 
+#ifndef __AVR	// Does not support AVR
+
+// TODO: Should there be an alternative for DataSet?
 template <class T>
 Matrix <T> *simple_batch_gradient(
 		Layer <T> *layers,
@@ -271,6 +299,8 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 
 	return J;
 }
+
+#endif		// Does not support AVR
 
 }
 

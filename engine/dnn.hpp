@@ -1,8 +1,9 @@
 #ifndef DNN_H_
 #define DNN_H_
 
+#ifndef __AVR	// Does not support AVR
+
 // C/C++ headers
-#include <chrono>
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
@@ -18,9 +19,13 @@
 #include <json/json.hpp>
 
 // Engine headers
+#include <dataset.hpp>
+
+#endif		// Does not support AVR
+
+// Engine headers
 #include <core/kernels.hpp>
 
-#include <dataset.hpp>
 #include <display.hpp>
 #include <layer.hpp>
 #include <gradient.hpp>
@@ -80,21 +85,34 @@ private:
 	Matrix <T> *		_Acache	= nullptr;
 	Matrix <T> *		_Zcache	= nullptr;
 
+	// Variadic constructor helper
+	size_t fill(size_t, const Layer <T> &);
+
+	template <class ... U>
+	size_t fill(size_t, const Layer <T> &, U ...);
+
+	// Other private helpers
 	void clear();
 	void clear_cache();
 	void init_cache();
 public:
 	DNN();
 	DNN(const DNN &);
-	DNN(size_t, const std::vector <Layer <T>> &);
+	
+	AVR_IGNORE(DNN(size_t, const std::vector <Layer <T>> &));
+
+	// Variadic layer constructor
+	template <class ... U>
+	DNN(size_t, size_t, U ...);
 
 	~DNN();
 
 	DNN &operator=(const DNN &);
 
 	// Saving and loading the network
-	void save(const std::string &);
-	void load(const std::string &);
+	AVR_IGNORE(void save(const std::string &));
+	AVR_IGNORE(void load(const std::string &));
+	
 	// void load_json(const std::string &);
 	
 	// Properties
@@ -138,6 +156,9 @@ DNN <T> ::DNN(const DNN &other) :
 	init_cache();
 }
 
+// TODO: new file
+#ifndef __AVR	// Does not support AVR
+
 /*
  * TODO: Add a input class from specifying input format.
  * NOTE: The pointers allocated and passed into this function
@@ -168,6 +189,20 @@ DNN <T> ::DNN(size_t isize, const std::vector <Layer <T>> &layers)
 	init_cache();
 }
 
+#endif		// Does not support AVR
+
+template <class T>
+template <class ... U>
+DNN <T> ::DNN(size_t layers, size_t isize, U ... args)
+		: _size(layers), _isize(isize)
+{
+	_layers = new Layer <T> [_size];
+
+	_osize = fill(0, args...);
+
+	init_cache();
+}
+
 template <class T>
 DNN <T> ::~DNN()
 {
@@ -192,6 +227,23 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 	}
 
 	return *this;
+}
+
+template <class T>
+template <class ... U>
+size_t DNN <T> ::fill(size_t i, const Layer <T> &layer, U ... args)
+{
+	_layers[i] = layer;
+
+	return fill(i + 1, args...);
+}
+
+template <class T>
+size_t DNN <T> ::fill(size_t i, const Layer <T> &layer)
+{
+	_layers[i] = layer;
+
+	return _layers[i].get_fan_out();
 }
 
 template <class T>
@@ -229,6 +281,9 @@ void DNN <T> ::init_cache()
 	_Zcache = new Matrix <T> [_size];
 }
 
+// TODO: another file (cpu)
+#ifndef __AVR	// Does not support AVR
+
 // Saving and loading
 template <class T>
 void DNN <T> ::save(const std::string &file)
@@ -259,6 +314,8 @@ void DNN <T> ::load(const std::string &file)
 	for (size_t i = 0; i < _size; i++)
 		_layers[i].read(fin);
 }
+
+#endif		// Does not support AVR
 
 // Properties
 template <class T>

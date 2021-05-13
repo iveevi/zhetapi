@@ -41,27 +41,6 @@ Vector <T> Vector <T> ::normalized() const
 }
 
 template <class T>
-Vector <T> ::Vector() : Matrix <T> () {}
-
-template <class T>
-Vector <T> ::Vector(const Vector &other) : Matrix <T> (other.size(), 1, T())
-{
-	for (size_t i = 0; i < this->_size; i++)
-		this->_array[i] = other._array[i];
-}
-
-template <class T>
-Vector <T> ::Vector(const Matrix <T> &other) : Matrix <T> (other.get_rows(), 1, T())
-{
-	for (size_t i = 0; i < this->_size; i++)
-		this->_array[i] = other[0][i];
-}
-
-// FIXME: Delegate Matrix constructor
-template <class T>
-Vector <T> ::Vector(size_t rs, T *ref, bool slice) : Matrix <T> (rs, 1, ref, slice) {}
-
-template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
 	if (this != &other) {

@@ -1,9 +1,6 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-// C++ standard headers
-#include <cstdint>
-
 namespace zhetapi {
 
 /**

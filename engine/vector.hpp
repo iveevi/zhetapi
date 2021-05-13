@@ -2,7 +2,7 @@
 #define VECTOR_H_
 
 // C/C++ headers
-#ifdef __AVR	// AVR support
+#ifdef __AVR	// Does not support AVR
 
 #ifdef max
 #undef max
@@ -17,7 +17,7 @@
 #include <cmath>
 #include <functional>
 
-#endif		// AVR support
+#endif		// Does not support AVR
 
 // Engine headers
 #ifdef ZHP_CUDA

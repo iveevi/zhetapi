@@ -1,5 +1,8 @@
 // Constructors
 template <class T>
+Vector <T> ::Vector() : Matrix <T> () {}
+
+template <class T>
 Vector <T> ::Vector(size_t len)
 		: Matrix <T> (len, 1) {}
 
@@ -14,6 +17,27 @@ Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
 template <class T>
 Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
 		: Matrix <T> (rs, 1, gen) {}
+
+template <class T>
+Vector <T> ::Vector(size_t rs, T *ref, bool slice)
+		: Matrix <T> (rs, 1, ref, slice) {}
+
+// Copy constructors
+template <class T>
+Vector <T> ::Vector(const Vector &other)
+		: Matrix <T> (other.size(), 1, T())
+{
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = other._array[i];
+}
+
+template <class T>
+Vector <T> ::Vector(const Matrix <T> &other)
+		: Matrix <T> (other.get_rows(), 1, T())
+{
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = other[0][i];
+}
 
 template <class T>
 T &Vector <T> ::x()

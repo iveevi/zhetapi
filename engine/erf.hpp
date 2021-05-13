@@ -1,9 +1,12 @@
 #ifndef ERF_H_
 #define ERF_H_
 
+#ifndef __AVR	// Does not support AVR
+
 // C/C++ headers
-#include <cmath>
 #include <memory>
+
+#endif		// Does not support AVR
 
 // Engine headers
 #ifdef ZHP_CUDA

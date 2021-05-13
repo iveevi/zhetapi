@@ -1,8 +1,12 @@
 #ifndef LAYERS_H_
 #define LAYERS_H_
 
+#ifndef __AVR	// Does not support AVR
+
 // JSON library
 #include <json/json.hpp>
+
+#endif		// Does not support AVR
 
 // Engine headers
 #include <matrix.hpp>
@@ -19,6 +23,12 @@ namespace ml {
 using utility::Interval;
 
 template <class T>
+using InitFtn = AVR_SWITCH(
+	T (*)(),
+	std::function <T ()>
+);
+
+template <class T>
 class Erf;
 
 // FIXME: Dropout should not be active during inference phase
@@ -32,7 +42,7 @@ class Layer {
 	Activation <T> *	_act		= nullptr;
 	Activation <T> *	_dact		= nullptr;
 
-	std::function <T ()>	_initializer;
+	InitFtn	<T>		_initializer;
 
 	long double		_dropout	= 0;
 
@@ -43,7 +53,10 @@ public:
 	// Memory operations
 	Layer();
 	Layer(size_t, Activation <T> *,
-			std::function <T ()> = RandomInitializer <T> (),
+			InitFtn <T> = AVR_SWITCH(
+				RandomInitializer <T>,
+				RandomInitializer <T> ()
+			),
 			long double = 0.0);
 
 	Layer(const Layer &);
@@ -61,8 +74,8 @@ public:
 	void set_fan_in(size_t);
 
 	// Read and write
-	void write(std::ofstream &) const;
-	void read(std::ifstream &);
+	AVR_IGNORE(void write(std::ofstream &) const);
+	AVR_IGNORE(void read(std::ifstream &));
 
 	// Initialize
 	void initialize();
@@ -139,11 +152,11 @@ Layer <T> ::Layer() {}
 
 template <class T>
 Layer <T> ::Layer(size_t fan_out, Activation <T> *act,
-		std::function <T ()> init,
+		InitFtn <T> init,
 		long double dropout) :
 		_fan_out(fan_out),
 		_act(act),
-		_initializer(RandomInitializer <T> ()),
+		_initializer(init),
 		_dropout(dropout)
 {
 	_dact = _act->derivative();
@@ -223,6 +236,8 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 		_mat = Matrix <T> (_fan_out, _fan_in + 1);
 }
 
+#ifndef __AVR	// Does not support AVR
+
 // Reading and writing
 template <class T>
 void Layer <T> ::write(std::ofstream &fout) const
@@ -252,6 +267,8 @@ void Layer <T> ::read(std::ifstream &fin)
 
 	_act = Activation <T> ::load(fin);
 }
+
+#endif		// Does not support AVR
 
 // Initializer
 template <class T>
@@ -288,7 +305,18 @@ inline void Layer <T> ::apply_gradient(const Matrix <T> &J)
 template <class T>
 void Layer <T> ::print() const
 {
+
+#ifdef __AVR
+
+	Serial.print("W = ");
+	Serial.println(_mat.display());
+
+#else
+
 	std::cout << "W = " << _mat << std::endl;
+
+#endif
+
 }
 
 template <class T>

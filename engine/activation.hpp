@@ -1,10 +1,14 @@
 #ifndef ACTIVATIONS_H_
 #define ACTIVATIONS_H_
 
+#ifndef __AVR	// Does not support AVR
+
 // C/C++ headers
 #include <algorithm>
 #include <functional>
 #include <map>
+
+#endif		// Does not support AVR
 
 // Engine headers
 #ifdef ZHP_CUDA
@@ -33,9 +37,13 @@ namespace ml {
 template <class T>
 class Activation;
 
+#ifndef __AVR	// Does not support AVR
+
 // Format of an activation loader
 template <class T>
 using Loader = Activation <T> *(*)(const std::vector <T> &);
+
+#endif		// Does not support AVR
 
 /*
  * Represents an activation in machine learning. Takes a vector of type T as an
@@ -58,11 +66,15 @@ public:
 	__cuda_dual__
 	Activation(activation_type);				// Type constructor
 
-	__cuda_dual__
-	Activation(const std::vector <T> &);			// Argument constructor
+	AVR_IGNORE(
+		__cuda_dual__
+		Activation(const std::vector <T> &)			// Argument constructor
+	);
 	
-	__cuda_dual__
-	Activation(activation_type, const std::vector <T> &);	// Type and argument constructor
+	AVR_IGNORE(
+		__cuda_dual__
+		Activation(activation_type, const std::vector <T> &)	// Type and argument constructor
+	);
 
 	virtual Activation *copy() const;
 	
@@ -72,16 +84,6 @@ public:
 
 	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &) const;
-
-	// Saving
-	void write_type(std::ofstream &) const;
-	void write_args(std::ofstream &) const;
-
-	virtual void write(std::ofstream &) const;
-
-	// Loading
-	static Activation <T> *load(std::ifstream &);
-	static Activation <T> *load(const std::string &, const std::vector <T> &);
 
 	__cuda_dual__
 	virtual Activation *derivative() const;
@@ -93,25 +95,42 @@ public:
 	__cuda_dual__
 	friend Activation <U> *copy(Activation <U> *);
 
+#ifndef __AVR	// Does not support AVR
+
+	// Saving
+	void write_type(std::ofstream &) const;
+	void write_args(std::ofstream &) const;
+
+	virtual void write(std::ofstream &) const;
+
+	// Loading
+	static Activation <T> *load(std::ifstream &);
+	static Activation <T> *load(const std::string &, const std::vector <T> &);
+
 	// Global list of all registered activations
 	static std::map <std::string, Loader <T>> _act_loaders_id;
 	static std::map <std::string, Loader <T>> _act_loaders_name;
 
 	// Exceptions
 	class undefined_loader {};
-protected:
-	// Arguments, empty by default
-	std::vector <T>	_args = {};
+#endif		// Does not support AVR
 
+protected:
 	activation_type	_kind = AT_Default;
+	
+	// Arguments, empty by default
+	AVR_IGNORE(std::vector <T>	_args = {});
 };
 
+#ifndef __AVR	// Does not support AVR
 
 template <class T>
 std::map <std::string, Loader <T>> Activation <T> ::_act_loaders_id;
 
 template <class T>
 std::map <std::string, Loader <T>> Activation <T> ::_act_loaders_name;
+
+#endif		// Does not support AVR
 
 #ifndef ZHP_CUDA
 
@@ -122,6 +141,9 @@ Activation <T> ::Activation() : _kind(AT_Default) {}
 template <class T>
 Activation <T> ::Activation(activation_type kind) : _kind(kind) {}
 
+// TODO: new file (add a new directory for cpu-generic headers)
+#ifndef __AVR	// Does not support AVR
+
 template <class T>
 Activation <T> ::Activation(const std::vector <T> &args) : _args(args),
 		_kind(AT_Default) {}
@@ -130,10 +152,17 @@ template <class T>
 Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
 		: _args(args), _kind(kind) {}
 
+#endif		// Does not support AVR
+
 template <class T>
 Activation <T> *Activation <T> ::copy() const
 {
-	std::cout << "Warning (from activation.hpp): using the default copy method." << std::endl;
+	static const char *msg = "Warning (from activation.hpp): using the default copy method.";
+
+	AVR_SWITCH(
+		Serial.println(msg),
+		std::cout << msg << std::endl;
+	);
 
 	return new Activation <T> ();
 }
@@ -148,10 +177,17 @@ Vector <T> Activation <T> ::operator()(const Vector <T> &x) const
 template <class T>
 Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 {
-	std::cout << "Warning (from activation.hpp): using the default compute method." << std::endl;
+	static const char *msg = "Warning (from activation.hpp): using the default compute method.";
+
+	AVR_SWITCH(
+		Serial.println(msg),
+		std::cout << msg << std::endl
+	);
 
 	return x;
 }
+
+#ifndef __AVR	// Does not support AVR
 
 // Saving
 template <class T>
@@ -230,6 +266,8 @@ Activation <T> *Activation <T> ::load(const std::string &name, const std::vector
 
 	return loader(args);
 }
+
+#endif		// Does not support AVR
 
 // Derivative
 template <class T>
