@@ -1,6 +1,12 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
+#ifndef __AVR	// Does not support AVR
+
+#include <cstdint>
+
+#endif		// Does not support AVR
+
 namespace zhetapi {
 
 /**

@@ -1,6 +1,9 @@
 #ifndef INTERVAL_H_
 #define INTERVAL_H_
 
+// Essentials
+#include <avr/essentials.hpp>
+
 #ifdef __AVR	// Does not support AVR
 
 #include <avr/random.hpp>
@@ -129,11 +132,18 @@ struct disjoint {
 	}
 };
 
+AVR_MASK(dre disjoint::gen = dre());
+AVR_MASK(udb disjoint::distro = udb());
+
 #ifndef __AVR	// Does not support AVR
 
 // TODO: Switch from double to long double
 template <>
 class Interval <1> {
+	// For random generation
+	static dre gen;
+	static udb distro;
+
 	// Should always contain disjoint intervals
 	std::set <disjoint>	_union;
 

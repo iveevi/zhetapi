@@ -3,8 +3,10 @@
 
 #ifdef __AVR
 
+// TODO: put all system based (AVR or not) aliases here
 #define AVR_IGNORE(code)
-#define AVR_SWITCH(code1, code2)      code1
+#define AVR_MASK(code)			code
+#define AVR_SWITCH(code1, code2)	code1
 
 #define assert(condition)                                               \
         if (!(condition)) {                                             \
@@ -24,8 +26,12 @@ using psize_t = _avr_pair <size_t, size_t>;
 
 #else
 
-#define AVR_IGNORE(code)              code
-#define AVR_SWITCH(code1, code2)      code2
+#include <utility>
+#include <cstdlib>
+
+#define AVR_IGNORE(code)		code
+#define AVR_MASK(code)
+#define AVR_SWITCH(code1, code2)	code2
 
 using psize_t = std::pair <size_t, size_t>;
 

@@ -2,6 +2,8 @@ template <class T>
 Matrix <T> ::Matrix()
 		: Tensor <T> (), _rows(0), _cols(0) {}
 
+#ifdef __AVR
+
 // Lambda constructors
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t))
@@ -43,6 +45,8 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t, size_t))
 			this->_array[_cols * i + j] = *gen(i, j);
 	}
 }
+
+#endif
 
 // Owner implies that the vector object will take care of the deallocation
 template <class T>

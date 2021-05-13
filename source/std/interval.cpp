@@ -4,6 +4,10 @@ namespace zhetapi {
 
 namespace utility {
 
+// Static
+dre disjoint::gen;
+udb disjoint::distro = udb(0, 1);
+
 dre Interval <1> ::gen;
 udb Interval <1> ::distro = udb(0, 1);
 

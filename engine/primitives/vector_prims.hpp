@@ -10,6 +10,8 @@ template <class T>
 Vector <T> ::Vector(size_t rs, T def)
 		: Matrix <T> (rs, 1, def) {}
 
+#ifdef __AVR
+
 template <class T>
 Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
 		: Matrix <T> (rs, 1, gen) {}
@@ -17,6 +19,8 @@ Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
 template <class T>
 Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
 		: Matrix <T> (rs, 1, gen) {}
+
+#endif
 
 template <class T>
 Vector <T> ::Vector(size_t rs, T *ref, bool slice)
