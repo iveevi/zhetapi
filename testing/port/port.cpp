@@ -23,7 +23,9 @@ vector <singlet> rig {
 	RIG(fourier_series),
 	RIG(polynomial_construction),
 	RIG(polynomial_comparison),
-	RIG(polynomial_arithmetic)
+	RIG(polynomial_arithmetic),
+	RIG(act_linear),
+	RIG(act_relu)
 };
 
 vector <singlet> failed;

@@ -4,7 +4,7 @@
 // Engine headers
 #include <erf.hpp>
 
-#include <core/erf_derivatives.hpp>
+#include <std/erf_derivatives.hpp>
 
 // Engine CUDA headers
 #include <cuda/essentials.cuh>

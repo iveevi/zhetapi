@@ -26,6 +26,8 @@
 #include <std/functions.hpp>
 #include <std/interval.hpp>
 #include <std/linalg.hpp>
+#include <std/activations.hpp>
+#include <std/erfs.hpp>
 
 // Macros
 #define TEST(name)	bool name(ostringstream &oss)
@@ -79,5 +81,8 @@ TEST(fourier_series);
 TEST(polynomial_construction);
 TEST(polynomial_comparison);
 TEST(polynomial_arithmetic);
+
+TEST(act_linear);
+TEST(act_relu);
 
 #endif

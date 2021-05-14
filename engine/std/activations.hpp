@@ -10,7 +10,7 @@
 
 #include <activation.hpp>
 
-#include <core/activation_derivatives.hpp>
+#include <std/activation_derivatives.hpp>
 
 #endif
 

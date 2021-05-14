@@ -1,5 +1,6 @@
 # Compile portability tests
 add_executable(port
+	testing/port/port-activation.cpp
 	testing/port/port-calculus.cpp
 	testing/port/port-function.cpp
 	testing/port/port-interval.cpp
