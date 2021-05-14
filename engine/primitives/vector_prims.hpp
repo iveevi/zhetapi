@@ -43,6 +43,43 @@ Vector <T> ::Vector(const Matrix <T> &other)
 		this->_array[i] = other[0][i];
 }
 
+// Assignment operators
+template <class T>
+Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
+{
+	if (this != &other) {
+		this->clear();
+
+		this->_array = new T[other._size];
+		this->_rows = other._rows;
+		this->_cols = other._cols;
+
+		this->_size = other._size;
+		for (size_t i = 0; i < this->_size; i++)
+			this->_array[i] = other._array[i];
+		
+		this->_dims = 1;
+		this->_dim = new size_t[1];
+
+		this->_dim[0] = this->_size;
+	}
+
+	return *this;
+}
+
+template <class T>
+Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
+{
+	if (this != &other) {
+		*this = Vector(other.get_rows(), T());
+
+		for (size_t i = 0; i < this->_size; i++)
+			this->_array[i] = other[0][i];
+	}
+
+	return *this;
+}
+
 template <class T>
 T &Vector <T> ::x()
 {
@@ -180,6 +217,46 @@ void Vector <T> ::normalize()
 
 	for (size_t i = 0; i < size(); i++)
 		(*this)[i] /= dt;
+}
+
+// TODO: rename these functions (or add): they imply modification (also add const)
+// TODO: use memcpy later
+template <class T>
+Vector <T> Vector <T> ::append_above(const T &x) const
+{
+	T *arr = new T[size() + 1];
+	arr[0] = x;
+	for (size_t i = 0; i < size(); i++)
+		arr[i + 1] = this->_array[i];
+	return Vector(size() + 1, arr, false);
+}
+
+template <class T>
+Vector <T> Vector <T> ::append_below(const T &x)
+{
+	T *arr = new T[size() + 1];
+	for (size_t i = 0; i < size(); i++)
+		arr[i] = this->_array[i];
+	arr[size()] = x;
+	return Vector(size() + 1, arr, false);
+}
+
+template <class T>
+Vector <T> Vector <T> ::remove_top()
+{
+	T *arr = new T[size() - 1];
+	for (size_t i = 1; i < size(); i++)
+		arr[i - 1] = this->_array[i];
+	return Vector(size() - 1, arr, false);
+}
+
+template <class T>
+Vector <T> Vector <T> ::remove_bottom()
+{
+	T *arr = new T[size() - 1];
+	for (size_t i = 0; i < size() - 1; i++)
+		arr[i] = this->_array[i];
+	return Vector(size() - 1, arr, false);
 }
 
 // Non-member operators

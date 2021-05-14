@@ -1,6 +1,7 @@
 #ifndef ACTIVATION_DERIVATIVES_H_
 #define ACTIVATION_DERIVATIVES_H_
 
+// TODO: put back in std
 namespace zhetapi {
 
 namespace ml {
@@ -28,7 +29,7 @@ public:
 		for (size_t i = 0; i < x.size(); i++) {
 			arr[i] = (x[i] > 0) ? 1 : 0;
 		}
-		return Vector <T> (x.size(), arr);
+		return Vector <T> (x.size(), arr, false);
 	}
 };
 

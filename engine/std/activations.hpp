@@ -109,7 +109,7 @@ public:
 		for (size_t i = 0; i < x.size(); i++) {
 			arr[i] = (x[i] > 0) ? x[i] : 0;
 		}
-		return Vector <T> (x.size(), arr);
+		return Vector <T> (x.size(), arr, false);
 	}
 
 	Activation <T> *derivative() const {

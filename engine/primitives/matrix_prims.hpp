@@ -549,8 +549,10 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
-	if (A._cols != B._rows)
-                throw typename Matrix <T> ::dimension_mismatch();
+	AVR_IGNORE(
+		if (A._cols != B._rows)
+			throw typename Matrix <T> ::dimension_mismatch()
+	);
 
         size_t rs = A._rows;
         size_t cs = B._cols;
