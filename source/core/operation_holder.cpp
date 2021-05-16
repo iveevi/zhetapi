@@ -40,7 +40,11 @@ std::string strcodes[] = {
 	"attribute/method",
 	"boolean or",
 	"boolean and",
-	"absolute value"
+	"absolute value",
+	"square root",
+	"round",
+	"floor",
+	"ceil"
 };
 
 // TODO: avoid overhead by using integer input (straight from the parser)
@@ -125,6 +129,14 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = bool_and;
 	else if (str == "abs")
 		code = abs_val;
+	else if (str == "sqrt")
+		code = square_root;
+	else if (str == "round")
+		code = round_int;
+	else if (str == "floor")
+		code = floor_int;
+	else if (str == "ceil")
+		code = ceil_int;
 	else
 		throw bad_operation();
 }

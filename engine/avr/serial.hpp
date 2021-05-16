@@ -129,7 +129,7 @@ class DefaultSerial : public SerialInterface {
 public:
         DefaultSerial() {}
 
-        DefaultSerial(size_t port)
+        explicit DefaultSerial(size_t port)
                         : _port(port) {
                 Serial.begin(port);
         }

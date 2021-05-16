@@ -45,24 +45,30 @@ Args symbol_suggestions(const std::string &symbol, const Args &choices)
 	return valid;
 }
 
-void symbol_error_msg(const std::string &symbol, Engine *context)
+void symbol_error_msg(const std::string &symbol, const std::string &loc, Engine *context)
 {
-	// Add a function for classifying the error
-	std::fprintf(stderr, "Error: The symbol %s has not been defined yet.",
-			symbol.c_str());
+	// TODO: add a function for classifying the error
+	// TODO: lines too long
+	if (loc.empty()) {
+		std::fprintf(stderr, "Error: The symbol \"%s\" has not been defined yet.\n",
+				symbol.c_str());
+	} else {
+		std::fprintf(stderr, "Error: The symbol \"%s\" has not been defined yet (from \"%s\").\n",
+				symbol.c_str(), loc.c_str());
+	}
 	
 	Args suggs = symbol_suggestions(symbol, context->symbol_list());
 
 	size_t n = suggs.size();
 	if (n) {
-		std::fprintf(stderr, "\nSuggested symbols: {");
+		std::fprintf(stderr, "Suggested symbols: {\n");
 
 		for (size_t i = 0; i < n; i++) {
-			std::fprintf(stderr, "%s%s", suggs[i].c_str(),
-					(i < n - 1) ? ", " : "");
+			std::fprintf(stderr, "\t%s%s\n", suggs[i].c_str(),
+					(i < n - 1) ? "," : "");
 		}
 		
-		std::fprintf(stderr, "}?\n");
+		std::fprintf(stderr, "}\n");
 	}
 }
 

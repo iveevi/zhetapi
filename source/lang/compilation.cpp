@@ -97,9 +97,9 @@ static void generate_statement(
 		try {
 			nm = node_manager(engine, tmp[split_size - 1], args, pardon);
 		} catch (const node_manager::undefined_symbol &e) {
-			symbol_error_msg(e.what(), engine);
+			symbol_error_msg(e.what(), tmp[split_size - 1], engine);
 
-			std::cerr << "\tfrom \"" << tmp[split_size - 1] << "\"" << std::endl;
+			// std::cerr << "\tfrom \"" << tmp[split_size - 1] << "\"" << std::endl;
 
 			exit(-1);
 		}

@@ -60,7 +60,7 @@ public:
 
 	Token *value(Engine *) const;
 	Token *sequential_value(Engine *) const;
-	Token *substitute_and_compute(Engine *, std::vector <Token *> &);
+	Token *substitute_and_compute(Engine *, const std::vector <Token *> &);
 	Token *substitute_and_seq_compute(Engine *, const std::vector <Token *> &);
 
 	void compress_branches();
@@ -159,6 +159,8 @@ private:
 		}
 	};
 public:
+        // TODO: put these two under std::runtime
+        
 	// Syntax error
 	class syntax_error : public error {
 	public:
@@ -173,10 +175,19 @@ public:
 				: error(s) {}
 	};
 
+        class bad_input : public std::runtime_error {
+        public:
+                explicit bad_input()
+                                : std::runtime_error("bad input") {}
+        };
+
 	// Static variables
 	
 	// Use for computation specifically
 	static Engine *shared_context;
+
+        // TODO: more Engine to core
+        // TODO: Also switch to UpperCase class naming (for any usable classes)
 };
 
 // Global functions

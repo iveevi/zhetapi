@@ -21,7 +21,7 @@ class Function : public Token {
 public:
 	Function();
 	Function(const char *);
-	Function(const std::string &);
+	Function(const std::string &, Engine * = shared_context);
 
 	Function(const std::string &,
 		const std::vector <std::string> &,
@@ -36,7 +36,8 @@ public:
 
 	void set_threads(size_t);
 
-	Token *operator()(std::vector <Token *>);
+	Token *compute(const std::vector <Token *> &, Engine * = shared_context);
+	Token *operator()(const std::vector <Token *> &, Engine * = shared_context);
 
 	template <class ... A>
 	Token *operator()(A ...);

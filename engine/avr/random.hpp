@@ -10,7 +10,8 @@ struct RandomEngine {
 	unsigned long long v;
 	unsigned long long w;
 
-	RandomEngine(unsigned long long j) : v(4101842887655102017LL), w(1) {
+	explicit RandomEngine(unsigned long long j)
+                        : v(4101842887655102017LL), w(1) {
 		u = j ^ v;
 		llint();
 

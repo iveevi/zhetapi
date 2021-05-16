@@ -68,8 +68,12 @@ node_manager::node_manager(Engine *context, const std::string &str)
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
+        if (!r)
+                throw bad_input();
+
 	/* using namespace std;
-	cout << "TREE PRE PROCESSED:" << endl;
+	cout << string(50, '=') << endl;
+	cout << "PRE _tree:" << endl;
 	_tree.print(); */
 
 	// Unpack variable clusters
@@ -81,6 +85,7 @@ node_manager::node_manager(Engine *context, const std::string &str)
 	
 	// Simplify
 	simplify(context, _tree);
+	// cout << string(50, '=') << endl;
 }
 
 node_manager::node_manager(
@@ -96,6 +101,14 @@ node_manager::node_manager(
 	siter end = str.end();
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
+
+        if (!r)
+                throw bad_input();
+
+	/* using namespace std;
+	cout << string(50, '=') << endl;
+	cout << "PRE _tree:" << endl;
+	_tree.print(); */
 
 	// Fill references
 	node tmp;
@@ -116,6 +129,7 @@ node_manager::node_manager(
 
 	// Simplify
 	simplify(context, _tree);
+	// cout << string(50, '=') << endl;
 }
 
 node_manager &node_manager::operator=(const node_manager &other)
@@ -173,7 +187,7 @@ Token *node_manager::sequential_value(Engine *context) const
 
 Token *node_manager::substitute_and_compute(
 		Engine *context,
-		std::vector <Token *> &toks)
+		const std::vector <Token *> &toks)
 {
 	assert(_refs.size() == toks.size());
 	for (size_t i = 0; i < _refs.size(); i++) {
@@ -447,6 +461,17 @@ node node_manager::expand(
 
 	contexts.push_back({{}, ""});
 
+	/* using namespace std;
+	cout << "EXPANDING: \"" << str << "\"" << endl;
+	cout << "Pardon:" << endl;
+	for (auto str : pardon)
+		cout << "\t" << str << endl;
+	cout << "Params:" << endl;
+	for (auto str : _params)	// TODO: refactor params to args
+		cout << "\t" << str << endl;
+	cout << "Context:" << endl;
+	context->list(); */
+
 	// Check once for differential
 	Token *dtok = context->get("d");
 	auto ditr = std::find(_params.begin(), _params.end(), "d");
@@ -542,7 +567,9 @@ node node_manager::expand(
 	std::vector <node> choice;
 
 	bool valid = false;
+	// cout << "Contexts:" << endl;
 	for (auto pr : contexts) {
+	//	cout << "\tleft over \"" << pr.second << "\"" << endl;
 		if (pr.second.empty()) {
 			valid = true;
 
@@ -557,8 +584,10 @@ node node_manager::expand(
 	 * If tmp is not empty, it implies that we could not find a
 	 * match for it, and therefore the parsing is incomplete.
 	 */
-	if (!valid)
+	if (!valid) {
+	//	cout << "NOT VALID: str = \"" << str << "\"" << endl;
 		throw undefined_symbol(str);
+	}
 
 	/*
 	 * The very last Token is attributed the leaves

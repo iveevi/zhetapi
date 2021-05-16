@@ -30,7 +30,7 @@ Function::Function()
 Function::Function(const char *str) : Function(std::string(str)) {}
 
 // TODO: Take an Engine as an input as well: there is no need to delay rvalue resolution
-Function::Function(const std::string &str)
+Function::Function(const std::string &str, Engine *context)
 		: _threads(1), Token({
 			{"derivative", ftn_deriv_attr}
 		})
@@ -106,10 +106,10 @@ Function::Function(const std::string &str)
 	_symbol = _symbol.substr(0, start);
 
 	// Construct the tree manager
-	_manager = node_manager(shared_context, str.substr(++index), _params);
+	_manager = node_manager(context, str.substr(++index), _params);
 
 	/* using namespace std;
-	cout << "manager:" << endl;
+	cout << "FUNCTION manager:" << endl;
 	print(); */
 }
 
@@ -151,12 +151,17 @@ void Function::set_threads(size_t threads)
 
 // Computational utilities
 
-// delete this
-Token *Function::operator()(std::vector <Token *> toks)
+Token *Function::compute(const std::vector <Token *> &toks, Engine *context)
 {
 	assert(toks.size() == _params.size());
 
-	return _manager.substitute_and_compute(shared_context, toks);
+	return _manager.substitute_and_compute(context, toks);
+}
+
+// TODO: remove this (no user is going to use this)
+Token *Function::operator()(const std::vector <Token *> &toks, Engine *context)
+{
+	return compute(toks, context);
 }
 
 template <class ... A>

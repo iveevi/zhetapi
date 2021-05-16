@@ -2,6 +2,7 @@
 
 namespace zhetapi {
 
+// TODO: put this constructor in another file
 engine_base::engine_base()
 {
 	std::vector <std::pair <std::pair <std::string, std::vector <std::type_index>>, Token *>> ops;
@@ -164,10 +165,29 @@ engine_base::engine_base()
 	_add_unary_operation_ftr(lg, Q, R, log(R (in->get()))/log(2));
 	_add_unary_operation_ftr(lg, R, R, log(R (in->get()))/log(2));
 
-	// Misc
+	// Misc (TODO: abs for Q should return Q)
 	_add_unary_operation_ftr(abs, Z, Z, std::abs(in->get()));
 	_add_unary_operation_ftr(abs, Q, R, std::abs(in->get()));
 	_add_unary_operation_ftr(abs, R, R, std::abs(in->get()));
+	
+	// TODO: check for perfect squares in Z and Q
+	// TODO: add std::sqrt for Q
+	// TODO: remove output type restrictions
+	_add_unary_operation_ftr(sqrt, Z, R, std::sqrt(in->get()));
+	_add_unary_operation_ftr(sqrt, Q, R, std::sqrt((R) in->get()));
+	_add_unary_operation_ftr(sqrt, R, R, std::sqrt(in->get()));
+	
+	_add_unary_operation_ftr(round, Z, Z, std::round(in->get()));
+	_add_unary_operation_ftr(round, Q, Z, std::round((R) in->get()));
+	_add_unary_operation_ftr(round, R, Z, std::round(in->get()));
+
+	_add_unary_operation_ftr(floor, Z, Z, std::floor(in->get()));
+	_add_unary_operation_ftr(floor, Q, Z, std::floor((R) in->get()));
+	_add_unary_operation_ftr(floor, R, Z, std::floor(in->get()));
+
+	_add_unary_operation_ftr(ceil, Z, Z, std::ceil(in->get()));
+	_add_unary_operation_ftr(ceil, Q, Z, std::ceil((R) in->get()));
+	_add_unary_operation_ftr(ceil, R, Z, std::ceil(in->get()));
 	
 	//////////////////////////////////////////
 	// Vector operations

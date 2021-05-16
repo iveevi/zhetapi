@@ -47,7 +47,11 @@ enum codes {
 	attribute,
 	bool_or,
 	bool_and,
-	abs_val
+	abs_val,
+	square_root,
+	round_int,
+	floor_int,
+	ceil_int
 };
 
 extern std::string strcodes[];

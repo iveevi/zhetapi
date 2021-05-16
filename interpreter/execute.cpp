@@ -35,14 +35,15 @@ Token *execute(string str)
 
 		for (int i = tsize - 2; i >= 0; i--) {
 			string ftr = tmp[i] + " = " + tmp[tsize - 1];
+			// cout << "ftr = " << ftr << endl;
 
 			try {
-				zhetapi::Function f(ftr);
+				zhetapi::Function f(ftr, engine);
 
 				engine->put(f);
 			} catch (...) {
 				if (pe) {
-					symbol_error_msg(us.what(), engine);
+					symbol_error_msg(us.what(), "", engine);
 					exit(-1);
 				}
 
@@ -50,6 +51,9 @@ Token *execute(string str)
 			}
 		}
 		
+		/* cout << "after insertion:" << endl;
+		engine->list(); */
+
 		delete tptr;
 	} else {		
 		// All functions and algorithms are stored in engine
@@ -62,13 +66,13 @@ Token *execute(string str)
 
 		try {
 			mg = node_manager(engine, str);
-			
+
 			tptr = mg.value(engine);
 		} catch (const Engine::unknown_op_overload &e)  {
 			cout << "err evaluating \'" << str << "\'\n" << e.what() << endl;
 			exit(-1);
 		} catch (const node_manager::undefined_symbol &e) {
-			symbol_error_msg(e.what(), engine);
+			symbol_error_msg(e.what(), "", engine);
 
 			exit(-1);
 		} catch (const Token::unknown_attribute &e) {

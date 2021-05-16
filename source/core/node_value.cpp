@@ -239,7 +239,7 @@ Token *node_value(Engine *context, node tree)
 			values.push_back(node_value(context, leaf));
 
 		// TODO: shorten (cast)
-		tptr = (*(dynamic_cast <Function *> (tree._tptr)))(values);
+		tptr = (tree.cast <Function> ())->compute(values, context);
 
 		return tptr->copy();
 	case Token::reg:

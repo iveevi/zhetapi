@@ -12,7 +12,7 @@ parser::parser() : parser::base_type(_start)
 	 * Parser for an identifier. Used to construct variable
 	 * clusters.
 	 */
-	_ident = +qi::char_("a-zA-Z$_");
+        _ident = qi::char_("a-zA-Z$_") >> *qi::char_("0-9a-zA-Z$_");
 
 	_str = +(_esc | (qi::char_ - '\"'));
 
