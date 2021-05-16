@@ -15,7 +15,9 @@ parser.add_argument("-j", "--threads",
 
 # Cleaning
 def clean():
-    os.system('[ -f libzhp.* ] && mv libzhp.* debug/')
+    os.system('mkdir -p debug/')
+    os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
+    os.system('[ -f libzhp.so ] && mv libzhp.so debug/')
 
 
 def clean_and_exit(sig):
@@ -189,16 +191,6 @@ def clang(args):
         clean_and_exit(-1)
 
 def base_bench(args):
-    print('Installing interpreter...')
-
-    # Make directories and compile interpreter
-    os.system('mkdir -p bin')
-
-    make_target(args.threads, 'zhetapi zhp-shared zhp-static')
-
-    os.system('mv zhetapi bin/')
-    os.system('mv libzhp.* bin/')
-
     # Run bench
     start_t = time.time()
 
@@ -209,16 +201,6 @@ def base_bench(args):
     print(f'\nEXECUTION TIME: {1000 * (end_t - start_t)} ms')
 
 def python_bench(args):
-    print('Installing interpreter...')
-
-    # Make directories and compile interpreter
-    os.system('mkdir -p bin')
-
-    make_target(args.threads, 'zhetapi zhp-shared zhp-static')
-
-    os.system('mv zhetapi bin/')
-    os.system('mv libzhp.* bin/')
-
     # Run bench for zhetapi-lang
     print('ZHETAPI-LANG:')
 

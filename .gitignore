@@ -23,10 +23,9 @@ cmake_install.cmake
 data
 debug
 gen
+include
 makefile
 portability
 samples/rl/res
 zhetapi
 zhetapi-header
-doxygen/latex
-doxygen/html
