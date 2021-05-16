@@ -12,7 +12,10 @@ enum mode {
 // Setup the default include directories
 bool verbose = false;
 
-vector <string> idirs = {"."};
+vector <string> idirs = {
+	".",				// Current directory
+	"/usr/local/include/zhetapi"	// Installed libs location
+};
 
 // Display guide
 static int guide()

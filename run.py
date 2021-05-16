@@ -87,6 +87,18 @@ def install(args):
     os.system('mv zhetapi bin/')
     os.system('mv libzhp.* bin/')
 
+    ret = os.system('ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi')
+    if ret != 0:
+        clean_and_exit(-1)
+
+    ret = os.system('ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so')
+    if ret != 0:
+        clean_and_exit(-1)
+
+    ret = os.system('ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a')
+    if ret != 0:
+        clean_and_exit(-1)
+
     print(50 * '=' + "\nCompiling libraries...\n" + 50 * '=')
     ret = os.system('./bin/zhetapi -v -c	\
 		lib/io/io.cpp		\
@@ -111,6 +123,11 @@ def install(args):
     ret = os.system('./bin/zhetapi -d include/math.zhplib')
     if ret != 0:
         clean_and_exit(-1)
+
+    ret = os.system('ln -s -f $PWD/include /usr/local/include/zhp')
+    if ret != 0:
+        clean_and_exit(-1)
+
 
 def zhetapi_normal(args):
     make_target(args.threads, 'zhetapi', args.mode)
