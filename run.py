@@ -227,7 +227,7 @@ def run_header_tests(args):
 
         run_and_check(
             f'echo \'Running tests for {filename}:\'',
-            f'g++ {filename} -lzhp -o {output}',
+            f'g++-8 {filename} -lzhp -o {output}',
             f'./{output}'
         )
 
