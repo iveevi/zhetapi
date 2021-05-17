@@ -33,5 +33,5 @@ jobs:
             sudo sh cmake-3.14.2-Linux-x86_64.sh --prefix=/opt/cmake --exclude-subdir --skip-license
             sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
       - run:
-          name: Install Zhetapi
+          name: Installing Zhetapi
           command: sudo ./run.py install -j 2

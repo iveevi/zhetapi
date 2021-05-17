@@ -87,7 +87,7 @@ def list_modes(args):
 
 def install(args):
     run_and_check(
-        'echo \'Installing...\'',
+        'echo \'Installing...\n\'',
         'mkdir -p bin',
 	    'mkdir -p include'
 	)
@@ -109,7 +109,7 @@ def install(args):
         './bin/zhetapi -d include/math.zhplib',
         'echo \'\nInstalling ZHP libraries...\n\'',
         'cp -r $PWD/include /usr/local/include/zhp',
-        'echo \'\nFinished installation.\''
+        'echo \'Finished installation.\''
     )
 
 def zhetapi_normal(args):

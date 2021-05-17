@@ -5,5 +5,18 @@ using namespace zhetapi;
 
 int main()
 {
-	return 0;
+        if (true) {
+                cout << "hi" << endl;
+        }
+        else {
+                int x = 0;
+        }
+
+        int x;
+        if (true)
+                x = 0;
+        else
+                x = 1;
+
+        return 0;
 }
