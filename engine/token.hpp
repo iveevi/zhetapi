@@ -23,7 +23,11 @@ public:
 	// Maybe differentiate between const vector & and vector & methods
 	using method = Token *(*)(Token *, const std::vector <Token *> &);
 protected:
-	std::map <std::string, method>	_attributes;
+	// From ZHP (algorithm, function, etc)
+	std::map <std::string, Token *>	_attributes;
+
+	// From API (Token)
+	std::map <std::string, method>	_methods;
 public:
 	Token();
 	Token(const std::vector <std::pair <std::string, method>> &);
@@ -65,7 +69,8 @@ public:
 		token_wildcard,
 		token_lvalue,
 		token_rvalue,
-		token_node_list
+		token_node_list,
+		token_module
 	};
 
 	bool operator!=(Token *) const;

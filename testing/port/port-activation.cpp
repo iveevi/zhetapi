@@ -1,13 +1,16 @@
 #include "port.hpp"
 
-// TODO: add another for double activations (take account for error)
+using namespace zhetapi;
+using namespace zhetapi::ml;
+
 static bool act_general(ostringstream &oss,
 		const std::string &prefix,
-		const vector <zhetapi::ml::Activation <int> *> &acts,
-		const vector <zhetapi::Vector <int>> &ins,
-		const vector <vector <zhetapi::Vector <int>>> &outs,
-		const vector <vector <zhetapi::Vector <int>>> &douts)
+		const vector <Activation <double> *> &acts,
+		const vector <Vector <double>> &ins,
+		const vector <vector <Vector <double>>> &outs)
 {
+	static double epsilon = 1e-10;
+
 	oss << "Inputs:" << endl;
 	for (auto v : ins)
 		oss << "\t" << v << endl;
@@ -19,13 +22,14 @@ static bool act_general(ostringstream &oss,
 			oss << prefix << (i + 1) << "(input #" << (j + 1)
 				<< ") = " << acts[i]->compute(ins[j]) << endl;
 			oss << "should equal " << outs[i][j] << endl;
+			oss << "diff = " << (acts[i]->compute(ins[j]) - outs[i][j]).norm() << endl;
 
-			if (acts[i]->compute(ins[j]) != outs[i][j])
+			if ((acts[i]->compute(ins[j]) - outs[i][j]).norm() > epsilon)
 				return false;
 		}
 	}
 
-	vector <zhetapi::ml::Activation <int> *> dacts;
+	vector <Activation <double> *> dacts;
 	for (auto act : acts)
 		dacts.push_back(act->derivative());
 	
@@ -33,11 +37,26 @@ static bool act_general(ostringstream &oss,
 		oss << endl;
 		oss << "Next activation derivative:" << endl;
 		for (size_t j = 0; j < ins.size(); j++) {
+			Vector <double> dout(ins[j].size());
+
+			// Use gradient checking
+			for (size_t k = 0; k < ins[j].size(); k++) {
+				Vector <double> back = ins[j];
+				Vector <double> forward = ins[j];
+
+				back[k] -= epsilon;
+				forward[k] += epsilon;
+
+				dout[k] = (acts[i]->compute(forward)
+					- acts[i]->compute(back))[k]/(2 * epsilon);
+			}
+
 			oss << prefix << (i + 1) << "(input #" << (j + 1)
 				<< ") = " << dacts[i]->compute(ins[j]) << endl;
-			oss << "should equal " << douts[i][j] << endl;
+			oss << "should equal " << dout << endl;
+			oss << "diff = " << (dacts[i]->compute(ins[j]) - dout).norm() << endl;
 
-			if (dacts[i]->compute(ins[j]) != douts[i][j])
+			if ((dacts[i]->compute(ins[j]) - dout).norm() > 1e-5)
 				return false;
 		}
 	}
@@ -53,52 +72,82 @@ static bool act_general(ostringstream &oss,
 
 TEST(act_linear)
 {
-	using namespace zhetapi;
-	using namespace zhetapi::ml;
-
 	return act_general(oss,
 		"linear",
 		{
-			new Linear <int> (),
-			new Linear <int> (2)
+			new Linear <double> (),
+			new Linear <double> (2)
 		},
 		{
-			Vector <int> {1, 2, 3, 4}
+			Vector <double> {1, 2, 3, 4}
 		},
 		{
-			{Vector <int> {1, 2, 3, 4}},
-			{Vector <int> {2, 4, 6, 8}}
-		},
-		{
-			{Vector <int> {1, 1, 1, 1}},
-			{Vector <int> {2, 2, 2, 2}}
+			{Vector <double> {1, 2, 3, 4}},
+			{Vector <double> {2, 4, 6, 8}}
 		});
 }
 
 TEST(act_relu)
 {
-	using namespace zhetapi;
-	using namespace zhetapi::ml;
-
 	return act_general(oss,
 		"relu",
 		{
-			new ReLU <int> ()
+			new ReLU <double> ()
 		},
 		{
-			Vector <int> {1, 2, 3, 4},
-			Vector <int> {1, -1, 3, -1}
+			Vector <double> {1, 2, 3, 4},
+			Vector <double> {1, -1, 3, -1}
 		},
 		{
 			{
-				Vector <int> {1, 2, 3, 4},
-				Vector <int> {1, 0, 3, 0}
+				Vector <double> {1, 2, 3, 4},
+				Vector <double> {1, 0, 3, 0}
 			}
+		});
+}
+
+TEST(act_leaky_relu)
+{
+	return act_general(oss,
+		"leaky relu",
+		{
+			new LeakyReLU <double> (0.2)
+		},
+		{
+			Vector <double> {1, 2, 3, 4},
+			Vector <double> {1, -1, 3, -2}
 		},
 		{
 			{
-				Vector <int> {1, 1, 1, 1},
-				Vector <int> {1, 0, 1, 0}
+				Vector <double> {1, 2, 3, 4},
+				Vector <double> {1, -0.2, 3, -0.4}
+			}
+		});
+}
+
+TEST(act_sigmoid)
+{
+	return act_general(oss,
+		"sigmoid",
+		{
+			new Sigmoid <double> ()
+		},
+		{
+			Vector <double> {0.5, 2, 0, 4},
+			Vector <double> {1, -1, 3, -2}
+		},
+		{
+			{
+				Vector <double> {
+					0.622459331202,
+					0.880797077978,
+					0.5,
+					0.982013790038},
+				Vector <double> {
+					0.73105857863,
+					0.26894142137,
+					0.952574126822,
+					0.119202922022}
 			}
 		});
 }

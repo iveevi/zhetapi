@@ -25,7 +25,9 @@ vector <singlet> rig {
 	RIG(polynomial_comparison),
 	RIG(polynomial_arithmetic),
 	RIG(act_linear),
-	RIG(act_relu)
+	RIG(act_relu),
+	RIG(act_leaky_relu),
+	RIG(act_sigmoid)
 };
 
 vector <singlet> failed;

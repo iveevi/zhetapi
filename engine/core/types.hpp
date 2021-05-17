@@ -15,6 +15,7 @@ namespace zhetapi {
 class Function;
 class algorithm;
 class Registrable;
+class Module;
 
 // All valid tokens
 // IDs are increasing in this order
@@ -92,6 +93,7 @@ set_zhp_id(OpMatCmpR, 20);
 set_zhp_id(Function, 21);
 set_zhp_id(algorithm, 22);
 set_zhp_id(Registrable, 23);
+set_zhp_id(Module, 24);
 
 // Is tensor type (for writing)
 // template <class T>

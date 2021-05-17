@@ -4,21 +4,20 @@
 // Engine headers
 #ifdef ZHP_CUDA
 
-#include <cuda/activation.cuh>
+#include "../cuda/activation.cuh"
 
 #else
 
-#include <activation.hpp>
-
-#include <std/activation_derivatives.hpp>
+#include "../activation.hpp"
+#include "activation_derivatives.hpp"
 
 #endif
 
 // Engine standard headers
-#include <std/loaders.hpp>
+#include "loaders.hpp"
 
 // Engine CUDA headers
-#include <cuda/essentials.cuh>
+#include "../cuda/essentials.cuh"
 
 namespace zhetapi {
 		
@@ -142,7 +141,8 @@ class LeakyReLU : public Activation <T> {
 public:
 	__cuda_dual__
 	LeakyReLU(const T &alpha = 1) :
-			Activation <T> (Activation <T> ::AT_ReLU, {alpha}) {}
+			Activation <T> (Activation <T> ::AT_ReLU, {alpha}),
+			_alpha(alpha) {}
 	
 	__cuda_dual__
 	Activation <T> *copy() const {

@@ -84,5 +84,7 @@ TEST(polynomial_arithmetic);
 
 TEST(act_linear);
 TEST(act_relu);
+TEST(act_leaky_relu);
+TEST(act_sigmoid);
 
 #endif

@@ -17,6 +17,7 @@ set(ZHETAPI_SOURCE
 	source/core/expr_parser.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp
+	source/core/module.cpp
 	source/core/node.cpp
 	source/core/node_differential.cpp
 	source/core/node_differentiation.cpp

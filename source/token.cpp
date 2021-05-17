@@ -6,20 +6,27 @@ namespace zhetapi {
 
 Token::Token() {}
 
+// attrs
 Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 {
 	for (auto attr_pr : attrs)
-		this->_attributes[attr_pr.first] = attr_pr.second;
+		this->_methods[attr_pr.first] = attr_pr.second;
 }
 
 Token::~Token() {}
 
 Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 {
-	if (_attributes.find(id) == _attributes.end())
-		throw unknown_attribute(typeid(*this), id);
-		
-	return _attributes[id](this, args);
+	// Priorotize attributes
+	if (_attributes.find(id) != _attributes.end())
+		return _attributes[id];
+	
+	if (_methods.find(id) != _methods.end())
+		return _methods[id](this, args);
+	
+	throw unknown_attribute(typeid(*this), id);
+
+	return nullptr;
 }
 
 bool Token::operator!=(Token *tptr) const
@@ -53,6 +60,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
  std::string Token::unknown_attribute::what() const
  {
 	// TODO: use the actual name instead of mangled
+	// TODO: use id() instead of typeid
 	return "<" + type_name(_ti) + ">"
 		+ " has no attribute \""
 		+ _msg + "\"";
