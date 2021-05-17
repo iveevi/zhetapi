@@ -34,4 +34,4 @@ jobs:
             sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
       - run:
           name: Install Zhetapi
-          command: sudo ./run.py install
+          command: sudo ./run.py install -j 2
