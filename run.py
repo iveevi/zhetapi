@@ -19,11 +19,18 @@ def clean():
     os.system('[ -f libzhp.a ] && mv libzhp.a debug/')
     os.system('[ -f libzhp.so ] && mv libzhp.so debug/')
 
-
 def clean_and_exit(sig):
     clean()
 
     exit(sig)
+
+# Executing shell
+def run_and_check(*args):
+    for cmd in args:
+        ret = os.system(cmd)
+
+        if ret != 0:
+            clean_and_exit(-1)
 
 # Compilation
 def make_target(threads, target, mode=''):
@@ -79,61 +86,31 @@ def list_modes(args):
         print('\t' + key)
 
 def install(args):
-    print("Installing...")
-
-    os.system('mkdir -p bin')
-    os.system('mkdir -p include')
+    run_and_check(
+        'echo \'Installing...\'',
+        'mkdir -p bin',
+	    'mkdir -p include'
+	)
 
     make_target(args.threads, 'zhetapi zhp-shared zhp-static')
 
-    os.system('mv zhetapi bin/')
-    os.system('mv libzhp.* bin/')
-
-    ret = os.system('ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi')
-    if ret != 0:
-        clean_and_exit(-1)
-    
-    ret = os.system('ln -s -f $PWD/engine /usr/local/include/zhetapi')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    ret = os.system('ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    ret = os.system('ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    print(50 * '=' + "\nCompiling libraries...\n" + 50 * '=')
-    ret = os.system('./bin/zhetapi -v -c	\
-		lib/io/io.cpp		\
-		lib/io/formatted.cpp	\
-		lib/io/file.cpp		\
-		-o include/io.zhplib')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    ret = os.system('./bin/zhetapi -v -c	\
-		lib/math/math.cpp	\
-		-o include/math.zhplib')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    print("\n" + 50 * '=' + "\nDisplaying symbols\n" + 50 * '=')
-
-    ret = os.system('./bin/zhetapi -d include/io.zhplib')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    ret = os.system('./bin/zhetapi -d include/math.zhplib')
-    if ret != 0:
-        clean_and_exit(-1)
-
-    ret = os.system('cp -r $PWD/include /usr/local/include/zhp')
-    if ret != 0:
-        clean_and_exit(-1)
-
+    run_and_check(
+        'mv zhetapi bin/',
+        'mv libzhp.* bin/',
+        'ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi',
+        'ln -s -f $PWD/engine /usr/local/include/zhetapi',
+        'ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so',
+        'ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a',
+        'echo \'\nCompiling libraries...\n\'',
+        './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp	lib/io/file.cpp	-o include/io.zhplib',
+        './bin/zhetapi -v -c lib/math/math.cpp -o include/math.zhplib',
+        'echo \'\nDisplaying symbols...\n\'',
+        './bin/zhetapi -d include/io.zhplib',
+        './bin/zhetapi -d include/math.zhplib',
+        'echo \'\nInstalling ZHP libraries...\n\'',
+        'cp -r $PWD/include /usr/local/include/zhp',
+        'echo \'\nFinished installation.\''
+    )
 
 def zhetapi_normal(args):
     make_target(args.threads, 'zhetapi', args.mode)
