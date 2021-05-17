@@ -2,7 +2,7 @@
 #define FILTER_H_
 
 // Engine headers
-#include <tensor.hpp>
+#include "tensor.hpp"
 
 namespace zhetapi {
 

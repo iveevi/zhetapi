@@ -19,15 +19,15 @@
 // Engine headers
 #ifdef ZHP_CUDA
 
-#include <cuda/tensor.cuh>
+#include "cuda/tensor.cuh"
 
 #else
 
-#include <tensor.hpp>
+#include "tensor.hpp"
 
 #endif
 
-#include <cuda/essentials.cuh>
+#include "cuda/essentials.cuh"
 
 // Redeclare minor as a matrix operation
 #ifdef minor
@@ -268,11 +268,11 @@ public:
 };
 
 // TODO use _CUDACC_ instead of _zhp_cuda and make _cuda files
-#include <primitives/matrix_prims.hpp>
+#include "primitives/matrix_prims.hpp"
 
 #ifndef __AVR
 
-#include <matrix_cpu.hpp>
+#include "matrix_cpu.hpp"
 
 #endif
 

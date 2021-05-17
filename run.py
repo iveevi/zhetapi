@@ -92,6 +92,10 @@ def install(args):
     ret = os.system('ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi')
     if ret != 0:
         clean_and_exit(-1)
+    
+    ret = os.system('ln -s -f $PWD/engine /usr/local/include/zhetapi')
+    if ret != 0:
+        clean_and_exit(-1)
 
     ret = os.system('ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so')
     if ret != 0:
@@ -126,7 +130,7 @@ def install(args):
     if ret != 0:
         clean_and_exit(-1)
 
-    ret = os.system('ln -s -f $PWD/include /usr/local/include/zhp')
+    ret = os.system('cp -r $PWD/include /usr/local/include/zhp')
     if ret != 0:
         clean_and_exit(-1)
 

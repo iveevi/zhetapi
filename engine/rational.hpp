@@ -1,6 +1,7 @@
 #ifndef RATIONAL_H_
 #define RATIONAL_H_
 
+// C/C++ headers
 #include <iostream>
 #include <algorithm>
 

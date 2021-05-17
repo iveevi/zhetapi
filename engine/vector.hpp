@@ -22,11 +22,11 @@
 // Engine headers
 #ifdef ZHP_CUDA
 
-#include <cuda/matrix.cuh>
+#include "cuda/matrix.cuh"
 
 #else
 
-#include <matrix.hpp>
+#include "matrix.hpp"
 
 #endif
 
@@ -170,12 +170,12 @@ public:
 };
 
 // Primitive operations for all systems (including embedded)
-#include <primitives/vector_prims.hpp>
+#include "primitives/vector_prims.hpp"
 
 // Additional operations for common systems
 #ifndef __AVR
 
-#include <vector_cpu.hpp>
+#include "vector_cpu.hpp"
 
 #endif
 

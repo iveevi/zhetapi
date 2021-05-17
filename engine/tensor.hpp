@@ -12,12 +12,14 @@
 #include <string>
 #include <vector>
 
-#include <std/interval.hpp>
+// Engine headers
+#include "std/interval.hpp"
 
 #endif				// Does not support AVR
 
-#include <cuda/essentials.cuh>
-#include <avr/essentials.hpp>
+// Engine headers
+#include "cuda/essentials.cuh"
+#include "avr/essentials.hpp"
 
 namespace zhetapi {
 
@@ -147,11 +149,11 @@ public:
 	friend Matrix <U> operator/(const U &, const Matrix <U> &);
 };
 
-#include <primitives/tensor_prims.hpp>
+#include "primitives/tensor_prims.hpp"
 
 #ifndef __AVR
 
-#include <tensor_cpu.hpp>
+#include "tensor_cpu.hpp"
 
 #endif
 
