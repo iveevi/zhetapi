@@ -8,6 +8,7 @@ jobs:
       - checkout
       - run: echo "In docker..."
       - run: |
+          apt-get -y install sudo
           sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
           sudo apt-get -y update
           sudo apt-get install -y libboost-all-dev
