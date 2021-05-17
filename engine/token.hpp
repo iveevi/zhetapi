@@ -74,6 +74,7 @@ public:
 	};
 
 	bool operator!=(Token *) const;
+	void list_attributes(std::ostream & = std::cout) const;
 
 	// Change caller to a public member (static)
 

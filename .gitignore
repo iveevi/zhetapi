@@ -23,6 +23,7 @@ cmake_install.cmake
 data
 debug
 gen
+htests
 include
 makefile
 portability

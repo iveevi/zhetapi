@@ -29,6 +29,8 @@
 #include <std/activations.hpp>
 #include <std/erfs.hpp>
 
+#include <core/module.hpp>
+
 // Macros
 #define TEST(name)	bool name(ostringstream &oss)
 #define RIG(name)	{#name, &name}	
@@ -86,5 +88,7 @@ TEST(act_linear);
 TEST(act_relu);
 TEST(act_leaky_relu);
 TEST(act_sigmoid);
+
+TEST(module_construction);
 
 #endif

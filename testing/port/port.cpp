@@ -27,7 +27,8 @@ vector <singlet> rig {
 	RIG(act_linear),
 	RIG(act_relu),
 	RIG(act_leaky_relu),
-	RIG(act_sigmoid)
+	RIG(act_sigmoid),
+	RIG(module_construction)
 };
 
 vector <singlet> failed;

@@ -6,6 +6,7 @@ add_executable(port
 	testing/port/port-interval.cpp
 	testing/port/port-linalg.cpp
 	testing/port/port-matrix.cpp
+	testing/port/port-module.cpp
 	testing/port/port-special.cpp
 	testing/port/port-tensor.cpp
 	testing/port/port-vector.cpp

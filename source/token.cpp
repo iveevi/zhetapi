@@ -39,6 +39,17 @@ bool tokcmp(Token *a, Token *b)
 	return *a == b;
 }
 
+void Token::list_attributes(std::ostream &os) const
+{
+	os << "Methods:" << std::endl;
+	for (const auto &m : _methods)
+		os << "\t" << m.first << std::endl;
+	
+	os << "Attributes:" << std::endl;
+	for (const auto &a : _attributes)
+		os << "\t" << a.first << " = " << a.second->dbg_str() << std::endl;
+}
+
 std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 {
 	os << "{";

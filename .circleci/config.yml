@@ -35,3 +35,6 @@ jobs:
       - run:
           name: Installing Zhetapi
           command: sudo ./run.py install -j 2
+      - run:
+          name: Testing Zhetapi Installation
+          command: ./run.py header_tests

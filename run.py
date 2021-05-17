@@ -4,6 +4,37 @@ import argparse
 import os
 import time
 
+# Execution modes
+modes = {
+    '': './',
+    'gdb': 'gdb ',
+    'warn': './',
+    'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
+    'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
+}
+
+# Post scripts
+post = {
+    'profile': 'kcachegrind callgrind.out && rm callgrind.out'
+}
+
+# Feature testing
+features = {
+    'imv': 'image view test'
+}
+
+# Preprocessing
+targets = [key for key in features.keys()]
+header_tests = []
+
+for filename in os.listdir("cmake"):
+    if filename.endswith(".cmake"):
+        targets.append(filename[:-6])
+
+for filename in os.listdir("testing/headers"):
+    if filename.endswith("_headers.cpp"):
+        header_tests.append('testing/headers/' + filename)
+
 # Build the parser
 parser = argparse.ArgumentParser()
 
@@ -51,26 +82,6 @@ def make_target(threads, target, mode=''):
 
     if ret != 0:
         clean_and_exit(-1)
-
-
-# Execution modes
-modes = {
-    '': './',
-    'gdb': 'gdb ',
-    'warn': './',
-    'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
-    'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
-}
-
-# Post scripts
-post = {
-    'profile': 'kcachegrind callgrind.out && rm callgrind.out'
-}
-
-# Feature testing
-features = {
-    'imv': 'image view test'
-}
 
 # Special targets
 def list_features(args):
@@ -208,6 +219,18 @@ def python_bench(args):
     print(f'PYTHON EXECUTION TIME:\t\t{1000 * py_t:.2f} ms')
     print(f'RATIO (ZHP/PY):\t\t\t{100 * zhp_t/py_t:.2f}%')
 
+def run_header_tests(args):
+    run_and_check('mkdir -p htests')
+
+    for filename in header_tests:
+        output = "htests/" + filename[:-12] + "_htest.out"
+
+        run_and_check(
+            f'echo \'Running tests for {filename}:\'',
+            f'g++ {filename} -lzhp -o {output}',
+            f'./{output}'
+        )
+
 special = {
     'install': install,
     'zhetapi': zhetapi,
@@ -215,15 +238,9 @@ special = {
     'list': list_features,
     'modes' : list_modes,
     'base_bench' : base_bench,
-    'python_bench' : python_bench
+    'python_bench' : python_bench,
+    'header_tests' : run_header_tests
 }
-
-# Preprocessing
-targets = [key for key in features.keys()]
-
-for filename in os.listdir("cmake"):
-    if filename.endswith(".cmake"):
-        targets.append(filename[:-6])
 
 args = parser.parse_args()
 
