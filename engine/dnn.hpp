@@ -16,20 +16,20 @@
 #include <unistd.h>
 
 // JSON library
-#include <json/json.hpp>
+// #include <json/json.hpp>
 
 // Engine headers
-#include <dataset.hpp>
+#include "dataset.hpp"
 
 #endif		// Does not support AVR
 
 // Engine headers
-#include <core/kernels.hpp>
+#include "core/kernels.hpp"
 
-#include <display.hpp>
-#include <layer.hpp>
-#include <gradient.hpp>
-#include <optimizer.hpp>
+#include "display.hpp"
+#include "layer.hpp"
+#include "gradient.hpp"
+#include "optimizer.hpp"
 
 #ifdef ZHP_CUDA
 

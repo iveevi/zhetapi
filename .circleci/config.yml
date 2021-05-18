@@ -75,7 +75,10 @@ jobs:
             sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
       - run:
           name: Running Port Tests
-          command: ./run.py port -j 2
+          command: |
+            ./run.py port -j 2 -m codecov
+            export CODECOV_TOKEN='1ac6a585-4a77-4592-a34c-c3e16a19b77f'
+            bash <(curl -s https://codecov.io/bash)
 
 workflows:
   ubuntu-18.04-installation-and-port:
