@@ -25,6 +25,7 @@ jobs:
             sudo apt-get -y install libpng-dev
             sudo apt-get -y install tree
             sudo apt-get -y install wget
+            gcov-8 -h
       - run:
           name: Installing Cmake
           command: |
@@ -75,3 +76,9 @@ jobs:
       - run:
           name: Running Port Tests
           command: ./run.py port -j 2
+
+workflows:
+  ubuntu-18.04-installation-and-port:
+    jobs:
+      - build
+      - port-testing
