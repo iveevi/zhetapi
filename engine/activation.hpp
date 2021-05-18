@@ -13,15 +13,15 @@
 // Engine headers
 #ifdef ZHP_CUDA
 
-#include <cuda/vector.cuh>
+#include "cuda/vector.cuh"
 
 #else
 
-#include <vector.hpp>
+#include "vector.hpp"
 
 #endif
 
-#include <cuda/essentials.cuh>
+#include "cuda/essentials.cuh"
 
 // A is class name, T is the type (template), L is the loader function
 #define _zhp_register_activation(A, T, L)			\
