@@ -22,6 +22,8 @@ build
 cmake_install.cmake
 data
 debug
+gcov-files
+gcov-out
 gen
 htests
 include

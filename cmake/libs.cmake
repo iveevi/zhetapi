@@ -28,7 +28,7 @@ set(ZHETAPI_SOURCE
 	source/core/operation.cpp
 	source/core/operation_holder.cpp
 	source/core/rvalue.cpp
-	source/core/shader.cpp
+	# source/core/shader.cpp
 	source/core/types.cpp
 	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
@@ -44,7 +44,7 @@ set(ZHETAPI_SOURCE
 
 	interpreter/builtin/basic_io.cpp
 	
-	glad/glad.c
+	# glad/glad.c
 )
 
 # Compile shared and static library

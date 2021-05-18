@@ -5,11 +5,16 @@
 #include <cstring>
 #include <bitset>
 
+// TODO: remove this, maybe move to SFML
+#define ZHP_NO_GUI
+
 #ifndef ZHP_NO_GUI
 
 // GLFW
 #include <glad.h>	// Replace this header
 #include <GLFW/glfw3.h>
+
+#include <core/shader.hpp>
 
 #endif
 
@@ -19,8 +24,6 @@
 // Engine headers
 #include <tensor.hpp>
 #include <vector.hpp>
-
-#include <core/shader.hpp>
 
 namespace zhetapi {
 

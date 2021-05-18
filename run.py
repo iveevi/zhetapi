@@ -9,6 +9,7 @@ modes = {
     '': './',
     'gdb': 'gdb ',
     'warn': './',
+    'codecov': './',
     'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
     'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
 }
@@ -69,6 +70,8 @@ def make_target(threads, target, mode=''):
         ret = os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
     elif mode in ['warn']:
         ret = os.system('cmake -DCMAKE_BUILD_TYPE=Warn .')
+    elif mode in ['codecov']:
+        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Codecov .')
     else:
         ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
 
