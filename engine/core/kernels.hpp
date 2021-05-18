@@ -2,8 +2,8 @@
 #define KERNELS_H_
 
 // Engine headers
-#include <matrix.hpp>
-#include <vector.hpp>
+#include "matrix.hpp"
+#include "vector.hpp"
 
 /**
  * This file contains CPU "kernels" which speed up computation in other parts of

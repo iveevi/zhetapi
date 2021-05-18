@@ -20,6 +20,7 @@ __pycache__
 bin
 build
 cmake_install.cmake
+coverage.info
 data
 debug
 gcov-files
