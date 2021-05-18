@@ -64,6 +64,7 @@ jobs:
             sudo apt-get -y install tree
             sudo apt-get -y install wget
             sudo apt-get -y install curl
+            sudo apt-get -y install lcov
       - run:
           name: Installing Cmake
           command: |
@@ -79,7 +80,10 @@ jobs:
           command: |
             ./run.py port -j 2 -m codecov
             export CODECOV_TOKEN='1ac6a585-4a77-4592-a34c-c3e16a19b77f'
-            bash <(curl -s https://codecov.io/bash)
+            lcov --capture --directory . --output-file coverage.info
+            lcov --remove coverage.info '/usr/*' --output-file coverage.info
+            lcov --list coverage.info
+            bash <(curl -s https://codecov.io/bash) -f coverage.info
 
 workflows:
   ubuntu-18.04-installation-and-port:
