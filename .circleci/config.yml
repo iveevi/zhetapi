@@ -25,6 +25,7 @@ jobs:
             sudo apt-get -y install libpng-dev
             sudo apt-get -y install tree
             sudo apt-get -y install wget
+            gcov-8 -h
       - run:
           name: Installing Cmake
           command: |
