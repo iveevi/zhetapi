@@ -79,7 +79,7 @@ jobs:
           command: |
             wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
             tar -xvzf lcov-1.15.tar.gz lcov-1.15/
-            cd loc-1.15/
+            cd lcov-1.15/
             sudo make install
             cd ../
       - run:
