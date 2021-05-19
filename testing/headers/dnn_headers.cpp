@@ -12,4 +12,6 @@ int main()
 		Layer <double> (4, new ReLU <double> ()),
 		Layer <double> (4, new ReLU <double> ())
 	});
+
+	cout << "model() = " << model({1, 1, 1, 1}) << endl;
 }

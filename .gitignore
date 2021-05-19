@@ -23,6 +23,7 @@ cmake_install.cmake
 coverage.info
 data
 debug
+engine/engine
 gcov-files
 gcov-out
 gen

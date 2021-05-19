@@ -226,7 +226,8 @@ def run_header_tests(args):
     run_and_check('mkdir -p htests')
 
     for filename in header_tests:
-        output = "htests/" + filename[:-12] + "_htest.out"
+        output = "htests/" + filename[16:-12] + "_htest.out"
+        print("OUTPUT = " + output)
 
         run_and_check(
             f'echo \'Running tests for {filename}:\'',
