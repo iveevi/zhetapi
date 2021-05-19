@@ -64,9 +64,9 @@ public:
 	Activation();						// Default constructor
 
 	__cuda_dual__
-	Activation(activation_type);				// Type constructor
+	explicit Activation(activation_type);				// Type constructor
 
-	AVR_IGNORE(
+	explicit AVR_IGNORE(
 		__cuda_dual__
 		Activation(const std::vector <T> &)			// Argument constructor
 	);

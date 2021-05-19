@@ -144,7 +144,7 @@ static Token *node_null_value(Engine *context, const node &tree)
 		return new Operand <Token *> (node_value(context, tree[0]));
 	default:
 		throw std::runtime_error("Unknown execution mode \'"
-				+ strlabs[tree._label] + "\'");
+				+ strlabs[tree.label()] + "\'");
 
 		break;
 	}
@@ -184,7 +184,7 @@ Token *node_value(Engine *context, node tree)
 
 		std::vector <Token *> args;
 
-		for (node leaf : tree[1]._leaves)
+		for (node leaf : tree[1])
 			args.push_back(node_value(context, leaf));
 
 		Token *callee = node_value(context, tree[0]);
@@ -200,21 +200,20 @@ Token *node_value(Engine *context, node tree)
 	case Token::opd:
 		return tree.copy_token();
 	case Token::oph:	
-		size = tree._leaves.size();
+		// size = tree._leaves.size();
 
-		// TODO: add begin and end for trees
-		for (node leaf : tree._leaves)
+		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 
 		tptr = context->compute((tree.cast <operation_holder> ())->rep, values);
 		
-		if (tree._label == l_post_modifier) {
+		if (tree.label() == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
 			
 			context->put(rv->symbol(), tptr);
 
 			return rv->get(context)->copy();
-		} else if (tree._label == l_pre_modifier) {
+		} else if (tree.label() == l_pre_modifier) {
 			rv= tree[0].cast <rvalue> ();
 
 			context->put(rv->symbol(), tptr);
@@ -232,10 +231,10 @@ Token *node_value(Engine *context, node tree)
 	case Token::token_node_list:
 		return (tree.cast <node_list> ())->evaluate(context);
 	case Token::ftn:
-		if (tree._leaves.empty())
-			return tree._tptr->copy();
+		if (tree.empty())
+			return tree.copy_token();
 		
-		for (node leaf : tree._leaves)
+		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 
 		// TODO: shorten (cast)
@@ -243,20 +242,21 @@ Token *node_value(Engine *context, node tree)
 
 		return tptr->copy();
 	case Token::reg:
-		for (node leaf : tree._leaves)
+		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 
-		tptr = (*(dynamic_cast <Registrable *> (tree._tptr)))(values);
+		// TODO: add compute()
+		tptr = (*(tree.cast <Registrable> ()))(values);
 
 		if (tptr)
 			return tptr->copy();
 
 		break;
 	case Token::alg:
-		for (node leaf : tree._leaves)
+		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 		
-		aptr = dynamic_cast <algorithm *> (tree._tptr);
+		aptr = tree.cast <algorithm> ();
 		tptr = aptr->execute(context, values);
 
 		if (tptr)
@@ -279,7 +279,7 @@ Token *node_sequential_value(Engine *context, node tree)
 	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
 	Token *tptr;
-	for (node nd : tree._leaves) {
+	for (node nd : tree) {
 		tptr = node_value(context, nd);
 
 		// Check value for special cases (early returns)

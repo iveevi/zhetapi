@@ -41,7 +41,7 @@ node_manager::node_manager(Engine *context, const node &tree, const Args &args)
 	for (std::string str : args) {
 		tmp = nf_zero();
 
-		tmp._label = l_variable;
+		tmp.relabel(l_variable);
 
 		_refs.push_back(tmp);
 	}
@@ -115,7 +115,7 @@ node_manager::node_manager(
 	for (std::string str : params) {
 		tmp = nf_zero();
 
-		tmp._label = l_variable;
+		tmp.relabel(l_variable);
 
 		_refs.push_back(tmp);
 	}
@@ -213,10 +213,10 @@ Token *node_manager::substitute_and_seq_compute(
 	return sequential_value(context);
 }
 
-// Setters
+// Setters (TODO: set to relabel)
 void node_manager::set_label(lbl label)
 {
-	_tree._label = label;
+	_tree.relabel(label);
 }
 
 // Branch compress/translation
@@ -233,12 +233,12 @@ void node_manager::create_branch(node &tree, size_t start, size_t end)
 	for (size_t i = start; i < end; i++) {
 		branch.append(tree[start]);
 
-		tree._leaves.erase(itr);
+		tree.erase(itr);
 	}
 
 	branch.set_label(l_branch);
 
-	tree._leaves.insert(itr, branch._tree);
+	tree.insert(itr, branch._tree);
 }
 
 // Make this non-method
@@ -323,7 +323,7 @@ void node_manager::add_args(const std::vector <std::string> &args)
 	for (std::string str : args) {
 		tmp = nf_zero();
 
-		tmp._label = l_variable;
+		tmp.relabel(l_variable);
 
 		_refs.push_back(tmp);
 	}
@@ -353,13 +353,11 @@ void node_manager::unpack()
 
 void node_manager::unpack(node &ref)
 {
-	if (ref.caller() == Token::token_rvalue) {
-		// TODO: make a method for assigning tokens to trees
-		ref._tptr = (ref.cast <rvalue> ())->get(shared_context);
-	}
+	if (ref.caller() == Token::token_rvalue)
+		ref.retokenize((ref.cast <rvalue> ())->get(shared_context));
 
 	// Add a foreach method in nodes (with ref)
-	for (node &nd : ref._leaves)
+	for (node &nd : ref)
 		unpack(nd);
 }
 
@@ -442,17 +440,17 @@ void node_manager::expand(
 
 		variable_cluster *vclptr = ref.cast <variable_cluster> ();
 
-		ref = expand(context, vclptr->_cluster, ref._leaves, pardon);
+		ref = expand(context, vclptr->_cluster, ref, pardon);
 	}
 
-	for (node &leaf : ref._leaves)
+	for (node &leaf : ref)
 		expand(context, leaf, pardon);
 }
 
 node node_manager::expand(
 		Engine *context,
 		const std::string &str,
-		const std::vector <node> &leaves,
+		const node &lsrc,
 		const std::set <std::string> &pardon)
 {
 	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
@@ -592,7 +590,7 @@ node node_manager::expand(
 	/*
 	 * The very last Token is attributed the leaves
 	 */
-	choice[choice.size() - 1]._leaves = leaves;
+	choice[choice.size() - 1].copy_leaves(lsrc);
 
 	/*
 	 * Binary fusing. Advantageous to linear fusing in the way in
@@ -623,10 +621,10 @@ node node_manager::expand(
 size_t node_manager::count_up(node &ref)
 {
 	size_t total = 1;
-	for (auto &child : ref._leaves)
+	for (auto &child : ref)
 		total += count_up(child);
 	
-	ref._nodes = total;
+	ref.set_count(total);
 
 	return total;
 }
@@ -655,7 +653,7 @@ void node_manager::simplify(Engine *context, node &ref)
 	} else if (ophptr && (ophptr->code == pwr)) {
 		simplify_power(context, ref);
 	} else {
-		for (auto &child : ref._leaves)
+		for (auto &child : ref)
 			simplify(context, child);
 	}
 }
@@ -820,12 +818,12 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 {
 	if (c == dvs) {
-		lbl l1 = ref._leaves[0]._label;
-		lbl l2 = ref._leaves[1]._label;
+		lbl l1 = ref[0].label();
+		lbl l2 = ref[1].label();
 
 		if (l1 == l_differential && l2 == l_differential) {
-			Token *t1 = ref._leaves[0]._tptr;
-			Token *t2 = ref._leaves[1]._tptr;
+			Token *t1 = ref[0].ptr();
+			Token *t2 = ref[1].ptr();
 
 			t1 = (dynamic_cast <node_differential *> (t1))->get();
 			t2 = (dynamic_cast <node_differential *> (t2))->get();
@@ -845,8 +843,8 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 			if (ftn && ftn->is_variable(var)) {
 				Function f = ftn->differentiate(var);
 
-				ref._leaves.clear();
-				ref._tptr = f.copy();
+				ref.clear();
+				ref.retokenize(f.copy());
 			}
 		}
 	}
@@ -1031,9 +1029,9 @@ void node_manager::differentiate(const std::string &str)
 {
 	for (size_t i = 0; i < _refs.size(); i++) {
 		if (_params[i] == str)
-			_refs[i]._label = l_variable;
+			_refs[i].relabel(l_variable);
 		else
-			_refs[i]._label = l_variable_constant;
+			_refs[i].relabel(l_variable_constant);
 	}
 
 	label(_tree);
@@ -1045,16 +1043,16 @@ void node_manager::differentiate(const std::string &str)
 // Post-label usage
 void node_manager::differentiate(node &ref)
 {
-	if (is_constant(ref._label)) {
+	if (is_constant(ref.label())) {
 		ref.transfer(nf_zero());
 
 		return;
 	}
 
-	switch (ref._label) {
+	switch (ref.label()) {
 	case l_separable:
-		differentiate(ref._leaves[0]);
-		differentiate(ref._leaves[1]);
+		differentiate(ref[0]);
+		differentiate(ref[1]);
 		break;
 	case l_multiplied:
 		differentiate_mul(ref);
@@ -1096,12 +1094,12 @@ void node_manager::refactor_reference(
 		const std::string &str,
 		Token *tptr)
 {
-	node_reference *ndr = dynamic_cast <node_reference *> (ref._tptr);
+	node_reference *ndr = dynamic_cast <node_reference *> (ref.ptr());
 	
 	if (ndr && ndr->symbol() == str)
-		ref._tptr = tptr->copy();
+		ref.retokenize(tptr->copy());
 
-	for (node &leaf : ref._leaves)
+	for (node &leaf : ref)
 		refactor_reference(leaf, str, tptr);
 }
 
@@ -1113,16 +1111,16 @@ std::string node_manager::display() const
 
 std::string node_manager::display(node ref) const
 {
-	switch (ref._tptr->caller()) {
+	switch (ref.ptr()->caller()) {
 	case Token::opd:
-		return ref._tptr->dbg_str();
+		return ref.ptr()->dbg_str();
 	case Token::oph:
 		return display_operation(ref);
 	case Token::ndr:
-		if ((dynamic_cast <node_reference *> (ref._tptr))->is_variable())
-			return (dynamic_cast <node_reference *> (ref._tptr))->symbol();
+		if ((dynamic_cast <node_reference *> (ref.ptr()))->is_variable())
+			return (dynamic_cast <node_reference *> (ref.ptr()))->symbol();
 		
-		return display(*(dynamic_cast <node_reference *> (ref._tptr)->get()));
+		return display(*(dynamic_cast <node_reference *> (ref.ptr())->get()));
 	default:
 		break;
 	}
@@ -1132,22 +1130,21 @@ std::string node_manager::display(node ref) const
 
 std::string node_manager::display_operation(node ref) const
 {
-	std::string str = (dynamic_cast <operation_holder *> (ref._tptr))->rep;
-	
-	operation_holder *ophptr = dynamic_cast <operation_holder *> (ref._tptr);
+	operation_holder *ophptr = ref.cast <operation_holder> ();
+	std::string str = ophptr->rep;
 
 	switch (ophptr->code) {
 	case add:
 	case sub:
 	case mul:
-		return display_pemdas(ref, ref._leaves[0]) + " "
-			+ str + " " + display_pemdas(ref, ref._leaves[1]);
+		return display_pemdas(ref, ref[0]) + " "
+			+ str + " " + display_pemdas(ref, ref[1]);
 	case dvs:
-		return display_pemdas(ref, ref._leaves[0])
-			+ str + display_pemdas(ref, ref._leaves[1]);
+		return display_pemdas(ref, ref[0])
+			+ str + display_pemdas(ref, ref[1]);
 	case pwr:
-		return display_pemdas(ref, ref._leaves[0]) + str
-			+ display_pemdas(ref, ref._leaves[1]);
+		return display_pemdas(ref, ref[0]) + str
+			+ display_pemdas(ref, ref[1]);
 	case sxn:
 	case cxs:
 	case txn:
@@ -1164,11 +1161,11 @@ std::string node_manager::display_operation(node ref) const
 
 	case xln:
 	case xlg:
-		return str + "(" + display_pemdas(ref, ref._leaves[0]) + ")";
+		return str + "(" + display_pemdas(ref, ref[0]) + ")";
 	case lxg:
 		// Fix bug with single/double argument overload
-		return str + "(" + display_pemdas(ref, ref._leaves[0])
-			+ ", " + display_pemdas(ref, ref._leaves[1]) + ")";
+		return str + "(" + display_pemdas(ref, ref[0])
+			+ ", " + display_pemdas(ref, ref[1]) + ")";
 	default:
 		break;
 	}
@@ -1178,8 +1175,8 @@ std::string node_manager::display_operation(node ref) const
 
 std::string node_manager::display_pemdas(node ref, node child) const
 {
-	operation_holder *rophptr = dynamic_cast <operation_holder *> (ref._tptr);
-	operation_holder *cophptr = dynamic_cast <operation_holder *> (child._tptr);
+	operation_holder *rophptr = ref.cast <operation_holder> ();
+	operation_holder *cophptr = child.cast <operation_holder> ();
 
 	if (!cophptr)
 		return display(child);
@@ -1245,37 +1242,36 @@ void node_manager::label(node &ref)
 		break;
 	case Token::oph:
 		// TODO: Method
-		for (node &leaf : ref._leaves)
+		for (node &leaf : ref)
 			label(leaf);
 
 		label_operation(ref);
 
 		break;
 	case Token::ftn:
-		for (node &leaf : ref._leaves)
+		for (node &leaf : ref)
 			label(leaf);
 		
 		/* Also add a different labeling if it is constant,
 		 * probably needs to be called an operation constant
 		 */
-		ref._label = l_function;
+		ref.relabel(l_function);
 		break;
 	case Token::var:
-		ref._label = l_variable;
+		ref.relabel(l_variable);
 		break;
 	case Token::ndr:
 		// Transfer labels, makes things easier
-		ref._label = (dynamic_cast <node_reference *>
-				(ref._tptr))->get()->_label;
+		ref.relabel((ref.cast <node_reference> ())->get()->label());
 		break;
 	case Token::ndd:
-		ref._label = l_differential;
+		ref.relabel(l_differential);
 		break;
 	case Token::reg:
-		for (node &leaf : ref._leaves)
+		for (node &leaf : ref)
 			label(leaf);
 
-		ref._label = l_registrable;
+		ref.relabel(l_registrable);
 		break;
 	default:
 		break;
@@ -1287,7 +1283,7 @@ void node_manager::label_operation(node &ref)
 	operation_holder *ophptr = ref.cast <operation_holder> ();
 
 	bool constant = true;
-	for (auto child : ref._leaves) {
+	for (auto child : ref) {
 		if (!is_constant(child.label())) {
 			constant = false;
 			break;
@@ -1325,8 +1321,8 @@ void node_manager::label_operation(node &ref)
 		ref.relabel(l_binary_log);
 		break;
 	case lxg:
-		if (is_constant(ref._leaves[0]._label) &&
-			!is_constant(ref._leaves[1]._label))
+		if (is_constant(ref[0].label()) &&
+			!is_constant(ref[1].label()))
 			ref.relabel(l_constant_base_log);
 		break;
 	case sxn:
@@ -1360,8 +1356,8 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref)
 {
-	if (ref._tptr && (ref._tptr->caller() == Token::ndr)) {
-		std::string tmp = (dynamic_cast <node_reference *> (ref._tptr))->symbol();
+	if (ref.caller() == Token::ndr) {
+		std::string tmp = (ref.cast <node_reference> ())->symbol();
 
 		auto itr = find(_params.begin(), _params.end(), tmp);
 
@@ -1369,13 +1365,14 @@ void node_manager::rereference(node &ref)
 			throw std::runtime_error("could not find param " + tmp);
 
 		// TODO: throw if index is at the end
+		// TODO: refactor _params to _args
 		size_t index = std::distance(_params.begin(), itr);
 
 		// Need a new method to clear/reset
-		ref._tptr = new node_reference(&_refs[index], tmp, index, true);
+		ref.retokenize(new node_reference(&_refs[index], tmp, index, true));
 	}
 
-	for (node &leaf : ref._leaves)
+	for (node &leaf : ref)
 		rereference(leaf);
 }
 

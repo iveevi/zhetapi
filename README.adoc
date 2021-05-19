@@ -1,6 +1,7 @@
 image::zhetapi-logo.png[]
 
 image:https://circleci.com/gh/vedavamadathil/zhetapi.svg?style=shield[link=https://circleci.com/gh/vedavamadathil/zhetapi]
+image:https://codecov.io/gh/vedavamadathil/zhetapi/branch/master/graph/badge.svg?token=ODIZYF4KQ2[link=https://codecov.io/gh/vedavamadathil/zhetapi]
 image:https://readthedocs.org/projects/zhetapi-docs/badge/?version=latest[Documentation Status, link=https://zhetapi-docs.readthedocs.io/en/latest/?badge=latest]
 image:https://app.codacy.com/project/badge/Grade/9df40090202d4fc1ba8a559fbe5f96a2[Quality, link=https://www.codacy.com/gh/vedavamadathil/zhetapi/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=vedavamadathil/zhetapi&amp;utm_campaign=Badge_Grade]
 image:https://img.shields.io/badge/License-MIT-yellow.svg[link=https://opensource.org/licenses/MIT]

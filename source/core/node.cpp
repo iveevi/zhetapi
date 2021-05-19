@@ -98,24 +98,42 @@ const node &node::operator[](size_t i) const
 	return _leaves[i];
 }
 
-std::vector <node> ::iterator node::begin()
+// Position iterators
+node::LeavesIt node::begin()
 {
 	return _leaves.begin();
 }
 
-std::vector <node> ::iterator node::end()
+node::LeavesIt node::end()
 {
 	return _leaves.end();
 }
 
-std::vector <node> ::const_iterator node::begin() const
+node::LeavesCit node::begin() const
 {
 	return _leaves.begin();
 }
 
-std::vector <node> ::const_iterator node::end() const
+node::LeavesCit node::end() const
 {
 	return _leaves.end();
+}
+
+// Leaves modifiers
+node::LeavesIt node::insert(const node::LeavesIt &it, const node &nd)
+{
+	return _leaves.insert(it, nd);
+}
+
+node::LeavesIt node::erase(const node::LeavesIt &it)
+{
+	return _leaves.erase(it);
+}
+
+// Clear leaves
+void node::clear()
+{
+	_leaves.clear();
 }
 
 // Properties
@@ -167,6 +185,16 @@ void node::retokenize(Token *tptr)
 	_tptr = tptr->copy();
 }
 
+void node::releaf(const node::Leaves &lvs)
+{
+	_leaves = lvs;
+}
+
+void node::set_count(size_t i)
+{
+	_nodes = i;
+}
+
 void node::transfer(const node &ref)
 {
 	if (ref._tptr) {
@@ -179,6 +207,11 @@ void node::transfer(const node &ref)
 	_label = ref._label;
 	_class = ref._class;
 	_nodes = ref._nodes;
+	_leaves = ref._leaves;
+}
+
+void node::copy_leaves(const node &ref)
+{
 	_leaves = ref._leaves;
 }
 
@@ -308,7 +341,7 @@ node factorize(const node &ref, const node &factor)
 
 		process.pop();
 
-		operation_holder *ophptr = dynamic_cast <operation_holder *> (top._tptr);
+		operation_holder *ophptr = top.cast <operation_holder> ();
 
 		if (ophptr && (ophptr->code == mul)) {
 			process.push(top[0]);

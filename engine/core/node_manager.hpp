@@ -117,7 +117,7 @@ private:
 	
 	void rereference(node &);
 
-	node expand(Engine *, const std::string &, const std::vector <node> &,
+	node expand(Engine *, const std::string &, const node &,
 			const std::set <std::string> & = std::set <std::string> ());
 
 	void simplify(Engine *, node &);

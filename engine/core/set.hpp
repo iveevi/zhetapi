@@ -18,7 +18,7 @@ private:
 	std::string	_name	= "";
 	Permit		_permit;
 public:
-	Set(const std::string &);
+	explicit Set(const std::string &);
 	Set(const std::string &, Permit);
 
 	virtual bool present(Token *) const;
@@ -44,7 +44,7 @@ private:
 	OpVec		_vec;
 	Operation	_op	= Union;
 public:
-	MultiSet(const OpVec &);
+	explicit MultiSet(const OpVec &);
 
 	bool present(Token *) const;
 

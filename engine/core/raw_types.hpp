@@ -2,10 +2,10 @@
 #define RAW_TYPES_H_
 
 // Engine headers
-#include "rational.hpp"
-#include "complex.hpp"
-#include "matrix.hpp"
-#include "vector.hpp"
+#include "../rational.hpp"
+#include "../complex.hpp"
+#include "../matrix.hpp"
+#include "../vector.hpp"
 
 namespace zhetapi {
 

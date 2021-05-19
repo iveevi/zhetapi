@@ -9,22 +9,25 @@
 #include <sstream>
 
 // Engine headers
-#include "token.hpp"
-
-#include "core/label.hpp"
-#include "core/class.hpp"
+#include "../token.hpp"
+#include "label.hpp"
+#include "class.hpp"
 
 namespace zhetapi {
 
 class node {
 public:
+	using Leaves = std::vector <node>;
+	using LeavesIt = Leaves::iterator;
+	using LeavesCit = Leaves::const_iterator;
+private:
 	// Members
-	Token *			_tptr		= nullptr;
-	lbl			_label		= l_none;
-	cls			_class		= c_none;
-	size_t			_nodes		= 0;
-	std::vector <node>	_leaves	= {};
-
+	Token *		_tptr		= nullptr;
+	lbl		_label		= l_none;
+	cls		_class		= c_none;
+	size_t		_nodes		= 0;
+	Leaves		_leaves;
+public:
 	// Constructors
 	node();
 	node(const node &);
@@ -49,11 +52,17 @@ public:
 	node &operator[](size_t);
 	const node &operator[](size_t) const;
 
-	std::vector <node> ::iterator begin();
-	std::vector <node> ::iterator end();
+	// Leaves modifiers
+	LeavesIt begin();
+	LeavesIt end();
 
-	std::vector <node> ::const_iterator begin() const;
-	std::vector <node> ::const_iterator end() const;
+	LeavesCit begin() const;
+	LeavesCit end() const;
+
+	LeavesIt insert(const LeavesIt &, const node &);
+	LeavesIt erase(const LeavesIt &);
+
+	void clear();
 
 	// Properties
 	lbl label() const;
@@ -66,9 +75,13 @@ public:
 	// Setters
 	void relabel(lbl);
 	void retokenize(Token *);
+	void releaf(const Leaves &);
+
+	void set_count(size_t);
 	
 	// Member functions
 	void transfer(const node &);
+	void copy_leaves(const node &);
 
 	void append(const node &);
 	void append_front(const node &);
