@@ -75,14 +75,22 @@ jobs:
             sudo sh cmake-3.14.2-Linux-x86_64.sh --prefix=/opt/cmake --exclude-subdir --skip-license
             sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
       - run:
+          name: Install lcov-1.15
+          command: |
+            wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
+            tar -xvzf lcov-1.15.tar.gz lcov-1.15/
+            cd loc-1.15/
+            sudo make install
+            cd ../
+      - run:
           name: Running Port Tests
           command: |
             ./run.py port -j 2 -m codecov
             export CODECOV_TOKEN='1ac6a585-4a77-4592-a34c-c3e16a19b77f'
-            lcov --gcov-tool gcov-8 --directory . --capture --output-file coverage.info
-            # lcov --remove coverage.info '/usr/*' --output-file coverage.info
-            # lcov --list coverage.info
-            # bash <(curl -s https://codecov.io/bash) -f coverage.info
+            ./lcov-1.15/bin/lcov --gcov-tool gcov-8 --directory . --capture --output-file coverage.info
+            ./lcov-1.15/bin/lcov --remove coverage.info '/usr/*' --output-file coverage.info
+            ./lcov-1.15/bin/lcov --list coverage.info
+            bash <(curl -s https://codecov.io/bash) -f coverage.info
 
 workflows:
   ubuntu-18.04-installation-and-port:
