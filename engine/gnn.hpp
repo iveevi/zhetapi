@@ -7,7 +7,7 @@
 #include <vector>
 
 // Engine headers
-#include <netnode.hpp>
+#include "netnode.hpp"
 
 namespace zhetapi {
 

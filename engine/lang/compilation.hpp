@@ -1,8 +1,8 @@
 #ifndef COMPILATION_H_
 #define COMPILATION_H_
 
-#include <core/common.hpp>
-#include <core/node_manager.hpp>
+#include "core/common.hpp"
+#include "core/node_manager.hpp"
 
 namespace zhetapi {
 

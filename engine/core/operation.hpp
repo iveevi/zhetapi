@@ -7,8 +7,9 @@
 #include <vector>
 
 // Engine Headers
-#include <operand.hpp>
+#include "../operand.hpp"
 
+// TODO: remove. this is completely obselete
 namespace zhetapi {
 
 class operation : public Token {

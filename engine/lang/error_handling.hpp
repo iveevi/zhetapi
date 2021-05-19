@@ -6,8 +6,8 @@
 #include <vector>
 
 // Engine headers
-#include <matrix.hpp>
-#include <core/common.hpp>
+#include "../matrix.hpp"
+#include "../core/common.hpp"
 
 namespace zhetapi {
 

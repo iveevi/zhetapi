@@ -6,8 +6,8 @@
 #include <vector>
 
 // Engine headers
-#include <tensor.hpp>
-#include <filter.hpp>
+#include "tensor.hpp"
+#include "filter.hpp"
 
 namespace zhetapi {
 

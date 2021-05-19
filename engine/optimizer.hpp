@@ -2,8 +2,8 @@
 #define OPTIMIZER_H_
 
 // Engine headers
-#include <dataset.hpp>
-#include <gradient.hpp>
+#include "dataset.hpp"
+#include "gradient.hpp"
 
 namespace zhetapi {
 

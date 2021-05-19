@@ -9,11 +9,10 @@
 #include <vector>
 
 // Engine headers
-#include <token.hpp>
-
-#include <std/combinatorial.hpp>
-#include <core/operation.hpp>
-#include <core/types.hpp>
+#include "../token.hpp"
+#include "../std/combinatorial.hpp"
+#include "operation.hpp"
+#include "types.hpp"
 
 // TODO: Fix these maCmpRos to accomodate for _table instead of ops
 // Instead of a maCmpRo use a private method (clearner code and header)

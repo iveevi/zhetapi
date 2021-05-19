@@ -8,8 +8,8 @@
 #include <cmath>
 
 // Engine headers
-#include <vector.hpp>
-#include <parametrization.hpp>
+#include "../vector.hpp"
+#include "../parametrization.hpp"
 
 namespace zhetapi {
 

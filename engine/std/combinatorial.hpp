@@ -6,7 +6,7 @@
 #include <vector>
 
 // Engine headers
-#include <rational.hpp>
+#include "rational.hpp"
 
 namespace zhetapi {
 

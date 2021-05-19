@@ -40,10 +40,10 @@
 
 #else
 
-#include <activation.hpp>
-#include <erf.hpp>
-#include <matrix.hpp>
-#include <vector.hpp>
+#include "activation.hpp"
+#include "erf.hpp"
+#include "matrix.hpp"
+#include "vector.hpp"
 
 #endif
 

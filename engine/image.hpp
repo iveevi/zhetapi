@@ -14,7 +14,7 @@
 #include <glad.h>	// Replace this header
 #include <GLFW/glfw3.h>
 
-#include <core/shader.hpp>
+#include "core/shader.hpp"
 
 #endif
 
@@ -22,8 +22,8 @@
 #include <png.h>
 
 // Engine headers
-#include <tensor.hpp>
-#include <vector.hpp>
+#include "tensor.hpp"
+#include "vector.hpp"
 
 namespace zhetapi {
 

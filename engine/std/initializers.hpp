@@ -3,7 +3,7 @@
 
 #ifdef __AVR	// Does not support AVR
 
-#include <avr/random.hpp>
+#include "avr/random.hpp"
 
 #else
 

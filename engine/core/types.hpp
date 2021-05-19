@@ -1,13 +1,12 @@
-#ifndef doubleYPES_H_
-#define doubleYPES_H_
+#ifndef TYPES_H_
+#define TYPES_H_
 
 // C/C++ headers
 #include <typeindex>
 
 // Engine headers
-#include <operand.hpp>
-
-#include <core/raw_types.hpp>
+#include "../operand.hpp"
+#include "raw_types.hpp"
 
 namespace zhetapi {
 

@@ -1,16 +1,18 @@
 #ifndef VM_H_
 #define VM_H_
 
+// TODO: remove.
+
 // C/C++ headers
 #include <vector>
 #include <cstdlib>
 #include <exception>
 
 // Engine headers
-#include <token.hpp>
-#include <operand.hpp>
+#include "../token.hpp"
+#include "../operand.hpp"
 
-#include <core/types.hpp>
+#include "../core/types.hpp"
 
 namespace zhetapi {
 

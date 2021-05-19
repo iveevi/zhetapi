@@ -5,7 +5,7 @@
 #include <sstream>
 
 // Engine headers
-#include <token.hpp>
+#include "../token.hpp"
 
 // Create as middle class inheriter
 // ('reference', then branch into rvalue and lvalue)

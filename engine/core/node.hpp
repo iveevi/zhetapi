@@ -9,10 +9,10 @@
 #include <sstream>
 
 // Engine headers
-#include <token.hpp>
+#include "token.hpp"
 
-#include <core/label.hpp>
-#include <core/class.hpp>
+#include "core/label.hpp"
+#include "core/class.hpp"
 
 namespace zhetapi {
 

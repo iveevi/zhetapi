@@ -4,16 +4,16 @@
 #ifndef __AVR	// Does not support AVR
 
 // JSON library
-#include <json/json.hpp>
+#include "json/json.hpp"
 
 #endif		// Does not support AVR
 
 // Engine headers
-#include <matrix.hpp>
-#include <activation.hpp>
+#include "matrix.hpp"
+#include "activation.hpp"
 
-#include <std/interval.hpp>
-#include <std/initializers.hpp>
+#include "std/interval.hpp"
+#include "std/initializers.hpp"
 
 namespace zhetapi {
 

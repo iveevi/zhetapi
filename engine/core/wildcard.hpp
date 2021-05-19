@@ -2,9 +2,8 @@
 #define WILDCARD_H_
 
 // Engine headers
-#include <token.hpp>
-
-#include <core/label.hpp>
+#include "../token.hpp"
+#include "label.hpp"
 
 namespace zhetapi {
 

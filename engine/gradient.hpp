@@ -10,11 +10,11 @@
 #endif		// Does not support AVR
 
 // Engine headers
-#include <matrix.hpp>
-#include <erf.hpp>
-#include <vector.hpp>
-#include <layer.hpp>
-#include <dataset.hpp>
+#include "matrix.hpp"
+#include "erf.hpp"
+#include "vector.hpp"
+#include "layer.hpp"
+#include "dataset.hpp"
 
 namespace zhetapi {
 

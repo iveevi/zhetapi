@@ -8,12 +8,12 @@
 #include <vector>
 
 // Engine headers
-#include <core/node_reference.hpp>
-#include <core/node_differential.hpp>
-#include <core/expr_parser.hpp>
-#include <core/types.hpp>
-#include <core/lvalue.hpp>
-#include <core/rvalue.hpp>
+#include "node_reference.hpp"
+#include "node_differential.hpp"
+#include "expr_parser.hpp"
+#include "types.hpp"
+#include "lvalue.hpp"
+#include "rvalue.hpp"
 
 namespace zhetapi {
 

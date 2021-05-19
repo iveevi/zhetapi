@@ -2,12 +2,12 @@
 #define STD_FILTERS_H_
 
 // Engine headrers
-#include <filter.hpp>
-#include <matrix.hpp>
-#include <vector.hpp>
-#include <image.hpp>
+#include "filter.hpp"
+#include "matrix.hpp"
+#include "vector.hpp"
+#include "image.hpp"
 
-#include <std/initializers.hpp>
+#include "std/initializers.hpp"
 
 namespace zhetapi {
 

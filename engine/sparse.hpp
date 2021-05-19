@@ -5,7 +5,7 @@
 #include <cstdlib>
 
 // Engine headers
-#include <matrix.hpp>
+#include "matrix.hpp"
 
 namespace zhetapi {
 
