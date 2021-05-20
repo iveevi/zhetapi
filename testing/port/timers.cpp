@@ -18,10 +18,10 @@ ostream &operator<<(ostream &os, const bench &b)
 		unit = " ms";
 	}
 
-	os << "[";
+	os << byellow << "[";
 	os << mcs;
 	os << unit;
-	os << "]\t";
+	os << "]\t" << reset;
 
 	return os;
 }

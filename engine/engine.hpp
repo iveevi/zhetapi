@@ -11,7 +11,7 @@
 
 namespace zhetapi {
 
-struct NULLPTR {};
+// struct NULLPTR {};
 
 class Engine : public engine_base {
 	// Broader scope

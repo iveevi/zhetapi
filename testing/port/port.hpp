@@ -31,6 +31,9 @@
 
 #include <core/module.hpp>
 
+#include <lang/parser.hpp>
+#include <lang/feeder.hpp>
+
 // Macros
 #define TEST(name)	bool name(ostringstream &oss)
 #define RIG(name)	{#name, &name}	
@@ -55,6 +58,28 @@ struct bench {
 };
 
 ostream &operator<<(ostream &, const bench &);
+
+// Coloring
+struct term_colors {
+	string color;
+};
+
+extern term_colors reset;
+
+extern term_colors bred;
+extern term_colors bgreen;
+extern term_colors byellow;
+
+ostream &operator<<(ostream &, const term_colors &);
+
+struct term_ok {};
+struct term_err {};
+
+extern term_ok ok;
+extern term_err err;
+
+ostream &operator<<(ostream &, const term_ok &);
+ostream &operator<<(ostream &, const term_err &);
 
 // Test functions
 TEST(gamma_and_factorial);
@@ -90,5 +115,8 @@ TEST(act_leaky_relu);
 TEST(act_sigmoid);
 
 TEST(module_construction);
+
+TEST(parsing_global_assignment);
+TEST(parsing_global_branching);
 
 #endif

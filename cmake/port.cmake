@@ -11,8 +11,10 @@ add_executable(port
 	testing/port/port-tensor.cpp
 	testing/port/port-vector.cpp
 	testing/port/port-fourier.cpp
+	testing/port/port-parsing.cpp
 	testing/port/port-polynomial.cpp
 	testing/port/port.cpp
+	testing/port/printing.cpp
 	testing/port/timers.cpp
 )
 

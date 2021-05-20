@@ -28,7 +28,9 @@ vector <singlet> rig {
 	RIG(act_relu),
 	RIG(act_leaky_relu),
 	RIG(act_sigmoid),
-	RIG(module_construction)
+	RIG(module_construction),
+	RIG(parsing_global_assignment),
+	RIG(parsing_global_branching)
 };
 
 vector <singlet> failed;
@@ -79,13 +81,22 @@ int main()
 			<< "\" test [" << t << "/"
 			<< size << "]:\n" << endl;
 
-		oss << string(100, '-') << endl;
-		bool tmp = s.second(oss);	
-		oss << string(100, '-') << endl;
+		bool tmp = true;
+		
+		try {
+			oss << string(100, '-') << endl;
+			tmp = s.second(oss);	
+			oss << string(100, '-') << endl;
+		} catch (...) {
+			cout << bred << "CAUGHT UNKNOWN EXCEPTION, TERMINATING."
+				<< reset << endl;
+			
+			throw;
+		}
 
 		if (tmp) {
-			oss << endl << "\"" << s.first
-				<< "\" test PASSED." << endl;
+			oss << endl << bgreen << "\"" << s.first
+				<< "\" test PASSED." << reset << endl;
 		} else {
 			// Add to list of failed tasks
 			fl_mtx.lock();
@@ -94,8 +105,8 @@ int main()
 
 			fl_mtx.unlock();
 
-			oss << endl << "\"" << s.first
-				<< "\" test FAILED." << endl;
+			oss << endl << bred << "\"" << s.first
+				<< "\" test FAILED." << reset << endl;
 		}
 		
 		oss << string(100, '=') << endl;

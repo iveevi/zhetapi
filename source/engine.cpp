@@ -146,7 +146,7 @@ Token *Engine::get(const std::string &str)
 	
 	if (_stack)
 		return _stack->get(str);
-	
+		
 	return nullptr;
 }
 

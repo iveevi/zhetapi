@@ -1,5 +1,5 @@
-#ifndef PARSER_H_
-#define PARSER_H_
+#ifndef EXPR_PARSER_H_
+#define EXPR_PARSER_H_
 
 // C/C++ headers
 #include <fstream>

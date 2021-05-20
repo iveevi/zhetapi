@@ -92,12 +92,10 @@ static void run_normal(const std::string &cache, Engine *context)
 {
 	node_manager mg;
 
-	Token *tptr = nullptr;
-
 	try {
 		mg = node_manager(context, cache);
 
-		tptr = mg.value(context);
+		mg.value(context);
 	} catch (const Engine::unknown_op_overload &e)  {
 		std::cout << "err evaluating \'" << cache << "\'\n" << e.what() << std::endl;
 		exit(-1);
