@@ -1,8 +1,9 @@
 #include <zhetapi/tensor.hpp>
+#include <zhetapi/matrix.hpp>
+#include <zhetapi/vector.hpp>
 
 using namespace std;
 using namespace zhetapi;
-using namespace zhetapi::ml;
 
 int main()
 {
