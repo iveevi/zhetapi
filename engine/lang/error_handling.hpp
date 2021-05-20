@@ -1,5 +1,5 @@
-#ifndef FEEDER_H_
-#define FEEDER_H_
+#ifndef ERROR_HANDLING_H_
+#define ERROR_HANDLING_H_
 
 // C/C++ headers
 #include <string>

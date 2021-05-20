@@ -1,23 +1,25 @@
-#include <lang/vm.hpp>
+#include <lang/parser.hpp>
 
 // Namespaces
 using namespace std;
 using namespace zhetapi;
 
+StringFeeder feeder(R"(
+println("Hello world - str = \"yo\"")
+x = 0
+y = 0, z = 12
+func(12, 13, 14, 15)
+ftr(12, 13
+	45,
+	46, 67)
+ftnl(12,34
+	23, 23
+)
+)");
+
 int main()
 {
-	uint8_t data[] = {
-		0x00,
-		0x02,
-		0x01,
-		0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x01,
-		0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-	};
+	Engine *context = new Engine(true);
 
-        instruction is {1, data};
-
-	vm machine;
-
-	machine.execute(is);
+	parse_global(&feeder, context);
 }

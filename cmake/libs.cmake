@@ -36,6 +36,7 @@ set(ZHETAPI_SOURCE
 	source/lang/compilation.cpp
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
+	source/lang/parser.cpp
 	source/lang/vm.cpp
 
 	source/std/functions.cpp

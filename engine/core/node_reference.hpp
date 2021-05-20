@@ -5,7 +5,7 @@
 #include <sstream>
 
 // Engine headers
-#include "core/node.hpp"
+#include "node.hpp"
 
 namespace zhetapi {
 

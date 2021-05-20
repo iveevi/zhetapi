@@ -14,6 +14,7 @@
 #include "types.hpp"
 #include "lvalue.hpp"
 #include "rvalue.hpp"
+#include "operation_holder.hpp"
 
 namespace zhetapi {
 

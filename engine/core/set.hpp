@@ -5,12 +5,14 @@
 #include <function>
 #include <string>
 #include <utility>
+#include <vector>
 
 // Engine headers
 #include "../token.hpp"
 
 namespace zhetapi {
 
+// Set class permits "in"-if operations
 class Set : public Token {
 public:
 	using Permit = std::function <bool (Token *)>;
@@ -58,11 +60,22 @@ public:
 
 class Generator : public Set {
 public:
+	virtual Token *next();
+	virtual void reset();
 	
+	// Inherited from Token
+	virtual size_t id() const override;
+	virtual Token *copy() const override;
+	virtual type caller() const override;
+	virtual std::string dbg_str() const override;
+	virtual bool operator==(Token *) const override;
 };
 
 class Collection : public Generator {
-
+	std::vector <Token *>	_tokens;
+public:
+	Collection();
+	explicit Collection(const std::vector <Token *> &);
 };
 
 class Dictionary : public Generator {
