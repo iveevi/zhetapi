@@ -2,6 +2,8 @@
 
 #include <core/common.hpp>
 
+namespace zhetapi {
+
 Args args_union(const Args &a, const Args &b)
 {
 	std::set <std::string> xorred;
@@ -17,4 +19,6 @@ Args args_union(const Args &a, const Args &b)
 		un.push_back(str);
 
 	return un;
+}
+
 }

@@ -34,9 +34,12 @@ set(ZHETAPI_SOURCE
 	source/core/variable_cluster.cpp
 
 	source/lang/compilation.cpp
+	source/lang/default_feeders.cpp
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
+	source/lang/keywords.cpp
 	source/lang/parser.cpp
+	source/lang/source.cpp
 	source/lang/vm.cpp
 
 	source/std/functions.cpp

@@ -1,11 +1,42 @@
 #include <lang/parser.hpp>
 #include <lang/error_handling.hpp>
 #include <core/node_manager.hpp>
+#include <core/common.hpp>
 
 namespace zhetapi {
 
+// TODO: another file
+State::State(bool bl) : alg(bl) {}
+
+void State::check_nest(char c) {
+	switch (c) {
+	case '(':
+		parenthesis++;
+		break;
+	case ')':
+		parenthesis--;
+		break;
+	case '{':
+		braces++;
+		break;
+	case '}':
+		braces--;
+		break;
+	case '[':
+		brackets++;
+		break;
+	case ']':
+		brackets--;
+		break;
+	}
+}
+
+bool State::is_nested() {
+	return parenthesis || braces || brackets;
+}
+
 // TODO: clean
-static std::vector <std::string> split(const std::string &str)
+static std::vector <std::string> eq_split(const std::string &str)
 {
 	// TODO: dont forget about op=
 	// TODO: if possible, split in the first pass
@@ -88,16 +119,16 @@ static void run_normal(const std::string &cache, Engine *context)
 }
 
 // TODO: clean
-static void run_assignment(const std::vector <std::string> &eq_split, Engine *context)
+static void run_assignment(const std::vector <std::string> &veq, Engine *context)
 {
 	Token *tptr = nullptr;
 
 	node_manager::undefined_symbol us("");
 	bool pe = false;
 
-	size_t n = eq_split.size();
+	size_t n = veq.size();
 	try {
-		node_manager mg(context, eq_split[n - 1]);
+		node_manager mg(context, veq[n - 1]);
 
 		tptr = mg.value(context);
 	} catch (const Engine::unknown_op_overload &e)  {
@@ -110,7 +141,7 @@ static void run_assignment(const std::vector <std::string> &eq_split, Engine *co
 	}
 
 	for (int i = n - 2; i >= 0; i--) {
-		std::string ftr = eq_split[i] + " = " + eq_split[n - 1];
+		std::string ftr = veq[i] + " = " + veq[n - 1];
 
 		try {
 			Function f(ftr, context);
@@ -122,7 +153,7 @@ static void run_assignment(const std::vector <std::string> &eq_split, Engine *co
 				exit(-1);
 			}
 
-			context->put(eq_split[i], tptr);
+			context->put(veq[i], tptr);
 		}
 	}
 
@@ -131,10 +162,10 @@ static void run_assignment(const std::vector <std::string> &eq_split, Engine *co
 
 void run(const std::string &cache, Engine *context)
 {
-	std::vector <std::string> eq_split;
+	std::vector <std::string> veq = eq_split(cache);
 
-	if (eq_split.size() > 1)
-		return run_assignment(eq_split, context);
+	if (veq.size() > 1)
+		return run_assignment(veq, context);
 
 	run_normal(cache, context);
 }
@@ -153,41 +184,7 @@ int parse_global(Feeder *feeder, Engine *context)
 	 *
 	 * Possible turn into an external struct
 	 */
-	struct {
-		std::string	cached;
-
-		// Nesting states
-		size_t		parenthesis	= 0;
-		size_t		braces		= 0;
-		size_t		brackets	= 0;
-
-		void check_nest(char c) {
-			switch (c) {
-			case '(':
-				parenthesis++;
-				break;
-			case ')':
-				parenthesis--;
-				break;
-			case '{':
-				braces++;
-				break;
-			case '}':
-				braces--;
-				break;
-			case '[':
-				brackets++;
-				break;
-			case ']':
-				brackets--;
-				break;
-			}
-		}
-
-		bool is_nested() {
-			return parenthesis || braces || brackets;
-		}
-	} state;
+	struct State state;
 
 	char c;
 	
@@ -226,8 +223,9 @@ int parse_global(Feeder *feeder, Engine *context)
 		state.check_nest(c);
 
 		// TODO: check for parenthesis (even for newline)
-		if (!state.is_nested() && (c == '\n' || c == ',')) {
-			cout << "cached string \"" << state.cached << "\" is ready..." << endl;
+		if (!state.is_nested() && (c == '\n' || c == ',')
+				&& !state.cached.empty()) {
+			// cout << "cached string \"" << state.cached << "\" is ready..." << endl;
 
 			// TODO: process cached
 			run(state.cached, context);
@@ -239,8 +237,10 @@ int parse_global(Feeder *feeder, Engine *context)
 			continue;
 		}
 
-		// Just keep the whitespace
-		state.cached += c;
+		if (!isspace(c))
+			state.cached += c;
+		
+		check_keyword(state.cached, feeder, context, &state);
 	}
 
 	return 0;
