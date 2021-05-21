@@ -151,14 +151,13 @@ static void run_assignment(const std::vector <std::string> &veq, Engine *context
 
 			context->put(f);
 		} catch (const node_manager::undefined_symbol &e) {
-			if (pe) {
-				symbol_error_msg(e.what(), "", context);
-				exit(-1);
-			}
-
+			symbol_error_msg(e.what(), "", context);
+			exit(-1);
+		} catch (const Function::invalid_definition &e) {
 			context->put(veq[i], tptr);
 		} catch (...) {
 			// TODO: fatal error Something else
+			throw;
 		}
 	}
 
@@ -246,6 +245,7 @@ int parse_global(Feeder *feeder, Engine *context)
 			state.cached += c;
 		
 		check_keyword(state.cached, feeder, context, &state);
+		// cout << "cached = " << state.cached << endl;
 	}
 
 	return 0;

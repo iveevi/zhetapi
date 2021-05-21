@@ -25,7 +25,13 @@ static bool check_if(Feeder *feeder,
 	std::string paren = feeder->extract_parenthesized();
 
 	// Skip construction step or something
+	using namespace std;
+	cout << "PAREN: " << paren << endl;
+	context->list();
+
 	node_manager nm(context, paren);
+
+	nm.print();
 
 	Token *tptr = nm.value(context);
 

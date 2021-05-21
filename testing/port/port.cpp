@@ -1,6 +1,7 @@
 #include "port.hpp"
 
 #define THREADS	8
+#define DEBUG_EXCEPTION
 
 typedef pair <string, bool (*)(ostringstream &)> singlet;
 
@@ -83,16 +84,26 @@ int main()
 
 		bool tmp = true;
 		
+#ifdef DEBUG_EXCEPTION
+			
+		oss << string(100, '-') << endl;
+		tmp = s.second(oss);	
+		oss << string(100, '-') << endl;
+
+#else
+
 		try {
 			oss << string(100, '-') << endl;
 			tmp = s.second(oss);	
 			oss << string(100, '-') << endl;
 		} catch (...) {
-			cout << bred << "CAUGHT UNKNOWN EXCEPTION, TERMINATING."
-				<< reset << endl;
+			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""
+				<< s.first << "\"), TERMINATING." << reset << endl;
 			
 			throw;
 		}
+
+#endif
 
 		if (tmp) {
 			oss << endl << bgreen << "\"" << s.first

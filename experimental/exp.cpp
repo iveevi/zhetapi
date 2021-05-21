@@ -4,14 +4,11 @@
 using namespace std;
 using namespace zhetapi;
 
-StringFeeder feeder(R"(
-if (false) {
-	println("YES")
-} elif (4 == 4) {
-	println("ELIF!")
-} else {
-	println("ELSE!")
-}
+zhetapi::StringFeeder feeder(R"(
+px = 10
+f(x, y) = x^2 + y^2
+println("px = ", px)
+println("f @ (3, 4) = ", f(3, 4))
 )");
 
 int main()
