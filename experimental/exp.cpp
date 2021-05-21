@@ -4,16 +4,25 @@
 using namespace std;
 using namespace zhetapi;
 
-zhetapi::StringFeeder feeder(R"(
-px = 10
-f(x, y) = x^2 + y^2
-println("px = ", px)
-println("f @ (3, 4) = ", f(3, 4))
+zhetapi::StringFeeder feeder1(R"(
+// px = 0
+println("px = ", 27)
+)");
+
+zhetapi::StringFeeder feeder2(R"(
+px = 0
+while (px < 10) {
+	println("px = ", px)
+
+	px = px + 1
+}
 )");
 
 int main()
 {
 	Engine *context = new Engine(true);
 
-	parse_global(&feeder, context);
+	cc_parse(&feeder1, context).print();
+
+	parse_global(&feeder2, context);
 }

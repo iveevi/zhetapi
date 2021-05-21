@@ -34,3 +34,6 @@ portability
 samples/rl/res
 zhetapi
 zhetapi-header
+*.ninja
+.ninja_deps
+.ninja_log

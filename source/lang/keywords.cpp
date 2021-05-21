@@ -25,13 +25,7 @@ static bool check_if(Feeder *feeder,
 	std::string paren = feeder->extract_parenthesized();
 
 	// Skip construction step or something
-	using namespace std;
-	cout << "PAREN: " << paren << endl;
-	context->list();
-
 	node_manager nm(context, paren);
-
-	nm.print();
 
 	Token *tptr = nm.value(context);
 
@@ -126,6 +120,23 @@ static bool check_else(Feeder *feeder,
 	return true;
 }
 
+bool check_while(Feeder *feeder,
+		Engine *context,
+		State *state)
+{
+	char c;
+	while ((c = feeder->feed()) != '(');
+
+	std::string paren = feeder->extract_parenthesized();
+
+	// Skip construction step or something
+	node_manager nm(context, paren);
+
+	nm.print();
+
+	return true;
+}
+
 void check_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -135,7 +146,8 @@ void check_keyword(std::string &cache,
 	static const Symtab <Processor> keywords {
 		{"if", check_if},
 		{"elif", check_elif},
-		{"else", check_else}
+		{"else", check_else},
+		{"while", check_while}
 	};
 
 	if (keywords.find(cache) == keywords.end())

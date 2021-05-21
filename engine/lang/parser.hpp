@@ -30,13 +30,18 @@ struct State {
 	bool is_nested();
 };
 
+// No forwarding needed
 void run(const std::string &, Engine *);
+node_manager cc_run(const std::string &, Engine *);
 
 void check_keyword(std::string &, Feeder *, Engine *, State *);
 
 // Make part of public API so others and I can use
 int parse_global(const std::string &, Engine *);
 int parse_global(Feeder *, Engine *);
+
+// Compile parsers
+node_manager cc_parse(Feeder *, Engine *);
 
 }
 
