@@ -16,6 +16,5 @@ RUN apt-get -yq update \
 	&& apt-get install -yq graphviz \
 	&& apt-get install -yq clang-tidy-8 \
 	&& apt-get install -yq lcov \
-	&& apt-get install -yq ninja-build \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
