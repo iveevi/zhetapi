@@ -18,12 +18,13 @@
 #include <boost/spirit/include/qi.hpp>
 
 // Engine headers
-#include <operand.hpp>
+#include "../operand.hpp"
 
-#include <core/node.hpp>
-#include <core/node_list.hpp>
-#include <core/operation_holder.hpp>
-#include <core/variable_cluster.hpp>
+#include "node.hpp"
+#include "node_list.hpp"
+#include "operation_holder.hpp"
+#include "variable_cluster.hpp"
+#include "special_tokens.hpp"
 
 #define _add_operation_symbol(name, str)				\
 	name = lit(#str) [						\

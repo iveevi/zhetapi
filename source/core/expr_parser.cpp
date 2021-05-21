@@ -383,7 +383,8 @@ parser::parser() : parser::base_type(_start)
 			// Empty call
 			| (_ident >> '(' >> ')') [
 				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1)
+					phoenix::new_ <variable_cluster> (_1),
+					node(blank_token())
 				)
 			]
 
@@ -415,7 +416,7 @@ parser::parser() : parser::base_type(_start)
 			(_node_rept) [_val = phoenix::construct
 			<zhetapi::node> (phoenix::new_
 				<operation_holder>
-				(::std::string("*")), _val, _1)]
+				(std::string("*")), _val, _1)]
 		);
 
 	/*
@@ -460,11 +461,11 @@ parser::parser() : parser::base_type(_start)
 			]
 			
 			| (_t_pre >> _node_var) [
-				_val = phoenix::construct <zhetapi::node> (_1, _2, true)
+				_val = phoenix::construct <zhetapi::node> (_1, _2)
 			]
 
 			| (_node_var >> _t_post) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1, true)
+				_val = phoenix::construct <zhetapi::node> (_2, _1)
 			]
 
 			| _node_factor [_val = _1] >> *(

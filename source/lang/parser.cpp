@@ -8,7 +8,9 @@ namespace zhetapi {
 // TODO: another file
 State::State(bool bl) : alg(bl) {}
 
-void State::check_nest(char c) {
+void State::check_nest(char c)
+{
+	// make sure all are positive
 	switch (c) {
 	case '(':
 		parenthesis++;
@@ -31,8 +33,11 @@ void State::check_nest(char c) {
 	}
 }
 
-bool State::is_nested() {
-	return parenthesis || braces || brackets;
+bool State::is_nested()
+{
+	return parenthesis
+		|| braces
+		|| brackets;
 }
 
 // TODO: clean
@@ -145,13 +150,15 @@ static void run_assignment(const std::vector <std::string> &veq, Engine *context
 			Function f(ftr, context);
 
 			context->put(f);
-		} catch (...) {
+		} catch (const node_manager::undefined_symbol &e) {
 			if (pe) {
-				symbol_error_msg(us.what(), "", context);
+				symbol_error_msg(e.what(), "", context);
 				exit(-1);
 			}
 
 			context->put(veq[i], tptr);
+		} catch (...) {
+			// TODO: fatal error Something else
 		}
 	}
 

@@ -22,7 +22,7 @@ node::node(Token *tptr, lbl label)
 		: _tptr(tptr), _label(label) {}
 
 // TODO: Remove this bool
-node::node(Token *tptr, const node &a, bool bl)
+node::node(Token *tptr, const node &a)
 		: _leaves({a})
 {
 	if (tptr)
