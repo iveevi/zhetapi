@@ -6,8 +6,8 @@
 
 // Engine headers
 #include "token.hpp"
-
 #include "core/raw_types.hpp"
+#include "core/common.hpp"
 
 // Macros to taste
 #define forward_ids(type)			\
@@ -122,6 +122,9 @@ size_t Operand <T> ::id() const
 // Forward declare specializations
 template <>
 std::string Operand <bool> ::dbg_str() const;
+
+template <>
+std::string Operand <Args> ::dbg_str() const;
 
 // Forward declare ID specializations
 forward_ids(Z);

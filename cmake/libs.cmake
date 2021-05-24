@@ -34,10 +34,12 @@ set(ZHETAPI_SOURCE
 	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
 
+	source/lang/cc_parser.cpp
 	source/lang/compilation.cpp
 	source/lang/default_feeders.cpp
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
+	source/lang/helpers.cpp
 	source/lang/keywords.cpp
 	source/lang/parser.cpp
 	source/lang/source.cpp

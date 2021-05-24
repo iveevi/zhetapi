@@ -5,7 +5,14 @@ using namespace std;
 using namespace zhetapi;
 
 zhetapi::StringFeeder feeder1(R"(
-// px = 0
+// f(x, y = 907
+g = f(x, y) = x^2 + y^2
+g(x, y, z) = f(x, y) = x^2 + y^2
+// g(x) = f(x, y) = x^2 + y^2
+// px = 127
+// px0 = 127
+// 0px = 54
+$px = 127
 println("px = ", 27)
 )");
 
@@ -22,7 +29,9 @@ int main()
 {
 	Engine *context = new Engine(true);
 
-	cc_parse(&feeder1, context).print();
+	Pardon pardon;
 
-	parse_global(&feeder2, context);
+	// cc_parse(&feeder1, context, {}, pardon).print();
+
+	parse_global(&feeder1, context);
 }

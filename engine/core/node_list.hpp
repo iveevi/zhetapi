@@ -5,9 +5,8 @@
 #include <sstream>
 
 // Engine headers
-#include "token.hpp"
-
-#include "core/node.hpp"
+#include "../token.hpp"
+#include "node.hpp"
 
 namespace zhetapi {
 

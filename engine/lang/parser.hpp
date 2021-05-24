@@ -3,6 +3,7 @@
 
 // C/C++ headers
 #include <iostream>
+#include <exception>
 
 // Engine headers
 #include "feeder.hpp"
@@ -30,9 +31,15 @@ struct State {
 	bool is_nested();
 };
 
+// Helper functions
+bool is_vaild_ident_char(char, size_t);
+bool is_valid_ident(const std::string &);
+bool in_args(const Args &, const Args &);
+Args get_args(const std::string &);
+Args eq_split(const std::string &);
+
 // No forwarding needed
 void run(const std::string &, Engine *);
-node_manager cc_run(const std::string &, Engine *);
 
 void check_keyword(std::string &, Feeder *, Engine *, State *);
 
@@ -40,8 +47,29 @@ void check_keyword(std::string &, Feeder *, Engine *, State *);
 int parse_global(const std::string &, Engine *);
 int parse_global(Feeder *, Engine *);
 
-// Compile parsers
-node_manager cc_parse(Feeder *, Engine *);
+// Compile parsers and runners
+node_manager cc_run(const std::string &, Engine *, const Args &, Pardon &);
+
+node_manager cc_parse(Feeder *, Engine *, const Args &, Pardon &);
+
+// cc exceptions
+class bad_identifier : public std::runtime_error {
+public:
+	bad_identifier(const std::string &str)
+		: std::runtime_error(str) {}
+};
+
+class bad_line : public std::runtime_error {
+public:
+	bad_line(const std::string &str)
+		: std::runtime_error(str) {}
+};
+
+class args_mismatch : public std::runtime_error {
+public:
+	args_mismatch(const std::string &str)
+		: std::runtime_error(str) {}
+};
 
 }
 

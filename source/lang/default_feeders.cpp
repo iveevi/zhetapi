@@ -38,6 +38,14 @@ char StringFeeder::peek()
 	return _source[_index + 1];
 }
 
+char StringFeeder::prev()
+{
+	if (_index == 0)
+		return EOF;
+
+	return _source[_index - 1];
+}
+
 size_t StringFeeder::tellg() const
 {
 	return _index;
@@ -105,6 +113,15 @@ char SourceFeeder::peek()
 		return EOF;
 	
 	return c;
+}
+
+char SourceFeeder::prev()
+{
+	if (_index == 0)
+		return EOF;
+
+	// TODO: make nice indexing function
+	return (*_source.src)[_index - 1];
 }
 
 size_t SourceFeeder::tellg() const

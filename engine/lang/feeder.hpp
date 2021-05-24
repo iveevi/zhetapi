@@ -34,6 +34,8 @@ public:
 	// TODO: dont forget to flush with EOF
 	virtual char feed() = 0;	// Reads, stores, returns and moves
 	virtual char peek() = 0;	// Reads, stores, returns but does not moves
+	virtual char prev() = 0;
+	
 	virtual size_t tellg() const = 0;
 
 	virtual void set_end(char = EOF) = 0;
@@ -61,9 +63,11 @@ public:
 	
 	char feed() override;
 	char peek() override;
+	char prev() override;
+	
 	size_t tellg() const override;
+	
 	void backup(size_t) override;
-
 	void set_end(char = EOF) override;
 
 	Feeder *pop_at(size_t i, char = EOF) const override;
@@ -83,6 +87,8 @@ public:
 
 	char feed() override;
 	char peek() override;
+	char prev() override;
+
 	size_t tellg() const override;
 
 	void set_end(char = EOF) override;

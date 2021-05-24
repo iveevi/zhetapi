@@ -19,6 +19,21 @@ std::string Operand <bool> ::dbg_str() const
 	return (_val) ? "true" : "false";
 }
 
+template <>
+std::string Operand <Args> ::dbg_str() const
+{
+	std::string out = "<Args> {";
+
+	for (size_t i = 0; i < _val.size(); i++) {
+		out += _val[i];
+
+		if (i < _val.size() - 1)
+			out += ", ";
+	}
+
+	return out + "}";
+}
+
 // ID specs
 id_spec(Z)
 id_spec(Q)
