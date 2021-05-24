@@ -48,7 +48,7 @@ using OpMatCmpR = Operand <MatCmpR>;
 // Id macros
 #define set_zhp_id(type, id)				\
 	template <>					\
-	inline constexpr size_t zhp_id <type> ()	\
+	inline constexpr uint8_t zhp_id <type> ()	\
 	{						\
 		return id;				\
 	}
@@ -58,7 +58,7 @@ using OpMatCmpR = Operand <MatCmpR>;
 
 // Default no id: 0
 template <class T>
-inline constexpr size_t zhp_id()
+inline constexpr uint8_t zhp_id()
 {
 	return 0;
 }

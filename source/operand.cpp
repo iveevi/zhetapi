@@ -5,7 +5,7 @@
 // Macros
 #define id_spec(type)					\
 	template <>					\
-	size_t Operand <type> ::id() const		\
+	uint8_t Operand <type> ::id() const		\
 	{						\
 		return zhp_id <Operand <type>> ();	\
 	}

@@ -15,6 +15,8 @@ namespace zhetapi {
 struct State {
 	std::string	cached;
 
+	size_t		line		= 0;
+
 	// Nesting states
 	size_t		parenthesis	= 0;
 	size_t		braces		= 0;

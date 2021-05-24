@@ -83,7 +83,7 @@ public:
 	 * choose what to do with different Tokens from other classes.
 	 */
 	virtual type caller() const;
-	virtual size_t id() const;
+	virtual uint8_t id() const;
 
 	/*
 	 * Returns a representation of the Token, regardless of its

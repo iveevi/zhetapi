@@ -26,7 +26,7 @@ Token::type Module::caller() const
 	return Token::token_module;
 }
 
-size_t Module::id() const
+uint8_t Module::id() const
 {
 	return zhp_id <Module> ();
 }

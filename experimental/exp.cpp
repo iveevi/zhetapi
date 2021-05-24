@@ -6,7 +6,7 @@ using namespace zhetapi;
 
 zhetapi::StringFeeder feeder1(R"(
 // f(x, y = 907
-g = f(x, y) = x^2 + y^2
+z = f(x, y) = x^2 + y^2
 g(x, y, z) = f(x, y) = x^2 + y^2
 // g(x) = f(x, y) = x^2 + y^2
 // px = 127
@@ -33,5 +33,7 @@ int main()
 
 	// cc_parse(&feeder1, context, {}, pardon).print();
 
-	parse_global(&feeder1, context);
+	parse_global(&feeder2, context);
+
+	// context->list();
 }

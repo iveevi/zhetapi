@@ -77,7 +77,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 		+ _msg + "\"";
 }
 
-size_t Token::id() const
+uint8_t Token::id() const
 {
 	return 0;
 }

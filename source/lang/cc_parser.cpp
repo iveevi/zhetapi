@@ -50,7 +50,7 @@ static node_manager cc_run_assignment(const std::vector <std::string> &veq,
 	Args fout = get_args(veq[n - 2]);
 	Args fargs(fout.begin() + 1, fout.end());
 	
-	if (fout.empty())
+	if (fout.empty() || !is_valid_ident(fout[0]))
 		throw bad_identifier(veq[n - 2]);
 
 	node_manager nm;
@@ -64,22 +64,27 @@ static node_manager cc_run_assignment(const std::vector <std::string> &veq,
 
 	out.append(nm);
 
-	node ftn(new lvalue(fout[0]));
+	node ftn(new lvalue(fout[0]), l_lvalue);
 	if (fout.size() > 1)
 		ftn.append(node(new Operand <Args> (fargs)));
 
 	out.append(ftn);
 
+	// TODO: args need to be valid as well
 	for (int i = n - 3; i >= 0; i--) {
 		Args kout = get_args(veq[i]);
 		Args kargs(kout.begin() + 1, kout.end());
 
-		if (kout.size() > 1) {
+		if (kout.size() > 1 && is_valid_ident(kout[0])) {
 			if (!in_args(fargs, kargs))
 				throw args_mismatch(veq[i]);
 
-			out.append(node(new lvalue(kout[0]),
-				node(new Operand <Args> (kargs))));
+			out.append(
+				node(new lvalue(kout[0]), l_lvalue,
+				{
+					node(new Operand <Args> (kargs))
+				})
+			);
 
 			if (!ctx->get(kout[0]))
 				pardon.insert(pardon.begin(), kout[0]);

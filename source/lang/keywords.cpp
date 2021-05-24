@@ -121,7 +121,7 @@ static bool check_else(Feeder *feeder,
 }
 
 bool check_while(Feeder *feeder,
-		Engine *context,
+		Engine *ctx,
 		State *state)
 {
 	char c;
@@ -130,9 +130,32 @@ bool check_while(Feeder *feeder,
 	std::string paren = feeder->extract_parenthesized();
 
 	// Skip construction step or something
-	node_manager nm(context, paren);
+	node_manager ncond(ctx, paren);
 
-	nm.print();
+	while (isspace(c = feeder->feed()));
+	if (is_true(ncond.value(ctx))) {
+		if (c != '{')
+			feeder->backup(1);
+		
+		feeder->set_end((c == '{') ? '}' : '\n');
+
+		Pardon pardon;
+		node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
+
+		node_manager nwhile;
+
+		nwhile.set_label(l_while_loop);
+		nwhile.append(ncond);
+		nwhile.append(nloop);
+
+		nwhile.value(ctx);
+
+		// Reset terminal
+		feeder->set_end();
+	} else {
+		// Skip block
+		feeder->skip_until((c == '{') ? "}" : "\n");
+	}
 
 	return true;
 }

@@ -12,7 +12,7 @@
 // Macros to taste
 #define forward_ids(type)			\
 	template <>				\
-	size_t Operand <type> ::id() const;
+	uint8_t Operand <type> ::id() const;
 
 namespace zhetapi {
 
@@ -37,7 +37,7 @@ public:
 	std::string dbg_str() const override;
 	Token *copy() const override;
 	bool operator==(Token *) const override;
-	size_t id() const override;
+	uint8_t id() const override;
 };
 
 // Constructors
@@ -114,7 +114,7 @@ bool Operand <T> ::operator==(Token *tptr) const
 }
 
 template <class T>
-size_t Operand <T> ::id() const
+uint8_t Operand <T> ::id() const
 {
 	return 0;
 }

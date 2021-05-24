@@ -19,7 +19,7 @@ public:
 
 	// Virtual functions
 	virtual type caller() const;
-	virtual size_t id() const;
+	virtual uint8_t id() const;
 	virtual std::string dbg_str() const;
 	virtual Token *copy() const;
 	virtual bool operator==(Token *) const;
