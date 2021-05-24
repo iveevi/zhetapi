@@ -70,6 +70,10 @@ static node_manager cc_run_assignment(const std::vector <std::string> &veq,
 
 	out.append(ftn);
 
+	// Add the first
+	if (!ctx->get(fout[0]))
+		pardon.insert(pardon.begin(), fout[0]);
+
 	// TODO: args need to be valid as well
 	for (int i = n - 3; i >= 0; i--) {
 		Args kout = get_args(veq[i]);

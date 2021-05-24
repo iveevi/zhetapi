@@ -98,6 +98,17 @@ const node &node::operator[](size_t i) const
 	return _leaves[i];
 }
 
+// Write to file
+void node::write(std::ostream &os) const
+{
+	os << "[tptr]";
+
+	size_t len = _leaves.size();
+	os.write((char *) (&len), sizeof(size_t));
+	for (const node &nd : _leaves)
+		nd.write(os);
+}
+
 // Position iterators
 node::LeavesIt node::begin()
 {

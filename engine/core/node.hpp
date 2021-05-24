@@ -43,6 +43,9 @@ public:
 
 	~node();
 
+	// Write to file
+	void write(std::ostream &os) const;
+
 	// Operations for cleaner code
 	template <class T>
 	T *cast() const;

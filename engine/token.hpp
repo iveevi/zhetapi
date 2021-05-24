@@ -105,7 +105,14 @@ public:
 	 */
 	virtual bool operator==(Token *) const = 0;
 
-	// virtual Token *value()?
+	// Read and write
+	virtual void write(std::ostream &) const;
+
+	// Exceptions
+	class empty_io : public std::runtime_error {
+	public:
+		empty_io() : std::runtime_error("Empty IO functions (write)...") {}
+	};
 
 	class unknown_attribute {
 		std::type_index _ti;

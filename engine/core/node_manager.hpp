@@ -32,20 +32,22 @@ public:
 	node_manager();
 	node_manager(const node_manager &);
 	node_manager(Engine *, const node &);
-	node_manager(Engine *, const node &,
-			const std::vector <std::string> &);
+	node_manager(Engine *, const node &, const Args &);
 	node_manager(Engine *, const std::string &);
 
 	// TODO: try to merge these two constructors with def. args
 	node_manager(Engine *, const std::string &,
-			const std::vector <std::string> &,
-			const std::set <std::string> & = std::set <std::string> ());
+			const Args &,
+			const Pardon & = Pardon());
 
 	node_manager &operator=(const node_manager &);
 
 	// Operators
 	node &operator[](size_t);
 	const node &operator[](size_t) const;
+
+	// Writing to file
+	void write(std::ostream &) const;
 
 	// Properties
 	bool empty() const;	// Is the _tree node empty?

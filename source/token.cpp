@@ -92,4 +92,9 @@ std::string Token::dbg_str() const
 	return "[?]";
 }
 
+void Token::write(std::ostream &os) const
+{
+	throw empty_io();
+}
+
 }
