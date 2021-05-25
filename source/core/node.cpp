@@ -50,6 +50,9 @@ node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
 		_tptr = tptr->copy();
 }
 
+node::node(Token *tptr, lbl label, const node &n1, const node &n2)
+		: node(tptr, label, {n1, n2}) {}
+
 node &node::operator=(const node &other)
 {
 	if (this != &other) {

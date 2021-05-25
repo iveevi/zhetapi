@@ -1,4 +1,6 @@
 #include <core/expr_parser.hpp>
+#include <core/lvalue.hpp>
+#include <core/rvalue.hpp>
 
 namespace zhetapi {
 
@@ -24,6 +26,7 @@ parser::parser() : parser::base_type(_start)
 	_add_operation_symbol(_power, ^);
 	_add_operation_symbol(_dot, @);
 	_add_operation_symbol(_mod, %);
+	// _add_operation_symbol(_in, in);
 	
 	// Binary comparison
 	_add_operation_symbol(_eq, ==);
@@ -366,6 +369,19 @@ parser::parser() : parser::base_type(_start)
 				::std::vector <zhetapi::node> {})
 	];
 
+	// Rvalue and lvalues nodes
+	_node_rvalue = _ident [
+		_val = phoenix::construct <zhetapi::node> (
+			phoenix::new_ <rvalue> (_1)
+		)
+	];
+	
+	_node_lvalue = _ident [
+		_val = phoenix::construct <zhetapi::node> (
+			phoenix::new_ <lvalue> (_1)
+		)
+	];
+
 	/*
 	 * A variable cluster, which is just a string of
 	 * characters. The expansion/unpakcing of this variable
@@ -388,10 +404,9 @@ parser::parser() : parser::base_type(_start)
 				)
 			]
 
-			| _ident [_val = phoenix::construct
-				<zhetapi::node> (phoenix::new_
-					<variable_cluster> (_1),
-					std::vector <zhetapi::node> {})]
+			| _ident [
+				_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), std::vector <zhetapi::node> {})
+			]
 		);
 
 	/*
@@ -478,10 +493,18 @@ parser::parser() : parser::base_type(_start)
 	/*
 	 * A full expression or function definition.
 	 */
-	_node_expr = _node_term [_val = _1] >> *(
-			(_t0_bin >> _node_term) [_val =
-			phoenix::construct <zhetapi::node> (_1,
-				_val, _2)]
+	_node_expr = (
+			(_node_lvalue >> "in" >> _node_rvalue) [
+				_val = phoenix::construct <zhetapi::node> (
+					nullptr, l_generator_in, _1, _2
+				)
+			]
+			
+			| _node_term [_val = _1] >> *(
+				(_t0_bin >> _node_term) [
+					_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+				]
+			)
 		);
 	
 	// Entry point

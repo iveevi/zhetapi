@@ -44,6 +44,7 @@ std::string strlabs[] = {
 	"sequential",
 	"assignment chain",
 	"lvalue",
+	"rvalue",
 	"if",
 	"else",
 	"elif",
@@ -52,6 +53,9 @@ std::string strlabs[] = {
 	"break loop",
 	"continue loop",
 	"return",
+
+	// "in" operator
+	"generator-in",
 
 	// Miscellaneious
 	"constant",

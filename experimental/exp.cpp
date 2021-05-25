@@ -11,14 +11,9 @@ println("OUT OF IF")
 )"); */
 
 zhetapi::StringFeeder feeder(R"(
-px = 0
-if (true)
-	println("IF!")
-elif (px > 0) {
-	println("ELIF!")
-	println("second statement")
-} else
-	println("ELSE!")
+x = {1, 2, 3, 4}
+for (k in x)
+	println("x = ", x")
 )");
 
 int main()
@@ -27,9 +22,11 @@ int main()
 
 	Pardon pardon;
 
-	node_manager nm = cc_parse(&feeder, context, {}, pardon);
+	// node_manager nm = cc_parse(&feeder, context, {}, pardon);
 
-	nm.print();
+	// nm.print();
 
 	// nm.write(cout);
+
+	parse_global(&feeder, context);
 }

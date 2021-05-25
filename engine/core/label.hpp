@@ -53,6 +53,7 @@ enum lbl {
 	l_sequential,				// Sequential node
 	l_assignment_chain,			// Assignment statements
 	l_lvalue,
+	l_rvalue,
 	l_if_branch,
 	l_else_branch,
 	l_elif_branch,
@@ -61,6 +62,9 @@ enum lbl {
 	l_break_loop,
 	l_continue_loop,
 	l_return_alg,
+	
+	// "in" operator
+	l_generator_in,
 
 	// Miscellaneious
 	l_constant,

@@ -63,6 +63,8 @@ struct parser : qi::grammar <siter, node (), qi::space_type> {
 	qi::rule <siter, node (), qi::space_type>			_node_rept;
 	qi::rule <siter, node (), qi::space_type>			_node_prth;
 	qi::rule <siter, node (), qi::space_type>			_node_var;
+	qi::rule <siter, node (), qi::space_type>			_node_rvalue;
+	qi::rule <siter, node (), qi::space_type>			_node_lvalue;
 	qi::rule <siter, node (), qi::space_type>			_node_opd;
 
 	// Helpers

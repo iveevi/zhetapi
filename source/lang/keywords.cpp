@@ -37,14 +37,11 @@ static bool check_if(Feeder *feeder,
 		if (c != '{')
 			feeder->backup(1);
 		
-		using namespace std;
-		cout << "c = \'" << c << "\'" << endl;
 		feeder->set_end((c == '{') ? '}' : '\n');
 		parse_global(feeder, context);
 
 		// Reset terminal
 		feeder->set_end();
-		cout << "END OF IF======================<" << endl;
 	} else {
 		// TODO: add a skip until for characters
 		feeder->skip_until((c == '{') ? "}" : "\n");
@@ -164,6 +161,26 @@ bool check_while(Feeder *feeder,
 	return true;
 }
 
+bool check_for(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	char c;
+	while ((c = feeder->feed()) != '(');
+
+	std::string paren = feeder->extract_parenthesized();
+
+	using namespace std;
+	cout << "paren = " << paren << endl;
+
+	// Skip construction step or something
+	node_manager ncond(ctx, paren);
+
+	ncond.print();
+
+	return true;
+}
+
 void check_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -174,7 +191,8 @@ void check_keyword(std::string &cache,
 		{"if", check_if},
 		{"elif", check_elif},
 		{"else", check_else},
-		{"while", check_while}
+		{"while", check_while},
+		{"for", check_for}
 	};
 
 	if (keywords.find(cache) == keywords.end())

@@ -71,7 +71,7 @@ node_manager::node_manager(Engine *context, const std::string &str)
         if (!r)
                 throw bad_input();
 
-	/* using namespace std;
+	/*using namespace std;
 	cout << string(50, '=') << endl;
 	cout << "PRE _tree:" << endl;
 	_tree.print(); */
