@@ -50,9 +50,22 @@ int parse_global(const std::string &, Engine *);
 int parse_global(Feeder *, Engine *);
 
 // Compile parsers and runners
-node_manager cc_run(const std::string &, Engine *, const Args &, Pardon &);
+node_manager cc_run(const std::string &,
+		Engine *,
+		const Args &,
+		Pardon &);
 
-node_manager cc_parse(Feeder *, Engine *, const Args &, Pardon &);
+node_manager cc_keyword(std::string &,
+		Feeder *,
+		Engine *,
+		const Args &,
+		Pardon &,
+		State *);
+
+node_manager cc_parse(Feeder *,
+		Engine *,
+		const Args &,
+		Pardon &);
 
 // cc exceptions
 class bad_identifier : public std::runtime_error {
@@ -71,6 +84,18 @@ class args_mismatch : public std::runtime_error {
 public:
 	args_mismatch(const std::string &str)
 		: std::runtime_error(str) {}
+};
+
+class bad_elif : public std::runtime_error {
+public:
+	bad_elif()
+		: std::runtime_error("Cannot have elif without if before") {}
+};
+
+class bad_else : public std::runtime_error {
+public:
+	bad_else()
+		: std::runtime_error("Cannot have else without if before") {}
 };
 
 }

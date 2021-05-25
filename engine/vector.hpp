@@ -79,8 +79,8 @@ public:
 		Vector(size_t, std::function <T *(size_t)>)
 	);
 
-	AVR_IGNORE(Vector(const std::vector <T> &);)
-	AVR_IGNORE(Vector(const std::initializer_list <T> &);)
+	AVR_IGNORE(Vector(const std::vector <T> &));
+	AVR_IGNORE(Vector(const std::initializer_list <T> &));
 	
 	// Cross-type operations
 	template <class A>

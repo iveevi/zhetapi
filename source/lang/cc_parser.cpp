@@ -167,9 +167,9 @@ node_manager cc_parse(Feeder *feeder,
 
 		if (!state.is_nested() && (c == '\n' || c == ',')
 				&& !state.cached.empty()) {
-			// cout << "cached string \"" << state.cached << "\" is ready..." << endl;
-
-			out.append(cc_run(state.cached, ctx, args, pardon));
+			node_manager nrun = cc_run(state.cached, ctx, args, pardon);
+			if (!nrun.empty())
+				out.append(nrun);
 
 			// Clear cached
 			state.cached.clear();
@@ -186,12 +186,31 @@ node_manager cc_parse(Feeder *feeder,
 		if (!isspace(c))
 			state.cached += c;
 		
+		node_manager nkey = cc_keyword(state.cached, feeder,
+				ctx, args, pardon, &state);
+		
+		if (!nkey.empty())
+			out.append(nkey);
 		// check_keyword(state.cached, feeder, context, &state);
 		// cout << "cached = " << state.cached << endl;
 	}
 
+	// TODO: dont forget to check parenthesis and such later
+	if (!state.cached.empty()) {
+		node_manager nrun = cc_run(state.cached, ctx, args, pardon);
+		if (!nrun.empty())
+			out.append(nrun);
+
+		// Clear cached
+		state.cached.clear();
+	}
+
 	// Finalize the tree
 	out.set_label(l_sequential);
+
+	/* cout << "PRE compression:" << endl;
+	out.print(); */
+
 	out.compress_branches();
 
 	return out;

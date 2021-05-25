@@ -14,9 +14,6 @@ StringFeeder::StringFeeder(const std::string &str, size_t i, char end)
 char StringFeeder::feed()
 {
 	_index++;
-	if (_source[_index] == _end && _end == '\n')
-		return '\n';
-	
 	if (_index >= _source.length()
 		|| _source[_index] == _end)
 		return EOF;
@@ -27,9 +24,6 @@ char StringFeeder::feed()
 
 char StringFeeder::peek()
 {
-	if (_source[_index + 1] == _end && _end == '\n')
-		return '\n';
-	
 	if (_index + 1 >= _source.length()
 		|| _source[_index + 1] == _end)
 		return EOF;

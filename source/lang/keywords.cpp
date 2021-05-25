@@ -12,6 +12,7 @@ bool is_true(Token *tptr)
 	return true_token == tptr;
 }
 
+// TODO: make sure state->branch gets reset
 static bool check_if(Feeder *feeder,
 		Engine *context,
 		State *state)
@@ -36,11 +37,14 @@ static bool check_if(Feeder *feeder,
 		if (c != '{')
 			feeder->backup(1);
 		
+		using namespace std;
+		cout << "c = \'" << c << "\'" << endl;
 		feeder->set_end((c == '{') ? '}' : '\n');
 		parse_global(feeder, context);
 
 		// Reset terminal
 		feeder->set_end();
+		cout << "END OF IF======================<" << endl;
 	} else {
 		// TODO: add a skip until for characters
 		feeder->skip_until((c == '{') ? "}" : "\n");

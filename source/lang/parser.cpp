@@ -141,8 +141,6 @@ int parse_global(Feeder *feeder, Engine *context)
 
 	char c;
 	
-	// TODO: remove using
-	using namespace std;
 	while ((c = feeder->feed()) != EOF) {
 		// Check for commented line
 		// TODO: another function
@@ -180,7 +178,6 @@ int parse_global(Feeder *feeder, Engine *context)
 				&& !state.cached.empty()) {
 			// cout << "cached string \"" << state.cached << "\" is ready..." << endl;
 
-			// TODO: process cached
 			run(state.cached, context);
 
 			// Clear cached
@@ -200,6 +197,14 @@ int parse_global(Feeder *feeder, Engine *context)
 		
 		check_keyword(state.cached, feeder, context, &state);
 		// cout << "cached = " << state.cached << endl;
+	}
+
+	// TODO: dont forget to check parenthesis and such later
+	if (!state.cached.empty()) {
+		run(state.cached, context);
+
+		// Clear cached
+		state.cached.clear();
 	}
 
 	return 0;

@@ -56,6 +56,7 @@ class StringFeeder : public Feeder {
 	std::string	_source;
 	size_t		_index	= 0;
 	char		_end	= EOF;
+	bool		_second	= false;
 	
 	StringFeeder(const std::string &, size_t, char = EOF);
 public:
