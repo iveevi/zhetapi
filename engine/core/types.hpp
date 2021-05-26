@@ -15,6 +15,7 @@ class Function;
 class algorithm;
 class Registrable;
 class Module;
+class Collection;
 
 // All valid tokens
 // IDs are increasing in this order
@@ -43,6 +44,8 @@ using OpMatCmpZ = Operand <MatCmpZ>;
 using OpMatCmpQ = Operand <MatCmpQ>;
 using OpMatCmpR = Operand <MatCmpR>;
 
+using Targs = std::vector <Token *>;
+
 #define	ONE	1
 
 // Id macros
@@ -53,7 +56,7 @@ using OpMatCmpR = Operand <MatCmpR>;
 		return id;				\
 	}
 
-#define get_zhp_id(type)			\
+#define get_zhp_id(type)	\
 	zhp_id <type> ()
 
 // Default no id: 0
@@ -94,18 +97,10 @@ set_zhp_id(algorithm, 22);
 set_zhp_id(Registrable, 23);
 set_zhp_id(Module, 24);
 
-// Is tensor type (for writing)
-// template <class T>
+set_zhp_id(Collection, 25);
 
 struct types {
 	static Token *one();
-
-	/* template <class A>
-	static Token *convert(A); */
-	
-	/////////////////////
-	// Token identifiers
-	/////////////////////
 	
 	static bool is_zero(Token *);
 	static bool is_one(Token *);

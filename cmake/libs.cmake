@@ -12,6 +12,7 @@ set(ZHETAPI_SOURCE
 
 	source/core/algorithm.cpp
 	source/core/class.cpp
+	source/core/collection.cpp
 	source/core/common.cpp
 	source/core/engine_base.cpp
 	source/core/expr_parser.cpp

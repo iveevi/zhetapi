@@ -2,7 +2,7 @@
 #define SET_H_
 
 // C/C++ headers
-#include <function>
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -13,10 +13,10 @@
 namespace zhetapi {
 
 // Set interface: branch-"in"
-class Set {
+class Set : public virtual Token {
 public:
 	virtual bool present(Token *) const = 0;
-}
+};
 
 // Set class permits "in"-if operations
 class DisjointSet : public Set {
@@ -29,9 +29,9 @@ public:
 	DisjointSet(const std::string &, Permit);
 
 	// Inherited from Token
-	virtual size_t id() const override;
+	virtual uint8_t id() const override;
 	virtual Token *copy() const override;
-	virtual type caller() const override;
+	// virtual Token::type caller() const override;
 	virtual std::string dbg_str() const override;
 	virtual bool operator==(Token *) const override;
 };
@@ -47,16 +47,16 @@ public:
 	};
 private:
 	OpVec		_vec;
-	Operation	_op	= Union;
+	Operation	_op	= Operation::Union;
 public:
 	explicit MultiSet(const OpVec &);
 
 	bool present(Token *) const;
 
 	// Inherited from Token
-	virtual size_t id() const override;
+	virtual uint8_t id() const override;
 	virtual Token *copy() const override;
-	virtual type caller() const override;
+	// virtual Token::type caller() const override;
 	virtual std::string dbg_str() const override;
 	virtual bool operator==(Token *) const override;
 };

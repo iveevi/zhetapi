@@ -4,14 +4,43 @@
 // Engine headers
 #include "generator.hpp"
 #include "indexable.hpp"
+#include "iterator.hpp"
+#include "types.hpp"
 
 namespace zhetapi {
 
-class Collection : public Generator {
-	std::vector <Token *>	_tokens;
+class CollectionIterator : public Iterator {
+	size_t	_index = 0;
+	Token *	_value = nullptr;
 public:
-	Collection();
-	explicit Collection(const std::vector <Token *> &);
+	CollectionIterator(size_t, Token *);
+
+	Token *value() const override;
+
+	// Inherited from Token
+	virtual Token *copy() const override;
+
+	// Friend collection
+	friend class Collection;
+};
+
+class Collection : public Generator, public Indexable {
+	Targs	_tokens;
+public:
+	explicit Collection(const Targs &);
+
+	// Set, Generator, Indexable
+	virtual bool present(Token *) const override;
+	virtual Iterator *begin() const override;
+	virtual Iterator *next(Iterator *) override;
+	virtual Token *index(Token *) override;
+
+	// Inherited from Token
+	virtual uint8_t id() const override;
+	virtual Token *copy() const override;
+	virtual type caller() const override;
+	virtual std::string dbg_str() const override;
+	virtual bool operator==(Token *) const override;
 };
 
 }

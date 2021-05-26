@@ -77,6 +77,7 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 		+ _msg + "\"";
 }
 
+// Defaulting virtual functions
 uint8_t Token::id() const
 {
 	return 0;
@@ -95,6 +96,11 @@ std::string Token::dbg_str() const
 void Token::write(std::ostream &os) const
 {
 	throw empty_io();
+}
+
+bool Token::operator==(Token *) const
+{
+	return false;
 }
 
 }

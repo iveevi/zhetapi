@@ -3,14 +3,16 @@
 
 // Engine headers
 #include "set.hpp"
+#include "iterator.hpp"
 
 namespace zhetapi {
 
 // Generator interface: for-"in"
 class Generator : public Set {
 public:
-	virtual Token *next();
-	virtual void reset();
+	// Return iterators
+	virtual Iterator *begin() const = 0;
+	virtual Iterator *next(Iterator *) = 0;
 };
 
 }

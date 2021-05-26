@@ -37,6 +37,7 @@ public:
 	Token *attr(const std::string &, const std::vector <Token *> &);
 	
 	/*
+	 * TODO: make this redundant
 	 * Codes used to identify the Token, more on the is presented
 	 * below. Should not be used by the user.
 	 *
@@ -70,7 +71,8 @@ public:
 		token_lvalue,
 		token_rvalue,
 		token_node_list,
-		token_module
+		token_module,
+		token_collection
 	};
 
 	bool operator!=(Token *) const;
@@ -103,17 +105,12 @@ public:
 	 * Compares Tokens and returns their similarity. Used for node
 	 * matching.
 	 */
-	virtual bool operator==(Token *) const = 0;
+	virtual bool operator==(Token *) const;
 
 	// Read and write
 	virtual void write(std::ostream &) const;
 
 	// Exceptions
-	class empty_io : public std::runtime_error {
-	public:
-		empty_io() : std::runtime_error("Empty IO functions (write)...") {}
-	};
-
 	class unknown_attribute {
 		std::type_index _ti;
 		std::string	_msg;
@@ -122,6 +119,11 @@ public:
 				: _ti(ti), _msg(msg) {}
 		
 		std::string what() const;
+	};
+
+	class empty_io : public std::runtime_error {
+	public:
+		empty_io() : std::runtime_error("Empty IO functions (write)...") {}
 	};
 };
 
