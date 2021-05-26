@@ -12,18 +12,21 @@
 
 namespace zhetapi {
 
+// Set interface: branch-"in"
+class Set {
+public:
+	virtual bool present(Token *) const = 0;
+}
+
 // Set class permits "in"-if operations
-class Set : public Token {
+class DisjointSet : public Set {
 public:
 	using Permit = std::function <bool (Token *)>;
 private:
-	std::string	_name	= "";
 	Permit		_permit;
 public:
-	explicit Set(const std::string &);
-	Set(const std::string &, Permit);
-
-	virtual bool present(Token *) const;
+	explicit DisjointSet(const std::string &);
+	DisjointSet(const std::string &, Permit);
 
 	// Inherited from Token
 	virtual size_t id() const override;
@@ -36,7 +39,7 @@ public:
 class MultiSet : public Token {
 public:
 	// Bool is for negation
-	using OpVec = std::vector <std::pair <Set *, bool>>;
+	using OpVec = std::vector <std::pair <DisjointSet *, bool>>;
 
 	enum class Operation {
 		Union,
@@ -57,32 +60,6 @@ public:
 	virtual std::string dbg_str() const override;
 	virtual bool operator==(Token *) const override;
 };
-
-class Generator : public Set {
-public:
-	virtual Token *next();
-	virtual void reset();
-	
-	// Inherited from Token
-	virtual size_t id() const override;
-	virtual Token *copy() const override;
-	virtual type caller() const override;
-	virtual std::string dbg_str() const override;
-	virtual bool operator==(Token *) const override;
-};
-
-class Collection : public Generator {
-	std::vector <Token *>	_tokens;
-public:
-	Collection();
-	explicit Collection(const std::vector <Token *> &);
-};
-
-class Dictionary : public Generator {
-
-};
-
-class 
 
 }
 
