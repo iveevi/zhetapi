@@ -174,9 +174,48 @@ bool check_for(Feeder *feeder,
 	cout << "paren = " << paren << endl;
 
 	// Skip construction step or something
-	node_manager ncond(ctx, paren);
+	node_manager niter(ctx, paren);
 
-	ncond.print();
+	niter.print();
+
+	node lin = niter.tree();
+
+	std::cout << strlabs[lin.label()] << std::endl;
+
+	if (lin.label() != l_generator_in)
+		throw bad_for();
+	
+	lvalue *lv = lin[0].cast <lvalue> ();
+
+	if (!lv)
+		throw bad_for();
+	
+	std::string ident = lv->symbol();
+
+	std::cout << "IDENT = " << ident << endl;
+
+	Pardon pardon {ident};
+
+	while (isspace(c = feeder->feed()));
+	if (c != '{')
+		feeder->backup(1);
+		
+	feeder->set_end((c == '{') ? '}' : '\n');
+
+	node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
+
+	node_manager nfor;
+
+	nfor.set_label(l_for_loop);
+	nfor.append(niter);
+	nfor.append(nloop);
+
+	nfor.print();
+
+	nfor.value(ctx);
+
+	// Reset terminal
+	feeder->set_end();
 
 	return true;
 }

@@ -157,6 +157,12 @@ const node &node_manager::operator[](size_t i) const
 	return _tree[i];
 }
 
+// Tree
+const node &node_manager::tree() const
+{
+	return _tree;
+}
+
 // Writing to a file
 void node_manager::write(std::ostream &os) const
 {

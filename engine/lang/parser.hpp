@@ -98,6 +98,12 @@ public:
 		: std::runtime_error("Cannot have else without if before") {}
 };
 
+class bad_for : public std::runtime_error {
+public:
+	bad_for()
+		: std::runtime_error("Expected ([identifier] in [expression]) inside the clause of for-loop") {}
+};
+
 }
 
 #endif

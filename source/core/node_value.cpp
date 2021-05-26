@@ -124,6 +124,52 @@ static Token *while_node(Engine *context, const node &tree)
 	return output;
 }
 
+static Token *for_node(Engine *context, const node &tree)
+{
+	Token *output = nullptr;
+
+	// Push new stack
+	context = push_and_ret_stack(context);
+
+	// NOTE: New struct (types) - All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
+	Token *break_token = new Operand <Token *> ((Token *) 0x1);
+	Token *continue_token = new Operand <Token *> ((Token *) 0x2);
+
+	node lin = tree[0];
+	node body = tree[1];
+
+	lvalue *lv = lin[0].cast <lvalue> ();
+	Generator *gen = dynamic_cast <Generator *>
+			(node_value(context, lin[1]));
+	// if (!lv) throw
+	// if (!gen) throw
+
+	Iterator *itr = gen->begin();
+	while (itr) {
+		lv->assign(itr->value(), context);
+
+		Token *eval = node_sequential_value(context, body);
+
+		// TODO: use the static comparator
+		if (eval && tokcmp(eval, break_token))
+				break;
+		else if (eval && tokcmp(eval, continue_token))
+			continue;
+		else if (dynamic_cast <Operand <Token *> *> (eval)) {
+			output = eval;
+
+			break;
+		}
+
+		itr = gen->next(itr);
+	}
+
+	// Pop the stack
+	context = pop_and_del_stack(context);
+
+	return output;
+}
+
 static Token *node_null_value(Engine *context, const node &tree)
 {
 	Token *output = nullptr;
@@ -134,6 +180,8 @@ static Token *node_null_value(Engine *context, const node &tree)
 		return branch_node(context, tree);
 	case l_while_loop:
 		return while_node(context, tree);
+	case l_for_loop:
+		return for_node(context, tree);
 	case l_break_loop:
 		return new Operand <Token *> ((Token *) 0x1);
 	case l_continue_loop:
@@ -193,11 +241,13 @@ Token *node_value(Engine *context, node tree)
 	}
 
 	// else: this func
-	
-	// TODO: Add a method for nodes to cast the token (ie. tree.cast <type> ())
-	
+
+	// TODO: replace this system (use functor and such and use
+	// labels for others like node_list, etc)	
 	switch (tree.caller()) {
 	case Token::opd:
+		return tree.copy_token();
+	case Token::token_collection:
 		return tree.copy_token();
 	case Token::oph:	
 		// size = tree._leaves.size();
@@ -270,7 +320,7 @@ Token *node_value(Engine *context, node tree)
 	return nullptr;
 }
 
-
+// TODO: use const tree instead
 Token *node_sequential_value(Engine *context, node tree)
 {
 	// Assumes that the top node is a sequential

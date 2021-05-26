@@ -1,5 +1,6 @@
 #include <core/node_list.hpp>
 #include <core/node_manager.hpp>
+#include <core/collection.hpp>
 
 namespace zhetapi {
 
@@ -15,7 +16,8 @@ Token *node_list::evaluate(Engine *context) const
 		toks.push_back(nm.value(context));
 	}
 
-	return new Operand <std::vector <Token *>> (toks);
+	// TODO: clear memory
+	return new Collection(toks);
 }
 
 Token::type node_list::caller() const

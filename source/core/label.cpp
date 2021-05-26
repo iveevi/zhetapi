@@ -50,6 +50,7 @@ std::string strlabs[] = {
 	"elif",
 	"branch",
 	"while loop",
+	"for loop",
 	"break loop",
 	"continue loop",
 	"return",

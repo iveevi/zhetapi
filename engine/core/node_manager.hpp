@@ -15,6 +15,7 @@
 #include "lvalue.hpp"
 #include "rvalue.hpp"
 #include "operation_holder.hpp"
+#include "generator.hpp"
 
 namespace zhetapi {
 
@@ -45,6 +46,9 @@ public:
 	// Operators
 	node &operator[](size_t);
 	const node &operator[](size_t) const;
+
+	// Tree
+	const node &tree() const;
 
 	// Writing to file
 	void write(std::ostream &) const;

@@ -59,6 +59,7 @@ enum lbl {
 	l_elif_branch,
 	l_branch,
 	l_while_loop,
+	l_for_loop,
 	l_break_loop,
 	l_continue_loop,
 	l_return_alg,

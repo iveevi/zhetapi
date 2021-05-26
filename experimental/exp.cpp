@@ -13,7 +13,7 @@ println("OUT OF IF")
 zhetapi::StringFeeder feeder(R"(
 x = {1, 2, 3, 4}
 for (k in x)
-	println("x = ", x")
+	println("k = ", k)
 )");
 
 int main()
