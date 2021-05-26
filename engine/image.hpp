@@ -5,16 +5,13 @@
 #include <cstring>
 #include <bitset>
 
-// TODO: remove this, maybe move to SFML
-#define ZHP_NO_GUI
-
 #ifndef ZHP_NO_GUI
 
-// GLFW
-#include <glad.h>	// Replace this header
-#include <GLFW/glfw3.h>
+#include <SFML/System.hpp>
+#include <SFML/Window.hpp>
+#include <SFML/Graphics.hpp>
 
-#include "core/shader.hpp"
+// #include "core/shader.hpp"
 
 #endif
 
@@ -166,14 +163,6 @@ Image load_png(const char *);
 Image load_png(const std::string &);
 
 void save_png(const Image &, const char *);
-
-#ifndef ZHP_NO_GUI
-
-// GLFW helpers
-void image_viewer_input_processor(GLFWwindow *);
-void image_viewer_resize_processor(GLFWwindow *, int, int);
-
-#endif
 
 }
 

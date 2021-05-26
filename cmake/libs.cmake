@@ -60,8 +60,7 @@ add_library(zhp-shared SHARED ${ZHETAPI_SOURCE})
 
 target_link_libraries(zhp-shared ${PNG_LIBRARY})
 target_link_libraries(zhp-shared ${CMAKE_DL_LIBS})
-target_link_libraries(zhp-shared ${OPENGL_LIBRARIES})
-target_link_libraries(zhp-shared ${GLFW_LIBRARY})
+target_link_libraries(zhp-shared sfml-graphics sfml-audio)
 
 SET_TARGET_PROPERTIES(zhp-shared PROPERTIES
    OUTPUT_NAME zhp CLEAN_DIRECT_OUTPUT 1)

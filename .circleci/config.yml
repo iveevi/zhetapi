@@ -3,10 +3,8 @@ version: 2.1
 orbs:
   codecov: codecov/codecov@1.0.2
 
-jobs:
-  build:
-    docker:
-      - image: ubuntu:18.04
+commands:
+  preinstall:
     steps:
       - checkout
       - run:
@@ -15,43 +13,8 @@ jobs:
             apt-get -y update
             apt-get -y install sudo
             sudo apt-get -y install software-properties-common
-      - run:
-          name: Installing dependencies
-          command: |
-            sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-            sudo apt-get -y update
-            sudo apt-get -y install libboost-all-dev
-            sudo apt-get -y install gcc-8 g++-8
-            sudo apt-get -y install libpng-dev
-            sudo apt-get -y install tree
-            sudo apt-get -y install wget
-      - run:
-          name: Installing Cmake
-          command: |
-            mkdir -p $HOME/usr
-            export PATH="$HOME/usr/bin:/usr/local/bin:$PATH"
-            sudo apt purge --auto-remove -y cmake
-            wget https://cmake.org/files/v3.19/cmake-3.19.2-Linux-x86_64.sh
-            sudo mkdir /opt/cmake
-            sudo sh cmake-3.19.2-Linux-x86_64.sh --prefix=/opt/cmake --exclude-subdir --skip-license
-            sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
-      - run:
-          name: Installing Zhetapi
-          command: sudo ./run.py install -j 2
-      - run:
-          name: Testing Zhetapi Installation
-          command: ./run.py header_tests
-  port-testing:
-    docker:
-      - image: ubuntu:18.04
-    steps:
-      - checkout
-      - run:
-          name: Installing sudo
-          command: |
-            apt-get -y update
-            apt-get -y install sudo
-            sudo apt-get -y install software-properties-common
+  dependencies:
+      steps:
       - run:
           name: Installing dependencies
           command: |
@@ -64,6 +27,7 @@ jobs:
             sudo apt-get -y install wget
             sudo apt-get -y install curl
             sudo apt-get -y install lcov
+	    sudo apt-get install libsfml-dev
       - run:
           name: Installing Cmake
           command: |
@@ -82,6 +46,26 @@ jobs:
             cd lcov-1.15/
             sudo make install
             cd ../
+
+jobs:
+  build:
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - preinstall
+      - dependencies
+      - run:
+          name: Installing Zhetapi
+          command: sudo ./run.py install -j 2
+      - run:
+          name: Testing Zhetapi Installation
+          command: ./run.py header_tests
+  port-testing:
+    docker:
+      - image: ubuntu:18.04
+    steps:
+      - preinstall
+      - dependencies
       - run:
           name: Running Port Tests
           command: |
