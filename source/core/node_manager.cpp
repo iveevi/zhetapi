@@ -17,6 +17,9 @@ node_manager::node_manager(const node_manager &other)
 	rereference(_tree);
 }
 
+node_manager::node_manager(const node &tree)
+		: _tree(tree) {}
+
 node_manager::node_manager(Engine *context, const node &tree)
 		: _tree(tree)
 {
@@ -68,8 +71,10 @@ node_manager::node_manager(Engine *context, const std::string &str)
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
-        if (!r)
+        if (!r) {
+		std::cout << "Error parsing \"" << str << "\"" << std::endl;
                 throw bad_input();
+	}
 
 	/*using namespace std;
 	cout << string(50, '=') << endl;
@@ -102,8 +107,10 @@ node_manager::node_manager(
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
-        if (!r)
+        if (!r) {
+		std::cout << "Error parsing \"" << str << "\"" << std::endl;
                 throw bad_input();
+	}
 
 	/* using namespace std;
 	cout << string(50, '=') << endl;
@@ -295,6 +302,9 @@ void node_manager::compress_branches(node &tree)
 }
 
 // Appending nodes
+
+// TODO: add a reconstruct function for doing post construction setup
+// will be used to delay such processes until full construction of the tree
 void node_manager::append(const node &n)
 {
 	_tree.append(n);

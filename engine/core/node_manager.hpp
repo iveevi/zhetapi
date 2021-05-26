@@ -25,13 +25,14 @@ class Function;
 class node_manager {
 private:
 	// TODO: refactor params to args
-	// Engine *			_engine	= nullptr;
-	node				_tree	= node();
-	std::vector <node>		_refs	= {};
-	std::vector <std::string>	_params	= {};
+	node			_tree	= node();
+	std::vector <node>	_refs	= {};
+	Args			_params	= {};
 public:
 	node_manager();
 	node_manager(const node_manager &);
+	
+	node_manager(const node &);
 	node_manager(Engine *, const node &);
 	node_manager(Engine *, const node &, const Args &);
 	node_manager(Engine *, const std::string &);

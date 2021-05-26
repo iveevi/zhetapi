@@ -141,6 +141,74 @@ static node_manager cc_while(Feeder *feeder,
 	return nwhile;
 }
 
+// TODO: make cleaner (looking)
+static node_manager cc_for(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	char c;
+	while ((c = feeder->feed()) != '(');
+
+	std::string paren = feeder->extract_parenthesized();
+
+	// Skip construction step or something
+	node_manager niter(ctx, paren);
+
+	std::cout << "NITER for FOR:" << std::endl;
+	std::cout << "-paren- = " << paren << std::endl;
+	niter.print();
+
+	node lin = niter.tree();
+	if (lin.label() != l_generator_in)
+		throw bad_for();
+	lvalue *lv = lin[0].cast <lvalue> ();
+	if (!lv)
+		throw bad_for();
+	std::string ident = lv->symbol();
+	pardon.insert(ident);
+
+	while (isspace(c = feeder->feed()));
+	if (c != '{')
+		feeder->backup(1);
+	std::cout << "TERM c = " << c << std::endl;
+	feeder->set_end((c == '{') ? '}' : '\n');
+
+	node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
+	std::cout << "NLOOP for FOR:" << std::endl;
+	nloop.print();
+
+	node_manager nfor;
+
+	nfor.set_label(l_for_loop);
+	nfor.append(niter);
+	nfor.append(nloop);
+
+	// Reset terminal
+	feeder->set_end();
+
+	return nfor;
+}
+
+static node_manager cc_break(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	return node(break_token());
+}
+
+static node_manager cc_continue(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	return node(continue_token());
+}
+
 node_manager cc_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -158,7 +226,10 @@ node_manager cc_keyword(std::string &cache,
 		{"if", cc_if},
 		{"elif", cc_elif},
 		{"else", cc_else},
-		{"while", cc_while}
+		{"while", cc_while},
+		{"for", cc_for},
+		{"break", cc_break},
+		{"continue", cc_continue}
 	};
 
 	if (keywords.find(cache) == keywords.end())

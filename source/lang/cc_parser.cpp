@@ -28,11 +28,11 @@ static node_manager cc_run_normal(const std::string &cache,
 			<< ": " << e.what() << std::endl;
 
 		exit(-1);
-	} catch (...) {
+	} /* catch (...) {
 		throw std::runtime_error(
-			"Caught unknown exception in zhetapi::run..."
+			"Caught unknown exception in zhetapi::cc_run..."
 		);
-	}
+	} */
 
 	return mg;
 }
@@ -134,6 +134,7 @@ node_manager cc_parse(Feeder *feeder,
 	// TODO: remove using
 	using namespace std;
 	while ((c = feeder->feed()) != EOF) {
+		std::cout << "cc_parse encountered c = " << c << std::endl;
 		// Check for commented line
 		// TODO: another function
 		if (c == '/') {
@@ -204,6 +205,8 @@ node_manager cc_parse(Feeder *feeder,
 		// Clear cached
 		state.cached.clear();
 	}
+
+	std::cout << "ENDED PARSING:====================================================" << std::endl;
 
 	// Finalize the tree
 	out.set_label(l_sequential);

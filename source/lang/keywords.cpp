@@ -170,18 +170,10 @@ bool check_for(Feeder *feeder,
 
 	std::string paren = feeder->extract_parenthesized();
 
-	using namespace std;
-	cout << "paren = " << paren << endl;
-
 	// Skip construction step or something
 	node_manager niter(ctx, paren);
 
-	niter.print();
-
 	node lin = niter.tree();
-
-	std::cout << strlabs[lin.label()] << std::endl;
-
 	if (lin.label() != l_generator_in)
 		throw bad_for();
 	
@@ -191,8 +183,6 @@ bool check_for(Feeder *feeder,
 		throw bad_for();
 	
 	std::string ident = lv->symbol();
-
-	std::cout << "IDENT = " << ident << endl;
 
 	Pardon pardon {ident};
 
@@ -210,14 +200,26 @@ bool check_for(Feeder *feeder,
 	nfor.append(niter);
 	nfor.append(nloop);
 
-	nfor.print();
-
 	nfor.value(ctx);
 
 	// Reset terminal
 	feeder->set_end();
 
 	return true;
+}
+
+bool check_break(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	throw global_break();
+}
+
+bool check_continue(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	throw global_continue();
 }
 
 void check_keyword(std::string &cache,
@@ -231,7 +233,9 @@ void check_keyword(std::string &cache,
 		{"elif", check_elif},
 		{"else", check_else},
 		{"while", check_while},
-		{"for", check_for}
+		{"for", check_for},
+		{"break", check_break},
+		{"continue", check_continue}
 	};
 
 	if (keywords.find(cache) == keywords.end())

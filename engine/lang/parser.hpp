@@ -104,6 +104,18 @@ public:
 		: std::runtime_error("Expected ([identifier] in [expression]) inside the clause of for-loop") {}
 };
 
+class global_break : public std::runtime_error {
+public:
+	global_break()
+		: std::runtime_error("Cannot break in global scope") {}
+};
+
+class global_continue : public std::runtime_error {
+public:
+	global_continue()
+		: std::runtime_error("Cannot use continue in global scope") {}
+};
+
 }
 
 #endif
