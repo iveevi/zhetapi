@@ -8,6 +8,8 @@
 #include "erf.hpp"
 #include "optimizer.hpp"
 
+#include "std/linalg.hpp"
+
 namespace zhetapi {
 
 namespace ml {
@@ -51,11 +53,11 @@ void fit(
 
 	// Use cached compute later
 	Vector <T> actual = dnn(in);
-	Vector <T> delta = derf->compute(actual, out);
+	Vector <T> delta = derf->compute(out, actual);
 
 	Matrix <T> *J;
 	
-	J = dnn.jacobian_delta(in, delta);
+	J = dnn.jacobian_delta(in, delta);	
 	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);
@@ -87,7 +89,11 @@ void fit(
 	Matrix <T> *J;
 	
 	// Put batch gradient (multithread and etc) in dnn method (batch jacobian)
-	J = simple_batch_gradient(dnn.layers(), dnn.size(), dnn.acache(), dnn.zcache(), ins, outs, erf);
+	J = simple_batch_gradient(dnn.layers(),
+		dnn.size(), dnn.acache(), dnn.zcache(),
+		ins, outs, erf
+	);
+
 	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);

@@ -216,6 +216,15 @@ static node_manager cc_continue(Feeder *feeder,
 	return node(continue_token());
 }
 
+static node_manager cc_alg(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	throw nested_alg();
+}
+
 node_manager cc_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -236,7 +245,8 @@ node_manager cc_keyword(std::string &cache,
 		{"while", cc_while},
 		{"for", cc_for},
 		{"break", cc_break},
-		{"continue", cc_continue}
+		{"continue", cc_continue},
+		{"alg", cc_alg}
 	};
 
 	if (keywords.find(cache) == keywords.end())

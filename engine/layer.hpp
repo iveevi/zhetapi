@@ -127,6 +127,15 @@ public:
 		const Vector <U> &,
 		Vector <U> &
 	);
+
+	template <class U>
+	friend Matrix <U> *jacobian_kernel_check(
+		Layer <U> *,
+		size_t,
+		const Vector <U> &,
+		const Vector <U> &,
+		Erf <U> *
+	);
 	
 	template <class U>
 	friend Matrix <U> *simple_gradient(

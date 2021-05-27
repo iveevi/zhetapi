@@ -237,6 +237,39 @@ bool check_continue(Feeder *feeder,
 	throw global_continue();
 }
 
+bool check_alg(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// Save end
+	char end = feeder->get_end();
+
+	std::pair <std::string, Args> sig = feeder->extract_signature();
+	
+	char c;
+	while (isspace(c = feeder->feed()));
+	if (c != '{')
+		feeder->backup(1);
+	
+	feeder->set_end((c == '{') ? '}' : '\n');
+
+	Pardon pardon;
+	node_manager nbody = cc_parse(feeder, ctx, sig.second, pardon);
+
+	nbody.add_args(sig.second);
+	nbody.set_label(l_sequential);
+	nbody.compress_branches();
+	
+	algorithm alg(sig.first, "", sig.second, nbody);
+
+	ctx->put(alg);
+
+	// Reset terminal
+	feeder->set_end(end);
+
+	return true;
+}
+
 void check_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -250,7 +283,8 @@ void check_keyword(std::string &cache,
 		{"while", check_while},
 		{"for", check_for},
 		{"break", check_break},
-		{"continue", check_continue}
+		{"continue", check_continue},
+		{"alg", check_alg}
 	};
 
 	if (keywords.find(cache) == keywords.end())

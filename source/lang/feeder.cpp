@@ -78,4 +78,35 @@ std::string Feeder::extract_parenthesized()
 	return out;
 }
 
+std::pair <std::string, Args> Feeder::extract_signature()
+{
+	std::string ident;
+	std::string tmp;
+	Args args;
+
+	char c;
+	while (isspace(c = feed()));
+
+	ident = c;
+	while ((c = feed()) != '(')
+		ident += c;
+	
+	while ((c = feed()) != ')') {
+		if (c == ',') {
+			if (!tmp.empty()) {
+				args.push_back(tmp);
+
+				tmp.clear();
+			}
+		} else if (!isspace(c)) {
+			tmp += c;
+		}
+	}
+
+	if (!tmp.empty())
+		args.push_back(tmp);
+
+	return {ident, args};
+}
+
 }

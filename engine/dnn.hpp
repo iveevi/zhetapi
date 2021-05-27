@@ -142,7 +142,9 @@ public:
 	Matrix <T> *jacobian(const Vector <T> &);
 	Matrix <T> *jacobian_delta(const Vector <T> &, Vector <T> &);
 
-	Matrix <T> *jacobian_check(const Vector <T> &);
+	Matrix <T> *jacobian_check(const Vector <T> &,
+			const Vector <T> &,
+			Erf <T> *);
 };
 
 // Constructors and other memory related operations
@@ -484,6 +486,24 @@ Matrix <T> *DNN <T> ::jacobian_delta(const Vector <T> &in, Vector <T> &delta)
 		in,
 		delta);
 
+	return J;
+}
+
+template <class T>
+Matrix <T> *DNN <T> ::jacobian_check(const Vector <T> &in,
+		const Vector <T> &target,
+		Erf <T> *erf)
+{
+	if (in.size() != _isize)
+		throw bad_io_dimensions();
+
+	Matrix <T> *J = jacobian_kernel_check(
+		_layers,
+		_size,
+		in,
+		target,
+		erf);
+	
 	return J;
 }
 

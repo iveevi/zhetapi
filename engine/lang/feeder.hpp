@@ -6,6 +6,9 @@
 #include <mutex>
 #include <string>
 
+// Engine headers
+#include <core/common.hpp>
+
 namespace zhetapi {
 
 // For checking termination
@@ -49,6 +52,8 @@ public:
 
 	std::string extract_quote();
 	std::string extract_parenthesized();
+
+	std::pair <std::string, Args>  extract_signature();
 
 	virtual Feeder *pop_at(size_t i, char = EOF) const = 0;
 };

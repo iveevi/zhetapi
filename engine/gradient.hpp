@@ -140,11 +140,55 @@ template <class T>
 Matrix <T> *jacobian_kernel_check(
 		Layer <T> *layers,
 		size_t size,
-		size_t osize,
-		Vector <T> *a,
-		Vector <T> *z,
-		const Vector <T> &in)
+		const Vector <T> &in,
+		const Vector <T> &target,
+		Erf <T> *erf)
 {
+	// Epsilon
+	static T epsilon = 1e-10;
+
+	// Making a copy of the layers
+	Layer <T> *copy = new Layer <T> [size];
+
+	for (size_t i = 0; i < size; i++)
+		copy[i] = layers[i];
+
+	Matrix <T> *J = new Matrix <T> [size];
+
+	using namespace std;
+	for (size_t i = 0; i < size; i++) {
+		size_t rows = layers[i]._mat.get_rows();
+		size_t cols = layers[i]._mat.get_cols();
+		cout << "Processing index = " << i << endl;
+		cout << "\trow = " << rows << endl;
+		cout << "\tcols = " << cols << endl;
+
+		J[i] = Matrix <T> (rows, cols);
+		// for (size_t)
+
+		for (size_t x = 0; x < rows; x++) {
+			for (size_t y = 0; y < cols; y++) {
+				// Modify the correct layer for forward
+				copy[i]._mat = layers[i]._mat;
+				copy[i]._mat[x][y] += epsilon;
+
+				Vector <T> forward = simple_compute(copy, size, in);
+
+				// Modify the correct layer for forward
+				copy[i]._mat = layers[i]._mat;
+				copy[i]._mat[x][y] -= epsilon;
+
+				Vector <T> backward = simple_compute(copy, size, in);
+
+				T ferf = (erf->compute(forward, target))[0];
+				T berf = (erf->compute(backward, target))[0];
+
+				J[i][x][y] = (ferf - berf)/(2 * epsilon);
+			}
+		}
+	}
+
+	return J;
 }
 
 template <class T>

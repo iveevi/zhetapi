@@ -67,7 +67,7 @@ node_manager cc_parse(Feeder *,
 		const Args &,
 		Pardon &);
 
-// cc exceptions
+// Exceptions ()
 class bad_identifier : public std::runtime_error {
 public:
 	bad_identifier(const std::string &str)
@@ -114,6 +114,12 @@ class global_continue : public std::runtime_error {
 public:
 	global_continue()
 		: std::runtime_error("Cannot use continue in global scope") {}
+};
+
+class nested_alg : public std::runtime_error {
+public:
+	nested_alg()
+		: std::runtime_error("Cannot define an algorithm in a nested scope") {}
 };
 
 }
