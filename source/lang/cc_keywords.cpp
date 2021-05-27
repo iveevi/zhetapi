@@ -8,6 +8,9 @@ static node_manager cc_if(Feeder *feeder,
 		Pardon &pardon,
 		State *state)
 {
+	// First save end
+	char end = feeder->get_end();
+	
 	// Return
 	node_manager nif;
 
@@ -34,7 +37,7 @@ static node_manager cc_if(Feeder *feeder,
 	nif.append(nblock);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return nif;
 }
@@ -45,6 +48,9 @@ static node_manager cc_elif(Feeder *feeder,
 		Pardon &pardon,
 		State *state)
 {
+	// First save end
+	char end = feeder->get_end();
+	
 	// Return
 	node_manager nelif;
 
@@ -72,7 +78,7 @@ static node_manager cc_elif(Feeder *feeder,
 	nelif.append(nblock);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return nelif;
 }
@@ -83,6 +89,9 @@ static node_manager cc_else(Feeder *feeder,
 		Pardon &pardon,
 		State *state)
 {
+	// First save end
+	char end = feeder->get_end();
+	
 	// Return
 	node_manager nelse;
 
@@ -101,7 +110,7 @@ static node_manager cc_else(Feeder *feeder,
 	nelse.append(nblock);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return nelse;
 }
@@ -112,6 +121,9 @@ static node_manager cc_while(Feeder *feeder,
 		Pardon &pardon,
 		State *state)
 {
+	// First save end
+	char end = feeder->get_end();
+	
 	// Return
 	node_manager nwhile;
 
@@ -136,7 +148,7 @@ static node_manager cc_while(Feeder *feeder,
 	nwhile.append(nloop);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return nwhile;
 }
@@ -148,6 +160,9 @@ static node_manager cc_for(Feeder *feeder,
 		Pardon &pardon,
 		State *state)
 {
+	// First save end
+	char end = feeder->get_end();
+	
 	char c;
 	while ((c = feeder->feed()) != '(');
 
@@ -155,11 +170,6 @@ static node_manager cc_for(Feeder *feeder,
 
 	// Skip construction step or something
 	node_manager niter(ctx, paren);
-
-	std::cout << "NITER for FOR:" << std::endl;
-	std::cout << "-paren- = " << paren << std::endl;
-	niter.print();
-
 	node lin = niter.tree();
 	if (lin.label() != l_generator_in)
 		throw bad_for();
@@ -172,12 +182,9 @@ static node_manager cc_for(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-	std::cout << "TERM c = " << c << std::endl;
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
-	std::cout << "NLOOP for FOR:" << std::endl;
-	nloop.print();
 
 	node_manager nfor;
 
@@ -186,7 +193,7 @@ static node_manager cc_for(Feeder *feeder,
 	nfor.append(nloop);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return nfor;
 }

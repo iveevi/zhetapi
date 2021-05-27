@@ -132,9 +132,7 @@ node_manager cc_parse(Feeder *feeder,
 	char c;
 	
 	// TODO: remove using
-	using namespace std;
 	while ((c = feeder->feed()) != EOF) {
-		std::cout << "cc_parse encountered c = " << c << std::endl;
 		// Check for commented line
 		// TODO: another function
 		if (c == '/') {
@@ -205,8 +203,6 @@ node_manager cc_parse(Feeder *feeder,
 		// Clear cached
 		state.cached.clear();
 	}
-
-	std::cout << "ENDED PARSING:====================================================" << std::endl;
 
 	// Finalize the tree
 	out.set_label(l_sequential);

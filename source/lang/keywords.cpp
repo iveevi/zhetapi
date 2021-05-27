@@ -17,6 +17,9 @@ static bool check_if(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
+	// Save end
+	char end = feeder->get_end();
+
 	// Update the state
 	state->branch = true;
 
@@ -41,7 +44,7 @@ static bool check_if(Feeder *feeder,
 		parse_global(feeder, context);
 
 		// Reset terminal
-		feeder->set_end();
+		feeder->set_end(end);
 	} else {
 		// TODO: add a skip until for characters
 		feeder->skip_until((c == '{') ? "}" : "\n");
@@ -54,6 +57,9 @@ static bool check_elif(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
+	// Save end
+	char end = feeder->get_end();
+
 	if (!state->branch) {
 		std::cerr << "TODO: elif out of place error..." << std::endl;
 		exit(-1);
@@ -78,7 +84,7 @@ static bool check_elif(Feeder *feeder,
 		parse_global(feeder, context);
 
 		// Reset terminal
-		feeder->set_end();
+		feeder->set_end(end);
 	} else  {
 		// TODO: add a skip until for characters
 		feeder->skip_until((c == '{') ? "}" : "\n");
@@ -91,6 +97,9 @@ static bool check_else(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
+	// Save end
+	char end = feeder->get_end();
+
 	if (!state->branch) {
 		std::cerr << "TODO: else out of place error..." << std::endl;
 		exit(-1);
@@ -111,7 +120,7 @@ static bool check_else(Feeder *feeder,
 		parse_global(feeder, context);
 
 		// Reset terminal
-		feeder->set_end();
+		feeder->set_end(end);
 	}
 
 	// End the current branch
@@ -125,6 +134,9 @@ bool check_while(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
+	// Save end
+	char end = feeder->get_end();
+
 	char c;
 	while ((c = feeder->feed()) != '(');
 
@@ -151,8 +163,8 @@ bool check_while(Feeder *feeder,
 
 		nwhile.value(ctx);
 
-		// Reset terminal
-		feeder->set_end();
+		// Restore terminal
+		feeder->set_end(end);
 	} else {
 		// Skip block
 		feeder->skip_until((c == '{') ? "}" : "\n");
@@ -165,6 +177,9 @@ bool check_for(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
+	// Save end
+	char end = feeder->get_end();
+
 	char c;
 	while ((c = feeder->feed()) != '(');
 
@@ -203,7 +218,7 @@ bool check_for(Feeder *feeder,
 	nfor.value(ctx);
 
 	// Reset terminal
-	feeder->set_end();
+	feeder->set_end(end);
 
 	return true;
 }

@@ -38,7 +38,9 @@ public:
 	
 	virtual size_t tellg() const = 0;
 
+	virtual char get_end() const = 0;
 	virtual void set_end(char = EOF) = 0;
+
 	virtual void backup(size_t) = 0;
 
 	// TODO: these two do not need to be pure virtual
@@ -68,8 +70,10 @@ public:
 	
 	size_t tellg() const override;
 	
-	void backup(size_t) override;
+	char get_end() const override;
 	void set_end(char = EOF) override;
+	
+	void backup(size_t) override;
 
 	Feeder *pop_at(size_t i, char = EOF) const override;
 };
@@ -92,7 +96,9 @@ public:
 
 	size_t tellg() const override;
 
+	char get_end() const override;
 	void set_end(char = EOF) override;
+	
 	void backup(size_t) override;
 
 	Feeder *pop_at(size_t i, char = EOF) const override;

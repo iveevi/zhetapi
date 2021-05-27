@@ -45,6 +45,11 @@ size_t StringFeeder::tellg() const
 	return _index;
 }
 
+char StringFeeder::get_end() const
+{
+	return _end;
+}
+
 void StringFeeder::set_end(char c)
 {
 	_end = c;
@@ -121,6 +126,11 @@ char SourceFeeder::prev()
 size_t SourceFeeder::tellg() const
 {
 	return _index;
+}
+
+char SourceFeeder::get_end() const
+{
+	return _end;
 }
 
 void SourceFeeder::set_end(char c)
