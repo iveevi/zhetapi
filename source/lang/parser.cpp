@@ -195,7 +195,11 @@ int parse_global(Feeder *feeder, Engine *context)
 		if (!isspace(c))
 			state.cached += c;
 		
-		check_keyword(state.cached, feeder, context, &state);
+		OpZ *opz = check_keyword(state.cached, feeder, context, &state);
+
+		if (opz)
+			return opz->get();
+		
 		// cout << "cached = " << state.cached << endl;
 	}
 

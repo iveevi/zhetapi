@@ -13,7 +13,7 @@ bool is_true(Token *tptr)
 }
 
 // TODO: make sure state->branch gets reset
-static bool check_if(Feeder *feeder,
+static OpZ *check_if(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
@@ -50,20 +50,21 @@ static bool check_if(Feeder *feeder,
 		feeder->skip_until((c == '{') ? "}" : "\n");
 	}
 
-	return true;
+	return nullptr;
 }
 
-static bool check_elif(Feeder *feeder,
+static OpZ *check_elif(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
 	// Save end
 	char end = feeder->get_end();
 
+	// TODO: throw exception
 	if (!state->branch) {
 		std::cerr << "TODO: elif out of place error..." << std::endl;
 		exit(-1);
-		return false;
+		return nullptr;
 	}
 
 	char c;
@@ -90,20 +91,21 @@ static bool check_elif(Feeder *feeder,
 		feeder->skip_until((c == '{') ? "}" : "\n");
 	}
 
-	return true;
+	return nullptr;
 }
 
-static bool check_else(Feeder *feeder,
+static OpZ *check_else(Feeder *feeder,
 		Engine *context,
 		State *state)
 {
 	// Save end
 	char end = feeder->get_end();
 
+	// Throw exception
 	if (!state->branch) {
 		std::cerr << "TODO: else out of place error..." << std::endl;
 		exit(-1);
-		return false;
+		return nullptr;
 	}
 
 	char c;
@@ -127,10 +129,10 @@ static bool check_else(Feeder *feeder,
 	state->branch = false;
 	state->bdone = false;
 
-	return true;
+	return nullptr;
 }
 
-bool check_while(Feeder *feeder,
+static OpZ *check_while(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
@@ -170,10 +172,10 @@ bool check_while(Feeder *feeder,
 		feeder->skip_until((c == '{') ? "}" : "\n");
 	}
 
-	return true;
+	return nullptr;
 }
 
-bool check_for(Feeder *feeder,
+static OpZ *check_for(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
@@ -220,24 +222,28 @@ bool check_for(Feeder *feeder,
 	// Reset terminal
 	feeder->set_end(end);
 
-	return true;
+	return nullptr;
 }
 
-bool check_break(Feeder *feeder,
+static OpZ *check_break(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
 	throw global_break();
+
+	return nullptr;
 }
 
-bool check_continue(Feeder *feeder,
+static OpZ *check_continue(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
 	throw global_continue();
+
+	return nullptr;
 }
 
-bool check_alg(Feeder *feeder,
+static OpZ *check_alg(Feeder *feeder,
 		Engine *ctx,
 		State *state)
 {
@@ -267,15 +273,38 @@ bool check_alg(Feeder *feeder,
 	// Reset terminal
 	feeder->set_end(end);
 
-	return true;
+	return nullptr;
 }
 
-void check_keyword(std::string &cache,
+static OpZ *check_return(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	std::string expression;
+
+	// TODO: Allow multiline if the user add '\'
+	char c;
+	while ((c = feeder->feed()) != '\n')
+		expression += c;
+	
+	Token *tptr = node_manager(ctx, expression).value(ctx);
+
+	OpZ *opz = dynamic_cast <OpZ *> (tptr);
+	
+	if (opz)
+		return opz;
+	
+	throw global_int_return();
+
+	return nullptr;
+}
+
+OpZ *check_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
 		State *state)
 {
-	using Processor = std::function <bool (Feeder *, Engine *, State *)>;
+	using Processor = std::function <OpZ *(Feeder *, Engine *, State *)>;
 	static const Symtab <Processor> keywords {
 		{"if", check_if},
 		{"elif", check_elif},
@@ -284,15 +313,18 @@ void check_keyword(std::string &cache,
 		{"for", check_for},
 		{"break", check_break},
 		{"continue", check_continue},
-		{"alg", check_alg}
+		{"alg", check_alg},
+		{"return", check_return}
 	};
 
 	if (keywords.find(cache) == keywords.end())
-		return;
-	
-	// Clear cache if the keyword extraction is successful
-	if ((keywords.at(cache))(feeder, context, state))
-		cache.clear();
+		return nullptr;
+
+	// Execute and clear the cache
+	OpZ *ret = (keywords.at(cache))(feeder, context, state);
+	cache.clear();
+
+	return ret;
 }
 
 }

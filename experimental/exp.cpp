@@ -14,9 +14,10 @@ println("OUT OF IF")
 // TODO: test evaluation of functions with blanks (and clean up the node_value
 // function by using node_functor)
 zhetapi::StringFeeder feeder(R"(
-alg foo(x, y, z) {
-	println("x = ", x)
-}
+x = 0
+println("x = ", x)
+
+return 46
 )");
 
 int main()
@@ -25,13 +26,15 @@ int main()
 
 	Pardon pardon;
 
-	// node_manager nm = cc_parse(&feeder, context, {}, pardon);
+	node_manager nm = cc_parse(&feeder, context, {}, pardon);
 
-	// nm.print();
+	nm.print();
 
 	// nm.write(cout);
 
-	parse_global(&feeder, context);
+	/* int ret = parse_global(&feeder, context);
+
+	cout << "return = " << ret << endl; */
 
 	context->list();
 }

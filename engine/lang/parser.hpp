@@ -43,7 +43,7 @@ Args eq_split(const std::string &);
 // No forwarding needed
 void run(const std::string &, Engine *);
 
-void check_keyword(std::string &, Feeder *, Engine *, State *);
+OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
 
 // Make part of public API so others and I can use
 int parse_global(const std::string &, Engine *);
@@ -120,6 +120,12 @@ class nested_alg : public std::runtime_error {
 public:
 	nested_alg()
 		: std::runtime_error("Cannot define an algorithm in a nested scope") {}
+};
+
+class global_int_return : public std::runtime_error {
+public:
+	global_int_return()
+		: std::runtime_error("Can only return integer codes at global scope") {}
 };
 
 }

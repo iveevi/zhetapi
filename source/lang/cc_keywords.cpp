@@ -225,6 +225,28 @@ static node_manager cc_alg(Feeder *feeder,
 	throw nested_alg();
 }
 
+static node_manager cc_return(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	std::string expression;
+
+	// TODO: Allow multiline if the user add '\'
+	char c;
+	while ((c = feeder->feed()) != '\n')
+		expression += c;
+	
+	node_manager nret;
+	node_manager nexpr(ctx, expression);
+
+	nret.append(nexpr);
+	nret.set_label(l_return_alg);
+
+	return nret;
+}
+
 node_manager cc_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -246,7 +268,8 @@ node_manager cc_keyword(std::string &cache,
 		{"for", cc_for},
 		{"break", cc_break},
 		{"continue", cc_continue},
-		{"alg", cc_alg}
+		{"alg", cc_alg},
+		{"return", cc_return}
 	};
 
 	if (keywords.find(cache) == keywords.end())
