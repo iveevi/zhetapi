@@ -23,6 +23,7 @@
 
 namespace zhetapi {
 
+// TODO: inspect the random-ness of the interval class
 namespace utility {
 
 #ifdef __AVR

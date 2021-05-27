@@ -300,8 +300,8 @@ int Image::show() const
 	// TODO: add optional names to images later
 	sf::RenderWindow window {
 		sf::VideoMode {
-			_dim[0],
-			_dim[1]
+			(unsigned long) _dim[0],
+			(unsigned long) _dim[1]
 		},
 		"Image show",
 		sf::Style::Titlebar | sf::Style::Close, glsettings

@@ -120,6 +120,10 @@ public:
 	size_t input_size() const;
 	size_t output_size() const;
 	
+	void enable_dropout() const;
+	void disable_dropout() const;
+	
+	// TODO: private?
 	Vector <T> *acache() const;
 	Vector <T> *zcache() const;
 
@@ -137,6 +141,8 @@ public:
 
 	Matrix <T> *jacobian(const Vector <T> &);
 	Matrix <T> *jacobian_delta(const Vector <T> &, Vector <T> &);
+
+	Matrix <T> *jacobian_check(const Vector <T> &);
 };
 
 // Constructors and other memory related operations
@@ -267,6 +273,11 @@ void DNN <T> ::clear_cache()
 		delete[] _Acache;
 	if (_Zcache)
 		delete[] _Zcache;
+
+	_acache = nullptr;
+	_zcache = nullptr;
+	_Acache = nullptr;
+	_Zcache = nullptr;
 }
 
 template <class T>
@@ -335,7 +346,22 @@ size_t DNN <T> ::output_size() const
 {
 	return _osize;
 }
+	
+template <class T>
+void DNN <T> ::enable_dropout() const
+{
+	for (size_t i = 0; i < _size; i++)
+		_layers[i].enable_dropout();
+}
 
+template <class T>
+void DNN <T> ::disable_dropout() const
+{
+	for (size_t i = 0; i < _size; i++)
+		_layers[i].disable_dropout();
+}
+
+// TODO: private?
 template <class T>
 Layer <T> *DNN <T> ::layers()
 {

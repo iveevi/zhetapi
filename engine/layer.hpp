@@ -44,7 +44,9 @@ class Layer {
 
 	InitFtn	<T>		_initializer;
 
+	// Dropout is off by default
 	long double		_dropout	= 0;
+	bool			_dp_enable	= false;
 
 	void clear();
 
@@ -72,6 +74,10 @@ public:
 	size_t get_fan_out() const;
 
 	void set_fan_in(size_t);
+	
+	// Enable and disable dropout
+	void enable_dropout() const;
+	void disable_dropout() const;
 
 	// Read and write
 	AVR_IGNORE(void write(std::ofstream &) const);
@@ -119,7 +125,7 @@ public:
 		Vector <U> *,
 		Vector <U> *,
 		const Vector <U> &,
-		const Vector <U> &
+		Vector <U> &
 	);
 	
 	template <class U>
@@ -236,6 +242,18 @@ void Layer <T> ::set_fan_in(size_t fan_in)
 		_mat = Matrix <T> (_fan_out, _fan_in + 1);
 }
 
+template <class T>
+void Layer <T> ::enable_dropout() const
+{
+	_dp_enable = true;
+}
+
+template <class T>
+void Layer <T> ::disable_dropout() const
+{
+	_dp_enable = false;
+}
+
 #ifndef __AVR	// Does not support AVR
 
 // Reading and writing
@@ -277,11 +295,18 @@ void Layer <T> ::initialize()
 	_mat.randomize(_initializer);
 }
 
-// Computation
+// Computation (TODO: why is there two?)
 template <class T>
 inline Vector <T> Layer <T> ::forward_propogate(const Vector <T> &in)
 {
-	return _act->compute(_mat * in.append_above(T (1)));
+	if (!_dp_enable)
+		return _act->compute(_mat * in.append_above(T (1)));
+
+	Vector <T> out = _act->compute(_mat * in.append_above(T (1)));
+	if (_dropout > 0)
+		out.nullify(_dropout, _unit);
+
+	return out;
 }
 
 template <class T>
@@ -291,8 +316,7 @@ inline void Layer <T> ::forward_propogate(Vector <T> &in1, Vector <T> &in2)
 	in1 = _act->compute(in2);
 
 	// Apply dropout (only if necessary)
-	// TODO: add a toggle feature for dropout (only for testing)
-	if (_dropout > 0)
+	if (_dp_enable && _dropout > 0)
 		in1.nullify(_dropout, _unit);
 }
 

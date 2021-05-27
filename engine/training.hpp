@@ -51,11 +51,12 @@ void fit(
 
 	// Use cached compute later
 	Vector <T> actual = dnn(in);
+	Vector <T> delta = derf->compute(actual, out);
 
 	Matrix <T> *J;
 	
-	J = dnn.jacobian(in, derf->compute(actual, out));
-	J = opt->update(J);
+	J = dnn.jacobian_delta(in, delta);
+	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);
 

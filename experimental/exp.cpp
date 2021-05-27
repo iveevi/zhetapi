@@ -10,6 +10,9 @@ if (false)
 println("OUT OF IF")
 )"); */
 
+// TODO: keywords should not be separated by spaces (account for whitespace)
+// TODO: test evaluation of functions with blanks (and clean up the node_value
+// function by using node_functor)
 zhetapi::StringFeeder feeder(R"(
 x = {1, 2, 3, 4}
 for (k in x) {

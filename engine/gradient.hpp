@@ -137,6 +137,17 @@ Matrix <T> *jacobian_kernel(
 }
 
 template <class T>
+Matrix <T> *jacobian_kernel_check(
+		Layer <T> *layers,
+		size_t size,
+		size_t osize,
+		Vector <T> *a,
+		Vector <T> *z,
+		const Vector <T> &in)
+{
+}
+
+template <class T>
 Matrix <T> *simple_gradient(
 		Layer <T> *layers,
 		size_t size,
