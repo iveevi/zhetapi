@@ -60,12 +60,8 @@ static OpZ *check_elif(Feeder *feeder,
 	// Save end
 	char end = feeder->get_end();
 
-	// TODO: throw exception
-	if (!state->branch) {
-		std::cerr << "TODO: elif out of place error..." << std::endl;
-		exit(-1);
-		return nullptr;
-	}
+	if (!state->branch)
+		throw bad_elif();
 
 	char c;
 	while ((c = feeder->feed()) != '(');
@@ -102,11 +98,8 @@ static OpZ *check_else(Feeder *feeder,
 	char end = feeder->get_end();
 
 	// Throw exception
-	if (!state->branch) {
-		std::cerr << "TODO: else out of place error..." << std::endl;
-		exit(-1);
-		return nullptr;
-	}
+	if (!state->branch)
+		throw bad_else();
 
 	char c;
 

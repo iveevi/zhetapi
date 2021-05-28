@@ -185,9 +185,13 @@ public:
 
         class bad_input : public std::runtime_error {
         public:
-                explicit bad_input()
-                                : std::runtime_error("bad input") {}
+                bad_input() : std::runtime_error("bad input") {}
         };
+
+	class null_attributee : public std::runtime_error {
+	public:
+		null_attributee() : std::runtime_error("Null attributee") {}
+	};
 
 	// Static variables
 	

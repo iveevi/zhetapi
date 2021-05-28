@@ -225,6 +225,9 @@ Token *node_value(Engine *context, node tree)
 	operation_holder *ophptr = tree.cast <operation_holder> ();
 
 	if (ophptr && ophptr->code == attribute) {
+		std::cout << "ATTRIBUTE: structure" << std::endl;
+		tree.print();
+
 		lvalue *lv = tree[1].cast <lvalue> ();
 
 		// TODO: throw on nullptr
@@ -236,6 +239,9 @@ Token *node_value(Engine *context, node tree)
 			args.push_back(node_value(context, leaf));
 
 		Token *callee = node_value(context, tree[0]);
+
+		if (!callee)
+			throw node_manager::null_attributee();
 
 		return callee->attr(at, args);
 	}

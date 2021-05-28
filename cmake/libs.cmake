@@ -43,6 +43,7 @@ set(ZHETAPI_SOURCE
 	source/lang/feeder.cpp
 	source/lang/helpers.cpp
 	source/lang/keywords.cpp
+	source/lang/mld_parser.cpp
 	source/lang/parser.cpp
 	source/lang/source.cpp
 	source/lang/vm.cpp

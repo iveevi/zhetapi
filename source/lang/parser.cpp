@@ -123,13 +123,6 @@ void run(const std::string &cache, Engine *context)
 	run_normal(cache, context);
 }
 
-int parse_global(const std::string &source, Engine *context)
-{
-	Feeder *feeder = new StringFeeder(source);
-
-	return parse_global(feeder, context);
-}
-
 int parse_global(Feeder *feeder, Engine *context)
 {
 	/* State of parsing: not static to allow multiple threads to parse

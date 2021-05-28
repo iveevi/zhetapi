@@ -8,10 +8,11 @@
 // Engine headers
 #include "feeder.hpp"
 #include "../engine.hpp"
+#include "../core/module.hpp"
 
 namespace zhetapi {
 
-// Parsing state
+// Parsing state (put in another file)
 struct State {
 	std::string	cached;
 
@@ -46,8 +47,10 @@ void run(const std::string &, Engine *);
 OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
 
 // Make part of public API so others and I can use
-int parse_global(const std::string &, Engine *);
 int parse_global(Feeder *, Engine *);
+
+// Make part of public API so others and I can use
+void mld_parse(Feeder *, Engine *, Module *);
 
 // Compile parsers and runners
 node_manager cc_run(const std::string &,
@@ -67,7 +70,8 @@ node_manager cc_parse(Feeder *,
 		const Args &,
 		Pardon &);
 
-// Exceptions ()
+// Exceptions (put into another header)
+// It is to be noted that branching does not count as nesting
 class bad_identifier : public std::runtime_error {
 public:
 	bad_identifier(const std::string &str)
@@ -126,6 +130,18 @@ class global_int_return : public std::runtime_error {
 public:
 	global_int_return()
 		: std::runtime_error("Can only return integer codes at global scope") {}
+};
+
+class nested_import : public std::runtime_error {
+public:
+	nested_import()
+		: std::runtime_error("Cannot import from a nested scope") {}
+};
+
+class nested_global : public std::runtime_error {
+public:
+	nested_global()
+		: std::runtime_error("Cannot use \"global\" in a nested scope") {}
 };
 
 }

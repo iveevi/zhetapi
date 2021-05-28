@@ -247,6 +247,24 @@ static node_manager cc_return(Feeder *feeder,
 	return nret;
 }
 
+static node_manager cc_import(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	throw nested_import();
+}
+
+static node_manager cc_global(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	throw nested_global();
+}
+
 node_manager cc_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
@@ -269,7 +287,9 @@ node_manager cc_keyword(std::string &cache,
 		{"break", cc_break},
 		{"continue", cc_continue},
 		{"alg", cc_alg},
-		{"return", cc_return}
+		{"return", cc_return},
+		{"import", cc_import},
+		{"global", cc_global}
 	};
 
 	if (keywords.find(cache) == keywords.end())

@@ -15,6 +15,7 @@ Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 
 Token::~Token() {}
 
+// TODO: how to deal with functors?
 Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 {
 	// Priorotize attributes
