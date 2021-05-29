@@ -114,6 +114,10 @@ public:
 	size_t width() const;
 	size_t height() const;
 	size_t channels() const;
+
+	// For SFML
+	sf::Image sfml_image() const;
+	sf::Texture sfml_texture() const;
 	
 	// Pixel value setter
 	void set(const pixel &, const Color &);			// Color

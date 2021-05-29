@@ -1,56 +1,40 @@
-#include <lang/parser.hpp>
+#include <thread>
+#include <functional>
+#include <vector>
 
-// Namespaces
+#include <vector.hpp>
+#include <plot.hpp>
+
 using namespace std;
 using namespace zhetapi;
 
-// TODO: keywords should not be separated by spaces (account for whitespace)
-// TODO: test evaluation of functions with blanks (and clean up the node_value
-// TODO: what about an assignment or statement before a comment? (eg. x = 0 // some comment...)
-// function by using node_functor)
-zhetapi::StringFeeder feeder(R"(
-alg foo() {
-	// println("x = ", x)
-	println("x = ...")
+auto F1 = [](double x) {
+	return 100 * sin(x / 100) + 50 * cos(x / 10) + sqrt(abs(x));
+};
 
-	return 46
-}
-)");
-
-zhetapi::StringFeeder feeder2(R"(
-test.foo()
-)");
+auto F2 = [](double x) {
+	return x * x;
+};
 
 int main()
 {
-	Engine *context = new Engine(true);
+	Plot plt;
 
-	Pardon pardon;
+	plt.show();
 
-	/* node_manager nm = cc_parse(&feeder, context, {}, pardon);
+	plt.plot(F1);
+	plt.plot(F2);
 
-	nm.print(); */
+	plt.plot({200, 200});
 
-	// nm.write(cout);
+	int a;
+	cout << "enter to stop: ";
+	cin >> a;
 
-	/* int ret = parse_global(&feeder, context);
-
-	cout << "return = " << ret << endl;
-
-	context->list(); */
-
-	Module *module = new Module("test");
+	plt.zoom(2);
 	
-	mld_parse(&feeder, context, module);
+	cout << "enter to stop: ";
+	cin >> a;
 
-	// TODO: add a list method
-	cout << "module = " << module->dbg_str() << endl;
-
-	module->list_attributes(cout);
-
-	context->put("test", module);
-
-	context->list();
-
-	parse_global(&feeder2, context);
+	plt.close();
 }

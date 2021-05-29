@@ -5,10 +5,12 @@ namespace zhetapi {
 namespace utility {
 
 // Static
-dre disjoint::gen;
+std::random_device	rd;
+
+dre disjoint::gen(rd());
 udb disjoint::distro = udb(0, 1);
 
-dre Interval <1> ::gen;
+dre Interval <1> ::gen(rd());
 udb Interval <1> ::distro = udb(0, 1);
 
 Interval <1> operator|(const Interval <1> &a, const Interval <1> &b)

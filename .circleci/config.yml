@@ -56,7 +56,11 @@ jobs:
       - dependencies
       - run:
           name: Installing Zhetapi
-          command: sudo ./run.py install -j 2
+          command: |
+            sudo ./run.py install -j 2
+            ls /usr/local/bin
+            ls /usr/local/lib
+            ls /usr/local/include
       - run:
           name: Testing Zhetapi Installation
           command: ./run.py header_tests

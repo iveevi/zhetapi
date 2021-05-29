@@ -45,8 +45,10 @@ using udb = distro_engine;
 
 #else
 
+extern std::random_device	rd;
+
 // Typedefs for sanity
-using dre = std::default_random_engine;
+using dre = std::mt19937;
 using udb = std::uniform_real_distribution <double>;
 
 #endif

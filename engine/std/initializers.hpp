@@ -39,42 +39,42 @@ struct RandomInitializer {
 
 #ifndef __AVR	// Does not support AVR
 
+std::random_device	_rd;
+std::mt19937		_mt(_rd());
+
 template <class T>
 struct LeCun {
-	std::default_random_engine		_gen;
-	std::normal_distribution <double>	_dbt;	
+	std::normal_distribution <T>		_dbt;
 public:
-	explicit LeCun(size_t fan_in) : _gen(),
-			_dbt(0, sqrt(T(1) / fan_in)) {}
+	explicit LeCun(size_t fan_in)
+			: _dbt(0, sqrt(T(1) / fan_in)) {}
 	
 	T operator()() {
-		return _dbt(_gen);
+		return _dbt(_mt);
 	}
 };
 
 template <class T>
 struct He {
-	std::default_random_engine		_gen;
-	std::normal_distribution <double>	_dbt;	
+	std::normal_distribution <T>		_dbt;	
 public:
-	explicit He(size_t fan_in) : _gen(),
-			_dbt(0, sqrt(T(2) / fan_in)) {}
+	explicit He(size_t fan_in)
+			: _dbt(0, sqrt(T(2) / fan_in)) {}
 	
 	T operator()() {
-		return _dbt(_gen);
+		return _dbt(_mt);
 	}
 }; 
 
 template <class T>
 struct Xavier {
-	std::default_random_engine		_gen;
-	std::normal_distribution <double>	_dbt;	
+	std::normal_distribution <T>		_dbt;	
 public:
-	explicit Xavier(size_t fan_avg) : _gen(),
-			_dbt(0, sqrt(T(1) / fan_avg)) {}
+	explicit Xavier(size_t fan_avg)
+			: _dbt(0, sqrt(T(1) / fan_avg)) {}
 	
 	T operator()() {
-		return _dbt(_gen);
+		return _dbt(_mt);
 	}
 };
 

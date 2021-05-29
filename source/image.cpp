@@ -171,6 +171,23 @@ size_t Image::channels() const
 	return _dim[2];
 }
 
+sf::Image Image::sfml_image() const
+{
+	sf::Image image;
+
+	// TODO: assert RGBA and/or fill
+	image.create(_dim[0], _dim[1], _array);
+
+	return image;
+}
+
+sf::Texture Image::sfml_texture() const
+{
+	sf::Texture texture;
+	texture.loadFromImage(sfml_image());
+	return texture;
+}
+
 void Image::set(const pixel &px, const Color &c)
 {
 	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
@@ -304,10 +321,9 @@ int Image::show() const
 			(unsigned long) _dim[1]
 		},
 		"Image show",
-		sf::Style::Titlebar | sf::Style::Close, glsettings
+		sf::Style::Titlebar | sf::Style::Close,
+		glsettings
 	};
-
-	const auto desktop = sf::VideoMode::getDesktopMode();
 
 	// TODO: this is RGBA only
 	sf::Image image;

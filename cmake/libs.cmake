@@ -6,6 +6,7 @@ set(ZHETAPI_SOURCE
 	source/function.cpp
 	source/image.cpp
 	source/operand.cpp
+	source/plot.cpp
 	source/polynomial.cpp
 	source/registration.cpp
 	source/token.cpp

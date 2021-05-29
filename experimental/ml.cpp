@@ -14,66 +14,54 @@ using namespace zhetapi;
 using namespace zhetapi::ml;
 using namespace zhetapi::utility;
 
-const size_t rounds = 5;
-const size_t channels = 2;
-const size_t actions = 2;
+const size_t rounds = 1000000;
+const size_t channels = 1;
+const size_t actions = 1;
 
 // TODO: add a global variable
 Interval <1> unit = 1_I;
 
 DNN <double> decryptor(channels, {
 	Layer <double> (4, new ReLU <double> ()),
-	/* Layer <double> (4, new ReLU <double> ()),
 	Layer <double> (4, new ReLU <double> ()),
-	Layer <double> (4, new ReLU <double> ()), */
-	Layer <double> (actions, new Sigmoid <double> ()),
+	Layer <double> (4, new ReLU <double> ()),
+	Layer <double> (4, new ReLU <double> ()),
+	Layer <double> (actions, new Sigmoid <double> ())
 });
 
-DNN <double> dummy;
+// True signal
+auto F = [](Vector <double> sig) {
+	return shur(sig, sig);
+};
 
 // Communication experiment
 int main()
 {
-	// Initialize random-ness
-	// srand(clock());
-
-	/* for (size_t i = 0; i < rounds; i++) {
-		cout << "Generated sig: " << unit.uniform() << endl;
-	} */
-
-	Vector <double> target(actions,
-		[&](size_t i) {
-			return unit.uniform();
-		}
-	);
-	
-	Vector <double> input(channels,
-		[&](size_t i) {
-			return unit.uniform();
-		}
-	);
-
-	cout << "target = " << target << endl;
-	cout << "input = " << input << endl;
-
-	Optimizer <double> *opt = new Adam <double> (1);
+	// Optimizer and erf
+	Optimizer <double> *opt = new SGD <double> (1);
 	Erf <double> *mse = new MSE <double> ();
-	Erf <double> *dmse = mse->derivative();
 
-	// Normal
-	cout << "NORMAL derivative:" << endl;
-
-	Vector <double> out = decryptor(input);
-	Vector <double> delta = dmse->compute(out, target);
-	Matrix <double> *Jn = decryptor.jacobian_delta(input, delta);
-
-	for (size_t i = 0; i < decryptor.size(); i++)
-		linalg::pretty(cout, Jn[i]) << endl;
+	// Process
+	for (size_t i = 0; i < rounds; i++) {
+		Vector <double> sig(actions,
+			[&](size_t i) {
+				return unit.uniform();
+			}
+		);
 	
-	// Gradient checking
-	cout << "CHECK derivative:" << endl;
-	Matrix <double> *Jc = decryptor.jacobian_check(input, target, mse);
+		cout << "sig = " << sig << endl;
+		cout << "encrypted sig = " << F(sig) << endl;
 
-	for (size_t i = 0; i < decryptor.size(); i++)
-		linalg::pretty(cout, Jc[i]) << endl;
+		Vector <double> in {F(sig)};
+
+		Vector <double> out = decryptor(in);
+
+		cout << "decrytped as " << out << endl;
+
+		cout << "\terror = " << mse->compute(sig, out) << endl;
+
+		fit(decryptor, in, sig, mse, opt);
+
+		// Graph this
+	}
 }
