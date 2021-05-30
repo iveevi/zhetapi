@@ -3,6 +3,7 @@
 namespace zhetapi {
 
 // Static variables
+double Plot::zoom_factor = 1.25;
 size_t Plot::def_width = 800;
 size_t Plot::def_height = 600;
 size_t Plot::def_aa_level = 10;
@@ -28,11 +29,11 @@ void Plot::plot(const Vector <double> &point)
 
 	circle.setRadius(5);
 	circle.setPosition(
-			point[0] + _origin[0],
-			_origin[1] - point[1]
-			);
+		point[0] + _origin[0],
+		_origin[1] - point[1]
+	);
 
-	_points.push_back(circle);
+	_points.push_back({point, circle});
 }
 
 void Plot::plot(const std::function <double (double)> &ftn)
@@ -50,7 +51,7 @@ void Plot::plot(const std::function <double (double)> &ftn)
 		curve[i].position = sf::Vector2f(p[0], p[1]);
 	}
 
-	_curves.push_back(curve);
+	_curves.push_back({ftn, curve});
 }
 
 void Plot::zoom(double factor)
@@ -89,6 +90,8 @@ void Plot::run()
 		{
 			if (event.type == sf::Event::Closed)
 				_win.close();
+			if (event.type == sf::Event::MouseWheelMoved)
+				zoom(pow(zoom_factor, event.mouseWheel.delta));
 		}
 
 		_win.clear(sf::Color::Black);
@@ -101,11 +104,11 @@ void Plot::run()
 		_win.draw(_axes.yup);
 		_win.draw(_axes.ydown);
 
-		for (const sf::VertexArray &curve : _curves)
-			_win.draw(curve);
+		for (const Curve &curve : _curves)
+			_win.draw(curve.va);
 
-		for (const sf::CircleShape &point : _points)
-			_win.draw(point);
+		for (const Point &point : _points)
+			_win.draw(point.circle);
 
 		_win.display();
 	}
@@ -113,6 +116,9 @@ void Plot::run()
 
 void Plot::init_axes()
 {
+	_axes.xscale = 10.0/_width;
+	_axes.yscale = 10.0/_height;
+
 	_axes.x = sf::VertexArray(sf::LinesStrip, 2);
 	_axes.x[0].position = {0, _origin[1]};
 	_axes.x[1].position = {_width, _origin[1]};

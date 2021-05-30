@@ -24,8 +24,19 @@ class Plot {
 
 	std::thread *			_wman = nullptr;
 
-	std::vector <sf::VertexArray>	_curves;
-	std::vector <sf::CircleShape>	_points;
+	struct Curve {
+		std::function <double (double)> ftn;
+		sf::VertexArray va;
+	};
+
+	std::vector <Curve>		_curves;
+
+	struct Point {
+		Vector <double>	tcoords;
+		sf::CircleShape circle;
+	};
+
+	std::vector <Point>		_points;
 
 	// Coordinate axes
 	struct {
@@ -39,6 +50,9 @@ class Plot {
 		sf::ConvexShape ydown;
 
 		sf::Color color;
+
+		double xscale;
+		double yscale;
 	} _axes;
 
 	// Origin
@@ -63,6 +77,7 @@ public:
 
 	void init_axes();
 
+	static double zoom_factor;
 	static size_t def_width;
 	static size_t def_height;
 	static size_t def_aa_level;

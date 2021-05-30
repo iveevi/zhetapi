@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import threading
 import argparse
 import os
 import time
@@ -57,31 +58,55 @@ def clean_and_exit(sig):
     exit(sig)
 
 # Executing shell
-def run_and_check(*args):
+def run_and_check(suppress, *args):
+    csup = ''
+    if suppress:
+        csup = ' >install.log 2>&1'
+
     for cmd in args:
-        ret = os.system(cmd)
+        ret = os.system(cmd + csup)
 
         if ret != 0:
+            print(f'Error executing command \'{cmd}\'')
             clean_and_exit(-1)
 
+# Run process with a spinner
+def spinner_process(function, arguments, msg1, msg2):
+    # Spinner string
+    spinner = '|\\-/'
+    
+    thread = threading.Thread(target=function, args=arguments)
+    thread.start();
+    
+    index = 0
+    while thread.is_alive():
+        print(f'{spinner[index]} {msg1}', end='\r')
+        index = (index + 1) % len(spinner)
+
+        time.sleep(0.1)
+
+    print(f'{msg2}' + ' ' * 50)
+
+
 # Compilation
-def make_target(threads, target, mode=''):
+def make_target(threads, target, mode='', suppress=False):
+    csup = ''
+    if suppress:
+        csup = ' >install.log 2>&1'
+
     if mode in ['gdb', 'valgrind', 'profile']:
-        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Debug .')
+        ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Debug . {csup}')
     elif mode in ['warn']:
-        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Warn .')
+        ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Warn . {csup}')
     elif mode in ['codecov']:
-        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Codecov .')
+        ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Codecov . {csup}')
     else:
-        ret = os.system('cmake -DCMAKE_BUILD_TYPE=Release .')
+        ret = os.system(f'(cmake -DCMAKE_BUILD_TYPE=Release .) {csup}')
 
     if ret != 0:
         clean_and_exit(-1)
 
-    ret = os.system('make -j{threads} {target}'.format(
-        threads=threads,
-        target=target
-    ))
+    ret = os.system(f'make -j{threads} {target} {csup}')
 
     if ret != 0:
         clean_and_exit(-1)
@@ -100,30 +125,51 @@ def list_modes(args):
         print('\t' + key)
 
 def install(args):
+    # TODO: print time stats as well
+
+    # zhetapi
+    spinner_process(make_target,
+            (args.threads, 'zhetapi', args.mode, True),
+            'Compiling ZHP interpreter...',
+            'Finished compiling ZHP interpreter.'
+    )
+    
+    spinner_process(make_target,
+            (args.threads, 'zhp-shared', args.mode, True),
+            'Compiling libzhp.so...',
+            'Finished compiling libzhp.so.'
+    )
+    
+    spinner_process(make_target,
+            (args.threads, 'zhp-static', args.mode, True),
+            'Compiling libzhp.a...',
+            'Finished compiling libzhp.a.'
+    )
+
     run_and_check(
-        'echo \'Installing...\n\'',
+        False,
         'mkdir -p bin',
-	    'mkdir -p include'
-	)
-
-    make_target(args.threads, 'zhetapi zhp-shared zhp-static')
-
-    run_and_check(
+	'mkdir -p include',
         'mv zhetapi bin/',
         'mv libzhp.* bin/',
         'ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi',
         'ln -s -f $PWD/engine /usr/local/include/zhetapi',
         'ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so',
         'ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a',
-        'echo \'\nCompiling libraries...\n\'',
-        './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp	lib/io/file.cpp	-o include/io.zhplib',
-        './bin/zhetapi -v -c lib/math/math.cpp -o include/math.zhplib',
-        'echo \'\nDisplaying symbols...\n\'',
-        './bin/zhetapi -d include/io.zhplib',
-        './bin/zhetapi -d include/math.zhplib',
-        'echo \'\nInstalling ZHP libraries...\n\'',
-        'cp -r $PWD/include /usr/local/include/zhp',
-        'echo \'Finished installation.\''
+    )
+
+    print('Finished installing essentials, moving on to libraries.\n')
+    
+    spinner_process(run_and_check,
+            (True, './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib', ),
+            'Compiling IO libary...',
+            'Finished compiling IO library.'
+    )
+    
+    spinner_process(run_and_check,
+            (True, './bin/zhetapi -v -c lib/math/math.cpp -o include/math.zhplib', ),
+            'Compiling Math libary...',
+            'Finished compiling Math library.'
     )
 
 def zhetapi_normal(args):

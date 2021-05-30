@@ -31,10 +31,5 @@ int main()
 	cout << "enter to stop: ";
 	cin >> a;
 
-	plt.zoom(2);
-	
-	cout << "enter to stop: ";
-	cin >> a;
-
 	plt.close();
 }
