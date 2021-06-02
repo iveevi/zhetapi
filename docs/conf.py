@@ -16,6 +16,7 @@
 import os
 
 os.system('doxygen')
+os.system('pip install breathe')
 
 # -- Project information -----------------------------------------------------
 
