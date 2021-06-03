@@ -5,6 +5,7 @@ set(ZHETAPI_SOURCE
 	source/equation.cpp
 	source/function.cpp
 	source/image.cpp
+	source/linalg.cpp
 	source/operand.cpp
 	source/plot.cpp
 	source/polynomial.cpp
@@ -51,7 +52,6 @@ set(ZHETAPI_SOURCE
 
 	source/std/functions.cpp
 	source/std/interval.cpp
-	source/std/linalg.cpp
 
 	interpreter/builtin/basic_io.cpp
 	

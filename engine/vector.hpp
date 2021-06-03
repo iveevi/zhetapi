@@ -55,6 +55,8 @@ bool is_vector_type()
 
 /**
  * @brief Represents a vector whose components are of type T.
+ *
+ * @tparam T the type of each component.
  */
 template <class T>
 class Vector : public Matrix <T> {

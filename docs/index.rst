@@ -13,3 +13,6 @@ To be changed.
    api/activation
    api/layer
    api/plot
+   api/parametrization
+   api/token
+   api/linalg

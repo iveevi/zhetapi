@@ -61,6 +61,8 @@ class Vector;
 
 /**
  * @brief A matrix with components of type T.
+ *
+ * @tparam T the type of each component.
  */
 template <class T>
 class Matrix : public Tensor <T> {

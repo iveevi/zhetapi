@@ -21,49 +21,42 @@ typedef Matrix <long double> Mat;
 extern const long double GAMMA;
 extern const long double EPSILON;
 
-// MatrixFactorization class
+/**
+ * @brief Represents a matrix factorization consisting of a specific number of
+ * matrices.
+ *
+ * @tparam T the type of each component of each matrix.
+ * @tparam N the number of matrices in each factorization.
+ */
 template <class T, size_t N>
 class MatrixFactorization {
 protected:
 	Matrix <T>	_terms[N];
 public:
-	MatrixFactorization(const std::vector <Matrix <T>> &terms) {
-		for (size_t i = 0; i < N; i++)
-			_terms[i] = terms[i];
-	}
-	
+	MatrixFactorization(const std::vector <Matrix <T>> &);
+
 	// Variadic constructor
 	template <class ... U>
-	MatrixFactorization(const Matrix <T> &A, U ... args) {
-		std::vector <Matrix <T>> terms {A};
+	MatrixFactorization(const Matrix <T> &, U ...);
 
-		collect(terms, args...);
-
-		// Skip overhead of std::vector
-		// by adding a collect function
-		// for pointer arrays
-		for (size_t i = 0; i < N; i++)
-			_terms[i] = terms[i];
-	}
-
-	Matrix <T> product() const {
-		// Check for appropriate number
-		if (N <= 0)
-			return Matrix <T> ::identity(1);
-		
-		Matrix <T> prod = _terms[0];
-
-		for (size_t i = 1; i < N; i++)
-			prod *= _terms[i];
-		
-		return prod;
-	}
+	Matrix <T> product() const;
 };
 
-// Separate matrix/vector methods from algorithms
+// TODO: Separate matrix/vector methods from algorithms
+
+/**
+ * @brief Pretty print for matrices. Prints in a tabular fashion, as opposed to
+ * a single line.
+ *
+ * @param os the output stream.
+ * @param mat the matrix to be printed.
+ *
+ * @return the modified output stream.
+ */
 template <class T>
 std::ostream &pretty(std::ostream &os, const Matrix <T> &mat)
 {
+	// TODO: more convenient syntax
 	size_t r = mat.get_rows();
 	size_t c = mat.get_cols();
 
@@ -233,7 +226,7 @@ std::vector <Vector <T>> gram_schmidt(const std::vector <Vector <T>> &span) {
 	assert(span.size());
 
 	std::vector <Vector <T>> basis = {span[0]};
-	
+
 	Vector <T> nelem;
 	for (size_t i = 1; i < span.size(); i++) {
 		nelem = span[i];
@@ -272,33 +265,67 @@ std::vector <Vector <T>> gram_schmidt_normalized(const std::vector <Vector <T>> 
 	return basis;
 }
 
-// QR factorization class
+/**
+ * @brief Represents a QR factorization.
+ *
+ * @tparam T the type of each component of the matrices.
+ */
 template <class T>
 class QR : public MatrixFactorization <T, 2> {
 public:
+	/**
+	 * @brief Constructs a QR factorization object out of its two
+	 * compromising matrices.
+	 *
+	 * @param Q an orthogonal matrix.
+	 * @param R an upper triangular matrix.
+	 */
 	QR(const Matrix <T> &Q, const Matrix <T> &R)
 			: MatrixFactorization <T, 2> (Q, R) {}
-	
+
+	/**
+	 * @return Q, the orthogonal matrix.
+	 */
 	Matrix <T> q() const {
 		return this->_terms[0];
 	}
 
+	/**
+	 * @return R, the upper triangular matrix.
+	 */
 	Matrix <T> r() const {
 		return this->_terms[1];
 	}
 };
 
-// LQ factorization class
+/**
+ * @brief Represents a LQ factorization.
+ *
+ * @tparam T the type of each component of the matrices.
+ */
 template <class T>
 class LQ : public MatrixFactorization <T, 2> {
 public:
+	/**
+	 * @brief Constructs a LQ factorization object out of its two
+	 * compromising matrices.
+	 *
+	 * @param L a lower triangular matrix.
+	 * @param Q an orthogonal matrix.
+	 */
 	LQ(const Matrix <T> &L, const Matrix <T> &Q)
 			: MatrixFactorization <T, 2> (L, Q) {}
-	
+
+	/**
+	 * @return L, the lower triangular matrix.
+	 */
 	Matrix <T> l() const {
 		return this->_terms[0];
 	}
 
+	/**
+	 * @return Q, the orthogonal matrix.
+	 */
 	Matrix <T> q() const {
 		return this->_terms[1];
 	}
@@ -332,18 +359,18 @@ QR <T> qr_decompose(const Matrix <T> &A)
 
 	us.push_back(u);
 	es.push_back(u.normalized());
-	
+
 	for (size_t i = 1; i < n; i++) {
 		Vector <T> ai = A.get_column(i);
 
 		u = ai;
 		for (size_t k = 0; k < i; k++)
 			u -= proj(us[k], ai);
-		
+
 		us.push_back(u);
 		es.push_back(u.normalized());
 	}
-	
+
 	Matrix <T> Q(es);
 
 	Matrix <T> R(n, n);
@@ -354,7 +381,7 @@ QR <T> qr_decompose(const Matrix <T> &A)
 
 	// Make a structure for matrix
 	// factorization of a general form
-	// 
+	//
 	// A * B * C * ...
 	return QR <T> (Q, R);
 }
@@ -381,12 +408,12 @@ LQ <T> lq_decompose(const Matrix <T> &A)
  * @brief Performs the QR algorithm to compute the eigenvalues of a square
  * matrix.
  *
- * @param A The matrix whos eigenvalues are to be computed.
- * @param epsilon The precision threshold; when all values not in the diagonal
+ * @param A the matrix whos eigenvalues are to be computed.
+ * @param epsilon the precision threshold; when all values not in the diagonal
  * of the matrix are less than or equal to epsilon, the algorithm terminates.
- * @param limit The maximum number of iterations to perform.
+ * @param limit the maximum number of iterations to perform.
  *
- * @return A vector of the diagonal elements of the matrix after termination. If
+ * @return a vector of the diagonal elements of the matrix after termination. If
  * the algorithm is successful, this should contain the (real) eigenvalues of A.
  */
 template <class T>
@@ -421,24 +448,32 @@ Vector <T> qr_algorithm(
 	return eigenvalues;
 }
 
-Vec pslq(const Vec &, long double = GAMMA, long double = EPSILON);
-
+/**
+ * @brief Matrix exponentiation, only for positive integer powers.
+ *
+ * @param A the matrix to be exponentiated.
+ * @param pow the exponent.
+ *
+ * @return the exponentiated matrix.
+ */
 template <class T>
 Matrix <T> exp(const Matrix <T> &A, size_t pow)
 {
 	// Base cases
 	if (pow == 0)
 		return Matrix <T> ::indentity(A.get_rows());
-	
+
 	if (pow == 1)
 		return A;
-	
+
 	// Use recusion
 	if (pow % 2)
 		return A * pow(A, (pow - 1)/2);
-	
+
 	return pow(A, pow/2);
 }
+
+Vec pslq(const Vec &, long double = GAMMA, long double = EPSILON);
 
 }
 

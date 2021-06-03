@@ -4,9 +4,11 @@
 
 namespace zhetapi {
 
+/**
+ * @brief Default Token constructor that does nothing. For inheritance purposes.
+ */
 Token::Token() {}
 
-// attrs
 Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 {
 	for (auto attr_pr : attrs)
@@ -15,9 +17,9 @@ Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 
 Token::~Token() {}
 
-// TODO: how to deal with functors?
 Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 {
+	// TODO: how to deal with functors?
 	// Priorotize attributes
 	if (_attributes.find(id) != _attributes.end())
 		return _attributes[id];
@@ -69,13 +71,13 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 }
 
 // Unknown attribute exception
- std::string Token::unknown_attribute::what() const
- {
+const char *Token::unknown_attribute::what() const noexcept
+{
 	// TODO: use the actual name instead of mangled
 	// TODO: use id() instead of typeid
-	return "<" + type_name(_ti) + ">"
+	return ("<" + type_name(_ti) + ">"
 		+ " has no attribute \""
-		+ _msg + "\"";
+		+ std::runtime_error::what() + "\"").c_str();
 }
 
 // Defaulting virtual functions
@@ -94,6 +96,12 @@ std::string Token::dbg_str() const
 	return "[?]";
 }
 
+/**
+ * @brief Writes data to an output stream. Not pure virtual because not all
+ * Token classes need this.
+ *
+ * @param os the stream to be written to.
+ */
 void Token::write(std::ostream &os) const
 {
 	throw empty_io();

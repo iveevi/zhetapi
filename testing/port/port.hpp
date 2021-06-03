@@ -16,16 +16,16 @@
 // Engine headers
 #include <all/zhplib.hpp>
 
-#include <vector.hpp>
-#include <matrix.hpp>
-#include <tensor.hpp>
 #include <fourier.hpp>
+#include <linalg.hpp>
+#include <matrix.hpp>
 #include <polynomial.hpp>
+#include <tensor.hpp>
+#include <vector.hpp>
 
 #include <std/calculus.hpp>
 #include <std/functions.hpp>
 #include <std/interval.hpp>
-#include <std/linalg.hpp>
 #include <std/activations.hpp>
 #include <std/erfs.hpp>
 

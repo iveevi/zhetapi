@@ -14,28 +14,11 @@
 namespace zhetapi {
 
 /** 
- * @brief Acts as a dummy class for
- * use of generic pointer in
- * other modules
+ * @brief The basic unit of computation for the ZHP scripting language and
+ * framework.
  */
 class Token {
 public:
-	// Maybe differentiate between const vector & and vector & methods
-	using method = Token *(*)(Token *, const std::vector <Token *> &);
-protected:
-	// From ZHP (algorithm, function, etc)
-	std::map <std::string, Token *>	_attributes;
-
-	// From API (Token)
-	std::map <std::string, method>	_methods;
-public:
-	Token();
-	Token(const std::vector <std::pair <std::string, method>> &);
-
-	virtual ~Token();
-
-	Token *attr(const std::string &, const std::vector <Token *> &);
-	
 	/*
 	 * TODO: make this redundant
 	 * Codes used to identify the Token, more on the is presented
@@ -74,6 +57,22 @@ public:
 		token_module,
 		token_collection
 	};
+	
+	// Maybe differentiate between const vector & and vector & methods
+	using method = Token *(*)(Token *, const std::vector <Token *> &);
+protected:
+	// From ZHP (algorithm, function, etc)
+	std::map <std::string, Token *>	_attributes;
+
+	// From API (Token)
+	std::map <std::string, method>	_methods;
+public:
+	Token();
+	Token(const std::vector <std::pair <std::string, method>> &);
+
+	virtual ~Token();
+
+	Token *attr(const std::string &, const std::vector <Token *> &);	
 
 	bool operator!=(Token *) const;
 	void list_attributes(std::ostream & = std::cout) const;
@@ -93,13 +92,7 @@ public:
 	 */
 	virtual std::string dbg_str() const;
 
-	// Add a virtual display method
-
-	/*
-	 * Returns a heap allocated copy of the Token. Used in copy
-	 * constructors for nodes and engines.
-	 */
-	virtual Token *copy() const = 0;
+	// TODO: Add a virtual display method
 
 	/*
 	 * Compares Tokens and returns their similarity. Used for node
@@ -110,17 +103,29 @@ public:
 	// Read and write
 	virtual void write(std::ostream &) const;
 
-	// Exceptions
-	class unknown_attribute {
+	/**
+	 * @brief Returns a copy of the Token (with the same data: the resulting
+	 * Token should equal the original with ==). Pure virtual because any
+	 * Tokens used will be copied at some point.
+	 */
+	virtual Token *copy() const = 0;
+
+	/**
+	 * @brief Thrown if the program requests a Token for an attribute or
+	 * method it does not have.
+	 */
+	class unknown_attribute : public std::runtime_error {
 		std::type_index _ti;
-		std::string	_msg;
 	public:
 		unknown_attribute(const std::type_info &ti, const std::string &msg)
-				: _ti(ti), _msg(msg) {}
+				: _ti(ti), std::runtime_error(msg) {}
 		
-		std::string what() const;
+		const char *what() const noexcept override;
 	};
 
+	/**
+	 * @brief Thrown if the Token does not have a write function.
+	 */
 	class empty_io : public std::runtime_error {
 	public:
 		empty_io() : std::runtime_error("Empty IO functions (write)...") {}
