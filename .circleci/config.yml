@@ -58,12 +58,9 @@ jobs:
           name: Installing Zhetapi
           command: |
             sudo ./run.py install -j 2
-            ls /usr/local/bin
-            ls /usr/local/lib
-            ls /usr/local/include
-      - run:
-          name: Testing Zhetapi Installation
-          command: ./run.py header_tests
+            #      - run:
+            #name: Testing Zhetapi Installation
+            #command: ./run.py header_tests
   port-testing:
     docker:
       - image: ubuntu:18.04

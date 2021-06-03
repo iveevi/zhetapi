@@ -32,7 +32,7 @@ class Plot {
 	std::vector <Curve>		_curves;
 
 	struct Point {
-		Vector <double>	tcoords;
+		Vector <double>	coords;
 		sf::CircleShape circle;
 	};
 
@@ -51,8 +51,11 @@ class Plot {
 
 		sf::Color color;
 
-		double xscale;
-		double yscale;
+		double xmin;
+		double xmax;
+		
+		double ymin;
+		double ymax;
 	} _axes;
 
 	// Origin
@@ -76,6 +79,10 @@ public:
 	void run();
 
 	void init_axes();
+
+	void redraw();
+
+	sf::Vector2f true_coords(const Vector <double> &);
 
 	static double zoom_factor;
 	static size_t def_width;

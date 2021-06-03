@@ -60,10 +60,7 @@ template <class T>
 class Vector;
 
 /**
- * @brief A general Matrix class
- * (could be a single row/col vector)
- * that supports conventional operations
- * that matrices in mathematics do.
+ * @brief A matrix with components of type T.
  */
 template <class T>
 class Matrix : public Tensor <T> {

@@ -54,9 +54,8 @@ bool is_vector_type()
 #endif		// Does not support AVR
 
 /**
- * @brief Represents a vector in mathematics, on the scalar field corresponding
- * to T. Derived from the matrix class.
- * */
+ * @brief Represents a vector whose components are of type T.
+ */
 template <class T>
 class Vector : public Matrix <T> {
 public:
@@ -97,9 +96,10 @@ public:
 	// Properties
 	size_t size() const;
 
-	// The three major components
 	T &x();
+	
 	T &y();
+	
 	T &z();
 	
 	const T &x() const;
@@ -169,6 +169,9 @@ public:
 	class index_out_of_bounds {};
 };
 
+
+}
+
 // Primitive operations for all systems (including embedded)
 #include "primitives/vector_prims.hpp"
 
@@ -178,8 +181,5 @@ public:
 #include "vector_cpu.hpp"
 
 #endif
-
-
-}
 
 #endif

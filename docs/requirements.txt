@@ -1,0 +1,2 @@
+# Readthedocs prerequisites
+breathe=4.30.0

@@ -1,3 +1,13 @@
+#ifndef VECTOR_CPU_H_
+#define VECTOR_CPU_H_
+
+namespace zhetapi {
+
+/**
+ * @brief Constructs a vector out of a list of components.
+ *
+ * @param ref the list of components.
+ */
 template <class T>
 Vector <T> ::Vector(const std::vector <T> &ref)
 		: Matrix <T> (ref) {}
@@ -62,4 +72,6 @@ template <class T>
 Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
 	        : Matrix <T> (rs, 1, gen) {}
 
-// TODO: bring back these operations for AVR
+}
+
+#endif

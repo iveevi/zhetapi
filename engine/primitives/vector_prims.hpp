@@ -1,21 +1,55 @@
-// Constructors
+#ifndef VECTOR_PRIMITIVES_H_
+#define VECTOR_PRIMITIVES_H_
+
+namespace zhetapi {
+
+/**
+ * @brief Default vector constructor.
+ */
 template <class T>
 Vector <T> ::Vector() : Matrix <T> () {}
 
+/**
+ * @brief Size constructor. Components are initialized to 0 or the default value
+ * of T.
+ *
+ * @param len size of the vector.
+ */
 template <class T>
 Vector <T> ::Vector(size_t len)
 		: Matrix <T> (len, 1) {}
 
+/**
+ * @brief Size constructor. Each component is initialized to def.
+ *
+ * @param rs the number of rows (size) of the vector.
+ * @param def the value each component is initialized to.
+ */
 template <class T>
 Vector <T> ::Vector(size_t rs, T def)
 		: Matrix <T> (rs, 1, def) {}
 
 #ifdef __AVR
 
+/**
+ * @brief Size constructor. Each component is evaluated from a function which
+ * depends on the index.
+ *
+ * @param rs the number of rows (size) of the vector.
+ * @param gen a pointer to the function that generates the coefficients.
+ */
 template <class T>
 Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
 		: Matrix <T> (rs, 1, gen) {}
 
+/**
+ * @brief Size constructor. Each component is evaluated from a function which
+ * depends on the index.
+ *
+ * @param rs the number of rows (size) of the vector.
+ * @param gen a pointer to the function that generates pointers to the
+ * coefficients.
+ */
 template <class T>
 Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
 		: Matrix <T> (rs, 1, gen) {}
@@ -80,6 +114,9 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	return *this;
 }
 
+/**
+ * @return the first component of the vector (index 0).
+ */
 template <class T>
 T &Vector <T> ::x()
 {
@@ -89,6 +126,9 @@ T &Vector <T> ::x()
 	return this->_array[0];
 }
 
+/**
+ * @return the second component of the vector (index 1).
+ */
 template <class T>
 T &Vector <T> ::y()
 {
@@ -98,6 +138,9 @@ T &Vector <T> ::y()
 	return this->_array[1];
 }
 
+/**
+ * @return the third component of the vector (index 2).
+ */
 template <class T>
 T &Vector <T> ::z()
 {
@@ -107,6 +150,9 @@ T &Vector <T> ::z()
 	return this->_array[2];
 }
 
+/**
+ * @return the first component of the vector (index 0).
+ */
 template <class T>
 const T &Vector <T> ::x() const
 {
@@ -116,6 +162,9 @@ const T &Vector <T> ::x() const
 	return this->_array[0];
 }
 
+/**
+ * @return the second component of the vector (index 1).
+ */
 template <class T>
 const T &Vector <T> ::y() const
 {
@@ -125,6 +174,9 @@ const T &Vector <T> ::y() const
 	return this->_array[1];
 }
 
+/**
+ * @return the third component of the vector (index 2).
+ */
 template <class T>
 const T &Vector <T> ::z() const
 {
@@ -134,28 +186,52 @@ const T &Vector <T> ::z() const
 	return this->_array[2];
 }
 
+/**
+ * @brief Indexing operator
+ *
+ * @param i the specified index
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
 template <class T>
 T &Vector <T> ::operator[](size_t i)
 {
 	return this->_array[i];
 }
 
+/**
+ * @brief Indexing operator
+ *
+ * @param i the specified index
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
 template <class T>
 const T &Vector <T> ::operator[](size_t i) const
 {
 	return this->_array[i];
 }
 
+/**
+ * @return the size of the vector.
+ */
 template <class T>
 size_t Vector <T> ::size() const
 {
 	return this->_size;
 }
 
+/**
+ * @brief Returns the argument of the vector. Assumes that the vector has at
+ * least two components.
+ *
+ * @return the argument of the vector in radians (the angle at which the vector
+ * is pointing to).
+ */
 template <class T>
 T Vector <T> ::arg() const
 {
-	return atan2((*this)[1], (*this)[0]);
+	return atan2(y(), x());
 }
 
 template <class T>
@@ -460,3 +536,7 @@ Vector <T> Tensor <T> ::cast_to_vector() const
 	// Return a slice-vector
 	return Vector <T> (_size, _array);
 }
+
+}
+
+#endif

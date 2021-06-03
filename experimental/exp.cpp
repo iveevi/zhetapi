@@ -9,11 +9,11 @@ using namespace std;
 using namespace zhetapi;
 
 auto F1 = [](double x) {
-	return 100 * sin(x / 100) + 50 * cos(x / 10) + sqrt(abs(x));
+	return sin(x) + 2 * cos(2 * x) + x/2;
 };
 
 auto F2 = [](double x) {
-	return x * x;
+	return x;
 };
 
 int main()
@@ -25,7 +25,7 @@ int main()
 	plt.plot(F1);
 	plt.plot(F2);
 
-	plt.plot({200, 200});
+	plt.plot({5, 5});
 
 	int a;
 	cout << "enter to stop: ";

@@ -269,13 +269,11 @@ def python_bench(args):
     print(f'RATIO (ZHP/PY):\t\t\t{100 * zhp_t/py_t:.2f}%')
 
 def run_header_tests(args):
-    run_and_check('mkdir -p htests')
+    run_and_check(False, 'mkdir -p htests')
 
     for filename in header_tests:
         output = "htests/" + filename[16:-12] + "_htest.out"
-        print("OUTPUT = " + output)
-
-        run_and_check(
+        run_and_check(False,
             f'echo \'Running tests for {filename}:\'',
             f'g++-8 {filename} -lzhp -o {output}',
             f'./{output}'

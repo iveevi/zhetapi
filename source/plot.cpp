@@ -23,32 +23,31 @@ Plot::Plot(const std::string &name)
 	init_axes();
 }
 
-void Plot::plot(const Vector <double> &point)
+void Plot::plot(const Vector <double> &coords)
 {
 	sf::CircleShape circle;
 
 	circle.setRadius(5);
-	circle.setPosition(
-		point[0] + _origin[0],
-		_origin[1] - point[1]
-	);
 
-	_points.push_back({point, circle});
+	sf::Vector2f tc = true_coords(coords);
+	circle.setPosition({
+		tc.x - 5,
+		tc.y - 5
+	});
+
+	_points.push_back({coords, circle});
 }
 
 void Plot::plot(const std::function <double (double)> &ftn)
 {
 	sf::VertexArray curve(sf::LinesStrip, _width);
 
+	// TODO: cache dx and dy
+	double dx = _axes.xmax - _axes.xmin;
 	for (int i = 0; i < _width; i++) {
-		double x = i - _origin[0];
+		double x = _axes.xmin + (i * dx)/_width;
 
-		Vector <double> p {
-			x + _origin[0],
-			_origin[1] - ftn(x)
-		};
-
-		curve[i].position = sf::Vector2f(p[0], p[1]);
+		curve[i].position = true_coords({x, ftn(x)});
 	}
 
 	_curves.push_back({ftn, curve});
@@ -56,9 +55,13 @@ void Plot::plot(const std::function <double (double)> &ftn)
 
 void Plot::zoom(double factor)
 {
-	sf::View view = _win.getView();
-	view.zoom(factor);
-	_win.setView(view);
+	// TODO: take origin into consideration
+	_axes.xmin /= factor;
+	_axes.xmax /= factor;
+	_axes.ymin /= factor;
+	_axes.ymax /= factor;
+
+	redraw();
 }
 
 void Plot::show()
@@ -116,8 +119,12 @@ void Plot::run()
 
 void Plot::init_axes()
 {
-	_axes.xscale = 10.0/_width;
-	_axes.yscale = 10.0/_height;
+	// Give some space for the ticks
+	_axes.xmin = -10.5;
+	_axes.xmax = 10.5;
+	
+	_axes.ymin = -10.5;
+	_axes.ymax = 10.5;
 
 	_axes.x = sf::VertexArray(sf::LinesStrip, 2);
 	_axes.x[0].position = {0, _origin[1]};
@@ -157,6 +164,34 @@ void Plot::init_axes()
 	_axes.ydown.setPoint(0, {_origin[0] + 5, _height - 10});
 	_axes.ydown.setPoint(1, {_origin[0] - 5, _height - 10});
 	_axes.ydown.setPoint(2, {_origin[0], _height});
+}
+
+void Plot::redraw()
+{
+	for (Point &point : _points) {
+		sf::Vector2f tc = true_coords(point.coords);
+		point.circle.setPosition({
+			tc.x - 5,
+			tc.y - 5
+		});
+	}
+
+	double dx = _axes.xmax - _axes.xmin;
+	for (Curve &curve : _curves) {
+		for (int i = 0; i < _width; i++) {
+			double x = _axes.xmin + (i * dx)/_width;
+
+			curve.va[i].position = true_coords({x, curve.ftn(x)});
+		}
+	}
+}
+
+sf::Vector2f Plot::true_coords(const Vector <double> &coords)
+{
+	double i = _width * (coords[0] - _axes.xmin)/(_axes.xmax - _axes.xmin);
+	double j = _height * (1 - (coords[1] - _axes.ymin)/(_axes.ymax - _axes.ymin));
+
+	return {i, j};
 }
 
 }
