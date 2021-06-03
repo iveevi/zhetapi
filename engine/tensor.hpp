@@ -105,11 +105,7 @@ public:
 	AVR_IGNORE(std::string print() const;)
 
 	AVR_IGNORE(template <class U>
-	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);)
-
-	// Dimension mismatch exception
-	class dimension_mismatch {};
-	class bad_dimensions {};
+	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &));
 
 	// Cross-type operations
 #ifndef __AVR
@@ -147,7 +143,13 @@ public:
 	
 	template <class U>
 	friend Matrix <U> operator/(const U &, const Matrix <U> &);
+
+	// Dimension mismatch exception
+	class dimension_mismatch {};
+	class bad_dimensions {};
 };
+
+}
 
 #include "primitives/tensor_prims.hpp"
 
@@ -156,7 +158,5 @@ public:
 #include "tensor_cpu.hpp"
 
 #endif
-
-}
 
 #endif

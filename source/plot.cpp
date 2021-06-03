@@ -10,6 +10,14 @@ size_t Plot::def_aa_level = 10;
 size_t Plot::def_plot_num = 1;
 sf::Color Plot::def_axis_col = sf::Color(100, 100, 100);
 
+/**
+ * @brief Name constructor. Initializes the center of the canvas to the origin.
+ * The bounds of the x and y axis are both initialized to [-10.5, 10.5].
+ * Defaults the size of the canvas to 800 x 600 pixels.
+ * 
+ * @param name the name of the plot (also the plot title). Defaults to "Plot
+ * #{pnum}," where pnum is a static, incremented plot number.
+ */
 Plot::Plot(const std::string &name)
 		: _name(name), _glsettings(0, 0, def_aa_level),
 		_win(sf::VideoMode {_width, _height}, _name,
@@ -23,6 +31,12 @@ Plot::Plot(const std::string &name)
 	init_axes();
 }
 
+/**
+ * @brief Plots a point. Note that the point will not be visible if the
+ * coordinate is not in bounds of the axes. 
+ * 
+ * @param coords the coordinate of the point to be plotted. 
+ */
 void Plot::plot(const Vector <double> &coords)
 {
 	sf::CircleShape circle;
@@ -38,6 +52,14 @@ void Plot::plot(const Vector <double> &coords)
 	_points.push_back({coords, circle});
 }
 
+/**
+ * @brief Plots a function. The function is evaluated for each pixel on the
+ * width of the canvas (so if the width of the canvas is 800 pixels then there
+ * would be 800 distinct evaulateions of the function). The value of the
+ * function is appropriately scaled.
+ * 
+ * @param ftn the function to be plotted.
+ */
 void Plot::plot(const std::function <double (double)> &ftn)
 {
 	sf::VertexArray curve(sf::LinesStrip, _width);
@@ -53,6 +75,7 @@ void Plot::plot(const std::function <double (double)> &ftn)
 	_curves.push_back({ftn, curve});
 }
 
+// TODO: make private
 void Plot::zoom(double factor)
 {
 	// TODO: take origin into consideration
@@ -64,6 +87,10 @@ void Plot::zoom(double factor)
 	redraw();
 }
 
+/**
+ * @brief Displays the plot on another thread. Any modifications to the plot
+ * will be displayed in real time.
+ */
 void Plot::show()
 {
 	_display = true;
@@ -71,13 +98,18 @@ void Plot::show()
 	_wman = new std::thread(&Plot::run, this);
 }
 
+/**
+ * @brief Closes the plot if it is not already closed.
+ */
 void Plot::close()
 {
+	// TODO: check if not already closed
 	_display = false;
 	_wman->join();
 	delete _wman;
 }
 
+// TODO: make private
 void Plot::run()
 {
 	while (_win.isOpen()) {
@@ -117,6 +149,7 @@ void Plot::run()
 	}
 }
 
+// TODO: make private
 void Plot::init_axes()
 {
 	// Give some space for the ticks

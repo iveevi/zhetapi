@@ -96,10 +96,8 @@ public:
 	// Properties
 	size_t size() const;
 
-	T &x();
-	
+	T &x();	
 	T &y();
-	
 	T &z();
 	
 	const T &x() const;

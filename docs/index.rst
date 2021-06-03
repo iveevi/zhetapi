@@ -12,3 +12,4 @@ To be changed.
    api/polynomial
    api/activation
    api/layer
+   api/plot

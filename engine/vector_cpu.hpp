@@ -12,14 +12,48 @@ template <class T>
 Vector <T> ::Vector(const std::vector <T> &ref)
 		: Matrix <T> (ref) {}
 
+/**
+ * @brief Constructs a vector out of a list of components.
+ *
+ * @param ref the list of components.
+ */
 template <class T>
 Vector <T> ::Vector(const std::initializer_list <T> &ref)
 		: Vector(std::vector <T> (ref)) {}
 
+/**
+ * @brief Size constructor. Each component is evaluated from a function which
+ * depends on the index.
+ *
+ * @param rs the number of rows (size) of the vector.
+ * @param gen a pointer to the function that generates the coefficients.
+ */
+template <class T>
+Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
+	        : Matrix <T> (rs, 1, gen) {}
+
+/**
+ * @brief Size constructor. Each component is evaluated from a function which
+ * depends on the index.
+ *
+ * @param rs the number of rows (size) of the vector.
+ * @param gen a pointer to the function that generates pointers to the
+ * coefficients.
+ */
+template <class T>
+Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
+	        : Matrix <T> (rs, 1, gen) {}
+
+/**
+ * @brief Heterogenous copy constructor.
+ * 
+ * @param other the reference vector (to be copied from).
+ */
 template <class T>
 template <class A>
 Vector <T> ::Vector(const Vector <A> &other)
 {
+	// TODO: remove this if and put into primitives
 	if (is_vector_type <A> ()) {
 		// Add a new function for this
 		this->_array = new T[other.size()];
@@ -37,6 +71,12 @@ Vector <T> ::Vector(const Vector <A> &other)
 	}
 }
 
+/**
+ * @brief Returns a vector with normalized components (length of 1). The
+ * direction is preserved, as with normalization.
+ * 
+ * @return The normalized vector.
+ */
 template <class T>
 Vector <T> Vector <T> ::normalized() const
 {
@@ -50,6 +90,13 @@ Vector <T> Vector <T> ::normalized() const
 	return Vector(out);
 }
 
+/**
+ * @brief Add and assignment operator.
+ * 
+ * TODO: Needs to return itself
+ * 
+ * @param the vector that will be added to this.
+ */
 template <class T>
 void Vector <T> ::operator+=(const Vector <T> &a)
 {
@@ -57,20 +104,19 @@ void Vector <T> ::operator+=(const Vector <T> &a)
 		this->_array[i] += a._array[i];
 }
 
+/**
+ * @brief Subtract and assignment operator.
+ * 
+ * TODO: Needs to return itself
+ * 
+ * @param the vector that will be subtracted from this.
+ */
 template <class T>
 void Vector <T> ::operator-=(const Vector <T> &a)
 {
 	for (size_t i = 0; i < this->_size; i++)
 		this->_array[i] -= a._array[i];
 }
-
-template <class T>
-Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
-	        : Matrix <T> (rs, 1, gen) {}
-
-template <class T>
-Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
-	        : Matrix <T> (rs, 1, gen) {}
 
 }
 

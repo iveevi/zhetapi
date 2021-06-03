@@ -1,6 +1,19 @@
+#ifndef TENSOR_PRIMITIVES_H_
+#define TENSOR_PRIMITIVES_H_
+
+namespace zhetapi {
+
+/**
+ * @brief Default constructor.
+ */
 template <class T>
 Tensor <T> ::Tensor() {}
 
+/**
+ * @brief Copy constructor.
+ * 
+ * @param other the reference vector (to be copied from).
+ */
 template <class T>
 Tensor <T> ::Tensor(const Tensor <T> &other)
 		: _size(other._size),
@@ -42,6 +55,9 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 	return *this;
 }
 
+/**
+ * @brief Deconstructor.
+ */
 template <class T>
 Tensor <T> ::~Tensor()
 {
@@ -64,12 +80,16 @@ void Tensor <T> ::clear()
 	_dim = nullptr;
 }
 
+/**
+ * @brief Returns the size of the tensor.
+ * 
+ * @return the size of the tensor (number of components in the tensor).
+ */
 template <class T>
 size_t Tensor <T> ::size() const
 {
 	return _size;
 }
-
 
 // Comparison
 template <class T>
@@ -91,3 +111,7 @@ bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 {
 	return !(a == b);
 }
+
+}
+
+#endif

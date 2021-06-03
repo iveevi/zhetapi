@@ -1,3 +1,8 @@
+#ifndef TENSOR_CPU_H_
+#define TENSOR_CPU_H_
+
+namespace zhetapi {
+
 template <class T>
 Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
 		: _dims(dim.size())
@@ -107,7 +112,7 @@ T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
 }
 
 template <class T>
-const T &Tensor <T> ::operator[](const ::std::vector <size_t> &indices) const
+const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
 {
 	size_t full = 0;
 
@@ -168,3 +173,7 @@ std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 
 	return os;
 }
+
+}
+
+#endif

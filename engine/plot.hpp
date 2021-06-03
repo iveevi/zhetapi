@@ -16,6 +16,9 @@
 
 namespace zhetapi {
 
+/**
+ * @brief A canvas that be used to graph functions, plot points, etc.
+ */
 class Plot {
 	std::string			_name;
 

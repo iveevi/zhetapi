@@ -60,7 +60,11 @@ template <class T>
 Vector <T> ::Vector(size_t rs, T *ref, bool slice)
 		: Matrix <T> (rs, 1, ref, slice) {}
 
-// Copy constructors
+/**
+ * @brief Copy constructor.
+ * 
+ * @param other the reference vector (to be copied from).
+ */
 template <class T>
 Vector <T> ::Vector(const Vector &other)
 		: Matrix <T> (other.size(), 1, T())
@@ -234,6 +238,11 @@ T Vector <T> ::arg() const
 	return atan2(y(), x());
 }
 
+/**
+ * @brief The minimum component of the vector.
+ * 
+ * @return the smallest component, \f$\min v_i.\f$
+ */
 template <class T>
 T Vector <T> ::min() const
 {
@@ -247,6 +256,11 @@ T Vector <T> ::min() const
 	return mn;
 }
 
+/**
+ * @brief The maximum component of the vector.
+ * 
+ * @return the largest component, \f$\max v_i.\f$
+ */
 template <class T>
 T Vector <T> ::max() const
 {
@@ -260,6 +274,11 @@ T Vector <T> ::max() const
 	return mx;
 }
 
+/**
+ * @brief The index of the smallest component: essentially argmin.
+ * 
+ * @return the index of the smallest component.
+ */
 template <class T>
 size_t Vector <T> ::imin() const
 {
@@ -273,6 +292,11 @@ size_t Vector <T> ::imin() const
 	return i;
 }
 
+/**
+ * @brief The index of the largest component: essentially argmax.
+ * 
+ * @return the index of the largest component.
+ */
 template <class T>
 size_t Vector <T> ::imax() const
 {
@@ -286,6 +310,10 @@ size_t Vector <T> ::imax() const
 	return i;
 }
 
+/**
+ * @brief Normalizes the components of the vector (the modified vector will have
+ * unit length).
+ */
 template <class T>
 void Vector <T> ::normalize()
 {
