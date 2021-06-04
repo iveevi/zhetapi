@@ -10,15 +10,15 @@ template <class T>
 Tensor <T> ::Tensor() {}
 
 /**
- * @brief Copy constructor.
+ * @brief Homogenous (with respect to the component type) copy constructor.
  * 
  * @param other the reference vector (to be copied from).
  */
 template <class T>
 Tensor <T> ::Tensor(const Tensor <T> &other)
-		: _size(other._size),
-		_dims(other._dims)
+		: _size(other._size), _dims(other._dims)
 {
+	// Faster for homogenous types
 	_dim = new size_t[_dims];
 	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
 
@@ -26,10 +26,27 @@ Tensor <T> ::Tensor(const Tensor <T> &other)
 	memcpy(_array, other._array, sizeof(T) * _size);
 }
 
+/**
+ * @brief Heterogenous (with respect to the component type) copy constructor.
+ * 
+ * @param other the reference vector (to be copied from).
+ */
+template <class T>
+template <class A>
+Tensor <T> ::Tensor(const Tensor <A> &other)
+		: _size(other._size), _dims(other._dims)
+{
+	_dim = new size_t[_dims];
+	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+	_array = new T[_size];
+	for (size_t i = 0; i < _size; i++)
+		_array[i] = static_cast <T> (other._array[i]);
+}
+
 template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
-		: _size(rows * cols),
-		_dims(2)
+		: _dims(2), _size(rows * cols)
 {
 	_dim = new size_t[2];
 	_dim[0] = rows;
@@ -38,9 +55,47 @@ Tensor <T> ::Tensor(size_t rows, size_t cols)
 	_array = new T[_size];
 }
 
+/**
+ * @brief Full slice constructor. Makes a Tensor out of existing (previously
+ * allocated memory), and the ownership can be decided. By default, the Tensor
+ * does not gain ownership over the memory. Note that the sizes given are not
+ * checked for validity.
+ * 
+ * @param dims the number of dimensions to slice.
+ * @param dim the dimension size array.
+ * @param size the size of the Tensor.
+ * @param array the components of the Tensor.
+ * @param slice the slice flag. Set to \c true to make sure the memory is not
+ * deallocated by the resulting Tensor, and \c false otherwise.
+ */
+template <class T>
+Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
+		: _dims(dims), _dim(dim), _size(size), _array(array),
+		_dim_slice(slice), _arr_slice(slice) {}
+
+template <class T>
+template <class A>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
+{
+	if (this != &other) {
+		_dims = other._dims;
+		_size = other._size;
+		
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+		_array = new T[_size];
+		for (size_t i = 0; i < _size; i++)
+			_array[i] = static_cast <T> (other._array[i]);
+	}
+
+	return *this;
+}
+
 template <class T>
 Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 {
+	// Faster version for homogenous types (memcpy is faster)
 	if (this != &other) {
 		_dims = other._dims;
 		_size = other._size;
@@ -70,10 +125,10 @@ void Tensor <T> ::clear()
 	if (!_array && !_dim)
 		return;
 
-	if (_dim)
+	if (_dim && !_dim_sliced)
 		delete[] _dim;
 
-	if (_array && !_sliced)
+	if (_array && !_arr_sliced)
 		delete[] _array;
 
 	_array = nullptr;
@@ -89,6 +144,30 @@ template <class T>
 size_t Tensor <T> ::size() const
 {
 	return _size;
+}
+
+/**
+ * @brief Returns the number of dimensions in the tensor.
+ * 
+ * @return the number of dimensions in the tensor.
+ */
+template <class T>
+size_t Tensor <T> ::dimensions() const
+{
+	return _dims;
+}
+
+/**
+ * @brief Returns the size of a specific dimension.
+ * 
+ * @param i the desired index.
+ * 
+ * @return the size of dimension \p i.
+ */
+template <class T>
+size_t Tensor <T> ::dim_size(size_t i) const
+{
+	return _dim[i];
 }
 
 // Comparison

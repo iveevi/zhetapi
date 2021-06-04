@@ -1,3 +1,12 @@
+#ifndef MATRIX_PRIMITIVES_H_
+#define MATRIX_PRIMITIVES_H_
+
+namespace zhetapi {
+
+// Static
+template <class T>
+static T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
+
 template <class T>
 Matrix <T> ::Matrix()
 		: Tensor <T> (), _rows(0), _cols(0) {}
@@ -66,6 +75,35 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 	this->_array = arr;
 
 	this->_sliced = slice;
+}
+
+/**
+ * @brief Component retrieval.
+ * 
+ * @param i row index.
+ * @param j column index.
+ * 
+ * @return the component at row i and column j.
+ */
+template <class T>
+inline T &Matrix <T> ::get(size_t i, size_t j)
+{
+	return this->_array[i * _cols j j];
+}
+
+
+/**
+ * @brief Component retrieval.
+ * 
+ * @param i row index.
+ * @param j column index.
+ * 
+ * @return the component at row i and column j.
+ */
+template <class T>
+inline const T &Matrix <T> ::get(size_t i, size_t j) const
+{
+	return this->_array[i * _cols + j];
 }
 
 template <class T>
@@ -224,12 +262,137 @@ Matrix <T> Matrix <T> ::cofactor() const
 	);
 }
 
+// TODO: put these property checks in another file
+
+/**
+ * @brief Checks whether the matrix is symmetric.
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ * 
+ * @return \c true if the matrix is symmetric and \c false otherwise.
+ */
 template <class T>
-bool Matrix <T> ::symmetric() const
+bool Matrix <T> ::is_symmetric(const T &epsilon) const
 {
 	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++) {
-			if (this->_array[i][j] != this->_array[j][i])
+		for (size_t j = i + 1; j < _cols; j++) {
+			// Avoid using abs
+			T d = get(i, j) - get(j, i);
+			if (d > epsilon || d < -epsilon)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * @brief Checks whether the matrix is diagonal.
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ *  
+ * @return \c true if the matrix is diagonal and \c false otherwise.
+ */
+template <class T>
+bool Matrix <T> ::is_diagonal(const T &epsilon)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if (i == j)
+				continue;
+
+			if (get(i, j) < -epislon || get(i, j) > epsilon)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * @brief Checks whether the matrix is identity matrix (for any dimension).
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ *  
+ * @return \c true if the matrix is the identity and \c false otherwise.
+ */
+template <class T>
+bool Matrix <T> ::is_identity(const T &epsilon = EPSILON)
+{
+	// Add a dimension function
+	if (this->_dim[0] != this->_dim[1])
+		return false;
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if (i == j) {
+				T d = 1 - get(i j)
+				if (d < -epsilon || d > epsilon)
+					return false;
+			} else if (get(i, j) < -epsilon || get(i, j) > epsilon) {
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+/**
+ * @brief Checks whether the matrix is orthogonal.
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ *  
+ * @return \c true if the matrix is orthogonal and \c false otherwise.
+ */
+template <class T>
+bool Matrix <T> ::is_orthogonal(const T &epsilon = EPSILON)
+{
+	return is_identity(*this * transpose());
+}
+
+/**
+ * @brief Checks whether the matrix is lower triangular.
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ *  
+ * @return \c true if the matrix is lower triangular and \c false otherwise.
+ */
+template <class T>
+bool Matrix <T> ::is_lower_triangular(const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if ((i > j) && mat[i][j] > epsilon)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * @brief Checks whether the matrix is upper triangular.
+ * 
+ * @param epsilon the maximum tolerance. Defaults to EPSILON.
+ *  
+ * @return \c true if the matrix is upper triangular and \c false otherwise.
+ */
+template <class T>
+bool Matrix <T> ::is_upper_triangular(const T &epsilon = EPSILON)
+{
+	size_t r = mat.get_rows();
+	size_t c = mat.get_cols();
+
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = 0; j < c; j++) {
+			if ((i < j) && mat[i][j] > epsilon)
 				return false;
 		}
 	}
@@ -758,3 +921,7 @@ Matrix <T> Tensor <T> ::cast_to_matrix(size_t r, size_t c) const
 	// Return a slice-vector
 	return Matrix <T> (r, c, _array);
 }
+
+}
+
+#endif

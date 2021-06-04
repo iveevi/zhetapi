@@ -1,3 +1,8 @@
+#ifndef MATRIX_CPU_H_
+#define MATRIX_CPU_H_
+
+namespace zhetapi {
+
 template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
 {
@@ -361,3 +366,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 
 	return os;
 }
+
+}
+
+#endif

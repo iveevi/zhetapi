@@ -42,6 +42,63 @@ public:
 	Matrix <T> product() const;
 };
 
+/**
+ * @brief Constructs a matrix factorization from a list of matrices.
+ *
+ * @param terms the list of matrices.
+ */
+template <class T, size_t N>
+MatrixFactorization <T, N> ::MatrixFactorization(
+		const std::vector <Matrix <T>> &terms)
+{
+	for (size_t i = 0; i < N; i++)
+		_terms[i] = terms[i];
+}
+
+/**
+ * @brief Constructs a matric factorization from a sequence of matrices. Same as
+ * the list constructor, but is variadic.
+ *
+ * @param A the first matrix of the sequence
+ * @param args the rest of the seqeuence.
+ */
+template <class T, size_t N>
+template <class ... U>
+MatrixFactorization <T, N> ::MatrixFactorization(
+		const Matrix <T> &A, U ... args)
+{
+	std::vector <Matrix <T>> terms {A};
+
+	collect(terms, args...);
+
+	// Skip overhead of std::vector
+	// by adding a collect function
+	// for pointer arrays
+	for (size_t i = 0; i < N; i++)
+		_terms[i] = terms[i];
+}
+
+/**
+ * @brief Computes the product of the factorization.
+ *
+ * @return the product of all the matrices in the factorization, from the first
+ * matrix to the left.
+ */
+template <class T, size_t N>
+Matrix <T> MatrixFactorization <T, N> ::product() const
+{
+	// Check for appropriate number
+	if (N <= 0)
+		return Matrix <T> ::identity(1);
+
+	Matrix <T> prod = _terms[0];
+
+	for (size_t i = 1; i < N; i++)
+		prod *= _terms[i];
+
+	return prod;
+}
+
 // TODO: Separate matrix/vector methods from algorithms
 
 /**
@@ -143,7 +200,7 @@ bool is_lower_triangular(const Matrix <T> &mat, const T &epsilon = EPSILON)
 }
 
 template <class T>
-bool is_right_triangular(const Matrix <T> &mat, const T &epsilon = EPSILON)
+bool is_upper_triangular(const Matrix <T> &mat, const T &epsilon = EPSILON)
 {
 	size_t r = mat.get_rows();
 	size_t c = mat.get_cols();
@@ -185,7 +242,14 @@ Matrix <T> fold(const Vector <T> &vec, size_t r, size_t c)
 template <class T>
 Tensor <T> reshape(const Vector <T> &);
 
-// Create a diagonal matrix
+/**
+ * @brief Constructs a diagonal matrix with components in a list.
+ * 
+ * @param cs the list of components on the diagonal (in order from top-left to
+ * bottom-right).
+ * 
+ * @return a diagonal matrix with the listed components.
+ */
 template <class T>
 Matrix <T> diag(const std::vector <T> &cs)
 {
@@ -196,6 +260,15 @@ Matrix <T> diag(const std::vector <T> &cs)
 	);
 }
 
+/**
+ * @brief Constructs a diagonal matrix with components in a sequence. Same as
+ * the \c diag function but is variadic.
+ * 
+ * @param x the first component of the sequence.
+ * @param args the remaining components.
+ * 
+ * @return a diagonal matrix with components in the sequence.
+ */
 template <class T, class ... U>
 Matrix <T> diag(T x, U ... args)
 {

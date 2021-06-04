@@ -67,7 +67,7 @@ class Vector;
 template <class T>
 class Matrix : public Tensor <T> {
 protected:
-	// Remove later
+	// TODO: Remove later
 	size_t  _rows	= 0;
 	size_t  _cols	= 0;
 public:
@@ -110,8 +110,8 @@ public:
 	__cuda_dual__
 	Matrix(size_t, size_t, T *, bool = true);
 
-	/* template <class A>
-	Matrix(A); */
+	inline T &get(size_t, size_t);
+	inline const T &get(size_t, size_t) const;
 	
 	T norm() const;
 
@@ -175,7 +175,13 @@ public:
 	Matrix adjugate() const;
 	Matrix cofactor() const;
 
-	bool symmetric() const;
+	// Property checkers
+	bool is_symmetric(const T & = EPSILON) const;
+	bool is_diagonal(const T & = EPSILON) const;
+	bool is_identity(const T & = EPSILON) const;
+	bool is_orthogonal(const T & = EPSILON) const;
+	bool is_lower_triangular(const T & = EPSILON) const;
+	bool is_upper_triangular(const T & = EPSILON) const;
 
 	AVR_SWITCH(
 		String display() const,
@@ -264,7 +270,11 @@ public:
 
 	template <class A, class B, class C>
 	friend Matrix <A> fmak(const Matrix <A> &, const Matrix <B> &, const Matrix <C> &, A, A);
+
+	static T EPSILON;
 };
+
+}
 
 // TODO use _CUDACC_ instead of _zhp_cuda and make _cuda files
 #include "primitives/matrix_prims.hpp"
@@ -274,7 +284,5 @@ public:
 #include "matrix_cpu.hpp"
 
 #endif
-
-}
 
 #endif

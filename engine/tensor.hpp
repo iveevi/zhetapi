@@ -57,14 +57,13 @@ bool is_tensor_type()
 template <class T>
 class Tensor {
 protected:
-	T	*_array = nullptr;
-	size_t	_size = 0;
+	size_t	_dims		= 0;
+	size_t *_dim		= nullptr;
+	bool	_dim_sliced	= false;
 
-	// Variables for printing
-	size_t	*_dim = nullptr;
-	size_t	_dims = 0;
-
-	bool	_sliced = false;	// Flag for no deallocation
+	size_t	_size		= 0;
+	T *	_array		= nullptr;
+	bool	_arr_sliced	= false;
 
 #ifdef _zhp_cuda
 
@@ -73,18 +72,32 @@ protected:
 #endif
 
 public:
-	// Construction and memory
+	// Essential constructors
 	Tensor();
 	Tensor(const Tensor &);
+
+	template <class A>
+	Tensor(const Tensor <A> &);
 	
 	Tensor(size_t, size_t);
-	AVR_IGNORE(explicit Tensor(const std::vector <std::size_t> &);)
-	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const T &);)
-	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const std::vector <T> &);)
+	Tensor(size_t, size_t *, size_t, T *, bool = true);
+
+	AVR_IGNORE(explicit Tensor(const std::vector <std::size_t> &));
+	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const T &));
+	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const std::vector <T> &));
+
+	// Indexing
+	Tensor <T> operator[](size_t);
+
+	AVR_IGNORE(T &operator[](const std::vector <size_t> &));
+	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const);
 
 	// TODO: remove size term from vector and matrix classes
 	size_t size() const;
+	size_t dimensions() const;
+	size_t dim_size(size_t) const;
 	
+	// TODO: private?
 	__cuda_dual__
 	void clear();
 
@@ -107,22 +120,12 @@ public:
 	AVR_IGNORE(template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &));
 
-	// Cross-type operations
-#ifndef __AVR
-
 	template <class A>
-	std::enable_if <is_tensor_type <A> (), Tensor &>
-		operator=(const Tensor <A> &);
-
-#endif
+	Tensor &operator=(const Tensor <A> &);
 
 	Tensor &operator=(const Tensor &);
 	
 	~Tensor();
-
-	// Indexing (add size_t operator[])
-	AVR_IGNORE(T &operator[](const std::vector <size_t> &);)
-	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const;)
 
 	// TODO: Re-organize the methods
 	Vector <T> cast_to_vector() const;

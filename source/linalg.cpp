@@ -7,63 +7,6 @@ namespace linalg {
 const long double GAMMA = 1.15470053837925152901 + 1e-4;
 const long double EPSILON = 1e-10;
 
-/**
- * @brief Constructs a matrix factorization from a list of matrices.
- *
- * @param terms the list of matrices.
- */
-template <class T, size_t N>
-MatrixFactorization <T, N> ::MatrixFactorization(
-		const std::vector <Matrix <T>> &terms)
-{
-	for (size_t i = 0; i < N; i++)
-		_terms[i] = terms[i];
-}
-
-/**
- * @brief Constructs a matric factorization from a sequence of matrices. Same as
- * the list constructor, but is variadic.
- *
- * @param A the first matrix of the sequence
- * @param args the rest of the seqeuence.
- */
-template <class T, size_t N>
-template <class ... U>
-MatrixFactorization <T, N> ::MatrixFactorization(
-		const Matrix <T> &A, U ... args)
-{
-	std::vector <Matrix <T>> terms {A};
-
-	collect(terms, args...);
-
-	// Skip overhead of std::vector
-	// by adding a collect function
-	// for pointer arrays
-	for (size_t i = 0; i < N; i++)
-		_terms[i] = terms[i];
-}
-
-/**
- * @brief Computes the product of the factorization.
- *
- * @return the product of all the matrices in the factorization, from the first
- * matrix to the left.
- */
-template <class T, size_t N>
-Matrix <T> MatrixFactorization <T, N> ::product() const
-{
-	// Check for appropriate number
-	if (N <= 0)
-		return Matrix <T> ::identity(1);
-
-	Matrix <T> prod = _terms[0];
-
-	for (size_t i = 1; i < N; i++)
-		prod *= _terms[i];
-
-	return prod;
-}
-
 static Mat size_reduce(const Mat &H)
 {
 	// Dimensions
