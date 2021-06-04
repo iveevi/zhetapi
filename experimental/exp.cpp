@@ -26,6 +26,7 @@ int main()
 	plt.plot(F2);
 
 	plt.plot({5, 5});
+	plt.plot({0, 0});
 
 	int a;
 	cout << "enter to stop: ";

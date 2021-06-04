@@ -22,8 +22,8 @@ namespace zhetapi {
 class Plot {
 	std::string			_name;
 
-	size_t				_width = def_width;
-	size_t				_height = def_height;
+	unsigned int			_width = def_width;
+	unsigned int			_height = def_height;
 
 	std::thread *			_wman = nullptr;
 
@@ -53,21 +53,27 @@ class Plot {
 		sf::ConvexShape ydown;
 
 		sf::Color color;
+		sf::Font font;
 
 		double xmin;
 		double xmax;
 		
 		double ymin;
 		double ymax;
+
+		sf::Text xtext;
+		sf::Text ytext;
 	} _axes;
 
 	// Origin
-	Vector <double>			_origin;
+	Vector <float>			_origin;
 
 	sf::ContextSettings		_glsettings;
 	sf::RenderWindow		_win;
 
 	bool				_display = false;
+
+	bool out_of_bounds() const;
 public:
 	Plot(const std::string & = "Plot #" + std::to_string(def_plot_num));
 

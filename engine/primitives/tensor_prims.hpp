@@ -71,7 +71,7 @@ Tensor <T> ::Tensor(size_t rows, size_t cols)
 template <class T>
 Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
 		: _dims(dims), _dim(dim), _size(size), _array(array),
-		_dim_slice(slice), _arr_slice(slice) {}
+		_dim_sliced(slice), _arr_sliced(slice) {}
 
 template <class T>
 template <class A>

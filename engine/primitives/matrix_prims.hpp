@@ -5,11 +5,10 @@ namespace zhetapi {
 
 // Static
 template <class T>
-static T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
+T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
 
 template <class T>
-Matrix <T> ::Matrix()
-		: Tensor <T> (), _rows(0), _cols(0) {}
+Matrix <T> ::Matrix() : Tensor <T> (), _rows(0), _cols(0) {}
 
 #ifdef __AVR
 
@@ -17,7 +16,7 @@ Matrix <T> ::Matrix()
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t))
                 : Tensor <T> (rs, cs), _rows(rs), _cols(cs)
-{	
+{
 	for (size_t i = 0; i < _rows; i++) {
 		for (size_t j = 0; j < _cols; j++)
 			this->_array[_cols * i + j] = gen(i);
@@ -74,30 +73,29 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 
 	this->_array = arr;
 
-	this->_sliced = slice;
+	this->_arr_sliced = slice;
 }
 
 /**
  * @brief Component retrieval.
- * 
+ *
  * @param i row index.
  * @param j column index.
- * 
+ *
  * @return the component at row i and column j.
  */
 template <class T>
 inline T &Matrix <T> ::get(size_t i, size_t j)
 {
-	return this->_array[i * _cols j j];
+	return this->_array[i * _cols + j];
 }
-
 
 /**
  * @brief Component retrieval.
- * 
+ *
  * @param i row index.
  * @param j column index.
- * 
+ *
  * @return the component at row i and column j.
  */
 template <class T>
@@ -266,16 +264,19 @@ Matrix <T> Matrix <T> ::cofactor() const
 
 /**
  * @brief Checks whether the matrix is symmetric.
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- * 
+ *
  * @return \c true if the matrix is symmetric and \c false otherwise.
  */
 template <class T>
 bool Matrix <T> ::is_symmetric(const T &epsilon) const
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = i + 1; j < _cols; j++) {
+	size_t r = get_rows();
+	size_t c = get_cols();
+	
+	for (size_t i = 0; i < r; i++) {
+		for (size_t j = i + 1; j < c; j++) {
 			// Avoid using abs
 			T d = get(i, j) - get(j, i);
 			if (d > epsilon || d < -epsilon)
@@ -288,23 +289,23 @@ bool Matrix <T> ::is_symmetric(const T &epsilon) const
 
 /**
  * @brief Checks whether the matrix is diagonal.
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- *  
+ *
  * @return \c true if the matrix is diagonal and \c false otherwise.
  */
 template <class T>
-bool Matrix <T> ::is_diagonal(const T &epsilon)
+bool Matrix <T> ::is_diagonal(const T &epsilon) const
 {
-	size_t r = mat.get_rows();
-	size_t c = mat.get_cols();
+	size_t r = get_rows();
+	size_t c = get_cols();
 
 	for (size_t i = 0; i < r; i++) {
 		for (size_t j = 0; j < c; j++) {
 			if (i == j)
 				continue;
 
-			if (get(i, j) < -epislon || get(i, j) > epsilon)
+			if (get(i, j) < -epsilon || get(i, j) > epsilon)
 				return false;
 		}
 	}
@@ -314,22 +315,24 @@ bool Matrix <T> ::is_diagonal(const T &epsilon)
 
 /**
  * @brief Checks whether the matrix is identity matrix (for any dimension).
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- *  
+ *
  * @return \c true if the matrix is the identity and \c false otherwise.
  */
 template <class T>
-bool Matrix <T> ::is_identity(const T &epsilon = EPSILON)
+bool Matrix <T> ::is_identity(const T &epsilon) const
 {
-	// Add a dimension function
-	if (this->_dim[0] != this->_dim[1])
+	size_t r = get_rows();
+	size_t c = get_cols();
+	
+	if (r != c)
 		return false;
 
 	for (size_t i = 0; i < r; i++) {
 		for (size_t j = 0; j < c; j++) {
 			if (i == j) {
-				T d = 1 - get(i j)
+				T d = 1 - get(i, j);
 				if (d < -epsilon || d > epsilon)
 					return false;
 			} else if (get(i, j) < -epsilon || get(i, j) > epsilon) {
@@ -343,33 +346,33 @@ bool Matrix <T> ::is_identity(const T &epsilon = EPSILON)
 
 /**
  * @brief Checks whether the matrix is orthogonal.
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- *  
+ *
  * @return \c true if the matrix is orthogonal and \c false otherwise.
  */
 template <class T>
-bool Matrix <T> ::is_orthogonal(const T &epsilon = EPSILON)
+bool Matrix <T> ::is_orthogonal(const T &epsilon) const
 {
 	return is_identity(*this * transpose());
 }
 
 /**
  * @brief Checks whether the matrix is lower triangular.
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- *  
+ *
  * @return \c true if the matrix is lower triangular and \c false otherwise.
  */
 template <class T>
-bool Matrix <T> ::is_lower_triangular(const T &epsilon = EPSILON)
+bool Matrix <T> ::is_lower_triangular(const T &epsilon) const
 {
-	size_t r = mat.get_rows();
-	size_t c = mat.get_cols();
+	size_t r = get_rows();
+	size_t c = get_cols();
 
 	for (size_t i = 0; i < r; i++) {
 		for (size_t j = 0; j < c; j++) {
-			if ((i > j) && mat[i][j] > epsilon)
+			if ((i > j) && get(i, j) > epsilon)
 				return false;
 		}
 	}
@@ -379,20 +382,20 @@ bool Matrix <T> ::is_lower_triangular(const T &epsilon = EPSILON)
 
 /**
  * @brief Checks whether the matrix is upper triangular.
- * 
+ *
  * @param epsilon the maximum tolerance. Defaults to EPSILON.
- *  
+ *
  * @return \c true if the matrix is upper triangular and \c false otherwise.
  */
 template <class T>
-bool Matrix <T> ::is_upper_triangular(const T &epsilon = EPSILON)
+bool Matrix <T> ::is_upper_triangular(const T &epsilon) const
 {
-	size_t r = mat.get_rows();
-	size_t c = mat.get_cols();
+	size_t r = get_rows();
+	size_t c = get_cols();
 
 	for (size_t i = 0; i < r; i++) {
 		for (size_t j = 0; j < c; j++) {
-			if ((i < j) && mat[i][j] > epsilon)
+			if ((i < j) && get(i, j) > epsilon)
 				return false;
 		}
 	}
@@ -422,7 +425,7 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 
 	size_t n;
 	size_t t;
-	
+
 	n = a._rows;
 
 	if (n == 1)
@@ -500,7 +503,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
 {
 	_rows = rs;
 	_cols = cs;
-	
+
 	for (size_t i = 0; i < this->_size; i++)
 		this->_array[i] = val;
 }
@@ -510,7 +513,7 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
 		this->clear();
-		
+
 		_rows = other._rows;
 		_cols = other._cols;
 
@@ -519,7 +522,7 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 		this->_array = new T[this->_size];
 		for (size_t i = 0; i < this->_size; i++)
 			this->_array[i] = other._array[i];
-		
+
 		this->_dims = 2;
 		this->_dim = new size_t[2];
 
@@ -542,7 +545,7 @@ void Matrix <T> ::resize(size_t rs, size_t cs)
 		this->clear();
 
 		this->_array = new T[this->_size];
-		
+
 		if (!this->_dim) {
 			this->_dims = 2;
 			this->_dim = new size_t[2];
@@ -566,15 +569,15 @@ const T *Matrix <T> ::operator[](size_t i) const
 }
 
 template <class T>
-size_t Matrix <T> ::get_rows() const
+inline size_t Matrix <T> ::get_rows() const
 {
-	return _rows;
+	return this->_dim[0];
 }
 
 template <class T>
-size_t Matrix <T> ::get_cols() const
+inline size_t Matrix <T> ::get_cols() const
 {
-	return _cols;
+	return this->_dim[1];
 }
 
 template <class T>
@@ -685,7 +688,7 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 {
 	if (A._cols != B._rows)
 		throw typename Matrix <T> ::dimension_mismatch();
-	
+
 	size_t rs = A._rows;
 	size_t cs = B._cols;
 
@@ -822,10 +825,10 @@ Matrix <T> fma(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C)
 {
 	if (A._cols != B._rows)
 		throw typename Matrix <T> ::dimension_mismatch();
-	
+
 	if (A._rows != C._rows || B._cols != C._cols)
 		throw typename Matrix <T> ::dimension_mismatch();
-	
+
 	size_t rs = A._rows;
 	size_t cs = B._cols;
 
@@ -855,10 +858,10 @@ Matrix <T> fmak(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C, T
 {
 	if (A._cols != B._rows)
 		throw typename Matrix <T> ::dimension_mismatch();
-	
+
 	if (A._rows != C._rows || B._cols != C._cols)
 		throw typename Matrix <T> ::dimension_mismatch();
-	
+
 	size_t rs = A._rows;
 	size_t cs = B._cols;
 

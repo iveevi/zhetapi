@@ -157,8 +157,8 @@ TEST(matrix_props)
 		return false;
 	}
 	
-	oss << "Is R right triangular? " << (is_right_triangular(qr.r()) ? "yes" : "no") << endl;
-	if (!is_right_triangular(qr.r())) {
+	oss << "Is R upper triangular? " << (is_upper_triangular(qr.r()) ? "yes" : "no") << endl;
+	if (!is_upper_triangular(qr.r())) {
 		oss << "\tWrong answer..." << endl;
 
 		return false;

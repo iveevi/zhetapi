@@ -123,8 +123,6 @@ public:
 
 	void set(size_t, size_t, T);
 
-	const T &get(size_t, size_t) const;
-
 	Vector <T> get_column(size_t) const;
 
 	// Rading from a binary file (TODO: unignore later)
@@ -218,8 +216,8 @@ public:
 	T *operator[](size_t);
 	const T *operator[](size_t) const;
 
-	size_t get_rows() const;
-	size_t get_cols() const;
+	inline size_t get_rows() const;
+	inline size_t get_cols() const;
 	
 	Matrix transpose() const;
 

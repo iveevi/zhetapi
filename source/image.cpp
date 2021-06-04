@@ -317,8 +317,8 @@ int Image::show() const
 	// TODO: add optional names to images later
 	sf::RenderWindow window {
 		sf::VideoMode {
-			(unsigned long) _dim[0],
-			(unsigned long) _dim[1]
+			static_cast <unsigned int> (_dim[0]),
+			static_cast <unsigned int> (_dim[1])
 		},
 		"Image show",
 		sf::Style::Titlebar | sf::Style::Close,
