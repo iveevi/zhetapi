@@ -13,6 +13,9 @@
 
 namespace zhetapi {
 
+// Forward declarations
+class Engine;
+
 /** 
  * @brief The basic unit of computation for the ZHP scripting language and
  * framework.
@@ -58,7 +61,8 @@ public:
 		token_collection
 	};
 	
-	// Maybe differentiate between const vector & and vector & methods
+	// TODO: Maybe differentiate between const vector & and vector & methods
+	// TODO: add a context to the arguments
 	using method = Token *(*)(Token *, const std::vector <Token *> &);
 protected:
 	// From ZHP (algorithm, function, etc)
@@ -72,7 +76,7 @@ public:
 
 	virtual ~Token();
 
-	Token *attr(const std::string &, const std::vector <Token *> &);	
+	Token *attr(Engine *, const std::string &, const std::vector <Token *> &);	
 
 	bool operator!=(Token *) const;
 	void list_attributes(std::ostream & = std::cout) const;

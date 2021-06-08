@@ -46,7 +46,7 @@ Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
 
 /**
  * @brief Heterogenous copy constructor.
- * 
+ *
  * @param other the reference vector (to be copied from).
  */
 template <class T>
@@ -63,7 +63,7 @@ Vector <T> ::Vector(const Vector <A> &other)
 		this->_size = other.size();
 		for (size_t i = 0; i < this->_size; i++)
 			this->_array[i] = other[i];
-		
+
 		this->_dims = 1;
 		this->_dim = new size_t[1];
 
@@ -71,10 +71,40 @@ Vector <T> ::Vector(const Vector <A> &other)
 	}
 }
 
+template <class T>
+Vector <T> Vector <T> ::operator()(std::function <T (T)> ftn)
+{
+	return Vector <T> (this->_size,
+		[&](size_t i) {
+			return ftn(this->_array[i]);
+		}
+	);
+}
+
+template <class T>
+T Vector <T> ::sum(std::function <T (T)> ftn)
+{
+	T s = 0;
+	for (size_t i = 0; i < this->_size; i++)
+		s += ftn(this->_array[i]);
+
+	return s;
+}
+
+template <class T>
+T Vector <T> ::product(std::function <T (T)> ftn)
+{
+	T p = 1;
+	for (size_t i = 0; i < this->_size; i++)
+		p *= ftn(this->_array[i]);
+
+	return p;
+}
+
 /**
  * @brief Returns a vector with normalized components (length of 1). The
  * direction is preserved, as with normalization.
- * 
+ *
  * @return The normalized vector.
  */
 template <class T>
@@ -84,7 +114,7 @@ Vector <T> Vector <T> ::normalized() const
 
 	T dt = this->norm();
 
-	for (size_t i = 0; i < size(); i++)
+	for (size_t i = 0; i < this->_size; i++)
 		out.push_back((*this)[i]/dt);
 
 	return Vector(out);
@@ -92,9 +122,9 @@ Vector <T> Vector <T> ::normalized() const
 
 /**
  * @brief Add and assignment operator.
- * 
+ *
  * TODO: Needs to return itself
- * 
+ *
  * @param the vector that will be added to this.
  */
 template <class T>
@@ -106,9 +136,9 @@ void Vector <T> ::operator+=(const Vector <T> &a)
 
 /**
  * @brief Subtract and assignment operator.
- * 
+ *
  * TODO: Needs to return itself
- * 
+ *
  * @param the vector that will be subtracted from this.
  */
 template <class T>

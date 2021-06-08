@@ -10,6 +10,7 @@ set(ZHETAPI_SOURCE
 	source/plot.cpp
 	source/polynomial.cpp
 	source/registration.cpp
+	source/timer.cpp
 	source/token.cpp
 
 	source/core/algorithm.cpp

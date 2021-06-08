@@ -61,11 +61,11 @@ static void run_normal(const std::string &cache, Engine *context)
 		//	<< ": " << e.what() << endl;
 
 		exit(-1);
-	} catch (...) {
+	} /* catch (...) {
 		throw std::runtime_error(
 			"Caught unknown exception in zhetapi::run..."
 		);
-	}
+	} */
 }
 
 // TODO: clean
@@ -100,7 +100,7 @@ static void run_assignment(const std::vector <std::string> &veq, Engine *ctx)
 		if (kout.size() > 1 && is_valid_ident(kout[0])) {
 			if (!in_args(fargs, kargs))
 				throw args_mismatch(veq[i]);
-			
+
 			std::string ftr = veq[i] + " = " + veq[n - 1];
 			ctx->put(Function(ftr, ctx));
 
@@ -133,7 +133,7 @@ int parse_global(Feeder *feeder, Engine *context)
 	struct State state;
 
 	char c;
-	
+
 	while ((c = feeder->feed()) != EOF) {
 		// Check for commented line
 		// TODO: another function
@@ -187,12 +187,12 @@ int parse_global(Feeder *feeder, Engine *context)
 
 		if (!isspace(c))
 			state.cached += c;
-		
+
 		OpZ *opz = check_keyword(state.cached, feeder, context, &state);
 
 		if (opz)
 			return opz->get();
-		
+
 		// cout << "cached = " << state.cached << endl;
 	}
 

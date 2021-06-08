@@ -62,7 +62,7 @@ Vector <T> ::Vector(size_t rs, T *ref, bool slice)
 
 /**
  * @brief Copy constructor.
- * 
+ *
  * @param other the reference vector (to be copied from).
  */
 template <class T>
@@ -95,7 +95,7 @@ Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 		this->_size = other._size;
 		for (size_t i = 0; i < this->_size; i++)
 			this->_array[i] = other._array[i];
-		
+
 		this->_dims = 1;
 		this->_dim = new size_t[1];
 
@@ -116,6 +116,62 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	}
 
 	return *this;
+}
+
+/**
+ * @brief Indexing operator.
+ *
+ * @param i the specified index.
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
+template <class T>
+__cuda_dual__
+inline T &Vector <T> ::operator[](size_t i)
+{
+	return this->_array[i];
+}
+
+/**
+ * @brief Indexing operator.
+ *
+ * @param i the specified index.
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
+template <class T>
+__cuda_dual__
+inline const T &Vector <T> ::operator[](size_t i) const
+{
+	return this->_array[i];
+}
+
+/**
+ * @brief Indexing function.
+ *
+ * @param i the specified index.
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
+template <class T>
+__cuda_dual__
+inline T &Vector <T> ::get(size_t i)
+{
+	return this->_array[i];
+}
+
+/**
+ * @brief Indexing function.
+ *
+ * @param i the specified index.
+ *
+ * @return the \f$i\f$th component of the vector.
+ */
+template <class T>
+__cuda_dual__
+inline const T &Vector <T> ::get(size_t i) const
+{
+	return this->_array[i];
 }
 
 /**
@@ -191,41 +247,6 @@ const T &Vector <T> ::z() const
 }
 
 /**
- * @brief Indexing operator
- *
- * @param i the specified index
- *
- * @return the \f$i\f$th component of the vector.
- */
-template <class T>
-T &Vector <T> ::operator[](size_t i)
-{
-	return this->_array[i];
-}
-
-/**
- * @brief Indexing operator
- *
- * @param i the specified index
- *
- * @return the \f$i\f$th component of the vector.
- */
-template <class T>
-const T &Vector <T> ::operator[](size_t i) const
-{
-	return this->_array[i];
-}
-
-/**
- * @return the size of the vector.
- */
-template <class T>
-size_t Vector <T> ::size() const
-{
-	return this->_size;
-}
-
-/**
  * @brief Returns the argument of the vector. Assumes that the vector has at
  * least two components.
  *
@@ -240,7 +261,7 @@ T Vector <T> ::arg() const
 
 /**
  * @brief The minimum component of the vector.
- * 
+ *
  * @return the smallest component, \f$\min v_i.\f$
  */
 template <class T>
@@ -258,7 +279,7 @@ T Vector <T> ::min() const
 
 /**
  * @brief The maximum component of the vector.
- * 
+ *
  * @return the largest component, \f$\max v_i.\f$
  */
 template <class T>
@@ -276,7 +297,7 @@ T Vector <T> ::max() const
 
 /**
  * @brief The index of the smallest component: essentially argmin.
- * 
+ *
  * @return the index of the smallest component.
  */
 template <class T>
@@ -294,7 +315,7 @@ size_t Vector <T> ::imin() const
 
 /**
  * @brief The index of the largest component: essentially argmax.
- * 
+ *
  * @return the index of the largest component.
  */
 template <class T>
@@ -319,7 +340,7 @@ void Vector <T> ::normalize()
 {
 	T dt = this->norm();
 
-	for (size_t i = 0; i < size(); i++)
+	for (size_t i = 0; i < this->_size; i++)
 		(*this)[i] /= dt;
 }
 
@@ -328,39 +349,39 @@ void Vector <T> ::normalize()
 template <class T>
 Vector <T> Vector <T> ::append_above(const T &x) const
 {
-	T *arr = new T[size() + 1];
+	T *arr = new T[this->_size + 1];
 	arr[0] = x;
-	for (size_t i = 0; i < size(); i++)
+	for (size_t i = 0; i < this->_size; i++)
 		arr[i + 1] = this->_array[i];
-	return Vector(size() + 1, arr, false);
+	return Vector(this->_size + 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::append_below(const T &x)
 {
-	T *arr = new T[size() + 1];
-	for (size_t i = 0; i < size(); i++)
+	T *arr = new T[this->_size + 1];
+	for (size_t i = 0; i < this->_size; i++)
 		arr[i] = this->_array[i];
-	arr[size()] = x;
-	return Vector(size() + 1, arr, false);
+	arr[this->_size] = x;
+	return Vector(this->_size + 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::remove_top()
 {
-	T *arr = new T[size() - 1];
-	for (size_t i = 1; i < size(); i++)
+	T *arr = new T[this->_size - 1];
+	for (size_t i = 1; i < this->_size; i++)
 		arr[i - 1] = this->_array[i];
-	return Vector(size() - 1, arr, false);
+	return Vector(this->_size - 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::remove_bottom()
 {
-	T *arr = new T[size() - 1];
-	for (size_t i = 0; i < size() - 1; i++)
+	T *arr = new T[this->_size - 1];
+	for (size_t i = 0; i < this->_size - 1; i++)
 		arr[i] = this->_array[i];
-	return Vector(size() - 1, arr, false);
+	return Vector(this->_size - 1, arr, false);
 }
 
 // Non-member operators
@@ -520,10 +541,10 @@ Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 
 	for (size_t i = 0; i < a.size(); i++)
 		arr[i] = a[i];
-	
+
 	for (size_t i = 0; i < b.size(); i++)
 		arr[a.size() + i] = b[i];
-	
+
 	return Vector <T> (a.size() + b.size(), arr);
 }
 

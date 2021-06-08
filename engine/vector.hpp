@@ -19,7 +19,7 @@
 
 #endif		// Does not support AVR
 
-// Engine headers
+/* Engine headers
 #ifdef ZHP_CUDA
 
 #include "cuda/matrix.cuh"
@@ -28,7 +28,9 @@
 
 #include "matrix.hpp"
 
-#endif
+#endif */
+
+#include "matrix.hpp"
 
 namespace zhetapi {
 
@@ -82,7 +84,7 @@ public:
 
 	AVR_IGNORE(Vector(const std::vector <T> &));
 	AVR_IGNORE(Vector(const std::initializer_list <T> &));
-	
+
 	// Cross-type operations
 	template <class A>
 	explicit Vector(const Vector <A> &);
@@ -92,23 +94,24 @@ public:
 	Vector &operator=(const Matrix <T> &);
 
 	// Indexing
-	T &operator[](size_t);
-	const T &operator[](size_t) const;
-	
-	// Properties
-	size_t size() const;
+	__cuda_dual__ inline T &get(size_t);
+	__cuda_dual__ inline const T &get(size_t) const;
 
-	T &x();	
+	__cuda_dual__ inline T &operator[](size_t);
+	__cuda_dual__ inline const T &operator[](size_t) const;
+
+	// Properties
+	T &x();
 	T &y();
 	T &z();
-	
+
 	const T &x() const;
 	const T &y() const;
 	const T &z() const;
 
 	// Direction of the vector (radians)
 	T arg() const;
-	
+
 	// Min and max value
 	T min() const;
 	T max() const;
@@ -116,7 +119,25 @@ public:
 	// Min and max index
 	size_t imin() const;
 	size_t imax() const;
-	
+
+	// Functions
+	AVR_SWITCH(
+		Vector operator()(T (*)(T)),
+		Vector operator()(std::function <T (T)>)
+	);
+
+	AVR_SWITCH(
+		T sum(T (*)(T)),
+		T sum(std::function <T (T)>)
+	);
+
+	AVR_SWITCH(
+		T product(T (*)(T)),
+		T product(std::function <T (T)>)
+	);
+
+	// TODO: operator(), product and sum
+
 	// Modifiers
 	Vector append_above(const T &) const;
 	Vector append_below(const T &);
@@ -134,33 +155,42 @@ public:
 	void operator+=(const Vector &);
 	void operator-=(const Vector &);
 
+// CUDA operations
+#ifdef __CUDACC__
+
+	void cuda_read(Vector <T> *);
+	Vector <T> *cuda_half_copy(NVArena *) const;
+	Vector <T> *cuda_full_copy(NVArena *);
+
+#endif
+
 	// Static methods
 	static Vector one(size_t);
 	static Vector rarg(double, double);
 
-	// Vector operations	
+	// Vector operations
 	template <class F, class U>
 	friend U max(F, const Vector <U> &);
-	
+
 	template <class F, class U>
 	friend U min(F, const Vector <U> &);
 
 	template <class F, class U>
 	friend U argmax(F, const Vector <U> &);
-	
+
 	template <class F, class U>
 	friend U argmin(F, const Vector <U> &);
-	
+
 	template <class U>
 	friend Vector <U> cross(const Vector <U> &, const Vector <U> &);
 
 	// Vector concatenation
 	template <class U>
 	friend Vector <U> concat(const Vector <U> &, const Vector <U> &);
-	
+
 	template <class U>
 	friend U inner(const Vector <U> &, const Vector <U> &);
-	
+
 	// Heterogenous inner product (assumes first underlying type)
 	template <class U, class V>
 	friend U inner(const Vector <U> &, const Vector <V> &);
@@ -172,13 +202,20 @@ public:
 
 }
 
-// Primitive operations for all systems (including embedded)
+// Primitive operations for all systems
 #include "primitives/vector_prims.hpp"
 
 // Additional operations for common systems
 #ifndef __AVR
 
 #include "vector_cpu.hpp"
+
+#endif
+
+// Additional operations for CUDA
+#ifdef __CUDACC__
+
+#include "cuda/vector.cuh"
 
 #endif
 

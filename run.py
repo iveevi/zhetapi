@@ -9,6 +9,7 @@ import time
 modes = {
     '': './',
     'gdb': 'gdb ',
+    'cuda-gdb': 'cuda-gdb ',
     'warn': './',
     'codecov': './',
     'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
@@ -74,10 +75,10 @@ def run_and_check(suppress, *args):
 def spinner_process(function, arguments, msg1, msg2):
     # Spinner string
     spinner = '|\\-/'
-    
+
     thread = threading.Thread(target=function, args=arguments)
     thread.start();
-    
+
     index = 0
     while thread.is_alive():
         print(f'{spinner[index]} {msg1}', end='\r')
@@ -94,7 +95,7 @@ def make_target(threads, target, mode='', suppress=False):
     if suppress:
         csup = ' >install.log 2>&1'
 
-    if mode in ['gdb', 'valgrind', 'profile']:
+    if mode in ['gdb', 'cuda-gdb', 'valgrind', 'profile']:
         ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Debug . {csup}')
     elif mode in ['warn']:
         ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Warn . {csup}')
@@ -133,13 +134,13 @@ def install(args):
             'Compiling ZHP interpreter...',
             'Finished compiling ZHP interpreter.'
     )
-    
+
     spinner_process(make_target,
             (args.threads, 'zhp-shared', args.mode, True),
             'Compiling libzhp.so...',
             'Finished compiling libzhp.so.'
     )
-    
+
     spinner_process(make_target,
             (args.threads, 'zhp-static', args.mode, True),
             'Compiling libzhp.a...',
@@ -159,13 +160,13 @@ def install(args):
     )
 
     print('Finished installing essentials, moving on to libraries.\n')
-    
+
     spinner_process(run_and_check,
             (True, './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib', ),
             'Compiling IO libary...',
             'Finished compiling IO library.'
     )
-    
+
     spinner_process(run_and_check,
             (True, './bin/zhetapi -v -c lib/math/math.cpp -o include/math.zhplib', ),
             'Compiling Math libary...',
@@ -204,12 +205,12 @@ def zhetapi_profile(args):
         exe=modes[args.mode],
         file=file
     ))
-    
+
     if (ret != 0):
         clean_and_exit(-1)
-    
+
     ret = os.system('{cmd}'.format(cmd=post[args.mode]))
-    
+
     if (ret != 0):
         clean_and_exit(-1)
 
@@ -252,7 +253,7 @@ def python_bench(args):
     end_t = time.time()
 
     zhp_t = end_t - start_t
-    
+
     # Run bench for python
     print('\nPYTHON:')
 

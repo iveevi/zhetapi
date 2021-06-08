@@ -1,6 +1,12 @@
 #ifndef TENSOR_PRIMITIVES_H_
 #define TENSOR_PRIMITIVES_H_
 
+#ifdef __CUDACC__
+
+#include "cuda/nvarena.cuh"
+
+#endif
+
 namespace zhetapi {
 
 /**
@@ -11,7 +17,7 @@ Tensor <T> ::Tensor() {}
 
 /**
  * @brief Homogenous (with respect to the component type) copy constructor.
- * 
+ *
  * @param other the reference vector (to be copied from).
  */
 template <class T>
@@ -28,7 +34,7 @@ Tensor <T> ::Tensor(const Tensor <T> &other)
 
 /**
  * @brief Heterogenous (with respect to the component type) copy constructor.
- * 
+ *
  * @param other the reference vector (to be copied from).
  */
 template <class T>
@@ -60,7 +66,7 @@ Tensor <T> ::Tensor(size_t rows, size_t cols)
  * allocated memory), and the ownership can be decided. By default, the Tensor
  * does not gain ownership over the memory. Note that the sizes given are not
  * checked for validity.
- * 
+ *
  * @param dims the number of dimensions to slice.
  * @param dim the dimension size array.
  * @param size the size of the Tensor.
@@ -80,7 +86,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	if (this != &other) {
 		_dims = other._dims;
 		_size = other._size;
-		
+
 		_dim = new size_t[_dims];
 		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
 
@@ -99,7 +105,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 	if (this != &other) {
 		_dims = other._dims;
 		_size = other._size;
-		
+
 		_dim = new size_t[_dims];
 		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
 
@@ -125,11 +131,39 @@ void Tensor <T> ::clear()
 	if (!_array && !_dim)
 		return;
 
-	if (_dim && !_dim_sliced)
-		delete[] _dim;
+	if (!_dim_sliced) {
 
-	if (_array && !_arr_sliced)
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+		if (_on_device) {
+			if (!_arena)
+				throw null_nvarena();
+
+			_arena->free(_dim);
+		} else {
+			delete[] _dim;
+		}
+#else
+		delete[] _dim;
+#endif
+
+	}
+
+	if (!_arr_sliced) {
+
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+		if (_on_device) {
+			if (!_arena)
+				throw null_nvarena();
+
+			_arena->free(_array);
+		} else {
+			delete[] _array;
+		}
+#else
 		delete[] _array;
+#endif
+
+	}
 
 	_array = nullptr;
 	_dim = nullptr;
@@ -137,10 +171,11 @@ void Tensor <T> ::clear()
 
 /**
  * @brief Returns the size of the tensor.
- * 
+ *
  * @return the size of the tensor (number of components in the tensor).
  */
 template <class T>
+__cuda_dual__
 size_t Tensor <T> ::size() const
 {
 	return _size;
@@ -148,10 +183,11 @@ size_t Tensor <T> ::size() const
 
 /**
  * @brief Returns the number of dimensions in the tensor.
- * 
+ *
  * @return the number of dimensions in the tensor.
  */
 template <class T>
+__cuda_dual__
 size_t Tensor <T> ::dimensions() const
 {
 	return _dims;
@@ -159,12 +195,13 @@ size_t Tensor <T> ::dimensions() const
 
 /**
  * @brief Returns the size of a specific dimension.
- * 
+ *
  * @param i the desired index.
- * 
+ *
  * @return the size of dimension \p i.
  */
 template <class T>
+__cuda_dual__
 size_t Tensor <T> ::dim_size(size_t i) const
 {
 	return _dim[i];

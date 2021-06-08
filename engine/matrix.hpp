@@ -16,7 +16,7 @@
 
 #endif					// AVR support
 
-// Engine headers
+/* Engine headers
 #ifdef ZHP_CUDA
 
 #include "cuda/tensor.cuh"
@@ -25,7 +25,8 @@
 
 #include "tensor.hpp"
 
-#endif
+#endif */
+#include "tensor.hpp"
 
 #include "cuda/essentials.cuh"
 
@@ -90,7 +91,7 @@ public:
 		Matrix(size_t, size_t, T *(*)(size_t)),
 		Matrix(size_t, size_t, std::function <T *(size_t)>)
 	);
-	
+
 	AVR_SWITCH(
 		Matrix(size_t, size_t, T (*)(size_t, size_t)),
 		Matrix(size_t, size_t, std::function <T (size_t, size_t)>)
@@ -112,7 +113,7 @@ public:
 
 	inline T &get(size_t, size_t);
 	inline const T &get(size_t, size_t) const;
-	
+
 	T norm() const;
 
 	void resize(size_t, size_t);
@@ -141,7 +142,7 @@ public:
 
 	// Row operations
 	void add_rows(size_t, size_t, T);
-	
+
 	void swap_rows(size_t, size_t);
 
 	void multiply_row(size_t, T);
@@ -150,10 +151,10 @@ public:
 
 	// Miscellanious opertions
 	AVR_IGNORE(void randomize(std::function <T ()>);)
-	
+
 	__cuda_dual__
 	void row_shur(const Vector <T> &);
-	
+
 	__cuda_dual__
 	void stable_shur(const Matrix <T> &);
 
@@ -185,7 +186,7 @@ public:
 		String display() const,
 		std::string display() const
 	);
-	
+
 #ifndef __AVR
 
 	template <class U>
@@ -198,13 +199,13 @@ public:
 
 	// Miscellaneous functions
 	template <class U>
-	friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &); 
-	
+	friend Vector <U> apt_and_mult(const Matrix <U> &, const Vector <U> &);
+
 	template <class U>
 	friend Vector <U> rmt_and_mult(const Matrix <U> &, const Vector <U> &);
 
 	template <class U>
-	friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &); 
+	friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &);
 
 	class dimension_mismatch {};
 protected:
@@ -218,48 +219,48 @@ public:
 
 	inline size_t get_rows() const;
 	inline size_t get_cols() const;
-	
+
 	Matrix transpose() const;
 
 	void operator+=(const Matrix &);
 	void operator-=(const Matrix &);
-	
+
 	void operator*=(const T &);
 	void operator/=(const T &);
 
 	// Matrix and matrix operations
 	template <class U>
 	friend Matrix <U> operator+(const Matrix <U> &, const Matrix <U> &);
-	
+
 	template <class U>
 	friend Matrix <U> operator-(const Matrix <U> &, const Matrix <U> &);
-	
+
 	// template <class U>
 	// friend Matrix <U> operator*(const Matrix <U> &, const Matrix <U> &);
-	
+
 	// Heterogenous multiplication
 	template <class U, class V>
 	friend Matrix <U> operator*(const Matrix <U> &, const Matrix <V> &);
-	
+
 	template <class U>
 	friend Matrix <U> operator*(const Matrix <U> &, const U &);
-	
+
 	template <class U>
 	friend Matrix <U> operator*(const U &, const Matrix <U> &);
-	
+
 	template <class U>
 	friend Matrix <U> operator/(const Matrix <U> &, const U &);
-	
+
 	template <class U>
 	friend Matrix <U> operator/(const U &, const Matrix <U> &);
 
 	template <class U>
 	friend bool operator==(const Matrix <U> &, const Matrix <U> &);
-	
+
 	// Miscellaneous operations
 	template <class U>
 	friend Matrix <U> shur(const Matrix <U> &, const Matrix <U> &);
-	
+
 	template <class U>
 	friend Matrix <U> inv_shur(const Matrix <U> &, const Matrix <U> &);
 

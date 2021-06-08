@@ -36,6 +36,13 @@ class Matrix;
 template <class T>
 class Vector;
 
+#ifdef __CUDACC__
+
+class NVArena;
+
+#endif
+
+// TODO: is this even needed
 #ifndef __AVR
 
 // Tensor_type operations
@@ -65,9 +72,10 @@ protected:
 	T *	_array		= nullptr;
 	bool	_arr_sliced	= false;
 
-#ifdef _zhp_cuda
+#ifdef __CUDACC__
 
-	bool	_on_device = false;	// Flag for device allocation
+	NVArena *_arena		= nullptr;
+	bool	_on_device	= false;
 
 #endif
 
@@ -78,7 +86,7 @@ public:
 
 	template <class A>
 	Tensor(const Tensor <A> &);
-	
+
 	Tensor(size_t, size_t);
 	Tensor(size_t, size_t *, size_t, T *, bool = true);
 
@@ -93,10 +101,10 @@ public:
 	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const);
 
 	// TODO: remove size term from vector and matrix classes
-	size_t size() const;
-	size_t dimensions() const;
-	size_t dim_size(size_t) const;
-	
+	__cuda_dual__ size_t size() const;
+	__cuda_dual__ size_t dimensions() const;
+	__cuda_dual__ size_t dim_size(size_t) const;
+
 	// TODO: private?
 	__cuda_dual__
 	void clear();
@@ -113,7 +121,7 @@ public:
 
 	template <class U>
 	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
-	
+
 	// Printing functions
 	AVR_IGNORE(std::string print() const;)
 
@@ -124,32 +132,42 @@ public:
 	Tensor &operator=(const Tensor <A> &);
 
 	Tensor &operator=(const Tensor &);
-	
+
 	~Tensor();
 
 	// TODO: Re-organize the methods
 	Vector <T> cast_to_vector() const;
 	Matrix <T> cast_to_matrix(size_t, size_t) const;
-	
+
 	// Arithmetic
 	void operator*=(const T &);
 	void operator/=(const T &);
-	
+
 	template <class U>
 	friend Matrix <U> operator*(const Matrix <U> &, const U &);
-	
+
 	template <class U>
 	friend Matrix <U> operator*(const U &, const Matrix <U> &);
-	
+
 	template <class U>
 	friend Matrix <U> operator/(const Matrix <U> &, const U &);
-	
+
 	template <class U>
 	friend Matrix <U> operator/(const U &, const Matrix <U> &);
 
 	// Dimension mismatch exception
 	class dimension_mismatch {};
 	class bad_dimensions {};
+
+#ifdef __CUDACC__
+
+	class null_nvarena : public std::runtime_error {
+	public:
+		null_nvarena() : std::runtime_error("Tensor::clear: null NVArena.") {}
+	};
+
+#endif
+
 };
 
 }

@@ -1,6 +1,7 @@
 #include <token.hpp>
 
 #include <core/types.hpp>
+#include <core/algorithm.hpp>
 
 namespace zhetapi {
 
@@ -17,16 +18,25 @@ Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 
 Token::~Token() {}
 
-Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
+Token *Token::attr(Engine *context, const std::string &id, const std::vector <Token *> &args)
 {
 	// TODO: how to deal with functors?
 	// Priorotize attributes
-	if (_attributes.find(id) != _attributes.end())
+	if (_attributes.find(id) != _attributes.end()) {
+		Token *tptr = _attributes[id];
+		if (tptr->caller() == Token::alg) {
+			std::cout << "ALGORITHM attribute!" << std::endl;
+
+			algorithm *alg = dynamic_cast <algorithm *> (tptr);
+			return alg->execute(context, args);
+		}
+
 		return _attributes[id];
-	
+	}
+
 	if (_methods.find(id) != _methods.end())
 		return _methods[id](this, args);
-	
+
 	throw unknown_attribute(typeid(*this), id);
 
 	return nullptr;
@@ -34,7 +44,7 @@ Token *Token::attr(const std::string &id, const std::vector <Token *> &args)
 
 bool Token::operator!=(Token *tptr) const
 {
-	return !(*this == tptr); 
+	return !(*this == tptr);
 }
 
 bool tokcmp(Token *a, Token *b)
@@ -47,7 +57,7 @@ void Token::list_attributes(std::ostream &os) const
 	os << "Methods:" << std::endl;
 	for (const auto &m : _methods)
 		os << "\t" << m.first << std::endl;
-	
+
 	os << "Attributes:" << std::endl;
 	for (const auto &a : _attributes)
 		os << "\t" << a.first << " = " << a.second->dbg_str() << std::endl;
