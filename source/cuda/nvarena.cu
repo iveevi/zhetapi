@@ -4,7 +4,12 @@
 
 namespace zhetapi {
 
-// Allocate per megabyte
+/**
+ * @brief Initializes the allocator with a specific amount of memory.
+ *
+ * @param mb the number of megabytes (not bytes!) that the allocator should hold
+ * on to and serve.
+ */
 NVArena::NVArena(size_t mb)
 {
 	size_t bytes = mb << 20;
@@ -14,6 +19,10 @@ NVArena::NVArena(size_t mb)
 	__cuda_check_error();
 }
 
+/**
+ * @brief Deconstructor. The allocator releases its pool of memory and notifies
+ * the user on blocks of memory that are still allocated.
+ */
 NVArena::~NVArena()
 {
 	if (_warn) {
@@ -29,6 +38,13 @@ NVArena::~NVArena()
 	cudaFree(_pool);
 }
 
+/**
+ * @brief Allocates a block of memory.
+ *
+ * @param bytes the number of bytes of allocate.
+ * 
+ * @return the allocated block.
+ */
 void *NVArena::alloc(size_t bytes)
 {
 	// Case where __flist is empty
@@ -53,6 +69,11 @@ void *NVArena::alloc(size_t bytes)
 	return laddr;
 }
 
+/**
+ * @brief Frees a block of memory.
+ *
+ * @param ptr the block of memory to be freed.
+ */
 void NVArena::free(void *ptr)
 {
 	if (_flist.find(ptr) == _flist.end())
@@ -64,7 +85,15 @@ void NVArena::free(void *ptr)
 	_flist[ptr] = 0;
 }
 
-// dst is GPU address, src is host address
+/**
+ * @brief Copies a block of memory from host memory to GPU memory, using \c
+ * cudaMemcpy. Warns if the number of bytes to copy exceeds the block size on
+ * the GPU (assuming the allocators warning flag is turned on).
+ *
+ * @param dst the pointer to the destination in GPU memory.
+ * @param src the pointer to the block in host memory.
+ * @param bytes the number of bytes to copy.
+ */
 void NVArena::write(void *dst, void *src, size_t bytes)
 {
 	// Do some checks before copying
@@ -94,7 +123,15 @@ void NVArena::write(void *dst, void *src, size_t bytes)
 	__cuda_check_error();
 }
 
-// dst is host address, src is GPU address
+/**
+ * @brief Copies a block of memory from GPU memory to host memory, using \c
+ * cudaMemcpy. Warns if the number of bytes to copy exceeds the block size on
+ * the GPU (assuming the allocators warning flag is turned on).
+ *
+ * @param dst the pointer to the destination in host memory.
+ * @param src the pointer to the block in GPU memory.
+ * @param bytes the number of bytes to copy.
+ */
 void NVArena::read(void *dst, void *src, size_t bytes)
 {
 	// Do some checks before copying
@@ -124,6 +161,10 @@ void NVArena::read(void *dst, void *src, size_t bytes)
 	__cuda_check_error();
 }
 
+/**
+ * @brief Prints each block that has allocated (or freed). Use for debugging
+ * purposes.
+ */
 void NVArena::show_mem_map() const
 {
 	for (const auto &pr : _flist) {

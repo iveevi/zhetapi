@@ -74,7 +74,6 @@ extern const Color GREY;
  * Celcius measurements in [0, 100] are more meaningful to use than are the
  * values in [0, 1].
  */
-
 class Gradient {
 	Color		_base;
 
@@ -93,7 +92,9 @@ public:
 	Color get(long double);
 };
 
-// Image class
+/**
+ * @brief Represents an image.
+ */
 class Image : public Tensor <unsigned char> {
 public:
 	// Using declararations

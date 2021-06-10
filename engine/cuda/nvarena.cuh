@@ -19,20 +19,33 @@ struct __addr_cmp {
 
 namespace zhetapi {
 
-// A memory pool class
+/**
+ * @brief An allocator class for Nvidia GPUs. Has additional features like
+ * warnings for memory leaks and copy bound errors. Overall is a more convenient
+ * interface to GPU memory than standard CUDA operations like \c cudaMalloc and
+ * \c cudaMemcpy.
+ */
 class NVArena {
 public:
+	// TODO: need to select the specific GPU
 	using memmap = std::map <void *, size_t, __addr_cmp>;
 
 	// TODO: bad alloc
 
-	// Thrown if the address has never been allocated
+	/**
+	 * @brief This exception is thrown if the user tries to free a piece of
+	 * memory that was never allocated.
+	 */
 	class segfault : public std::runtime_error {
 	public:
 		segfault() : std::runtime_error("NVArena: segmentation fault.") {}
 	};
 
-	// Thrown if the address was allocated but then already freed
+	/**
+	 * @brief This exceptoin is thrown if the user frees a piece of memory
+	 * more than once. The allocator keeps track of all allocated blocks for
+	 * this.
+	 */
 	class double_free : public std::runtime_error {
 	public:
 		double_free() : std::runtime_error("NVArena: double free.") {}
@@ -85,6 +98,15 @@ public:
 	void show_mem_map() const;
 };
 
+/**
+ * @brief Allocates a block of items of a specific type.
+ *
+ * @tparam t the specific type of item to allocate.
+ *
+ * @param items the number of items to allocate.
+ * 
+ * @return the allocated block.
+ */
 template <class T>
 T *NVArena::alloc(size_t items)
 {
@@ -93,20 +115,47 @@ T *NVArena::alloc(size_t items)
         return (T *) data;
 }
 
+/**
+ * @brief Frees a block of items of a specific type.
+ *
+ * @tparam T the specific type of item to free.
+ *
+ * @param ptr the block of memory to be freed.
+ */
 template <class T>
 void NVArena::free(T *ptr)
 {
 	free((void *) ptr);
 }
 
-// Transfers n items of type T, not n bytes
+/**
+ * @brief Copies a block of memory from host memory to GPU memory, using \c
+ * cudaMemcpy.
+ *
+ * @tparam T the type of each element in the blocks of memory.
+ *
+ * @param dst the pointer to the destination in GPU memory.
+ * @param src the pointer to the block in host memory.
+ * @param n the number of items to copy (note that this copies `n *
+ * sizeof(T)` bytes in total).
+ */
 template <class T>
 void NVArena::write(T *dst, T *src, size_t n)
 {
 	write((void *) dst, (void *) src, n * sizeof(T));
 }
 
-// Transfers n items of type T, not n bytes
+/**
+ * @brief Copies a block of memory from GPU memory to host memory, using \c
+ * cudaMemcpy.
+ *
+ * @tparam T the type of each element in the blocks of memory.
+ *
+ * @param dst the pointer to the destination in host memory.
+ * @param src the pointer to the block in GPU memory.
+ * @param n the number of items to copy (note that this copies `n *
+ * sizeof(T)` bytes in total).
+ */
 template <class T>
 void NVArena::read(T *dst, T *src, size_t n)
 {
