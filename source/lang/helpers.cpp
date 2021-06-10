@@ -81,7 +81,7 @@ Args eq_split(const std::string &str)
 
 	char pc = 0;
 
-	std::vector <std::string> out;
+	Args out;
 	size_t n;
 
 	n = str.length();
@@ -94,7 +94,7 @@ Args eq_split(const std::string &str)
 			if (pc == '>' || pc == '<' || pc == '!'
 				|| (i > 0 && str[i - 1] == '='))
 				ignore = true;
-			
+
 			if (!ignore && str[i] == '=') {
 				if (i < n - 1 && str[i + 1] == '=') {
 					tmp += "==";
@@ -106,17 +106,53 @@ Args eq_split(const std::string &str)
 			} else {
 				if (str[i] == '\"')
 					quoted = true;
-				
+
 				tmp += str[i];
 			}
 		} else {
+			// TODO: start with this
 			if (str[i] == '\"')
 				quoted = false;
-			
+
 			tmp += str[i];
 		}
 
 		pc = str[i];
+	}
+
+	if (!tmp.empty())
+		out.push_back(tmp);
+
+	return out;
+}
+
+Args comma_split(const std::string &str)
+{
+	bool quoted = false;
+
+	Args out;
+
+	char c;
+	std::string tmp;
+	for (size_t i = 0; i < str.length(); i++) {
+		c = str[i];
+		if (quoted) {
+			if (c == '\"')
+				quoted = false;
+
+			tmp += c;
+		} else {
+			if (c == '\"')
+				quoted = true;
+
+			if (c == ',' && !tmp.empty()) {
+				out.push_back(tmp);
+
+				tmp.clear();
+			} else if (!isspace(c)) {
+				tmp += c;
+			}
+		}
 	}
 
 	if (!tmp.empty())

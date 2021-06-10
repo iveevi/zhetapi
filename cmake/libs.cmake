@@ -1,4 +1,4 @@
-set(ZHETAPI_SOURCE 
+set(ZHETAPI_SOURCE
 	source/complex.cpp
 	source/display.cpp
 	source/engine.cpp
@@ -32,7 +32,6 @@ set(ZHETAPI_SOURCE
 	source/core/operation.cpp
 	source/core/operation_holder.cpp
 	source/core/rvalue.cpp
-	# source/core/shader.cpp
 	source/core/special_tokens.cpp
 	source/core/types.cpp
 	source/core/wildcard.cpp
@@ -46,7 +45,7 @@ set(ZHETAPI_SOURCE
 	source/lang/feeder.cpp
 	source/lang/helpers.cpp
 	source/lang/keywords.cpp
-	source/lang/mld_parser.cpp
+	source/lang/mdl_parser.cpp
 	source/lang/parser.cpp
 	source/lang/source.cpp
 	source/lang/vm.cpp
@@ -55,8 +54,6 @@ set(ZHETAPI_SOURCE
 	source/std/interval.cpp
 
 	interpreter/builtin/basic_io.cpp
-	
-	# glad/glad.c
 )
 
 # Compile shared and static library

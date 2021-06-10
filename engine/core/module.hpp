@@ -16,6 +16,7 @@ public:
 
 	// Methods
 	void add(const NamedToken &);
+	void add(const std::string &, Token *);
 
 	// Virtual functions
 	virtual type caller() const;

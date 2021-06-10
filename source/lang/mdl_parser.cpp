@@ -5,8 +5,60 @@
 
 namespace zhetapi {
 
+// Inserting variables
+static void run_assignment(const Args &veq, Engine *ctx, Module *module)
+{
+	size_t n = veq.size();
+
+	// Get possible arguments for the first assignment
+	Args fout = get_args(veq[n - 2]);
+	Args fargs(fout.begin() + 1, fout.end());
+
+	// Ensure valid identifier
+	if (fout.empty() || !is_valid_ident(fout[0]))
+		throw bad_identifier(veq[n - 2]);
+
+	Token *tptr = nullptr;
+	if (fout.size() > 1) {
+		std::string ftr = veq[n - 2] + " = " + veq[n - 1];
+
+		tptr = new Function(ftr, ctx);
+
+		module->add(fout[0], tptr);
+		ctx->put(fout[0], tptr);
+	} else {
+		tptr = (node_manager(ctx, veq[n - 1])).value(ctx);
+
+		module->add(fout[0], tptr);
+		ctx->put(fout[0], tptr);
+	}
+
+	for (int i = n - 3; i >= 0; i--) {
+		Args kout = get_args(veq[i]);
+		Args kargs(kout.begin() + 1, kout.end());
+
+		if (kout.size() > 1 && is_valid_ident(kout[0])) {
+			if (!in_args(fargs, kargs))
+				throw args_mismatch(veq[i]);
+
+			std::string ftr = veq[i] + " = " + veq[n - 1];
+
+			// Update the token with functions
+			tptr = new Function(ftr, ctx);
+
+			module->add(kout[0], tptr);
+			ctx->put(kout[0], tptr);
+		} else if (kout.size() > 0 && is_valid_ident(kout[0])) {
+			module->add(kout[0], tptr);
+			ctx->put(kout[0], tptr);
+		} else {
+			throw bad_identifier(veq[i]);
+		}
+	}
+}
+
 // TODO: make sure state->branch gets reset
-static void mld_if(Feeder *feeder,
+static void mdl_if(Feeder *feeder,
 		Engine *context,
 		Module *module,
 		State *state)
@@ -19,12 +71,12 @@ static void mld_if(Feeder *feeder,
 
 	char c;
 	while ((c = feeder->feed()) != '(');
-	
+
 	// TODO: add a skip until for characters
 	feeder->skip_until((c == '{') ? "}" : "\n");
 }
 
-static void mld_elif(Feeder *feeder,
+static void mdl_elif(Feeder *feeder,
 		Engine *context,
 		Module *module,
 		State *state)
@@ -47,7 +99,7 @@ static void mld_elif(Feeder *feeder,
 	feeder->skip_until((c == '{') ? "}" : "\n");
 }
 
-static void mld_else(Feeder *feeder,
+static void mdl_else(Feeder *feeder,
 		Engine *context,
 		Module *module,
 		State *state)
@@ -62,7 +114,7 @@ static void mld_else(Feeder *feeder,
 	char c;
 
 	while (isspace(c = feeder->feed()));
-	
+
 	// Skip block
 	feeder->skip_until((c == '{') ? "}" : "\n");
 
@@ -70,7 +122,7 @@ static void mld_else(Feeder *feeder,
 	state->branch = false;
 }
 
-static void mld_while(Feeder *feeder,
+static void mdl_while(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -89,7 +141,7 @@ static void mld_while(Feeder *feeder,
 	feeder->skip_until((c == '{') ? "}" : "\n");
 }
 
-static void mld_for(Feeder *feeder,
+static void mdl_for(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -109,7 +161,7 @@ static void mld_for(Feeder *feeder,
 	feeder->set_end(end);
 }
 
-static void mld_break(Feeder *feeder,
+static void mdl_break(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -117,7 +169,7 @@ static void mld_break(Feeder *feeder,
 	throw global_break();
 }
 
-static void mld_continue(Feeder *feeder,
+static void mdl_continue(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -125,7 +177,7 @@ static void mld_continue(Feeder *feeder,
 	throw global_continue();
 }
 
-static void mld_alg(Feeder *feeder,
+static void mdl_alg(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -134,12 +186,12 @@ static void mld_alg(Feeder *feeder,
 	char end = feeder->get_end();
 
 	std::pair <std::string, Args> sig = feeder->extract_signature();
-	
+
 	char c;
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-	
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	Pardon pardon;
@@ -148,7 +200,7 @@ static void mld_alg(Feeder *feeder,
 	nbody.add_args(sig.second);
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();
-	
+
 	algorithm alg(sig.first, "", sig.second, nbody);
 
 	ctx->put(alg);
@@ -158,7 +210,7 @@ static void mld_alg(Feeder *feeder,
 	feeder->set_end(end);
 }
 
-static void mld_return(Feeder *feeder,
+static void mdl_return(Feeder *feeder,
 		Engine *ctx,
 		Module *module,
 		State *state)
@@ -168,8 +220,36 @@ static void mld_return(Feeder *feeder,
 	while ((c = feeder->feed()) != '\n');
 }
 
+static void mdl_global(Feeder *feeder,
+		Engine *ctx,
+		Module *module,
+		State *state)
+{
+	using namespace std;
+
+	// TODO: Allow multiline if the user add '\'
+	char c;
+
+	std::string line;
+	while ((c = feeder->feed()) != '\n')
+		line += c;
+
+	cout << "line = " << line << endl;
+
+	Args vcomma = comma_split(line);
+	for (auto str: vcomma)
+		cout << "\t" << str << endl;
+
+	for (const std::string &as : vcomma) {
+		Args veq = eq_split(as);
+
+		if (veq.size() > 1)
+			run_assignment(veq, ctx, module);
+	}
+}
+
 // Static?
-static void mld_keyword(std::string &cache,
+static void mdl_keyword(std::string &cache,
 		Feeder *feeder,
 		Engine *context,
 		Module *module,
@@ -177,28 +257,29 @@ static void mld_keyword(std::string &cache,
 {
 	using Processor = std::function <void (Feeder *, Engine *, Module *, State *)>;
 	static const Symtab <Processor> keywords {
-		{"if", mld_if},
-		{"elif", mld_elif},
-		{"else", mld_else},
-		{"while", mld_while},
-		{"for", mld_for},
-		{"break", mld_break},
-		{"continue", mld_continue},
-		{"alg", mld_alg},
-		{"return", mld_return}
+		{"if", mdl_if},
+		{"elif", mdl_elif},
+		{"else", mdl_else},
+		{"while", mdl_while},
+		{"for", mdl_for},
+		{"break", mdl_break},
+		{"continue", mdl_continue},
+		{"alg", mdl_alg},
+		{"return", mdl_return},
+		{"global", mdl_global}
 		// TODO: Import
 		// TODO: global keyword
 	};
 
 	if (keywords.find(cache) == keywords.end())
 		return;
-	
+
 	// Execute and clear the cache
 	(keywords.at(cache))(feeder, context, module, state);
 	cache.clear();
 }
 
-void mld_parse(Feeder *feeder, Engine *context, Module *module)
+void mdl_parse(Feeder *feeder, Engine *context, Module *module)
 {
 	/* State of parsing: not static to allow multiple threads to parse
 	 * (possibly) different sources at the same time.
@@ -208,7 +289,7 @@ void mld_parse(Feeder *feeder, Engine *context, Module *module)
 	struct State state;
 
 	char c;
-	
+
 	while ((c = feeder->feed()) != EOF) {
 		// Check for commented line
 		// TODO: another function
@@ -262,12 +343,12 @@ void mld_parse(Feeder *feeder, Engine *context, Module *module)
 
 		if (!isspace(c))
 			state.cached += c;
-		
-		mld_keyword(state.cached, feeder, context, module, &state);
+
+		mdl_keyword(state.cached, feeder, context, module, &state);
 
 		/* if (opz)
 			return opz->get();
-		
+
 		// cout << "cached = " << state.cached << endl; */
 	}
 

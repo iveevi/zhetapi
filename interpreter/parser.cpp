@@ -18,7 +18,7 @@ inline bool __file_exists(string file)
 		return true;
 	} else {
 		return false;
-	} 
+	}
 }
 
 // Global scope code
@@ -53,7 +53,7 @@ static int split_for_statement(string condition, string &variable, string &expre
 	for (size_t i = 0; i < i_in; i++) {
 		if (isspace(condition[i]))
 			break;
-		
+
 		variable += condition[i];
 	}
 
@@ -82,7 +82,7 @@ static int parse_parenthesized(string &parenthesized)
 		} else if (c == ')') {
 			if (!level)
 				break;
-			
+
 			level--;
 		}
 
@@ -92,11 +92,11 @@ static int parse_parenthesized(string &parenthesized)
 	return 0;
 }
 
-// TODO: Whats the difference between parse block and parse 
+// TODO: Whats the difference between parse block and parse
 static int extract_block(string &block)
 {
 	char c;
-	
+
 	__skip_space();
 	// while (isspace(c = getchar()));
 
@@ -108,7 +108,7 @@ static int extract_block(string &block)
 			} else if (c == '}') {
 				if (!level)
 					break;
-				
+
 				level--;
 			}
 
@@ -129,7 +129,7 @@ static int extract_block(string &block)
 static int parse_block()
 {
 	char c;
-	
+
 	while (isspace(c = getchar())) {
 		__lineup(c);
 	}
@@ -150,7 +150,7 @@ static int parse_block()
 static int parse_block(string &str)
 {
 	char c;
-	
+
 	while (isspace(c = getchar())) {
 		__lineup(c);
 	}
@@ -163,7 +163,7 @@ static int parse_block(string &str)
 			} else if (c == '}') {
 				if (!level)
 					break;
-				
+
 				level--;
 			}
 
@@ -186,7 +186,7 @@ static int parse_block(string &str)
 static int parse_block_ignore()
 {
 	char c;
-	
+
 	while (isspace(c = getchar())) {
 		__lineup(c);
 	}
@@ -209,7 +209,7 @@ static int parse_function(string &ident, vector <string> &params)
 	char c;
 
 	__skip_space();
-	
+
 	fseek(stdin, -1, SEEK_CUR);
 
 	while ((c = getchar()) != '(')
@@ -272,7 +272,7 @@ void check(string &keyword)
 
 			parse_block_ignore();
 		}
-		
+
 		keyword.clear();
 	}
 
@@ -303,7 +303,7 @@ void check(string &keyword)
 
 			parse_block_ignore();
 		}
-		
+
 		keyword.clear();
 	}
 
@@ -313,14 +313,14 @@ void check(string &keyword)
 
 			exit(-1);
 		}
-		
+
 		if_prev  = false;
 
 		if (if_true)
 			parse_block_ignore();
 		else
 			parse_block();
-		
+
 		keyword.clear();
 	}
 
@@ -331,7 +331,7 @@ void check(string &keyword)
 		}
 
 		node_manager condition(engine, parenthesized, args, pardon);
-		
+
 		if (extract_block(block)) {
 			printf("Syntax error at line %lu: missing statement after a while\n", line);
 			exit(-1);
@@ -349,9 +349,9 @@ void check(string &keyword)
 		engine = push_and_ret_stack(engine);
 
 		nm_while.value(engine);
-		
+
 		engine = pop_and_del_stack(engine);
-		
+
 		keyword.clear();
 	}
 
@@ -363,12 +363,12 @@ void check(string &keyword)
 
 		string var;
 		string expr;
-		
+
 		if (split_for_statement(parenthesized, var, expr)) {
 			printf("Syntax error at line %lu: unexpected condition in for loop\n", line);
 			exit(-1);
 		}
-		
+
 		if (extract_block(block)) {
 			printf("Syntax error at line %lu: missing statement after a for\n", line);
 			exit(-1);
@@ -478,7 +478,7 @@ int parse(char ex)
 				paren++;
 			if (c == ')' || c == '}')
 				paren--;
-			
+
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
 					execute(tmp);
@@ -491,7 +491,7 @@ int parse(char ex)
 		} else {
 			if (c == '\"')
 				quoted = false;
-			
+
 			tmp += c;
 		}
 
@@ -529,7 +529,7 @@ int parse(string str)
 				paren++;
 			if ((c == ')' || c == '}') && paren)
 				paren--;
-			
+
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
 					// cout << "executing tmp = " << tmp << endl;
@@ -543,7 +543,7 @@ int parse(string str)
 		} else {
 			if (c == '\"')
 				quoted = false;
-			
+
 			tmp += c;
 		}
 
@@ -584,7 +584,7 @@ vector <string> split(string str)
 			if (pc == '>' || pc == '<' || pc == '!'
 				|| (i > 0 && str[i - 1] == '='))
 				ignore = true;
-			
+
 			if (!ignore && str[i] == '=') {
 				if (i < n - 1 && str[i + 1] == '=') {
 					tmp += "==";
@@ -596,13 +596,13 @@ vector <string> split(string str)
 			} else {
 				if (str[i] == '\"')
 					quoted = true;
-				
+
 				tmp += str[i];
 			}
 		} else {
 			if (str[i] == '\"')
 				quoted = false;
-			
+
 			tmp += str[i];
 		}
 
@@ -611,7 +611,7 @@ vector <string> split(string str)
 
 	if (!tmp.empty())
 		out.push_back(tmp);
-	
+
 	/* cout << "split:" << endl;
 	for (auto s : out)
 		cout << "\ts = " << s << endl; */

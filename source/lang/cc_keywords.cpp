@@ -2,6 +2,7 @@
 
 namespace zhetapi {
 
+// TODO: for all of these, make sure to push and pop stacks
 static node_manager cc_if(Feeder *feeder,
 		Engine *context,
 		const Args &args,
@@ -10,7 +11,7 @@ static node_manager cc_if(Feeder *feeder,
 {
 	// First save end
 	char end = feeder->get_end();
-	
+
 	// Return
 	node_manager nif;
 
@@ -26,7 +27,7 @@ static node_manager cc_if(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-	
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nblock = cc_parse(feeder, context,
@@ -50,7 +51,7 @@ static node_manager cc_elif(Feeder *feeder,
 {
 	// First save end
 	char end = feeder->get_end();
-	
+
 	// Return
 	node_manager nelif;
 
@@ -67,7 +68,7 @@ static node_manager cc_elif(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-		
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nblock = cc_parse(feeder, context,
@@ -91,7 +92,7 @@ static node_manager cc_else(Feeder *feeder,
 {
 	// First save end
 	char end = feeder->get_end();
-	
+
 	// Return
 	node_manager nelse;
 
@@ -100,7 +101,7 @@ static node_manager cc_else(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-		
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nblock = cc_parse(feeder, context,
@@ -123,7 +124,7 @@ static node_manager cc_while(Feeder *feeder,
 {
 	// First save end
 	char end = feeder->get_end();
-	
+
 	// Return
 	node_manager nwhile;
 
@@ -138,7 +139,7 @@ static node_manager cc_while(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-		
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nloop = cc_parse(feeder, ctx, args, pardon);
@@ -162,7 +163,7 @@ static node_manager cc_for(Feeder *feeder,
 {
 	// First save end
 	char end = feeder->get_end();
-	
+
 	char c;
 	while ((c = feeder->feed()) != '(');
 
@@ -237,7 +238,7 @@ static node_manager cc_return(Feeder *feeder,
 	char c;
 	while ((c = feeder->feed()) != '\n')
 		expression += c;
-	
+
 	node_manager nret;
 	node_manager nexpr(ctx, expression);
 
@@ -277,7 +278,7 @@ node_manager cc_keyword(std::string &cache,
 			const Args &,
 			Pardon &,
 			State *)>;
-	
+
 	static const Symtab <Processor> keywords {
 		{"if", cc_if},
 		{"elif", cc_elif},
@@ -294,14 +295,14 @@ node_manager cc_keyword(std::string &cache,
 
 	if (keywords.find(cache) == keywords.end())
 		return node_manager();
-	
+
 	// Clear cache if the keyword extraction is successful
 	node_manager nm = (keywords.at(cache))(feeder, context,
 			args, pardon, state);
 
 	if (!nm.empty())
 		cache.clear();
-	
+
 	return nm;
 }
 

@@ -57,7 +57,7 @@ class Plot {
 
 		double xmin;
 		double xmax;
-		
+
 		double ymin;
 		double ymax;
 

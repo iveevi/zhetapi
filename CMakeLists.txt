@@ -18,6 +18,7 @@ project(imv)
 # Source for projects
 include(cmake/zhetapi.cmake)
 include(cmake/deps.cmake)
+include(cmake/lang.cmake)
 include(cmake/libs.cmake)
 include(cmake/exp.cmake)
 include(cmake/ml.cmake)

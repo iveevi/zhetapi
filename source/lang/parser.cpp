@@ -69,7 +69,7 @@ static void run_normal(const std::string &cache, Engine *context)
 }
 
 // TODO: clean
-static void run_assignment(const std::vector <std::string> &veq, Engine *ctx)
+static void run_assignment(const Args &veq, Engine *ctx)
 {
 	size_t n = veq.size();
 
@@ -115,7 +115,7 @@ static void run_assignment(const std::vector <std::string> &veq, Engine *ctx)
 
 void run(const std::string &cache, Engine *context)
 {
-	std::vector <std::string> veq = eq_split(cache);
+	Args veq = eq_split(cache);
 
 	if (veq.size() > 1)
 		return run_assignment(veq, context);

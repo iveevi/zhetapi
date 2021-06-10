@@ -40,6 +40,7 @@ bool is_valid_ident(const std::string &);
 bool in_args(const Args &, const Args &);
 Args get_args(const std::string &);
 Args eq_split(const std::string &);
+Args comma_split(const std::string &);
 
 // No forwarding needed
 void run(const std::string &, Engine *);
@@ -50,7 +51,7 @@ OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
 int parse_global(Feeder *, Engine *);
 
 // Make part of public API so others and I can use
-void mld_parse(Feeder *, Engine *, Module *);
+void mdl_parse(Feeder *, Engine *, Module *);
 
 // Compile parsers and runners
 node_manager cc_run(const std::string &,

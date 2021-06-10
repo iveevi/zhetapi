@@ -118,12 +118,12 @@ public:
 	// For SFML
 	sf::Image sfml_image() const;
 	sf::Texture sfml_texture() const;
-	
+
 	// Pixel value setter
 	void set(const pixel &, const Color &);			// Color
 	void set(const pixel &, size_t, byte);
 	void set(const pixel &, const Vector <byte> &);
-	
+
 	void set_hex(const pixel &, size_t);
 	void set_hex(const pixel &, const std::string &);
 

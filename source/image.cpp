@@ -235,7 +235,7 @@ uint32_t Image::color(const pixel &px) const
 	uint32_t ur = _array[index];
 	uint32_t ug = _array[index + 1];
 	uint32_t ub = _array[index + 2];
-	
+
 	return (((ur << 8) + ug) << 8) + ub;
 }
 

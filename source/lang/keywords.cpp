@@ -39,7 +39,7 @@ static OpZ *check_if(Feeder *feeder,
 		state->bdone = true;
 		if (c != '{')
 			feeder->backup(1);
-		
+
 		feeder->set_end((c == '{') ? '}' : '\n');
 		parse_global(feeder, context);
 
@@ -76,7 +76,7 @@ static OpZ *check_elif(Feeder *feeder,
 		state->bdone = true;
 		if (c != '{')
 			feeder->backup(1);
-		
+
 		feeder->set_end((c == '{') ? '}' : '\n');
 		parse_global(feeder, context);
 
@@ -110,7 +110,7 @@ static OpZ *check_else(Feeder *feeder,
 	} else {
 		if (c != '{')
 			feeder->backup(1);
-		
+
 		feeder->set_end((c == '{') ? '}' : '\n');
 		parse_global(feeder, context);
 
@@ -144,7 +144,7 @@ static OpZ *check_while(Feeder *feeder,
 	if (is_true(ncond.value(ctx))) {
 		if (c != '{')
 			feeder->backup(1);
-		
+
 		feeder->set_end((c == '{') ? '}' : '\n');
 
 		Pardon pardon;
@@ -186,12 +186,12 @@ static OpZ *check_for(Feeder *feeder,
 	node lin = niter.tree();
 	if (lin.label() != l_generator_in)
 		throw bad_for();
-	
+
 	lvalue *lv = lin[0].cast <lvalue> ();
 
 	if (!lv)
 		throw bad_for();
-	
+
 	std::string ident = lv->symbol();
 
 	Pardon pardon {ident};
@@ -199,7 +199,7 @@ static OpZ *check_for(Feeder *feeder,
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-		
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
@@ -244,12 +244,12 @@ static OpZ *check_alg(Feeder *feeder,
 	char end = feeder->get_end();
 
 	std::pair <std::string, Args> sig = feeder->extract_signature();
-	
+
 	char c;
 	while (isspace(c = feeder->feed()));
 	if (c != '{')
 		feeder->backup(1);
-	
+
 	feeder->set_end((c == '{') ? '}' : '\n');
 
 	Pardon pardon;
@@ -258,7 +258,7 @@ static OpZ *check_alg(Feeder *feeder,
 	nbody.add_args(sig.second);
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();
-	
+
 	algorithm alg(sig.first, "", sig.second, nbody);
 
 	ctx->put(alg);
@@ -279,14 +279,14 @@ static OpZ *check_return(Feeder *feeder,
 	char c;
 	while ((c = feeder->feed()) != '\n')
 		expression += c;
-	
+
 	Token *tptr = node_manager(ctx, expression).value(ctx);
 
 	OpZ *opz = dynamic_cast <OpZ *> (tptr);
-	
+
 	if (opz)
 		return opz;
-	
+
 	throw global_int_return();
 
 	return nullptr;

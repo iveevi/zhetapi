@@ -16,8 +16,13 @@ Module::Module(const std::string &name, const std::vector <NamedToken> &parts)
 
 void Module::add(const NamedToken &nt)
 {
-	// Copy token?
-	_attributes[nt.first] = nt.second;
+	add(nt.first, nt.second);
+}
+
+void Module::add(const std::string &name, Token *tptr)
+{
+	// TODO: Copy token?
+	_attributes[name] = tptr;
 }
 
 // Virtual functions

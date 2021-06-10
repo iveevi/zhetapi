@@ -1,6 +1,8 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
+// TOOD: is this redundant?
+
 // Include appropriate headers
 #include <mutex>
 
@@ -62,30 +64,6 @@ struct _mutex {
 		if (id == MTX_CPU)
 			_mtx._cpu_mtx.unlock();
 #endif
-	}
-};
-
-// Work on this later
-// Allocater allocates on both gpu and cpu
-template <class T>
-class Allocator {
-protected:
-	_device_property *	_dp;
-public:
-	Allocator() {
-		_dp = nullptr;
-	}
-
-	T *alloc(size_t size) {
-		return new T[size];
-	}
-
-	void free(T *ptr) {
-		delete[] ptr;
-	}
-
-	_device_property *dev_prop() const {
-		return _dp;
 	}
 };
 

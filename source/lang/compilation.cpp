@@ -30,7 +30,7 @@ static std::vector <std::string> split_assignment_chain(std::string str)
 			if (pc == '>' || pc == '<' || pc == '!'
 				|| (i > 0 && str[i - 1] == '='))
 				ignore = true;
-			
+
 			if (!ignore && str[i] == '=') {
 				if (i < n - 1 && str[i + 1] == '=') {
 					tmp += "==";
@@ -42,13 +42,13 @@ static std::vector <std::string> split_assignment_chain(std::string str)
 			} else {
 				if (str[i] == '\"')
 					quoted = true;
-				
+
 				tmp += str[i];
 			}
 		} else {
 			if (str[i] == '\"')
 				quoted = false;
-			
+
 			tmp += str[i];
 		}
 
@@ -57,7 +57,7 @@ static std::vector <std::string> split_assignment_chain(std::string str)
 
 	if (!tmp.empty())
 		out.push_back(tmp);
-	
+
 	/* cout << "split:" << endl;
 	for (auto s : out)
 		cout << "\ts = " << s << endl; */
@@ -77,7 +77,7 @@ static void generate_statement(
 		return;
 
 	std::vector <std::string> tmp = split_assignment_chain(str);
-	
+
 	size_t split_size = tmp.size();
 	if (split_size > 1) {
 		node_manager eq;
@@ -108,10 +108,10 @@ static void generate_statement(
 		eq.set_label(l_assignment_chain);
 
 		rnm.append(eq);
-	} else {		
+	} else {
 		// All functions and algorithms are stored in engine
 		node_manager mg;
-		
+
 		try {
 			mg = node_manager(engine, str, args, pardon);
 		} catch (const node_manager::undefined_symbol &e) {
@@ -145,7 +145,7 @@ static int parse_parenthesized(const std::string &code, size_t &i, std::string &
 		} else if (c == ')') {
 			if (!level)
 				break;
-			
+
 			level--;
 		}
 
@@ -158,7 +158,7 @@ static int parse_parenthesized(const std::string &code, size_t &i, std::string &
 static int extract_block(const std::string &code, size_t &i, std::string &block)
 {
 	char c;
-	
+
 	// __skip_space();
 	size_t n = code.length();
 	while ((i < n) && isspace(c = code[i++]));
@@ -171,7 +171,7 @@ static int extract_block(const std::string &code, size_t &i, std::string &block)
 			} else if (c == '}') {
 				if (!level)
 					break;
-				
+
 				level--;
 			}
 
@@ -192,7 +192,7 @@ static int extract_line(const std::string &code, size_t &i, std::string &line)
 {
 	// TODO: extend by allowing multiline with '\'
 	char c;
-	
+
 	// __skip_space();
 	size_t n = code.length();
 	while ((i < n) && isspace(c = code[i++]));
@@ -241,7 +241,7 @@ static void check_keyword(
 		ifcond.set_label(l_if_branch);
 
 		rnm.append(ifcond);
-		
+
 		keyword.clear();
 	}
 
@@ -265,7 +265,7 @@ static void check_keyword(
 		elifcond.set_label(l_elif_branch);
 
 		rnm.append(elifcond);
-		
+
 		keyword.clear();
 	}
 
@@ -281,7 +281,7 @@ static void check_keyword(
 		elsecond.set_label(l_else_branch);
 
 		rnm.append(elsecond);
-		
+
 		keyword.clear();
 	}
 
@@ -305,7 +305,7 @@ static void check_keyword(
 		nm_while.set_label(l_while_loop);
 
 		rnm.append(nm_while);
-		
+
 		keyword.clear();
 	}
 
@@ -335,7 +335,7 @@ static void check_keyword(
 
 		// TODO: only one line returns
 		extract_line(code, i, line);
-		
+
 		node_manager nm_line(engine, line, args, pardon);
 
 		nm_return.append(nm_line);
@@ -364,11 +364,11 @@ node_manager compile_block(
 	// Use the definition line number
 	bool quoted = false;
 	int paren = 0;
-	
+
 	std::string tmp;
 
 	size_t i = 0;
-	
+
 	size_t n = code.length();
 
 	char c;
@@ -380,7 +380,7 @@ node_manager compile_block(
 				paren++;
 			if (c == ')')
 				paren--;
-			
+
 			if (c == '\n' || (!paren && c == ',')) {
 				if (!tmp.empty()) {
 					generate_statement(engine, tmp, compiled, args, pardon);
@@ -393,7 +393,7 @@ node_manager compile_block(
 		} else {
 			if (c == '\"')
 				quoted = false;
-			
+
 			tmp += c;
 		}
 
