@@ -4,12 +4,63 @@
 
 namespace zhetapi {
 
+// TODO: make sure to guard for EOFs
+
 // TODO: put elsewhere
 bool is_true(Token *tptr)
 {
 	static const Operand <bool> true_token(true);
 
 	return true_token == tptr;
+}
+
+// TODO: put elsewhere (helpers)
+//
+// Importing libraries
+static void import_as(const std::string &lib, Engine *ctx, State *state)
+{
+	// First check the possible locations and warn on ambiguity
+	std::string fname = lib.substr(0, lib.find_last_of("."));
+
+	Args lpaths;
+	for (const std::string &idir : state->idirs) {
+		// Generate library and file names as candidates
+		std::string join1 = idir + '/' + lib + ".zhplib";
+		std::string join2 = idir + '/' + lib + ".zhp";
+
+		std::fstream f1(join1);
+		if (f1.good())
+			lpaths.push_back(join1);
+
+		std::fstream f2(join2);
+		if (f2.good())
+			lpaths.push_back(join2);
+	}
+
+	// TODO: Fancify the errors! (and throw if necessary)
+	if (lpaths.size() < 1) {
+		std::cout << "Error: could not find library \"" << lib << "\"" << std::endl;
+
+		// TODO: throw
+		return;
+	} else if (lpaths.size() > 1) {
+		std::cout << "Ambiguity in importing \"" << lib << "\"" << std::endl;
+
+		for (const std::string &str : lpaths)
+			std::cout << "\tCandidate " << str << std::endl;
+
+		// TODO: throw
+		return;
+	}
+
+	// TODO: deal with lib
+
+	// Create, read and load library (depending on file or lib)
+	Module *module = new Module(fname);
+
+	StringFeeder sf = file_feeder(lpaths[0]);
+	mdl_parse(&sf, ctx, module);
+	ctx->put(lib, module);
 }
 
 // TODO: make sure state->branch gets reset
@@ -41,7 +92,7 @@ static OpZ *check_if(Feeder *feeder,
 			feeder->backup(1);
 
 		feeder->set_end((c == '{') ? '}' : '\n');
-		parse_global(feeder, context);
+		parse_global(feeder, context, state->idirs);
 
 		// Reset terminal
 		feeder->set_end(end);
@@ -78,7 +129,7 @@ static OpZ *check_elif(Feeder *feeder,
 			feeder->backup(1);
 
 		feeder->set_end((c == '{') ? '}' : '\n');
-		parse_global(feeder, context);
+		parse_global(feeder, context, state->idirs);
 
 		// Reset terminal
 		feeder->set_end(end);
@@ -112,7 +163,7 @@ static OpZ *check_else(Feeder *feeder,
 			feeder->backup(1);
 
 		feeder->set_end((c == '{') ? '}' : '\n');
-		parse_global(feeder, context);
+		parse_global(feeder, context, state->idirs);
 
 		// Reset terminal
 		feeder->set_end(end);
@@ -136,9 +187,12 @@ static OpZ *check_while(Feeder *feeder,
 	while ((c = feeder->feed()) != '(');
 
 	std::string paren = feeder->extract_parenthesized();
+	// cout << "paren = " << paren << endl;
 
 	// Skip construction step or something
 	node_manager ncond(ctx, paren);
+
+	// ncond.print();
 
 	while (isspace(c = feeder->feed()));
 	if (is_true(ncond.value(ctx))) {
@@ -160,6 +214,8 @@ static OpZ *check_while(Feeder *feeder,
 
 		// Restore terminal
 		feeder->set_end(end);
+
+		// cout << "Next character after nloop: " << (int) feeder->peek() << endl;
 	} else {
 		// Skip block
 		feeder->skip_until((c == '{') ? "}" : "\n");
@@ -246,7 +302,7 @@ static OpZ *check_alg(Feeder *feeder,
 	std::pair <std::string, Args> sig = feeder->extract_signature();
 
 	char c;
-	while (isspace(c = feeder->feed()));
+	while (isspace(c = feeder->feed()) && c != EOF);
 	if (c != '{')
 		feeder->backup(1);
 
@@ -277,7 +333,7 @@ static OpZ *check_return(Feeder *feeder,
 
 	// TODO: Allow multiline if the user add '\'
 	char c;
-	while ((c = feeder->feed()) != '\n')
+	while ((c = feeder->feed()) != '\n' && c != EOF)
 		expression += c;
 
 	Token *tptr = node_manager(ctx, expression).value(ctx);
@@ -288,6 +344,67 @@ static OpZ *check_return(Feeder *feeder,
 		return opz;
 
 	throw global_int_return();
+
+	return nullptr;
+}
+
+// include [dir1], [dir2], ...
+static OpZ *check_include(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// TODO: Allow multiline
+	char c;
+
+	std::string line;
+	while ((c = feeder->feed()) != '\n' && c != EOF)
+		line += c;
+
+	Args vcomma = comma_split(line);
+	for (auto str : vcomma)
+		state->idirs.push_back(str);
+
+	return nullptr;
+}
+
+static OpZ *check_import(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// TODO: Allow multiline
+	// TODO: also allow 'as' clause
+	char c;
+
+	std::string line;
+	while ((c = feeder->feed()) != '\n' && c != EOF)
+		line += c;
+
+	Args vcomma = comma_split(line);
+	for (auto str : vcomma)
+		import_as(str, ctx, state);
+
+	return nullptr;
+}
+
+static OpZ *check_global(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// TODO: Allow multiline if the user add '\'
+	char c;
+
+	std::string line;
+	while ((c = feeder->feed()) != '\n' && c != EOF)
+		line += c;
+
+	Args vcomma = comma_split(line);
+	for (const std::string &as : vcomma) {
+		Args veq = eq_split(as);
+
+		// TODO: should it just be run_assignment?
+		if (veq.size() > 1)
+			run_assignment(veq, ctx);
+	}
 
 	return nullptr;
 }
@@ -307,7 +424,10 @@ OpZ *check_keyword(std::string &cache,
 		{"break", check_break},
 		{"continue", check_continue},
 		{"alg", check_alg},
-		{"return", check_return}
+		{"return", check_return},
+		{"include", check_include},
+		{"import", check_import},
+		{"global", check_global}
 	};
 
 	if (keywords.find(cache) == keywords.end())

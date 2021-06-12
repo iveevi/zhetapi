@@ -248,6 +248,15 @@ static node_manager cc_return(Feeder *feeder,
 	return nret;
 }
 
+static node_manager cc_include(Feeder *feeder,
+		Engine *ctx,
+		const Args &args,
+		Pardon &pardon,
+		State *state)
+{
+	throw nested_include();
+}
+
 static node_manager cc_import(Feeder *feeder,
 		Engine *ctx,
 		const Args &args,
@@ -289,6 +298,7 @@ node_manager cc_keyword(std::string &cache,
 		{"continue", cc_continue},
 		{"alg", cc_alg},
 		{"return", cc_return},
+		{"include", cc_include},
 		{"import", cc_import},
 		{"global", cc_global}
 	};

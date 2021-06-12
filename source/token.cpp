@@ -25,7 +25,7 @@ Token *Token::attr(Engine *context, const std::string &id, const std::vector <To
 	if (_attributes.find(id) != _attributes.end()) {
 		Token *tptr = _attributes[id];
 		if (tptr->caller() == Token::alg) {
-			std::cout << "ALGORITHM attribute!" << std::endl;
+			// std::cout << "ALGORITHM attribute!" << std::endl;
 
 			algorithm *alg = dynamic_cast <algorithm *> (tptr);
 			return alg->execute(context, args);

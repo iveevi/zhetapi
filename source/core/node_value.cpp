@@ -19,7 +19,7 @@ static Token *assignment_node(Engine *context, const node &tree)
 		// Ensure that the node has type lvalue
 		if (tree[i].label() != l_lvalue)
 			throw std::runtime_error("Need an lvalue on the left side of an \'=\'");
-		
+
 		lvalue *lv = tree[i].cast <lvalue> ();
 
 		lv->assign(tmp, context);
@@ -52,7 +52,7 @@ static Token *branch_node(Engine *context, const node &tree)
 				output = tptr;
 			if (dynamic_cast <Operand <Token *> *> (tptr))
 				output = tptr;
-			
+
 			break;
 		}
 
@@ -69,7 +69,7 @@ static Token *branch_node(Engine *context, const node &tree)
 				output = tptr;
 			if (dynamic_cast <Operand <Token *> *> (tptr))
 				output = tptr;
-			
+
 			break;
 		}
 	}
@@ -196,7 +196,7 @@ static Token *node_null_value(Engine *context, const node &tree)
 
 		break;
 	}
-	
+
 	return nullptr;
 }
 
@@ -246,24 +246,24 @@ Token *node_value(Engine *context, node tree)
 	// else: this func
 
 	// TODO: replace this system (use functor and such and use
-	// labels for others like node_list, etc)	
+	// labels for others like node_list, etc)
 	switch (tree.caller()) {
 	case Token::opd:
 	case Token::token_module:
 		return tree.copy_token();
 	case Token::token_collection:
 		return tree.copy_token();
-	case Token::oph:	
+	case Token::oph:
 		// size = tree._leaves.size();
 
 		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 
 		tptr = context->compute((tree.cast <operation_holder> ())->rep, values);
-		
+
 		if (tree.label() == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
-			
+
 			context->put(rv->symbol(), tptr);
 
 			return rv->get(context)->copy();
@@ -287,7 +287,7 @@ Token *node_value(Engine *context, node tree)
 	case Token::ftn:
 		if (tree.empty())
 			return tree.copy_token();
-		
+
 		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
 
@@ -309,7 +309,7 @@ Token *node_value(Engine *context, node tree)
 	case Token::alg:
 		for (node leaf : tree)
 			values.push_back(node_value(context, leaf));
-		
+
 		aptr = tree.cast <algorithm> ();
 		tptr = aptr->execute(context, values);
 
@@ -345,7 +345,7 @@ Token *node_sequential_value(Engine *context, node tree)
 		if (dynamic_cast <Operand <Token *> *> (tptr))
 			return tptr;
 	}
-	
+
 	return nullptr;
 }
 

@@ -40,7 +40,7 @@ bool State::is_nested()
 		|| brackets;
 }
 
-static void run_normal(const std::string &cache, Engine *context)
+void run_normal(const std::string &cache, Engine *context)
 {
 	node_manager mg;
 
@@ -69,7 +69,7 @@ static void run_normal(const std::string &cache, Engine *context)
 }
 
 // TODO: clean
-static void run_assignment(const Args &veq, Engine *ctx)
+void run_assignment(const Args &veq, Engine *ctx)
 {
 	size_t n = veq.size();
 
@@ -123,17 +123,19 @@ void run(const std::string &cache, Engine *context)
 	run_normal(cache, context);
 }
 
-int parse_global(Feeder *feeder, Engine *context)
+int parse_global(Feeder *feeder, Engine *context, const Args &idirs)
 {
 	/* State of parsing: not static to allow multiple threads to parse
 	 * (possibly) different sources at the same time.
 	 *
 	 * Possible turn into an external struct
 	 */
-	struct State state;
+	State state;
+
+	// Set idirs
+	state.idirs = idirs;
 
 	char c;
-
 	while ((c = feeder->feed()) != EOF) {
 		// Check for commented line
 		// TODO: another function

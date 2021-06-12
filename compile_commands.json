@@ -1,0 +1,642 @@
+[
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/complex.o -c /home/ram/zhetapi/source/complex.cpp",
+  "file": "/home/ram/zhetapi/source/complex.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/display.o -c /home/ram/zhetapi/source/display.cpp",
+  "file": "/home/ram/zhetapi/source/display.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/engine.o -c /home/ram/zhetapi/source/engine.cpp",
+  "file": "/home/ram/zhetapi/source/engine.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/equation.o -c /home/ram/zhetapi/source/equation.cpp",
+  "file": "/home/ram/zhetapi/source/equation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/function.o -c /home/ram/zhetapi/source/function.cpp",
+  "file": "/home/ram/zhetapi/source/function.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/image.o -c /home/ram/zhetapi/source/image.cpp",
+  "file": "/home/ram/zhetapi/source/image.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/linalg.o -c /home/ram/zhetapi/source/linalg.cpp",
+  "file": "/home/ram/zhetapi/source/linalg.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/operand.o -c /home/ram/zhetapi/source/operand.cpp",
+  "file": "/home/ram/zhetapi/source/operand.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/plot.o -c /home/ram/zhetapi/source/plot.cpp",
+  "file": "/home/ram/zhetapi/source/plot.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/polynomial.o -c /home/ram/zhetapi/source/polynomial.cpp",
+  "file": "/home/ram/zhetapi/source/polynomial.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/registration.o -c /home/ram/zhetapi/source/registration.cpp",
+  "file": "/home/ram/zhetapi/source/registration.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/timer.o -c /home/ram/zhetapi/source/timer.cpp",
+  "file": "/home/ram/zhetapi/source/timer.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/token.o -c /home/ram/zhetapi/source/token.cpp",
+  "file": "/home/ram/zhetapi/source/token.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/algorithm.o -c /home/ram/zhetapi/source/core/algorithm.cpp",
+  "file": "/home/ram/zhetapi/source/core/algorithm.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/class.o -c /home/ram/zhetapi/source/core/class.cpp",
+  "file": "/home/ram/zhetapi/source/core/class.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/collection.o -c /home/ram/zhetapi/source/core/collection.cpp",
+  "file": "/home/ram/zhetapi/source/core/collection.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/common.o -c /home/ram/zhetapi/source/core/common.cpp",
+  "file": "/home/ram/zhetapi/source/core/common.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/engine_base.o -c /home/ram/zhetapi/source/core/engine_base.cpp",
+  "file": "/home/ram/zhetapi/source/core/engine_base.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/expr_parser.o -c /home/ram/zhetapi/source/core/expr_parser.cpp",
+  "file": "/home/ram/zhetapi/source/core/expr_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/label.o -c /home/ram/zhetapi/source/core/label.cpp",
+  "file": "/home/ram/zhetapi/source/core/label.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/lvalue.o -c /home/ram/zhetapi/source/core/lvalue.cpp",
+  "file": "/home/ram/zhetapi/source/core/lvalue.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/module.o -c /home/ram/zhetapi/source/core/module.cpp",
+  "file": "/home/ram/zhetapi/source/core/module.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node.o -c /home/ram/zhetapi/source/core/node.cpp",
+  "file": "/home/ram/zhetapi/source/core/node.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_differential.o -c /home/ram/zhetapi/source/core/node_differential.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_differential.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_differentiation.o -c /home/ram/zhetapi/source/core/node_differentiation.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_differentiation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_list.o -c /home/ram/zhetapi/source/core/node_list.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_list.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_manager.o -c /home/ram/zhetapi/source/core/node_manager.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_manager.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_reference.o -c /home/ram/zhetapi/source/core/node_reference.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_reference.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/node_value.o -c /home/ram/zhetapi/source/core/node_value.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_value.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/operation.o -c /home/ram/zhetapi/source/core/operation.cpp",
+  "file": "/home/ram/zhetapi/source/core/operation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/operation_holder.o -c /home/ram/zhetapi/source/core/operation_holder.cpp",
+  "file": "/home/ram/zhetapi/source/core/operation_holder.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/rvalue.o -c /home/ram/zhetapi/source/core/rvalue.cpp",
+  "file": "/home/ram/zhetapi/source/core/rvalue.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/special_tokens.o -c /home/ram/zhetapi/source/core/special_tokens.cpp",
+  "file": "/home/ram/zhetapi/source/core/special_tokens.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/types.o -c /home/ram/zhetapi/source/core/types.cpp",
+  "file": "/home/ram/zhetapi/source/core/types.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/wildcard.o -c /home/ram/zhetapi/source/core/wildcard.cpp",
+  "file": "/home/ram/zhetapi/source/core/wildcard.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/core/variable_cluster.o -c /home/ram/zhetapi/source/core/variable_cluster.cpp",
+  "file": "/home/ram/zhetapi/source/core/variable_cluster.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/cc_keywords.o -c /home/ram/zhetapi/source/lang/cc_keywords.cpp",
+  "file": "/home/ram/zhetapi/source/lang/cc_keywords.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/cc_parser.o -c /home/ram/zhetapi/source/lang/cc_parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/cc_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/compilation.o -c /home/ram/zhetapi/source/lang/compilation.cpp",
+  "file": "/home/ram/zhetapi/source/lang/compilation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/default_feeders.o -c /home/ram/zhetapi/source/lang/default_feeders.cpp",
+  "file": "/home/ram/zhetapi/source/lang/default_feeders.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/error_handling.o -c /home/ram/zhetapi/source/lang/error_handling.cpp",
+  "file": "/home/ram/zhetapi/source/lang/error_handling.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/feeder.o -c /home/ram/zhetapi/source/lang/feeder.cpp",
+  "file": "/home/ram/zhetapi/source/lang/feeder.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/helpers.o -c /home/ram/zhetapi/source/lang/helpers.cpp",
+  "file": "/home/ram/zhetapi/source/lang/helpers.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/keywords.o -c /home/ram/zhetapi/source/lang/keywords.cpp",
+  "file": "/home/ram/zhetapi/source/lang/keywords.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/mdl_parser.o -c /home/ram/zhetapi/source/lang/mdl_parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/mdl_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/parser.o -c /home/ram/zhetapi/source/lang/parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/source.o -c /home/ram/zhetapi/source/lang/source.cpp",
+  "file": "/home/ram/zhetapi/source/lang/source.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/lang/vm.o -c /home/ram/zhetapi/source/lang/vm.cpp",
+  "file": "/home/ram/zhetapi/source/lang/vm.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/std/functions.o -c /home/ram/zhetapi/source/std/functions.cpp",
+  "file": "/home/ram/zhetapi/source/std/functions.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/source/std/interval.o -c /home/ram/zhetapi/source/std/interval.cpp",
+  "file": "/home/ram/zhetapi/source/std/interval.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8 -Dzhp_shared_EXPORTS -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -fPIC -std=gnu++14 -o CMakeFiles/zhp-shared.dir/interpreter/builtin/basic_io.o -c /home/ram/zhetapi/interpreter/builtin/basic_io.cpp",
+  "file": "/home/ram/zhetapi/interpreter/builtin/basic_io.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/imv.dir/samples/features/image_viewer.o -c /home/ram/zhetapi/samples/features/image_viewer.cpp",
+  "file": "/home/ram/zhetapi/samples/features/image_viewer.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/local/cuda/bin/nvcc -forward-unknown-to-host-compiler  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -O3 -DNDEBUG --generate-code=arch=compute_70,code=[compute_70,sm_70] --expt-extended-lambda -std=c++14 -x cu -c /home/ram/zhetapi/experimental/main.cu -o CMakeFiles/cuda.dir/experimental/main.cu.o",
+  "file": "/home/ram/zhetapi/experimental/main.cu"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-activation.o -c /home/ram/zhetapi/testing/port/port-activation.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-activation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-calculus.o -c /home/ram/zhetapi/testing/port/port-calculus.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-calculus.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-function.o -c /home/ram/zhetapi/testing/port/port-function.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-function.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-interval.o -c /home/ram/zhetapi/testing/port/port-interval.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-interval.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-linalg.o -c /home/ram/zhetapi/testing/port/port-linalg.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-linalg.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-matrix.o -c /home/ram/zhetapi/testing/port/port-matrix.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-matrix.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-module.o -c /home/ram/zhetapi/testing/port/port-module.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-module.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-special.o -c /home/ram/zhetapi/testing/port/port-special.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-special.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-tensor.o -c /home/ram/zhetapi/testing/port/port-tensor.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-tensor.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-vector.o -c /home/ram/zhetapi/testing/port/port-vector.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-vector.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-fourier.o -c /home/ram/zhetapi/testing/port/port-fourier.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-fourier.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-parsing.o -c /home/ram/zhetapi/testing/port/port-parsing.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-parsing.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port-polynomial.o -c /home/ram/zhetapi/testing/port/port-polynomial.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port-polynomial.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/port.o -c /home/ram/zhetapi/testing/port/port.cpp",
+  "file": "/home/ram/zhetapi/testing/port/port.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/printing.o -c /home/ram/zhetapi/testing/port/printing.cpp",
+  "file": "/home/ram/zhetapi/testing/port/printing.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/port.dir/testing/port/timers.o -c /home/ram/zhetapi/testing/port/timers.cpp",
+  "file": "/home/ram/zhetapi/testing/port/timers.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/lang.dir/experimental/lang.o -c /home/ram/zhetapi/experimental/lang.cpp",
+  "file": "/home/ram/zhetapi/experimental/lang.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/complex.o -c /home/ram/zhetapi/source/complex.cpp",
+  "file": "/home/ram/zhetapi/source/complex.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/display.o -c /home/ram/zhetapi/source/display.cpp",
+  "file": "/home/ram/zhetapi/source/display.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/engine.o -c /home/ram/zhetapi/source/engine.cpp",
+  "file": "/home/ram/zhetapi/source/engine.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/equation.o -c /home/ram/zhetapi/source/equation.cpp",
+  "file": "/home/ram/zhetapi/source/equation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/function.o -c /home/ram/zhetapi/source/function.cpp",
+  "file": "/home/ram/zhetapi/source/function.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/image.o -c /home/ram/zhetapi/source/image.cpp",
+  "file": "/home/ram/zhetapi/source/image.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/linalg.o -c /home/ram/zhetapi/source/linalg.cpp",
+  "file": "/home/ram/zhetapi/source/linalg.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/operand.o -c /home/ram/zhetapi/source/operand.cpp",
+  "file": "/home/ram/zhetapi/source/operand.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/plot.o -c /home/ram/zhetapi/source/plot.cpp",
+  "file": "/home/ram/zhetapi/source/plot.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/polynomial.o -c /home/ram/zhetapi/source/polynomial.cpp",
+  "file": "/home/ram/zhetapi/source/polynomial.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/registration.o -c /home/ram/zhetapi/source/registration.cpp",
+  "file": "/home/ram/zhetapi/source/registration.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/timer.o -c /home/ram/zhetapi/source/timer.cpp",
+  "file": "/home/ram/zhetapi/source/timer.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/token.o -c /home/ram/zhetapi/source/token.cpp",
+  "file": "/home/ram/zhetapi/source/token.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/algorithm.o -c /home/ram/zhetapi/source/core/algorithm.cpp",
+  "file": "/home/ram/zhetapi/source/core/algorithm.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/class.o -c /home/ram/zhetapi/source/core/class.cpp",
+  "file": "/home/ram/zhetapi/source/core/class.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/collection.o -c /home/ram/zhetapi/source/core/collection.cpp",
+  "file": "/home/ram/zhetapi/source/core/collection.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/common.o -c /home/ram/zhetapi/source/core/common.cpp",
+  "file": "/home/ram/zhetapi/source/core/common.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/engine_base.o -c /home/ram/zhetapi/source/core/engine_base.cpp",
+  "file": "/home/ram/zhetapi/source/core/engine_base.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/expr_parser.o -c /home/ram/zhetapi/source/core/expr_parser.cpp",
+  "file": "/home/ram/zhetapi/source/core/expr_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/label.o -c /home/ram/zhetapi/source/core/label.cpp",
+  "file": "/home/ram/zhetapi/source/core/label.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/lvalue.o -c /home/ram/zhetapi/source/core/lvalue.cpp",
+  "file": "/home/ram/zhetapi/source/core/lvalue.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/module.o -c /home/ram/zhetapi/source/core/module.cpp",
+  "file": "/home/ram/zhetapi/source/core/module.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node.o -c /home/ram/zhetapi/source/core/node.cpp",
+  "file": "/home/ram/zhetapi/source/core/node.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_differential.o -c /home/ram/zhetapi/source/core/node_differential.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_differential.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_differentiation.o -c /home/ram/zhetapi/source/core/node_differentiation.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_differentiation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_list.o -c /home/ram/zhetapi/source/core/node_list.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_list.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_manager.o -c /home/ram/zhetapi/source/core/node_manager.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_manager.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_reference.o -c /home/ram/zhetapi/source/core/node_reference.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_reference.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/node_value.o -c /home/ram/zhetapi/source/core/node_value.cpp",
+  "file": "/home/ram/zhetapi/source/core/node_value.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/operation.o -c /home/ram/zhetapi/source/core/operation.cpp",
+  "file": "/home/ram/zhetapi/source/core/operation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/operation_holder.o -c /home/ram/zhetapi/source/core/operation_holder.cpp",
+  "file": "/home/ram/zhetapi/source/core/operation_holder.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/rvalue.o -c /home/ram/zhetapi/source/core/rvalue.cpp",
+  "file": "/home/ram/zhetapi/source/core/rvalue.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/special_tokens.o -c /home/ram/zhetapi/source/core/special_tokens.cpp",
+  "file": "/home/ram/zhetapi/source/core/special_tokens.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/types.o -c /home/ram/zhetapi/source/core/types.cpp",
+  "file": "/home/ram/zhetapi/source/core/types.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/wildcard.o -c /home/ram/zhetapi/source/core/wildcard.cpp",
+  "file": "/home/ram/zhetapi/source/core/wildcard.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/core/variable_cluster.o -c /home/ram/zhetapi/source/core/variable_cluster.cpp",
+  "file": "/home/ram/zhetapi/source/core/variable_cluster.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/cc_keywords.o -c /home/ram/zhetapi/source/lang/cc_keywords.cpp",
+  "file": "/home/ram/zhetapi/source/lang/cc_keywords.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/cc_parser.o -c /home/ram/zhetapi/source/lang/cc_parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/cc_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/compilation.o -c /home/ram/zhetapi/source/lang/compilation.cpp",
+  "file": "/home/ram/zhetapi/source/lang/compilation.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/default_feeders.o -c /home/ram/zhetapi/source/lang/default_feeders.cpp",
+  "file": "/home/ram/zhetapi/source/lang/default_feeders.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/error_handling.o -c /home/ram/zhetapi/source/lang/error_handling.cpp",
+  "file": "/home/ram/zhetapi/source/lang/error_handling.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/feeder.o -c /home/ram/zhetapi/source/lang/feeder.cpp",
+  "file": "/home/ram/zhetapi/source/lang/feeder.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/helpers.o -c /home/ram/zhetapi/source/lang/helpers.cpp",
+  "file": "/home/ram/zhetapi/source/lang/helpers.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/keywords.o -c /home/ram/zhetapi/source/lang/keywords.cpp",
+  "file": "/home/ram/zhetapi/source/lang/keywords.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/mdl_parser.o -c /home/ram/zhetapi/source/lang/mdl_parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/mdl_parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/parser.o -c /home/ram/zhetapi/source/lang/parser.cpp",
+  "file": "/home/ram/zhetapi/source/lang/parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/source.o -c /home/ram/zhetapi/source/lang/source.cpp",
+  "file": "/home/ram/zhetapi/source/lang/source.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/lang/vm.o -c /home/ram/zhetapi/source/lang/vm.cpp",
+  "file": "/home/ram/zhetapi/source/lang/vm.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/std/functions.o -c /home/ram/zhetapi/source/std/functions.cpp",
+  "file": "/home/ram/zhetapi/source/std/functions.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/source/std/interval.o -c /home/ram/zhetapi/source/std/interval.cpp",
+  "file": "/home/ram/zhetapi/source/std/interval.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhp-static.dir/interpreter/builtin/basic_io.o -c /home/ram/zhetapi/interpreter/builtin/basic_io.cpp",
+  "file": "/home/ram/zhetapi/interpreter/builtin/basic_io.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhetapi.dir/interpreter/main.o -c /home/ram/zhetapi/interpreter/main.cpp",
+  "file": "/home/ram/zhetapi/interpreter/main.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhetapi.dir/interpreter/parser.o -c /home/ram/zhetapi/interpreter/parser.cpp",
+  "file": "/home/ram/zhetapi/interpreter/parser.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhetapi.dir/interpreter/library.o -c /home/ram/zhetapi/interpreter/library.cpp",
+  "file": "/home/ram/zhetapi/interpreter/library.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhetapi.dir/interpreter/execute.o -c /home/ram/zhetapi/interpreter/execute.cpp",
+  "file": "/home/ram/zhetapi/interpreter/execute.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/zhetapi.dir/interpreter/builtin/basic_io.o -c /home/ram/zhetapi/interpreter/builtin/basic_io.cpp",
+  "file": "/home/ram/zhetapi/interpreter/builtin/basic_io.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -I/usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/ml.dir/experimental/ml.o -c /home/ram/zhetapi/experimental/ml.cpp",
+  "file": "/home/ram/zhetapi/experimental/ml.cpp"
+},
+{
+  "directory": "/home/ram/zhetapi",
+  "command": "/usr/bin/g++-8  -I/home/ram/zhetapi/PUBLIC -I/home/ram/zhetapi/engine -I/home/ram/zhetapi/interpreter -I/home/ram/zhetapi/glad -I/home/ram/zhetapi/CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES -isystem /usr/local/include/opencv4 -pthread -O3 -DNDEBUG -std=gnu++14 -o CMakeFiles/exp.dir/experimental/exp.o -c /home/ram/zhetapi/experimental/exp.cpp",
+  "file": "/home/ram/zhetapi/experimental/exp.cpp"
+}
+]

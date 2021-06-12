@@ -22,9 +22,18 @@ global y = 76, z = 80
 )");
 
 zhetapi::StringFeeder feeder2(R"(
+// import samples.zhp.simple
+include samples/zhp
+import simple
+
 test.foo()
 println("test.str = ", test.str)
 println("sum of x, y, z = ", test.x + test.y + test.z)
+
+global main_glob = 7756.3243
+
+println("main glob = ", main_glob)
+println("xsimple = ", simple.xsimple1)
 )");
 
 int main()
@@ -50,13 +59,12 @@ int main()
 	mdl_parse(&feeder, nctx, module);
 
 	// TODO: add a list method
-	cout << "module = " << module->dbg_str() << endl;
-
-	module->list_attributes(cout);
+	// cout << "module = " << module->dbg_str() << endl;
 
 	context->put("test", module);
 
-	context->list();
+	// module->list_attributes(cout);
+	// context->list();
 
 	cout << "PARSING MAIN CODE:" << endl;
 	parse_global(&feeder2, context);

@@ -13,6 +13,8 @@ namespace special {
 double ln_gamma(double);
 double ln_factorial(int);
 
+double poission(double, int);
+
 }
 
 }

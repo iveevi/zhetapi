@@ -274,7 +274,7 @@ bool Matrix <T> ::is_symmetric(const T &epsilon) const
 {
 	size_t r = get_rows();
 	size_t c = get_cols();
-	
+
 	for (size_t i = 0; i < r; i++) {
 		for (size_t j = i + 1; j < c; j++) {
 			// Avoid using abs
@@ -325,7 +325,7 @@ bool Matrix <T> ::is_identity(const T &epsilon) const
 {
 	size_t r = get_rows();
 	size_t c = get_cols();
-	
+
 	if (r != c)
 		return false;
 

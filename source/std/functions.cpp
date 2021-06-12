@@ -8,7 +8,7 @@ double ln_gamma(double x)
 {
 	if (x <= 0)
 		throw("ln_gamma: expected a positive argument.");
-	
+
 	static const int N = 14;
 
 	static const double C[] = {
@@ -42,7 +42,7 @@ double ln_gamma(double x)
 	int i = 0;
 	while (i < N)
 		ser += C[i++]/(++ty);
-		
+
 	return tmp + log(2.5066282746310005 * ser / tx);
 }
 
@@ -65,6 +65,12 @@ double ln_factorial(int x)
 		return table[x];
 
 	return ln_gamma(x + 1.0);
+}
+
+double poisson(double lambda, int k)
+{
+	double lp = -lambda + k * log(k) - ln_gamma(k + 1);
+	return exp(lp);
 }
 
 }

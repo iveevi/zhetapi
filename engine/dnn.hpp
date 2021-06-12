@@ -98,7 +98,7 @@ private:
 public:
 	DNN();
 	DNN(const DNN &);
-	
+
 	AVR_IGNORE(DNN(size_t, const std::vector <Layer <T>> &));
 
 	// Variadic layer constructor
@@ -112,17 +112,17 @@ public:
 	// Saving and loading the network
 	AVR_IGNORE(void save(const std::string &));
 	AVR_IGNORE(void load(const std::string &));
-	
+
 	// void load_json(const std::string &);
-	
+
 	// Properties
 	size_t size() const;
 	size_t input_size() const;
 	size_t output_size() const;
-	
+
 	void enable_dropout() const;
 	void disable_dropout() const;
-	
+
 	// TODO: private?
 	Vector <T> *acache() const;
 	Vector <T> *zcache() const;
@@ -136,7 +136,7 @@ public:
 	Vector <T> operator()(const Vector <T> &);
 
 	Vector <T> compute(const Vector <T> &);
-	
+
 	void apply_gradient(Matrix <T> *);
 
 	Matrix <T> *jacobian(const Vector <T> &);
@@ -160,7 +160,7 @@ DNN <T> ::DNN(const DNN &other) :
 
 	for (size_t i = 0; i < _size; i++)
 		_layers[i] = other._layers[i];
-	
+
 	init_cache();
 }
 
@@ -230,7 +230,7 @@ DNN <T> &DNN <T> ::operator=(const DNN <T> &other)
 		_layers = new Layer <T> [_size];
 		for (size_t i = 0; i < _size; i++)
 			_layers[i] = other._layers[i];
-		
+
 		init_cache();
 	}
 
@@ -259,7 +259,7 @@ void DNN <T> ::clear()
 {
 	if (_layers)
 		delete[] _layers;
-	
+
 	clear_cache();
 }
 
@@ -270,7 +270,7 @@ void DNN <T> ::clear_cache()
 		delete[] _acache;
 	if (_zcache)
 		delete[] _zcache;
-	
+
 	if (_Acache)
 		delete[] _Acache;
 	if (_Zcache)
@@ -348,7 +348,7 @@ size_t DNN <T> ::output_size() const
 {
 	return _osize;
 }
-	
+
 template <class T>
 void DNN <T> ::enable_dropout() const
 {
@@ -503,7 +503,7 @@ Matrix <T> *DNN <T> ::jacobian_check(const Vector <T> &in,
 		in,
 		target,
 		erf);
-	
+
 	return J;
 }
 

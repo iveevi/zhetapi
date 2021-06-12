@@ -122,7 +122,7 @@ public:
 		std::type_index _ti;
 	public:
 		unknown_attribute(const std::type_info &ti, const std::string &msg)
-				: _ti(ti), std::runtime_error(msg) {}
+				: std::runtime_error(msg), _ti(ti) {}
 		
 		const char *what() const noexcept override;
 	};

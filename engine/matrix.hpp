@@ -207,6 +207,7 @@ public:
 	template <class U>
 	friend Matrix <U> vvt_mult(const Vector <U> &, const Vector <U> &);
 
+	// TODO: just use the Tensor one
 	class dimension_mismatch {};
 protected:
 	// TODO: Looks ugly here

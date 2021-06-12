@@ -59,7 +59,7 @@ vector <double> read_image(ifstream &fin)
 
 		pixels.push_back(temp);
 	}
-	
+
 	return pixels;
 }
 
@@ -89,16 +89,16 @@ int main()
 	train_images.read((char *) &tmp, sizeof(tmp));
 	train_images.read((char *) &tmp, sizeof(tmp));
 	train_images.read((char *) &tmp, sizeof(tmp));
-	
+
 	valid_images.read((char *) &tmp, sizeof(tmp));
 	valid_images.read((char *) &tmp, sizeof(tmp));
 	valid_images.read((char *) &tmp, sizeof(tmp));
 	valid_images.read((char *) &tmp, sizeof(tmp));
-	
+
 	// First 8 bytes
 	train_labels.read((char *) &tmp, sizeof(tmp));
 	train_labels.read((char *) &tmp, sizeof(tmp));
-	
+
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 	valid_labels.read((char *) &tmp, sizeof(tmp));
 
@@ -119,7 +119,7 @@ int main()
 		train_imgs.push_back(in);
 		train_exps.push_back(exp);
 	}
-	
+
 	// Extract validation data
 	for (size_t i = 0; i < VALID_IMAGES; i++) {
 		Vector <double> in = read_image(valid_images);

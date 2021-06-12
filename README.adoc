@@ -382,10 +382,11 @@ directory for more information.
 |===
 
 
-= Building and Usage
+= Building and Installation
 
-Most of the features of Zhetapi depend only on `C++17` and the Boost library
-(preferable version 1.65). CMake is used to compile the targets.
+Most of the features of Zhetapi depend only on `C++14` and the Boost library
+(preferable version 1.65). SFML is used for anything graphics related. CMake is
+used to compile the targets.
 
 It is recommended that you use the `g++-8` compiler, as it is the only one that
 has been tested with so far.
@@ -396,22 +397,27 @@ has been tested with so far.
 $ brew install gcc@8 boost cmake
 ```
 
+SFML can be downloaded link:https://www.sfml-dev.org/download.php[here].
+
 *Ubuntu (18.04 and later)*
 
 ```
-$ sudo apt-get install gcc-8 g++-8 libboost-dev cmake
+$ sudo apt-get install gcc-8 g++-8 libboost-dev libsfml-dev cmake
 ```
 
-Additional dependencies for image processing are `libpng`, `OpenGL` and `GLFW3`.
-These are specifically used only for loading and displaying images.
+An additional dependency for image processing is `libpng`.
 
-To install the interpreter for ZHP, run `./run.py install -j[THREADS=8]` in the
-home directory of this repository. This also compiles the API libraries
-(`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and the default ZHP libraries
-(`math` and `io` for now).
+To install the interpreter for ZHP, run `sudo ./run.py install -j[THREADS=8]` in
+the home directory of this repository. This does the following:
 
-To use the C++ API in your own programs, include the `engine` directory (which
-includes all the headers) and link your program with the shared/static libraries.
+ - Compiles the interpreter (`zhetapi`) and installs it in `/usr/local/bin/`
+ - Compiles the libraries (`libzhp.so`, `libzhpcuda.so` and `libzhp.a`) and
+   installs them in `/usr/local/lib/`.
+ - Compiles default ZHP libraries (currently only `math` and `io`) and copies
+   them to `/usr/local/include/zhp`
+ - Installs the headers (in `engine`) to `/usr/local/include` as `zhetapi`
+
+With this, headers can be included with `#include <zhetapi/[header]>`.
 
 This project is being developed on Unix environments (MacOS and Linux) and has
 only been tested for them. It is a work in progress.

@@ -107,7 +107,7 @@ T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
 	assert(indices.size() == _dims);
 	for (size_t i = 0; i < _dims; i++)
 		full += indices[i] * _dim[_dims - (i + 1)];
-	
+
 	return _array[full];
 }
 
@@ -119,7 +119,7 @@ const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
 	assert(indices.size() == _dims);
 	for (size_t i = 0; i < _dims; i++)
 		full += indices[i] * _dim[_dims - (i + 1)];
-	
+
 	return _array[full];
 }
 
@@ -144,7 +144,7 @@ std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 {
 	if (size == 0)
 		return "[]";
-	
+
 	std::string out = "[";
 
 	// Size of each dimension

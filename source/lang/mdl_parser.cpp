@@ -217,7 +217,7 @@ static void mdl_return(Feeder *feeder,
 {
 	// TODO: Allow multiline if the user add '\'
 	char c;
-	while ((c = feeder->feed()) != '\n');
+	while ((c = feeder->feed()) != '\n' && c != EOF);
 }
 
 static void mdl_global(Feeder *feeder,
@@ -225,21 +225,14 @@ static void mdl_global(Feeder *feeder,
 		Module *module,
 		State *state)
 {
-	using namespace std;
-
 	// TODO: Allow multiline if the user add '\'
 	char c;
 
 	std::string line;
-	while ((c = feeder->feed()) != '\n')
+	while ((c = feeder->feed()) != '\n' && c != EOF)
 		line += c;
 
-	cout << "line = " << line << endl;
-
 	Args vcomma = comma_split(line);
-	for (auto str: vcomma)
-		cout << "\t" << str << endl;
-
 	for (const std::string &as : vcomma) {
 		Args veq = eq_split(as);
 

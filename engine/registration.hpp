@@ -32,6 +32,7 @@
 
 namespace zhetapi {
 
+// TODO: change all of this to account for modules
 #define ZHETAPI_REGISTER(fident)			\
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 

@@ -22,7 +22,7 @@
 #include "cuda/essentials.cuh"
 
 namespace zhetapi {
-		
+
 namespace ml {
 
 template <class T>

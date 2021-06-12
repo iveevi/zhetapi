@@ -68,10 +68,18 @@ std::string Feeder::extract_parenthesized()
 	std::string out;
 	char c;
 
+	int level = 1;
 	while ((c = feed()) != EOF) {
-		if (c == ')')
-			break;
-		
+		if (c == ')') {
+			if (level == 1)
+				break;
+
+			level--;
+		} else if (c == '(') {
+			// TODO: throw if below 0
+			level++;
+		}
+
 		out += c;
 	}
 
@@ -90,7 +98,7 @@ std::pair <std::string, Args> Feeder::extract_signature()
 	ident = c;
 	while ((c = feed()) != '(')
 		ident += c;
-	
+
 	while ((c = feed()) != ')') {
 		if (c == ',') {
 			if (!tmp.empty()) {

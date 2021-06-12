@@ -60,6 +60,8 @@ public:
 
 // Feeder from string
 class StringFeeder : public Feeder {
+	// TODO: use a shared pointer to save resources if needed (copy
+	// constructors, etc)
 	std::string	_source;
 	size_t		_index	= 0;
 	char		_end	= EOF;
@@ -80,34 +82,11 @@ public:
 	
 	void backup(size_t) override;
 
+	// TODO: any use?
 	Feeder *pop_at(size_t i, char = EOF) const override;
 };
 
-// Feeder from file
-class SourceFeeder : public Feeder {
-	Source	_source;
-	size_t	_index	= 0;
-	char	_end	= EOF;
-
-	SourceFeeder(const Source &, size_t, char = EOF);
-
-	bool read_and_store();
-public:
-	SourceFeeder(const std::string &);
-
-	char feed() override;
-	char peek() override;
-	char prev() override;
-
-	size_t tellg() const override;
-
-	char get_end() const override;
-	void set_end(char = EOF) override;
-	
-	void backup(size_t) override;
-
-	Feeder *pop_at(size_t i, char = EOF) const override;
-};
+StringFeeder file_feeder(const std::string &);
 
 }
 
