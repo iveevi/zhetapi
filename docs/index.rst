@@ -16,3 +16,5 @@ To be changed.
    api/parametrization
    api/token
    api/linalg
+   api/nvarena
+   api/image
