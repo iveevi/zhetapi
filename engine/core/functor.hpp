@@ -15,7 +15,7 @@ class Engine;
 // Functor interface
 class Functor : public virtual Token {
 public:
-	virtual Token *evaluate(Engine *, const Targs &);
+	virtual Token *evaluate(Engine *, const Targs &) = 0;
 
 	// Exception
 	class insufficient_args : public std::runtime_error {
@@ -24,8 +24,8 @@ public:
 			: std::runtime_error("Needed " + std::to_string(need)
 				+ " arguments, but received " + std::to_string(got)
 				+ " instead") {}
-	}
-}
+	};
+};
 
 }
 

@@ -6,7 +6,7 @@
 #include <vector>
 
 // Engine headers
-#include "rational.hpp"
+#include "../rational.hpp"
 
 namespace zhetapi {
 
@@ -16,12 +16,14 @@ namespace utility {
 // Exceptions
 //////////////////////////////////////////
 
-/* @brief Exception for asserting that
+/**
+ * @brief Exception for asserting that
  * a certain input be non-negative.
  */
 class negative_block_exception {};
 
-/* @brief Exception for asserting that
+/**
+ * @brief Exception for asserting that
  * a certain input be strictly positive.
  */
 class positive_flow_exception {};
@@ -105,20 +107,20 @@ T gcd(T a, T b, T (*mod)(T, T) = ::std::fmod, T eps = 0)
 	if (a == 0 || b == 0)
 		return 1;
 
-	a = ::std::abs(a);
-	b = ::std::abs(b);
+	a = std::abs(a);
+	b = std::abs(b);
 
 	if (a > b)
-		::std::swap(a, b);
+		std::swap(a, b);
 
-	while (::std::abs(mod(b, a)) != 0) {
+	while (std::abs(mod(b, a)) != 0) {
 		b = mod(b, a);
 
 		if (a > b)
-			::std::swap(a, b);
+			std::swap(a, b);
 	}
 
-	return ::std::min(a, b);
+	return std::min(a, b);
 }
 
 /**
@@ -128,7 +130,7 @@ T gcd(T a, T b, T (*mod)(T, T) = ::std::fmod, T eps = 0)
  * from the modulus function which is passed.
  */
 template <class T>
-T lcm(T a, T b, T(*mod)(T, T) = ::std::fmod, T eps = 0)
+T lcm(T a, T b, T(*mod)(T, T) = std::fmod, T eps = 0)
 {
 	return a * b / gcd(a, b, mod, eps);
 }

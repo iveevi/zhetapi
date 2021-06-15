@@ -7,7 +7,7 @@
 #include <functional>
 
 // Engine headers
-#include "token.hpp"
+#include "core/functor.hpp"
 
 /**
  * This file contains functions that aid the creation of Engine-registrable
@@ -18,7 +18,7 @@
  * ======================
  *
  * Any function that is to be registered in a engine must have the signature
- * 
+ *
  * 	zhetapi::Token *(const std::vector <Token *> &).
  *
  * Register the function into a Engine with the register method, as follows
@@ -32,35 +32,22 @@
 
 namespace zhetapi {
 
-// TODO: change all of this to account for modules
-#define ZHETAPI_REGISTER(fident)			\
-	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
-
-#define ZHETAPI_LIBRARY()				\
-	extern "C" void zhetapi_export_symbols(zhetapi::Engine *engine)
-
-#define ZHETAPI_EXPORT(symbol)			\
-	engine->put(zhetapi::Registrable(#symbol, &symbol));
-
-#define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)	\
-	engine->put(zhetapi::Registrable(#symbol, &ftr));
-
-#define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
-	engine->put(#symbol, new zhetapi::Operand <type> (op));
-
-class Registrable : public Token {
+class Registrable : public Functor {
 public:
-	using mapper = std::function <Token *(const std::vector <Token *> &)>;
+	using Evaluator = std::function <Token *(const std::vector <Token *> &)>;
 private:
-	mapper		_ftn;
+	Evaluator	_ftn;
 
 	std::string	_ident;
 public:
 	Registrable();
 	Registrable(const Registrable &);
-	Registrable(const std::string &, mapper);
+	Registrable(const std::string &, Evaluator);
 
+	// TODO: get rid of this
 	Token *operator()(const std::vector <Token *> &) const;
+
+	Token *evaluate(Engine *, const std::vector <Token *> &) override;
 
 	std::string dbg_str() const override;
 	type caller() const override;
@@ -132,12 +119,12 @@ void zhetapi_cast_process(const std::vector <Token *> &tokens, size_t
 {
 	if (i >= tokens.size())
 		throw zhetapi_cast_overflow();
-	
+
 	tptr = dynamic_cast <T> (tokens[i]);
 
 	if (!tptr)
 		throw zhetapi_cast_nullptr();
-	
+
 	zhetapi_cast_process(tokens, i + 1, args ...);
 }
 

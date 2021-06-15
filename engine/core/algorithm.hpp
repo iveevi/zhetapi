@@ -8,6 +8,7 @@
 
 // Engine headers
 #include "common.hpp"
+#include "functor.hpp"
 #include "node_manager.hpp"
 
 namespace zhetapi {
@@ -16,7 +17,7 @@ class Engine;
 class node_manager;
 
 // Algorithm class
-class algorithm : public Token {
+class algorithm : public Functor {
 	std::string			_ident		= "";
 	std::string			_alg		= "";
 
@@ -39,7 +40,7 @@ public:
 	
 	void compile(Engine *);	
 	
-	Token *execute(Engine *, const std::vector <Token *> &);
+	Token *evaluate(Engine *, const std::vector <Token *> &) override;
 
 	// Put somewhere else
 	// std::vector <std::string> split(std::string str);

@@ -1,8 +1,9 @@
-#include <registration.hpp>
+#include "../engine/registration.hpp"
 
 namespace zhetapi {
 
-Registrable::Registrable() : _ident(""), _ftn(0) {}
+Registrable::Registrable()
+		: _ident(""), _ftn(0) {}
 
 Registrable::Registrable(const Registrable &other)
 {
@@ -10,9 +11,15 @@ Registrable::Registrable(const Registrable &other)
 	_ident = other._ident;
 }
 
-Registrable::Registrable(const ::std::string &ident, mapper ftn) : _ident(ident), _ftn(ftn) {}
+Registrable::Registrable(const ::std::string &ident, Evaluator ftn)
+		: _ident(ident), _ftn(ftn) {}
 
 Token *Registrable::operator()(const ::std::vector <Token *> &ins) const
+{
+	return _ftn(ins);
+}
+
+Token *Registrable::evaluate(Engine *ctx, const std::vector<Token *> &ins)
 {
 	return _ftn(ins);
 }

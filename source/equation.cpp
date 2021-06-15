@@ -1,7 +1,7 @@
 #include <set>
 
-#include <equation.hpp>
-#include <function.hpp>
+#include "../engine/equation.hpp"
+#include "../engine/function.hpp"
 
 namespace zhetapi {
 
@@ -150,7 +150,7 @@ Solutions Equation::solve() const
 	Token *qt;
 	Token *st;
 
-	x0 = A_newton.execute(_engine, {x0, f.copy()});
+	x0 = A_newton.evaluate(_engine, {x0, f.copy()});
 
         cout << "x0 = " << x0->dbg_str() << endl;
 

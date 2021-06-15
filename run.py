@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+# TODO: add cleanup for sudo install (CMakeFiles/ bin/ debug/)
 import threading
 import argparse
 import os

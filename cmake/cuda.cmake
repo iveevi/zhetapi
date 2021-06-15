@@ -9,7 +9,7 @@ if (CUDA_FOUND)
 
 	find_library(ZHP_CUDA_LIBS
 		NAMES zhpcuda
-		PATHS .)
+		PATHS . bin)
 
 	target_link_libraries(cuda PUBLIC zhp-shared)
 	target_link_libraries(cuda PUBLIC ${ZHP_CUDA_LIBS})

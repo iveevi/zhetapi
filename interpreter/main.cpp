@@ -12,11 +12,6 @@ enum mode {
 // Setup the default include directories
 bool verbose = false;
 
-vector <string> idirs = {
-	".",				// Current directory
-	"/usr/local/include/zhetapi"	// Installed libs location
-};
-
 // Display guide
 static int guide()
 {
@@ -44,6 +39,8 @@ static inline string __get_dir(string file)
 // Inline kernel
 static int inline_interpret()
 {
+	Engine *ctx = new Engine();
+
 	while (true) {
 		cout << "> ";
 
@@ -52,15 +49,18 @@ static int inline_interpret()
 
 		if (!cin) {
 			cout << endl;
-			
+
 			exit(0);
 		}
 
 		if (str.empty())
 			continue;
 
-		parse(str);
+		StringFeeder sf(str);
+		parse_global(&sf, ctx);
 	}
+
+	delete ctx;
 }
 
 // Interpretation kernel
@@ -68,16 +68,21 @@ static int interpreter(string infile)
 {
 	if (infile.empty())
 		inline_interpret();
-	
+
 	if (!freopen(infile.c_str(), "r", stdin)) {
 		printf("Fatal error: failed to open file '%s'.\n", infile.c_str());
 
 		exit(-1);
 	}
 
-	file = infile;
+	Engine *ctx = new Engine();
+	
+	StringFeeder sf = file_feeder(infile);
+	int ret = parse_global(&sf, ctx);
+	
+	delete ctx;
 
-	return parse();
+	return ret;
 }
 
 // Main
@@ -110,10 +115,10 @@ int main(int argc, char *argv[])
 
 				if (next[0] == '-')
 					break;
-			
+
 				sources.push_back(next);
 			}
-			
+
 			break;
 		case 'd':
 			if (md != help)
@@ -127,10 +132,10 @@ int main(int argc, char *argv[])
 
 				if (next[0] == '-')
 					break;
-				
+
 				sources.push_back(next);
 			}
-			
+
 			break;
 		case 'o':
 			output = optarg;
@@ -138,7 +143,7 @@ int main(int argc, char *argv[])
 			break;
 		case 'L':
 			idirs.push_back(optarg);
-			
+
 			break;
 		case 'h':
 			md = help;

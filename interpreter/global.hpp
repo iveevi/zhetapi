@@ -7,12 +7,10 @@
 #include <iterator>
 
 // Engine headers
-#include <all/zhplib.hpp>
-
-#include <core/algorithm.hpp>
-
-#include <lang/compilation.hpp>
-#include <lang/error_handling.hpp>
+#include "../engine/all/zhplib.hpp"
+#include "../engine/core/algorithm.hpp"
+#include "../engine/lang/parser.hpp"
+#include "../engine/lang/error_handling.hpp"
 
 // Namespaces
 using namespace std;
@@ -25,9 +23,6 @@ extern vector <string> global;
 extern vector <string> idirs;
 
 extern Engine *engine;
-
-extern Operand <bool> *op_true;
-extern Operand <bool> *op_false;
 
 int parse(char = EOF);
 int parse(string);

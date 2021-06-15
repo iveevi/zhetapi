@@ -2,8 +2,8 @@
 #include <mutex>
 #include <vector>
 
-#include <fixed_vector.hpp>
-#include <image.hpp>
+#include "../engine/fixed_vector.hpp"
+#include "../engine/image.hpp"
 
 // Namespaces
 using namespace std;

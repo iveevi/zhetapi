@@ -1,5 +1,5 @@
-#ifndef FUNCTOR_H_
-#define FUNCTOR_H_
+#ifndef FUNCTION_H_
+#define FUNCTION_H_
 
 // C/C++ headers
 #include <ostream>
@@ -9,11 +9,12 @@
 
 // Engine headers
 #include "core/common.hpp"
+#include "core/functor.hpp"
 #include "core/node_manager.hpp"
 
 namespace zhetapi {
 
-class Function : public Token {
+class Function : public Functor {
 	std::string			_symbol;
 	std::vector <std::string>	_params;
 	node_manager			_manager;
@@ -35,6 +36,8 @@ public:
 	const std::string symbol() const;
 
 	void set_threads(size_t);
+
+	Token *evaluate(Engine *, const std::vector <Token *> &) override;
 
 	Token *compute(const std::vector <Token *> &, Engine * = shared_context);
 	Token *operator()(const std::vector <Token *> &, Engine * = shared_context);

@@ -1,7 +1,5 @@
 #include "global.hpp"
 
-typedef void (*exporter)(Engine *);
-
 static int assess_library(string);
 
 int compile_library(vector <string> files, string output)
@@ -119,7 +117,7 @@ int import_library(string file)
 		return -1;
 	}
 
-	exporter exprt = (exporter) ptr;
+	Exporter exprt = (Exporter) ptr;
 
 	if (!exprt) {
 		printf("Failed to extract exporter\n");

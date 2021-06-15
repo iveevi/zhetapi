@@ -8,7 +8,7 @@
 // Engine headers
 #include "feeder.hpp"
 #include "../engine.hpp"
-#include "../core/module.hpp"
+#include "../module.hpp"
 
 namespace zhetapi {
 

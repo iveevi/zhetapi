@@ -1,4 +1,4 @@
 // Combined header package for zhetapi-lang related facilties
-#include "engine.hpp"
-
-#include "core/algorithm.hpp"
+#include "../engine.hpp"
+#include "../module.hpp"
+#include "../core/algorithm.hpp"

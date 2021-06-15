@@ -1,8 +1,6 @@
-#include <engine.hpp>
-
-#include <core/algorithm.hpp>
-
-#include <lang/compilation.hpp>
+#include "../../engine/engine.hpp"
+#include "../../engine/core/algorithm.hpp"
+#include "../../engine/lang/compilation.hpp"
 
 namespace zhetapi {
 
@@ -35,8 +33,12 @@ void algorithm::compile(Engine *engine)
 }
 
 // Executing the function
-Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
+Token *algorithm::evaluate(Engine *engine, const std::vector <Token *> &args)
 {
+	// Ensure appropriate number of arguments
+	if (args.size() != _args.size())
+		throw Functor::insufficient_args(args.size(), _args.size());
+
 	// Ignore arguments for now
 	if (_compiled.empty())
 		compile(engine);
@@ -48,6 +50,7 @@ Token *algorithm::execute(Engine *engine, const std::vector <Token *> &args)
 	engine = pop_and_del_stack(engine);
 
 	// Check returns
+	// TODO: create a new Return token
 	if (dynamic_cast <Operand <Token *> *> (tptr))
 		return (dynamic_cast <Operand <Token *> *> (tptr))->get();
 

@@ -6,6 +6,7 @@ set(ZHETAPI_SOURCE
 	source/function.cpp
 	source/image.cpp
 	source/linalg.cpp
+	source/module.cpp
 	source/operand.cpp
 	source/plot.cpp
 	source/polynomial.cpp
@@ -21,7 +22,6 @@ set(ZHETAPI_SOURCE
 	source/core/expr_parser.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp
-	source/core/module.cpp
 	source/core/node.cpp
 	source/core/node_differential.cpp
 	source/core/node_differentiation.cpp

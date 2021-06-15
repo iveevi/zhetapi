@@ -1,7 +1,6 @@
-#include <token.hpp>
-
-#include <core/types.hpp>
-#include <core/algorithm.hpp>
+#include "../engine/token.hpp"
+#include "../engine/core/types.hpp"
+#include "../engine/core/algorithm.hpp"
 
 namespace zhetapi {
 
@@ -28,7 +27,7 @@ Token *Token::attr(Engine *context, const std::string &id, const std::vector <To
 			// std::cout << "ALGORITHM attribute!" << std::endl;
 
 			algorithm *alg = dynamic_cast <algorithm *> (tptr);
-			return alg->execute(context, args);
+			return alg->evaluate(context, args);
 		}
 
 		return _attributes[id];

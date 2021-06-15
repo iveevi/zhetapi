@@ -5,6 +5,7 @@
 #include <fstream>
 #include <stack>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 // Engine headers
@@ -191,6 +192,11 @@ public:
 	class null_attributee : public std::runtime_error {
 	public:
 		null_attributee() : std::runtime_error("Null attributee") {}
+	};
+
+	class bad_token_type : public std::runtime_error {
+	public:
+		bad_token_type() : std::runtime_error("Bad token type for evaluation") {}
 	};
 
 	// Static variables

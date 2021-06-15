@@ -1,7 +1,7 @@
-#include <lang/parser.hpp>
-#include <lang/error_handling.hpp>
-#include <core/node_manager.hpp>
-#include <core/common.hpp>
+#include "../../engine/lang/parser.hpp"
+#include "../../engine/lang/error_handling.hpp"
+#include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/common.hpp"
 
 namespace zhetapi {
 

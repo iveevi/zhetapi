@@ -1,5 +1,5 @@
-#include <function.hpp>
-#include <engine.hpp>
+#include "../engine/function.hpp"
+#include "../engine/engine.hpp"
 
 namespace zhetapi {
 
@@ -150,12 +150,23 @@ void Function::set_threads(size_t threads)
 }
 
 // Computational utilities
-
-Token *Function::compute(const std::vector <Token *> &toks, Engine *context)
+Token *Function::evaluate(Engine *ctx, const std::vector<Token *> &ins)
 {
-	assert(toks.size() == _params.size());
+	// TODO: refactor params to args
+	// TODO: create an assert macro (or constexpr) thats throws
+	if (ins.size() != _params.size())
+		throw Functor::insufficient_args(ins.size(), _params.size());
 
-	return _manager.substitute_and_compute(context, toks);
+	return _manager.substitute_and_compute(ctx, ins);
+}
+
+// TODO: useless
+Token *Function::compute(const std::vector <Token *> &ins, Engine *ctx)
+{
+	if (ins.size() != _params.size())
+		throw Functor::insufficient_args(ins.size(), _params.size());
+
+	return _manager.substitute_and_compute(ctx, ins);
 }
 
 // TODO: remove this (no user is going to use this)

@@ -7,7 +7,7 @@
 #include <string>
 
 // Engine headers
-#include <core/common.hpp>
+#include "../core/common.hpp"
 
 namespace zhetapi {
 

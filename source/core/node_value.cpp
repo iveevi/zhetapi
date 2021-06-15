@@ -1,9 +1,23 @@
-#include <engine.hpp>
-
-#include <core/common.hpp>
-#include <core/node_manager.hpp>
+#include "../../engine/engine.hpp"
+#include "../../engine/core/common.hpp"
+#include "../../engine/core/node_manager.hpp"
 
 namespace zhetapi {
+
+static Targs proper_args(Engine *ctx, const node &tree)
+{
+	Targs targs;
+
+	Token *tptr;
+	for (const node &leaf : tree) {
+		tptr = node_value(ctx, leaf);
+
+		if (!is_blank_token(tptr))
+			targs.push_back(tptr);
+	}
+
+	return targs;
+}
 
 static Token *assignment_node(Engine *context, const node &tree)
 {
@@ -200,10 +214,10 @@ static Token *node_null_value(Engine *context, const node &tree)
 	return nullptr;
 }
 
-Token *node_value(Engine *context, node tree)
+// TODO: refactor engine to context
+Token *node_value(Engine *ctx, node tree)
 {
-	std::vector <Token *> values;
-
+	// TODO: clean up these variables
 	Token *tptr;
 	Token *vptr;
 
@@ -219,9 +233,33 @@ Token *node_value(Engine *context, node tree)
 
 	node reffed;
 
+	// Check for operation
 	if (tree.null())
-		return node_null_value(context, tree);
+		return node_null_value(ctx, tree);
 
+	Token::type t = tree.caller();
+
+	// Preliminary check (not functor or operation)
+	switch (t) {
+	case Token::opd:
+	case Token::token_module:
+	case Token::token_collection:
+		return tree.copy_token();
+	case Token::token_rvalue:
+		return (tree.cast <rvalue> ())->get(ctx);
+	case Token::token_node_list:
+		return (tree.cast <node_list> ())->evaluate(ctx);
+	case Token::ndr:
+		reffed = *((tree.cast <node_reference> ())->get());
+
+		tree.retokenize(node_value(ctx, reffed));
+
+		return node_value(ctx, tree);
+	default:
+		break;
+	}
+
+	// TODO: put this in its own function
 	operation_holder *ophptr = tree.cast <operation_holder> ();
 
 	if (ophptr && ophptr->code == attribute) {
@@ -230,91 +268,67 @@ Token *node_value(Engine *context, node tree)
 		// TODO: throw on nullptr
 		std::string at = lv->symbol();
 
-		std::vector <Token *> args;
+		Targs targs = proper_args(ctx, tree[1]);
 
-		for (node leaf : tree[1])
-			args.push_back(node_value(context, leaf));
+		/* for (node leaf : tree[1]) {
+			tptr = node_value(ctx, leaf);
 
-		Token *callee = node_value(context, tree[0]);
+			if (!is_blank_token(tptr))
+				args.push_back(tptr);
+		} */
+
+		Token *callee = node_value(ctx, tree[0]);
 
 		if (!callee)
 			throw node_manager::null_attributee();
 
-		return callee->attr(context, at, args);
+		return callee->attr(ctx, at, targs);
 	}
 
 	// else: this func
+	Targs values = proper_args(ctx, tree);
 
-	// TODO: replace this system (use functor and such and use
-	// labels for others like node_list, etc)
-	switch (tree.caller()) {
-	case Token::opd:
-	case Token::token_module:
-		return tree.copy_token();
-	case Token::token_collection:
-		return tree.copy_token();
+	// TODO: Should only be functor from here
+	switch (t) {
 	case Token::oph:
-		// size = tree._leaves.size();
-
-		for (node leaf : tree)
-			values.push_back(node_value(context, leaf));
-
-		tptr = context->compute((tree.cast <operation_holder> ())->rep, values);
+		tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
 
 		if (tree.label() == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
 
-			context->put(rv->symbol(), tptr);
+			ctx->put(rv->symbol(), tptr);
 
-			return rv->get(context)->copy();
+			return rv->get(ctx);
 		} else if (tree.label() == l_pre_modifier) {
-			rv= tree[0].cast <rvalue> ();
+			rv = tree[0].cast <rvalue> ();
 
-			context->put(rv->symbol(), tptr);
+			ctx->put(rv->symbol(), tptr);
 		}
 
-		return tptr->copy();
-	case Token::token_rvalue:
-		return (tree.cast <rvalue> ())->get(context)->copy();
-	case Token::ndr:
-		reffed = *((tree.cast <node_reference> ())->get());
-
-		tree.retokenize(node_value(context, reffed));
-
-		return node_value(context, tree);
-	case Token::token_node_list:
-		return (tree.cast <node_list> ())->evaluate(context);
+		return tptr;
 	case Token::ftn:
-		if (tree.empty())
-			return tree.copy_token();
-
-		for (node leaf : tree)
-			values.push_back(node_value(context, leaf));
+		if (values.empty())
+			return tree.ptr();
 
 		// TODO: shorten (cast)
-		tptr = (tree.cast <Function> ())->compute(values, context);
+		tptr = (tree.cast <Function> ())->compute(values, ctx);
 
 		return tptr->copy();
 	case Token::reg:
-		for (node leaf : tree)
-			values.push_back(node_value(context, leaf));
-
-		// TODO: add compute()
-		tptr = (*(tree.cast <Registrable> ()))(values);
+		tptr = (tree.cast <Registrable> ())->evaluate(ctx, values);
 
 		if (tptr)
-			return tptr->copy();
+			return tptr;
+			// return tptr->copy();
 
 		break;
 	case Token::alg:
-		for (node leaf : tree)
-			values.push_back(node_value(context, leaf));
-
 		aptr = tree.cast <algorithm> ();
-		tptr = aptr->execute(context, values);
+		tptr = aptr->evaluate(ctx, values);
 
 		if (tptr)
-			return tptr->copy();
+			return tptr;
+			// return tptr->copy();
 
 		break;
 	default:

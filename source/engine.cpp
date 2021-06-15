@@ -1,10 +1,9 @@
-#include <engine.hpp>
-#include <core/algorithm.hpp>
-#include <function.hpp>
-
 #include <cmath>
 
-#include <builtin/basic_io.hpp>
+#include "../engine/engine.hpp"
+#include "../engine/core/algorithm.hpp"
+#include "../engine/function.hpp"
+#include "../interpreter/builtin/basic_io.hpp"
 
 namespace zhetapi {
 
