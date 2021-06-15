@@ -1,10 +1,14 @@
 fib = {1, 1, 2, 3, 5, 8, 13}
 
-for (i in fib)
+println("fib[0] = ", fib.at(0))
+println("fib[0] = ", fib[0])
+println("fib[0] + fib[1] = ", fib[0] + fib[1])
+
+/* for (i in fib)
 	println("i = ", i)
 
 println("fib[0] = ", fib.at(0))
 
 fib.append(1, 2, 6, 7, 1, 9)
 
-println("fib = ", fib)
+println("fib = ", fib) */

@@ -282,6 +282,20 @@ Token *node_value(Engine *ctx, node tree)
 		return callee->attr(ctx, at, targs);
 	}
 
+	// TODO: put this in its own function
+	Token *iptr;
+	if (ophptr && ophptr->code == indexing) {
+		tptr = node_value(ctx, tree[0]);
+
+		Indexable *idx = dynamic_cast <Indexable *> (tptr);
+		if (!idx)
+			throw node_manager::bad_indexable();
+
+		iptr = node_value(ctx, tree[1]);
+
+		return idx->index(iptr);
+	}
+
 	// else: this func
 	Targs values = proper_args(ctx, tree);
 

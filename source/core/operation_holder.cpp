@@ -1,4 +1,4 @@
-#include <core/operation_holder.hpp>
+#include "../../engine/core/operation_holder.hpp"
 
 namespace zhetapi {
 
@@ -38,6 +38,7 @@ std::string strcodes[] = {
 	"pre incr",
 	"pre decr",
 	"attribute/method",
+	"indexing",
 	"boolean or",
 	"boolean and",
 	"absolute value",
@@ -123,6 +124,8 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = rde;
 	else if (str == ".")
 		code = attribute;
+	else if (str == "[]")
+		code = indexing;
 	else if (str == "||")
 		code = bool_or;
 	else if (str == "&&")

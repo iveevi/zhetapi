@@ -45,6 +45,7 @@ enum codes {
 	rde,	// Pre incremeny
 	rin,	// Pre decrement
 	attribute,
+	indexing,
 	bool_or,
 	bool_and,
 	abs_val,

@@ -17,6 +17,7 @@
 #include "rvalue.hpp"
 #include "operation_holder.hpp"
 #include "generator.hpp"
+#include "indexable.hpp"
 
 namespace zhetapi {
 
@@ -197,6 +198,11 @@ public:
 	class bad_token_type : public std::runtime_error {
 	public:
 		bad_token_type() : std::runtime_error("Bad token type for evaluation") {}
+	};
+
+	class bad_indexable : public std::runtime_error {
+	public:
+		bad_indexable() : std::runtime_error("Can only index Indexables") {}
 	};
 
 	// Static variables

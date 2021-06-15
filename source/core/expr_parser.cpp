@@ -1,6 +1,6 @@
-#include <core/expr_parser.hpp>
-#include <core/lvalue.hpp>
-#include <core/rvalue.hpp>
+#include "../../engine/core/expr_parser.hpp"
+#include "../../engine/core/lvalue.hpp"
+#include "../../engine/core/rvalue.hpp"
 
 namespace zhetapi {
 
@@ -401,6 +401,15 @@ parser::parser() : parser::base_type(_start)
 				_val = phoenix::construct <zhetapi::node> (
 					phoenix::new_ <variable_cluster> (_1),
 					node(blank_token())
+				)
+			]
+
+			// Index
+			| (_ident >> '[' >> _node_expr >> ']') [
+				_val = phoenix::construct <zhetapi::node> (
+					new operation_holder("[]"),
+					phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1)),
+					_2
 				)
 			]
 
