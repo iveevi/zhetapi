@@ -1,6 +1,57 @@
 #include "global.hpp"
 
-static int assess_library(string);
+static int assess_library(string file)
+{
+	Module tmp("md-tmp");
+
+	const char *dlsymerr = nullptr;
+
+	// Load the library
+	void *handle = dlopen(file.c_str(), RTLD_NOW);
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	// Get the exporter
+	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	Exporter exporter = (Exporter) ptr;
+
+	if (!exporter) {
+		printf("Failed to extract exporter\n");
+
+		return -1;
+	}
+
+	exporter(&tmp);
+
+	tmp.list_attributes(cout);
+
+	return 0;
+}
+
+int assess_libraries(vector <string> files)
+{
+	for (string file : files)
+		assess_library(file);
+
+	return 0;
+}
 
 int compile_library(vector <string> files, string output)
 {
@@ -32,100 +83,6 @@ int compile_library(vector <string> files, string output)
 		
                 return -1;
         }
-
-	return 0;
-}
-
-int assess_libraries(vector <string> files)
-{
-	for (string file : files)
-		assess_library(file);
-
-	return 0;
-}
-
-static int assess_library(string file)
-{
-	Engine tmp;
-
-	const char *dlsymerr = nullptr;
-
-	// Load the library
-	void *handle = dlopen(file.c_str(), RTLD_NOW);
-
-	// Check for errors
-	dlsymerr = dlerror();
-
-	if (dlsymerr) {
-		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
-
-		return -1;
-	}
-
-	// Get the exporter
-	void *ptr = dlsym(handle, "zhetapi_export_symbols");
-
-	// Check for errors
-	dlsymerr = dlerror();
-
-	if (dlsymerr) {
-		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
-
-		return -1;
-	}
-
-	exporter exprt = (exporter) ptr;
-
-	if (!exprt) {
-		printf("Failed to extract exporter\n");
-
-		return -1;
-	}
-
-	exprt(&tmp);
-
-	tmp.list_registered(file);
-
-	return 0;
-}
-
-int import_library(string file)
-{
-	const char *dlsymerr = nullptr;
-
-	// Load the library
-	void *handle = dlopen(file.c_str(), RTLD_NOW);
-
-	// Check for errors
-	dlsymerr = dlerror();
-
-	if (dlsymerr) {
-		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
-
-		return -1;
-	}
-
-	// Get the exporter
-	void *ptr = dlsym(handle, "zhetapi_export_symbols");
-
-	// Check for errors
-	dlsymerr = dlerror();
-
-	if (dlsymerr) {
-		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
-
-		return -1;
-	}
-
-	Exporter exprt = (Exporter) ptr;
-
-	if (!exprt) {
-		printf("Failed to extract exporter\n");
-
-		return -1;
-	}
-
-	exprt(engine);
 
 	return 0;
 }

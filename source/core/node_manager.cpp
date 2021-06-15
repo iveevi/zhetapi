@@ -1,7 +1,6 @@
-#include <engine.hpp>
-
-#include <core/common.hpp>
-#include <core/node_manager.hpp>
+#include "../../engine/engine.hpp"
+#include "../../engine/core/common.hpp"
+#include "../../engine/core/node_manager.hpp"
 
 namespace zhetapi {
 
@@ -534,27 +533,12 @@ node node_manager::expand(
 			} else if (itr != _params.end()) {
 				t = node(new node_reference(&_refs[index], pr.second, index, true), {});
 			} else if (tptr != nullptr) {
-				// Delaying actual evaluation to
-				// evaluation - better for algorithms,
-				// where values are not always known
-				// for sure
-				//
-				// TODO: Add special case for base scope,
-				// where dependencies can be ignored (does
-				// not include if/else statements)
-				//
-				// TODO: Add a block class (maybe oversees
-				// the algorithm class as well)
-				
-				// For now only operands are allowed as rvalues
-				if (tptr->caller() == Token::opd) {
-					rvalue *rv = new rvalue(pr.second);
-
-					t = node(rv);
-				} else {
-					// t = node(new rvalue(pr.second, shared_context), {});
+				// Take immediate result if the token is not an
+				// operand, otherwise we can delay
+				if (dynamic_cast <Functor *> (tptr))
 					t = node(tptr);
-				}
+				else
+					t = node(new rvalue(pr.second));
 			} else if (diff != _params.end()) {
 				t = node(new node_differential(new node_reference(&_refs[dindex], pr.second.substr(1), dindex, true)));
 			} else if (dptr != nullptr) {

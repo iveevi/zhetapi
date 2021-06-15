@@ -76,6 +76,7 @@ public:
 
 	virtual ~Token();
 
+	// TODO: also need to add documentation for methods
 	Token *attr(Engine *, const std::string &, const std::vector <Token *> &);	
 
 	bool operator!=(Token *) const;
@@ -119,12 +120,9 @@ public:
 	 * method it does not have.
 	 */
 	class unknown_attribute : public std::runtime_error {
-		std::type_index _ti;
 	public:
-		unknown_attribute(const std::type_info &ti, const std::string &msg)
-				: std::runtime_error(msg), _ti(ti) {}
-		
-		const char *what() const noexcept override;
+		unknown_attribute(const std::string &msg)
+				: std::runtime_error(msg) {}
 	};
 
 	/**
@@ -147,7 +145,11 @@ bool tokcmp(Token *, Token *);
 
 // Printing a list of tokens
 std::ostream &operator<<(std::ostream &, const std::vector <Token *> &);
-	
+
+// Macro for defining methods
+#define TOKEN_METHOD(name)	\
+	Token *name(Token *tptr, const Targs &args)
+
 }
 
 #endif

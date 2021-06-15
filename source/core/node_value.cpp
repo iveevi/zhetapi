@@ -270,17 +270,14 @@ Token *node_value(Engine *ctx, node tree)
 
 		Targs targs = proper_args(ctx, tree[1]);
 
-		/* for (node leaf : tree[1]) {
-			tptr = node_value(ctx, leaf);
-
-			if (!is_blank_token(tptr))
-				args.push_back(tptr);
-		} */
-
 		Token *callee = node_value(ctx, tree[0]);
 
 		if (!callee)
 			throw node_manager::null_attributee();
+
+		/* std::cout << "targs = " << std::endl;
+		for (auto t : targs)
+			std::cout << "\t" << t->dbg_str() << std::endl; */
 
 		return callee->attr(ctx, at, targs);
 	}

@@ -14,25 +14,24 @@
 #include <string.h>
 
 // Engine headers
-#include <all/zhplib.hpp>
+#include "../../engine/all/zhplib.hpp"
 
-#include <fourier.hpp>
-#include <linalg.hpp>
-#include <matrix.hpp>
-#include <polynomial.hpp>
-#include <tensor.hpp>
-#include <vector.hpp>
+#include "../../engine/fourier.hpp"
+#include "../../engine/linalg.hpp"
+#include "../../engine/matrix.hpp"
+#include "../../engine/polynomial.hpp"
+#include "../../engine/tensor.hpp"
+#include "../../engine/vector.hpp"
+#include "../../engine/module.hpp"
 
-#include <std/calculus.hpp>
-#include <std/functions.hpp>
-#include <std/interval.hpp>
-#include <std/activations.hpp>
-#include <std/erfs.hpp>
+#include "../../engine/std/calculus.hpp"
+#include "../../engine/std/functions.hpp"
+#include "../../engine/std/interval.hpp"
+#include "../../engine/std/activations.hpp"
+#include "../../engine/std/erfs.hpp"
 
-#include <core/module.hpp>
-
-#include <lang/parser.hpp>
-#include <lang/feeder.hpp>
+#include "../../engine/lang/parser.hpp"
+#include "../../engine/lang/feeder.hpp"
 
 // Macros
 #define TEST(name)	bool name(ostringstream &oss)

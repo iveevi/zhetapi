@@ -1,4 +1,4 @@
-#include <core/collection.hpp>
+#include "../../engine/core/collection.hpp"
 
 namespace zhetapi {
 
@@ -16,8 +16,44 @@ Token *CollectionIterator::copy() const
 	return new CollectionIterator(_index, _value->copy());
 }
 
+// Collection class methods
+
+// TODO: set macro to name mangle
+TOKEN_METHOD(col_at_method)
+{	
+	// TODO: remove assert (and use a special one that throw mistch errs)
+	// use zhp cast
+	assert(args.size() == 1);
+	
+	Collection *cptr = dynamic_cast <Collection *> (tptr);
+	OpZ *index = dynamic_cast <OpZ *> (args[0]);
+
+	return cptr->_tokens[index->get()];
+}
+
+// Uncapped append
+TOKEN_METHOD(col_append_method)
+{	
+	// TODO: remove assert (and use a special one that throw mistch errs)
+	
+	Collection *cptr = dynamic_cast <Collection *> (tptr);
+
+	cptr->_tokens.insert(cptr->_tokens.end(),
+			args.begin(),
+			args.end());
+
+	return nullptr;
+}
+
 // Collection
+Collection::Collection()
+		: Token({
+			{"at", col_at_method},
+			{"append", col_append_method}
+		}) {}
+
 Collection::Collection(const Targs &targs)
+		: Collection()
 {
 	_tokens.resize(targs.size());
 	for (size_t i = 0; i < targs.size(); i++)

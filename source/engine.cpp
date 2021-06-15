@@ -136,9 +136,10 @@ Token *Engine::get(const std::string &str)
 	
 	if (_reg_table.count(str))
 		return _reg_table[str].copy();
-	
+
+	// Return modifiable references (TODO: do the same with others)
 	if (_var_table.count(str))
-		return _var_table[str]->copy();
+		return _var_table[str];
 	
 	if (_ftr_table.count(str))
 		return _ftr_table[str].copy();

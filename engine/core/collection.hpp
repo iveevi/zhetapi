@@ -26,6 +26,8 @@ public:
 
 class Collection : public Generator, public Indexable {
 	Targs	_tokens;
+
+	Collection();
 public:
 	explicit Collection(const Targs &);
 
@@ -41,6 +43,10 @@ public:
 	virtual type caller() const override;
 	virtual std::string dbg_str() const override;
 	virtual bool operator==(Token *) const override;
+
+	// Friend methods
+	friend TOKEN_METHOD(col_at_method);
+	friend TOKEN_METHOD(col_append_method);
 };
 
 }

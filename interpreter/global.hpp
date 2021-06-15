@@ -27,11 +27,8 @@ extern Engine *engine;
 int parse(char = EOF);
 int parse(string);
 
-int compile_library(vector <string>, string);
-
-int assess_libraries(vector <string>);
-
-int import_library(string);
+int assess_libraries(Args);
+int compile_library(Args, string);
 
 Token *execute(string);
 

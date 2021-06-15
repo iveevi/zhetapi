@@ -11,7 +11,7 @@ double Function::h = 0.0001;
 // Constructors
 
 // TODO: use macro
-Token *ftn_deriv_attr(Token *tptr, const std::vector <Token *> &args)
+TOKEN_METHOD(ftn_deriv_attr)
 {
 	// TODO: remove assert (and use a special one that throw mistch errs)
 	assert(args.size() == 0);

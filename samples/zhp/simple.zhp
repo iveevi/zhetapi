@@ -1,18 +1,10 @@
-phi = (1 + sqrt(5))/2
-max = ceil((1000 + log(5)/2)/log(phi))
+fib = {1, 1, 2, 3, 5, 8, 13}
 
-println("phi = ", phi)
-println("max = ", max)
+for (i in fib)
+	println("i = ", i)
 
-digs(x) = ceil(xlog(phi) - log(5)/2)
+println("fib[0] = ", fib.at(0))
 
-println("digs(max) = ", digs(max))
+fib.append(1, 2, 6, 7, 1, 9)
 
-while (digs(max) >= 1000)
-        max--
-
-println("min term is ", max + 1)
-
-println("digs(max) = ", digs(max + 1))
-
-global xsimple = 56
+println("fib = ", fib)

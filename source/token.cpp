@@ -24,6 +24,7 @@ Token *Token::attr(Engine *context, const std::string &id, const std::vector <To
 	if (_attributes.find(id) != _attributes.end()) {
 		Token *tptr = _attributes[id];
 		if (tptr->caller() == Token::alg) {
+			// TODO: still check for arguments
 			// std::cout << "ALGORITHM attribute!" << std::endl;
 
 			algorithm *alg = dynamic_cast <algorithm *> (tptr);
@@ -36,7 +37,7 @@ Token *Token::attr(Engine *context, const std::string &id, const std::vector <To
 	if (_methods.find(id) != _methods.end())
 		return _methods[id](this, args);
 
-	throw unknown_attribute(typeid(*this), id);
+	throw unknown_attribute(id);
 
 	return nullptr;
 }
@@ -77,16 +78,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 	os << "}";
 
 	return os;
-}
-
-// Unknown attribute exception
-const char *Token::unknown_attribute::what() const noexcept
-{
-	// TODO: use the actual name instead of mangled
-	// TODO: use id() instead of typeid
-	return ("<" + type_name(_ti) + ">"
-		+ " has no attribute \""
-		+ std::runtime_error::what() + "\"").c_str();
 }
 
 // Defaulting virtual functions

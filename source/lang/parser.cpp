@@ -47,9 +47,14 @@ void run_normal(const std::string &cache, Engine *context)
 	try {
 		mg = node_manager(context, cache);
 
+		/* std::cout << "cache = \"" << cache << "\"" << std::endl;
+		std::cout << "MG:" << std::endl;
+		mg.print(); */
+
 		mg.value(context);
 	} catch (const Engine::unknown_op_overload &e)  {
-		std::cout << "err evaluating \'" << cache << "\'\n" << e.what() << std::endl;
+		std::cerr << "FIXME: Error evaluating \'" << cache << "\'\n"
+			<< e.what() << std::endl;
 		exit(-1);
 	} catch (const node_manager::undefined_symbol &e) {
 		// TODO: include line number
@@ -57,6 +62,7 @@ void run_normal(const std::string &cache, Engine *context)
 
 		exit(-1);
 	} catch (const Token::unknown_attribute &e) {
+		std::cerr << "FIXME: Error: unknown attribute \"" << e.what() << "\"" << std::endl;
 		// cout << "Error at line " << line
 		//	<< ": " << e.what() << endl;
 

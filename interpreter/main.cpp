@@ -12,6 +12,11 @@ enum mode {
 // Setup the default include directories
 bool verbose = false;
 
+Args idirs {
+	".",
+	"/usr/local/libs/zhp"
+};
+
 // Display guide
 static int guide()
 {
@@ -75,10 +80,10 @@ static int interpreter(string infile)
 		exit(-1);
 	}
 
-	Engine *ctx = new Engine();
+	Engine *ctx = new Engine(true);
 	
 	StringFeeder sf = file_feeder(infile);
-	int ret = parse_global(&sf, ctx);
+	int ret = parse_global(&sf, ctx, idirs);
 	
 	delete ctx;
 

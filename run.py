@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 # TODO: add cleanup for sudo install (CMakeFiles/ bin/ debug/)
+# TODO: Install into different directory
 import threading
 import argparse
 import os
