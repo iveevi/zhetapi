@@ -14,21 +14,6 @@ namespace zhetapi {
 // For checking termination
 bool is_terminal(char);
 
-// Smart source handler
-struct Source {
-	std::string *	src	= nullptr;
-	std::ifstream *	file	= nullptr;
-	size_t *	count	= nullptr;
-	std::mutex *	lock	= nullptr;
-
-        Source();
-	Source(const Source &);
-	
-	explicit Source(const std::string &);
-
-	~Source();
-};
-
 // Feeder abstract class
 // TODO: needs a line method
 class Feeder {

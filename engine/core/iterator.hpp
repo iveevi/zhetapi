@@ -6,8 +6,14 @@
 
 namespace zhetapi {
 
+/**
+ * @brief Iterator interface for Generator types.
+ */
 class Iterator : public Token {
 public:
+	/**
+	 * @return the value of the iterator.
+	 */
 	virtual Token *value() const = 0;
 };
 

@@ -11,6 +11,7 @@ class Engine;
 
 namespace lang {
 
+// TODO: remove this header
 node_manager compile_block(Engine *, const std::string &, Args, Pardon &);
 
 }
