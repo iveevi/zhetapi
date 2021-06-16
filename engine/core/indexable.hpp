@@ -7,9 +7,22 @@
 namespace zhetapi {
 
 // Indexable interface: indexing operator
+
+/**
+ * @brief An interface for any primitive type that can be indexed with the
+ * bracket operator, [].
+ */
 class Indexable : public virtual Token {
 public:
-	virtual Token *index(Token *) = 0;
+	/**
+	 * @brief The indexing function that must be overriden by any primitive
+	 * type that is to be indexable.
+	 * 
+	 * @param tptr the "index" to be taken.
+	 * 
+	 * @return the value at the specified "index".
+	 */
+	virtual Token *index(Token *tptr) = 0;
 };
 
 }

@@ -9,6 +9,9 @@
 
 namespace zhetapi {
 
+/**
+ * @brief Iterator for the Collection primitive type.
+ */
 class CollectionIterator : public Iterator {
 	size_t	_index = 0;
 	Token *	_value = nullptr;
