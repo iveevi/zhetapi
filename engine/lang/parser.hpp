@@ -4,6 +4,7 @@
 // C/C++ headers
 #include <iostream>
 #include <exception>
+#include <stdexcept>
 
 // Engine headers
 #include "feeder.hpp"
@@ -58,24 +59,33 @@ int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zh
 void mdl_parse(Feeder *, Engine *, Module *);
 
 // Compile parsers and runners
-node_manager cc_run(const std::string &,
+node_manager cc_run_assignment(
+		const Args &,
 		Engine *,
 		const Args &,
 		Pardon &);
 
-node_manager cc_keyword(std::string &,
+node_manager cc_run(
+		const std::string &,
+		Engine *,
+		const Args &,
+		Pardon &);
+
+node_manager cc_keyword(
+		std::string &,
 		Feeder *,
 		Engine *,
 		const Args &,
 		Pardon &,
 		State *);
 
-node_manager cc_parse(Feeder *,
+node_manager cc_parse(
+		Feeder *,
 		Engine *,
 		const Args &,
 		Pardon &);
 
-// Exceptions (put into another header)
+// TODO: Exceptions (put into another header)
 // It is to be noted that branching does not count as nesting
 class bad_identifier : public std::runtime_error {
 public:
@@ -153,6 +163,15 @@ class nested_global : public std::runtime_error {
 public:
 	nested_global()
 		: std::runtime_error("Cannot use \"global\" in a nested scope") {}
+};
+
+class fatal_error : public std::runtime_error {
+public:
+	fatal_error(const char *file, const char *function)
+		: std::runtime_error("Fatal error: at " + std::string(file)
+				+ " : " + std::string(function)
+				+ "\n\t\tPlease report this to "
+				"https://github.com/vedavamadathil/zhetapi/issues") {}
 };
 
 }

@@ -2,10 +2,11 @@
 #define COLLECTION_H_
 
 // Engine headers
-#include "generator.hpp"
+#include "interfaces/generator.hpp"
+#include "interfaces/iterator.hpp"
 #include "indexable.hpp"
-#include "iterator.hpp"
 #include "types.hpp"
+#include "method_table.hpp"
 
 namespace zhetapi {
 
@@ -13,12 +14,12 @@ namespace zhetapi {
  * @brief Iterator for the Collection primitive type.
  */
 class CollectionIterator : public Iterator {
-	size_t	_index = 0;
-	Token *	_value = nullptr;
+	Targs::iterator	_itr;
 public:
-	CollectionIterator(size_t, Token *);
+	CollectionIterator(Targs::iterator);
 
 	Token *value() const override;
+	void assign(Token *) override;
 
 	// Inherited from Token
 	virtual Token *copy() const override;
@@ -36,7 +37,7 @@ public:
 
 	// Set, Generator, Indexable
 	virtual bool present(Token *) const override;
-	virtual Iterator *begin() const override;
+	virtual Iterator *begin() override;
 	virtual Iterator *next(Iterator *) override;
 	virtual Token *index(Token *) override;
 
@@ -50,6 +51,9 @@ public:
 	// Friend methods
 	friend TOKEN_METHOD(col_at_method);
 	friend TOKEN_METHOD(col_append_method);
+
+	// Static method table
+	// static MethodTable mtable;
 };
 
 }

@@ -2,20 +2,6 @@
 
 namespace zhetapi {
 
-// Collection iterator
-CollectionIterator::CollectionIterator(size_t i, Token *tptr)
-		: _index(i), _value(tptr) {}
-
-Token *CollectionIterator::value() const
-{
-	return _value;
-}
-
-Token *CollectionIterator::copy() const
-{
-	return new CollectionIterator(_index, _value->copy());
-}
-
 // Collection class methods
 
 // TODO: set macro to name mangle
@@ -45,6 +31,30 @@ TOKEN_METHOD(col_append_method)
 	return nullptr;
 }
 
+/* TODO: fix Registering the methods
+MethodTable Collection::mtable {
+	{"at", MethodTable::MethodEntry {col_at_method, "NA"}}
+}; */
+
+// Collection iterator
+CollectionIterator::CollectionIterator(Targs::iterator itr)
+		: _itr(itr) {}
+
+Token *CollectionIterator::value() const
+{
+	return *_itr;
+}
+
+void CollectionIterator::assign(Token *tptr)
+{
+	*_itr = tptr;
+}
+
+Token *CollectionIterator::copy() const
+{
+	return new CollectionIterator(_itr);
+}
+
 // Collection
 Collection::Collection()
 		: Token({
@@ -70,12 +80,12 @@ bool Collection::present(Token *tptr) const
 	return false;
 }
 
-Iterator *Collection::begin() const
+Iterator *Collection::begin()
 {
 	if (!_tokens.size())
 		return nullptr;
 	
-	return new CollectionIterator(0, _tokens[0]);
+	return new CollectionIterator(_tokens.begin());
 }
 
 Iterator *Collection::next(Iterator *tptr)
@@ -85,9 +95,9 @@ Iterator *Collection::next(Iterator *tptr)
 	if (!citr)
 		return nullptr;
 	
-	size_t nindex = citr->_index + 1;
-	if (nindex < _tokens.size())
-		return new CollectionIterator(nindex, _tokens[nindex]);
+	Targs::iterator next = std::next(citr->_itr);
+	if (next != _tokens.end())
+		return new CollectionIterator(next);
 	
 	return nullptr;
 }
@@ -96,13 +106,15 @@ Token *Collection::index(Token *tptr)
 {
 	OpZ *tindex = dynamic_cast <OpZ *> (tptr);
 
+	// TODO: throw here?
 	if (!tindex)
 		return nullptr;
-	
+
 	size_t index = tindex->get();
 	if (index < _tokens.size())
-		return _tokens[index];
+		return new CollectionIterator(index + _tokens.begin());
 
+	// TODO: throw here?
 	return nullptr;
 }
 

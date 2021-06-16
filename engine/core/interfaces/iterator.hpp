@@ -2,14 +2,14 @@
 #define ITERATOR_H_
 
 // Engine headers
-#include "../token.hpp"
+#include "assignable.hpp"
 
 namespace zhetapi {
 
 /**
  * @brief Iterator interface for Generator types.
  */
-class Iterator : public Token {
+class Iterator : public Assignable {
 public:
 	/**
 	 * @return the value of the iterator.

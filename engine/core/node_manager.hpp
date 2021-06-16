@@ -16,7 +16,7 @@
 #include "lvalue.hpp"
 #include "rvalue.hpp"
 #include "operation_holder.hpp"
-#include "generator.hpp"
+#include "interfaces/generator.hpp"
 #include "indexable.hpp"
 
 namespace zhetapi {

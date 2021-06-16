@@ -1,7 +1,7 @@
-#include <lang/parser.hpp>
-#include <lang/error_handling.hpp>
-#include <core/node_manager.hpp>
-#include <core/common.hpp>
+#include "../../engine/lang/parser.hpp"
+#include "../../engine/lang/error_handling.hpp"
+#include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/common.hpp"
 
 namespace zhetapi {
 
@@ -38,7 +38,8 @@ static node_manager cc_run_normal(const std::string &cache,
 }
 
 // TODO: clean
-static node_manager cc_run_assignment(const std::vector <std::string> &veq,
+node_manager cc_run_assignment(
+		const Args &veq,
 		Engine *ctx,
 		const Args &args,
 		Pardon &pardon)
@@ -50,8 +51,8 @@ static node_manager cc_run_assignment(const std::vector <std::string> &veq,
 	Args fout = get_args(veq[n - 2]);
 	Args fargs(fout.begin() + 1, fout.end());
 	
-	if (fout.empty() || !is_valid_ident(fout[0]))
-		throw bad_identifier(veq[n - 2]);
+	/* if (fout.empty() || !is_valid_ident(fout[0]))
+		throw bad_identifier(veq[n - 2]); */
 
 	node_manager nm;
 	if (fout.size() > 1) {
@@ -64,11 +65,23 @@ static node_manager cc_run_assignment(const std::vector <std::string> &veq,
 
 	out.append(nm);
 
-	node ftn(new lvalue(fout[0]), l_lvalue);
-	if (fout.size() > 1)
-		ftn.append(node(new Operand <Args> (fargs)));
+	if (is_valid_ident(fout[0])) {
+		node ftn(new lvalue(fout[0]), l_lvalue);
 
-	out.append(ftn);
+		if (fout.size() > 1)
+			ftn.append(node(new Operand <Args> (fargs)));
+		
+		out.append(ftn);
+	} else {
+		// TODO: make a function
+		try {
+			out.append(node_manager(ctx, veq[n - 2],
+						args_union(args, fargs),
+						pardon));
+		} catch (const node_manager::undefined_symbol &e) {
+			std::cout << "FIXME: undefined symbol: " << e.what() << std::endl;
+		}
+	}
 
 	// Add the first
 	if (!ctx->get(fout[0]))

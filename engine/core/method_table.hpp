@@ -20,15 +20,15 @@ public:
 	using Method = Token *(*)(Token *, Engine *, const std::vector <Token *> &);
 
 	struct MethodEntry {
-		std::string	docs;
 		Method		method;
+		std::string	docs;
 	};
 
 	using Table = std::unordered_map <std::string, MethodEntry>;
 private:
 	Table _mtable;
 public:
-	MethodTable(const Table &);
+	MethodTable(Table);
 
 	Token *get(const std::string &) const;
 	const std::string &docs(const std::string &) const;

@@ -23,7 +23,7 @@ public:
 	/**
 	 * @return the starting iterator.
 	 */
-	virtual Iterator *begin() const = 0;
+	virtual Iterator *begin() = 0;
 
 	/**
 	 * @brief Get the next iterator.

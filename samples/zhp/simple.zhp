@@ -1,13 +1,9 @@
-fib = {1, 2, 5, 6, 7, 8};
+l = {1, 2, 5, 6, 7, 8};
 
-a = 12
-b = 8
-if (a in fib)
-	println("a is in!")
-else
-	println("a is not in :(")
+x = 6
 
-if (b in fib)
-	println("b is in!")
-else
-	println("b is not in :(")
+println("l = ", l)
+
+l[0] = 6
+
+println("l = ", l)

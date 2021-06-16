@@ -82,52 +82,12 @@ void run_normal(const std::string &cache, Engine *context, bool line)
 // TODO: clean
 void run_assignment(const Args &veq, Engine *ctx, bool line)
 {
-	size_t n = veq.size();
+	// TODO: is this overkill?
+	Pardon pardon;
 
-	// Get possible arguments for the first assignment
-	Args fout = get_args(veq[n - 2]);
-	Args fargs(fout.begin() + 1, fout.end());
+	node_manager chain = cc_run_assignment(veq, ctx, {}, pardon);
 
-	// Ensure valid identifier
-	if (fout.empty() || !is_valid_ident(fout[0]))
-		throw bad_identifier(veq[n - 2]);
-
-	Token *tptr = nullptr;
-	if (fout.size() > 1) {
-		std::string ftr = veq[n - 2] + " = " + veq[n - 1];
-
-		ctx->put(Function(ftr, ctx));
-		tptr = ctx->get(fout[0]);
-	} else {
-		// TODO: make this a function
-		try {
-			tptr = (node_manager(ctx, veq[n - 1])).value(ctx);
-		} catch (const node_manager::undefined_symbol &e) {
-			// TODO: include line number
-			symbol_error_msg(e.what(), "", ctx);
-		}
-
-		ctx->put(fout[0], tptr);
-	}
-
-	for (int i = n - 3; i >= 0; i--) {
-		Args kout = get_args(veq[i]);
-		Args kargs(kout.begin() + 1, kout.end());
-
-		if (kout.size() > 1 && is_valid_ident(kout[0])) {
-			if (!in_args(fargs, kargs))
-				throw args_mismatch(veq[i]);
-
-			std::string ftr = veq[i] + " = " + veq[n - 1];
-			ctx->put(Function(ftr, ctx));
-
-			tptr = ctx->get(kout[0]);
-		} else if (kout.size() > 0 && is_valid_ident(kout[0])) {
-			ctx->put(kout[0], tptr);
-		} else {
-			throw bad_identifier(veq[i]);
-		}
-	}
+	Token *tptr = chain.value(ctx);
 
 	// TODO: add a real str method
 	if (line && tptr)

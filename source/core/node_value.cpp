@@ -19,10 +19,10 @@ static Targs proper_args(Engine *ctx, const node &tree)
 	return targs;
 }
 
-static Token *assignment_node(Engine *context, const node &tree)
+static Token *assignment_node(Engine *ctx, const node &tree)
 {
 	// Evaluate first node
-	Token *tmp = node_value(context, tree[0]);
+	Token *tmp = node_value(ctx, tree[0]);
 
 	// Assign for the other nodes
 
@@ -30,16 +30,24 @@ static Token *assignment_node(Engine *context, const node &tree)
 	size_t nleaves = tree.child_count(); // Use a method instead
 
 	for (size_t i = 1; i < nleaves; i++) {
-		// Ensure that the node has type lvalue
-		if (tree[i].label() != l_lvalue)
-			throw std::runtime_error("Need an lvalue on the left side of an \'=\'");
-
+		// Ensure that the node has type Assignable (TODO: merge with lvalue)
 		lvalue *lv = tree[i].cast <lvalue> ();
+		if (lv) {
+			lv->assign(tmp, ctx);
 
-		lv->assign(tmp, context);
+			continue;
+		}
+
+		Token *tptr = node_value(ctx, tree[i]);
+		Assignable *asgn = dynamic_cast <Assignable *> (tptr);
+
+		if (asgn)
+			asgn->assign(tmp);
+		else
+			throw std::runtime_error("FIXME: Need an lvalue or Assignable on the left side of an \'=\'");
 	}
 
-	return nullptr;
+	return tmp;
 }
 
 static Token *branch_node(Engine *context, const node &tree)
