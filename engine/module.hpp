@@ -16,6 +16,7 @@ public:
 
 	// Methods
 	void add(const NamedToken &);
+	void add(const char *, Token *);
 	void add(const std::string &, Token *);
 
 	// Virtual functions
@@ -37,10 +38,10 @@ using Exporter = void (*)(Module *);
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
 #define ZHETAPI_EXPORT(symbol)				\
-	module->add(#symbol, zhetapi::Registrable(#symbol, &symbol));
+	module->add(#symbol, new zhetapi::Registrable(#symbol, &symbol));
 
 #define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)		\
-	module->add(#symbol, zhetapi::Registrable(#symbol, &ftr));
+	module->add(#symbol, new zhetapi::Registrable(#symbol, &ftr));
 
 #define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
 	module->add(#symbol, new zhetapi::Operand <type> (op));

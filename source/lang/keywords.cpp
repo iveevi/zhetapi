@@ -1,6 +1,7 @@
-#include <lang/parser.hpp>
-#include <lang/error_handling.hpp>
-#include <core/node_manager.hpp>
+#include "../../engine/lang/parser.hpp"
+#include "../../engine/lang/error_handling.hpp"
+#include "../../engine/core/node_manager.hpp"
+#include <cstdlib>
 
 namespace zhetapi {
 
@@ -15,7 +16,47 @@ bool is_true(Token *tptr)
 }
 
 // TODO: put elsewhere (helpers)
-//
+
+// Importing DLL
+static void import_dll(const std::string &file, Module &module)
+{
+	const char *dlsymerr = nullptr;
+
+	// Load the library
+	void *handle = dlopen(file.c_str(), RTLD_NOW);
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: unable to open file '%s': %s\n", file.c_str(), dlsymerr);
+
+		abort();
+	}
+
+	// Get the exporter
+	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+
+	// Check for errors
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"zhetapi_export_symbols\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		abort();
+	}
+
+	Exporter exporter = (Exporter) ptr;
+
+	if (!exporter) {
+		printf("Failed to extract exporter\n");
+
+		abort();
+	}
+
+	exporter(&module);
+}
+
 // Importing libraries
 static void import_as(const std::string &lib, Engine *ctx, State *state)
 {
@@ -23,18 +64,30 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 	std::string fname = lib.substr(0, lib.find_last_of("."));
 
 	Args lpaths;
+	bool dll = false;
+
 	for (const std::string &idir : state->idirs) {
 		// Generate library and file names as candidates
 		std::string join1 = idir + '/' + lib + ".zhplib";
 		std::string join2 = idir + '/' + lib + ".zhp";
 
-		std::fstream f1(join1);
-		if (f1.good())
+		// Check dll: use dlopen to check presence
+		void *handle = dlopen(join1.c_str(), RTLD_NOW);
+
+		// std::fstream f1(join1);
+		if (handle != nullptr) {
 			lpaths.push_back(join1);
+			dll = true;
+	
+			// close handle
+			dlclose(handle);
+		}
 
 		std::fstream f2(join2);
-		if (f2.good())
+		if (f2) {
 			lpaths.push_back(join2);
+			dll = false;
+		}
 	}
 
 	// TODO: Fancify the errors! (and throw if necessary)
@@ -58,8 +111,13 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 	// Create, read and load library (depending on file or lib)
 	Module *module = new Module(fname);
 
-	StringFeeder sf = file_feeder(lpaths[0]);
-	mdl_parse(&sf, ctx, module);
+	if (dll) {
+		import_dll(lpaths[0], *module);
+	} else {
+		StringFeeder sf = file_feeder(lpaths[0]);
+		mdl_parse(&sf, ctx, module);
+	}
+	
 	ctx->put(lib, module);
 }
 

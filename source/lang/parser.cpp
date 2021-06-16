@@ -40,7 +40,7 @@ bool State::is_nested()
 		|| brackets;
 }
 
-void run_normal(const std::string &cache, Engine *context)
+void run_normal(const std::string &cache, Engine *context, bool line)
 {
 	node_manager mg;
 
@@ -51,7 +51,12 @@ void run_normal(const std::string &cache, Engine *context)
 		std::cout << "MG:" << std::endl;
 		mg.print(); */
 
-		mg.value(context);
+		// Print on non-null result if inline interpreting
+		Token *tptr = mg.value(context);
+
+		// TODO: add a real str method
+		if (line && tptr)
+			std::cout << "\t" << tptr->dbg_str() << std::endl;
 	} catch (const Engine::unknown_op_overload &e)  {
 		std::cerr << "FIXME: Error evaluating \'" << cache << "\'\n"
 			<< e.what() << std::endl;
@@ -75,7 +80,7 @@ void run_normal(const std::string &cache, Engine *context)
 }
 
 // TODO: clean
-void run_assignment(const Args &veq, Engine *ctx)
+void run_assignment(const Args &veq, Engine *ctx, bool line)
 {
 	size_t n = veq.size();
 
@@ -94,7 +99,13 @@ void run_assignment(const Args &veq, Engine *ctx)
 		ctx->put(Function(ftr, ctx));
 		tptr = ctx->get(fout[0]);
 	} else {
-		tptr = (node_manager(ctx, veq[n - 1])).value(ctx);
+		// TODO: make this a function
+		try {
+			tptr = (node_manager(ctx, veq[n - 1])).value(ctx);
+		} catch (const node_manager::undefined_symbol &e) {
+			// TODO: include line number
+			symbol_error_msg(e.what(), "", ctx);
+		}
 
 		ctx->put(fout[0], tptr);
 	}
@@ -117,19 +128,23 @@ void run_assignment(const Args &veq, Engine *ctx)
 			throw bad_identifier(veq[i]);
 		}
 	}
+
+	// TODO: add a real str method
+	if (line && tptr)
+		std::cout << "\t" << tptr->dbg_str() << std::endl;
 }
 
-void run(const std::string &cache, Engine *context)
+void run(const std::string &cache, Engine *context, bool line)
 {
 	Args veq = eq_split(cache);
 
 	if (veq.size() > 1)
-		return run_assignment(veq, context);
+		return run_assignment(veq, context, line);
 
-	run_normal(cache, context);
+	run_normal(cache, context, line);
 }
 
-int parse_global(Feeder *feeder, Engine *context, const Args &idirs)
+int parse_global(Feeder *feeder, Engine *context, const Args &idirs, bool line)
 {
 	/* State of parsing: not static to allow multiple threads to parse
 	 * (possibly) different sources at the same time.
@@ -179,7 +194,7 @@ int parse_global(Feeder *feeder, Engine *context, const Args &idirs)
 				&& !state.cached.empty()) {
 			// cout << "cached string \"" << state.cached << "\" is ready..." << endl;
 
-			run(state.cached, context);
+			run(state.cached, context, line);
 
 			// Clear cached
 			state.cached.clear();
@@ -206,7 +221,7 @@ int parse_global(Feeder *feeder, Engine *context, const Args &idirs)
 
 	// TODO: dont forget to check parenthesis and such later
 	if (!state.cached.empty()) {
-		run(state.cached, context);
+		run(state.cached, context, line);
 
 		// Clear cached
 		state.cached.clear();

@@ -19,6 +19,11 @@ void Module::add(const NamedToken &nt)
 	add(nt.first, nt.second);
 }
 
+void Module::add(const char *name, Token *tptr)
+{
+	add(std::string(name), tptr);
+}
+
 void Module::add(const std::string &name, Token *tptr)
 {
 	// TODO: Copy token?

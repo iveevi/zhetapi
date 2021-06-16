@@ -45,14 +45,14 @@ Args eq_split(const std::string &);
 Args comma_split(const std::string &);
 
 // No forwarding needed
-void run(const std::string &, Engine *);
-void run_normal(const std::string &, Engine *);
-void run_assignment(const Args &, Engine *);
+void run(const std::string &, Engine *, bool = false);
+void run_normal(const std::string &, Engine *, bool = false);
+void run_assignment(const Args &, Engine *, bool = false);
 
 OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
 
 // Make part of public API so others and I can use
-int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zhp"});
+int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zhp"}, bool = false);
 
 // Make part of public API so others and I can use
 void mdl_parse(Feeder *, Engine *, Module *);

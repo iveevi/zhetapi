@@ -17,21 +17,17 @@ Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
 
 Token::~Token() {}
 
-Token *Token::attr(Engine *context, const std::string &id, const std::vector <Token *> &args)
+Token *Token::attr(Engine *ctx, const std::string &id, const std::vector <Token *> &args)
 {
-	// TODO: how to deal with functors?
 	// Priorotize attributes
 	if (_attributes.find(id) != _attributes.end()) {
 		Token *tptr = _attributes[id];
-		if (tptr->caller() == Token::alg) {
-			// TODO: still check for arguments
-			// std::cout << "ALGORITHM attribute!" << std::endl;
 
-			algorithm *alg = dynamic_cast <algorithm *> (tptr);
-			return alg->evaluate(context, args);
-		}
+		Functor *ftr = dynamic_cast <Functor *> (tptr);
+		if (ftr && args.size())
+			return ftr->evaluate(ctx, args);
 
-		return _attributes[id];
+		return tptr;
 	}
 
 	if (_methods.find(id) != _methods.end())

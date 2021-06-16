@@ -22,10 +22,6 @@ global y = 76, z = 80
 )");
 
 zhetapi::StringFeeder feeder2(R"(
-// import samples.zhp.simple
-include samples/zhp
-import simple
-
 test.foo()
 println("test.str = ", test.str)
 println("sum of x, y, z = ", test.x + test.y + test.z)
@@ -33,7 +29,6 @@ println("sum of x, y, z = ", test.x + test.y + test.z)
 global main_glob = 7756.3243
 
 println("main glob = ", main_glob)
-println("xsimple = ", simple.xsimple1)
 )");
 
 int main()

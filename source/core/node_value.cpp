@@ -215,6 +215,7 @@ static Token *node_null_value(Engine *context, const node &tree)
 }
 
 // TODO: refactor engine to context
+// TODO: take const ref
 Token *node_value(Engine *ctx, node tree)
 {
 	// TODO: clean up these variables
@@ -271,7 +272,6 @@ Token *node_value(Engine *ctx, node tree)
 		Targs targs = proper_args(ctx, tree[1]);
 
 		Token *callee = node_value(ctx, tree[0]);
-
 		if (!callee)
 			throw node_manager::null_attributee();
 
@@ -299,9 +299,7 @@ Token *node_value(Engine *ctx, node tree)
 	// else: this func
 	Targs values = proper_args(ctx, tree);
 
-	// TODO: Should only be functor from here
-	switch (t) {
-	case Token::oph:
+	if (t == Token::oph) {
 		tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
 
 		if (tree.label() == l_post_modifier) {
@@ -317,36 +315,17 @@ Token *node_value(Engine *ctx, node tree)
 		}
 
 		return tptr;
-	case Token::ftn:
-		if (values.empty())
-			return tree.ptr();
-
-		// TODO: shorten (cast)
-		tptr = (tree.cast <Function> ())->compute(values, ctx);
-
-		return tptr->copy();
-	case Token::reg:
-		tptr = (tree.cast <Registrable> ())->evaluate(ctx, values);
-
-		if (tptr)
-			return tptr;
-			// return tptr->copy();
-
-		break;
-	case Token::alg:
-		aptr = tree.cast <algorithm> ();
-		tptr = aptr->evaluate(ctx, values);
-
-		if (tptr)
-			return tptr;
-			// return tptr->copy();
-
-		break;
-	default:
-		break;
 	}
 
-	return nullptr;
+	Functor *ftr = dynamic_cast <Functor *> (tree.ptr());
+	if (!ftr)
+		throw node_manager::bad_token_type();
+
+	// Return the functor itself if there are no arguments
+	if (values.size())
+		ftr->evaluate(ctx, values);
+
+	return tree.copy_token();
 }
 
 // TODO: use const tree instead

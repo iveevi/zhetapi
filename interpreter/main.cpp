@@ -14,7 +14,7 @@ bool verbose = false;
 
 Args idirs {
 	".",
-	"/usr/local/libs/zhp"
+	"/usr/local/lib/zhp"
 };
 
 // Display guide
@@ -44,7 +44,7 @@ static inline string __get_dir(string file)
 // Inline kernel
 static int inline_interpret()
 {
-	Engine *ctx = new Engine();
+	Engine *ctx = new Engine(true);
 
 	while (true) {
 		cout << "> ";
@@ -61,8 +61,8 @@ static int inline_interpret()
 		if (str.empty())
 			continue;
 
-		StringFeeder sf(str);
-		parse_global(&sf, ctx);
+		StringFeeder sf('\n' + str);
+		parse_global(&sf, ctx, idirs, true);
 	}
 
 	delete ctx;

@@ -52,7 +52,8 @@ enum codes {
 	square_root,
 	round_int,
 	floor_int,
-	ceil_int
+	ceil_int,
+	cast_int
 };
 
 extern std::string strcodes[];

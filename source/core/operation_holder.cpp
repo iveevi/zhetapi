@@ -45,7 +45,8 @@ std::string strcodes[] = {
 	"square root",
 	"round",
 	"floor",
-	"ceil"
+	"ceil",
+	"int"
 };
 
 // TODO: avoid overhead by using integer input (straight from the parser)
@@ -140,6 +141,8 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = floor_int;
 	else if (str == "ceil")
 		code = ceil_int;
+	else if (str == "int")
+		code = cast_int;
 	else
 		throw bad_operation();
 }

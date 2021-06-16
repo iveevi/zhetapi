@@ -2,9 +2,11 @@
 #include <vector>
 
 // Engine include
-#include <all/zhplib.hpp>
+#include <zhetapi/all/zhplib.hpp>
+#include <zhetapi/core/collection.hpp>
+#include <zhetapi/std/numtheory.hpp>
 
 using namespace std;
-using namespace zhetapi;
 
 ZHETAPI_REGISTER(zhp_complex);
+ZHETAPI_REGISTER(zhp_sieve);

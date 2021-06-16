@@ -4,12 +4,13 @@
 
 #include "../engine/fixed_vector.hpp"
 #include "../engine/image.hpp"
+#include "../engine/std/numtheory.hpp"
 
 // Namespaces
 using namespace std;
 using namespace zhetapi;
 
-// Forward declarations
+/* Forward declarations
 class Simulation;
 class Shape;
 class Rect;
@@ -106,24 +107,31 @@ public:
 
 	bool in(const Vec3f &) const override;
 	image::Color color(const Vec3f &) const override;
-};
+}; */
 
 int main()
 {
-	Simulation sim;
+	/* Simulation sim;
 
 	Rect rect(Vec3f {0, 100, 200}, Vec3f {100, 100, 100});
 
-	sim.run();
+	sim.run(); */
+
+	std::vector <long long> primes = numtheory::sieve(100LL);
+
+	cout << "primes = {";
+	for (auto i : primes)
+		cout << i << " ";
+	cout << endl;
 }
 
-// Ray
+/* Ray
 Ray::Ray(const Vec3f &start, const Vec3f &delta)
 		: _start(start), _delta(delta.normalized()) {}
 
 Vec3f Ray::at(float t)
 {
-	return _start + t * _delta;
+	return _start; // + t * _delta;
 }
 
 // Simulation
@@ -195,4 +203,4 @@ image::Color Rect::color(const Vec3f &pos) const
 		return _col;
 
 	return image::BLACK;
-}
+} */

@@ -64,7 +64,7 @@ def clean_and_exit(sig):
 def run_and_check(suppress, *args):
     csup = ''
     if suppress:
-        csup = ' >install.log 2>&1'
+        csup = ' >> install.log 2>&1'
 
     for cmd in args:
         ret = os.system(cmd + csup)
@@ -95,7 +95,7 @@ def spinner_process(function, arguments, msg1, msg2):
 def make_target(threads, target, mode='', suppress=False):
     csup = ''
     if suppress:
-        csup = ' >install.log 2>&1'
+        csup = ' >> install.log 2>&1'
 
     if mode in ['gdb', 'cuda-gdb', 'valgrind', 'profile']:
         ret = os.system(f'cmake -DCMAKE_BUILD_TYPE=Debug . {csup}')
@@ -161,7 +161,7 @@ def install(args):
         'ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a',
     )
 
-    print('Finished installing essentials, moving on to libraries.\n')
+    print('\nFinished installing essentials, moving on to libraries.\n')
 
     spinner_process(run_and_check,
             (True, './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib', ),
@@ -175,6 +175,13 @@ def install(args):
             'Finished compiling Math library.'
     )
 
+    run_and_check(
+            True,
+            'cp -Trv include /usr/local/lib/zhp'
+    )
+
+    print('\nFinished installing everything. Get start with \'zhetapi -h\'')
+
 def zhetapi_normal(args):
     make_target(args.threads, 'zhetapi', args.mode)
 
@@ -182,7 +189,7 @@ def zhetapi_normal(args):
 
     ret = 0
     if args.mode == '':
-        ret = os.system('{exe}zhetapi {file} -L include'.format(
+        ret = os.system('{exe}zhetapi {file}'.format(
             exe=modes[args.mode],
             file=file
         ))
@@ -203,7 +210,7 @@ def zhetapi_profile(args):
     # Use the benchmark test for profiling
     file = 'testing/benchmarks/base_bench.zhp'
 
-    ret = os.system('{exe}zhetapi {file} -L include'.format(
+    ret = os.system('{exe}zhetapi {file}'.format(
         exe=modes[args.mode],
         file=file
     ))

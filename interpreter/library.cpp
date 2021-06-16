@@ -53,6 +53,7 @@ int assess_libraries(vector <string> files)
 	return 0;
 }
 
+// TODO: add gcc compilation flags
 int compile_library(vector <string> files, string output)
 {
 	string sources = "";
@@ -67,6 +68,7 @@ int compile_library(vector <string> files, string output)
 		outlib = base + ".zhplib";
 	}
 
+	// should also optimize
 	string opts = " --no-gnu-unique -g -rdynamic -fPIC -shared ";
 	string idir = " -I engine ";
 	string ldir = " -L$PWD/bin ";

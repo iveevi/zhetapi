@@ -2,7 +2,7 @@
 
 ZHETAPI_REGISTER(zhp_fprint)
 {
-	Operand <string> *file;
+	OpS *file;
 
 	zhetapi_cast(inputs, file);
 
@@ -18,7 +18,7 @@ ZHETAPI_REGISTER(zhp_fprint)
 // TODO: change to str() later
 ZHETAPI_REGISTER(zhp_fprintln)
 {
-	Operand <string> *file;
+	OpS *file;
 
 	zhetapi_cast(inputs, file);
 

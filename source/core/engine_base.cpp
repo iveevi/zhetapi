@@ -5,6 +5,8 @@ namespace zhetapi {
 // TODO: put this constructor in another file
 engine_base::engine_base()
 {
+	// TODO: add an ID or TYPE operation
+	
 	std::vector <std::pair <std::pair <std::string, std::vector <std::type_index>>, Token *>> ops;
 
 	//////////////////////////////////////////
@@ -188,6 +190,11 @@ engine_base::engine_base()
 	_add_unary_operation_ftr(ceil, Z, Z, std::ceil(in->get()));
 	_add_unary_operation_ftr(ceil, Q, Z, std::ceil((R) in->get()));
 	_add_unary_operation_ftr(ceil, R, Z, std::ceil(in->get()));
+
+	// Converion operations
+	_add_unary_operation_ftr(int, Z, Z, in->get());
+	_add_unary_operation_ftr(int, Q, Z, (Z) in->get());
+	_add_unary_operation_ftr(int, R, Z, (Z) in->get());
 	
 	//////////////////////////////////////////
 	// Vector operations

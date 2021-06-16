@@ -1,6 +1,7 @@
 #include "../../engine/core/expr_parser.hpp"
 #include "../../engine/core/lvalue.hpp"
 #include "../../engine/core/rvalue.hpp"
+#include <boost/spirit/home/support/common_terminals.hpp>
 
 namespace zhetapi {
 
@@ -78,13 +79,10 @@ parser::parser() : parser::base_type(_start)
 	_t_post = _post_incr | _post_decr;
 	_t_pre = _pre_incr | _pre_decr;
 
-	// Type parsers (change dependence on int_ and double_ parsers
-	// specifically)
-
 	// Reals
-	_z = int_;
+	_z = long_long;
 
-	_q = (int_ >> '/' >> int_) [
+	_q = (long_long >> '/' >> long_long) [
 		_val = phoenix::construct <Q> (_1, _2)
 	];
 
