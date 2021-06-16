@@ -15,12 +15,14 @@ namespace zhetapi {
 
 // Forward declarations
 class Engine;
+class MethodTable;
 
 /** 
  * @brief The basic unit of computation for the ZHP scripting language and
  * framework.
  */
 class Token {
+	MethodTable *_mtable;
 public:
 	/*
 	 * TODO: make this redundant
@@ -69,15 +71,17 @@ protected:
 	std::map <std::string, Token *>	_attributes;
 
 	// From API (Token)
-	std::map <std::string, method>	_methods;
+	// std::map <std::string, method>	_methods;
 public:
 	Token();
-	Token(const std::vector <std::pair <std::string, method>> &);
+	Token(MethodTable *);
+	// Token(const std::vector <std::pair <std::string, method>> &);
 
 	virtual ~Token();
 
 	// TODO: also need to add documentation for methods
-	Token *attr(Engine *, const std::string &, const std::vector <Token *> &);
+	virtual Token *attr(const std::string &, Engine *,
+			const std::vector <Token *> &);
 
 	bool operator!=(Token *) const;
 	void list_attributes(std::ostream & = std::cout) const;

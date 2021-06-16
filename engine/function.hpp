@@ -11,6 +11,7 @@
 #include "core/common.hpp"
 #include "core/functor.hpp"
 #include "core/node_manager.hpp"
+#include "core/method_table.hpp"
 
 namespace zhetapi {
 
@@ -67,8 +68,6 @@ public:
 
 	std::string display() const;
 
-	// Friends
-	friend Token *ftn_deriv_attr(Token *, const std::vector <Token *> &);
 
 	friend std::ostream &operator<<(std::ostream &, const Function &);
 private:
@@ -85,8 +84,13 @@ public:
 
 	// Static variables
 	static Engine *shared_context;
-
 	static double h;
+	
+	// Methods
+	friend ZHP_TOKEN_METHOD(ftn_deriv_method);
+
+	// Static method table
+	static MethodTable mtable;
 };
 
 template <class ... A>

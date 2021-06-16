@@ -1,4 +1,5 @@
 #include "../engine/token.hpp"
+#include "../engine/core/method_table.hpp"
 #include "../engine/core/types.hpp"
 #include "../engine/core/algorithm.hpp"
 
@@ -9,17 +10,13 @@ namespace zhetapi {
  */
 Token::Token() {}
 
-Token::Token(const std::vector <std::pair <std::string, method>> &attrs)
-{
-	for (auto attr_pr : attrs)
-		this->_methods[attr_pr.first] = attr_pr.second;
-}
+Token::Token(MethodTable *mtable) : _mtable(mtable) {}
 
 Token::~Token() {}
 
-Token *Token::attr(Engine *ctx, const std::string &id, const std::vector <Token *> &args)
+Token *Token::attr(const std::string &id, Engine *ctx, const Targs &args)
 {
-	// Priorotize attributes
+	// TODO: module only Priorotize attributes
 	if (_attributes.find(id) != _attributes.end()) {
 		Token *tptr = _attributes[id];
 
@@ -30,12 +27,7 @@ Token *Token::attr(Engine *ctx, const std::string &id, const std::vector <Token 
 		return tptr;
 	}
 
-	if (_methods.find(id) != _methods.end())
-		return _methods[id](this, args);
-
-	throw unknown_attribute(id);
-
-	return nullptr;
+	return _mtable->get(id, this, ctx, args);
 }
 
 bool Token::operator!=(Token *tptr) const
@@ -50,9 +42,7 @@ bool tokcmp(Token *a, Token *b)
 
 void Token::list_attributes(std::ostream &os) const
 {
-	os << "Methods:" << std::endl;
-	for (const auto &m : _methods)
-		os << "\t" << m.first << std::endl;
+	_mtable->list(os);
 
 	os << "Attributes:" << std::endl;
 	for (const auto &a : _attributes)

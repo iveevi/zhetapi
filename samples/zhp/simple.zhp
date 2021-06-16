@@ -7,3 +7,4 @@ println("l = ", l)
 l[0] = 6
 
 println("l = ", l)
+println("l[0] = ", l.at(0))

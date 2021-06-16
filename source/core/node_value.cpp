@@ -306,7 +306,7 @@ Token *node_value(Engine *ctx, node tree)
 		for (auto t : targs)
 			std::cout << "\t" << t->dbg_str() << std::endl; */
 
-		return callee->attr(ctx, at, targs);
+		return callee->attr(at, ctx, targs);
 	}
 
 	// TODO: put this in its own function

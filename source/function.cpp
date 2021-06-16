@@ -8,10 +8,10 @@ Engine *Function::shared_context = new Engine();
 
 double Function::h = 0.0001;
 
-// Constructors
+// Methods
 
 // TODO: use macro
-TOKEN_METHOD(ftn_deriv_attr)
+ZHP_TOKEN_METHOD(ftn_deriv_method)
 {
 	// TODO: remove assert (and use a special one that throw mistch errs)
 	assert(args.size() == 0);
@@ -22,18 +22,18 @@ TOKEN_METHOD(ftn_deriv_attr)
 	return fptr->differentiate(fptr->_params[0]).copy();
 }
 
-Function::Function()
-		: _threads(1), Token({
-			{"derivative", ftn_deriv_attr}
-		}) {}
+MethodTable Function::mtable ({
+	{"derivative", {&ftn_deriv_method, "NA"}}
+});
+
+// Constructors
+Function::Function() : _threads(1), Token(&Function::mtable) {}
 
 Function::Function(const char *str) : Function(std::string(str)) {}
 
 // TODO: Take an Engine as an input as well: there is no need to delay rvalue resolution
 Function::Function(const std::string &str, Engine *context)
-		: _threads(1), Token({
-			{"derivative", ftn_deriv_attr}
-		})
+		: _threads(1), Token(&Function::mtable)
 {
 	// TODO: Remove this (duplication)
 	std::string pack;
@@ -117,15 +117,12 @@ Function::Function(const std::string &str, Engine *context)
 Function::Function(const std::string &symbol, const std::vector
 		<std::string> &params, const node_manager &manager) :
 		_symbol(symbol), _params(params),
-		_manager(manager), _threads(1), Token({
-			{"derivative", ftn_deriv_attr}
-		}) {}
+		_manager(manager), _threads(1), Token(&Function::mtable) {}
 
 Function::Function(const Function &other) :
 		_symbol(other._symbol), _params(other._params),
-		_manager(other._manager), _threads(1), Token({
-			{"derivative", ftn_deriv_attr}
-		}) {}
+		_manager(other._manager), _threads(1),
+		Token(&Function::mtable) {}
 
 // Getters
 bool Function::is_variable(const std::string &str) const

@@ -5,7 +5,7 @@ namespace zhetapi {
 // Collection class methods
 
 // TODO: set macro to name mangle
-TOKEN_METHOD(col_at_method)
+ZHP_TOKEN_METHOD(col_at_method)
 {	
 	// TODO: remove assert (and use a special one that throw mistch errs)
 	// use zhp cast
@@ -18,7 +18,7 @@ TOKEN_METHOD(col_at_method)
 }
 
 // Uncapped append
-TOKEN_METHOD(col_append_method)
+ZHP_TOKEN_METHOD(col_append_method)
 {	
 	// TODO: remove assert (and use a special one that throw mistch errs)
 	
@@ -31,10 +31,11 @@ TOKEN_METHOD(col_append_method)
 	return nullptr;
 }
 
-/* TODO: fix Registering the methods
-MethodTable Collection::mtable {
-	{"at", MethodTable::MethodEntry {col_at_method, "NA"}}
-}; */
+// Registering the methods
+MethodTable Collection::mtable ({
+	{"at", {&col_at_method, "NA"}},
+	{"append", {&col_append_method, "NA"}}
+});
 
 // Collection iterator
 CollectionIterator::CollectionIterator(Targs::iterator itr)
@@ -56,11 +57,7 @@ Token *CollectionIterator::copy() const
 }
 
 // Collection
-Collection::Collection()
-		: Token({
-			{"at", col_at_method},
-			{"append", col_append_method}
-		}) {}
+Collection::Collection() : Token(&Collection::mtable) {}
 
 Collection::Collection(const Targs &targs)
 		: Collection()

@@ -8,6 +8,7 @@
 
 // Engine headers
 #include "../token.hpp"
+#include "common.hpp"
 
 namespace zhetapi {
 
@@ -30,13 +31,14 @@ private:
 public:
 	MethodTable(Table);
 
-	Token *get(const std::string &) const;
+	Token *get(const std::string &, Token *, Engine *, const Targs &) const;
 	const std::string &docs(const std::string &) const;
+	void list(std::ostream &) const;
 };
 
 // Method creation macros
 #define ZHP_TOKEN_METHOD(name)				\
-	Token *name(Token *tptr, const Targs &args)
+	Token *name(Token *tptr, Engine *ctx, const Targs &args)
 
 }
 
