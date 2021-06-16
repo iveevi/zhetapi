@@ -1,4 +1,4 @@
-#include <lang/parser.hpp>
+#include "../../engine/lang/parser.hpp"
 
 namespace zhetapi {
 
@@ -32,6 +32,18 @@ static node_manager cc_if(Feeder *feeder,
 
 	node_manager nblock = cc_parse(feeder, context,
 			args, pardon);
+
+	if (ncond.get_label() == l_generator_in) {
+		ncond.set_label(l_set_in);
+
+		lvalue *lv = ncond[0].cast <lvalue> ();
+
+		// TODO: Throw an error that redirects to the issue page
+		// if (!lv) throw
+
+		// TODO: Gotta free or something
+		ncond[0].retokenize(new rvalue(lv->symbol()));
+	}
 
 	nif.set_label(l_if_branch);
 	nif.append(ncond);
@@ -73,6 +85,19 @@ static node_manager cc_elif(Feeder *feeder,
 
 	node_manager nblock = cc_parse(feeder, context,
 			args, pardon);
+
+	// TODO: put in its own function
+	if (ncond.get_label() == l_generator_in) {
+		ncond.set_label(l_set_in);
+
+		lvalue *lv = ncond[0].cast <lvalue> ();
+
+		// TODO: Throw an error that redirects to the issue page
+		// if (!lv) throw
+
+		// TODO: Gotta free or something
+		ncond[0].retokenize(new rvalue(lv->symbol()));
+	}
 
 	nelif.set_label(l_elif_branch);
 	nelif.append(ncond);

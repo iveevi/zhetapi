@@ -1,20 +1,13 @@
-/* fib = {1, 1, 2, 3, 5, 8, 13}
+fib = {1, 2, 5, 6, 7, 8};
 
-println("fib[0] = ", fib.at(0))
-println("fib[0] = ", fib[0])
-println("fib[0] + fib[1] = ", fib[0] + fib[1])
+a = 12
+b = 8
+if (a in fib)
+	println("a is in!")
+else
+	println("a is not in :(")
 
-for (i in fib)
-	println("i = ", i)
-
-println("fib[0] = ", fib.at(0))
-
-fib.append(1, 2, 6, 7, 1, 9)
-
-println("fib = ", fib) */
-
-import math
-
-ps = math.sieve(10000000)
-
-println("ps = ", ps)
+if (b in fib)
+	println("b is in!")
+else
+	println("b is not in :(")

@@ -138,9 +138,21 @@ static OpZ *check_if(Feeder *feeder,
 	std::string paren = feeder->extract_parenthesized();
 
 	// Skip construction step or something
-	node_manager nm(context, paren);
+	node_manager ncond(context, paren);
+	
+	if (ncond.get_label() == l_generator_in) {
+		ncond.set_label(l_set_in);
 
-	Token *tptr = nm.value(context);
+		lvalue *lv = ncond[0].cast <lvalue> ();
+
+		// TODO: Throw an error that redirects to the issue page
+		// if (!lv) throw
+
+		// TODO: Gotta free or something
+		ncond[0].retokenize(new rvalue(lv->symbol()));
+	}
+
+	Token *tptr = ncond.value(context);
 
 	// TODO: Add a skip whitespace
 	while (isspace(c = feeder->feed()));
@@ -177,8 +189,21 @@ static OpZ *check_elif(Feeder *feeder,
 
 	std::string paren = feeder->extract_parenthesized();
 
-	node_manager nm(context, paren);
-	Token *tptr = nm.value(context);
+	node_manager ncond(context, paren);
+	
+	if (ncond.get_label() == l_generator_in) {
+		ncond.set_label(l_set_in);
+
+		lvalue *lv = ncond[0].cast <lvalue> ();
+
+		// TODO: Throw an error that redirects to the issue page
+		// if (!lv) throw
+
+		// TODO: Gotta free or something
+		ncond[0].retokenize(new rvalue(lv->symbol()));
+	}
+
+	Token *tptr = ncond.value(context);
 
 	while (isspace(c = feeder->feed()));
 	if (!state->bdone && is_true(tptr)) {

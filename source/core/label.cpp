@@ -57,6 +57,7 @@ std::string strlabs[] = {
 
 	// "in" operator
 	"generator-in",
+	"set-in",
 
 	// Miscellaneious
 	"constant",

@@ -47,7 +47,6 @@ set(ZHETAPI_SOURCE
 	source/lang/keywords.cpp
 	source/lang/mdl_parser.cpp
 	source/lang/parser.cpp
-	source/lang/source.cpp
 	source/lang/vm.cpp
 
 	source/std/functions.cpp

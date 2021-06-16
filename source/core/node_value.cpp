@@ -184,6 +184,23 @@ static Token *for_node(Engine *context, const node &tree)
 	return output;
 }
 
+static Token *set_in_node(Engine *ctx, const node &tree)
+{
+	// For now assume that the first node is an lvalue
+	rvalue *rv = tree[0].cast <rvalue> ();
+
+	Set *set = dynamic_cast <Set *> (node_value(ctx, tree[1]));
+
+	// if (!rv) throw
+	// if (!set) throw
+	
+	// TODO: use token factories to return
+	if (set->present(rv->get(ctx)))
+		return new OpB(true);
+
+	return new OpB(false);
+}
+
 static Token *node_null_value(Engine *context, const node &tree)
 {
 	Token *output = nullptr;
@@ -196,6 +213,8 @@ static Token *node_null_value(Engine *context, const node &tree)
 		return while_node(context, tree);
 	case l_for_loop:
 		return for_node(context, tree);
+	case l_set_in:
+		return set_in_node(context, tree);
 	case l_break_loop:
 		return new Operand <Token *> ((Token *) 0x1);
 	case l_continue_loop:

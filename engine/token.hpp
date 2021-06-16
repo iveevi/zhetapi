@@ -77,7 +77,7 @@ public:
 	virtual ~Token();
 
 	// TODO: also need to add documentation for methods
-	Token *attr(Engine *, const std::string &, const std::vector <Token *> &);	
+	Token *attr(Engine *, const std::string &, const std::vector <Token *> &);
 
 	bool operator!=(Token *) const;
 	void list_attributes(std::ostream & = std::cout) const;

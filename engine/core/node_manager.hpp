@@ -50,7 +50,7 @@ public:
 	node &operator[](size_t);
 	const node &operator[](size_t) const;
 
-	// Tree
+	// Tree (TODO: remove this)
 	const node &tree() const;
 
 	// Writing to file
@@ -58,6 +58,7 @@ public:
 
 	// Properties
 	bool empty() const;	// Is the _tree node empty?
+	lbl get_label() const;
 	size_t num_args() const;
 	const node &get_tree() const;
 

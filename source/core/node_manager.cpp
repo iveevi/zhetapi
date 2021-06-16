@@ -181,6 +181,11 @@ bool node_manager::empty() const
 	return _tree.empty();
 }
 
+lbl node_manager::get_label() const
+{
+	return _tree.label();
+}
+
 size_t node_manager::num_args() const
 {
 	return _params.size();
@@ -1239,6 +1244,9 @@ void node_manager::print(bool address) const
 // Labeling utilities
 void node_manager::label(node &ref)
 {
+	if (ref.null())
+		return;
+
 	switch (ref.caller()) {
 	case Token::opd:
 		ref.relabel(constant_label(ref.ptr()));

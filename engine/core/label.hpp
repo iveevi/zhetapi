@@ -66,6 +66,7 @@ enum lbl {
 	
 	// "in" operator
 	l_generator_in,
+	l_set_in,
 
 	// Miscellaneious
 	l_constant,

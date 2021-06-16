@@ -507,6 +507,9 @@ parser::parser() : parser::base_type(_start)
 					nullptr, l_generator_in, _1, _2
 				)
 			]
+
+			// TODO: add "in" for expr in expr (actually add as a
+			// node_factor 
 			
 			| _node_term [_val = _1] >> *(
 				(_t0_bin >> _node_term) [
