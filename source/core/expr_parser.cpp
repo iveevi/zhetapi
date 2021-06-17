@@ -502,7 +502,7 @@ parser::parser() : parser::base_type(_start)
 	 */
 	_node_expr = (
 			// TODO: use expression instead of rvalue
-			(_node_lvalue >> "in" >> _node_rvalue) [
+			(_node_lvalue >> "in" >> _node_term) [
 				_val = phoenix::construct <zhetapi::node> (
 					nullptr, l_generator_in, _1, _2
 				)

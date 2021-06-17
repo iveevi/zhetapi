@@ -55,7 +55,8 @@ static void import_dll(const std::string &file, Module &module, const char *lint
 
 	// TODO: color in yellow
 	if (strcmp(linted_version, lver()) != 0) {
-		printf("WARNING: Version of module \"%s\", <%s>, "
+		// TODO: add color macros
+		printf("\x1b[1;33m" "WARNING:" "\x1b[0m" " Version of module \"%s\", <%s>, "
 				"differs from interpreter's version, <%s>\n",
 				file.c_str(), lver(), linted_version);
 	}

@@ -1,6 +1,7 @@
 #include "../../engine/engine.hpp"
 #include "../../engine/core/common.hpp"
 #include "../../engine/core/node_manager.hpp"
+#include <stdexcept>
 
 namespace zhetapi {
 
@@ -153,7 +154,7 @@ static Token *for_node(Engine *context, const node &tree)
 	// Push new stack
 	context = push_and_ret_stack(context);
 
-	// NOTE: New struct (types) - All operand <Token *> from 0->10 are special (0 = null, 1 = break, etc)
+	// TODO: replace with special
 	Token *break_token = new Operand <Token *> ((Token *) 0x1);
 	Token *continue_token = new Operand <Token *> ((Token *) 0x2);
 
@@ -161,10 +162,13 @@ static Token *for_node(Engine *context, const node &tree)
 	node body = tree[1];
 
 	lvalue *lv = lin[0].cast <lvalue> ();
-	Generator *gen = dynamic_cast <Generator *>
-			(node_value(context, lin[1]));
+
+	Token *expr = node_value(context, lin[1]);
+	Generator *gen = dynamic_cast <Generator *> (expr);
 	// if (!lv) throw
-	// if (!gen) throw
+
+	if (!gen)
+		throw std::runtime_error("Can only for-loop with generators, trying to loop through <" + std::string(typeid(*expr).name()) + ">");
 
 	Iterator *itr = gen->begin();
 	while (itr) {
@@ -350,7 +354,7 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 
 	// Return the functor itself if there are no arguments
 	if (values.size())
-		ftr->evaluate(ctx, values);
+		return ftr->evaluate(ctx, values);
 
 	return tree.copy_token();
 }

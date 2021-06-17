@@ -2,7 +2,9 @@
 add_executable(zhetapi
 	interpreter/main.cpp
 	interpreter/library.cpp
-	interpreter/builtin/basic_io.cpp
+	# TODO: Do we need to add these here are well?
+	interpreter/builtin/io.cpp
+	interpreter/builtin/utility.cpp
 )
 
 target_link_libraries(zhetapi PUBLIC zhp-static)

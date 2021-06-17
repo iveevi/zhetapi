@@ -37,9 +37,6 @@ Token *execute(string);
 
 vector <string> split(string);
 
-// Include builtin
-#include "builtin/basic_io.hpp"
-
 // Version function
 constexpr const char *__get_linted_version__()
 {

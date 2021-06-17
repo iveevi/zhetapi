@@ -3,7 +3,7 @@
 #include "../engine/engine.hpp"
 #include "../engine/core/algorithm.hpp"
 #include "../engine/function.hpp"
-#include "../interpreter/builtin/basic_io.hpp"
+#include "../interpreter/builtin/builtin.hpp"
 
 namespace zhetapi {
 
@@ -18,6 +18,7 @@ Engine::Engine(bool defaults) : engine_base()
 
 		put(Registrable("print", &bt_print));
 		put(Registrable("println", &bt_println));
+		put(Registrable("range", &bt_range));
 	}
 }
 

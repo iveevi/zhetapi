@@ -53,7 +53,8 @@ set(ZHETAPI_SOURCE
 	source/std/functions.cpp
 	source/std/interval.cpp
 
-	interpreter/builtin/basic_io.cpp
+	interpreter/builtin/io.cpp
+	interpreter/builtin/utility.cpp
 )
 
 # Compile shared and static library
