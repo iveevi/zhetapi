@@ -218,7 +218,7 @@ public:
 // Global functions
 
 // TODO: take in node as a reference (const)
-Token *node_value(Engine *, node);
+Token *node_value(Engine *, node, bool = false);
 Token *node_sequential_value(Engine *, node);
 
 }

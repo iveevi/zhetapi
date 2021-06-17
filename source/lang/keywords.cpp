@@ -18,7 +18,7 @@ bool is_true(Token *tptr)
 // TODO: put elsewhere (helpers)
 
 // Importing DLL
-static void import_dll(const std::string &file, Module &module)
+static void import_dll(const std::string &file, Module &module, const char *linted_version)
 {
 	const char *dlsymerr = nullptr;
 
@@ -33,9 +33,35 @@ static void import_dll(const std::string &file, Module &module)
 
 		abort();
 	}
+	
+	// Display the linted version
+	void *ptr1 = dlsym(handle, "__zhp_linted_version__");
+	
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"__zhp_linted_version__\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		abort();
+	}
+
+	const char *(*lver)() = (const char *(*)()) ptr1;
+
+	if (!lver) {
+		printf("Failed to extract version linter\n");
+
+		abort();
+	}
+
+	// TODO: color in yellow
+	if (strcmp(linted_version, lver()) != 0) {
+		printf("WARNING: Version of module \"%s\", <%s>, "
+				"differs from interpreter's version, <%s>\n",
+				file.c_str(), lver(), linted_version);
+	}
 
 	// Get the exporter
-	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+	void *ptr2 = dlsym(handle, "zhetapi_export_symbols");
 
 	// Check for errors
 	dlsymerr = dlerror();
@@ -46,7 +72,7 @@ static void import_dll(const std::string &file, Module &module)
 		abort();
 	}
 
-	Exporter exporter = (Exporter) ptr;
+	Exporter exporter = (Exporter) ptr2;
 
 	if (!exporter) {
 		printf("Failed to extract exporter\n");
@@ -112,7 +138,7 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 	Module *module = new Module(fname);
 
 	if (dll) {
-		import_dll(lpaths[0], *module);
+		import_dll(lpaths[0], *module, state->lver);
 	} else {
 		StringFeeder sf = file_feeder(lpaths[0]);
 		mdl_parse(&sf, ctx, module);

@@ -31,6 +31,8 @@ struct State {
 
 	Args		idirs;
 
+	const char *	lver;
+
 	State(bool = false);
 
 	void check_nest(char);
@@ -53,7 +55,7 @@ void run_assignment(const Args &, Engine *, bool = false);
 OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
 
 // Make part of public API so others and I can use
-int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zhp"}, bool = false);
+int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zhp"}, const char * = "Untitled", bool = false);
 
 // Make part of public API so others and I can use
 void mdl_parse(Feeder *, Engine *, Module *);

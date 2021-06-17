@@ -22,7 +22,7 @@ class MethodTable;
  * framework.
  */
 class Token {
-	MethodTable *_mtable;
+	MethodTable *_mtable = nullptr;
 public:
 	/*
 	 * TODO: make this redundant
@@ -62,16 +62,6 @@ public:
 		token_module,
 		token_collection
 	};
-	
-	// TODO: Maybe differentiate between const vector & and vector & methods
-	// TODO: add a context to the arguments
-	using method = Token *(*)(Token *, const std::vector <Token *> &);
-protected:
-	// From ZHP (algorithm, function, etc)
-	std::map <std::string, Token *>	_attributes;
-
-	// From API (Token)
-	// std::map <std::string, method>	_methods;
 public:
 	Token();
 	Token(MethodTable *);
@@ -82,9 +72,9 @@ public:
 	// TODO: also need to add documentation for methods
 	virtual Token *attr(const std::string &, Engine *,
 			const std::vector <Token *> &);
+	virtual void list_attributes(std::ostream & = std::cout) const;
 
 	bool operator!=(Token *) const;
-	void list_attributes(std::ostream & = std::cout) const;
 
 	// Change caller to a public member (static)
 

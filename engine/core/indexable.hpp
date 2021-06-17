@@ -19,10 +19,12 @@ public:
 	 * type that is to be indexable.
 	 * 
 	 * @param tptr the "index" to be taken.
+	 * @param cref determines whether to return a reference to the indexed
+	 * value.
 	 * 
 	 * @return the value at the specified "index".
 	 */
-	virtual Token *index(Token *tptr) = 0;
+	virtual Token *index(Token *tptr, bool ref = false) = 0;
 };
 
 }

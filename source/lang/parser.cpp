@@ -104,7 +104,7 @@ void run(const std::string &cache, Engine *context, bool line)
 	run_normal(cache, context, line);
 }
 
-int parse_global(Feeder *feeder, Engine *context, const Args &idirs, bool line)
+int parse_global(Feeder *feeder, Engine *context, const Args &idirs, const char *linted_version, bool line)
 {
 	/* State of parsing: not static to allow multiple threads to parse
 	 * (possibly) different sources at the same time.
@@ -113,8 +113,9 @@ int parse_global(Feeder *feeder, Engine *context, const Args &idirs, bool line)
 	 */
 	State state;
 
-	// Set idirs
+	// Set idirs and lver
 	state.idirs = idirs;
+	state.lver = linted_version;
 
 	char c;
 	while ((c = feeder->feed()) != EOF) {

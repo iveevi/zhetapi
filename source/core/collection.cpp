@@ -99,7 +99,7 @@ Iterator *Collection::next(Iterator *tptr)
 	return nullptr;
 }
 
-Token *Collection::index(Token *tptr)
+Token *Collection::index(Token *tptr, bool mref)
 {
 	OpZ *tindex = dynamic_cast <OpZ *> (tptr);
 
@@ -108,8 +108,13 @@ Token *Collection::index(Token *tptr)
 		return nullptr;
 
 	size_t index = tindex->get();
-	if (index < _tokens.size())
-		return new CollectionIterator(index + _tokens.begin());
+	if (mref) {
+		if (index < _tokens.size())
+			return new CollectionIterator(index + _tokens.begin());
+	} else {
+		if (index < _tokens.size())
+			return _tokens[index];
+	}
 
 	// TODO: throw here?
 	return nullptr;

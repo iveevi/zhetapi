@@ -1,18 +1,30 @@
 #ifndef MODULE_H_
 #define MODULE_H_
 
+// C/C++ headers
+#include <unordered_map>
+
 // Engine headers
 #include "token.hpp"
+#include "core/common.hpp"
 
 namespace zhetapi {
 
 using NamedToken = std::pair <std::string, Token *>;
 
 class Module : public Token {
-	std::string	_name;
+	std::string					_name;
+
+	// Add documentation for attributes as well
+	std::unordered_map <std::string, Token *>	_attributes;
 public:
 	Module(const std::string &);
 	Module(const std::string &, const std::vector <NamedToken> &);
+
+	// Overriding attr
+	Token *attr(const std::string &, Engine *, const Targs &) override;
+
+	void list_attributes(std::ostream &) const override;
 
 	// Methods
 	void add(const NamedToken &);
@@ -20,14 +32,14 @@ public:
 	void add(const std::string &, Token *);
 
 	// Virtual functions
-	virtual type caller() const;
-	virtual uint8_t id() const;
-	virtual std::string dbg_str() const;
-	virtual Token *copy() const;
-	virtual bool operator==(Token *) const;
+	virtual type caller() const override;
+	virtual uint8_t id() const override;
+	virtual std::string dbg_str() const override;
+	virtual Token *copy() const override;
+	virtual bool operator==(Token *) const override;
 };
 
-// Aliases
+// Aliases (TODO: put this inside module)
 using Exporter = void (*)(Module *);
 
 // Library creation macros

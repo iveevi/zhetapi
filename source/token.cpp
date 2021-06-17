@@ -16,18 +16,12 @@ Token::~Token() {}
 
 Token *Token::attr(const std::string &id, Engine *ctx, const Targs &args)
 {
-	// TODO: module only Priorotize attributes
-	if (_attributes.find(id) != _attributes.end()) {
-		Token *tptr = _attributes[id];
+	if (_mtable)
+		return _mtable->get(id, this, ctx, args);
 
-		Functor *ftr = dynamic_cast <Functor *> (tptr);
-		if (ftr && args.size())
-			return ftr->evaluate(ctx, args);
+	throw unknown_attribute(id);
 
-		return tptr;
-	}
-
-	return _mtable->get(id, this, ctx, args);
+	return nullptr;
 }
 
 bool Token::operator!=(Token *tptr) const
@@ -42,11 +36,8 @@ bool tokcmp(Token *a, Token *b)
 
 void Token::list_attributes(std::ostream &os) const
 {
-	_mtable->list(os);
-
-	os << "Attributes:" << std::endl;
-	for (const auto &a : _attributes)
-		os << "\t" << a.first << " = " << a.second->dbg_str() << std::endl;
+	if (_mtable)
+		_mtable->list(os);
 }
 
 std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)

@@ -38,7 +38,7 @@ static Token *assignment_node(Engine *ctx, const node &tree)
 			continue;
 		}
 
-		Token *tptr = node_value(ctx, tree[i]);
+		Token *tptr = node_value(ctx, tree[i], true);
 		Assignable *asgn = dynamic_cast <Assignable *> (tptr);
 
 		if (asgn)
@@ -243,7 +243,7 @@ static Token *node_null_value(Engine *context, const node &tree)
 
 // TODO: refactor engine to context
 // TODO: take const ref
-Token *node_value(Engine *ctx, node tree)
+Token *node_value(Engine *ctx, node tree, bool mref)
 {
 	// TODO: clean up these variables
 	Token *tptr;
@@ -320,7 +320,7 @@ Token *node_value(Engine *ctx, node tree)
 
 		iptr = node_value(ctx, tree[1]);
 
-		return idx->index(iptr);
+		return idx->index(iptr, mref);
 	}
 
 	// else: this func

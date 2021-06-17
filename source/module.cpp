@@ -1,5 +1,6 @@
 #include "../engine/module.hpp"
 #include "../engine/core/types.hpp"
+#include "../engine/core/functor.hpp"
 
 namespace zhetapi {
 
@@ -12,6 +13,34 @@ Module::Module(const std::string &name, const std::vector <NamedToken> &parts)
 	// Copy token?
 	for (const NamedToken &nt : parts)
 		_attributes[nt.first] = nt.second;
+}
+
+Token *Module::attr(const std::string &id, Engine *ctx, const Targs &args)
+{
+	// Priorotize attributes
+	if (_attributes.find(id) != _attributes.end()) {
+		Token *tptr = _attributes[id];
+
+		Functor *ftr = dynamic_cast <Functor *> (tptr);
+		if (ftr && args.size())
+			return ftr->evaluate(ctx, args);
+
+		return tptr;
+	}
+
+	return Token::attr(id, ctx, args);
+}
+
+void Module::list_attributes(std::ostream &os) const
+{
+	// Attributes first
+	os << "Attributes:" << std::endl;
+	for (const auto &a : _attributes) {
+		os << "\t" << a.first << " = "
+			<< a.second->dbg_str() << std::endl;
+	}
+
+	Token::list_attributes(os);
 }
 
 void Module::add(const NamedToken &nt)

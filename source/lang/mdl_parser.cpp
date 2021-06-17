@@ -63,9 +63,6 @@ static void mdl_if(Feeder *feeder,
 		Module *module,
 		State *state)
 {
-	// Save end
-	char end = feeder->get_end();
-
 	// Update the state
 	state->branch = true;
 
@@ -81,9 +78,6 @@ static void mdl_elif(Feeder *feeder,
 		Module *module,
 		State *state)
 {
-	// Save end
-	char end = feeder->get_end();
-
 	// TODO: throw exception
 	if (!state->branch)
 		throw bad_elif();
@@ -104,9 +98,6 @@ static void mdl_else(Feeder *feeder,
 		Module *module,
 		State *state)
 {
-	// Save end
-	char end = feeder->get_end();
-
 	// Throw exception
 	if (!state->branch)
 		throw bad_else();
@@ -127,9 +118,6 @@ static void mdl_while(Feeder *feeder,
 		Module *module,
 		State *state)
 {
-	// Save end
-	char end = feeder->get_end();
-
 	char c;
 	while ((c = feeder->feed()) != '(');
 

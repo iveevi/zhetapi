@@ -39,7 +39,7 @@ public:
 	virtual bool present(Token *) const override;
 	virtual Iterator *begin() override;
 	virtual Iterator *next(Iterator *) override;
-	virtual Token *index(Token *) override;
+	virtual Token *index(Token *, bool) override;
 
 	// Inherited from Token
 	virtual uint8_t id() const override;

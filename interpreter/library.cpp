@@ -1,4 +1,5 @@
 #include "global.hpp"
+#include <dlfcn.h>
 
 static int assess_library(string file)
 {
@@ -18,8 +19,34 @@ static int assess_library(string file)
 		return -1;
 	}
 
-	// Get the exporter
-	void *ptr = dlsym(handle, "zhetapi_export_symbols");
+	// Display the linted version
+	void *ptr1 = dlsym(handle, "__zhp_linted_version__");
+	
+	dlsymerr = dlerror();
+
+	if (dlsymerr) {
+		printf("Fatal error: could not find \"__zhp_linted_version__\" in file '%s': %s\n", file.c_str(), dlsymerr);
+
+		return -1;
+	}
+
+	const char *(*lver)() = (const char *(*)()) ptr1;
+
+	if (!lver) {
+		printf("Failed to extract version linter\n");
+
+		return -1;
+	}
+
+	printf("Linted version = <%s>\n", lver());
+
+	if (strcmp(__get_linted_version__(), lver()) == 0)
+		printf("\tSame as interpreter version\n");
+	else
+		printf("\tWARNING: Differs from interpreter's version, <%s>", __get_linted_version__());
+
+	// Get the exporter (TODO: add __ to the name)
+	void *ptr2 = dlsym(handle, "zhetapi_export_symbols");
 
 	// Check for errors
 	dlsymerr = dlerror();
@@ -30,7 +57,7 @@ static int assess_library(string file)
 		return -1;
 	}
 
-	Exporter exporter = (Exporter) ptr;
+	Exporter exporter = (Exporter) ptr2;
 
 	if (!exporter) {
 		printf("Failed to extract exporter\n");
@@ -41,6 +68,10 @@ static int assess_library(string file)
 	exporter(&tmp);
 
 	tmp.list_attributes(cout);
+
+	dlclose(handle);
+
+	// TODO: Handle errors
 
 	return 0;
 }
@@ -56,7 +87,8 @@ int assess_libraries(vector <string> files)
 // TODO: add gcc compilation flags
 int compile_library(vector <string> files, string output)
 {
-	string sources = "";
+	// Assuming zhetapi is already installed
+	string sources = "/usr/local/include/zhetapi/version.cpp ";
 	for (string file : files)
 		sources += file + " ";
 
@@ -69,7 +101,10 @@ int compile_library(vector <string> files, string output)
 	}
 
 	// should also optimize
-	string opts = " --no-gnu-unique -g -rdynamic -fPIC -shared ";
+	string opts = " --no-gnu-unique -g -rdynamic -fPIC -shared -D__ZHETAPI_LINTED_VERSION__=\'\""
+		+ std::string(__get_linted_version__()) + "\"\'";
+
+	// TOOD: remove idir
 	string idir = " -I engine ";
 	string ldir = " -L$PWD/bin ";
 	string libs = " -lzhp ";

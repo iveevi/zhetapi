@@ -46,6 +46,7 @@ static int inline_interpret()
 {
 	Engine *ctx = new Engine(true);
 
+	cout << "Running Zhetapi version <" << __get_linted_version__() << ">" << endl;
 	while (true) {
 		cout << "> ";
 
@@ -62,7 +63,7 @@ static int inline_interpret()
 			continue;
 
 		StringFeeder sf('\n' + str);
-		parse_global(&sf, ctx, idirs, true);
+		parse_global(&sf, ctx, idirs, __get_linted_version__(), true);
 	}
 
 	delete ctx;
@@ -83,7 +84,7 @@ static int interpreter(string infile)
 	Engine *ctx = new Engine(true);
 	
 	StringFeeder sf = file_feeder(infile);
-	int ret = parse_global(&sf, ctx, idirs);
+	int ret = parse_global(&sf, ctx, idirs, __get_linted_version__());
 	
 	delete ctx;
 

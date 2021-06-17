@@ -1,6 +1,9 @@
 #ifndef GLOBAL_H_
 #define GLOBAL_H_
 
+// Defining the version
+#define __zhp_version__ "v1.0.0"
+
 // C/C++ headers
 #include <iostream>
 #include <vector>
@@ -36,5 +39,11 @@ vector <string> split(string);
 
 // Include builtin
 #include "builtin/basic_io.hpp"
+
+// Version function
+constexpr const char *__get_linted_version__()
+{
+	return __zhp_version__ " " __TIMESTAMP__;
+}
 
 #endif
