@@ -43,7 +43,7 @@ vector <string> split(string);
 // Version function
 constexpr const char *__get_linted_version__()
 {
-	return __zhp_version__ " " __TIMESTAMP__;
+	return __zhp_version__ " " __TIME__ " " __DATE__;
 }
 
 #endif

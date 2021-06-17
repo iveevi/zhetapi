@@ -43,7 +43,7 @@ static int assess_library(string file)
 	if (strcmp(__get_linted_version__(), lver()) == 0)
 		printf("\tSame as interpreter version\n");
 	else
-		printf("\tWARNING: Differs from interpreter's version, <%s>", __get_linted_version__());
+		printf("\tWARNING: Differs from interpreter's version, <%s>\n", __get_linted_version__());
 
 	// Get the exporter (TODO: add __ to the name)
 	void *ptr2 = dlsym(handle, "zhetapi_export_symbols");
