@@ -335,10 +335,9 @@ parser::parser() : parser::base_type(_start)
 	];
 
 	// Nodes
+	_node_pack = _start % ',' | eps;
 
-	_node_pack = _start % ',';
-
-	_collection = ('{' >> _node_pack >> '}') [
+	_collection =  ('{' >> _node_pack >> '}') [
 		_val = phoenix::new_ <node_list> (_1)
 	];
 
@@ -527,6 +526,7 @@ parser::parser() : parser::base_type(_start)
 	_node_expr.name("node expression");
 	_node_term.name("node term");
 	_node_opd.name("node Operand");
+	_node_pack.name("node pack");
 
 	_plus.name("addition");
 	_minus.name("subtraction");
@@ -534,6 +534,8 @@ parser::parser() : parser::base_type(_start)
 	_divide.name("division");
 	_power.name("exponentiation");
 	_attribute.name("attribute/method");
+
+	_collection.name("collection");
 	
 	_o_str.name("literal operand");
 
@@ -623,21 +625,25 @@ parser::parser() : parser::base_type(_start)
 	_mcgq_inter.name("intermediate matrix complex general rational");
 	_mcgr_inter.name("intermediate matrix complex general real");
 
-#ifdef	ZHP_DEBUG
+// #define ZHP_DEBUG
+#ifdef ZHP_DEBUG
 
 	debug(_start);
 
 	debug(_node_expr);
 	debug(_node_term);
 	debug(_node_opd);
+	debug(_node_pack);
 
-	debug(_plus);
+	/* debug(_plus);
 	debug(_minus);
 	debug(_times);
 	debug(_divide);
 	debug(_power);
-
-	debug(_o_str);
+	debug(_attr); */
+	debug(_collection);
+	
+	/* debug(_o_str);
 
 	debug(_o_z);
 	debug(_o_q);
@@ -701,7 +707,7 @@ parser::parser() : parser::base_type(_start)
 	debug(_mcq);
 	debug(_mcr);
 	debug(_mcgq);
-	debug(_mcgr);
+	debug(_mcgr); */
 
 #endif
 

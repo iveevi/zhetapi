@@ -1,11 +1,17 @@
-println("l1:")
-for (i in range(10))
-	println("\ti = ", i)
+/* import math
 
-println("l2:")
-for (i in range(2, 10))
-	println("\ti = ", i)
+println("gcd = ", math.gcd(12, 14))
+println("gcd = ", math.gcd(36, 12))
+println("gcd = ", math.gcd(12, 12))
 
-println("l3:")
-for (i in range(2, 10, 2))
-	println("\ti = ", i)
+println("lcm = ", math.lcm(12, 14))
+println("lcm = ", math.lcm(36, 12))
+println("lcm = ", math.lcm(12, 12))
+
+println("modexp = ", math.modexp(2, 10, 1000))
+println("modexp = ", math.modexp(3, 6, 100))
+
+println("modexp = ", math.modexp(999, 999, 10^10)) */
+
+g = {}
+println("g = ", g)

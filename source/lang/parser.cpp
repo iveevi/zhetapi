@@ -86,6 +86,8 @@ void run_assignment(const Args &veq, Engine *ctx, bool line)
 	Pardon pardon;
 
 	node_manager chain = cc_run_assignment(veq, ctx, {}, pardon);
+	/* std::cout << "chain:" << std::endl;
+	chain.print(); */
 
 	Token *tptr = chain.value(ctx);
 

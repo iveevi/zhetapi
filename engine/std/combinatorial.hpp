@@ -102,7 +102,7 @@ T integral_binom(T n, T k)
  * function.
  */
 template <class T>
-T gcd(T a, T b, T (*mod)(T, T) = ::std::fmod, T eps = 0)
+T gcd(T a, T b, T (*mod)(T, T) = std::fmod, T eps = 0)
 {
 	if (a == 0 || b == 0)
 		return 1;
@@ -135,44 +135,6 @@ T lcm(T a, T b, T(*mod)(T, T) = std::fmod, T eps = 0)
 	return a * b / gcd(a, b, mod, eps);
 }
 
-
-/**
- * @brief Integral equivalent of the general
- * gcd function, preferably used for integer
- * types.
- */
-template <class T>
-T integral_gcd(T a, T b)
-{
-	if (a == 0 || b == 0)
-		return 1;
-
-	a = ::std::abs(a);
-	b = ::std::abs(b);
-
-	if (a > b)
-		::std::swap(a, b);
-
-	while (b % a != 0) {
-		b %= a;
-
-		if (a > b)
-			::std::swap(a, b);
-	}
-
-	return ::std::min(a, b);
-}
-
-/**
- * @brief Integral equivalent of the
- * lcm function.
- */
-template <class T>
-T integral_lcm(T a, T b)
-{
-	return a * b / integral_gcd(a, b);
-}
-
 /**
  * @brief Bernoulli sequence generator, generates
  * a list (array, vector) of the first arbitrary
@@ -180,7 +142,7 @@ T integral_lcm(T a, T b)
  * binomial function.
  */
 template <class T>
-::std::vector <T> bernoulli_sequence_real(T n, T (*gamma)(T) = ::std::tgamma)
+std::vector <T> bernoulli_sequence_real(T n, T (*gamma)(T) = ::std::tgamma)
 {
 	::std::vector <T> ibs = {1};
 

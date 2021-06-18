@@ -1,11 +1,13 @@
+l = {}
 x = 0
 
 i = 0
 n = 0
 while (i < 100000) {
+	l.append(i)
 	x = x + i * i
 	n = n + 3
-    i++
+	i++
 }
 
 println("final x = ", x)

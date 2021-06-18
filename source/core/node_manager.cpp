@@ -104,6 +104,7 @@ node_manager::node_manager(
 	siter iter = str.begin();
 	siter end = str.end();
 
+	// std::cout << "PARSING \"" << str << "\"" << std::endl;
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
         if (!r) {
