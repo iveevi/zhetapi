@@ -1,6 +1,5 @@
-#include <core/types.hpp>
-
-#include <function.hpp>
+#include "../../engine/function.hpp"
+#include "../../engine/core/types.hpp"
 
 namespace zhetapi {
 
@@ -46,7 +45,7 @@ bool types::is_one(Token *tptr)
 }
 
 // TODO: what is this?
-std::string types::symbol(const std::type_index &type)
+const char *types::symbol(const std::type_index &type)
 {
 	// Complex numbers
 	// TODO: use ID and a hash table

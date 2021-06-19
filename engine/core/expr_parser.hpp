@@ -104,6 +104,7 @@ struct parser : qi::grammar <siter, node (), qi::space_type> {
 	qi::rule <siter, Token *(), qi::space_type>			_minus;
 	qi::rule <siter, Token *(), qi::space_type>			_dot;
 	qi::rule <siter, Token *(), qi::space_type>			_mod;
+	qi::rule <siter, Token *(), qi::space_type>			_factorial;
 	
 	qi::rule <siter, Token *(), qi::space_type>			_times;
 	qi::rule <siter, Token *(), qi::space_type>			_divide;

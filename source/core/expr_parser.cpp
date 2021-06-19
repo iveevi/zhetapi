@@ -27,6 +27,7 @@ parser::parser() : parser::base_type(_start)
 	_add_operation_symbol(_power, ^);
 	_add_operation_symbol(_dot, @);
 	_add_operation_symbol(_mod, %);
+	_add_operation_symbol(_factorial, !);
 	// _add_operation_symbol(_in, in);
 	
 	// Binary comparison
@@ -447,6 +448,13 @@ parser::parser() : parser::base_type(_start)
 	_node_factor = (
 			_node_prep [_val = _1]
 
+			| (_node_opd >> _factorial) [
+				_val = phoenix::construct <zhetapi::node> (
+					_2,
+					_1
+				)
+			]
+
 			| _node_opd [_val = _1] >> *(
 				(_node_rept) [
 					_val = phoenix::construct <zhetapi::node> (
@@ -487,6 +495,12 @@ parser::parser() : parser::base_type(_start)
 
 			| (_node_var >> _t_post) [
 				_val = phoenix::construct <zhetapi::node> (_2, _1)
+			]
+
+			| (_minus >> _node_term) [
+				_val = phoenix::construct <zhetapi::node> (
+					new operation_holder("*"), _2, node(new OpZ(-1))
+				)
 			]
 
 			| _node_factor [_val = _1] >> *(

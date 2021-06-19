@@ -1,17 +1,3 @@
-/* import math
+x = -(8!)
 
-println("gcd = ", math.gcd(12, 14))
-println("gcd = ", math.gcd(36, 12))
-println("gcd = ", math.gcd(12, 12))
-
-println("lcm = ", math.lcm(12, 14))
-println("lcm = ", math.lcm(36, 12))
-println("lcm = ", math.lcm(12, 12))
-
-println("modexp = ", math.modexp(2, 10, 1000))
-println("modexp = ", math.modexp(3, 6, 100))
-
-println("modexp = ", math.modexp(999, 999, 10^10)) */
-
-g = {}
-println("g = ", g)
+println("x = ", x)

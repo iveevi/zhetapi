@@ -56,6 +56,7 @@ using Targs = std::vector <Token *>;
 		return id;				\
 	}
 
+// TODO: redunant?
 #define get_zhp_id(type)	\
 	zhp_id <type> ()
 
@@ -105,7 +106,7 @@ struct types {
 	static bool is_zero(Token *);
 	static bool is_one(Token *);
 
-	static std::string symbol(const ::std::type_index &);
+	static const char *symbol(const std::type_index &);
 };
 
 std::string type_name(const std::type_index &);
