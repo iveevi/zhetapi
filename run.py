@@ -204,6 +204,27 @@ def zhetapi_normal(args):
     if (ret != 0):
         clean_and_exit(-1)
 
+# TODO: un run and check
+def zhetapi_memcheck(args):
+    make_target(args.threads, 'zhetapi', args.mode)
+
+    # Use the benchmark test for profiling
+    file = 'samples/zhp/simple.zhp'
+
+    ret = os.system('{exe}zhetapi {file}'.format(
+        exe=modes[args.mode],
+        file=file
+    ))
+
+    if (ret != 0):
+        clean_and_exit(-1)
+
+    os.system('mkdir -p debug/')
+    os.system('mv zhetapi debug/')
+
+    if (ret != 0):
+        clean_and_exit(-1)
+
 def zhetapi_profile(args):
     make_target(args.threads, 'zhetapi', args.mode)
 
@@ -232,6 +253,8 @@ def zhetapi_profile(args):
 def zhetapi(args):
     if args.mode == 'profile':
         zhetapi_profile(args)
+    elif args.mode == 'valgrind':
+        zhetapi_memcheck(args)
     else:
         zhetapi_normal(args)
 

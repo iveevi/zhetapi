@@ -1,0 +1,92 @@
+#ifndef ENODE_H_
+#define ENODE_H_
+
+// C/C++ headers
+#include <cstdint>
+#include <vector>
+#include <exception>
+#include <stdexcept>
+
+// Engine headers
+#include "primitive.hpp"
+#include "primoptns.hpp"
+
+// TODO: separate source and header
+namespace zhetapi {
+
+// New node (expression node)
+struct Enode {
+	using Leaves = std::vector <Enode>;
+
+	// Local type
+	enum Type : uint8_t {
+		etype_operation,
+		etype_primtive,
+		etype_special,
+		etype_miscellaneous
+	};
+
+	// Union saves space
+	// - also allows us to greatly optimize prim-prim operations
+	union Data {
+		OpCode code;
+		uint8_t misc;		// 1 for branching, 2 for while, ...
+		Primitive prim;
+		// Token *tok;		// representing special types
+	} data;
+
+	Type type; // 1 for op, 2 for prim, 3 for tok/spec type, 4 for misc
+	std::vector <Enode> leaves;
+
+	// Type specific constructors
+	Enode();
+
+	Enode(OpCode);
+	Enode(OpCode, const Leaves &);	
+	Enode(OpCode, const Enode &, const Enode &);
+
+	Enode(const Primitive &);
+
+	// Debugging stuff
+	void print(int = 0, std::ostream & = std::cout) const;
+};
+
+// Printing
+std::ostream &operator<<(std::ostream &, const Enode &);
+
+// Value type (special type or primitive) TODO: switch to variant
+struct Variant {
+	// Local type
+	enum Type : uint8_t {
+		var_null,
+		var_prim,
+		var_spec
+	};
+
+	union {
+		Primitive prim;
+		// Struct type
+	} data;
+
+	Type type; // 0 for null, 1 for prim, 2 for struct/spec
+
+	std::string str() const;
+};
+
+// Add spec type
+inline Variant vnull()
+{
+	return {{}, Variant::var_null};
+}
+
+inline Variant vprim(const Primitive &prim)
+{
+	return {{.prim = prim}, Variant::var_prim};
+}
+
+// TODO: add symtab
+Variant enode_value(const Enode &);
+
+}
+
+#endif

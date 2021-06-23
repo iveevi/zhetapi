@@ -19,6 +19,8 @@ set(ZHETAPI_SOURCE
 	source/core/collection.cpp
 	source/core/common.cpp
 	source/core/engine_base.cpp
+	source/core/enode.cpp
+	source/core/enode_parser.cpp
 	source/core/expr_parser.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp
@@ -31,13 +33,14 @@ set(ZHETAPI_SOURCE
 	source/core/node_reference.cpp
 	source/core/node_value.cpp
 	source/core/operation.cpp
-	source/core/operation_base.cpp
 	source/core/operation_holder.cpp
+	source/core/primitive.cpp
+	source/core/primoptns.cpp
 	source/core/rvalue.cpp
 	source/core/special_tokens.cpp
 	source/core/types.cpp
-	source/core/wildcard.cpp
 	source/core/variable_cluster.cpp
+	source/core/wildcard.cpp
 
 	source/lang/cc_keywords.cpp
 	source/lang/cc_parser.cpp

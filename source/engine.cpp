@@ -95,7 +95,7 @@ void Engine::put(const std::string &str, Token *tptr)
 
 	// Insert appropriately
 	if (_var_table.count(str))
-		_var_table[str] = tptr->copy();
+		_var_table[str] = tptr;
 	else
 		_var_table.insert(std::make_pair(str, tptr->copy()));
 }
