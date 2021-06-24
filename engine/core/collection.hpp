@@ -4,7 +4,7 @@
 // Engine headers
 #include "interfaces/generator.hpp"
 #include "interfaces/iterator.hpp"
-#include "indexable.hpp"
+#include "interfaces/indexable.hpp"
 #include "types.hpp"
 #include "method_table.hpp"
 
@@ -28,6 +28,7 @@ public:
 	friend class Collection;
 };
 
+// TODO: add a guide for a generic implementation of a class
 class Collection : public Generator, public Indexable {
 	Targs	_tokens;
 

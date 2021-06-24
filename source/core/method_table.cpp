@@ -2,6 +2,9 @@
 
 namespace zhetapi {
 
+MethodTable::MethodTable() {}
+
+// TODO: take const ref
 MethodTable::MethodTable(Table table) : _mtable(table) {}
 
 Token *MethodTable::get(

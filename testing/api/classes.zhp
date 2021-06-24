@@ -1,0 +1,20 @@
+alg test_collection()
+{
+	println("List tests:")
+
+	x = {1, 2, 34}
+
+	x.append(12, 543, 232.2332)
+
+	println(x)
+
+	x[0] = 13
+
+	println(x[0])
+	println("new x = ", x)
+}
+
+alg test_dictionary()
+{
+	println("Dict:")
+}

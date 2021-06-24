@@ -21,6 +21,7 @@
 
 // Engine headers
 #include "enode.hpp"
+#include "primitive.hpp"
 
 namespace zhetapi {
 
@@ -44,8 +45,8 @@ public:
 	// Add alilas for rule <siter, ...>
 private:
 	// Primitive types
-	Rule <Siter, Enode (), Space>		_int;
-	Rule <Siter, Enode (), Space>		_double;
+	Rule <Siter, Primitive (), Space>	_int;
+	Rule <Siter, Primitive (), Space>	_double;
 
 	// Operations
 	Rule <Siter, OpCode, Space>		_addition;
@@ -58,7 +59,7 @@ private:
 	Rule <Siter, OpCode, Space>		_t1_bin;
 	
 	// Structural
-	Rule <Siter, Enode (), Space>		_operand;
+	Rule <Siter, Primitive (), Space>	_primop;
 	Rule <Siter, Enode (), Space>		_term;
 	
 	Rule <Siter, Enode (), Space>		_start;

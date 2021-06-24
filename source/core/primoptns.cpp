@@ -7,43 +7,23 @@ namespace zhetapi {
 // TODO: macro-fy
 Primitive optn_add_int_int(const Primitive &v1, const Primitive &v2)
 {
-	return Primitive {
-		{
-			.i = (v1.data.i + v2.data.i)
-		},
-		id_int
-	};
+	return Primitive(v1.data.i + v2.data.i);
 }
 
 Primitive optn_sub_int_int(const Primitive &v1, const Primitive &v2)
 {
-	return Primitive {
-		{
-			.i = (v1.data.i - v2.data.i)
-		},
-		id_int
-	};
+	return Primitive(v1.data.i - v2.data.i);
 }
 
 Primitive optn_mul_int_int(const Primitive &v1, const Primitive &v2)
 {
-	return Primitive {
-		{
-			.i = (v1.data.i * v2.data.i)
-		},
-		id_int
-	};
+	return Primitive(v1.data.i * v2.data.i);
 }
 
 Primitive optn_div_int_int(const Primitive &v1, const Primitive &v2)
 {
 	// Gotta return a double
-	return Primitive {
-		{
-			.i = (v1.data.i / v2.data.i)
-		},
-		id_int
-	};
+	return Primitive(v1.data.i / v2.data.i);
 }
 
 // Filling out the operation base

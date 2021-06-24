@@ -18,6 +18,7 @@ set(ZHETAPI_SOURCE
 	source/core/class.cpp
 	source/core/collection.cpp
 	source/core/common.cpp
+	source/core/dictionary.cpp
 	source/core/engine_base.cpp
 	source/core/enode.cpp
 	source/core/enode_parser.cpp
@@ -57,6 +58,7 @@ set(ZHETAPI_SOURCE
 	source/std/functions.cpp
 	source/std/interval.cpp
 
+	interpreter/builtin/classes.cpp
 	interpreter/builtin/io.cpp
 	interpreter/builtin/utility.cpp
 )

@@ -10,6 +10,18 @@
 
 namespace zhetapi {
 
+// TODO: change to namespace
+struct types {
+	static Token *one();
+	
+	static bool is_zero(Token *);
+	static bool is_one(Token *);
+
+	static const char *symbol(const std::type_index &);
+};
+
+std::string type_name(const std::type_index &);
+
 // Forward declarations
 class Function;
 class algorithm;
@@ -44,7 +56,38 @@ using OpMatCmpZ = Operand <MatCmpZ>;
 using OpMatCmpQ = Operand <MatCmpQ>;
 using OpMatCmpR = Operand <MatCmpR>;
 
+// Comparison (for containers)
+class TokenEqual {
+public:
+	bool operator()(Token *a, Token *b) const {
+		return tokcmp(a, b);
+	}
+};
+
+// Hashing (for containers)
+class TokenHash {
+public:
+	size_t operator()(Token *a) const {
+		OpZ *oz;
+		if ((oz = dynamic_cast <OpZ *> (a)))
+			return std::hash <Z> {} (oz->get());
+
+		throw unhashable(typeid(*a));
+	}
+
+	// Exceptions
+	class unhashable : std::runtime_error {
+	public:
+		unhashable(const std::type_index &ti)
+				: std::runtime_error("Cannot hash type <"
+						+ std::string(types::symbol(ti))
+						+ ">") {}
+	};
+};
+
 using Targs = std::vector <Token *>;
+using TTargs = std::vector <std::pair <Token *, Token *>>;
+using THTable = std::unordered_map <Token *, Token *, TokenHash, TokenEqual>;
 
 #define	ONE	1
 
@@ -99,17 +142,6 @@ set_zhp_id(Registrable, 23);
 set_zhp_id(Module, 24);
 
 set_zhp_id(Collection, 25);
-
-struct types {
-	static Token *one();
-	
-	static bool is_zero(Token *);
-	static bool is_one(Token *);
-
-	static const char *symbol(const std::type_index &);
-};
-
-std::string type_name(const std::type_index &);
 
 }
 

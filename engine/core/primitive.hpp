@@ -27,14 +27,15 @@ struct Primitive {
 	
 	TypeId id;
 
+	// Constructors
+	Primitive();
+	Primitive(bool);
+	Primitive(long long int);
+	Primitive(long double);
+
 	// Methods
 	std::string str() const;
 };
-
-// TODO: Make as constructors instead
-Primitive p_bool(bool);
-Primitive p_int(long long int);
-Primitive p_double(long double);
 
 }
 

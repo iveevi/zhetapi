@@ -29,6 +29,7 @@ public:
 private:
 	Table _mtable;
 public:
+	MethodTable();
 	MethodTable(Table);
 
 	Token *get(const std::string &, Token *, Engine *, const Targs &) const;

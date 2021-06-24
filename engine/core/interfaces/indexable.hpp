@@ -2,7 +2,7 @@
 #define INDEXABLE_H_
 
 // Engine headers
-#include "../token.hpp"
+#include "../../token.hpp"
 
 namespace zhetapi {
 

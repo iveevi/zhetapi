@@ -2,7 +2,6 @@
 
 #include "builtin.hpp"
 
-using namespace zhetapi;
 using namespace std;
 
 namespace zhetapi {

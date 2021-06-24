@@ -20,6 +20,7 @@ struct Enode {
 
 	// Local type
 	enum Type : uint8_t {
+		etype_null,
 		etype_operation,
 		etype_primtive,
 		etype_special,
@@ -63,26 +64,21 @@ struct Variant {
 		var_spec
 	};
 
-	union {
-		Primitive prim;
+	union Data {
+		char		null;
+		Primitive	prim;
 		// Struct type
 	} data;
 
 	Type type; // 0 for null, 1 for prim, 2 for struct/spec
 
+	// Constructors
+	Variant();			// Null variant
+	Variant(const Primitive &);
+
+	// Methods
 	std::string str() const;
 };
-
-// Add spec type
-inline Variant vnull()
-{
-	return {{}, Variant::var_null};
-}
-
-inline Variant vprim(const Primitive &prim)
-{
-	return {{.prim = prim}, Variant::var_prim};
-}
 
 // TODO: add symtab
 Variant enode_value(const Enode &);

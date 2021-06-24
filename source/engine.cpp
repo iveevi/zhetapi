@@ -19,6 +19,7 @@ Engine::Engine(bool defaults) : engine_base()
 		put(Registrable("print", &bt_print));
 		put(Registrable("println", &bt_println));
 		put(Registrable("range", &bt_range));
+		put(Registrable("dict", &bt_dict));
 	}
 }
 

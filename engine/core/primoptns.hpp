@@ -78,7 +78,7 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 	// Throw here
 	throw bad_overload(code, arg1.id, arg2.id);
 
-	return {{}, id_null};
+	return Primitive();
 }
 
 }

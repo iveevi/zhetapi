@@ -11,10 +11,6 @@ static EnodeParser eparser;
 		boost::spirit::qi::_val = code		\
 	]
 
-// Create adapted functions
-BOOST_PHOENIX_ADAPT_FUNCTION(Primitive, ph_p_int, p_int, 1);
-BOOST_PHOENIX_ADAPT_FUNCTION(Primitive, ph_p_double, p_double, 1);
-
 EnodeParser::EnodeParser()
 		: EnodeParser::base_type(_start)
 {
@@ -37,19 +33,19 @@ EnodeParser::EnodeParser()
 
 	// Primitives
 	_int = qi::long_long [
-		_val = ph_p_int(_1)
+		_val = construct <Primitive> (_1)
 	];
 	
 	_double = (qi::real_parser <long double, qi::strict_real_policies <long double>> ()) [
-		_val = ph_p_double(_1)
+		_val = construct <Primitive> (_1)
 	];
 
 	// Structural
-	_operand = _double | _int;
+	_primop = (_double | _int);
 
 	// TODO: change operand to factor
 	_term = (
-		_operand [_val = _1] >> *(_t1_bin >> _operand) [
+		_primop [_val = _1] >> *(_t1_bin >> _primop) [
 			_val = construct <Enode> (_1, _val, _2)
 		]
 	);

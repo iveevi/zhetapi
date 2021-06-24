@@ -2,6 +2,11 @@
 
 namespace zhetapi {
 
+Primitive::Primitive() : data({.b = false}), id(id_null) {}
+Primitive::Primitive(bool b) : data({.b = b}), id(id_bool) {}
+Primitive::Primitive(long long int i) : data({.i = i}), id(id_int) {}
+Primitive::Primitive(long double d) : data({.d = d}), id(id_double) {}
+
 std::string Primitive::str() const
 {
 	switch (id) {
@@ -16,21 +21,6 @@ std::string Primitive::str() const
 	}
 
 	return "?";
-}
-
-Primitive p_bool(bool b)
-{
-	return {{.b = b}, id_bool};
-}
-
-Primitive p_int(long long int i)
-{
-	return {{.i = i}, id_int};
-}
-
-Primitive p_double(long double d)
-{
-	return {{.d = d}, id_double};
 }
 
 }

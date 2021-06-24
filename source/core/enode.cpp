@@ -2,7 +2,15 @@
 
 namespace zhetapi {
 
-Enode::Enode() {}
+// TODO: Add spec type
+Variant::Variant()
+		: data({.null = 0}), type(var_null) {}
+
+Variant::Variant(const Primitive &prim)
+		: data(Data {.prim = prim}), type(var_prim) {}
+
+// Enode
+Enode::Enode() : data({.code = l_add}), type(etype_null) {}
 
 Enode::Enode(OpCode code, const Leaves &lvs)
 		: data(Data {.code = code}), type(etype_operation),
@@ -81,13 +89,13 @@ std::string Variant::str() const
 
 Variant op_prim_prim(OpCode code, const Variant &v1, const Variant &v2)
 {
-	return vprim(do_prim_optn(code, v1.data.prim, v2.data.prim));
+	return Variant(do_prim_optn(code, v1.data.prim, v2.data.prim));
 }
 
 Variant enode_value(const Enode &en)
 {
-	Variant v1 = vnull();
-	Variant v2 = vnull();
+	Variant v1;
+	Variant v2;
 
 	Primitive *p1 = nullptr;
 	Primitive *p2 = nullptr;
@@ -110,9 +118,9 @@ Variant enode_value(const Enode &en)
 		
 		break;
 	case Enode::etype_primtive:
-		return vprim(en.data.prim);
+		return Variant(en.data.prim);
 	case Enode::etype_special:
-		return {{}, Variant::var_null};
+		return Variant();
 	case Enode::etype_miscellaneous:
 		break;
 	default:

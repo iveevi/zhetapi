@@ -60,7 +60,8 @@ public:
 		token_rvalue,
 		token_node_list,
 		token_module,
-		token_collection
+		token_collection,
+		token_dictionary
 	};
 public:
 	Token();
