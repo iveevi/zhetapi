@@ -112,3 +112,62 @@ may be added in the future.
 .. toctree::
         :maxdepth: 2
         :hidden:
+
+Loops
+-----
+
+The ZHP scripting language supports two styles of looping: ``while`` looping and
+``for`` looping. These are distinct and are generally not exchangable.
+
+While Loops
+~~~~~~~~~~~
+
+While loops follow the same principles as from other languages. The body of the
+loops is repeatedly executed as long as the condition is evaluate to ``true``.
+
+.. code-block::
+
+
+        # Loops can be single line...
+        x = 0
+        while (x < 10)
+                println("x = ", x)
+        
+        # Or multiline, for larger bodies
+        x = 256
+        while (x > 0) {
+                println("x = ", x)
+
+                x = x / 2
+        }
+
+In the future, warning against possible infinite loops may be displayed for
+monotonic inequalities (such as ``x > 0`` or ``x < 100``).
+
+For Loops
+~~~~~~~~~
+
+All for loops must consist of a "generator" clause of the form ``[identifier] in
+[expression]``, which is then followed by the body of the loop. The
+``identifier`` in the generator clause must be a valid identifier, and
+``expression`` must evaluate to a Generator type (such as a Collection). The
+loop then iterates over the Generator, assigns the values to ``[indentifier]``
+and executes the body of the loop.
+
+.. code-block::
+
+        # l is a collection of values
+        l = {1, 2, "three", 4.0}
+
+        for (x in l)
+                println("x = ", l)
+        
+        # A more common and useful example
+        for (x in range(4))
+                println("l[x] = ", l[x])
+
+Modules
+-------
+
+There are currently two ways of organizing source code into separate files and
+libraries, both of which revolve around the principle of Modules.

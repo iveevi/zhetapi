@@ -14,7 +14,7 @@ Token::Token(MethodTable *mtable) : _mtable(mtable) {}
 
 Token::~Token() {}
 
-Token *Token::attr(const std::string &id, Engine *ctx, const Targs &args)
+Token *Token::attr(const std::string &id, Engine *ctx, const Targs &args, size_t osize)
 {
 	if (_mtable)
 		return _mtable->get(id, this, ctx, args);

@@ -72,7 +72,7 @@ public:
 
 	// TODO: also need to add documentation for methods
 	virtual Token *attr(const std::string &, Engine *,
-			const std::vector <Token *> &);
+			const std::vector <Token *> &, size_t);
 	virtual void list_attributes(std::ostream & = std::cout) const;
 
 	bool operator!=(Token *) const;

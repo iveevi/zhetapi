@@ -57,7 +57,7 @@ static int assess_library(string file)
 		return -1;
 	}
 
-	Exporter exporter = (Exporter) ptr2;
+	Module::Exporter exporter = (Module::Exporter) ptr2;
 
 	if (!exporter) {
 		printf("Failed to extract exporter\n");

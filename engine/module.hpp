@@ -12,6 +12,10 @@ namespace zhetapi {
 
 using NamedToken = std::pair <std::string, Token *>;
 
+/**
+ * @brief Represents a collection of variables (algorithms, registrables,
+ * functions, operands) from a separate library or file.
+ */
 class Module : public Token {
 	std::string					_name;
 
@@ -22,7 +26,7 @@ public:
 	Module(const std::string &, const std::vector <NamedToken> &);
 
 	// Overriding attr
-	Token *attr(const std::string &, Engine *, const Targs &) override;
+	Token *attr(const std::string &, Engine *, const Targs &, size_t) override;
 
 	void list_attributes(std::ostream &) const override;
 
@@ -37,12 +41,20 @@ public:
 	virtual std::string dbg_str() const override;
 	virtual Token *copy() const override;
 	virtual bool operator==(Token *) const override;
+
+	/**
+	 * @brief Exporter type alias. The "exporter" of each compiled library is a
+	 * function that is executed upon loading the library. Any symbols that the
+	 * library designer wishes to make available through the library's interface
+	 * are made public in this function.
+	 */
+	using Exporter = void (*)(Module *);
 };
 
-// Aliases (TODO: put this inside module)
-using Exporter = void (*)(Module *);
-
-// Library creation macros
+/**
+ * @brief Defines the exporter function of a library. There should exactly be
+ * one such function for each compiled library.
+ */
 #define ZHETAPI_LIBRARY()				\
 	extern "C" void zhetapi_export_symbols(zhetapi::Module *module)
 

@@ -15,20 +15,20 @@ Module::Module(const std::string &name, const std::vector <NamedToken> &parts)
 		_attributes[nt.first] = nt.second;
 }
 
-Token *Module::attr(const std::string &id, Engine *ctx, const Targs &args)
+Token *Module::attr(const std::string &id, Engine *ctx, const Targs &args, size_t osize)
 {
 	// Priorotize attributes
 	if (_attributes.find(id) != _attributes.end()) {
 		Token *tptr = _attributes[id];
 
 		Functor *ftr = dynamic_cast <Functor *> (tptr);
-		if (ftr && args.size())
+		if (ftr && osize)
 			return ftr->evaluate(ctx, args);
 
 		return tptr;
 	}
 
-	return Token::attr(id, ctx, args);
+	return Token::attr(id, ctx, args, osize);
 }
 
 void Module::list_attributes(std::ostream &os) const

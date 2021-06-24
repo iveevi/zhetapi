@@ -73,7 +73,7 @@ static void import_dll(const std::string &file, Module &module, const char *lint
 		abort();
 	}
 
-	Exporter exporter = (Exporter) ptr2;
+	Module::Exporter exporter = (Module::Exporter) ptr2;
 
 	if (!exporter) {
 		printf("Failed to extract exporter\n");
@@ -154,7 +154,7 @@ static OpZ *check_if(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Update the state
 	state->branch = true;
@@ -206,7 +206,7 @@ static OpZ *check_elif(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	if (!state->branch)
 		throw bad_elif();
@@ -238,7 +238,7 @@ static OpZ *check_elif(Feeder *feeder,
 		if (c != '{')
 			feeder->backup(1);
 
-		feeder->set_end((c == '{') ? '}' : '\n');
+		feeder->set_end({(c == '{') ? '}' : '\n', 1});
 		parse_global(feeder, context, state->idirs);
 
 		// Reset terminal
@@ -256,7 +256,7 @@ static OpZ *check_else(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Throw exception
 	if (!state->branch)
@@ -291,7 +291,7 @@ static OpZ *check_while(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	char c;
 	while ((c = feeder->feed()) != '(');
@@ -309,7 +309,7 @@ static OpZ *check_while(Feeder *feeder,
 		if (c != '{')
 			feeder->backup(1);
 
-		feeder->set_end((c == '{') ? '}' : '\n');
+		feeder->set_end({(c == '{') ? '}' : '\n', 1});
 
 		Pardon pardon;
 		node_manager nloop = cc_parse(feeder, ctx, {}, pardon);
@@ -339,7 +339,7 @@ static OpZ *check_for(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	char c;
 	while ((c = feeder->feed()) != '(');
@@ -407,7 +407,7 @@ static OpZ *check_alg(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	std::pair <std::string, Args> sig = feeder->extract_signature();
 
@@ -416,7 +416,7 @@ static OpZ *check_alg(Feeder *feeder,
 	if (c != '{')
 		feeder->backup(1);
 
-	feeder->set_end((c == '{') ? '}' : '\n');
+	feeder->set_end({(c == '{') ? '}' : '\n', 1});
 
 	Pardon pardon;
 	node_manager nbody = cc_parse(feeder, ctx, sig.second, pardon);

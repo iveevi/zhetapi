@@ -19,6 +19,9 @@ bool is_terminal(char);
 class Feeder {
 	// TODO: put index here
 public:
+	// State type
+	using State = std::pair <char, int>;
+
 	// TODO: dont forget to flush with EOF
 	virtual char feed() = 0;	// Reads, stores, returns and moves
 	virtual char peek() = 0;	// Reads, stores, returns but does not moves
@@ -26,8 +29,10 @@ public:
 	
 	virtual size_t tellg() const = 0;
 
-	virtual char get_end() const = 0;
-	virtual void set_end(char = EOF) = 0;
+	virtual State get_end() const = 0;
+	virtual void set_end(State = {EOF, 1}) = 0;	// Reverse virtualness
+
+	void set_end(char = EOF, int = 1);
 
 	virtual void backup(size_t) = 0;
 
@@ -51,6 +56,7 @@ class StringFeeder : public Feeder {
 	size_t		_index	= 0;
 	char		_end	= EOF;
 	bool		_second	= false;
+	int		_count	= 1;		// For ending characters (eg. '{')
 	
 	StringFeeder(const std::string &, size_t, char = EOF);
 public:
@@ -62,8 +68,8 @@ public:
 	
 	size_t tellg() const override;
 	
-	char get_end() const override;
-	void set_end(char = EOF) override;
+	State get_end() const override;
+	void set_end(State = {EOF, 1}) override;
 	
 	void backup(size_t) override;
 

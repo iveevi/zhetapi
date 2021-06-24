@@ -10,7 +10,7 @@ static node_manager cc_if(Feeder *feeder,
 		State *state)
 {
 	// First save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Return
 	node_manager nif;
@@ -62,7 +62,7 @@ static node_manager cc_elif(Feeder *feeder,
 		State *state)
 {
 	// First save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Return
 	node_manager nelif;
@@ -116,7 +116,7 @@ static node_manager cc_else(Feeder *feeder,
 		State *state)
 {
 	// First save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Return
 	node_manager nelse;
@@ -148,7 +148,7 @@ static node_manager cc_while(Feeder *feeder,
 		State *state)
 {
 	// First save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	// Return
 	node_manager nwhile;
@@ -187,7 +187,7 @@ static node_manager cc_for(Feeder *feeder,
 		State *state)
 {
 	// First save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	char c;
 	while ((c = feeder->feed()) != '(');

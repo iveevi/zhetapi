@@ -297,7 +297,8 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	if (ophptr && ophptr->code == attribute) {
 		lvalue *lv = tree[1].cast <lvalue> ();
 
-		// TODO: throw on nullptr
+		// TODO: throw on nullptr (TODO: embed the attribute name into
+		// the token)
 		std::string at = lv->symbol();
 
 		Targs targs = proper_args(ctx, tree[1]);
@@ -310,7 +311,7 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 		for (auto t : targs)
 			std::cout << "\t" << t->dbg_str() << std::endl; */
 
-		return callee->attr(at, ctx, targs);
+		return callee->attr(at, ctx, targs, tree[1].child_count());
 	}
 
 	// TODO: put this in its own function

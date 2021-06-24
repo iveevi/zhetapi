@@ -1,3 +1,5 @@
 include testing/api
 
 import classes
+
+classes.test_collection()

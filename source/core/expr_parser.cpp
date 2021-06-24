@@ -387,18 +387,18 @@ parser::parser() : parser::base_type(_start)
 	 * where access to the engine object is present.
 	 */
 	_node_var = (
-			(_ident >> '(' >> _node_pack >> ')') [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1),
-					_2
-				)
-			]
-
 			// Empty call
-			| (_ident >> '(' >> ')') [
+			(_ident >> '(' >> ')') [
 				_val = phoenix::construct <zhetapi::node> (
 					phoenix::new_ <variable_cluster> (_1),
 					node(blank_token())
+				)
+			]
+
+			| (_ident >> '(' >> _node_pack >> ')') [
+				_val = phoenix::construct <zhetapi::node> (
+					phoenix::new_ <variable_cluster> (_1),
+					_2
 				)
 			]
 
@@ -427,6 +427,7 @@ parser::parser() : parser::base_type(_start)
 	 * is because terms like x3(5 + 3) are much more awkward
 	 * compared to 3x(5 + 3)
 	 */
+	// TODO: the or is useless
 	_node_rept = _node_var | _node_prth;
 	
 	/*

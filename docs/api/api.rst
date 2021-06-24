@@ -45,12 +45,14 @@ Full List
      
         activation
         collection
+        generator
         image
         indexable
         iterator
         layer
         linalg
         matrix
+        module
         nvarena
         parametrization
         plot
@@ -58,4 +60,3 @@ Full List
         tensor
         token
         vector
-        generator

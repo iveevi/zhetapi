@@ -1,4 +1,4 @@
-#include <lang/feeder.hpp>
+#include "../../engine/lang/feeder.hpp"
 
 namespace zhetapi {
 
@@ -15,8 +15,17 @@ StringFeeder::StringFeeder(const std::string &str, size_t i, char end)
 char StringFeeder::feed()
 {
 	_index++;
+	
+	// TODO: deal with count and stuff in the base class
+	// TODO: use some sort of anti system
+	if (_end == '}' && _source[_index] == '{')
+		_count++;
+
+	if (_source[_index] == _end)
+		_count--;
+
 	if (_index >= _source.length()
-		|| _source[_index] == _end)
+		|| _count <= 0)
 		return EOF;
 
 	// TODO: check newline here
@@ -25,8 +34,15 @@ char StringFeeder::feed()
 
 char StringFeeder::peek()
 {
+	int tcount = _count;
+	if (_end == '}' && _source[_index + 1] == '{')
+		tcount++;
+
+	if (_source[_index + 1] == _end)
+		tcount--;
+
 	if (_index + 1 >= _source.length()
-		|| _source[_index + 1] == _end)
+		|| tcount <= 0)
 		return EOF;
 
 	// TODO: check newline here (actually dont)
@@ -46,14 +62,15 @@ size_t StringFeeder::tellg() const
 	return _index;
 }
 
-char StringFeeder::get_end() const
+Feeder::State StringFeeder::get_end() const
 {
-	return _end;
+	return {_end, _count};
 }
 
-void StringFeeder::set_end(char c)
+void StringFeeder::set_end(State s)
 {
-	_end = c;
+	_end = s.first;
+	_count = s.second;
 }
 
 void StringFeeder::backup(size_t diff)

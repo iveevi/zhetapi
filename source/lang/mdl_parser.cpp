@@ -135,7 +135,7 @@ static void mdl_for(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	char c;
 	while ((c = feeder->feed()) != '(');
@@ -171,7 +171,7 @@ static void mdl_alg(Feeder *feeder,
 		State *state)
 {
 	// Save end
-	char end = feeder->get_end();
+	Feeder::State end = feeder->get_end();
 
 	std::pair <std::string, Args> sig = feeder->extract_signature();
 

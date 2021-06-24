@@ -1,4 +1,4 @@
-#include <lang/feeder.hpp>
+#include "../../engine/lang/feeder.hpp"
 
 namespace zhetapi {
 
@@ -9,6 +9,11 @@ bool is_terminal(char c)
 }
 
 // Feeder functions
+void Feeder::set_end(char c, int count)
+{
+	this->set_end({c, count});
+}
+
 void Feeder::skip_line()
 {
 	char c;
