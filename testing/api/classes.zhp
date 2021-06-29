@@ -1,6 +1,6 @@
 alg test_collection()
 {
-	println("List tests:")
+	println("\nCollection Tests:")
 
 	x = {1, 2, 34}
 
@@ -16,5 +16,13 @@ alg test_collection()
 
 alg test_dictionary()
 {
-	println("Dict:")
+	println("\nDictionary Tests:")
+
+	x = dict()
+
+	x[1] = "hello"
+	x[4.5] = "double"
+	x["clear"] = "facts"
+
+	println("x = ", x)
 }

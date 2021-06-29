@@ -185,6 +185,9 @@ static void mdl_alg(Feeder *feeder,
 	Pardon pardon;
 	node_manager nbody = cc_parse(feeder, ctx, sig.second, pardon);
 
+	/* std::cout << "Module alg:" << std::endl;
+	nbody.print(); */
+
 	nbody.add_args(sig.second);
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();

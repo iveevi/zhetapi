@@ -1,0 +1,4 @@
+import classes
+
+classes.test_collection()
+classes.test_dictionary()
