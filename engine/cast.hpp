@@ -54,6 +54,8 @@
 
 namespace zhetapi {
 
+// TODO: rename cc cast to partial cast
+// and add another cast method that goes down the list until fully casted
 template <class T>
 bool zhetapi_cast_process(
 		const std::vector <Token *> &tokens,

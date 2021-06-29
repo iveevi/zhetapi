@@ -6,6 +6,7 @@
 #include <stack>
 #include <set>
 #include <stdexcept>
+#include <typeindex>
 #include <vector>
 
 // Engine headers
@@ -33,7 +34,7 @@ private:
 public:
 	node_manager();
 	node_manager(const node_manager &);
-	
+
 	node_manager(const node &);
 	node_manager(Engine *, const node &);
 	node_manager(Engine *, const node &, const Args &);
@@ -122,10 +123,10 @@ private:
 	void unpack(node &);
 
 	size_t count_up(node &);
-	
+
 	void label(node &);
 	void label_operation(node &);
-	
+
 	void rereference(node &);
 
 	node expand(Engine *, const std::string &, const node &,
@@ -145,7 +146,7 @@ private:
 	void differentiate_const_log(node &);
 	void differentiate_trig(node &);
 	void differentiate_hyp(node &);
-	
+
 	void refactor_reference(node &, const std::string &, Token *);
 
 	std::string display(node) const;
@@ -158,7 +159,7 @@ private:
 	 */
 	static node nf_one();
 	static node nf_zero();
-	
+
 	// General error
 	class error {
 		std::string str;
@@ -171,7 +172,7 @@ private:
 	};
 public:
         // TODO: put these two under std::runtime
-        
+
 	// Syntax error
 	class syntax_error : public error {
 	public:
@@ -203,11 +204,16 @@ public:
 
 	class bad_indexable : public std::runtime_error {
 	public:
-		bad_indexable() : std::runtime_error("Can only index Indexables") {}
+		bad_indexable(std::type_index ti)
+				: std::runtime_error(
+					std::string("Can only index ")
+					+ "Indexables (tried to index <"
+					+ ti.name() + ">)"
+				) {}
 	};
 
 	// Static variables
-	
+
 	// Use for computation specifically
 	static Engine *shared_context;
 

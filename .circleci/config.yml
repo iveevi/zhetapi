@@ -59,6 +59,7 @@ jobs:
           command: |
             sudo ./run.py install -j 2
             ./run.py python_bench
+            zhetapi testing/api/main.zhp
             #      - run:
             #name: Testing Zhetapi Installation
             #command: ./run.py header_tests

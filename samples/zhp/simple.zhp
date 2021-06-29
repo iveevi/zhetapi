@@ -1,5 +1,14 @@
-include testing/api
+/* include testing/api
 
 import classes
 
 classes.test_collection()
+classes.test_dictionary() */
+
+x = dict()
+
+println("x = ", x)
+
+x[1] = "hello"
+
+println("x = ", x)

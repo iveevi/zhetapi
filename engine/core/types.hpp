@@ -2,6 +2,7 @@
 #define TYPES_H_
 
 // C/C++ headers
+#include <functional>
 #include <typeindex>
 
 // Engine headers
@@ -68,15 +69,24 @@ public:
 class TokenHash {
 public:
 	size_t operator()(Token *a) const {
-		OpZ *oz;
-		if ((oz = dynamic_cast <OpZ *> (a)))
-			return std::hash <Z> {} (oz->get());
+		// TODO: add a macro for all of this
+		OpZ *opz;
+		if ((opz = dynamic_cast <OpZ *> (a)))
+			return std::hash <Z> {} (opz->get());
+
+		OpR *opr;
+		if ((opr = dynamic_cast <OpR *> (a)))
+			return std::hash <R> {} (opr->get());
+
+		OpS *ops;
+		if ((ops = dynamic_cast <OpS *> (a)))
+			return std::hash <S> {} (ops->get());
 
 		throw unhashable(typeid(*a));
 	}
 
 	// Exceptions
-	class unhashable : std::runtime_error {
+	class unhashable : public std::runtime_error {
 	public:
 		unhashable(const std::type_index &ti)
 				: std::runtime_error("Cannot hash type <"

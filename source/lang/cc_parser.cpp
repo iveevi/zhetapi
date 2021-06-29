@@ -109,7 +109,7 @@ node_manager cc_run_assignment(
 	}
 	
 	out.set_label(l_assignment_chain);
-	
+
 	return out;
 }
 

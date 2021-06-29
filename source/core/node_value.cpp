@@ -321,7 +321,7 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 
 		Indexable *idx = dynamic_cast <Indexable *> (tptr);
 		if (!idx)
-			throw node_manager::bad_indexable();
+			throw node_manager::bad_indexable(typeid(*tptr));
 
 		iptr = node_value(ctx, tree[1]);
 
@@ -353,8 +353,8 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	if (!ftr)
 		throw node_manager::bad_token_type();
 
-	// Return the functor itself if there are no arguments
-	if (values.size())
+	// Return the functor itself if there were no arguments
+	if (tree.child_count() || values.size())
 		return ftr->evaluate(ctx, values);
 
 	return tree.copy_token();
