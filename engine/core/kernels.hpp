@@ -6,10 +6,12 @@
 #include "../vector.hpp"
 
 /**
- * This file contains CPU "kernels" which speed up computation in other parts of
+ * @file kernels.hpp
+ * @brief This file contains CPU "kernels" which speed up computation in other parts of
  * the library, such as Neural Network training. Some of these kernels may be
  * moved to become part of the public API.
  */
+
 namespace zhetapi {
 
 /**

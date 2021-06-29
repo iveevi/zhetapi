@@ -59,7 +59,14 @@ const Color	WHITE	= "#FFFFFF";
 const Color	BLACK	= "#000000";
 const Color	GREY	= "#808080";
 
-// Gradient constructor
+/**
+ * @brief Gradient constructor from two colors and two values.
+ * 
+ * @param A the starting color.
+ * @param B the ending color.
+ * @param start the start value (corresponding to the starting color).
+ * @param end the ending value (corresponding to th ending color).
+ */
 Gradient::Gradient(const Color &A, const Color &B,
 		long double start, long double end)
 		: _base(A), _start(start), _end(end)
@@ -69,6 +76,14 @@ Gradient::Gradient(const Color &A, const Color &B,
 	_db = B.b - A.b;
 }
 
+/**
+ * @brief Gradient constructor from two colors and two values.
+ * 
+ * @param A the starting color as a hex string.
+ * @param B the ending color as a hex string.
+ * @param start the start value (corresponding to the starting color).
+ * @param end the ending value (corresponding to th ending color).
+ */
 Gradient::Gradient(const std::string &hexs_a, const std::string &hexs_b,
 		long double start, long double end)
 		: _base(hexs_a), _start(start), _end(end)
@@ -80,7 +95,29 @@ Gradient::Gradient(const std::string &hexs_a, const std::string &hexs_b,
 	_db = B.b - _base.b;
 }
 
-// Gradient getter
+/**
+ * @brief Retrieves the Color corresponding to the passed value. Does not check
+ * the bounds of the passed value.
+ * 
+ * @param x the gradient value.
+ */
+Color Gradient::operator()(long double x)
+{
+	long double k = (x - _start)/(_start - _end);
+
+	return Color {
+		(byte) (_base.r + _dr * k),
+		(byte) (_base.g + _dg * k),
+		(byte) (_base.b + _db * k)
+	};
+}
+
+/**
+ * @brief Retrieves the Color corresponding to the passed value. Throws
+ * bad_value if the passed value is out of bounds.
+ * 
+ * @param x the gradient value.
+ */
 Color Gradient::get(long double x)
 {
 	long double k = (x - _start)/(_start - _end);

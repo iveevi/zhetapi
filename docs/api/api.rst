@@ -12,16 +12,17 @@ on symbolic manipulation, and making the language easy to use for beginners.
 See more about the core API from ZHP's persepective:
 
 .. toctree::
-        :maxdepth: 2
+        :maxdepth: 1
 
         ../zhp/zhp
+        ../zhp/libs
 
 Linear Algebra
 ---------------
 
 Crucial to any numerical analysis (and machine learning) library is the
 framework to perform basic operations with matrices and vectors. This is possible
-through Zhetapi's Matric and Vector classes and ``C++`` overloading.
+through Zhetapi's Matric and Vector classes and C++ overloading.
 
 Machine Learning
 -----------------
@@ -46,6 +47,7 @@ Full List
         activation
         collection
         generator
+        gnn
         image
         indexable
         iterator
@@ -60,3 +62,5 @@ Full List
         tensor
         token
         vector
+        cast
+        gradient

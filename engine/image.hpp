@@ -4,6 +4,7 @@
 // C++ headers
 #include <cstring>
 #include <bitset>
+#include <stdexcept>
 
 #ifndef ZHP_NO_GUI
 
@@ -34,7 +35,7 @@ class bad_hex_string {};
 
 // Color structure
 //
-// TODO: Derive Color from Vector
+// TODO: Derive Color from FixedVector
 struct Color {
 	byte	r	= 0;
 	byte	g	= 0;
@@ -59,20 +60,18 @@ extern const Color WHITE;
 extern const Color BLACK;
 extern const Color GREY;
 
-/*
- * Gradient:
- *
- * A parametrized gradient class, from color A to B, and operating on a range a
- * to b. A value c in the range [a, b] will equate to a color appropriately
- * in between A and B.
+/**
+ * @brief A parametrized gradient class, from color A to B, and operating on a
+ * range a to b. A value c in the range \f$[a, b]\f$ will equate to a color
+ * appropriately in between A and B.
  *
  * This class can essentially be thought of as a slider from color A to color B
  * (with the slider value ranging from a to b).
  *
- * The reason we do not restrict a, b = 0, 1 is to allow for more meaningful
- * values. For example, if the gradient is intended to represent heat, the
- * Celcius measurements in [0, 100] are more meaningful to use than are the
- * values in [0, 1].
+ * The reason we do not restrict a and b to 0 and 1 is to allow for more
+ * meaningful values. For example, if the gradient is intended to represent
+ * heat, the Celcius measurements in \f$[0, 100]\f$ are more meaningful to use than
+ * are the values in \f$[0, 1]\f$.
  */
 class Gradient {
 	Color		_base;
@@ -90,6 +89,18 @@ public:
 			long double = 0, long double = 1);
 
 	Color get(long double);
+	Color operator()(long double);
+
+	/**
+	 * @brief Thrown in the \c get method if the passed value is out of the
+	 * bounds of the starting and ending values of the Gradient's scale.
+	 */
+	class bad_value : public std::runtime_error {
+	public:
+		bad_value(long double x) : std::runtime_error("Gradient value "
+				+ std::to_string(x)
+				+ " is out of bounds of the Gradient object's scale.") {}
+	};
 };
 
 /**

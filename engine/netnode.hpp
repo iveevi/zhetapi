@@ -13,6 +13,7 @@ namespace zhetapi {
 
 namespace ml {
 
+// TODO: add a method to retrieve the array
 template <class T = double>
 class NetNode {
 	struct iforward {

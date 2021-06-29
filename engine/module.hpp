@@ -58,18 +58,43 @@ public:
 #define ZHETAPI_LIBRARY()				\
 	extern "C" void zhetapi_export_symbols(zhetapi::Module *module)
 
+/**
+ * @brief Defines a function with signature Token *(const std::vector <Token *> &).
+ * 
+ * @param fident the name of the function.
+ */
 #define ZHETAPI_REGISTER(fident)			\
 	zhetapi::Token *fident(const std::vector <zhetapi::Token *> &inputs)
 
+// TODO: add an overload for registrables, and others
+
+/**
+ * @brief Adds a Registrable to the module (inside the zhetapi_export_function)
+ * 
+ * @param symbol the name of the function to add.
+ */
 #define ZHETAPI_EXPORT(symbol)				\
 	module->add(#symbol, new zhetapi::Registrable(#symbol, &symbol));
 
+/**
+ * @brief Adds a Registrable to the module (inside the zhetapi_export_function)
+ * 
+ * @param symbol the name of that the function should have in the module (the
+ * binded name).
+ * @param ftr the name of the function to bind.
+ */
 #define ZHETAPI_EXPORT_SYMBOL(symbol, ftr)		\
 	module->add(#symbol, new zhetapi::Registrable(#symbol, &ftr));
 
+/**
+ * @brief Adds an operand type variable to the module.
+ * 
+ * @param symbol the name that the value should have (the binded name).
+ * @param type the type of the value.
+ * @param op the actual value of the variable.
+ */
 #define ZHETAPI_EXPORT_CONSTANT(symbol, type, op)	\
 	module->add(#symbol, new zhetapi::Operand <type> (op));
-
 
 }
 

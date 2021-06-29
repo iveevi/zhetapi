@@ -27,16 +27,16 @@ below.
 
 .. code-block::
 
-        # Integer
+        // Integer
         x = 10
 
-        # Rational
+        // Rational
         y = 5/3
 
-        # Real
+        // Real
         z = 1.66
 
-        # Vector with complex components
+        // Vector with complex components
         v = [i, 0.16i, 5i/3]
 
 Operators are objects which take in a set of operands and output an operand; it
@@ -56,7 +56,7 @@ One defines functions as follows:
 
         f(x) = x^2 - x * sin(x)
 
-        # g and f are the same function
+        // g and f are the same function
         g = f
 
 Algorithms
@@ -67,7 +67,7 @@ consider this simple example.
 
 .. code-block::
 
-        # An overly simplified example
+        // An overly simplified example
         alg foo()
         {
                 println("Computing the answer to life...")
@@ -128,12 +128,12 @@ loops is repeatedly executed as long as the condition is evaluate to ``true``.
 .. code-block::
 
 
-        # Loops can be single line...
+        // Loops can be single line...
         x = 0
         while (x < 10)
                 println("x = ", x)
         
-        # Or multiline, for larger bodies
+        // Or multiline, for larger bodies
         x = 256
         while (x > 0) {
                 println("x = ", x)
@@ -156,13 +156,13 @@ and executes the body of the loop.
 
 .. code-block::
 
-        # l is a collection of values
+        // l is a collection of values
         l = {1, 2, "three", 4.0}
 
         for (x in l)
                 println("x = ", l)
         
-        # A more common and useful example
+        // A more common and useful example
         for (x in range(4))
                 println("l[x] = ", l[x])
 
@@ -171,3 +171,74 @@ Modules
 
 There are currently two ways of organizing source code into separate files and
 libraries, both of which revolve around the principle of Modules.
+
+Modules as Source Files
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Modules can be created simply as source files. The only difference is that by
+default, only algorithms are available from imported modules. To make regular
+variables available, the ``global`` keyword must be used. An example source
+module is shown below. Note that the values are retrieved from the module using
+the member operator, ``[module].[member]``.
+
+.. code-block::
+        :caption: module.zhp
+
+        // Defining a global variable
+        global x = 100
+
+        // Defining a file-local variable
+        y = 10
+
+        // Simple function
+        alg foo()
+                println("Printing from foo!");
+        
+        // Another function
+        alg bar() {
+                println("Printing a file-local variable...")
+
+                // Should result in an error when called from
+                // the module as y is a file-local variable
+                println("\ty = ", y)
+        }
+
+Then, importing and using the module can be done as follows.
+
+.. code-block::
+        :caption: main.zhp
+
+        // Import module.zhp
+        import module
+
+        // Print the variables from the module:
+        // there should be an error with the second
+        // println because y is file-local in module.zhp
+        println("x = ", module.x)
+        println("y = ", module.y)
+
+        // Call both algorithms from the module:
+        // there should be an error with the second call,
+        // as per its comment
+        module.foo()
+        module.bar()
+
+Modules as Shared Libraries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Aside from source files, shared libraries compiled with a specific set of
+functions can also be used as modules. See more below:
+
+.. toctree::
+        :maxdepth: 1
+
+        libs
+
+Include Directories
+~~~~~~~~~~~~~~~~~~~
+
+By default, any modules imported with the ``import`` keyword must be located in
+either the current directory or ``/usr/local/include/zhp``. To add a search
+path, use the ``include`` keyword. For example, ``include bin/libs/`` adds
+``bin/libs`` (from the current directory) to the include paths for the execution
+of the program.

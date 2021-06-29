@@ -13,12 +13,18 @@ namespace zhetapi {
 
 namespace ml {
 
-/*
- * General neural network (GNN):
+/**
+ * @brief General neural network (GNN):
  *
  * Represents a neural network whose structure is theoretically unlimited, i.e.
  * a neural network with various kinds of connections (skip connections, etc.)
  * and different types of layers (deep layer, convolutional layer, recurrent layer).
+ * 
+ * The true representation of the network is as a series of "pipes" between
+ * nodes. Each of these pipes contains a Tensor object representing the pipes
+ * current state of execution. The two most important sets of pipes are the
+ * input and output pipes which, as their name implies, carry the inputs and
+ * outputs.
  */
 template <class T = double>
 class GNN {
@@ -43,9 +49,12 @@ public:
 	explicit GNN(U ...);
 
 	// Extraction
-	NetNode <T> &operator[](size_t);
+	inline NetNode <T> &ipipe(size_t);
+	inline NetNode <T> &operator[](size_t);
 
-	const NetNode <T> &operator[](size_t) const;
+	// Retrieval
+	inline const NetNode <T> &opipe(size_t) const;
+	inline const NetNode <T> &operator[](size_t) const;
 
 	// Passing
 	void pass(std::vector <Tensor <T>> &) const;
@@ -122,21 +131,46 @@ void GNN <T> ::getouts()
 }
 
 /**
- * @brief This specific overload (used for modifying the state of an input)
- * can be used to alter the properties of a specific input node.
+ * @brief Modifies an input pipe (when assigned, such as `gnn.ipipe() =
+ * tensor`).
+ * 
+ * @param i the input pipe index.
  */
 template <class T>
-NetNode <T> &GNN <T> ::operator[](size_t i)
+inline NetNode <T> &GNN <T> ::ipipe(size_t i)
+{
+	return *(_ins[i]);	
+}
+
+/**
+ * @brief Modifies an input pipe (when assigned, such as `gnn[0] = tensor`).
+ * 
+ * @param i the input pipe index.
+ */
+template <class T>
+inline NetNode <T> &GNN <T> ::operator[](size_t i)
 {
 	return *(_ins[i]);
 }
 
 /**
- * @brief This specific overload is used to extract the output nodes, from
- * which the Tensors in the pipes can be accessed.
+ * @brief Retrieves an output pipe.
+ * 
+ * @param i the output pipe index.
  */
 template <class T>
-const NetNode <T> &GNN <T> ::operator[](size_t i) const
+inline const NetNode <T> &GNN <T> ::opipe(size_t i) const
+{
+	return *(_outs[i]);
+}
+
+/**
+ * @brief Retrieves an output pipe.
+ * 
+ * @param i the output pipe index.
+ */
+template <class T>
+inline const NetNode <T> &GNN <T> ::operator[](size_t i) const
 {
 	return *(_outs[i]);
 }
