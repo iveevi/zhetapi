@@ -18,6 +18,8 @@ protected:
 public:
 	node_reference(node *, const ::std::string &, size_t, bool = false);
 
+	void set(node *);
+
 	node *get();
 	const node &get() const;
 

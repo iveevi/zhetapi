@@ -1,14 +1,6 @@
-/* include testing/api
+alg get_func(n)
+{
+	f(x) = nx
+}
 
-import classes
-
-classes.test_collection()
-classes.test_dictionary() */
-
-x = dict()
-
-println("x = ", x)
-
-x[1] = "hello"
-
-println("x = ", x)
+get_func(3)

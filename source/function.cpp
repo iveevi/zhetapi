@@ -113,7 +113,7 @@ Function::Function(const std::string &str, Engine *context)
 	print(); */
 }
 
-// Member-wise construction
+// Member-wise construction (TODO: change to Args)
 Function::Function(const std::string &symbol, const std::vector
 		<std::string> &params, const node_manager &manager) :
 		_symbol(symbol), _params(params),

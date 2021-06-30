@@ -1,5 +1,5 @@
-#include "../../engine/engine.hpp"
 #include "../../engine/core/common.hpp"
+#include "../../engine/engine.hpp"
 #include "../../engine/core/node_manager.hpp"
 #include <stdexcept>
 
@@ -20,17 +20,57 @@ static Targs proper_args(Engine *ctx, const node &tree)
 	return targs;
 }
 
+static void substitute(Engine *ctx, node &tree)
+{
+	node_reference *ndrptr;
+	if ((ndrptr = tree.cast <node_reference> ())) {
+		if (ndrptr->get())
+			tree.retokenize(node_value(ctx, *(ndrptr->get())));
+	}
+
+	for (node &child : tree)
+		substitute(ctx, child);
+}
+
 static Token *assignment_node(Engine *ctx, const node &tree)
 {
 	// Evaluate first node
-	Token *tmp = node_value(ctx, tree[0]);
-
+	Token *tmp = nullptr;
 	// Assign for the other nodes
 
 	// Add index operator for nodes
 	size_t nleaves = tree.child_count(); // Use a method instead
 
 	for (size_t i = 1; i < nleaves; i++) {
+		// TODO: change to general case where child count is not equal to p count
+		if (tree[i].child_count()) {
+			node body = tree[0];
+
+			substitute(ctx, body);
+			std::cout << "Need to stuff as function:" << std::endl;
+			body.print();
+
+			Args args = (tree[i][0].cast <Operand <Args>> ())->get();
+
+			std::cout << "args:" << std::endl;
+			for (auto str : args)
+				std::cout << "\tstr = " << str << std::endl;
+
+			node_manager fbody(body);
+			fbody.add_args(args);
+
+			std::cout << "fbody:" << std::endl;
+			fbody.print(true);
+
+			// TODO: check for null lvalue
+			tmp = new Function((tree[i].cast <lvalue> ())->symbol(),
+				args, fbody);
+
+			std::cout << "tmp = " << tmp->dbg_str() << std::endl;
+		} else {
+			node_value(ctx, tree[0]);
+		}
+
 		// Ensure that the node has type Assignable (TODO: merge with lvalue)
 		lvalue *lv = tree[i].cast <lvalue> ();
 		if (lv) {
@@ -282,6 +322,9 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	case Token::token_node_list:
 		return (tree.cast <node_list> ())->evaluate(ctx);
 	case Token::ndr:
+		std::cout << "VALUE OF NDR:" << std::endl;
+		tree.print();
+
 		reffed = *((tree.cast <node_reference> ())->get());
 
 		tree.retokenize(node_value(ctx, reffed));

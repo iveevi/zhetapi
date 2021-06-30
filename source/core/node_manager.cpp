@@ -1223,7 +1223,7 @@ std::string node_manager::display_pemdas(node ref, node child) const
 // Printing utilities
 void node_manager::print(bool address) const
 {
-	node_reference::address = address;
+	// node_reference::address = address;
 
 	if (address)
 		_tree.print();
@@ -1369,26 +1369,32 @@ void node_manager::label_operation(node &ref)
 	}
 }
 
-void node_manager::rereference(node &ref)
+void node_manager::rereference(node &ref, bool optional)
 {
 	if (ref.caller() == Token::ndr) {
 		std::string tmp = (ref.cast <node_reference> ())->symbol();
 
 		auto itr = find(_params.begin(), _params.end(), tmp);
 
-		if (itr == _params.end())
-			throw std::runtime_error("could not find param " + tmp);
+		if (itr == _params.end()) {
+			if (optional) {
+				((ref.cast <node_reference> ()))->set(nullptr);
+				return;
+			} else {
+				throw std::runtime_error("could not find param " + tmp);
+			}
+		} else {
+			// TODO: throw if index is at the end
+			// TODO: refactor _params to _args
+			size_t index = std::distance(_params.begin(), itr);
 
-		// TODO: throw if index is at the end
-		// TODO: refactor _params to _args
-		size_t index = std::distance(_params.begin(), itr);
-
-		// Need a new method to clear/reset
-		ref.retokenize(new node_reference(&_refs[index], tmp, index, true));
+			// Need a new method to clear/reset
+			ref.retokenize(new node_reference(&_refs[index], tmp, index, true));
+		}
 	}
 
 	for (node &leaf : ref)
-		rereference(leaf);
+		rereference(leaf, optional || (ref.label() == l_assignment_chain));
 }
 
 // Arithmetic

@@ -127,7 +127,7 @@ private:
 	void label(node &);
 	void label_operation(node &);
 
-	void rereference(node &);
+	void rereference(node &, bool = false);
 
 	node expand(Engine *, const std::string &, const node &,
 			const std::set <std::string> & = std::set <std::string> ());

@@ -8,6 +8,11 @@ node_reference::node_reference(node *ref, const ::std::string &str, size_t
 		idx, bool var) : _ref(ref), _symbol(str),
 	_index(idx), _var(var) {}
 
+void node_reference::set(node *nptr)
+{
+	_ref = nptr;
+}
+
 node *node_reference::get()
 {
 	return _ref;
