@@ -3,9 +3,11 @@
 
 // C/C++ headers
 #include <cstdint>
+#include <unordered_map>
 
 // Engine headers
 #include "method_table.hpp"
+#include "primitive.hpp"
 
 namespace zhetapi {
 
@@ -17,7 +19,7 @@ namespace zhetapi {
 // Object type
 struct Object {
         // ID header
-        size_t		id;
+        TypeId		id;
 
         // Data
         void *		data;
@@ -25,7 +27,7 @@ struct Object {
 
 	// Fixed size table for special operations
 	// as an array of function pointers
-	void *		spops[NSPOS];
+	void *		spops[NSPOPS];
 
 	// Indexes for special operations
 	enum Spidx : size_t {
@@ -41,14 +43,20 @@ struct Object {
         size_t *	memoffs;	// TODO: also need some information on the type of each member (id)
         size_t		nmems;
 
-	// ID assignment counter (starts from the last primitive id)
-	static size_t nid;
-
 	// "Inheritance" checks
 	inline bool is_functor() const;
 	inline bool is_indexable() const;
 	inline bool is_set() const;
 	inline bool is_generator() const;
+
+	// ID assignment counter (starts from the last primitive id)
+	static size_t nid;
+
+	static size_t get_nid();
+
+	// Hash table from type name to id (for structs)
+	// TODO: add an alias from symtab
+	static std::unordered_map <std::string, TypeId> idtable;
 };
 
 }

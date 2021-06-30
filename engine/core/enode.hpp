@@ -10,6 +10,7 @@
 // Engine headers
 #include "primitive.hpp"
 #include "primoptns.hpp"
+#include "variant.hpp"
 
 // TODO: separate source and header
 namespace zhetapi {
@@ -54,31 +55,6 @@ struct Enode {
 
 // Printing
 std::ostream &operator<<(std::ostream &, const Enode &);
-
-// Value type (special type or primitive) TODO: switch to variant
-struct Variant {
-	// Local type
-	enum Type : uint8_t {
-		var_null,
-		var_prim,
-		var_spec
-	};
-
-	union Data {
-		char		null;
-		Primitive	prim;
-		// Struct type
-	} data;
-
-	Type type; // 0 for null, 1 for prim, 2 for struct/spec
-
-	// Constructors
-	Variant();			// Null variant
-	Variant(const Primitive &);
-
-	// Methods
-	std::string str() const;
-};
 
 // TODO: add symtab
 Variant enode_value(const Enode &);

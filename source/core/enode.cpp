@@ -2,13 +2,6 @@
 
 namespace zhetapi {
 
-// TODO: Add spec type
-Variant::Variant()
-		: data({.null = 0}), type(var_null) {}
-
-Variant::Variant(const Primitive &prim)
-		: data(Data {.prim = prim}), type(var_prim) {}
-
 // Enode
 Enode::Enode() : data({.code = l_add}), type(etype_null) {}
 
@@ -74,12 +67,12 @@ std::ostream &operator<<(std::ostream &os, const Enode &en)
 
 std::string Variant::str() const
 {
-	switch (type) {
-	case var_null:
+	switch (variant_type()) {
+	case 0:
 		return "<Null>";
-	case var_prim:
+	case 1:
 		return data.prim.str();
-	case var_spec:
+	case 2:
 	default:
 		break;
 	}
@@ -109,7 +102,8 @@ Variant enode_value(const Enode &en)
 		if (en.leaves.size() == 2)
 			v2 = enode_value(en.leaves[1]);
 
-		sum = v1.type + 4 * v2.type;
+		// TODO: use data.id later
+		sum = v1.variant_type() + 4 * v2.variant_type();
 		if (sum == 5) { // prim & prim
 			return op_prim_prim(en.data.code, v1, v2);
 		} else {

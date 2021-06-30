@@ -15,6 +15,12 @@ making mathematical computation and algorithmic research more convenient to
 users. In the name of convenience and beginner-friendliness, the API comes with a
 scripting language, ZHP.
 
+See the full documentation for the API and language
+https://zhetapi.readthedocs.io/en/latest/[here].
+
+I have also made a small series on an introduction to programming
+https://zhetapi.readthedocs.io/en/latest/guide/guide.html[here].
+
 = Features
 
 == Evaluation of Complex Expressions

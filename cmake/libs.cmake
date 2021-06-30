@@ -33,6 +33,7 @@ set(ZHETAPI_SOURCE
 	source/core/node_manager.cpp
 	source/core/node_reference.cpp
 	source/core/node_value.cpp
+	source/core/object.cpp
 	source/core/operation.cpp
 	source/core/operation_holder.cpp
 	source/core/primitive.cpp
@@ -41,6 +42,7 @@ set(ZHETAPI_SOURCE
 	source/core/special_tokens.cpp
 	source/core/types.cpp
 	source/core/variable_cluster.cpp
+	source/core/variant.cpp
 	source/core/wildcard.cpp
 
 	source/lang/cc_keywords.cpp

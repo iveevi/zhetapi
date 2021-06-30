@@ -7,8 +7,14 @@
 
 namespace zhetapi {
 
+// Maximum ID of a primitive
+#define MAX_PIDS	3
+
+// ID type alias
+using TypeId = size_t;
+
 // Enode type IDs (at most 16) TODO: put inside primitive
-enum TypeId : uint8_t {
+enum PrimIds : TypeId {
 	id_null,
 	id_int,
 	id_bool,
@@ -18,14 +24,15 @@ enum TypeId : uint8_t {
 // Primitive type
 // either of bool, int or floating point (for now)
 struct Primitive {
+	// ID header
+	TypeId id;
+
 	// TODO: add the rest
 	union {
 		bool b;
 		long long int i;
 		long double d;
 	} data;
-	
-	TypeId id;
 
 	// Constructors
 	Primitive();
