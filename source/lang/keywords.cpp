@@ -425,9 +425,6 @@ static OpZ *check_alg(Feeder *feeder,
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();
 
-	std::cout << "alg = " << std::endl;
-	nbody.print(true);
-
 	algorithm alg(sig.first, "", sig.second, nbody);
 
 	ctx->put(alg);

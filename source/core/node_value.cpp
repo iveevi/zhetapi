@@ -47,28 +47,17 @@ static Token *assignment_node(Engine *ctx, const node &tree)
 			node body = tree[0];
 
 			substitute(ctx, body);
-			std::cout << "Need to stuff as function:" << std::endl;
-			body.print();
 
 			Args args = (tree[i][0].cast <Operand <Args>> ())->get();
-
-			std::cout << "args:" << std::endl;
-			for (auto str : args)
-				std::cout << "\tstr = " << str << std::endl;
 
 			node_manager fbody(body);
 			fbody.add_args(args);
 
-			std::cout << "fbody:" << std::endl;
-			fbody.print(true);
-
 			// TODO: check for null lvalue
 			tmp = new Function((tree[i].cast <lvalue> ())->symbol(),
 				args, fbody);
-
-			std::cout << "tmp = " << tmp->dbg_str() << std::endl;
 		} else {
-			node_value(ctx, tree[0]);
+			tmp = node_value(ctx, tree[0]);
 		}
 
 		// Ensure that the node has type Assignable (TODO: merge with lvalue)

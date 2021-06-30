@@ -1,6 +1,15 @@
 alg get_func(n)
 {
 	f(x) = nx
+
+	x = 3
+
+	println("x = ", x)
+	println("f: ", f)
+
+	return f
 }
 
-get_func(3)
+g = get_func(3)
+
+println("g = ", g)
