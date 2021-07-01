@@ -1,4 +1,4 @@
-alg get_func(n)
+/* alg get_func(n)
 {
 	f(x) = nx
 
@@ -12,4 +12,11 @@ alg get_func(n)
 
 g = get_func(3)
 
-println("g = ", g)
+println("g = ", g) */
+
+f(x) = x
+
+println("f(1) = ", f(1))
+
+// println("f(2) = ", f(2))
+// println("f(3) = ", f(3))

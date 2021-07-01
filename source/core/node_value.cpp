@@ -34,6 +34,10 @@ static void substitute(Engine *ctx, node &tree)
 
 static Token *assignment_node(Engine *ctx, const node &tree)
 {
+	std::cout << std::string(50, '=') << std::endl;
+	std::cout << "Assignment!!" << std::endl;
+	tree.print();
+	
 	// Evaluate first node
 	Token *tmp = nullptr;
 	// Assign for the other nodes
@@ -43,20 +47,34 @@ static Token *assignment_node(Engine *ctx, const node &tree)
 
 	for (size_t i = 1; i < nleaves; i++) {
 		// TODO: change to general case where child count is not equal to p count
-		if (tree[i].child_count()) {
+		if (tree[i].child_count() && tree[i].label() == l_lvalue) {
 			node body = tree[0];
+			std::cout << "body pre subst." << std::endl;
+			body.print();
 
 			substitute(ctx, body);
+			std::cout << "body post subst." << std::endl;
+			body.print();
 
 			Args args = (tree[i][0].cast <Operand <Args>> ())->get();
 
 			node_manager fbody(body);
+
+			std::cout << "fbody: " << std::endl;
+			fbody.print();
+
 			fbody.add_args(args);
+
+			std::cout << "fbody-post arg: " << std::endl;
+			fbody.print();
 
 			// TODO: check for null lvalue
 			tmp = new Function((tree[i].cast <lvalue> ())->symbol(),
 				args, fbody);
+			
+			std::cout << "resulting function:" << tmp->dbg_str() << std::endl;
 		} else {
+			// TODO: stop recomputing
 			tmp = node_value(ctx, tree[0]);
 		}
 
@@ -76,6 +94,8 @@ static Token *assignment_node(Engine *ctx, const node &tree)
 		else
 			throw std::runtime_error("FIXME: Need an lvalue or Assignable on the left side of an \'=\'");
 	}
+	
+	std::cout << std::string(50, '=') << std::endl;
 
 	return tmp;
 }
@@ -381,14 +401,32 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 		return tptr;
 	}
 
-	Functor *ftr = dynamic_cast <Functor *> (tree.ptr());
+	Functor *ftr = tree.cast <Functor> ();
 	if (!ftr)
 		throw node_manager::bad_token_type();
 
-	// Return the functor itself if there were no arguments
-	if (tree.child_count() || values.size())
-		return ftr->evaluate(ctx, values);
+	// std::cout << "Dealing with functor:" << std::endl;
+	// tree.print();
 
+	Function *ftn = tree.cast <Function> ();
+	if (ftn) {
+		std::cout << "Printing function:" << std::endl;
+		ftn->print();
+	}
+
+	// Return the functor itself if there were no arguments
+	if (tree.child_count() || values.size()) {
+		Token *tptr = ftr->evaluate(ctx, values);
+
+		if (tptr)
+			std::cout << "\tEvaluated as " << tptr->dbg_str() << std::endl;
+		else
+			std::cout << "\tEvaluated null:" << std::endl;
+
+		return tptr;
+	}
+
+	std::cout << "Returning functor itself:" << std::endl;
 	return tree.copy_token();
 }
 

@@ -34,6 +34,9 @@ static node_manager cc_run_normal(const std::string &cache,
 		);
 	} */
 
+	// std::cout << "Generated statement:" << std::endl;
+	// mg.print();
+
 	return mg;
 }
 

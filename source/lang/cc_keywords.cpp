@@ -264,12 +264,6 @@ static node_manager cc_return(Feeder *feeder,
 	while ((c = feeder->feed()) != '\n')
 		expression += c;
 
-	std::cout << "Need to expand for return: " << expression << std::endl;
-	ctx->list();
-	std::cout << "Pardon:" << std::endl;
-	for (auto str : pardon)
-		std::cout << "\t" << str << std::endl;
-
 	node_manager nret;
 	node_manager nexpr(ctx, expression, args, pardon);
 

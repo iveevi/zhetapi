@@ -1371,6 +1371,12 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref, bool optional)
 {
+	std::cout << "rerefing:" << std::endl;
+	ref.print();
+
+	std::cout << "this = " << std::endl;
+	print();
+
 	if (ref.caller() == Token::ndr) {
 		std::string tmp = (ref.cast <node_reference> ())->symbol();
 
@@ -1378,8 +1384,10 @@ void node_manager::rereference(node &ref, bool optional)
 
 		if (itr == _params.end()) {
 			if (optional) {
+				std::cout << "Resetting (nulling) ref:" << std::endl;
+				ref.print();
 				((ref.cast <node_reference> ()))->set(nullptr);
-				return;
+				// return;
 			} else {
 				throw std::runtime_error("could not find param " + tmp);
 			}
