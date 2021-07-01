@@ -64,6 +64,9 @@ node_manager cc_run_assignment(
 				args_union(args, fargs),
 				pardon);
 		nm.nullify_refs(fargs);
+
+		std::cout << "post nullified nm:" << std::endl;
+		nm.print();
 	} else {
 		nm = node_manager(ctx, veq[n - 1], args, pardon);
 	}
@@ -84,6 +87,9 @@ node_manager cc_run_assignment(
 			node_manager tmp(ctx, veq[n - 2],
 				args_union(args, fargs), pardon);
 			tmp.nullify_refs(fargs);
+
+			std::cout << "post nullified tmp:" << std::endl;
+			tmp.print();
 
 			out.append(tmp);
 		} catch (const node_manager::undefined_symbol &e) {

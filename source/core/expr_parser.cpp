@@ -436,38 +436,45 @@ parser::parser() : parser::base_type(_start)
 	 * juxtaposition.
 	 */
 	_node_prep = _node_rept [_val = _1] >> *(
-			(_node_rept) [_val = phoenix::construct
-			<zhetapi::node> (phoenix::new_
-				<operation_holder>
-				(std::string("*")), _val, _1)]
-		);
+		(_node_rept) [_val = phoenix::construct
+		<zhetapi::node> (phoenix::new_
+			<operation_holder>
+			(std::string("*")), _val, _1)]
+	);
 
 	/*
 	 * Represents a part of a term. For example, in the term
 	 * 3x, 3 and x are both collectibles.
 	 */
 	_node_factor = (
-			_node_prep [_val = _1]
+		_collection [_val = _1]
 
-			| (_node_opd >> _factorial) [
+		// TODO: must rearrange attribute chains
+
+		// TODO: clean this up for the love of god
+		| (_node_rept >> _power >> (_node_rept | _node_opd)) [
+			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+		]
+
+		| (_node_opd >> _factorial) [
+			_val = phoenix::construct <zhetapi::node> (
+				_2,
+				_1
+			)
+		]
+
+		| _node_prep [_val = _1]
+
+		/* | _node_opd [_val = _1] >> *(
+			(_node_rept) [
 				_val = phoenix::construct <zhetapi::node> (
-					_2,
+					phoenix::new_ <operation_holder> (std::string("*")),
+					_val,
 					_1
 				)
 			]
-
-			| _node_opd [_val = _1] >> *(
-				(_node_rept) [
-					_val = phoenix::construct <zhetapi::node> (
-						phoenix::new_ <operation_holder> (std::string("*")),
-						_val,
-						_1
-					)
-				]
-			)
-
-			| _collection [_val = _1]
-		);
+		) */
+	);
 	
 	_attr = _ident [
 		_val = phoenix::construct <zhetapi::node> (
@@ -481,35 +488,40 @@ parser::parser() : parser::base_type(_start)
 	 * unless in parenthesis.
 	 */
 	_node_term = (
-			// TODO: must rearrange attribute chains
-			(_node_factor >> _power >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-			]
-
-			| (_node_factor >> _attribute >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-			]
-			
-			| (_t_pre >> _node_var) [
-				_val = phoenix::construct <zhetapi::node> (_1, _2)
-			]
-
-			| (_node_var >> _t_post) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1)
-			]
-
-			| (_minus >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (
-					new operation_holder("*"), _2, node(new OpZ(-1))
-				)
-			]
-
-			| _node_factor [_val = _1] >> *(
-				(_t1_bin >> _node_factor)
-				[_val = phoenix::construct
-				<zhetapi::node> (_1, _val, _2)]
+		(_node_opd >> _node_factor) [
+			_val = phoenix::construct <zhetapi::node> (
+				new operation_holder("*"), _1, _2
 			)
-		);
+		]
+
+		| (_node_opd >> _t1_bin >> _node_factor) [
+			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+		]
+		
+		| (_node_factor >> _attribute >> _node_term) [
+			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+		]
+			
+		| (_t_pre >> _node_var) [
+			_val = phoenix::construct <zhetapi::node> (_1, _2)
+		]
+
+		| (_node_var >> _t_post) [
+			_val = phoenix::construct <zhetapi::node> (_2, _1)
+		]
+
+		| (_minus >> _node_term) [
+			_val = phoenix::construct <zhetapi::node> (
+				new operation_holder("*"), _2, node(new OpZ(-1))
+			)
+		]
+
+		| _node_factor [_val = _1] >> *(
+			(_t1_bin >> _node_factor) [
+				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+			]
+		)
+	);
 
 	/*
 	 * A full expression or function definition.
@@ -542,6 +554,8 @@ parser::parser() : parser::base_type(_start)
 	_node_term.name("node term");
 	_node_opd.name("node Operand");
 	_node_pack.name("node pack");
+	_node_rept.name("Rept node");
+	_node_factor.name("Factor node");
 
 	_plus.name("addition");
 	_minus.name("subtraction");
@@ -648,20 +662,22 @@ parser::parser() : parser::base_type(_start)
 	debug(_node_expr);
 	debug(_node_term);
 	debug(_node_opd);
-	debug(_node_pack);
+	debug(_node_rept);
+	debug(_node_factor);
+	//debug(_node_pack);
 
-	/* debug(_plus);
-	debug(_minus);
+	// debug(_plus);
+	// debug(_minus);
 	debug(_times);
-	debug(_divide);
+	// debug(_divide);
 	debug(_power);
-	debug(_attr); */
-	debug(_collection);
+	// debug(_attr);
+	// debug(_collection);
 	
-	/* debug(_o_str);
+	// debug(_o_str);
 
 	debug(_o_z);
-	debug(_o_q);
+	/* debug(_o_q);	// o_q is useless
 	debug(_o_r);
 	debug(_o_cz);
 	debug(_o_cq);
