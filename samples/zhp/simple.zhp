@@ -14,12 +14,29 @@ g = get_func(3)
 
 println("g = ", g) */
 
-f(x) = x^3 + x - sin(x)
+alg function_assignment()
+{
+	f(x) = 3 * x^2
 
-println("f(1) = ", f(1))
-println("f(2) = ", f(2))
-println("f(3) = ", f(3))
+	println("f: ", f)
+	println("f(2) = ", f(2))
+	println("f(3) = ", f(3))
+}
 
-y = 1943290.43243
+g(x) = 2x^3 + xsin(x)
 
-println("y = ", y)
+function_assignment()
+
+println("g: ", g)
+println("g(1) = ", g(1))
+println("g(2) = ", g(2))
+println("g(3) = ", g(3))
+
+g(x) = 3 * x^2
+
+function_assignment()
+
+println("g: ", g)
+println("g(1) = ", g(1))
+println("g(2) = ", g(2))
+println("g(3) = ", g(3))

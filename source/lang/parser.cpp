@@ -47,9 +47,9 @@ void run_normal(const std::string &cache, Engine *context, bool line)
 	try {
 		mg = node_manager(context, cache);
 
-		std::cout << "cache = \"" << cache << "\"" << std::endl;
+		/* std::cout << "cache = \"" << cache << "\"" << std::endl;
 		std::cout << "MG:" << std::endl;
-		mg.print();
+		mg.print(); */
 
 		// Print on non-null result if inline interpreting
 		Token *tptr = mg.value(context);

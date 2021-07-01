@@ -1,12 +1,6 @@
 import assignment
 import classes
 
-f(x) = x^3
-
-println("f(1) = ", f(1))
-println("f(2) = ", f(2))
-println("f(3) = ", f(3))
-
 assignment.function_assignment()
 classes.test_collection()
 classes.test_dictionary()

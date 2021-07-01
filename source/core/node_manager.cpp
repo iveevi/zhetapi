@@ -539,21 +539,22 @@ node node_manager::expand(
 
 			bool matches = true;
 
+			// TODO: must we wait till here to finish?
 			node t;
 			if (context->present(pr.second)) {
 				t = node(new operation_holder(pr.second), {});
 			} else if (itr != _params.end()) {
 				t = node(new node_reference(&_refs[index], pr.second, index, true), {});
 			} else if (tptr != nullptr) {
+				// This is fine because of node_value
+				// substitution and recomputing for rvalues
+				t = node(new rvalue(pr.second));
 				// Take immediate result if the token is not an
 				// operand, otherwise we can delay
-				std::cout << "EXPAND: found tptr = " << tptr->dbg_str() << std::endl;
-				if (dynamic_cast <Functor *> (tptr))
-					t = node(tptr);
-				else {
-					std::cout << "\tNot Functor :(" << std::endl;
-					t = node(new rvalue(pr.second));
-				}
+				/* if (dynamic_cast <Functor *> (tptr))
+					t = node(tptr->copy());
+				else
+					t = node(new rvalue(pr.second)); */
 			} else if (diff != _params.end()) {
 				t = node(new node_differential(new node_reference(&_refs[dindex], pr.second.substr(1), dindex, true)));
 			} else if (dptr != nullptr) {

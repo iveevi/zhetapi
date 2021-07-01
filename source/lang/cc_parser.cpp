@@ -47,6 +47,10 @@ node_manager cc_run_assignment(
 		const Args &args,
 		Pardon &pardon)
 {
+	std::cout << "cc assignmnet:" << std::endl;
+	for (auto str : veq)
+		std::cout << "\t" << str << std::endl;
+
 	node_manager out;
 
 	size_t n = veq.size();
@@ -118,6 +122,9 @@ node_manager cc_run_assignment(
 	}
 	
 	out.set_label(l_assignment_chain);
+
+	std::cout << "resulting chain:" << std::endl;
+	out.print();
 
 	return out;
 }

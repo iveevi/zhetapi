@@ -146,9 +146,9 @@ Token *Engine::get(const std::string &str)
 	if (_ftr_table.count(str))
 		return _ftr_table[str].copy();
 	
-	if (_stack)
+	if (_stack) 
 		return _stack->get(str);
-		
+
 	return nullptr;
 }
 
