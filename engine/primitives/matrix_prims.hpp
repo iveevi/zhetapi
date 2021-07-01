@@ -456,9 +456,8 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
-		: _rows(other._rows),
-		_cols(other._cols),
-		Tensor <T> (other._rows, other._cols)
+		: Tensor <T> (other._rows, other._cols),
+		_rows(other._rows), _cols(other._cols)
 {
 	for (size_t i = 0; i < this->_size; i++)
 		this->_array[i] = other._array[i];

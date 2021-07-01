@@ -1,7 +1,8 @@
 #include <stack>
 
-#include <core/node.hpp>
-#include <core/operation_holder.hpp>
+#include "../../engine/core/node.hpp"
+#include "../../engine/core/operation_holder.hpp"
+#include "../../engine/core/node_reference.hpp"
 
 namespace zhetapi {
 
@@ -313,6 +314,7 @@ std::string node::display(int num, int lev) const
 	return oss.str();
 }
 
+// Make non-member
 bool node::loose_match(const node &a, const node &b)
 {
 	// Check the Token
@@ -332,6 +334,19 @@ bool node::loose_match(const node &a, const node &b)
 }
 
 // Non-member functions
+void nullify_tree_refs(node &ref, const Args &args)
+{
+	node_reference *nptr;
+	if ((nptr = ref.cast <node_reference> ())) {
+		if (std::find(args.begin(), args.end(),
+				nptr->symbol()) != args.end())
+			nptr->set(nullptr);
+	}
+
+	for (node &child : ref)
+		nullify_tree_refs(child, args);
+}
+
 node factorize(const node &ref, const node &factor)
 {
 	using namespace std;

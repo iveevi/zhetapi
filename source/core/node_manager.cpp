@@ -388,6 +388,12 @@ void node_manager::unpack(node &ref)
 		unpack(nd);
 }
 
+// Misc
+void node_manager::nullify_refs(const Args &args)
+{
+	nullify_tree_refs(_tree, args);
+}
+
 // Expansion methods
 void attribute_invert(node &ref)
 {
@@ -541,10 +547,13 @@ node node_manager::expand(
 			} else if (tptr != nullptr) {
 				// Take immediate result if the token is not an
 				// operand, otherwise we can delay
+				std::cout << "EXPAND: found tptr = " << tptr->dbg_str() << std::endl;
 				if (dynamic_cast <Functor *> (tptr))
 					t = node(tptr);
-				else
+				else {
+					std::cout << "\tNot Functor :(" << std::endl;
 					t = node(new rvalue(pr.second));
+				}
 			} else if (diff != _params.end()) {
 				t = node(new node_differential(new node_reference(&_refs[dindex], pr.second.substr(1), dindex, true)));
 			} else if (dptr != nullptr) {
@@ -624,7 +633,6 @@ node node_manager::expand(
 	
 		choice = tmp;
 	}
-
 
 	return choice[0];
 }
@@ -1371,11 +1379,11 @@ void node_manager::label_operation(node &ref)
 
 void node_manager::rereference(node &ref, bool optional)
 {
-	std::cout << "rerefing:" << std::endl;
+	/* std::cout << "rerefing:" << std::endl;
 	ref.print();
 
 	std::cout << "this = " << std::endl;
-	print();
+	print(); */
 
 	if (ref.caller() == Token::ndr) {
 		std::string tmp = (ref.cast <node_reference> ())->symbol();
@@ -1384,8 +1392,8 @@ void node_manager::rereference(node &ref, bool optional)
 
 		if (itr == _params.end()) {
 			if (optional) {
-				std::cout << "Resetting (nulling) ref:" << std::endl;
-				ref.print();
+				/* std::cout << "Resetting (nulling) ref:" << std::endl;
+				ref.print(); */
 				((ref.cast <node_reference> ()))->set(nullptr);
 				// return;
 			} else {

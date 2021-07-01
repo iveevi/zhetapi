@@ -65,24 +65,10 @@ std::ostream &operator<<(std::ostream &os, const Enode &en)
 	return os;
 }
 
-std::string Variant::str() const
-{
-	switch (variant_type()) {
-	case 0:
-		return "<Null>";
-	case 1:
-		return data.prim.str();
-	case 2:
-	default:
-		break;
-	}
-
-	return "?";
-}
-
 Variant op_prim_prim(OpCode code, const Variant &v1, const Variant &v2)
 {
-	return Variant(do_prim_optn(code, v1.data.prim, v2.data.prim));
+	// TODO: add cast functions (returning objects, not pointers)
+	return new Primitive(do_prim_optn(code, *((Primitive *) v1), *((Primitive *) v2)));
 }
 
 Variant enode_value(const Enode &en)
@@ -103,7 +89,7 @@ Variant enode_value(const Enode &en)
 			v2 = enode_value(en.leaves[1]);
 
 		// TODO: use data.id later
-		sum = v1.variant_type() + 4 * v2.variant_type();
+		sum = variant_type(v1) + (variant_type(v2) << 32);
 		if (sum == 5) { // prim & prim
 			return op_prim_prim(en.data.code, v1, v2);
 		} else {
@@ -112,7 +98,7 @@ Variant enode_value(const Enode &en)
 		
 		break;
 	case Enode::etype_primtive:
-		return Variant(en.data.prim);
+		return Variant(&en.data.prim);
 	case Enode::etype_special:
 		return Variant();
 	case Enode::etype_miscellaneous:

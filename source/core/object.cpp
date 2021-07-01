@@ -10,6 +10,6 @@ size_t Object::get_nid()
 	return (nid++);
 }
 
-std::unordered_map <std::string, size_t> Object::idtable;
+std::unordered_map <std::string, TypeId> Object::idtable;
 
 }

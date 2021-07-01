@@ -70,6 +70,8 @@ public:
 	// Methods
 	void unpack();
 
+	void nullify_refs(const Args &);
+
 	Token *value(Engine *) const;
 	Token *sequential_value(Engine *) const;
 	Token *substitute_and_compute(Engine *, const std::vector <Token *> &);

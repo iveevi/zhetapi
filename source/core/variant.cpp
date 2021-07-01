@@ -2,20 +2,32 @@
 
 namespace zhetapi {
 
-// Constructors
-Variant::Variant()
-		: data({.id = 0}) {}
-
-Variant::Variant(const Primitive &prim)
-		: data(Data {.prim = prim}) {}
-
-Variant::Variant(const Object &obj)
-		: data(Data {.obj = obj}) {}
+Variant null_variant()
+{
+	// Id needs to equal 0
+	return new size_t(0);
+}
 
 // Variant type getter
-size_t Variant::variant_type() const
+TypeId variant_type(Variant var)
 {
-	return (data.id) ? (1 + (data.id > MAX_PIDS)) : 0;
+	TypeId id = *((TypeId *) var);
+	return (id) ? (1 + (id > MAX_PIDS)) : 0;
+}
+
+std::string variant_str(Variant var)
+{
+	switch (variant_type(var)) {
+	case 0:
+		return "<Null>";
+	case 1:
+		return ((Primitive *) var)->str();
+	case 2:
+	default:
+		break;
+	}
+
+	return "?";
 }
 
 }

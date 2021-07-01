@@ -70,7 +70,7 @@ Token::type Token::caller() const
 
 std::string Token::dbg_str() const
 {
-	return "[?]";
+	return "[" + std::string(typeid(*this).name()) + "]";
 }
 
 /**

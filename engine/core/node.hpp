@@ -111,6 +111,8 @@ T *node::cast() const
 }
 
 // Forward declarations
+void nullify_tree_refs(node &, const Args &);
+
 node factorize(const node &, const node &);
 
 }

@@ -14,9 +14,12 @@ g = get_func(3)
 
 println("g = ", g) */
 
-f(x) = x
+f(x) = x^3 + x - sin(x)
 
 println("f(1) = ", f(1))
+println("f(2) = ", f(2))
+println("f(3) = ", f(3))
 
-// println("f(2) = ", f(2))
-// println("f(3) = ", f(3))
+y = 1943290.43243
+
+println("y = ", y)

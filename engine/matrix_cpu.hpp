@@ -111,7 +111,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
-		: _rows(rs), _cols(cs), Tensor <T> (rs, cs)
+		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
 {
 	for (size_t i = 0; i < _rows; i++) {
 		for (size_t j = 0; j < _cols; j++)

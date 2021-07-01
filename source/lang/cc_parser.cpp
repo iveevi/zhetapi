@@ -59,12 +59,14 @@ node_manager cc_run_assignment(
 		nm = node_manager(ctx, veq[n - 1],
 				args_union(args, fargs),
 				pardon);
+		nm.nullify_refs(fargs);
 	} else {
 		nm = node_manager(ctx, veq[n - 1], args, pardon);
 	}
 
 	out.append(nm);
 
+	// TODO: what is this???
 	if (is_valid_ident(fout[0])) {
 		node ftn(new lvalue(fout[0]), l_lvalue);
 
@@ -73,11 +75,13 @@ node_manager cc_run_assignment(
 		
 		out.append(ftn);
 	} else {
-		// TODO: make a function
+		// TODO: make a function (WHAT IS THIS???)
 		try {
-			out.append(node_manager(ctx, veq[n - 2],
-						args_union(args, fargs),
-						pardon));
+			node_manager tmp(ctx, veq[n - 2],
+				args_union(args, fargs), pardon);
+			tmp.nullify_refs(fargs);
+
+			out.append(tmp);
 		} catch (const node_manager::undefined_symbol &e) {
 			std::cout << "FIXME: undefined symbol: " << e.what() << std::endl;
 		}
@@ -102,9 +106,11 @@ node_manager cc_run_assignment(
 		} else {
 			// TODO: make a function
 			try {
-				out.append(node_manager(ctx, veq[i],
-							args_union(args, kargs),
-							pardon));
+				// TODO: dont do this here (auto add args in assignment function)
+				node_manager tmp(ctx, veq[i],
+					args_union(args, kargs), pardon);
+				tmp.nullify_refs(kargs);
+				out.append(tmp);
 			} catch (const node_manager::undefined_symbol &e) {
 				std::cout << "FIXME: undefined symbol: " << e.what() << std::endl;
 			}

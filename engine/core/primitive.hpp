@@ -11,7 +11,7 @@ namespace zhetapi {
 #define MAX_PIDS	3
 
 // ID type alias
-using TypeId = size_t;
+using TypeId = uint32_t;
 
 // Enode type IDs (at most 16) TODO: put inside primitive
 enum PrimIds : TypeId {
