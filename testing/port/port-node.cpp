@@ -1,116 +1,26 @@
 #include "port.hpp"
 
-// Kind of a stupid test given the one right after,
-// but oh well, better have more tests than none :P
-//
-// TODO: merge with the test below
-TEST(compile_operand)
-{
-	using namespace zhetapi;
-
-	// Total number of tests here
-	int count = 4;
-
-	// Context
-	Engine *ctx = new Engine(true);
-
-	// Manual trees
-	node n1(new OpZ(564));
-	node n2(new OpQ(Q(7, 5)));
-	node n3(new rvalue("false"));
-	node n4(new OpS("my string"));
-	/* TODO: fix this
-	node n5(
-		new Operand <({
-			new OpZ(1), new OpR(3.14), new OpB(true)
-		})
-	); */
-
-	// Compiled trees
-	node_manager nm1(ctx, "564");
-	node_manager nm2(ctx, "7/5");
-	node_manager nm3(ctx, "false");
-	node_manager nm4(ctx, "\"my string\"");
-	// node_manager nm5(ctx, "{1, 3.14, true}");
-
-	// Integer
-	if (node::loose_match(n1, nm1.tree())) {
-		oss << ok << " Integer trees" << reset << endl;
-		count--;
-	} else {
-		oss << err << " Integer trees" << reset << endl;
-		oss << "Manual:" << endl;
-		n1.print(oss);
-		oss << "Compiled:" << endl;
-		nm1.print(oss);
-	}
-	
-	// Rational (skpi real because of accuracy issues)
-	if (node::loose_match(n2, nm2.tree())) {
-		oss << ok << " Real trees" << reset << endl;
-		count--;
-	} else {
-		oss << err << " Real trees" << reset << endl;
-		oss << "Manual:" << endl;
-		n2.print(oss);
-		oss << "Compiled:" << endl;
-		nm2.print(oss);
-	}
-	
-	// Rvalue
-	if (node::loose_match(n3, nm3.tree())) {
-		oss << ok << " Boolean trees" << reset << endl;
-		count--;
-	} else {
-		oss << err << " Boolean trees" << reset << endl;
-		oss << "Manual:" << endl;
-		n3.print(oss);
-		oss << "Compiled:" << endl;
-		nm3.print(oss);
-	}
-	
-	// String
-	if (node::loose_match(n4, nm4.tree())) {
-		oss << ok << " String trees" << reset << endl;
-		count--;
-	} else {
-		oss << err << " String trees" << reset << endl;
-		oss << "Manual:" << endl;
-		n4.print(oss);
-		oss << "Compiled:" << endl;
-		nm4.print(oss);
-	}
-	
-	/* Collection
-	if (node::loose_match(n5, nm5.tree())) {
-		oss << ok << "Collection trees" << reset << endl;
-		count--;
-	} else {
-		oss << err << "Collection trees" << reset << endl;
-		oss << "Manual:" << endl;
-		n5.print();
-		oss << "Compiled:" << endl;
-		nm5.print();
-	} */
-
-	return (count == 0);
-}
-
 TEST(compile_const_exprs)
 {
 	using namespace zhetapi;
 
 	// Context
-	Engine *ctx = new Engine();
+	Engine *ctx = new Engine(true);
 
 	// List of compiled expressions
 	vector <std::string> exprs {
+		// Operands
+		"564", "7/5", "false", "\"my string\"",
+		"[1, 2, 3, 5, 8]",
 		// First come the binary operations
 		"7 + 5", "7 - 5", "7 * 5", "7 / 5"
 	};
 
 	// List of their values
 	vector <Token *> values {
+		// Operands
+		new OpZ(564), new OpQ(Q(7, 5)), new OpB(false),
+		new OpS("my string"), new OpVecZ(VecZ({1, 2, 3, 5, 8})),
 		// Binary operations
 		new OpZ(12), new OpZ(2), new OpZ(35), new OpQ(Q(7, 5))
 	};

@@ -126,7 +126,7 @@ Args eq_split(const std::string &str)
 	return out;
 }
 
-Args comma_split(const std::string &str)
+Args comma_split(const std::string &str, bool ignore_space)
 {
 	bool quoted = false;
 
@@ -149,7 +149,7 @@ Args comma_split(const std::string &str)
 				out.push_back(tmp);
 
 				tmp.clear();
-			} else if (!isspace(c)) {
+			} else if (!ignore_space || !isspace(c)) {
 				tmp += c;
 			}
 		}
@@ -159,6 +159,37 @@ Args comma_split(const std::string &str)
 		out.push_back(tmp);
 
 	return out;
+}
+
+std::pair <std::string, std::string> as_split(const std::string &str)
+{
+	std::string libname;
+	std::string middle;
+	std::string alias;
+
+	size_t i = 0;
+	size_t size = str.size();
+
+	while (isspace(str[i]) && i < size) i++;
+	while (!isspace(str[i]) && i < size)
+		libname += str[i++];
+	
+	while (isspace(str[i]) && i < size) i++;
+	while (!isspace(str[i]) && i < size)
+		middle += str[i++];
+	
+	if (middle == "as") {
+		while (isspace(str[i]) && i < size) i++;
+		while (!isspace(str[i]) && i < size)
+			alias += str[i++];
+	} else if (!middle.empty()) {
+		throw std::runtime_error("Unexpected \"" + middle + "\" in import clause");
+	}
+
+	if (alias.empty())
+		alias = libname;
+
+	return {libname, alias};
 }
 
 }

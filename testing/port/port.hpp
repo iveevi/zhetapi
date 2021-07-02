@@ -123,7 +123,6 @@ TEST(module_construction);
 TEST(parsing_global_assignment);
 TEST(parsing_global_branching);
 
-TEST(compile_operand);
 TEST(compile_const_exprs);
 TEST(compile_var_exprs);
 

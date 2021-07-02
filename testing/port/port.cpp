@@ -1,7 +1,7 @@
 #include "port.hpp"
 
 #define THREADS	8
-#define DEBUG_EXCEPTION
+// #define DEBUG_EXCEPTION
 
 typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
@@ -32,7 +32,6 @@ vector <singlet> rig {
 	RIG(module_construction),
 	RIG(parsing_global_assignment),
 	RIG(parsing_global_branching),
-	RIG(compile_operand),
 	RIG(compile_const_exprs),
 	RIG(compile_var_exprs)
 };

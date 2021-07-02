@@ -85,7 +85,7 @@ static void import_dll(const std::string &file, Module &module, const char *lint
 }
 
 // Importing libraries
-static void import_as(const std::string &lib, Engine *ctx, State *state)
+static void import_as(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
 {
 	// First check the possible locations and warn on ambiguity
 	std::string fname = lib.substr(0, lib.find_last_of("."));
@@ -97,6 +97,9 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 		// Generate library and file names as candidates
 		std::string join1 = idir + '/' + lib + ".zhplib";
 		std::string join2 = idir + '/' + lib + ".zhp";
+
+		std::cout << "trying : \"" << join1 << "\"" << std::endl;
+		std::cout << "trying : \"" << join2 << "\"" << std::endl;
 
 		// Check dll: use dlopen to check presence
 		void *handle = dlopen(join1.c_str(), RTLD_NOW);
@@ -136,7 +139,7 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 	// TODO: deal with lib
 
 	// Create, read and load library (depending on file or lib)
-	Module *module = new Module(fname);
+	Module *module = new Module(alias);
 
 	if (dll) {
 		import_dll(lpaths[0], *module, state->lver);
@@ -145,7 +148,8 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 		mdl_parse(&sf, ctx, module);
 	}
 	
-	ctx->put(lib, module);
+	// TODO: remove name info from modules
+	ctx->put(alias, module);
 }
 
 // TODO: make sure state->branch gets reset
@@ -485,13 +489,22 @@ static OpZ *check_import(Feeder *feeder,
 	// TODO: also allow 'as' clause
 	char c;
 
+	// TODO: Combine all here instead of using all the helpers (and reparsing...)
 	std::string line;
 	while ((c = feeder->feed()) != '\n' && c != EOF)
 		line += c;
 
-	Args vcomma = comma_split(line);
-	for (auto str : vcomma)
-		import_as(str, ctx, state);
+	Args vcomma = comma_split(line, false);
+	for (auto str : vcomma) {
+		std::cout << "Importing as: \"" << str << "\"" << std::endl;
+
+		// TODO: alias please
+		std::pair <std::string, std::string> pstr = as_split(str);
+
+		std::cout << "\tpstr = <\""  << pstr.first << "\", \"" << pstr.second << "\">" << std::endl;
+
+		import_as(pstr.first, pstr.second, ctx, state);
+	}
 
 	return nullptr;
 }
