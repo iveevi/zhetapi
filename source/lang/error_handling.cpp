@@ -1,7 +1,7 @@
 #include <cstdio>
 
-#include <engine.hpp>
-#include <lang/error_handling.hpp>
+#include "../../engine/engine.hpp"
+#include "../../engine/lang/error_handling.hpp"
 
 namespace zhetapi {
 
@@ -45,6 +45,8 @@ Args symbol_suggestions(const std::string &symbol, const Args &choices)
 	return valid;
 }
 
+// Enable for tracking symbol errors
+// #define SYM_ERR_THROW
 void symbol_error_msg(const std::string &symbol, const std::string &loc, Engine *context)
 {
 	// TODO: add a function for classifying the error
@@ -70,6 +72,12 @@ void symbol_error_msg(const std::string &symbol, const std::string &loc, Engine 
 		
 		std::fprintf(stderr, "}\n");
 	}
+
+#ifdef SYM_ERR_THROW
+
+	throw std::runtime_error("Throwing from sym err...");
+
+#endif
 }
 
 }

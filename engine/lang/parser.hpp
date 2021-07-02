@@ -49,6 +49,7 @@ Args comma_split(const std::string &, bool = true);
 
 // TODO: alias for SS
 std::pair <std::string, std::string> as_split(const std::string &);
+std::pair <std::string, std::string> from_split(const std::string &);
 
 // No forwarding needed
 void run(const std::string &, Engine *, bool = false);

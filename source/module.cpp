@@ -1,4 +1,5 @@
 #include "../engine/module.hpp"
+#include "../engine/engine.hpp"
 #include "../engine/core/types.hpp"
 #include "../engine/core/functor.hpp"
 
@@ -101,6 +102,14 @@ void Module::add(const std::string &name, Token *tptr)
 {
 	// TODO: Copy token?
 	_attributes[name] = tptr;
+}
+
+void Module::from_add(Engine *ctx, const std::string &regex)
+{
+	for (const auto &a : _attributes) {
+		if (a.first == regex || regex == "*")
+			ctx->put(a.first, a.second);
+	}
 }
 
 // Virtual functions

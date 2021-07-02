@@ -2,6 +2,7 @@
 #define MODULE_H_
 
 // C/C++ headers
+#include <regex>
 #include <unordered_map>
 
 // Engine headers
@@ -34,6 +35,8 @@ public:
 	void add(const NamedToken &);
 	void add(const char *, Token *);
 	void add(const std::string &, Token *);
+
+	void from_add(Engine *, const std::string &);
 
 	// Virtual functions
 	virtual type caller() const override;

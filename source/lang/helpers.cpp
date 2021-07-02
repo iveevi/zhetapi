@@ -1,4 +1,5 @@
 #include <core/common.hpp>
+#include <stdexcept>
 
 namespace zhetapi {
 
@@ -190,6 +191,37 @@ std::pair <std::string, std::string> as_split(const std::string &str)
 		alias = libname;
 
 	return {libname, alias};
+}
+
+std::pair <std::string, std::string> from_split(const std::string &str)
+{
+	std::string libname;
+	std::string middle;
+	std::string regex;
+
+	size_t i = 0;
+	size_t size = str.size();
+
+	while (isspace(str[i]) && i < size) i++;
+	while (!isspace(str[i]) && i < size)
+		libname += str[i++];
+	
+	while (isspace(str[i]) && i < size) i++;
+	while (!isspace(str[i]) && i < size)
+		middle += str[i++];
+	
+	if (middle == "import") {
+		while (isspace(str[i]) && i < size) i++;
+		while (!isspace(str[i]) && i < size)
+			regex += str[i++];
+	} else if (!middle.empty()) {
+		throw std::runtime_error("Unexpected \"" + middle + "\" in import clause");
+	}
+
+	if (regex.empty())
+		throw std::runtime_error("Cannot import nothing from library");
+
+	return {libname, regex};
 }
 
 }

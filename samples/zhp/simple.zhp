@@ -1,6 +1,6 @@
 include testing/api
-import assignment
-import classes as cl
 
-cl.test_dictionary()
-classes.test_dictionary()
+from classes import *
+
+test_collection()
+test_dictionary()

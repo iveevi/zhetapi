@@ -1,7 +1,6 @@
 #include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/error_handling.hpp"
 #include "../../engine/core/node_manager.hpp"
-#include <cstdlib>
 
 namespace zhetapi {
 
@@ -84,8 +83,7 @@ static void import_dll(const std::string &file, Module &module, const char *lint
 	exporter(&module);
 }
 
-// Importing libraries
-static void import_as(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
+static Module *fetch_module(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
 {
 	// First check the possible locations and warn on ambiguity
 	std::string fname = lib.substr(0, lib.find_last_of("."));
@@ -97,9 +95,6 @@ static void import_as(const std::string &lib, const std::string &alias, Engine *
 		// Generate library and file names as candidates
 		std::string join1 = idir + '/' + lib + ".zhplib";
 		std::string join2 = idir + '/' + lib + ".zhp";
-
-		std::cout << "trying : \"" << join1 << "\"" << std::endl;
-		std::cout << "trying : \"" << join2 << "\"" << std::endl;
 
 		// Check dll: use dlopen to check presence
 		void *handle = dlopen(join1.c_str(), RTLD_NOW);
@@ -125,7 +120,7 @@ static void import_as(const std::string &lib, const std::string &alias, Engine *
 		std::cout << "Error: could not find library \"" << lib << "\"" << std::endl;
 
 		// TODO: throw
-		return;
+		return nullptr;
 	} else if (lpaths.size() > 1) {
 		std::cout << "Ambiguity in importing \"" << lib << "\"" << std::endl;
 
@@ -133,10 +128,8 @@ static void import_as(const std::string &lib, const std::string &alias, Engine *
 			std::cout << "\tCandidate " << str << std::endl;
 
 		// TODO: throw
-		return;
+		return nullptr;
 	}
-
-	// TODO: deal with lib
 
 	// Create, read and load library (depending on file or lib)
 	Module *module = new Module(alias);
@@ -144,12 +137,34 @@ static void import_as(const std::string &lib, const std::string &alias, Engine *
 	if (dll) {
 		import_dll(lpaths[0], *module, state->lver);
 	} else {
+		Engine *nctx = push_and_ret_stack(ctx);
+
 		StringFeeder sf = file_feeder(lpaths[0]);
-		mdl_parse(&sf, ctx, module);
+		mdl_parse(&sf, nctx, module);
+
+		delete nctx;
 	}
+
+	return module;
+}
+
+// Importing libraries
+static void import_as(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
+{
+	// Create, read and load library (depending on file or lib)
+	Module *module = fetch_module(lib, alias, ctx, state);
 	
 	// TODO: remove name info from modules
 	ctx->put(alias, module);
+}
+
+static void import_from(const std::string &lib, const std::string &regex, Engine *ctx, State *state)
+{
+	// Create, read and load library (depending on file or lib)
+	Module *module = fetch_module(lib, lib, ctx, state);
+
+	// Really should be a semi-regex (* or name)
+	module->from_add(ctx, regex);
 }
 
 // TODO: make sure state->branch gets reset
@@ -496,14 +511,34 @@ static OpZ *check_import(Feeder *feeder,
 
 	Args vcomma = comma_split(line, false);
 	for (auto str : vcomma) {
-		std::cout << "Importing as: \"" << str << "\"" << std::endl;
-
 		// TODO: alias please
 		std::pair <std::string, std::string> pstr = as_split(str);
 
-		std::cout << "\tpstr = <\""  << pstr.first << "\", \"" << pstr.second << "\">" << std::endl;
-
 		import_as(pstr.first, pstr.second, ctx, state);
+	}
+
+	return nullptr;
+}
+
+static OpZ *check_from(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// TODO: Allow multiline
+	// TODO: also allow 'as' clause
+	char c;
+
+	// TODO: Combine all here instead of using all the helpers (and reparsing...)
+	std::string line;
+	while ((c = feeder->feed()) != '\n' && c != EOF)
+		line += c;
+
+	Args vcomma = comma_split(line, false);
+	for (auto str : vcomma) {
+		// TODO: alias please
+		std::pair <std::string, std::string> pstr = from_split(str);
+
+		import_from(pstr.first, pstr.second, ctx, state);
 	}
 
 	return nullptr;
@@ -550,6 +585,7 @@ OpZ *check_keyword(std::string &cache,
 		{"return", check_return},
 		{"include", check_include},
 		{"import", check_import},
+		{"from", check_from},
 		{"global", check_global}
 	};
 
