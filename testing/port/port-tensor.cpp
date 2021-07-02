@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool tensor_construction_and_memory(ostringstream &oss)
+TEST(tensor_construction_and_memory)
 {
 	using namespace zhetapi;
 

@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool vector_construction_and_memory(ostringstream &oss)
+TEST(vector_construction_and_memory)
 {
 	using namespace zhetapi;
 
@@ -40,7 +40,7 @@ bool vector_construction_and_memory(ostringstream &oss)
 	return true;
 }
 
-bool vector_operations(ostringstream &oss)
+TEST(vector_operations)
 {
 	using namespace zhetapi;
 

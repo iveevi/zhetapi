@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool function_computation(ostringstream &oss)
+TEST(function_computation)
 {
 	using namespace zhetapi;
 

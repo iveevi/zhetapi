@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool interval_construction(ostringstream &oss)
+TEST(interval_construction)
 {
 	using namespace zhetapi::utility;
 
@@ -31,7 +31,7 @@ bool interval_construction(ostringstream &oss)
 	return true;
 }
 
-bool interval_sampling(ostringstream &oss)
+TEST(interval_sampling)
 {
 	using namespace zhetapi::utility;
 	

@@ -3,7 +3,7 @@
 #define THREADS	8
 #define DEBUG_EXCEPTION
 
-typedef pair <string, bool (*)(ostringstream &)> singlet;
+typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
 // Testing rig
 vector <singlet> rig {
@@ -31,7 +31,10 @@ vector <singlet> rig {
 	RIG(act_sigmoid),
 	RIG(module_construction),
 	RIG(parsing_global_assignment),
-	RIG(parsing_global_branching)
+	RIG(parsing_global_branching),
+	RIG(compile_operand),
+	RIG(compile_const_exprs),
+	RIG(compile_var_exprs)
 };
 
 vector <singlet> failed;
@@ -87,14 +90,14 @@ int main()
 #ifdef DEBUG_EXCEPTION
 			
 		oss << string(100, '-') << endl;
-		tmp = s.second(oss);	
+		tmp = s.second(oss, 0);	
 		oss << string(100, '-') << endl;
 
 #else
 
 		try {
 			oss << string(100, '-') << endl;
-			tmp = s.second(oss);	
+			tmp = s.second(oss, 0);	
 			oss << string(100, '-') << endl;
 		} catch (...) {
 			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""

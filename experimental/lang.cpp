@@ -12,11 +12,21 @@ Engine *ctx = new Engine();
 
 int main()
 {
+	node n1(new operation_holder("*"), {
+		node(new node_reference(nullptr, "x", 0, true)),
+		node(new OpZ(2))
+	});
+
 	node_manager nm;
 	
-	/* nm = node_manager(ctx, "3", {"x"});
+	nm = node_manager(ctx, "2x", {"x"});
 
-	std::cout << "==============" << std::endl;
+	nm.print();
+	n1.print();
+
+	cout << "nm1 == nm ? " << boolalpha << node::loose_match(n1, nm.tree()) << endl;
+
+	/* std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
 
@@ -42,11 +52,11 @@ int main()
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
-	nm.print(); */
+	nm.print();
 
 	nm = node_manager(ctx, "x^2 + 10^2", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
-	nm.print();
+	nm.print(); */
 }

@@ -19,10 +19,11 @@
 #include "../../engine/fourier.hpp"
 #include "../../engine/linalg.hpp"
 #include "../../engine/matrix.hpp"
+#include "../../engine/module.hpp"
 #include "../../engine/polynomial.hpp"
 #include "../../engine/tensor.hpp"
+#include "../../engine/token.hpp"
 #include "../../engine/vector.hpp"
-#include "../../engine/module.hpp"
 
 #include "../../engine/std/calculus.hpp"
 #include "../../engine/std/functions.hpp"
@@ -33,8 +34,12 @@
 #include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/feeder.hpp"
 
+#include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/raw_types.hpp"
+#include "../../engine/core/collection.hpp"
+
 // Macros
-#define TEST(name)	bool name(ostringstream &oss)
+#define TEST(name)	bool name(ostringstream &oss, int cout)
 #define RIG(name)	{#name, &name}	
 
 // Namespaces
@@ -117,5 +122,9 @@ TEST(module_construction);
 
 TEST(parsing_global_assignment);
 TEST(parsing_global_branching);
+
+TEST(compile_operand);
+TEST(compile_const_exprs);
+TEST(compile_var_exprs);
 
 #endif
