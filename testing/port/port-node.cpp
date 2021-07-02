@@ -2,20 +2,22 @@
 
 // Kind of a stupid test given the one right after,
 // but oh well, better have more tests than none :P
+//
+// TODO: merge with the test below
 TEST(compile_operand)
 {
 	using namespace zhetapi;
 
 	// Total number of tests here
-	int count = 5;
+	int count = 4;
 
 	// Context
 	Engine *ctx = new Engine(true);
 
 	// Manual trees
 	node n1(new OpZ(564));
-	node n2(new OpR(1.618));
-	node n3(new OpB(false));
+	node n2(new OpQ(Q(7, 5)));
+	node n3(new rvalue("false"));
 	node n4(new OpS("my string"));
 	/* TODO: fix this
 	node n5(
@@ -26,57 +28,57 @@ TEST(compile_operand)
 
 	// Compiled trees
 	node_manager nm1(ctx, "564");
-	node_manager nm2(ctx, "1.618");
+	node_manager nm2(ctx, "7/5");
 	node_manager nm3(ctx, "false");
 	node_manager nm4(ctx, "\"my string\"");
 	// node_manager nm5(ctx, "{1, 3.14, true}");
 
 	// Integer
 	if (node::loose_match(n1, nm1.tree())) {
-		oss << ok << "Integer trees" << reset << endl;
+		oss << ok << " Integer trees" << reset << endl;
 		count--;
 	} else {
-		oss << err << "Integer trees" << reset << endl;
+		oss << err << " Integer trees" << reset << endl;
 		oss << "Manual:" << endl;
-		n1.print();
+		n1.print(oss);
 		oss << "Compiled:" << endl;
-		nm1.print();
+		nm1.print(oss);
 	}
 	
-	// Real
+	// Rational (skpi real because of accuracy issues)
 	if (node::loose_match(n2, nm2.tree())) {
-		oss << ok << "Real trees" << reset << endl;
+		oss << ok << " Real trees" << reset << endl;
 		count--;
 	} else {
-		oss << err << "Real trees" << reset << endl;
+		oss << err << " Real trees" << reset << endl;
 		oss << "Manual:" << endl;
-		n2.print();
+		n2.print(oss);
 		oss << "Compiled:" << endl;
-		nm2.print();
+		nm2.print(oss);
 	}
 	
-	// Boolean
+	// Rvalue
 	if (node::loose_match(n3, nm3.tree())) {
-		oss << ok << "Boolean trees" << reset << endl;
+		oss << ok << " Boolean trees" << reset << endl;
 		count--;
 	} else {
-		oss << err << "Boolean trees" << reset << endl;
+		oss << err << " Boolean trees" << reset << endl;
 		oss << "Manual:" << endl;
-		n3.print();
+		n3.print(oss);
 		oss << "Compiled:" << endl;
-		nm3.print();
+		nm3.print(oss);
 	}
 	
 	// String
 	if (node::loose_match(n4, nm4.tree())) {
-		oss << ok << "String trees" << reset << endl;
+		oss << ok << " String trees" << reset << endl;
 		count--;
 	} else {
-		oss << err << "String trees" << reset << endl;
+		oss << err << " String trees" << reset << endl;
 		oss << "Manual:" << endl;
-		n4.print();
+		n4.print(oss);
 		oss << "Compiled:" << endl;
-		nm4.print();
+		nm4.print(oss);
 	}
 	
 	/* Collection
@@ -91,7 +93,7 @@ TEST(compile_operand)
 		nm5.print();
 	} */
 
-	return !count;
+	return (count == 0);
 }
 
 TEST(compile_const_exprs)
@@ -125,13 +127,15 @@ TEST(compile_const_exprs)
 			<< (tptr ? tptr->dbg_str() : "[Null]")
 			<< " <=> " << values[i]->dbg_str() << endl;
 		
-		if (tokcmp(tptr, values[i]))
+		if (tokcmp(tptr, values[i])) {
 			oss << ok << "\tValues are equal." << endl;
-		else
+			count++;
+		} else {
 			oss << err << "\tValues are mismatching." << endl;
+		}
 	}
 
-	return count == size;
+	return (count == size);
 }
 
 TEST(compile_var_exprs)
@@ -180,5 +184,5 @@ TEST(compile_var_exprs)
 		}
 	}
 
-	return count == size;
+	return (count == size);
 }

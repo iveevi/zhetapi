@@ -12,19 +12,9 @@ Engine *ctx = new Engine();
 
 int main()
 {
-	node n1(new operation_holder("*"), {
-		node(new node_reference(nullptr, "x", 0, true)),
-		node(new OpZ(2))
-	});
-
-	node_manager nm;
-	
-	nm = node_manager(ctx, "2x", {"x"});
+	node_manager nm(ctx, "2 / 7");
 
 	nm.print();
-	n1.print();
-
-	cout << "nm1 == nm ? " << boolalpha << node::loose_match(n1, nm.tree()) << endl;
 
 	/* std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;

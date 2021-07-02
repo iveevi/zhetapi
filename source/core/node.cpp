@@ -271,6 +271,30 @@ void node::print(int num, int lev) const
 		itr.print(++counter, lev + 1);
 }
 
+void node::print(std::ostream &os, int num, int lev) const
+{
+	int counter = lev;
+	while (counter > 0) {
+		os << "\t";
+
+		counter--;
+	}
+
+	if (_tptr) {
+		os << "#" << num << ": " << _tptr->dbg_str()
+			<< " (" << _tptr << ", " << strlabs[_label]
+			<< ") @ " << this << std::endl;	
+	} else {
+		os << "#" << num << ": null ("
+			<< _tptr << ", " << strlabs[_label] << ") @ "
+			<< this << std::endl;
+	}
+
+	counter = 0;
+	for (node itr : _leaves)
+		itr.print(os, ++counter, lev + 1);
+}
+
 void node::print_no_address(int num, int lev) const
 {
 	int counter = lev;
@@ -290,6 +314,27 @@ void node::print_no_address(int num, int lev) const
 	counter = 0;
 	for (node itr : _leaves)
 		itr.print_no_address(++counter, lev + 1);
+}
+
+void node::print_no_address(std::ostream &os, int num, int lev) const
+{
+	int counter = lev;
+	while (counter > 0) {
+		os << "\t";
+		counter--;
+	}
+
+	if (_tptr) {
+		os << "#" << num << ": " << _tptr->dbg_str() << " (" <<
+			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+	} else {
+		os << "#" << num << ": null (" <<
+			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+	}
+
+	counter = 0;
+	for (node itr : _leaves)
+		itr.print_no_address(os, ++counter, lev + 1);
 }
 
 std::string node::display(int num, int lev) const

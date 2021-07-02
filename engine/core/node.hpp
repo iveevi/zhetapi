@@ -94,7 +94,9 @@ public:
 
 	// Printing
 	void print(int = 1, int = 0) const;
+	void print(std::ostream &, int = 1, int = 0) const;
 	void print_no_address(int = 1, int = 0) const;
+	void print_no_address(std::ostream &, int = 1, int = 0) const;
 
 	std::string display(int = 1, int = 0) const;
 

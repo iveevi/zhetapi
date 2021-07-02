@@ -107,6 +107,7 @@ public:
 	std::string display() const;
 
 	void print(bool = false) const;
+	void print(std::ostream &, bool = false) const;
 
 	// Arithmetic
 	friend node_manager operator+(

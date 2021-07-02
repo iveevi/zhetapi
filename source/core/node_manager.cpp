@@ -1247,6 +1247,27 @@ void node_manager::print(bool address) const
 	}
 }
 
+void node_manager::print(std::ostream &os, bool address) const
+{
+	// node_reference::address = address;
+
+	if (address)
+		_tree.print(os);
+	else	
+		_tree.print_no_address(os);
+
+	if (_refs.size()) {
+		std::cout << "Refs [" << _refs.size() << "]" << std::endl;
+		
+		for (auto &ref : _refs) {
+			if (address)
+				ref.print(os);
+			else
+				ref.print_no_address(os);
+		}
+	}
+}
+
 // Labeling utilities
 void node_manager::label(node &ref)
 {

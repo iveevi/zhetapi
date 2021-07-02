@@ -520,6 +520,7 @@ parser::parser() : parser::base_type(_start)
 			)
 		]
 
+		// TODO: 3rd term should be node_term (right recursion)
 		| _node_factor [_val = _1] >> *(
 			(_t1_bin >> _node_factor) [
 				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
@@ -530,6 +531,13 @@ parser::parser() : parser::base_type(_start)
 		| (_node_opd >> _power >> _node_opd) [
 			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 		]
+
+		// TODO: REALLY NEED TO FIX GENERALIZATION WITH OPERANDS
+		| _node_opd [_val = _1]  >> *(
+			(_t1_bin >> _node_term) [
+				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+			]
+		)
 
 		| _node_opd [_val = _1]
 	);
