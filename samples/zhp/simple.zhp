@@ -1,6 +1,6 @@
 include testing/api
 
-from classes import *
+from classes import test_collection, test_dictionary
 
 test_collection()
 test_dictionary()

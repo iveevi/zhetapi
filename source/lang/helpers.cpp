@@ -127,7 +127,7 @@ Args eq_split(const std::string &str)
 	return out;
 }
 
-Args comma_split(const std::string &str, bool ignore_space)
+Args comma_split(const std::string &str, bool ignore_space = true)
 {
 	bool quoted = false;
 
@@ -193,11 +193,13 @@ std::pair <std::string, std::string> as_split(const std::string &str)
 	return {libname, alias};
 }
 
-std::pair <std::string, std::string> from_split(const std::string &str)
+std::pair <std::string, Args> from_split(const std::string &str)
 {
 	std::string libname;
 	std::string middle;
-	std::string regex;
+	std::string commas;
+
+	Args all;
 
 	size_t i = 0;
 	size_t size = str.size();
@@ -212,16 +214,16 @@ std::pair <std::string, std::string> from_split(const std::string &str)
 	
 	if (middle == "import") {
 		while (isspace(str[i]) && i < size) i++;
-		while (!isspace(str[i]) && i < size)
-			regex += str[i++];
+		while (i < size)
+			commas += str[i++];
 	} else if (!middle.empty()) {
 		throw std::runtime_error("Unexpected \"" + middle + "\" in import clause");
 	}
 
-	if (regex.empty())
+	if (commas.empty())
 		throw std::runtime_error("Cannot import nothing from library");
 
-	return {libname, regex};
+	return {libname, comma_split(commas)};
 }
 
 }

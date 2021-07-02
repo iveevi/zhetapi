@@ -158,13 +158,13 @@ static void import_as(const std::string &lib, const std::string &alias, Engine *
 	ctx->put(alias, module);
 }
 
-static void import_from(const std::string &lib, const std::string &regex, Engine *ctx, State *state)
+static void import_from(const std::string &lib, const Args &syms, Engine *ctx, State *state)
 {
 	// Create, read and load library (depending on file or lib)
 	Module *module = fetch_module(lib, lib, ctx, state);
 
 	// Really should be a semi-regex (* or name)
-	module->from_add(ctx, regex);
+	module->from_add(ctx, syms);
 }
 
 // TODO: make sure state->branch gets reset
@@ -533,13 +533,9 @@ static OpZ *check_from(Feeder *feeder,
 	while ((c = feeder->feed()) != '\n' && c != EOF)
 		line += c;
 
-	Args vcomma = comma_split(line, false);
-	for (auto str : vcomma) {
-		// TODO: alias please
-		std::pair <std::string, std::string> pstr = from_split(str);
+	std::pair <std::string, Args> pstrs = from_split(line);
 
-		import_from(pstr.first, pstr.second, ctx, state);
-	}
+	import_from(pstrs.first, pstrs.second, ctx, state);
 
 	return nullptr;
 }

@@ -36,7 +36,7 @@ public:
 	void add(const char *, Token *);
 	void add(const std::string &, Token *);
 
-	void from_add(Engine *, const std::string &);
+	void from_add(Engine *, const Args &);
 
 	// Virtual functions
 	virtual type caller() const override;
