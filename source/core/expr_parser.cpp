@@ -83,142 +83,144 @@ parser::parser() : parser::base_type(_start)
 	// Reals
 	_z = long_long;
 
-	_q = (long_long >> '/' >> long_long) [
+	/* _q = (long_long >> '/' >> long_long) [
 		_val = phoenix::construct <Q> (_1, _2)
-	];
+	]; */
 
 	// _r = double_;
 	_r = qi::real_parser <R, qi::strict_real_policies <R>> ();
 
-	// Generalized
+	/* Generalized
 	_gq = _q | _z;
-	_gr = _r | _gq;
+	_gr = _r | _gq; */
 	
 	// Complex
 	_cz = (_z >> 'i') [
 		_val = phoenix::construct <CmpZ> (0, _1)
 	];
 	
-	_cq = (_q >> 'i') [
+	/* _cq = (_q >> 'i') [
 		_val = phoenix::construct <CmpQ> (0, _1)
-	];
+	]; */
 	
 	_cr = (_r >> 'i') [
 		_val = phoenix::construct <CmpR> (0, _1)
 	];
 	
-	_cgq = (_gq >> 'i') [
+	/* _cgq = (_gq >> 'i') [
 		_val = phoenix::construct <CmpQ> (0, _1)
 	];
 	
 	_cgr = (_gr >> 'i') [
 		_val = phoenix::construct <CmpR> (0, _1)
-	];
+	]; */
 
-	// Vector
-
+	// Vectors
 	_vz_inter = _z % ',';
-	_vq_inter = _q % ',';
 	_vr_inter = _r % ',';
-	_vgq_inter = _gq % ',';
-	_vgr_inter = _gr % ',';
 	_vcz_inter = _cz % ',';
-	_vcq_inter = _cq % ',';
 	_vcr_inter = _cr % ',';
-	_vcgq_inter = _cgq % ',';
-	_vcgr_inter = _cgr % ',';
+
+	//_vq_inter = _q % ',';
+	//_vgq_inter = _gq % ',';
+	//_vgr_inter = _gr % ',';
+	//_vcq_inter = _cq % ',';
+	//_vcgq_inter = _cgq % ',';
+	//_vcgr_inter = _cgr % ',';
 	
+	// TODO: disregard inters
 	_vz = ('[' >> _vz_inter >> ']') [
 		_val = _1
 	];
 	
-	_vq = ('[' >> _vq_inter >> ']') [
+	/* _vq = ('[' >> _vq_inter >> ']') [
 		_val = _1
-	];
+	]; */
 	
 	_vr = ('[' >> _vr_inter >> ']') [
 		_val = _1
 	];
 	
-	_vgq = ('[' >> _vgq_inter >> ']') [
-		_val = _1
-	];
+	// _vgq = ('[' >> _vgq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
-	_vgr = ('[' >> _vgr_inter >> ']') [
-		_val = _1
-	];
+	// _vgr = ('[' >> _vgr_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	_vcz = ('[' >> _vcz_inter >> ']') [
 		_val = _1
 	];
 	
-	_vcq = ('[' >> _vcq_inter >> ']') [
-		_val = _1
-	];
+	// _vcq = ('[' >> _vcq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	_vcr = ('[' >> _vcr_inter >> ']') [
 		_val = _1
 	];
 	
-	_vcgq = ('[' >> _vcgq_inter >> ']') [
-		_val = _1
-	];
+	// _vcgq = ('[' >> _vcgq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
-	_vcgr = ('[' >> _vcgr_inter >> ']') [
-		_val = _1
-	];
+	// _vcgr = ('[' >> _vcgr_inter >> ']') [
+	// 	_val = _1
+	// ];
 
 	// Matrix
 	_mz_inter = _vz % ',';
-	_mq_inter = _vq % ',';
 	_mr_inter = _vr % ',';
-	_mgq_inter = _vgq % ',';
-	_mgr_inter = _vgr % ',';
 	_mcz_inter = _vcz % ',';
-	_mcq_inter = _vcq % ',';
 	_mcr_inter = _vcr % ',';
-	_mcgq_inter = _vcgq % ',';
-	_mcgr_inter = _vcgr % ',';
+
+	// _mq_inter = _vq % ',';
+	// _mgq_inter = _vgq % ',';
+	// _mgr_inter = _vgr % ',';
+	// _mcq_inter = _vcq % ',';
+	// _mcgq_inter = _vcgq % ',';
+	// _mcgr_inter = _vcgr % ',';
 	
 	_mz = ('[' >> _mz_inter >> ']') [
 		_val = _1
 	];
 	
-	_mq = ('[' >> _mq_inter >> ']') [
-		_val = _1
-	];
+	// _mq = ('[' >> _mq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	_mr = ('[' >> _mr_inter >> ']') [
 		_val = _1
 	];
 	
-	_mgq = ('[' >> _mgq_inter >> ']') [
-		_val = _1
-	];
+	// _mgq = ('[' >> _mgq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
-	_mgr = ('[' >> _mgr_inter >> ']') [
-		_val = _1
-	];
+	// _mgr = ('[' >> _mgr_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	_mcz = ('[' >> _mcz_inter >> ']') [
 		_val = _1
 	];
 	
-	_mcq = ('[' >> _mcq_inter >> ']') [
-		_val = _1
-	];
+	// _mcq = ('[' >> _mcq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	_mcr = ('[' >> _mcr_inter >> ']') [
 		_val = _1
 	];
 	
-	_mcgq = ('[' >> _mcgq_inter >> ']') [
-		_val = _1
-	];
+	// _mcgq = ('[' >> _mcgq_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
-	_mcgr = ('[' >> _mcgr_inter >> ']') [
-		_val = _1
-	];
+	// _mcgr = ('[' >> _mcgr_inter >> ']') [
+	// 	_val = _1
+	// ];
 	
 	// Token parsers
 
@@ -231,9 +233,9 @@ parser::parser() : parser::base_type(_start)
 		_val = phoenix::new_ <OpZ> (_1)
 	];
 	
-	_o_q = _q [
-		_val = phoenix::new_ <OpQ> (_1)
-	];
+	// _o_q = _q [
+	// 	_val = phoenix::new_ <OpQ> (_1)
+	// ];
 
 	_o_r = _r [
 		_val = phoenix::new_ <OpR> (_1)
@@ -257,83 +259,83 @@ parser::parser() : parser::base_type(_start)
 		_val = phoenix::new_ <OpVecZ> (_1)
 	];
 	
-	_o_vq = _vq [
-		_val = phoenix::new_ <OpVecQ> (_1)
-	];
+	// _o_vq = _vq [
+	// 	_val = phoenix::new_ <OpVecQ> (_1)
+	// ];
 	
 	_o_vr = _vr [
 		_val = phoenix::new_ <OpVecR> (_1)
 	];
 	
-	_o_vgq = _vgq [
-		_val = phoenix::new_ <OpVecQ> (_1)
-	];
+	// _o_vgq = _vgq [
+	// 	_val = phoenix::new_ <OpVecQ> (_1)
+	// ];
 	
-	_o_vgr = _vgr [
-		_val = phoenix::new_ <OpVecR> (_1)
-	];
+	// _o_vgr = _vgr [
+	// 	_val = phoenix::new_ <OpVecR> (_1)
+	// ];
 	
 	_o_vcz = _vcz [
 		_val = phoenix::new_ <OpVecCmpZ> (_1)
 	];
 	
-	_o_vcq = _vcq [
-		_val = phoenix::new_ <OpVecCmpQ> (_1)
-	];
+	// _o_vcq = _vcq [
+	// 	_val = phoenix::new_ <OpVecCmpQ> (_1)
+	// ];
 	
 	_o_vcr = _vcr [
 		_val = phoenix::new_ <OpVecCmpR> (_1)
 	];
 	
 	// TODO: why all general??
-	_o_vcgq = _vcgq [
-		_val = phoenix::new_ <OpVecCmpQ> (_1)
-	];
+	// _o_vcgq = _vcgq [
+	// 	_val = phoenix::new_ <OpVecCmpQ> (_1)
+	// ];
 	
-	_o_vcgr = _vcgr [
-		_val = phoenix::new_ <OpVecCmpR> (_1)
-	];
+	// _o_vcgr = _vcgr [
+	// 	_val = phoenix::new_ <OpVecCmpR> (_1)
+	// ];
 
 	// Matrix
 	_o_mz = _mz [
 		_val = phoenix::new_ <OpMatZ> (_1)
 	];
 	
-	_o_mq = _mq [
-		_val = phoenix::new_ <OpMatQ> (_1)
-	];
+	// _o_mq = _mq [
+	// 	_val = phoenix::new_ <OpMatQ> (_1)
+	// ];
 	
 	_o_mr = _mr [
 		_val = phoenix::new_ <OpMatR> (_1)
 	];
 	
-	_o_mgq = _mgq [
-		_val = phoenix::new_ <OpMatQ> (_1)
-	];
+	// _o_mgq = _mgq [
+	// 	_val = phoenix::new_ <OpMatQ> (_1)
+	// ];
 	
-	_o_mgr = _mgr [
-		_val = phoenix::new_ <OpMatR> (_1)
-	];
+	// _o_mgr = _mgr [
+	// 	_val = phoenix::new_ <OpMatR> (_1)
+	// ];
 	
 	_o_mcz = _mcz [
 		_val = phoenix::new_ <OpMatCmpZ> (_1)
 	];
 	
-	_o_mcq = _mcq [
-		_val = phoenix::new_ <OpMatCmpQ> (_1)
-	];
+	// _o_mcq = _mcq [
+	// 	_val = phoenix::new_ <OpMatCmpQ> (_1)
+	// ];
 	
 	_o_mcr = _mcr [
 		_val = phoenix::new_ <OpMatCmpR> (_1)
 	];
 	
-	_o_mcgq = _mcgq [
-		_val = phoenix::new_ <OpMatCmpQ> (_1)
-	];
+	// _o_mcgq = _mcgq [
+	// 	_val = phoenix::new_ <OpMatCmpQ> (_1)
+	// ];
 	
-	_o_mcgr = _mcgr [
-		_val = phoenix::new_ <OpMatCmpR> (_1)
-	];
+	// _o_mcgr = _mcgr [
+	// 	_val = phoenix::new_ <OpMatCmpR> (_1)
+	// ];
 
 	// Nodes
 	_node_pack = _start % ',' | eps;
@@ -351,17 +353,19 @@ parser::parser() : parser::base_type(_start)
 	 * will yield a rational result.
 	 */
 	_node_opd = (
-			_o_str
+			_collection
+			| _o_str
 			| _o_cr | _o_cz
 			| _o_r | _o_z
 			| _o_vcr | _o_vcz
 			| _o_vr | _o_vz
-			| _o_vcgr
-			| _o_vgr
 			| _o_mcr | _o_mcz
 			| _o_mr | _o_mz
-			| _o_mcgr
-			| _o_mgr
+
+			// | _o_vcgr
+			// | _o_vgr
+			// | _o_mcgr
+			// | _o_mgr
 		) [
 		_val = phoenix::construct <zhetapi::node> (_1,
 				::std::vector <zhetapi::node> {})
@@ -447,12 +451,12 @@ parser::parser() : parser::base_type(_start)
 	 * 3x, 3 and x are both collectibles.
 	 */
 	_node_factor = (
-		_collection [_val = _1]
+		// _collection [_val = _1]
 
 		// TODO: must rearrange attribute chains
 
 		// TODO: clean this up for the love of god
-		| (_node_rept >> _power >> (_node_rept | _node_opd)) [
+		(_node_rept >> _power >> (_node_rept | _node_opd)) [
 			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
 		]
 
@@ -521,6 +525,13 @@ parser::parser() : parser::base_type(_start)
 				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
 			]
 		)
+		
+		// TODO: manually adding powers for operands
+		| (_node_opd >> _power >> _node_opd) [
+			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+		]
+
+		| _node_opd [_val = _1]
 	);
 
 	/*
@@ -705,10 +716,10 @@ parser::parser() : parser::base_type(_start)
 	debug(_o_mcgq);
 	debug(_o_mcgr);
 
-	debug(_str);
+	debug(_str); */
 	
 	debug(_z);
-	debug(_q);
+	/* debug(_q);
 	debug(_r);
 	debug(_gq);
 	debug(_gr);

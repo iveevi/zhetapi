@@ -14,29 +14,56 @@ g = get_func(3)
 
 println("g = ", g) */
 
-alg function_assignment()
-{
-	f(x) = 3 * x^2
+x = 12
+y = 2
+z = 24
+w = 786
+const = 14
 
-	println("f: ", f)
-	println("f(2) = ", f(2))
-	println("f(3) = ", f(3))
+if (true)
+	x = 24
+
+if (true) {
+	w = 907
+
+	y = 37, z = 76
 }
 
-g(x) = 2x^3 + xsin(x)
+if (false)
+	const = 25
 
-function_assignment()
+px = 0
+py = 2
 
-println("g: ", g)
-println("g(1) = ", g(1))
-println("g(2) = ", g(2))
-println("g(3) = ", g(3))
+if (px^2 + py^2 == 4) {
+	println("#1 Correct path!")
+	px = 24
+} else {
+	println("px^2 + py^2 = ", px^2 + py^2)
+	println("#1 Wrong path!")
+}
 
-g(x) = 3 * x^2
+if (x^2 + 5^2 == 12^2) {
+	x = 5
+	println("#2 Wrong path!")
+} else {
+	println("#2 Correct path!")
+}
 
-function_assignment()
+if (x^2 + 10^2 == 26^2) {
+	py = 27
 
-println("g: ", g)
-println("g(1) = ", g(1))
-println("g(2) = ", g(2))
-println("g(3) = ", g(3))
+	px = py + px
+	println("#3 Correct path!")
+} else {
+	println("#3 Wrong path!")
+	println("\tx^2 + 10^2 = ", x^2 + 10^2)
+}
+
+println("x = ", x, "\n\tx is good? ", x == 24)
+println("y = ", y, "\n\ty is good? ", y == 37)
+println("z = ", z, "\n\tz is good? ", z == 76)
+println("w = ", w, "\n\tw is good? ", w == 907)
+println("const = ", const, "\n\tconst is good? ", const == 14)
+println("px = ", px, "\n\tpx is good? ", px == 51)
+println("py = ", py, "\n\tpy is good? ", py == 27)

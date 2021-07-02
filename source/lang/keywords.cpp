@@ -178,7 +178,7 @@ static OpZ *check_if(Feeder *feeder,
 		// TODO: Gotta free or something
 		ncond[0].retokenize(new rvalue(lv->symbol()));
 	}
-
+	
 	Token *tptr = ncond.value(context);
 
 	// TODO: Add a skip whitespace

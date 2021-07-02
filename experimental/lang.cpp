@@ -12,8 +12,41 @@ Engine *ctx = new Engine();
 
 int main()
 {
-	node_manager nm(ctx, "3 / x^2", {"x"});
+	node_manager nm;
+	
+	/* nm = node_manager(ctx, "3", {"x"});
 
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "{3, 5, 6}", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "\"fdfsdffsf\\t\"", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "3/x^2", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "3x^2", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	nm = node_manager(ctx, "x^2 + 10^2", {"x"});
+
+	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
 }

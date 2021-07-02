@@ -304,8 +304,13 @@ std::string node::display(int num, int lev) const
 		counter--;
 	}
 
-	oss << "#" << num << ": " << _tptr->dbg_str() << " (" << _tptr << ") @ "
-		<< this << " "  << _nodes << " nodes" << ::std::endl;
+	if (_tptr) {
+		oss << "#" << num << ": " << _tptr->dbg_str() << " (" << _tptr
+			<< ") @ " << this << " "  << _nodes << " nodes" << std::endl;
+	} else {
+		oss << "#" << num << ": [Null](" << _tptr
+			<< ") @ " << this << " "  << _nodes << " nodes" << std::endl;
+	}
 
 	counter = 0;
 	for (node itr : _leaves)

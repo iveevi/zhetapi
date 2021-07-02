@@ -47,9 +47,9 @@ node_manager cc_run_assignment(
 		const Args &args,
 		Pardon &pardon)
 {
-	std::cout << "cc assignmnet:" << std::endl;
+	/* std::cout << "cc assignment:" << std::endl;
 	for (auto str : veq)
-		std::cout << "\t" << str << std::endl;
+		std::cout << "\t" << str << std::endl; */
 
 	node_manager out;
 
@@ -65,8 +65,8 @@ node_manager cc_run_assignment(
 				pardon);
 		nm.nullify_refs(fargs);
 
-		std::cout << "post nullified nm:" << std::endl;
-		nm.print();
+		/* std::cout << "post nullified nm:" << std::endl;
+		nm.print(); */
 	} else {
 		nm = node_manager(ctx, veq[n - 1], args, pardon);
 	}
@@ -88,8 +88,8 @@ node_manager cc_run_assignment(
 				args_union(args, fargs), pardon);
 			tmp.nullify_refs(fargs);
 
-			std::cout << "post nullified tmp:" << std::endl;
-			tmp.print();
+			// std::cout << "post nullified tmp:" << std::endl;
+			// tmp.print();
 
 			out.append(tmp);
 		} catch (const node_manager::undefined_symbol &e) {
@@ -129,8 +129,8 @@ node_manager cc_run_assignment(
 	
 	out.set_label(l_assignment_chain);
 
-	std::cout << "resulting chain:" << std::endl;
-	out.print();
+	// std::cout << "resulting chain:" << std::endl;
+	// out.print();
 
 	return out;
 }

@@ -307,9 +307,13 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	case Token::token_collection:
 		return tree.copy_token();
 	case Token::token_rvalue:
-		tree.retokenize((tree.cast <rvalue> ())->get(ctx));
+		if (tree.child_count()) {
+			tree.retokenize((tree.cast <rvalue> ())->get(ctx));
 
-		return node_value(ctx, tree);
+			return node_value(ctx, tree);
+		}
+
+		return (tree.cast <rvalue> ())->get(ctx);
 	case Token::token_node_list:
 		return (tree.cast <node_list> ())->evaluate(ctx);
 	case Token::ndr:
@@ -382,7 +386,7 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 
 	Functor *ftr = tree.cast <Functor> ();
 	if (!ftr)
-		throw node_manager::bad_token_type();
+		throw node_manager::bad_token_type(tree.ptr());
 
 	// Return the functor itself if there were no arguments
 	if (tree.child_count() || values.size())

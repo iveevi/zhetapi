@@ -70,10 +70,8 @@ node_manager::node_manager(Engine *context, const std::string &str)
 
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
-        if (!r) {
-		std::cout << "Error parsing \"" << str << "\"" << std::endl;
-                throw bad_input();
-	}
+        if (!r)
+                throw bad_input(str);
 
 	/* using namespace std;
 	cout << string(50, '=') << endl;
@@ -107,10 +105,8 @@ node_manager::node_manager(
 	// std::cout << "PARSING \"" << str << "\"" << std::endl;
 	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
 
-        if (!r) {
-		std::cout << "Error parsing \"" << str << "\"" << std::endl;
-                throw bad_input();
-	}
+        if (!r)
+                throw bad_input(str);
 
 	/* using namespace std;
 	cout << string(50, '=') << endl;

@@ -149,7 +149,8 @@ TEST(parsing_global_branching)
 	if (OpZ (51) == tptr6) {
 		oss << ok << " Correct value found for px." << endl;
 	} else {
-		oss << err << " Wrong value for px." << endl;
+		oss << err << " Wrong value for px: "
+			<< ((tptr6) ? tptr6->dbg_str() : "[Null]") << endl;
 
 		return false;
 	}
