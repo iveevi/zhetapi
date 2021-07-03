@@ -27,188 +27,158 @@
 #include "special_tokens.hpp"
 
 #define _add_operation_symbol(name, str)				\
-	name = lit(#str) [						\
-		_val = phoenix::new_					\
+	name = boost::spirit::qi::lit(#str) [				\
+		boost::spirit::qi::_val = boost::phoenix::new_		\
 			<operation_holder> (std::string(#str))		\
 	];
 
 #define _add_operation_heter_symbol(name, str, act)			\
-	name = lit(#str) [						\
-		_val = phoenix::new_					\
+	name = boost::spirit::qi::lit(#str) [				\
+		boost::spirit::qi::_val = boost::phoenix::new_		\
 			<operation_holder> (std::string(#act))		\
 	];
 
 namespace zhetapi {
 
-typedef std::string::const_iterator siter;
-
-using namespace boost;
-
-using namespace boost::spirit;
-using namespace boost::phoenix;
-
 // Parser
-struct parser : qi::grammar <siter, node (), qi::space_type> {
-	parser();
+struct parser : boost::spirit::qi::grammar <
+		std::string::const_iterator,
+		node (),
+		boost::spirit::qi::space_type> {
+public:	
+	using Siter = std::string::const_iterator;
 
-	qi::symbols <char const, char const>				_esc;
+	// Qi rule (no skip)
+	template <class A, class B>
+	using NSRule = boost::spirit::qi::rule <A, B>;
+
+	// Qi rule
+	template <class A, class B, class C>
+	using Rule = boost::spirit::qi::rule <A, B, C>;
+
+	// Space type
+	using Space = boost::spirit::qi::space_type;
+
+	// Vector aliases
+	template <class T>
+	using V1 = std::vector <T>;
 	
-	qi::rule <siter, node (), qi::space_type>			_start;
+	template <class T>
+	using V2 = std::vector <std::vector <T>>;
+private:
+	boost::spirit::qi::symbols
+		<char const, char const>	_esc;
+	
+	Rule <Siter, node (), Space>		_start;
 	
 	// Nodes
-	qi::rule <siter, node (), qi::space_type>			_node_expr;
-	qi::rule <siter, node (), qi::space_type>			_node_term;
-	qi::rule <siter, node (), qi::space_type>			_node_factor;
-	qi::rule <siter, node (), qi::space_type>			_node_prep;
-	qi::rule <siter, node (), qi::space_type>			_node_rept;
-	qi::rule <siter, node (), qi::space_type>			_node_prth;
-	qi::rule <siter, node (), qi::space_type>			_node_var;
-	qi::rule <siter, node (), qi::space_type>			_node_rvalue;
-	qi::rule <siter, node (), qi::space_type>			_node_lvalue;
-	qi::rule <siter, node (), qi::space_type>			_node_opd;
+	Rule <Siter, node (), Space>		_node_expr;
+	Rule <Siter, node (), Space>		_node_term;
+	Rule <Siter, node (), Space>		_node_factor;
+	Rule <Siter, node (), Space>		_node_prep;
+	Rule <Siter, node (), Space>		_node_rept;
+	Rule <Siter, node (), Space>		_node_prth;
+	Rule <Siter, node (), Space>		_node_var;
+	Rule <Siter, node (), Space>		_node_rvalue;
+	Rule <Siter, node (), Space>		_node_lvalue;
+	Rule <Siter, node (), Space>		_node_opd;
 
 	// Helpers
-	qi::rule <siter, node(), qi::space_type>			_attr;
+	Rule <Siter, node(), Space>		_attr;
 
 	// Parameter pack
-	qi::rule <siter, std::vector <node> (), qi::space_type>	_node_pack;
+	Rule <Siter, V1 <node> (), Space>	_node_pack;
 
 	// Identifiers
-	qi::rule <siter, std::string ()>				_ident;
+	NSRule <Siter, std::string ()>		_ident;
 
 	// Operations
-	qi::rule <siter, Token *(), qi::space_type>			_t0_bin;
-	qi::rule <siter, Token *(), qi::space_type>			_t1_bin;
-	qi::rule <siter, Token *(), qi::space_type>			_t2_bin;
+	Rule <Siter, Token *(), Space>		_t0_bin;
+	Rule <Siter, Token *(), Space>		_t1_bin;
+	Rule <Siter, Token *(), Space>		_t2_bin;
 
-	qi::rule <siter, Token *(), qi::space_type>			_t_pre;
-	qi::rule <siter, Token *(), qi::space_type>			_t_post;
+	Rule <Siter, Token *(), Space>		_t_pre;
+	Rule <Siter, Token *(), Space>		_t_post;
 
-	qi::rule <siter, Token *(), qi::space_type>			_eq;
-	qi::rule <siter, Token *(), qi::space_type>			_neq;
-	qi::rule <siter, Token *(), qi::space_type>			_ge;
-	qi::rule <siter, Token *(), qi::space_type>			_le;
-	qi::rule <siter, Token *(), qi::space_type>			_leq;
-	qi::rule <siter, Token *(), qi::space_type>			_geq;
+	Rule <Siter, Token *(), Space>		_eq;
+	Rule <Siter, Token *(), Space>		_neq;
+	Rule <Siter, Token *(), Space>		_ge;
+	Rule <Siter, Token *(), Space>		_le;
+	Rule <Siter, Token *(), Space>		_leq;
+	Rule <Siter, Token *(), Space>		_geq;
 
-	qi::rule <siter, Token *(), qi::space_type>			_or;
-	qi::rule <siter, Token *(), qi::space_type>			_and;
+	Rule <Siter, Token *(), Space>		_or;
+	Rule <Siter, Token *(), Space>		_and;
 
-	qi::rule <siter, Token *(), qi::space_type>			_post_incr;
-	qi::rule <siter, Token *(), qi::space_type>			_post_decr;
+	Rule <Siter, Token *(), Space>		_post_incr;
+	Rule <Siter, Token *(), Space>		_post_decr;
 	
-	qi::rule <siter, Token *(), qi::space_type>			_pre_incr;
-	qi::rule <siter, Token *(), qi::space_type>			_pre_decr;
+	Rule <Siter, Token *(), Space>		_pre_incr;
+	Rule <Siter, Token *(), Space>		_pre_decr;
 
-	qi::rule <siter, Token *(), qi::space_type>			_plus;
-	qi::rule <siter, Token *(), qi::space_type>			_minus;
-	qi::rule <siter, Token *(), qi::space_type>			_dot;
-	qi::rule <siter, Token *(), qi::space_type>			_mod;
-	qi::rule <siter, Token *(), qi::space_type>			_factorial;
+	Rule <Siter, Token *(), Space>		_plus;
+	Rule <Siter, Token *(), Space>		_minus;
+	Rule <Siter, Token *(), Space>		_dot;
+	Rule <Siter, Token *(), Space>		_mod;
+	Rule <Siter, Token *(), Space>		_factorial;
 	
-	qi::rule <siter, Token *(), qi::space_type>			_times;
-	qi::rule <siter, Token *(), qi::space_type>			_divide;
+	Rule <Siter, Token *(), Space>		_times;
+	Rule <Siter, Token *(), Space>		_divide;
 	
-	qi::rule <siter, Token *(), qi::space_type>			_power;
-
-	qi::rule <siter, Token *(), qi::space_type>			_attribute;
-
-	qi::rule <siter, Token *(), qi::space_type>			_collection;
+	Rule <Siter, Token *(), Space>		_power;
+	Rule <Siter, Token *(), Space>		_attribute;
+	Rule <Siter, Token *(), Space>		_collection;
 
 	// Operands
 
 	// Token parsers
-	qi::rule <siter, Token *()>					_o_str;
+	NSRule <Siter, Token *()>		_o_str;
 
-	qi::rule <siter, Token *(), qi::space_type>			_o_z;
-	qi::rule <siter, Token *(), qi::space_type>			_o_q;
-	qi::rule <siter, Token *(), qi::space_type>			_o_r;
-	qi::rule <siter, Token *(), qi::space_type>			_o_cz;
-	qi::rule <siter, Token *(), qi::space_type>			_o_cq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_cr;
+	Rule <Siter, Token *(), Space>		_o_z;
+	Rule <Siter, Token *(), Space>		_o_r;
+	Rule <Siter, Token *(), Space>		_o_cz;
+	Rule <Siter, Token *(), Space>		_o_cr;
 	
-	qi::rule <siter, Token *(), qi::space_type>			_o_vz;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vgq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vgr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vcz;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vcq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vcr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vcgq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_vcgr;
+	Rule <Siter, Token *(), Space>		_o_vz;
+	Rule <Siter, Token *(), Space>		_o_vr;
+	Rule <Siter, Token *(), Space>		_o_vcz;
+	Rule <Siter, Token *(), Space>		_o_vcr;
 	
-	qi::rule <siter, Token *(), qi::space_type>			_o_mz;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mgr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mgq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mcz;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mcq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mcr;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mcgq;
-	qi::rule <siter, Token *(), qi::space_type>			_o_mcgr;
+	Rule <Siter, Token *(), Space>		_o_mz;
+	Rule <Siter, Token *(), Space>		_o_mr;
+	Rule <Siter, Token *(), Space>		_o_mcz;
+	Rule <Siter, Token *(), Space>		_o_mcr;
 	
 	// Type parsers
-	qi::rule <siter, std::string ()>					_str;
+	NSRule <Siter, std::string ()>		_str;
 
-	qi::rule <siter, Z (), qi::space_type>					_z;
-	qi::rule <siter, Q (), qi::space_type>					_q;
-	qi::rule <siter, R (), qi::space_type>					_r;
-	qi::rule <siter, Q (), qi::space_type>					_gq;
-	qi::rule <siter, R (), qi::space_type>					_gr;
-	qi::rule <siter, CmpZ (), qi::space_type>				_cz;
-	qi::rule <siter, CmpQ (), qi::space_type>				_cq;
-	qi::rule <siter, CmpR (), qi::space_type>				_cr;
-	qi::rule <siter, CmpQ (), qi::space_type>				_cgq;
-	qi::rule <siter, CmpR (), qi::space_type>				_cgr;
+	Rule <Siter, Z (), Space>		_z;
+	Rule <Siter, R (), Space>		_r;
+	Rule <Siter, CmpZ (), Space>		_cz;
+	Rule <Siter, CmpR (), Space>		_cr;
 	
-	qi::rule <siter, std::vector <Z> (), qi::space_type>			_vz;
-	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vq;
-	qi::rule <siter, std::vector <R> (), qi::space_type>			_vr;
-	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vgq;
-	qi::rule <siter, std::vector <R> (), qi::space_type>			_vgr;
-	qi::rule <siter, std::vector <CmpZ> (), qi::space_type>			_vcz;
-	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcq;
-	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcr;
-	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcgq;
-	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcgr;
+	Rule <Siter, V1 <Z> (), Space>		_vz;
+	Rule <Siter, V1 <R> (), Space>		_vr;
+	Rule <Siter, V1 <CmpZ> (), Space>	_vcz;
+	Rule <Siter, V1 <CmpR> (), Space>	_vcr;
 	
-	qi::rule <siter, std::vector <std::vector <Z>> (), qi::space_type>	_mz;
-	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mq;
-	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mr;
-	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mgq;
-	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mgr;
-	qi::rule <siter, std::vector <std::vector <CmpZ>> (), qi::space_type>	_mcz;
-	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcq;
-	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcr;
-	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcgq;
-	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcgr;
+	Rule <Siter, V2 <Z> (), Space>		_mz;
+	Rule <Siter, V2 <R> (), Space>		_mr;
+	Rule <Siter, V2 <CmpZ> (), Space>	_mcz;
+	Rule <Siter, V2 <CmpR> (), Space>	_mcr;
 
-	// Vector and matrix intermediates
-	// TODO: using typedef or alias for rule <siter> and space_type
-	qi::rule <siter, std::vector <Z> (), qi::space_type>			_vz_inter;
-	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vq_inter;
-	qi::rule <siter, std::vector <R> (), qi::space_type>			_vr_inter;
-	qi::rule <siter, std::vector <Q> (), qi::space_type>			_vgq_inter;
-	qi::rule <siter, std::vector <R> (), qi::space_type>			_vgr_inter;
-	qi::rule <siter, std::vector <CmpZ> (), qi::space_type>			_vcz_inter;
-	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcq_inter;
-	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcr_inter;
-	qi::rule <siter, std::vector <CmpQ> (), qi::space_type>			_vcgq_inter;
-	qi::rule <siter, std::vector <CmpR> (), qi::space_type>			_vcgr_inter;
+	// Vector and matrix intermediates (TODO: remove)
+	Rule <Siter, V1 <Z> (), Space>		_vz_inter;
+	Rule <Siter, V1 <R> (), Space>		_vr_inter;
+	Rule <Siter, V1 <CmpZ> (), Space>	_vcz_inter;
+	Rule <Siter, V1 <CmpR> (), Space>	_vcr_inter;
 	
-	qi::rule <siter, std::vector <std::vector <Z>> (), qi::space_type>	_mz_inter;
-	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mq_inter;
-	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mr_inter;
-	qi::rule <siter, std::vector <std::vector <Q>> (), qi::space_type>	_mgq_inter;
-	qi::rule <siter, std::vector <std::vector <R>> (), qi::space_type>	_mgr_inter;
-	qi::rule <siter, std::vector <std::vector <CmpZ>> (), qi::space_type>	_mcz_inter;
-	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcq_inter;
-	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcr_inter;
-	qi::rule <siter, std::vector <std::vector <CmpQ>> (), qi::space_type>	_mcgq_inter;
-	qi::rule <siter, std::vector <std::vector <CmpR>> (), qi::space_type>	_mcgr_inter;
-
+	Rule <Siter, V2 <Z> (), Space>		_mz_inter;
+	Rule <Siter, V2 <R> (), Space>		_mr_inter;
+	Rule <Siter, V2 <CmpZ> (), Space>	_mcz_inter;
+	Rule <Siter, V2 <CmpR> (), Space>	_mcr_inter;
+public:
+	parser();
 };
 
 }

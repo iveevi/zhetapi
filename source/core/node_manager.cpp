@@ -63,12 +63,12 @@ node_manager::node_manager(Engine *context, const node &tree, const Args &args)
 
 node_manager::node_manager(Engine *context, const std::string &str)
 {
-	zhetapi::parser pr;
+	parser pr;
 
-	siter iter = str.begin();
-	siter end = str.end();
+	auto start = str.begin();
+	auto end = str.end();
 
-	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
+	bool r = boost::spirit::qi::phrase_parse(start, end, pr, boost::spirit::qi::space, _tree);
 
         if (!r)
                 throw bad_input(str);
@@ -99,11 +99,11 @@ node_manager::node_manager(
 {
 	parser pr;
 
-	siter iter = str.begin();
-	siter end = str.end();
+	auto start = str.begin();
+	auto end = str.end();
 
 	// std::cout << "PARSING \"" << str << "\"" << std::endl;
-	bool r = qi::phrase_parse(iter, end, pr, qi::space, _tree);
+	bool r = boost::spirit::qi::phrase_parse(start, end, pr, boost::spirit::qi::space, _tree);
 
         if (!r)
                 throw bad_input(str);

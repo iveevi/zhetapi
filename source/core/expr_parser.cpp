@@ -7,17 +7,25 @@ namespace zhetapi {
 
 parser::parser() : parser::base_type(_start)
 {
+	// Using declarations
+	using boost::phoenix::new_;
+	using boost::phoenix::construct;
+	using boost::spirit::qi::char_;
+	using boost::spirit::qi::lit;
+	using boost::spirit::qi::_val;
+	using boost::spirit::qi::_1;
+	using boost::spirit::qi::_2;
+	using boost::spirit::qi::_3;
+
 	_esc.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
 		("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
 		("\\\'", '\'')("\\\"", '\"');
 
-	/*
-	 * Parser for an identifier. Used to construct variable
-	 * clusters.
-	 */
-        _ident = qi::char_("a-zA-Z$_") >> *qi::char_("0-9a-zA-Z$_");
+	// Identifier (TODO: keep outside this scope)
+        _ident = char_("a-zA-Z$_") >> *char_("0-9a-zA-Z$_");
 
-	_str = +(_esc | (qi::char_ - '\"'));
+	// General string
+	_str = +(_esc | (char_ - '\"'));
 
 	// Operation parsers
 	_add_operation_symbol(_plus, +);
@@ -28,7 +36,6 @@ parser::parser() : parser::base_type(_start)
 	_add_operation_symbol(_dot, @);
 	_add_operation_symbol(_mod, %);
 	_add_operation_symbol(_factorial, !);
-	// _add_operation_symbol(_in, in);
 	
 	// Binary comparison
 	_add_operation_symbol(_eq, ==);
@@ -81,39 +88,17 @@ parser::parser() : parser::base_type(_start)
 	_t_pre = _pre_incr | _pre_decr;
 
 	// Reals
-	_z = long_long;
-
-	/* _q = (long_long >> '/' >> long_long) [
-		_val = phoenix::construct <Q> (_1, _2)
-	]; */
-
-	// _r = double_;
-	_r = qi::real_parser <R, qi::strict_real_policies <R>> ();
-
-	/* Generalized
-	_gq = _q | _z;
-	_gr = _r | _gq; */
+	_z = boost::spirit::qi::long_long;
+	_r = boost::spirit::qi::real_parser <R, boost::spirit::qi::strict_real_policies <R>> ();
 	
 	// Complex
 	_cz = (_z >> 'i') [
-		_val = phoenix::construct <CmpZ> (0, _1)
+		_val = construct <CmpZ> (0, _1)
 	];
-	
-	/* _cq = (_q >> 'i') [
-		_val = phoenix::construct <CmpQ> (0, _1)
-	]; */
 	
 	_cr = (_r >> 'i') [
-		_val = phoenix::construct <CmpR> (0, _1)
+		_val = construct <CmpR> (0, _1)
 	];
-	
-	/* _cgq = (_gq >> 'i') [
-		_val = phoenix::construct <CmpQ> (0, _1)
-	];
-	
-	_cgr = (_gr >> 'i') [
-		_val = phoenix::construct <CmpR> (0, _1)
-	]; */
 
 	// Vectors
 	_vz_inter = _z % ',';
@@ -121,227 +106,107 @@ parser::parser() : parser::base_type(_start)
 	_vcz_inter = _cz % ',';
 	_vcr_inter = _cr % ',';
 
-	//_vq_inter = _q % ',';
-	//_vgq_inter = _gq % ',';
-	//_vgr_inter = _gr % ',';
-	//_vcq_inter = _cq % ',';
-	//_vcgq_inter = _cgq % ',';
-	//_vcgr_inter = _cgr % ',';
-	
 	// TODO: disregard inters
 	_vz = ('[' >> _vz_inter >> ']') [
 		_val = _1
 	];
 	
-	/* _vq = ('[' >> _vq_inter >> ']') [
-		_val = _1
-	]; */
-	
 	_vr = ('[' >> _vr_inter >> ']') [
 		_val = _1
 	];
-	
-	// _vgq = ('[' >> _vgq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
-	// _vgr = ('[' >> _vgr_inter >> ']') [
-	// 	_val = _1
-	// ];
 	
 	_vcz = ('[' >> _vcz_inter >> ']') [
 		_val = _1
 	];
 	
-	// _vcq = ('[' >> _vcq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
 	_vcr = ('[' >> _vcr_inter >> ']') [
 		_val = _1
 	];
-	
-	// _vcgq = ('[' >> _vcgq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
-	// _vcgr = ('[' >> _vcgr_inter >> ']') [
-	// 	_val = _1
-	// ];
 
 	// Matrix
 	_mz_inter = _vz % ',';
 	_mr_inter = _vr % ',';
 	_mcz_inter = _vcz % ',';
 	_mcr_inter = _vcr % ',';
-
-	// _mq_inter = _vq % ',';
-	// _mgq_inter = _vgq % ',';
-	// _mgr_inter = _vgr % ',';
-	// _mcq_inter = _vcq % ',';
-	// _mcgq_inter = _vcgq % ',';
-	// _mcgr_inter = _vcgr % ',';
 	
 	_mz = ('[' >> _mz_inter >> ']') [
 		_val = _1
 	];
 	
-	// _mq = ('[' >> _mq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
 	_mr = ('[' >> _mr_inter >> ']') [
 		_val = _1
 	];
-	
-	// _mgq = ('[' >> _mgq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
-	// _mgr = ('[' >> _mgr_inter >> ']') [
-	// 	_val = _1
-	// ];
 	
 	_mcz = ('[' >> _mcz_inter >> ']') [
 		_val = _1
 	];
 	
-	// _mcq = ('[' >> _mcq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
 	_mcr = ('[' >> _mcr_inter >> ']') [
 		_val = _1
 	];
 	
-	// _mcgq = ('[' >> _mcgq_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
-	// _mcgr = ('[' >> _mcgr_inter >> ']') [
-	// 	_val = _1
-	// ];
-	
 	// Token parsers
 
 	// Reals
-	_o_str = qi::lit('\"') >> _str [
-		_val = phoenix::new_ <OpS> (_1)
-	] >> qi::lit('\"');
+	_o_str = lit('\"') >> _str [
+		_val = new_ <OpS> (_1)
+	] >> lit('\"');
 
 	_o_z = _z [
-		_val = phoenix::new_ <OpZ> (_1)
+		_val = new_ <OpZ> (_1)
 	];
-	
-	// _o_q = _q [
-	// 	_val = phoenix::new_ <OpQ> (_1)
-	// ];
 
 	_o_r = _r [
-		_val = phoenix::new_ <OpR> (_1)
+		_val = new_ <OpR> (_1)
 	];
 	
 	// Complex
 	_o_cz = _cz [
-		_val = phoenix::new_ <OpCmpZ> (_1)
-	];
-	
-	_o_cq = _cq [
-		_val = phoenix::new_ <OpCmpQ> (_1)
+		_val = new_ <OpCmpZ> (_1)
 	];
 
 	_o_cr = _cr [
-		_val = phoenix::new_ <OpCmpR> (_1)
+		_val = new_ <OpCmpR> (_1)
 	];
 
 	// Vector (whats all this mess??)
 	_o_vz = _vz [
-		_val = phoenix::new_ <OpVecZ> (_1)
+		_val = new_ <OpVecZ> (_1)
 	];
-	
-	// _o_vq = _vq [
-	// 	_val = phoenix::new_ <OpVecQ> (_1)
-	// ];
 	
 	_o_vr = _vr [
-		_val = phoenix::new_ <OpVecR> (_1)
+		_val = new_ <OpVecR> (_1)
 	];
-	
-	// _o_vgq = _vgq [
-	// 	_val = phoenix::new_ <OpVecQ> (_1)
-	// ];
-	
-	// _o_vgr = _vgr [
-	// 	_val = phoenix::new_ <OpVecR> (_1)
-	// ];
 	
 	_o_vcz = _vcz [
-		_val = phoenix::new_ <OpVecCmpZ> (_1)
+		_val = new_ <OpVecCmpZ> (_1)
 	];
-	
-	// _o_vcq = _vcq [
-	// 	_val = phoenix::new_ <OpVecCmpQ> (_1)
-	// ];
 	
 	_o_vcr = _vcr [
-		_val = phoenix::new_ <OpVecCmpR> (_1)
+		_val = new_ <OpVecCmpR> (_1)
 	];
-	
-	// TODO: why all general??
-	// _o_vcgq = _vcgq [
-	// 	_val = phoenix::new_ <OpVecCmpQ> (_1)
-	// ];
-	
-	// _o_vcgr = _vcgr [
-	// 	_val = phoenix::new_ <OpVecCmpR> (_1)
-	// ];
-
 	// Matrix
 	_o_mz = _mz [
-		_val = phoenix::new_ <OpMatZ> (_1)
+		_val = new_ <OpMatZ> (_1)
 	];
-	
-	// _o_mq = _mq [
-	// 	_val = phoenix::new_ <OpMatQ> (_1)
-	// ];
 	
 	_o_mr = _mr [
-		_val = phoenix::new_ <OpMatR> (_1)
+		_val = new_ <OpMatR> (_1)
 	];
-	
-	// _o_mgq = _mgq [
-	// 	_val = phoenix::new_ <OpMatQ> (_1)
-	// ];
-	
-	// _o_mgr = _mgr [
-	// 	_val = phoenix::new_ <OpMatR> (_1)
-	// ];
 	
 	_o_mcz = _mcz [
-		_val = phoenix::new_ <OpMatCmpZ> (_1)
+		_val = new_ <OpMatCmpZ> (_1)
 	];
-	
-	// _o_mcq = _mcq [
-	// 	_val = phoenix::new_ <OpMatCmpQ> (_1)
-	// ];
 	
 	_o_mcr = _mcr [
-		_val = phoenix::new_ <OpMatCmpR> (_1)
+		_val = new_ <OpMatCmpR> (_1)
 	];
-	
-	// _o_mcgq = _mcgq [
-	// 	_val = phoenix::new_ <OpMatCmpQ> (_1)
-	// ];
-	
-	// _o_mcgr = _mcgr [
-	// 	_val = phoenix::new_ <OpMatCmpR> (_1)
-	// ];
 
 	// Nodes
-	_node_pack = _start % ',' | eps;
+	_node_pack = _start % ',' | boost::spirit::qi::eps;
 
 	_collection =  ('{' >> _node_pack >> '}') [
-		_val = phoenix::new_ <node_list> (_1)
+		_val = new_ <node_list> (_1)
 	];
 
 	/*
@@ -367,20 +232,20 @@ parser::parser() : parser::base_type(_start)
 			// | _o_mcgr
 			// | _o_mgr
 		) [
-		_val = phoenix::construct <zhetapi::node> (_1,
-				::std::vector <zhetapi::node> {})
+		_val = construct <node> (_1,
+				std::vector <node> {})
 	];
 
 	// Rvalue and lvalues nodes
 	_node_rvalue = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <rvalue> (_1)
+		_val = construct <node> (
+			new_ <rvalue> (_1)
 		)
 	];
 	
 	_node_lvalue = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <lvalue> (_1)
+		_val = construct <node> (
+			new_ <lvalue> (_1)
 		)
 	];
 
@@ -393,30 +258,30 @@ parser::parser() : parser::base_type(_start)
 	_node_var = (
 			// Empty call
 			(_ident >> '(' >> ')') [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1),
+				_val = construct <node> (
+					new_ <variable_cluster> (_1),
 					node(blank_token())
 				)
 			]
 
 			| (_ident >> '(' >> _node_pack >> ')') [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1),
+				_val = construct <node> (
+					new_ <variable_cluster> (_1),
 					_2
 				)
 			]
 
 			// Index
 			| (_ident >> '[' >> _node_expr >> ']') [
-				_val = phoenix::construct <zhetapi::node> (
+				_val = construct <node> (
 					new operation_holder("[]"),
-					phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1)),
+					construct <node> (new_ <variable_cluster> (_1)),
 					_2
 				)
 			]
 
 			| _ident [
-				_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), std::vector <zhetapi::node> {})
+				_val = construct <node> (new_ <variable_cluster> (_1), std::vector <node> {})
 			]
 		);
 
@@ -440,8 +305,8 @@ parser::parser() : parser::base_type(_start)
 	 * juxtaposition.
 	 */
 	_node_prep = _node_rept [_val = _1] >> *(
-		(_node_rept) [_val = phoenix::construct
-		<zhetapi::node> (phoenix::new_
+		(_node_rept) [_val = construct
+		<node> (new_
 			<operation_holder>
 			(std::string("*")), _val, _1)]
 	);
@@ -457,32 +322,22 @@ parser::parser() : parser::base_type(_start)
 
 		// TODO: clean this up for the love of god
 		(_node_rept >> _power >> (_node_rept | _node_opd)) [
-			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+			_val = construct <node> (_2, _1, _3)
 		]
 
 		| (_node_opd >> _factorial) [
-			_val = phoenix::construct <zhetapi::node> (
+			_val = construct <node> (
 				_2,
 				_1
 			)
 		]
 
 		| _node_prep [_val = _1]
-
-		/* | _node_opd [_val = _1] >> *(
-			(_node_rept) [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <operation_holder> (std::string("*")),
-					_val,
-					_1
-				)
-			]
-		) */
 	);
 	
 	_attr = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <variable_cluster> (_1)
+		_val = construct <node> (
+			new_ <variable_cluster> (_1)
 		)
 	];
 
@@ -493,29 +348,29 @@ parser::parser() : parser::base_type(_start)
 	 */
 	_node_term = (
 		(_node_opd >> _node_factor) [
-			_val = phoenix::construct <zhetapi::node> (
+			_val = construct <node> (
 				new operation_holder("*"), _1, _2
 			)
 		]
 
 		| (_node_opd >> _t1_bin >> _node_factor) [
-			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+			_val = construct <node> (_2, _1, _3)
 		]
 		
 		| (_node_factor >> _attribute >> _node_term) [
-			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+			_val = construct <node> (_2, _1, _3)
 		]
 			
 		| (_t_pre >> _node_var) [
-			_val = phoenix::construct <zhetapi::node> (_1, _2)
+			_val = construct <node> (_1, _2)
 		]
 
 		| (_node_var >> _t_post) [
-			_val = phoenix::construct <zhetapi::node> (_2, _1)
+			_val = construct <node> (_2, _1)
 		]
 
 		| (_minus >> _node_term) [
-			_val = phoenix::construct <zhetapi::node> (
+			_val = construct <node> (
 				new operation_holder("*"), _2, node(new OpZ(-1))
 			)
 		]
@@ -523,19 +378,19 @@ parser::parser() : parser::base_type(_start)
 		// TODO: 3rd term should be node_term (right recursion)
 		| _node_factor [_val = _1] >> *(
 			(_t1_bin >> _node_factor) [
-				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+				_val = construct <node> (_1, _val, _2)
 			]
 		)
 		
 		// TODO: manually adding powers for operands
 		| (_node_opd >> _power >> _node_opd) [
-			_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
+			_val = construct <node> (_2, _1, _3)
 		]
 
 		// TODO: REALLY NEED TO FIX GENERALIZATION WITH OPERANDS
 		| _node_opd [_val = _1]  >> *(
 			(_t1_bin >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+				_val = construct <node> (_1, _val, _2)
 			]
 		)
 
@@ -548,7 +403,7 @@ parser::parser() : parser::base_type(_start)
 	_node_expr = (
 			// TODO: use expression instead of rvalue
 			(_node_lvalue >> "in" >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (
+				_val = construct <node> (
 					nullptr, l_generator_in, _1, _2
 				)
 			]
@@ -558,7 +413,7 @@ parser::parser() : parser::base_type(_start)
 			
 			| _node_term [_val = _1] >> *(
 				(_t0_bin >> _node_term) [
-					_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
+					_val = construct <node> (_1, _val, _2)
 				]
 			)
 		);
@@ -588,90 +443,48 @@ parser::parser() : parser::base_type(_start)
 	_o_str.name("literal operand");
 
 	_o_z.name("integer operand");
-	_o_q.name("rational operand");
+	// _o_q.name("rational operand");
 	_o_r.name("real operand");
 	_o_cz.name("complex integer operand");
-	_o_cq.name("complex rational operand");
+	// _o_cq.name("complex rational operand");
 	_o_cr.name("complex real operand");
 	
 	_o_vz.name("vector integer operand");
-	_o_vq.name("vector rational operand");
 	_o_vr.name("vector real operand");
-	_o_vgq.name("vector general rational operand");
-	_o_vgr.name("vector general real operand");
 	_o_vcz.name("vector complex integer operand");
-	_o_vcq.name("vector complex rational operand");
 	_o_vcr.name("vector complex real operand");
-	_o_vcgq.name("vector complex general rational operand");
-	_o_vcgr.name("vector complex general real operand");
 	
 	_o_mz.name("matrix integer Operand");
-	_o_mq.name("matrix rational Operand");
 	_o_mr.name("matrix real Operand");
-	_o_mgq.name("matrix general rational Operand");
-	_o_mgr.name("matrix general real Operand");
 	_o_mcz.name("matrix complex integer Operand");
-	_o_mcq.name("matrix complex rational Operand");
 	_o_mcr.name("matrix complex real Operand");
-	_o_mcgq.name("matrix complex general rational Operand");
-	_o_mcgr.name("matrix complex general real Operand");
 
 	_str.name("literal");
 
 	_z.name("integer");
-	_q.name("rational");
 	_r.name("real");
-	_gq.name("general rational");
-	_gr.name("general real");
 	_cz.name("complex integer");
-	_cq.name("complex rational");
 	_cr.name("complex real");
-	_cgq.name("complex general rational");
-	_cgr.name("complex general real");
 	
 	_vz.name("vector integer");
-	_vq.name("vector rational");
 	_vr.name("vector real");
-	_vgq.name("vector general rational");
-	_vgr.name("vector general real");
 	_vcz.name("vector complex integer");
-	_vcq.name("vector complex rational");
 	_vcr.name("vector complex real");
-	_vcgq.name("vector complex general rational");
-	_vcgr.name("vector complex general real");
 	
 	_mz.name("matrix integer");
-	_mq.name("matrix rational");
 	_mr.name("matrix real");
-	_mgq.name("matrix general rational");
-	_mgr.name("matrix general real");
 	_mcz.name("matrix complex integer");
-	_mcq.name("matrix complex rational");
 	_mcr.name("matrix complex real");
-	_mcgq.name("matrix complex general rational");
-	_mcgr.name("matrix complex general real");
 	
 	_vz_inter.name("intermediate vector integer");
-	_vq_inter.name("intermediate vector rational");
 	_vr_inter.name("intermediate vector real");
-	_vgq_inter.name("intermediate vector general rational");
-	_vgr_inter.name("intermediate vector general real");
 	_vcz_inter.name("intermediate vector complex integer");
-	_vcq_inter.name("intermediate vector complex rational");
 	_vcr_inter.name("intermediate vector complex real");
-	_vcgq_inter.name("intermediate vector complex general rational");
-	_vcgr_inter.name("intermediate vector complex general real");
 	
 	_mz_inter.name("intermediate matrix integer");
-	_mq_inter.name("intermediate matrix rational");
 	_mr_inter.name("intermediate matrix real");
-	_mgq_inter.name("intermediate matrix general rational");
-	_mgr_inter.name("intermediate matrix general real");
 	_mcz_inter.name("intermediate matrix complex integer");
-	_mcq_inter.name("intermediate matrix complex rational");
 	_mcr_inter.name("intermediate matrix complex real");
-	_mcgq_inter.name("intermediate matrix complex general rational");
-	_mcgr_inter.name("intermediate matrix complex general real");
 
 // #define ZHP_DEBUG
 #ifdef ZHP_DEBUG
