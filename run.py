@@ -7,6 +7,14 @@ import argparse
 import os
 import time
 
+# Colors
+FAIL = '\033[1;91m'
+SUCCESS = '\033[1;92m'
+RESET = '\033[0m'
+
+# Global results
+result = []
+
 # Execution modes
 modes = {
     '': './',
@@ -70,14 +78,19 @@ def run_and_check(suppress, *args):
         ret = os.system(cmd + csup)
 
         if ret != 0:
-            print(f'Error executing command \'{cmd}\'')
+            print(FAIL + f'Error executing command \'{cmd}\', see install.log'
+                    + RESET)
             clean_and_exit(-1)
+    
+    # Success
+    result.append(1)
 
 # Run process with a spinner
 def spinner_process(function, arguments, msg1, msg2):
     # Spinner string
     spinner = '|\\-/'
 
+    result.clear()
     thread = threading.Thread(target=function, args=arguments)
     thread.start();
 
@@ -88,11 +101,14 @@ def spinner_process(function, arguments, msg1, msg2):
 
         time.sleep(0.1)
 
+    if len(result) == 0:
+        clean_and_exit(-1)
+
     print(f'{msg2}' + ' ' * 50)
 
-
 # Compilation
-def make_target(threads, target, mode='', suppress=False):
+def make_target(threads, target, mode='', suppress = False):
+    # TODO: try using run and check?
     csup = ''
     if suppress:
         csup = ' >> install.log 2>&1'
@@ -110,9 +126,12 @@ def make_target(threads, target, mode='', suppress=False):
         clean_and_exit(-1)
 
     ret = os.system(f'make -j{threads} {target} {csup}')
-
     if ret != 0:
+        print(FAIL + f'Error compiling {target}, see install.log' + RESET)
         clean_and_exit(-1)
+
+    # Success
+    result.append(1)
 
 # Special targets
 def list_features(args):
@@ -132,47 +151,48 @@ def install(args):
 
     # zhetapi
     spinner_process(make_target,
-            (args.threads, 'zhetapi', args.mode, True),
-            'Compiling ZHP interpreter...',
-            'Finished compiling ZHP interpreter.'
-    )
-
-    spinner_process(make_target,
             (args.threads, 'zhp-shared', args.mode, True),
             'Compiling libzhp.so...',
-            'Finished compiling libzhp.so.'
+            SUCCESS + 'Finished compiling libzhp.so.' + RESET
     )
 
     spinner_process(make_target,
             (args.threads, 'zhp-static', args.mode, True),
             'Compiling libzhp.a...',
-            'Finished compiling libzhp.a.'
+            SUCCESS + 'Finished compiling libzhp.a.' + RESET
+    )
+
+    spinner_process(make_target,
+            (args.threads, 'zhetapi', args.mode, True),
+            'Compiling ZHP interpreter...',
+            SUCCESS + 'Finished compiling ZHP interpreter.' + RESET
     )
 
     run_and_check(
-        False,
-        'mkdir -p bin',
-	'mkdir -p include',
-        'mv zhetapi bin/',
-        'mv libzhp.* bin/',
-        'ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi',
-        'ln -s -f $PWD/engine /usr/local/include/zhetapi',
-        'ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so',
-        'ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a',
+            False,
+            'mkdir -p bin',
+            'mkdir -p include',
+            'mv zhetapi bin/',
+            'mv libzhp.* bin/',
+            'ln -s -f $PWD/bin/zhetapi /usr/local/bin/zhetapi',
+            'ln -s -f $PWD/engine /usr/local/include/zhetapi',
+            'ln -s -f $PWD/bin/libzhp.so /usr/local/lib/libzhp.so',
+            'ln -s -f $PWD/bin/libzhp.a /usr/local/lib/libzhp.a',
     )
 
-    print('\nFinished installing essentials, moving on to libraries.\n')
+    print(SUCCESS + '\nFinished installing essentials, moving on to libraries.\n'
+            + RESET)
 
     spinner_process(run_and_check,
             (True, './bin/zhetapi -v -c lib/io/io.cpp lib/io/formatted.cpp lib/io/file.cpp -o include/io.zhplib', ),
             'Compiling IO libary...',
-            'Finished compiling IO library.'
+            SUCCESS + 'Finished compiling IO library.' + RESET
     )
 
     spinner_process(run_and_check,
             (True, './bin/zhetapi -v -c lib/math/math.cpp -o include/math.zhplib', ),
             'Compiling Math libary...',
-            'Finished compiling Math library.'
+            SUCCESS + 'Finished compiling Math library.' + RESET
     )
 
     run_and_check(
@@ -180,7 +200,8 @@ def install(args):
             'cp -Trv include /usr/local/lib/zhp'
     )
 
-    print('\nFinished installing everything. Get start with \'zhetapi -h\'')
+    print(SUCCESS + '\nFinished installing everything. Get start with \'zhetapi -h\''
+            + RESET)
 
 def zhetapi_normal(args):
     make_target(args.threads, 'zhetapi', args.mode)
