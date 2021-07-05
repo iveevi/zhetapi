@@ -19,6 +19,9 @@ engine_base::engine_base()
 	_add_binary_operation_set(+);
 	_add_binary_operation_set(-);
 
+	// Integer and boolean
+	_add_heterogenous_binary_operation(+, Z, B, Z);
+
 	// InCmpRement and deCmpRement
 	_add_unary_operation_ftr(p++, Z, Z, in->get() + 1);
 	_add_unary_operation_ftr(p--, Z, Z, in->get() - 1);
@@ -391,28 +394,40 @@ bool engine_base::present(const std::string &str) const
 
 std::string engine_base::overload_catalog(const std::string &str)
 {
-	std::string out = "Available overloads for \"" + str + "\": {";
+	static const size_t linelen = 25;
+
+	std::string out = "Available overloads for \"" + str + "\": {\n";
+	std::string tmp;
 
 	overloads ovlds = _overloads[str];
 	for (size_t i = 0; i < ovlds.size(); i++) {
 		signature sig = ovlds[i].first;
 
-		out += "(";
+		tmp += "(";
 
 		for (size_t j = 0; j < sig.size(); j++) {
-			out += types::symbol(sig[j]);
+			tmp += types::symbol(sig[j]);
 
 			if (j < sig.size() - 1)
-				out += ",";
+				tmp += ",";
 		}
 
-		out += ")";
-
+		tmp += ")";
 		if (i < ovlds.size() - 1)
-			out += ", ";
+			tmp += ", ";
+		
+		if (tmp.length() > linelen) {
+			tmp += "\n";
+
+			out += "\t" + tmp;
+			tmp.clear();
+		}
 	}
 
-	return out + "}";
+	if (!tmp.empty())
+		out += "\t" + tmp;
+	
+	return out + "\n}";
 }
 
 // Private methods

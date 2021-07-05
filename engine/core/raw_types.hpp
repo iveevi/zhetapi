@@ -9,7 +9,7 @@
 
 namespace zhetapi {
 
-// All valid types
+// All valid types (use less vague naming, like Integer, Real, Boolean, etc)
 using Z = long long int;
 using Q = Rational <Z>;
 using R = long double;

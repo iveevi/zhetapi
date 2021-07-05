@@ -64,6 +64,7 @@ private:
 	Rule <Siter, node (), Space>		_full_factor;
 	Rule <Siter, node (), Space>		_factor;
 	Rule <Siter, node (), Space>		_term;
+	Rule <Siter, node (), Space>		_simple_expression;
 	Rule <Siter, node (), Space>		_start;
 
 	// Identifiers
@@ -71,10 +72,12 @@ private:
 	
 	// Type parsers
 	Rule <Siter, Z (), Space>		_integer;
-	Rule <Siter, VecZ (), Space>		_vector_integer;
-	Rule <Siter, VecR (), Space>		_vector_real;
 	Rule <Siter, R (), Space>		_pure_real;
 	Rule <Siter, R (), Space>		_real;
+	Rule <Siter, VecZ (), Space>		_vector_integer;
+	Rule <Siter, VecR (), Space>		_vector_real;
+	Rule <Siter, MatZ (), Space>		_matrix_integer;
+	Rule <Siter, MatR (), Space>		_matrix_real;
 	Rule <Siter, Token *(), Space>		_collection;
 	NSRule <Siter, std::string ()>		_string;
 	NSRule <Siter, std::string ()>		_identifier;
@@ -82,6 +85,7 @@ private:
 	// Categories of operations
 	Rule <Siter, Token *(), Space>		_term_operation;
 	Rule <Siter, Token *(), Space>		_start_operation;
+	Rule <Siter, Token *(), Space>		_expression_operation;
 
 	// Operations
 	Rule <Siter, Token *(), Space>		_and;
@@ -105,6 +109,7 @@ private:
 	Rule <Siter, Token *(), Space>		_pre_decr;
 	Rule <Siter, Token *(), Space>		_pre_incr;
 	Rule <Siter, Token *(), Space>		_times;
+	Rule <Siter, Token *(), Space>		_in;
 
 	// Token parsers
 	NSRule <Siter, Token *()>		_o_str;

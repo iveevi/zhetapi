@@ -1,5 +1,6 @@
 #include "port.hpp"
 
+// TODO: add another test for checking hanlding of invalid input
 TEST(compile_const_exprs)
 {
 	using namespace zhetapi;
@@ -11,7 +12,7 @@ TEST(compile_const_exprs)
 	vector <std::string> exprs {
 		// Operands
 		"564", "7/5", "false", "\"my string\"",
-		"[1, 2, 3, 5, 8]",
+		"[1, 2, 3, 5, 8]", "[[1, 2, 3], [4, 5, 6]]"
 		// First come the binary operations
 		"7 + 5", "7 - 5", "7 * 5", "7 / 5"
 	};
@@ -21,6 +22,7 @@ TEST(compile_const_exprs)
 		// Operands
 		new OpZ(564), new OpQ(Q(7, 5)), new OpB(false),
 		new OpS("my string"), new OpVecZ(VecZ({1, 2, 3, 5, 8})),
+		new OpMatZ(MatZ({{1, 2, 3}, {4, 5, 6}})),
 		// Binary operations
 		new OpZ(12), new OpZ(2), new OpZ(35), new OpQ(Q(7, 5))
 	};
@@ -30,7 +32,14 @@ TEST(compile_const_exprs)
 
 	size_t size = exprs.size();
 	for (size_t i = 0; i < size; i++) {
-		node_manager nm(ctx, exprs[i]);
+		node_manager nm;
+		
+		try {
+			nm = node_manager(ctx, exprs[i]);
+		} catch (const node_manager::bad_input &e) {
+			oss << err << "\tBad input exception was thrown" << endl;
+			continue;
+		}
 
 		Token *tptr = nm.value(ctx);
 		oss << "Value of \"" << exprs[i] << "\" = "

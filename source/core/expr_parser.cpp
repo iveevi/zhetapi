@@ -70,6 +70,7 @@ parser::parser(Engine *ctx)
 	_add_operation_symbol(_or, ||);
 	_add_operation_symbol(_plus, +);
 	_add_operation_symbol(_times, *);
+	_add_operation_symbol(_in, in);
 	_add_operation_heter_symbol(_post_decr, --, p--);
 	_add_operation_heter_symbol(_post_incr, ++, p++);
 	_add_operation_heter_symbol(_pre_decr, --, r--);
@@ -78,6 +79,7 @@ parser::parser(Engine *ctx)
 	// Categorizing operations
 	_term_operation = _times | _divide | _mod | _and;
 	_start_operation = _plus | _minus | _or;
+	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq;
 
 	// Type parsers (real can be integer as well)
 	_integer = boost::spirit::qi::long_long;
@@ -95,6 +97,14 @@ parser::parser(Engine *ctx)
 	// Second priority over vector integer
 	_vector_real = (_real % ',') [
 		_val = construct <VecR> (_1)
+	];
+
+	_matrix_integer = (('[' >> _vector_integer >> ']') [_val = _1] % ',') [
+		_val = construct <MatZ> (_1)
+	];
+	
+	_matrix_real = (('[' >> _vector_real >> ']') [_val = _1] % ',') [
+		_val = construct <MatR> (_1)
 	];
 	
 	_string = +(_esc | (char_ - '\"'));
@@ -142,6 +152,11 @@ parser::parser(Engine *ctx)
 		| _identifier [
 			_val = construct <node> (new_ <variable_cluster> (_1))
 		]
+
+		// Parenthesized expressions
+		| ('(' >> _start > ')') [
+			_val = _1
+		]
 	);
 
 	// Full factors
@@ -171,16 +186,25 @@ parser::parser(Engine *ctx)
 		| _factor [_val = _1]
 	);
 
-	// Starting expression
-	_start = (
+	// Simple expression
+	_simple_expression = (
 		(_term >> _start_operation >> _start) [
 			_val = construct <node> (_2, _1, _3)
 		]
 
 		| _term [_val = _1]
 	);
+	
+	// Starting expression
+	_start = (
+		(_simple_expression >> _expression_operation >> _start) [
+			_val = construct <node> (_2, _1, _3)
+		]
 
-#define ZHETAPI_PARSER_DEBUG
+		| _simple_expression [_val = _1]
+	);
+
+// #define ZHETAPI_PARSER_DEBUG
 #ifdef ZHETAPI_PARSER_DEBUG
 
 	// Debugging name information

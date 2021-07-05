@@ -26,7 +26,7 @@ int main()
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print(); */
 
-	nm = node_manager(ctx, "[1, 2.438, 3]", {"x"});
+	nm = node_manager(ctx, "25.0 + 4 == 4", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;

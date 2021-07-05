@@ -99,9 +99,17 @@ int main()
 			oss << string(100, '-') << endl;
 			tmp = s.second(oss, 0);	
 			oss << string(100, '-') << endl;
+		} catch (const std::runtime_error &e) {
+			oss << bred << "CAUGHT RUNTIME EXCEPTION (in test \""
+				<< s.first << "\"):" << endl;
+			oss << "\t" << e.what() << endl;
+			oss << "PASSING THROUGH FOR NOW." << reset << endl;
+
+			tmp = false;
 		} catch (...) {
 			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""
-				<< s.first << "\"), PASSING THROUGH FOR NOW." << reset << endl;
+				<< s.first << "\"), PASSING THROUGH FOR NOW."
+				<< reset << endl;
 
 			tmp = false;
 		}

@@ -50,7 +50,7 @@ const char *types::symbol(const std::type_index &type)
 	// Complex numbers
 	// TODO: use ID and a hash table
 	if (type == typeid(OpZ))
-		return "Z";
+		return "Integer";
 	if (type == typeid(OpQ))
 		return "Q";
 	if (type == typeid(OpR))
@@ -90,9 +90,15 @@ const char *types::symbol(const std::type_index &type)
 	if (type == typeid(OpMatCmpR))
 		return "MCR";
 
+	if (type == typeid(OpB))
+		return "Bool";
+	if (type == typeid(OpS))
+		return "String";
+
 	return type.name();
 }
 
+// TODO: is this relevant
 std::string type_name(const std::type_index &type)
 {
 	// Complex numbers
