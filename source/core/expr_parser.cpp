@@ -79,11 +79,11 @@ parser::parser(Engine *ctx)
 	// Categorizing operations
 	_term_operation = _times | _divide | _mod | _and;
 	_start_operation = _plus | _minus | _or;
-	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq;
+	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq | _in;
 
 	// Type parsers (real can be integer as well)
 	_integer = boost::spirit::qi::long_long;
-	
+
 	_pure_real = boost::spirit::qi::real_parser
 		<R, boost::spirit::qi::strict_real_policies <R>> ();
 
@@ -93,22 +93,26 @@ parser::parser(Engine *ctx)
 	_vector_integer = (_integer % ',') [
 		_val = construct <VecZ> (_1)
 	];
-	
+
 	// Second priority over vector integer
 	_vector_real = (_real % ',') [
 		_val = construct <VecR> (_1)
 	];
 
-	_matrix_integer = (('[' >> _vector_integer >> ']') [_val = _1] % ',') [
+	// Use V2 constructor instead of vector constructor
+	_matrix_integer = (('[' >> (_integer % ',') >> ']')
+			[_val = _1] % ',') [
 		_val = construct <MatZ> (_1)
 	];
-	
-	_matrix_real = (('[' >> _vector_real >> ']') [_val = _1] % ',') [
+
+	// Use V2 constructor instead of vector constructor
+	_matrix_real = (('[' >> (_real % ',') >> ']')
+			[_val = _1] % ',') [
 		_val = construct <MatR> (_1)
 	];
-	
+
 	_string = +(_esc | (char_ - '\"'));
-        
+
 	// Identifier (TODO: keep outside this scope later)
 	_identifier = char_("a-zA-Z$_") >> *char_("0-9a-zA-Z$_");
 
@@ -138,9 +142,17 @@ parser::parser(Engine *ctx)
 		| ('[' >> _vector_integer >> ']') [
 			_val = construct <node> (new_ <OpVecZ> (_1))
 		]
-		
+
 		| ('[' >> _vector_real >> ']') [
 			_val = construct <node> (new_ <OpVecR> (_1))
+		]
+
+		| ('[' >> _matrix_integer >> ']') [
+			_val = construct <node> (new_ <OpMatZ> (_1))
+		]
+
+		| ('[' >> _matrix_real >> ']') [
+			_val = construct <node> (new_ <OpMatR> (_1))
 		]
 	);
 
@@ -148,13 +160,25 @@ parser::parser(Engine *ctx)
 	_closed_factor = (
 		_operand [_val = _1]
 
-		// TODO: expand right here using ctx and args
+		// Prioritize function with aruments (or blank)
+		| (_identifier >> "()") [
+			_val = construct <node> (
+				new_ <variable_cluster> (_1),
+				V1 <node> {node(blank_token())}
+			)
+		]
+
+		| (_identifier >> '(' >> (_start % ',') >> ')') [
+			_val = construct <node> (new_ <variable_cluster> (_1), _2)
+		]
+
+		// TODO: expand right (if immediate) here using ctx and args
 		| _identifier [
 			_val = construct <node> (new_ <variable_cluster> (_1))
 		]
 
 		// Parenthesized expressions
-		| ('(' >> _start > ')') [
+		| ('(' >> _start >> ')') [
 			_val = _1
 		]
 	);
@@ -164,7 +188,7 @@ parser::parser(Engine *ctx)
 		(_closed_factor >> _exponent >> _full_factor) [
 			_val = construct <node> (_2, _1, _3)
 		]
-	
+
 		| _closed_factor [_val = _1]
 	);
 
@@ -194,7 +218,7 @@ parser::parser(Engine *ctx)
 
 		| _term [_val = _1]
 	);
-	
+
 	// Starting expression
 	_start = (
 		(_simple_expression >> _expression_operation >> _start) [

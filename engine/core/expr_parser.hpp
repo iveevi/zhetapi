@@ -34,7 +34,7 @@ struct parser : boost::spirit::qi::grammar <
 		std::string::const_iterator,
 		node (),
 		boost::spirit::qi::space_type> {
-public:	
+public:
 	using Siter = std::string::const_iterator;
 
 	// Qi rule (no skip)
@@ -51,13 +51,13 @@ public:
 	// Vector aliases
 	template <class T>
 	using V1 = std::vector <T>;
-	
+
 	template <class T>
 	using V2 = std::vector <std::vector <T>>;
 private:
 	boost::spirit::qi::symbols
 		<char const, char const>	_esc;
-	
+
 	// Node grammars (structural, from bottom to top)
 	Rule <Siter, node (), Space>		_operand;
 	Rule <Siter, node (), Space>		_closed_factor;
@@ -67,9 +67,9 @@ private:
 	Rule <Siter, node (), Space>		_simple_expression;
 	Rule <Siter, node (), Space>		_start;
 
-	// Identifiers
+	// Identifiers (TODO: redundant?)
 	NSRule <Siter, std::string ()>		_ident;
-	
+
 	// Type parsers
 	Rule <Siter, Z (), Space>		_integer;
 	Rule <Siter, R (), Space>		_pure_real;
@@ -81,7 +81,7 @@ private:
 	Rule <Siter, Token *(), Space>		_collection;
 	NSRule <Siter, std::string ()>		_string;
 	NSRule <Siter, std::string ()>		_identifier;
-	
+
 	// Categories of operations
 	Rule <Siter, Token *(), Space>		_term_operation;
 	Rule <Siter, Token *(), Space>		_start_operation;
@@ -118,28 +118,28 @@ private:
 	Rule <Siter, Token *(), Space>		_o_r;
 	Rule <Siter, Token *(), Space>		_o_cz;
 	Rule <Siter, Token *(), Space>		_o_cr;
-	
+
 	Rule <Siter, Token *(), Space>		_o_vz;
 	Rule <Siter, Token *(), Space>		_o_vr;
 	Rule <Siter, Token *(), Space>		_o_vcz;
 	Rule <Siter, Token *(), Space>		_o_vcr;
-	
+
 	Rule <Siter, Token *(), Space>		_o_mz;
 	Rule <Siter, Token *(), Space>		_o_mr;
 	Rule <Siter, Token *(), Space>		_o_mcz;
 	Rule <Siter, Token *(), Space>		_o_mcr;
-	
+
 	// Type parsers
 	NSRule <Siter, std::string ()>		_str;
 
 	Rule <Siter, CmpZ (), Space>		_cz;
 	Rule <Siter, CmpR (), Space>		_cr;
-	
+
 	Rule <Siter, V1 <Z> (), Space>		_vz;
 	Rule <Siter, V1 <R> (), Space>		_vr;
 	Rule <Siter, V1 <CmpZ> (), Space>	_vcz;
 	Rule <Siter, V1 <CmpR> (), Space>	_vcr;
-	
+
 	Rule <Siter, V2 <Z> (), Space>		_mz;
 	Rule <Siter, V2 <R> (), Space>		_mr;
 	Rule <Siter, V2 <CmpZ> (), Space>	_mcz;
@@ -150,7 +150,7 @@ private:
 	Rule <Siter, V1 <R> (), Space>		_vr_inter;
 	Rule <Siter, V1 <CmpZ> (), Space>	_vcz_inter;
 	Rule <Siter, V1 <CmpR> (), Space>	_vcr_inter;
-	
+
 	Rule <Siter, V2 <Z> (), Space>		_mz_inter;
 	Rule <Siter, V2 <R> (), Space>		_mr_inter;
 	Rule <Siter, V2 <CmpZ> (), Space>	_mcz_inter;

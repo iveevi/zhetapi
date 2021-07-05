@@ -52,29 +52,29 @@ const char *types::symbol(const std::type_index &type)
 	if (type == typeid(OpZ))
 		return "Integer";
 	if (type == typeid(OpQ))
-		return "Q";
+		return "Rational";
 	if (type == typeid(OpR))
-		return "R";
+		return "Real";
 	if (type == typeid(OpCmpZ))
-		return "CZ";
+		return "Z[i]";
 	if (type == typeid(OpCmpQ))
-		return "CQ";
+		return "Q[i]";
 	if (type == typeid(OpCmpR))
-		return "CR";
+		return "R[i]";
 	
 	// Vectors
 	if (type == typeid(OpVecZ))
-		return "VZ";
+		return "Z^n";
 	if (type == typeid(OpVecQ))
-		return "VQ";
+		return "Q^n";
 	if (type == typeid(OpVecR))
-		return "VR";
+		return "R^n";
 	if (type == typeid(OpVecCmpZ))
-		return "VCZ";
+		return "Z[i]^n";
 	if (type == typeid(OpVecCmpQ))
-		return "VCQ";
+		return "Q[i]^n";
 	if (type == typeid(OpVecCmpR))
-		return "VCR";
+		return "R[i]^n";
 	
 	// Matrices
 	if (type == typeid(OpMatZ))

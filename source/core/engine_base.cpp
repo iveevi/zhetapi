@@ -1,6 +1,176 @@
-#include <core/engine_base.hpp>
+#include "../../engine/core/engine_base.hpp"
 
 namespace zhetapi {
+
+// TODO: Fix these macros to accomodate for _table instead of ops
+// Instead of a macroo use a private method (clearner code and header)
+// TODO: clean these macros
+#define _add_binary_operation(str, A, B, O)							\
+	ops.push_back({										\
+			{									\
+				std::string(#str),						\
+				std::vector <std::type_index> {					\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
+				}								\
+			},									\
+												\
+			new operation {								\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#B) + ")",			\
+				2,								\
+				[&](const ::std::vector <Token *> &ins) {			\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
+												\
+					O out = a->get() str b->get();				\
+												\
+					return new Operand <O> (out);				\
+				}								\
+			}									\
+	});
+
+#define _add_heterogenous_binary_operation(str, A, B, O)					\
+	_add_binary_operation(str, A, B, O)							\
+	_add_binary_operation(str, B, A, O)
+
+#define _add_binary_operation_ftr(str, A, B, O, ftr)						\
+	ops.push_back({										\
+			{									\
+				std::string(#str),						\
+				std::vector <std::type_index> {					\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
+				}								\
+			},									\
+												\
+			new operation {								\
+				std::string(#str),						\
+				"$1 (" + std::string(#A) + ") " + std::string(#str)		\
+					+ " $2 (" + std::string(#B) + ")",			\
+				2,								\
+				[&](const ::std::vector <Token *> &ins) {			\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
+												\
+					return new Operand <O> (ftr);				\
+				}								\
+			}									\
+	});
+
+#define _add_heterogenous_binary_operation_ftr(str, A, B, O, ftr)				\
+	ops.push_back({										\
+			{									\
+				::std::string(#str),						\
+				::std::vector <::std::type_index> {				\
+					typeid(Operand <A>),					\
+					typeid(Operand <B>)					\
+				}								\
+			},									\
+												\
+			new operation {								\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#A) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#B) + ")",			\
+				2,								\
+				[&](const ::std::vector <Token *> &ins) {			\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[0]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[1]);	\
+												\
+					return new Operand <O> (ftr);				\
+				}								\
+			}									\
+	});											\
+												\
+	ops.push_back({										\
+			{									\
+				std::string(#str),						\
+				std::vector <std::type_index> {					\
+					typeid(Operand <B>),					\
+					typeid(Operand <A>)					\
+				}								\
+			},									\
+												\
+			new operation {								\
+				::std::string(#str),						\
+				"$1 (" + ::std::string(#B) + ") " + ::std::string(#str)		\
+					+ " $2 (" + ::std::string(#A) + ")",			\
+				2,								\
+				[&](const std::vector <Token *> &ins) {			\
+					Operand <A> *a = dynamic_cast <Operand <A> *> (ins[1]);	\
+					Operand <B> *b = dynamic_cast <Operand <B> *> (ins[0]);	\
+												\
+					return new Operand <O> (ftr);				\
+				}								\
+			}									\
+	});
+
+#define _add_binary_operation_set(str)								\
+	_add_binary_operation(str, Z, Z, Z);							\
+	_add_binary_operation(str, R, R, R);							\
+	_add_binary_operation(str, Q, Q, Q);							\
+	_add_binary_operation(str, CmpR, CmpR, CmpR);							\
+	_add_binary_operation(str, CmpQ, CmpQ, CmpQ);							\
+												\
+	_add_heterogenous_binary_operation(str, R, Z, R);					\
+	_add_heterogenous_binary_operation_ftr(str, Z, Q, Q, Q(a->get()) str b->get());	\
+	_add_heterogenous_binary_operation(str, R, Q, R);					\
+	_add_heterogenous_binary_operation(str, R, CmpR, CmpR);					\
+	_add_heterogenous_binary_operation_ftr(str, R, CmpQ, CmpR, CmpR(a->get() str			\
+				R(b->get().real()), R(b->get().imag())));			\
+	_add_heterogenous_binary_operation_ftr(str, Z, CmpR, CmpR, CmpR(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	_add_heterogenous_binary_operation_ftr(str, Z, CmpQ, CmpQ, CmpQ(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	_add_heterogenous_binary_operation_ftr(str, Q, CmpR, CmpR, CmpR(R(a->get())			\
+				str b->get().real(), b->get().imag()));				\
+	_add_heterogenous_binary_operation_ftr(str, Q, CmpQ, CmpQ, CmpQ(a->get() str			\
+				b->get().real(), b->get().imag()));				\
+	_add_heterogenous_binary_operation_ftr(str, CmpR, CmpQ, CmpR,				\
+			CmpR(a->get().real() str (R) b->get().real(),				\
+				a->get().imag() str (R) b->get().imag()));
+
+#define _add_unary_operation(str, I, O)							\
+	ops.push_back({										\
+			{									\
+				std::string(#str),						\
+				std::vector <std::type_index> {typeid(Operand <I>)}		\
+			},									\
+												\
+			new operation {								\
+				std::string(#str),						\
+				"$1 (" + std::string(#I) + ")",					\
+				1, 								\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <I> *in = dynamic_cast				\
+						<Operand <I> *> (ins[0]);			\
+												\
+					return new Operand <O> (str(in->get()));		\
+				}								\
+			}									\
+	});
+
+#define _add_unary_operation_ftr(str, I, O, ftr)						\
+	ops.push_back({										\
+			{									\
+				std::string(#str),						\
+				std::vector <std::type_index> {typeid(Operand <I>)}		\
+			},									\
+												\
+			new operation {								\
+				std::string(#str),						\
+				"$1 (" + std::string(#I) + ")",					\
+				1, 								\
+				[&](const std::vector <Token *> &ins) {				\
+					Operand <I> *in = dynamic_cast				\
+						<Operand <I> *> (ins[0]);			\
+												\
+					return new Operand <O> (ftr);				\
+				}								\
+			}									\
+	});
+
 
 // TODO: put this constructor in another file
 engine_base::engine_base()
@@ -214,8 +384,8 @@ engine_base::engine_base()
 	_add_binary_operation(-, VecR, VecR, VecR);
 
 	// Scalar multiplication
-	_add_binary_operation_ftr(*, Z, VecZ, VecZ, (a->get()) * b->get());
-	_add_binary_operation_ftr(*, Z, VecQ, VecQ, ((Q) a->get()) * b->get());
+	_add_heterogenous_binary_operation_ftr(*, Z, VecZ, VecZ, (a->get()) * b->get());
+	_add_heterogenous_binary_operation_ftr(*, Z, VecQ, VecQ, ((Q) a->get()) * b->get());
 	
 	// Dot product
 	_add_binary_operation_ftr(., VecZ, VecZ, Z, inner(a->get(), b->get()));
@@ -234,11 +404,17 @@ engine_base::engine_base()
 	// Matrix operations
 	//////////////////////////////////////////
 
+	_add_binary_operation(+, MatZ, MatZ, MatZ);
 	_add_binary_operation(+, MatQ, MatQ, MatQ);
 	_add_binary_operation(+, MatR, MatR, MatR);
 	
+	_add_binary_operation(-, MatZ, MatZ, MatZ);
 	_add_binary_operation(-, MatQ, MatQ, MatQ);
 	_add_binary_operation(-, MatR, MatR, MatR);
+	
+	// Scalar multiplication
+	_add_heterogenous_binary_operation_ftr(*, Z, MatZ, MatZ, (a->get()) * b->get());
+	_add_heterogenous_binary_operation_ftr(*, Z, MatQ, MatQ, ((Q) a->get()) * b->get());
 	
 	_add_binary_operation_ftr(shur, MatQ, MatQ, MatQ, shur(a->get(), b->get()));
 	_add_binary_operation_ftr(shur, MatR, MatR, MatR, shur(a->get(), b->get()));
@@ -409,7 +585,7 @@ std::string engine_base::overload_catalog(const std::string &str)
 			tmp += types::symbol(sig[j]);
 
 			if (j < sig.size() - 1)
-				tmp += ",";
+				tmp += ", ";
 		}
 
 		tmp += ")";
@@ -442,7 +618,7 @@ std::string engine_base::gen_overload_msg(const signature &sig, const std::strin
 			msg += ", ";
 	}
 
-	return msg + ") for operation \"" + str + "\". " + overload_catalog(str);
+	return msg + ") for operation \"" + str + "\".\n\t" + overload_catalog(str);
 }
 
 signature engine_base::gen_signature(const std::vector <Token *> &vals)

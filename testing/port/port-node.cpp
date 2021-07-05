@@ -12,7 +12,7 @@ TEST(compile_const_exprs)
 	vector <std::string> exprs {
 		// Operands
 		"564", "7/5", "false", "\"my string\"",
-		"[1, 2, 3, 5, 8]", "[[1, 2, 3], [4, 5, 6]]"
+		"[1, 2, 3, 5, 8]", "[[1, 2, 3], [4, 5, 6]]",
 		// First come the binary operations
 		"7 + 5", "7 - 5", "7 * 5", "7 / 5"
 	};
@@ -33,15 +33,34 @@ TEST(compile_const_exprs)
 	size_t size = exprs.size();
 	for (size_t i = 0; i < size; i++) {
 		node_manager nm;
-		
+		Token *tptr;
+	
+		// Construction
 		try {
 			nm = node_manager(ctx, exprs[i]);
 		} catch (const node_manager::bad_input &e) {
-			oss << err << "\tBad input exception was thrown" << endl;
+			oss << err << "\tBad input exception was thrown with \""
+				<< exprs[i] << "\"" << endl;
+			continue;
+		} catch (const engine_base::unknown_op_overload &e) {
+			oss << err << "\tUnknown operation overload with \""
+				<< exprs[i] << "\"" << endl;
+			oss << e.what() << endl;
+			oss << "Tree:" << endl;
+			nm.print();
 			continue;
 		}
 
-		Token *tptr = nm.value(ctx);
+		// Evaluation
+		try {
+			tptr = nm.value(ctx);
+		} catch (const engine_base::unknown_op_overload &e) {
+			oss << err << e.what() << endl;
+			oss << "Tree:" << endl;
+			nm.print();
+			continue;
+		}
+
 		oss << "Value of \"" << exprs[i] << "\" = "
 			<< (tptr ? tptr->dbg_str() : "[Null]")
 			<< " <=> " << values[i]->dbg_str() << endl;
