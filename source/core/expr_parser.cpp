@@ -70,7 +70,6 @@ parser::parser(Engine *ctx)
 	_add_operation_symbol(_or, ||);
 	_add_operation_symbol(_plus, +);
 	_add_operation_symbol(_times, *);
-	_add_operation_symbol(_in, in);
 	_add_operation_heter_symbol(_post_decr, --, p--);
 	_add_operation_heter_symbol(_post_incr, ++, p++);
 	_add_operation_heter_symbol(_pre_decr, --, r--);
@@ -79,7 +78,7 @@ parser::parser(Engine *ctx)
 	// Categorizing operations
 	_term_operation = _times | _divide | _mod | _and;
 	_start_operation = _plus | _minus | _or;
-	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq | _in;
+	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq;
 
 	// Type parsers (real can be integer as well)
 	_integer = boost::spirit::qi::long_long;
@@ -116,9 +115,15 @@ parser::parser(Engine *ctx)
 	// Identifier (TODO: keep outside this scope later)
 	_identifier = char_("a-zA-Z$_") >> *char_("0-9a-zA-Z$_");
 
-	_collection = ('{' >> (_start % ',') >> '}') [
-		_val = new_ <node_list> (_1)
-	];
+	_collection = (
+		lit("{}") [
+			_val = new_ <Collection> (V1 <Token *> {})
+		]
+
+		| ('{' >> (_start % ',') >> '}') [
+			_val = new_ <node_list> (_1)
+		]
+	);
 
 	// Operands (TODO: can also be a operation of operands)
 	_operand = (
@@ -161,6 +166,7 @@ parser::parser(Engine *ctx)
 		_operand [_val = _1]
 
 		// Prioritize function with aruments (or blank)
+		// TODO: extended _identifier with closed factor
 		| (_identifier >> "()") [
 			_val = construct <node> (
 				new_ <variable_cluster> (_1),
@@ -185,8 +191,18 @@ parser::parser(Engine *ctx)
 
 	// Full factors
 	_full_factor = (
-		(_closed_factor >> _exponent >> _full_factor) [
+		// Prioritize the "in" operation to avoid it being interpreted as
+		// an identifier
+		(_closed_factor >> "in" >> _full_factor) [
+			_val = construct <node> (nullptr, l_generator_in, _1, _2)
+		]
+
+		| (_closed_factor >> _exponent >> _full_factor) [
 			_val = construct <node> (_2, _1, _3)
+		]
+
+		| (_closed_factor >> '[' >> _start >> ']') [
+			_val = construct <node> (_new_oph("[]"), _1, _2)
 		]
 
 		| _closed_factor [_val = _1]
@@ -246,11 +262,11 @@ parser::parser(Engine *ctx)
 	_start.name("Start");
 
 	// Confirming debug
-	debug(_integer);
+	// debug(_integer);
 	// debug(_pure_real);
 	// debug(_real);
 	debug(_collection);
-	debug(_identifier);
+	// debug(_identifier);
 
 	debug(_operand);
 	debug(_closed_factor);

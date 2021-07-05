@@ -109,25 +109,6 @@ private:
 	Rule <Siter, Token *(), Space>		_pre_decr;
 	Rule <Siter, Token *(), Space>		_pre_incr;
 	Rule <Siter, Token *(), Space>		_times;
-	Rule <Siter, Token *(), Space>		_in;
-
-	// Token parsers
-	NSRule <Siter, Token *()>		_o_str;
-
-	Rule <Siter, Token *(), Space>		_o_z;
-	Rule <Siter, Token *(), Space>		_o_r;
-	Rule <Siter, Token *(), Space>		_o_cz;
-	Rule <Siter, Token *(), Space>		_o_cr;
-
-	Rule <Siter, Token *(), Space>		_o_vz;
-	Rule <Siter, Token *(), Space>		_o_vr;
-	Rule <Siter, Token *(), Space>		_o_vcz;
-	Rule <Siter, Token *(), Space>		_o_vcr;
-
-	Rule <Siter, Token *(), Space>		_o_mz;
-	Rule <Siter, Token *(), Space>		_o_mr;
-	Rule <Siter, Token *(), Space>		_o_mcz;
-	Rule <Siter, Token *(), Space>		_o_mcr;
 
 	// Type parsers
 	NSRule <Siter, std::string ()>		_str;
@@ -144,17 +125,6 @@ private:
 	Rule <Siter, V2 <R> (), Space>		_mr;
 	Rule <Siter, V2 <CmpZ> (), Space>	_mcz;
 	Rule <Siter, V2 <CmpR> (), Space>	_mcr;
-
-	// Vector and matrix intermediates (TODO: remove)
-	Rule <Siter, V1 <Z> (), Space>		_vz_inter;
-	Rule <Siter, V1 <R> (), Space>		_vr_inter;
-	Rule <Siter, V1 <CmpZ> (), Space>	_vcz_inter;
-	Rule <Siter, V1 <CmpR> (), Space>	_vcr_inter;
-
-	Rule <Siter, V2 <Z> (), Space>		_mz_inter;
-	Rule <Siter, V2 <R> (), Space>		_mr_inter;
-	Rule <Siter, V2 <CmpZ> (), Space>	_mcz_inter;
-	Rule <Siter, V2 <CmpR> (), Space>	_mcr_inter;
 public:
 	parser(Engine *ctx);
 };

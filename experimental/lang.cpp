@@ -26,11 +26,17 @@ int main()
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print(); */
 
-	nm = node_manager(ctx, "12 in x", {"x"});
+	/* nm = node_manager(ctx, "{}");
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
+
+	nm = node_manager(ctx, "12 index", {"dex"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
 
 	/* nm = node_manager(ctx, "\"fdfsdffsf\\t\"", {"x"});
 

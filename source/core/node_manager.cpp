@@ -73,10 +73,10 @@ node_manager::node_manager(Engine *ctx, const std::string &str)
         if (!r)
                 throw bad_input(str);
 
-	using namespace std;
+	/* using namespace std;
 	cout << string(50, '=') << endl;
 	cout << "PRE _tree:" << endl;
-	_tree.print();
+	_tree.print(); */
 
 	// TODO: check whether these are redundant
 
@@ -110,10 +110,10 @@ node_manager::node_manager(
         if (!r)
                 throw bad_input(str);
 
-	using namespace std;
+	/* using namespace std;
 	cout << string(50, '=') << endl;
 	cout << "PRE _tree:" << endl;
-	_tree.print();
+	_tree.print(); */
 
 	// Fill references
 	node tmp;
