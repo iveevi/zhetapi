@@ -9,6 +9,7 @@
 #include <boost/config/warning_disable.hpp>
 #include <boost/fusion/include/at_c.hpp>
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
+#include <boost/phoenix/function/adapt_function.hpp>
 #include <boost/spirit/include/phoenix.hpp>
 #include <boost/spirit/include/phoenix_container.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
@@ -25,18 +26,6 @@
 #include "operation_holder.hpp"
 #include "variable_cluster.hpp"
 #include "special_tokens.hpp"
-
-#define _add_operation_symbol(name, str)				\
-	name = boost::spirit::qi::lit(#str) [				\
-		boost::spirit::qi::_val = boost::phoenix::new_		\
-			<operation_holder> (std::string(#str))		\
-	];
-
-#define _add_operation_heter_symbol(name, str, act)			\
-	name = boost::spirit::qi::lit(#str) [				\
-		boost::spirit::qi::_val = boost::phoenix::new_		\
-			<operation_holder> (std::string(#act))		\
-	];
 
 namespace zhetapi {
 
@@ -69,67 +58,53 @@ private:
 	boost::spirit::qi::symbols
 		<char const, char const>	_esc;
 	
+	// Node grammars (structural, from bottom to top)
+	Rule <Siter, node (), Space>		_operand;
+	Rule <Siter, node (), Space>		_closed_factor;
+	Rule <Siter, node (), Space>		_full_factor;
+	Rule <Siter, node (), Space>		_factor;
+	Rule <Siter, node (), Space>		_term;
 	Rule <Siter, node (), Space>		_start;
-	
-	// Nodes
-	Rule <Siter, node (), Space>		_node_expr;
-	Rule <Siter, node (), Space>		_node_term;
-	Rule <Siter, node (), Space>		_node_factor;
-	Rule <Siter, node (), Space>		_node_prep;
-	Rule <Siter, node (), Space>		_node_rept;
-	Rule <Siter, node (), Space>		_node_prth;
-	Rule <Siter, node (), Space>		_node_var;
-	Rule <Siter, node (), Space>		_node_rvalue;
-	Rule <Siter, node (), Space>		_node_lvalue;
-	Rule <Siter, node (), Space>		_node_opd;
-
-	// Helpers
-	Rule <Siter, node(), Space>		_attr;
-
-	// Parameter pack
-	Rule <Siter, V1 <node> (), Space>	_node_pack;
 
 	// Identifiers
 	NSRule <Siter, std::string ()>		_ident;
+	
+	// Type parsers
+	Rule <Siter, Z (), Space>		_integer;
+	Rule <Siter, VecZ (), Space>		_vector_integer;
+	Rule <Siter, VecR (), Space>		_vector_real;
+	Rule <Siter, R (), Space>		_pure_real;
+	Rule <Siter, R (), Space>		_real;
+	Rule <Siter, Token *(), Space>		_collection;
+	NSRule <Siter, std::string ()>		_string;
+	NSRule <Siter, std::string ()>		_identifier;
+	
+	// Categories of operations
+	Rule <Siter, Token *(), Space>		_term_operation;
+	Rule <Siter, Token *(), Space>		_start_operation;
 
 	// Operations
-	Rule <Siter, Token *(), Space>		_t0_bin;
-	Rule <Siter, Token *(), Space>		_t1_bin;
-	Rule <Siter, Token *(), Space>		_t2_bin;
-
-	Rule <Siter, Token *(), Space>		_t_pre;
-	Rule <Siter, Token *(), Space>		_t_post;
-
+	Rule <Siter, Token *(), Space>		_and;
+	Rule <Siter, Token *(), Space>		_attribute;
+	Rule <Siter, Token *(), Space>		_divide;
+	Rule <Siter, Token *(), Space>		_dot;
 	Rule <Siter, Token *(), Space>		_eq;
-	Rule <Siter, Token *(), Space>		_neq;
+	Rule <Siter, Token *(), Space>		_exponent;
+	Rule <Siter, Token *(), Space>		_factorial;
 	Rule <Siter, Token *(), Space>		_ge;
+	Rule <Siter, Token *(), Space>		_geq;
 	Rule <Siter, Token *(), Space>		_le;
 	Rule <Siter, Token *(), Space>		_leq;
-	Rule <Siter, Token *(), Space>		_geq;
-
-	Rule <Siter, Token *(), Space>		_or;
-	Rule <Siter, Token *(), Space>		_and;
-
-	Rule <Siter, Token *(), Space>		_post_incr;
-	Rule <Siter, Token *(), Space>		_post_decr;
-	
-	Rule <Siter, Token *(), Space>		_pre_incr;
-	Rule <Siter, Token *(), Space>		_pre_decr;
-
-	Rule <Siter, Token *(), Space>		_plus;
 	Rule <Siter, Token *(), Space>		_minus;
-	Rule <Siter, Token *(), Space>		_dot;
 	Rule <Siter, Token *(), Space>		_mod;
-	Rule <Siter, Token *(), Space>		_factorial;
-	
+	Rule <Siter, Token *(), Space>		_neq;
+	Rule <Siter, Token *(), Space>		_or;
+	Rule <Siter, Token *(), Space>		_plus;
+	Rule <Siter, Token *(), Space>		_post_decr;
+	Rule <Siter, Token *(), Space>		_post_incr;
+	Rule <Siter, Token *(), Space>		_pre_decr;
+	Rule <Siter, Token *(), Space>		_pre_incr;
 	Rule <Siter, Token *(), Space>		_times;
-	Rule <Siter, Token *(), Space>		_divide;
-	
-	Rule <Siter, Token *(), Space>		_power;
-	Rule <Siter, Token *(), Space>		_attribute;
-	Rule <Siter, Token *(), Space>		_collection;
-
-	// Operands
 
 	// Token parsers
 	NSRule <Siter, Token *()>		_o_str;
@@ -152,8 +127,6 @@ private:
 	// Type parsers
 	NSRule <Siter, std::string ()>		_str;
 
-	Rule <Siter, Z (), Space>		_z;
-	Rule <Siter, R (), Space>		_r;
 	Rule <Siter, CmpZ (), Space>		_cz;
 	Rule <Siter, CmpR (), Space>		_cr;
 	
@@ -178,7 +151,7 @@ private:
 	Rule <Siter, V2 <CmpZ> (), Space>	_mcz_inter;
 	Rule <Siter, V2 <CmpR> (), Space>	_mcr_inter;
 public:
-	parser();
+	parser(Engine *ctx);
 };
 
 }

@@ -61,9 +61,9 @@ node_manager::node_manager(Engine *context, const node &tree, const Args &args)
 	simplify(context, _tree);
 }
 
-node_manager::node_manager(Engine *context, const std::string &str)
+node_manager::node_manager(Engine *ctx, const std::string &str)
 {
-	parser pr;
+	parser pr(ctx);
 
 	auto start = str.begin();
 	auto end = str.end();
@@ -73,20 +73,22 @@ node_manager::node_manager(Engine *context, const std::string &str)
         if (!r)
                 throw bad_input(str);
 
-	/* using namespace std;
+	using namespace std;
 	cout << string(50, '=') << endl;
 	cout << "PRE _tree:" << endl;
-	_tree.print(); */
+	_tree.print();
+
+	// TODO: check whether these are redundant
 
 	// Unpack variable clusters
-	expand(context, _tree);
+	expand(ctx, _tree);
 
 	// Label the tree
 	label(_tree);
 	count_up(_tree);
 	
 	// Simplify
-	simplify(context, _tree);
+	simplify(ctx, _tree);
 	// cout << string(50, '=') << endl;
 }
 
@@ -97,7 +99,7 @@ node_manager::node_manager(
 		const std::set <std::string> &pardon)
 		: _params(params)
 {
-	parser pr;
+	parser pr(context);
 
 	auto start = str.begin();
 	auto end = str.end();
@@ -108,10 +110,10 @@ node_manager::node_manager(
         if (!r)
                 throw bad_input(str);
 
-	/* using namespace std;
+	using namespace std;
 	cout << string(50, '=') << endl;
 	cout << "PRE _tree:" << endl;
-	_tree.print(); */
+	_tree.print();
 
 	// Fill references
 	node tmp;

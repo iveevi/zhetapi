@@ -2,6 +2,7 @@
 
 #define THREADS	8
 // #define DEBUG_EXCEPTION
+#define PASSTHROUGH_EXCEPTION
 
 typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
@@ -86,11 +87,24 @@ int main()
 
 		bool tmp = true;
 		
-#ifdef DEBUG_EXCEPTION
+#if defined(DEBUG_EXCEPTION)
 			
 		oss << string(100, '-') << endl;
 		tmp = s.second(oss, 0);	
 		oss << string(100, '-') << endl;
+
+#elif defined(PASSTHROUGH_EXCEPTION)
+		
+		try {
+			oss << string(100, '-') << endl;
+			tmp = s.second(oss, 0);	
+			oss << string(100, '-') << endl;
+		} catch (...) {
+			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""
+				<< s.first << "\"), PASSING THROUGH FOR NOW." << reset << endl;
+
+			tmp = false;
+		}
 
 #else
 

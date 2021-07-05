@@ -12,33 +12,39 @@ Engine *ctx = new Engine();
 
 int main()
 {
-	node_manager nm(ctx, "2 / 7");
+	node_manager nm;
 
-	nm.print();
+	/* nm = node_manager(ctx, "2 / 7");
 
-	/* std::cout << "==============" << std::endl;
+	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
+	
+	nm = node_manager(ctx, "2.987 / 7 + 59.45");
 
-	nm = node_manager(ctx, "{3, 5, 6}", {"x"});
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	nm = node_manager(ctx, "[1, 2.438, 3]", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
 
-	nm = node_manager(ctx, "\"fdfsdffsf\\t\"", {"x"});
+	/* nm = node_manager(ctx, "\"fdfsdffsf\\t\"", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
-	nm.print();
+	nm.print(); */
 
-	nm = node_manager(ctx, "3/x^2", {"x"});
+	/* nm = node_manager(ctx, "3/x^2", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
-	nm.print();
+	nm.print(); */
 
-	nm = node_manager(ctx, "3x^2", {"x"});
+	/* nm = node_manager(ctx, "3x^2", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
@@ -49,4 +55,6 @@ int main()
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print(); */
+
+	std::cout << "value = " << nm.value(ctx)->dbg_str() << std::endl;
 }
