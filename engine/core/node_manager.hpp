@@ -125,8 +125,6 @@ private:
 
 	void unpack(node &);
 
-	size_t count_up(node &);
-
 	void label(node &);
 	void label_operation(node &);
 

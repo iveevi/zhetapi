@@ -27,7 +27,6 @@ node_manager::node_manager(Engine *context, const node &tree)
 
 	// Label the tree
 	label(_tree);
-	count_up(_tree);
 
 	// Simplify
 	simplify(context, _tree);
@@ -53,7 +52,6 @@ node_manager::node_manager(Engine *context, const node &tree, const Args &args)
 
 	// Label the tree
 	label(_tree);
-	count_up(_tree);
 	
 	rereference(_tree);
 
@@ -85,7 +83,6 @@ node_manager::node_manager(Engine *ctx, const std::string &str)
 
 	// Label the tree
 	label(_tree);
-	count_up(_tree);
 	
 	// Simplify
 	simplify(ctx, _tree);
@@ -130,7 +127,6 @@ node_manager::node_manager(
 
 	// Label the tree
 	label(_tree);
-	count_up(_tree);
 
 	// Simplify
 	simplify(context, _tree);
@@ -311,34 +307,22 @@ void node_manager::compress_branches(node &tree)
 void node_manager::append(const node &n)
 {
 	_tree.append(n);
-
-	// Add the rest of the elements
-	count_up(_tree);
 }
 
 void node_manager::append(const node_manager &nm)
 {
 	_tree.append(nm._tree);
-
-	// Add the rest of the elements
-	count_up(_tree);
 }
 
 // Better names
 void node_manager::append_front(const node &n)
 {
 	_tree.append_front(n);
-
-	// Add the rest of the elements
-	count_up(_tree);
 }
 
 void node_manager::append_front(const node_manager &nm)
 {
 	_tree.append_front(nm._tree);
-
-	// Add the rest of the elements
-	count_up(_tree);
 }
 
 void node_manager::add_args(const std::vector <std::string> &args)
@@ -634,18 +618,6 @@ node node_manager::expand(
 	}
 
 	return choice[0];
-}
-
-// Counting nodes
-size_t node_manager::count_up(node &ref)
-{
-	size_t total = 1;
-	for (auto &child : ref)
-		total += count_up(child);
-	
-	ref.set_count(total);
-
-	return total;
 }
 
 // Simplication methods

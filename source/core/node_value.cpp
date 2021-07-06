@@ -32,6 +32,35 @@ static void substitute(Engine *ctx, node &tree)
 		substitute(ctx, child);
 }
 
+static Token *vector_expr_node(Engine *ctx, const node &tree)
+{
+	Targs tokens;
+	for (const node &child : tree) {
+		// TODO: add error handling here
+		tokens.push_back(node_value(ctx, child));
+	}
+
+	// TODO: add a typedef for this
+	return new Operand <Vector <Token *>> (Vector <Token *> (tokens));
+}
+
+static Token *matrix_expr_node(Engine *ctx, const node &tree)
+{
+	std::vector <std::vector <Token *>> tokens1;
+	for (const node &child1 : tree) {
+		Targs tokens2;
+		for (const node &child2 : child1) {
+			// TODO: add error handling here
+			tokens2.push_back(node_value(ctx, child2));
+		}
+
+		tokens1.push_back(tokens2);
+	}
+
+	// TODO: add a typedef for this
+	return new Operand <Matrix <Token *>> (Matrix <Token *> (tokens1));
+}
+
 static Token *assignment_node(Engine *ctx, const node &tree)
 {	
 	// Evaluate first node
@@ -246,6 +275,10 @@ static Token *node_null_value(Engine *context, const node &tree)
 {
 	Token *output = nullptr;
 	switch (tree.label()) {
+	case l_vector_expr:
+		return vector_expr_node(context, tree);
+	case l_matrix_expr:
+		return matrix_expr_node(context, tree);
 	case l_assignment_chain:
 		return assignment_node(context, tree);
 	case l_branch:

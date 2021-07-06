@@ -9,8 +9,7 @@ namespace zhetapi {
 node::node() {}
 
 node::node(const node &other)
-		: _label(other._label), _class(other._class),
-		_nodes(other._nodes), _leaves(other._leaves)
+		: _label(other._label), _leaves(other._leaves)
 {
 	if (other._tptr)
 		_tptr = other._tptr->copy();
@@ -68,8 +67,6 @@ node &node::operator=(const node &other)
 			_tptr = other._tptr->copy();
 		
 		_label = other._label;
-		_class = other._class;
-		_nodes = other._nodes;
 		_leaves = other._leaves;
 	}
 
@@ -205,11 +202,6 @@ void node::releaf(const node::Leaves &lvs)
 	_leaves = lvs;
 }
 
-void node::set_count(size_t i)
-{
-	_nodes = i;
-}
-
 void node::transfer(const node &ref)
 {
 	if (ref._tptr) {
@@ -220,8 +212,6 @@ void node::transfer(const node &ref)
 	}
 
 	_label = ref._label;
-	_class = ref._class;
-	_nodes = ref._nodes;
 	_leaves = ref._leaves;
 }
 
@@ -305,10 +295,10 @@ void node::print_no_address(int num, int lev) const
 
 	if (_tptr) {
 		std::cout << "#" << num << ": " << _tptr->dbg_str() << " (" <<
-			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+			strlabs[_label] << ")" << std::endl;
 	} else {
 		std::cout << "#" << num << ": null (" <<
-			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+			strlabs[_label] << ")" << std::endl;
 	}
 
 	counter = 0;
@@ -326,10 +316,10 @@ void node::print_no_address(std::ostream &os, int num, int lev) const
 
 	if (_tptr) {
 		os << "#" << num << ": " << _tptr->dbg_str() << " (" <<
-			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+			strlabs[_label] << ")" << std::endl;
 	} else {
 		os << "#" << num << ": null (" <<
-			strlabs[_label] << ") " << _nodes << " nodes" << ::std::endl;
+			strlabs[_label] << ")" << std::endl;
 	}
 
 	counter = 0;
@@ -351,10 +341,10 @@ std::string node::display(int num, int lev) const
 
 	if (_tptr) {
 		oss << "#" << num << ": " << _tptr->dbg_str() << " (" << _tptr
-			<< ") @ " << this << " "  << _nodes << " nodes" << std::endl;
+			<< ") @ " << this << std::endl;
 	} else {
 		oss << "#" << num << ": [Null](" << _tptr
-			<< ") @ " << this << " "  << _nodes << " nodes" << std::endl;
+			<< ") @ " << this << std::endl;
 	}
 
 	counter = 0;

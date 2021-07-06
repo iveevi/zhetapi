@@ -67,9 +67,6 @@ private:
 	Rule <Siter, node (), Space>		_simple_expression;
 	Rule <Siter, node (), Space>		_start;
 
-	// Identifiers (TODO: redundant?)
-	NSRule <Siter, std::string ()>		_ident;
-
 	// Type parsers
 	Rule <Siter, Z (), Space>		_integer;
 	Rule <Siter, R (), Space>		_pure_real;
@@ -89,6 +86,8 @@ private:
 	Rule <Siter, Token *(), Space>		_term_operation;
 	Rule <Siter, Token *(), Space>		_start_operation;
 	Rule <Siter, Token *(), Space>		_expression_operation;
+	Rule <Siter, Token *(), Space>		_post_operations;
+	Rule <Siter, Token *(), Space>		_pre_operations;
 
 	// Operations
 	Rule <Siter, Token *(), Space>		_and;

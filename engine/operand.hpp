@@ -126,6 +126,12 @@ std::string Operand <bool> ::dbg_str() const;
 template <>
 std::string Operand <Args> ::dbg_str() const;
 
+template <>
+std::string Operand <Vector <Token *>> ::dbg_str() const;
+
+template <>
+std::string Operand <Matrix <Token *>> ::dbg_str() const;
+
 // Forward declare ID specializations
 forward_ids(Z);
 forward_ids(Q);

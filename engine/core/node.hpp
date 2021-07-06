@@ -24,8 +24,6 @@ private:
 	// Members
 	Token *		_tptr		= nullptr;
 	lbl		_label		= l_none;
-	cls		_class		= c_none;
-	size_t		_nodes		= 0;
 	Leaves		_leaves;
 public:
 	// Constructors
@@ -80,8 +78,6 @@ public:
 	void relabel(lbl);
 	void retokenize(Token *);
 	void releaf(const Leaves &);
-
-	void set_count(size_t);
 	
 	// Member functions
 	void transfer(const node &);

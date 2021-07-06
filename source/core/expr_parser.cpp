@@ -76,9 +76,11 @@ parser::parser(Engine *ctx)
 	_add_operation_heter_symbol(_pre_incr, ++, r++);
 
 	// Categorizing operations
-	_term_operation = _times | _divide | _mod | _and;
+	_term_operation = _times | _divide | _mod | _dot | _and;
 	_start_operation = _plus | _minus | _or;
 	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq;
+	_post_operations = _factorial | _post_decr | _post_incr;
+	_pre_operations = _pre_decr | _pre_incr;
 
 	// Type parsers (real can be integer as well)
 	_integer = boost::spirit::qi::long_long;
@@ -223,6 +225,14 @@ parser::parser(Engine *ctx)
 
 		| (_closed_factor >> '[' >> _start >> ']') [
 			_val = construct <node> (_new_oph("[]"), _1, _2)
+		]
+
+		| (_closed_factor >> _post_operations) [
+			_val = construct <node> (_2, _1)
+		]
+
+		| (_pre_operations >> _closed_factor) [
+			_val = construct <node> (_1, _2)
 		]
 
 		| _closed_factor [_val = _1]

@@ -14,12 +14,21 @@ int main()
 {
 	node_manager nm;
 
-	nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
+	// Test factorial
+	// nm = node_manager(ctx, "x++", {"x"});
+	// nm = node_manager(ctx, "x[10]", {"x"});
+	nm = node_manager(ctx, "[[12 + 54, 76/9.0], [56 * 76 / 2, 2.65/43]]");
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
-	
+
+	/* nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
 	/* nm = node_manager(ctx, "2.987 / 7 + 59.45");
 
 	std::cout << "==============" << std::endl;
