@@ -11,6 +11,8 @@ using namespace zhetapi;
 
 Engine *ctx = new Engine();
 
+Pardon pardon;
+
 int main()
 {
 	node_manager nm;
@@ -18,10 +20,19 @@ int main()
 	// Test factorial
 	// nm = node_manager(ctx, "x++", {"x"});
 	// nm = node_manager(ctx, "x[10]", {"x"});
-	nm = node_manager(ctx, "x < 12 || x > 60", {"x"});
+	/* nm = node_manager(ctx, "x + 3", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	// Args veq = eq_split("x=x+3");
+
+	// cout << "veq[0] = " << veq[0] << endl;
+	// cout << "veq[1] = " << veq[1] << endl;
+	nm = node_manager(ctx, "+3.43", {"x"}); // cc_run("x=x+3", ctx, {"x"}, pardon);
+
+	std::cout << "Tree:" << std::endl;
 	nm.print();
 
 	/* nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");

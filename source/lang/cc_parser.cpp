@@ -69,6 +69,10 @@ node_manager cc_run_assignment(
 		nm.print(); */
 	} else {
 		nm = node_manager(ctx, veq[n - 1], args, pardon);
+
+		/* std::cout << "veq[n - 1] = " << veq[n - 1] << std::endl;
+		std::cout << "Second branch:" << std::endl;
+		nm.print(); */
 	}
 
 	out.append(nm);
@@ -140,12 +144,27 @@ node_manager cc_run(const std::string &cache,
 		const Args &args,
 		Pardon &pardon)
 {
-	std::vector <std::string> veq = eq_split(cache);
+	std::cout << "Compiling as tree: " << cache << std::endl;
 
-	if (veq.size() > 1)
-		return cc_run_assignment(veq, context, args, pardon);
+	Args veq = eq_split(cache);
+	for (auto str : veq)
+		std::cout << "\t" << str << std::endl;
 
-	return cc_run_normal(cache, context, args, pardon);
+	if (veq.size() > 1) {
+		auto nm = cc_run_assignment(veq, context, args, pardon);
+
+		std::cout << "Tree:" << std::endl;
+		nm.print();
+
+		return nm;
+	}
+
+	auto nm = cc_run_normal(cache, context, args, pardon);
+
+	std::cout << "Tree:" << std::endl;
+	nm.print();
+
+	return nm;
 }
 
 node_manager cc_parse(Feeder *feeder,

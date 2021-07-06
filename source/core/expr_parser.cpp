@@ -83,10 +83,10 @@ parser::parser(Engine *ctx)
 	_pre_operations = _pre_decr | _pre_incr;
 
 	// Type parsers (real can be integer as well)
-	_integer = boost::spirit::qi::long_long;
+	_integer = boost::spirit::qi::ulong_long;
 
 	_pure_real = boost::spirit::qi::real_parser
-		<R, boost::spirit::qi::strict_real_policies <R>> ();
+		<R, boost::spirit::qi::strict_ureal_policies <R>> ();
 
 	_real = _pure_real | _integer;
 
@@ -254,7 +254,18 @@ parser::parser(Engine *ctx)
 
 	// Terms: series of factors under multiplication or division
 	_term = (
-		(_factor >> _term_operation >> _term) [
+		(_plus >> _term) [
+			_val = _2
+		]
+
+		// TODO: add a constant for -1
+		| (_minus >> _term) [
+			_val = construct <node> (
+				_new_oph("*"), _2, node(new OpZ(-1))
+			)
+		]
+
+		| (_factor >> _term_operation >> _term) [
 			_val = construct <node> (_2, _1, _3)
 		]
 
@@ -284,7 +295,7 @@ parser::parser(Engine *ctx)
 
 	// Debugging name information
 	_integer.name("Integer parser");
-	_pure_real.name("Pure rule (decimal) parser");
+	_pure_real.name("Pure real (decimal) parser");
 	_real.name("Real parser");
 	_collection.name("Collection parser");
 	_identifier.name("Indentifier parser");
@@ -296,19 +307,25 @@ parser::parser(Engine *ctx)
 	_term.name("Term");
 	_start.name("Start");
 
+	_plus.name("Plus");
+	_times.name("Times");
+
 	// Confirming debug
-	// debug(_integer);
-	// debug(_pure_real);
+	debug(_integer);
+	debug(_pure_real);
 	// debug(_real);
-	debug(_collection);
+	// debug(_collection);
 	// debug(_identifier);
 
-	debug(_operand);
-	debug(_closed_factor);
-	debug(_full_factor);
-	debug(_factor);
-	debug(_term);
-	debug(_start);
+	// debug(_operand);
+	// debug(_closed_factor);
+	// debug(_full_factor);
+	// debug(_factor);
+	// debug(_term);
+	// debug(_start);
+
+	// debug(_plus);
+	// debug(_times);
 
 #endif
 }
