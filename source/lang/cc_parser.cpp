@@ -144,27 +144,11 @@ node_manager cc_run(const std::string &cache,
 		const Args &args,
 		Pardon &pardon)
 {
-	std::cout << "Compiling as tree: " << cache << std::endl;
-
 	Args veq = eq_split(cache);
-	for (auto str : veq)
-		std::cout << "\t" << str << std::endl;
+	if (veq.size() > 1)
+		return cc_run_assignment(veq, context, args, pardon);
 
-	if (veq.size() > 1) {
-		auto nm = cc_run_assignment(veq, context, args, pardon);
-
-		std::cout << "Tree:" << std::endl;
-		nm.print();
-
-		return nm;
-	}
-
-	auto nm = cc_run_normal(cache, context, args, pardon);
-
-	std::cout << "Tree:" << std::endl;
-	nm.print();
-
-	return nm;
+	return cc_run_normal(cache, context, args, pardon);
 }
 
 node_manager cc_parse(Feeder *feeder,

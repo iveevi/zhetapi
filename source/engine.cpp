@@ -26,8 +26,8 @@ Engine::Engine(bool defaults) : engine_base()
 Engine::Engine(const Engine &other)
 		: engine_base(other),
 		_stack(other._stack),
-		_reg_table(other._reg_table),
 		_alg_table(other._alg_table),
+		_reg_table(other._reg_table),
 		_ftr_table(other._ftr_table),
 		_var_table(other._var_table) {}
 
@@ -44,6 +44,12 @@ Engine &Engine::operator=(const Engine &other)
 	}
 
 	return *this;
+}
+
+Engine::~Engine()
+{
+	for (auto pair : _var_table)
+		delete pair.second;
 }
 
 // Methods
@@ -137,7 +143,8 @@ Token *Engine::get(const std::string &str)
 		return _alg_table[str].copy();
 	
 	if (_reg_table.count(str))
-		return _reg_table[str].copy();
+		return &(_reg_table[str]);
+	//	return _reg_table[str].copy();
 
 	// Return modifiable references (TODO: do the same with others)
 	if (_var_table.count(str))

@@ -30,6 +30,8 @@ public:
 
 	Engine &operator=(const Engine &);
 
+	~Engine();
+
 	// List all symbols
 	Args symbol_list() const;
 

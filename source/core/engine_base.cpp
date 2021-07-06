@@ -171,12 +171,23 @@ namespace zhetapi {
 			}									\
 	});
 
-
 // TODO: put this constructor in another file
 engine_base::engine_base()
+	: _universal({
+		{"==", new operation(
+			"==", "$1 == $2", 2,
+			[](const std::vector <Token *> &ins) {
+				return new Operand <bool> (tokcmp(ins[0], ins[1]));
+			})
+		},
+		{"!=", new operation(
+			"!=", "$1 != $2", 2,
+			[](const std::vector <Token *> &ins) {
+				return new Operand <bool> (!tokcmp(ins[0], ins[1]));
+			})
+		}
+	})
 {
-	// TODO: add an ID or TYPE operation
-	
 	std::vector <std::pair <std::pair <std::string, std::vector <std::type_index>>, Token *>> ops;
 
 	//////////////////////////////////////////
@@ -434,31 +445,6 @@ engine_base::engine_base()
 	
 	_add_binary_operation_ftr(binom, Z, Z, Z, utility::integral_binom(a->get(), b->get()));
 
-	//////////////////////////////////////////
-	// Boolean operations
-	//////////////////////////////////////////
-
-	// Add a "variant" type
-
-	// == and != operators
-	_universal["=="] = new operation(
-		"==",
-		"$1 == $2",
-		2,
-		[](const std::vector <Token *> &ins) {
-			return new Operand <bool> (tokcmp(ins[0], ins[1]));
-		}
-	);
-
-	_universal["!="] = new operation(
-		"!=",
-		"$1 != $2",
-		2,
-		[](const std::vector <Token *> &ins) {
-			return new Operand <bool> (!tokcmp(ins[0], ins[1]));
-		}
-	);
-
 	// Make these universal operations
 	_add_binary_operation(>, Z, Z, B);
 	_add_binary_operation(>, R, R, B);
@@ -513,6 +499,9 @@ engine_base::~engine_base()
 		for (auto id : overload_list.second)
 			delete id.second;
 	}
+
+	for (auto pair : _universal)
+		delete pair.second;
 }
 
 Token *engine_base::compute(

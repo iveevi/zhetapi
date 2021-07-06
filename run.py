@@ -22,7 +22,7 @@ modes = {
     'cuda-gdb': 'cuda-gdb ',
     'warn': './',
     'codecov': './',
-    'valgrind': 'valgrind --leak-check=full --track-origins=yes ./',
+    'valgrind': 'valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./',
     'profile': 'valgrind --tool=callgrind --callgrind-out-file=callgrind.out ./'
 }
 
