@@ -75,11 +75,6 @@ Token *Dictionary::index(Token *tptr, bool mref)
 	return _table[tptr];
 }
 
-uint8_t Dictionary::id() const
-{
-	return get_zhp_id(Dictionary);
-}
-
 Token *Dictionary::copy() const
 {
 	return new Dictionary(_table);

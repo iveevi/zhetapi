@@ -338,6 +338,9 @@ static OpZ *check_while(Feeder *feeder,
 		nwhile.set_label(l_while_loop);
 		nwhile.append(ncond);
 		nwhile.append(nloop);
+		
+		/* std::cout << "while loop:" << std::endl;
+		nwhile.print(); */
 
 		nwhile.value(ctx);
 

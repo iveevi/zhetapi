@@ -146,11 +146,6 @@ Token::type Module::caller() const
 	return Token::token_module;
 }
 
-uint8_t Module::id() const
-{
-	return zhp_id <Module> ();
-}
-
 std::string Module::dbg_str() const
 {
 	return "module-\"" + _name + "\"";

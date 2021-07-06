@@ -18,16 +18,11 @@ int main()
 	// Test factorial
 	// nm = node_manager(ctx, "x++", {"x"});
 	// nm = node_manager(ctx, "x[10]", {"x"});
-	/* nm = node_manager(ctx, "[[12 + 54, 76/9.0], [56 * 76 / 2, 2.65/43]]");
+	nm = node_manager(ctx, "x < 12 || x > 60", {"x"});
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
-	nm.print(); */
-
-	Args veq = eq_split("x %= 65");
-
-	cout << "veq[0] = " << veq[0] << endl;
-	cout << "veq[1] = " << veq[1] << endl;
+	nm.print();
 
 	/* nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
 

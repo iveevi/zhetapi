@@ -223,6 +223,11 @@ parser::parser(Engine *ctx)
 			_val = construct <node> (_2, _1, _3)
 		]
 
+		// Relax the grammar here, allows for garbage like foo.23
+		| (_closed_factor >> _attribute >> _closed_factor) [
+			_val = construct <node> (_2, _1, _3)
+		]
+
 		| (_closed_factor >> '[' >> _start >> ']') [
 			_val = construct <node> (_new_oph("[]"), _1, _2)
 		]

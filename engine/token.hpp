@@ -17,6 +17,8 @@ namespace zhetapi {
 class Engine;
 class MethodTable;
 
+// TODO: clean this file and its comments
+
 /** 
  * @brief The basic unit of computation for the ZHP scripting language and
  * framework.
@@ -24,24 +26,8 @@ class MethodTable;
 class Token {
 	MethodTable *_mtable = nullptr;
 public:
-	/*
-	 * TODO: make this redundant
-	 * Codes used to identify the Token, more on the is presented
-	 * below. Should not be used by the user.
-	 *
-	 * Codes:
-	 * 	opd - Operand
-	 * 	oph - operation (place holder)
-	 * 	opn - operation
-	 * 	var - variable
-	 * 	vrh - variable (place holder)
-	 * 	vcl - variable cluster (place holder)
-	 * 	ftn - function
-	 * 	ndr - node reference
-	 *	ndd - node differential
-	 *	reg - engine registrable
-	 * 	wld - wildcard
-	 */
+	// Keep for this release
+	// Use more concise names (also refactor to Type)
 	enum type {
 		undefined,
 		alg,
@@ -84,7 +70,6 @@ public:
 	 * choose what to do with different Tokens from other classes.
 	 */
 	virtual type caller() const;
-	virtual uint8_t id() const;
 
 	/*
 	 * Returns a representation of the Token, regardless of its

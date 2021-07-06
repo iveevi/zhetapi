@@ -43,7 +43,6 @@ public:
 	virtual Token *index(Token *, bool) override;
 
 	// Inherited from Token
-	virtual uint8_t id() const override;
 	virtual Token *copy() const override;
 	virtual type caller() const override;
 	virtual std::string dbg_str() const override;

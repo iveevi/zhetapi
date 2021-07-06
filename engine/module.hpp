@@ -40,7 +40,6 @@ public:
 
 	// Virtual functions
 	virtual type caller() const override;
-	virtual uint8_t id() const override;
 	virtual std::string dbg_str() const override;
 	virtual Token *copy() const override;
 	virtual bool operator==(Token *) const override;

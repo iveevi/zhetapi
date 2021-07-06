@@ -57,12 +57,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 	return os;
 }
 
-// Defaulting virtual functions
-uint8_t Token::id() const
-{
-	return 0;
-}
-
 Token::type Token::caller() const
 {
 	return undefined;

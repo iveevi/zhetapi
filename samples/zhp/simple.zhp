@@ -1,7 +1,14 @@
-i = 0
-while (i < 12) {
-	println("i = ", i)
+l = {}
+x = 0
 
-	i += 5
-	i %= 11
+i = 0
+n = 0
+while (i < 10) {
+	l.append(i)
+	x = x + i * i
+	n = n + 3
+	i++
 }
+
+println("final x = ", x)
+println("~operation = ", n)

@@ -29,7 +29,6 @@ public:
 	DisjointSet(const std::string &, Permit);
 
 	// Inherited from Token
-	virtual uint8_t id() const override;
 	virtual Token *copy() const override;
 	// virtual Token::type caller() const override;
 	virtual std::string dbg_str() const override;
@@ -54,7 +53,6 @@ public:
 	bool present(Token *) const;
 
 	// Inherited from Token
-	virtual uint8_t id() const override;
 	virtual Token *copy() const override;
 	// virtual Token::type caller() const override;
 	virtual std::string dbg_str() const override;
