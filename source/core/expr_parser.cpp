@@ -110,6 +110,16 @@ parser::parser(Engine *ctx)
 		_val = construct <MatR> (_1)
 	];
 
+	// Generic vectors and matrices
+	_vector_expr = _start % ',';
+
+	_partial_matrix_expr = ('[' >> (_start % ',') >> ']') [
+		_val = construct <node> (nullptr, l_partial_matrix_expr, _1)
+	];
+
+	_matrix_expr = _partial_matrix_expr % ',';
+
+	// Quoted strings
 	_string = +(_esc | (char_ - '\"'));
 
 	// Identifier (TODO: keep outside this scope later)
@@ -158,6 +168,16 @@ parser::parser(Engine *ctx)
 
 		| ('[' >> _matrix_real >> ']') [
 			_val = construct <node> (new_ <OpMatR> (_1))
+		]
+
+		// Matrix of expressions
+		| ('[' >> _matrix_expr >> ']') [
+			_val = construct <node> (nullptr, l_matrix_expr, _1)
+		]
+
+		// Vector of expressions
+		| ('[' >> _vector_expr >> ']') [
+			_val = construct <node> (nullptr, l_vector_expr, _1)
 		]
 	);
 

@@ -78,6 +78,9 @@ private:
 	Rule <Siter, VecR (), Space>		_vector_real;
 	Rule <Siter, MatZ (), Space>		_matrix_integer;
 	Rule <Siter, MatR (), Space>		_matrix_real;
+	Rule <Siter, V1 <node> (), Space>	_vector_expr;
+	Rule <Siter, node (), Space>		_partial_matrix_expr;
+	Rule <Siter, V1 <node> (), Space>	_matrix_expr;
 	Rule <Siter, Token *(), Space>		_collection;
 	NSRule <Siter, std::string ()>		_string;
 	NSRule <Siter, std::string ()>		_identifier;
@@ -109,22 +112,6 @@ private:
 	Rule <Siter, Token *(), Space>		_pre_decr;
 	Rule <Siter, Token *(), Space>		_pre_incr;
 	Rule <Siter, Token *(), Space>		_times;
-
-	// Type parsers
-	NSRule <Siter, std::string ()>		_str;
-
-	Rule <Siter, CmpZ (), Space>		_cz;
-	Rule <Siter, CmpR (), Space>		_cr;
-
-	Rule <Siter, V1 <Z> (), Space>		_vz;
-	Rule <Siter, V1 <R> (), Space>		_vr;
-	Rule <Siter, V1 <CmpZ> (), Space>	_vcz;
-	Rule <Siter, V1 <CmpR> (), Space>	_vcr;
-
-	Rule <Siter, V2 <Z> (), Space>		_mz;
-	Rule <Siter, V2 <R> (), Space>		_mr;
-	Rule <Siter, V2 <CmpZ> (), Space>	_mcz;
-	Rule <Siter, V2 <CmpR> (), Space>	_mcr;
 public:
 	parser(Engine *ctx);
 };

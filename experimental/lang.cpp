@@ -14,13 +14,13 @@ int main()
 {
 	node_manager nm;
 
-	/* nm = node_manager(ctx, "2 / 7");
+	nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
 	nm.print();
 	
-	nm = node_manager(ctx, "2.987 / 7 + 59.45");
+	/* nm = node_manager(ctx, "2.987 / 7 + 59.45");
 
 	std::cout << "==============" << std::endl;
 	std::cout << "Compiled tree:" << std::endl;
