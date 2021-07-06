@@ -1,6 +1,7 @@
-include testing/api
+i = 0
+while (i < 12) {
+	println("i = ", i)
 
-from classes import test_collection, test_dictionary
-
-test_collection()
-test_dictionary()
+	i += 5
+	i %= 11
+}

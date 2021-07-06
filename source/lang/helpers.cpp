@@ -91,12 +91,27 @@ Args eq_split(const std::string &str)
 	for (size_t i = 0; i < n; i++) {
 		if (!quoted) {
 			bool ignore = false;
+			bool opeq = false;
 
+			// TODO: clean?
 			if (pc == '>' || pc == '<' || pc == '!'
 				|| (i > 0 && str[i - 1] == '='))
 				ignore = true;
+			
+			if (pc == '+' || pc == '-' || pc == '*' || pc == '@'
+				|| pc == '/' || pc == '%'
+				|| pc == '&' || pc == '|'
+				|| (i > 0 && str[i - 1] == '='))
+				opeq = true;
 
-			if (!ignore && str[i] == '=') {
+			if (opeq && str[i] == '=') {
+				// Grab the rest of the string
+
+				// TODO: error handling
+				// if (out.size()) throw
+				tmp = tmp.substr(0, tmp.length() - 1);
+				return {tmp, tmp + pc + '(' + str.substr(i + 1) + ')'};
+			} if (!ignore && str[i] == '=') {
 				if (i < n - 1 && str[i + 1] == '=') {
 					tmp += "==";
 				} else if (!tmp.empty()) {
