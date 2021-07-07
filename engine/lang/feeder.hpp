@@ -8,6 +8,7 @@
 
 // Engine headers
 #include "../core/common.hpp"
+#include "colors.hpp"
 
 namespace zhetapi {
 
@@ -18,9 +19,18 @@ bool is_terminal(char);
 // TODO: needs a line method
 class Feeder {
 	// TODO: put index here
+
+	// Source location (unnamed by default)
+	std::string _location;
 public:
+	Feeder(const std::string & = "unnamed");
+
+	const std::string &location() const;
+
 	// State type
 	using State = std::pair <char, int>;
+
+	virtual size_t line() const = 0;
 
 	// TODO: dont forget to flush with EOF
 	virtual char feed() = 0;	// Reads, stores, returns and moves
@@ -54,13 +64,19 @@ class StringFeeder : public Feeder {
 	// constructors, etc)
 	std::string	_source;
 	size_t		_index	= 0;
+	size_t		_line	= 1;
+
 	char		_end	= EOF;
+
+	// TODO: what is this for?
 	bool		_second	= false;
 	int		_count	= 1;		// For ending characters (eg. '{')
 	
 	StringFeeder(const std::string &, size_t, char = EOF);
 public:
-	StringFeeder(const std::string &);
+	StringFeeder(const std::string &, const std::string & = "unnamed");
+
+	size_t line() const override;
 	
 	char feed() override;
 	char peek() override;

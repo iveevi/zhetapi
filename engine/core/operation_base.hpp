@@ -117,6 +117,10 @@ public:
 	binary_operation(in1, in2, out, str),				\
 	binary_operation(in2, in1, out, str)
 
+#define het_binary_operation_ftn(in1, in2, out, ftn)			\
+	binary_operation_ftn(in1, in2, out, ftn),			\
+	binary_operation_ftn(in2, in1, out, ftn)
+
 #define casted_binary_operation(in1, in2, out, str)			\
 	{								\
 		{typeid(Operand <in1>), typeid(Operand <in2>)},		\

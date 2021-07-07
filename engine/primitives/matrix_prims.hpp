@@ -683,7 +683,7 @@ template <class T>
 Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 {
 	Matrix <T> c = a;
-	c += b;
+	c -= b;
 	return c;
 }
 

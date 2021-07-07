@@ -48,6 +48,7 @@ set(ZHETAPI_SOURCE
 
 	source/lang/cc_keywords.cpp
 	source/lang/cc_parser.cpp
+	source/lang/colors.cpp
 	source/lang/compilation.cpp
 	source/lang/default_feeders.cpp
 	source/lang/error_handling.cpp

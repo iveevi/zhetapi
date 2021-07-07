@@ -132,6 +132,10 @@ long double lg(long double x) {return std::log(x)/std::log(2);}
 long double csc(long double x) {return 1.0/std::sin(x);}
 long double sec(long double x) {return 1.0/std::cos(x);}
 long double cot(long double x) {return 1.0/std::tan(x);}
+long double csch(long double x) {return 1.0/std::sinh(x);}
+long double sech(long double x) {return 1.0/std::cosh(x);}
+long double coth(long double x) {return 1.0/std::tanh(x);}
+long double log(long double x, long double y) {return std::log(y)/std::log(x);}
 
 // Operations
 std::unordered_map <std::string, Overload> operations {
@@ -146,7 +150,29 @@ std::unordered_map <std::string, Overload> operations {
 		casted_matrix_binary_operation_set(-)
 	}},
 	{"*", {casted_binary_operation_set(*)}},
-	{"/", {casted_binary_operation_set(/)}},
+	{"/", {
+		casted_binary_operation(Z, Z, Q, /),
+		casted_binary_operation(Q, Q, Q, /),
+		casted_binary_operation(R, R, R, /),
+		casted_binary_operation(CmpZ, CmpZ, CmpQ, /),
+		casted_binary_operation(CmpQ, CmpQ, CmpQ, /),
+		casted_binary_operation(CmpR, CmpR, CmpR, /),
+		het_casted_binary_operation(Z, Q, Q, /),
+		het_casted_binary_operation(Z, R, R, /),
+		het_casted_binary_operation(Z, CmpZ, CmpZ, /),
+		het_casted_binary_operation(Z, CmpQ, CmpQ, /),
+		het_casted_binary_operation(Z, CmpR, CmpR, /),
+		het_casted_binary_operation(Q, R, R, /),
+		het_casted_binary_operation(Q, CmpZ, CmpQ, /),
+		het_casted_binary_operation(Q, CmpQ, CmpQ, /),
+		het_casted_binary_operation(Q, CmpR, CmpR, /),
+		het_casted_binary_operation(R, CmpZ, CmpR, /),
+		het_casted_binary_operation(R, CmpQ, CmpR, /),
+		het_casted_binary_operation(R, CmpR, CmpR, /),
+		het_casted_binary_operation(CmpZ, CmpQ, CmpQ, /),
+		het_casted_binary_operation(CmpZ, CmpR, CmpR, /),
+		het_casted_binary_operation(CmpQ, CmpR, CmpR, /)
+	}},
 	{"^", {
 		binary_operation_ftn(Z, Z, Z, pow),
 		binary_operation_ftn(Q, Q, R, pow),
@@ -206,17 +232,64 @@ std::unordered_map <std::string, Overload> operations {
 		casted_unary_operation_ftn(Q, R, cot),
 		casted_unary_operation_ftn(R, R, cot)
 	}},
+	{"sinh", {
+		casted_unary_operation_ftn(Z, R, std::sinh),
+		casted_unary_operation_ftn(Q, R, std::sinh),
+		casted_unary_operation_ftn(R, R, std::sinh)
+	}},
+	{"cosh", {
+		casted_unary_operation_ftn(Z, R, std::cosh),
+		casted_unary_operation_ftn(Q, R, std::cosh),
+		casted_unary_operation_ftn(R, R, std::cosh)
+	}},
+	{"tanh", {
+		casted_unary_operation_ftn(Z, R, std::tanh),
+		casted_unary_operation_ftn(Q, R, std::tanh),
+		casted_unary_operation_ftn(R, R, std::tanh)
+	}},
+	{"csch", {
+		casted_unary_operation_ftn(Z, R, csch),
+		casted_unary_operation_ftn(Q, R, csch),
+		casted_unary_operation_ftn(R, R, csch)
+	}},
+	{"sech", {
+		casted_unary_operation_ftn(Z, R, sech),
+		casted_unary_operation_ftn(Q, R, sech),
+		casted_unary_operation_ftn(R, R, sech)
+	}},
+	{"coth", {
+		casted_unary_operation_ftn(Z, R, coth),
+		casted_unary_operation_ftn(Q, R, coth),
+		casted_unary_operation_ftn(R, R, coth)
+	}},
 	{"ln", {
 		casted_unary_operation_ftn(Z, R, std::log),
 		casted_unary_operation_ftn(Q, R, std::log),
 		casted_unary_operation_ftn(R, R, std::log)
 	}},
 	{"lg", {
-		// TODO: add a static lg function
 		casted_unary_operation_ftn(Z, R, lg),
 		casted_unary_operation_ftn(Q, R, lg),
 		casted_unary_operation_ftn(R, R, lg)
-	}}
+	}},
+	{"log", {
+		casted_unary_operation_ftn(Z, R, std::log10),
+		casted_unary_operation_ftn(Q, R, std::log10),
+		casted_unary_operation_ftn(R, R, std::log10),
+		het_binary_operation_ftn(Z, Q, R, log),
+		het_binary_operation_ftn(Z, R, R, log),
+		het_binary_operation_ftn(Q, R, R, log)
+	}},
+	{{"int"}, {
+		unary_operation_ftn(Z, Z, int),
+		unary_operation_ftn(Q, Z, int),
+		unary_operation_ftn(R, Z, int)
+	}},
+	{{"float"}, {
+		unary_operation_ftn(Z, R, (long double)),
+		unary_operation_ftn(Q, R, (long double)),
+		unary_operation_ftn(R, R, (long double))
+	}},
 };
 
 }
