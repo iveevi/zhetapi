@@ -35,8 +35,8 @@ public:
 	bool is_real() const;
 
 	// Operators
-	operator double() const;
-	operator int() const;
+	operator long double() const;
+	operator long long int() const;
 
 	// Functional Methods
 	Complex normalize() const;
@@ -95,22 +95,16 @@ bool Complex <T> ::is_real() const
 }
 
 template <class T>
-Complex <T> ::operator double() const
+Complex <T> ::operator long double() const
 {
-	// std::cout << "Zcompex conv: Here" << std::endl;
-	return (double) this->real();
+	return (long double) this->real();
 }
 
 template <class T>
-Complex <T> ::operator int() const
+Complex <T> ::operator long long int() const
 {
-	// std::cout << "Zcompex conv: Here" << std::endl;
-	return (int) this->real();
+	return (long long int) this->real();
 }
-
-//////////////////////////////////////////
-// Functional Methods
-//////////////////////////////////////////
 
 template <class T>
 Complex <T> Complex <T> ::normalize() const
@@ -118,9 +112,6 @@ Complex <T> Complex <T> ::normalize() const
 	return *this/magnitude();
 }
 
-//////////////////////////////////////////
-// Output Methods
-//////////////////////////////////////////
 template <class T>
 std::string to_string(const Complex <T> &z)
 {

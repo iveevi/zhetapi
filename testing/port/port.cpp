@@ -3,6 +3,7 @@
 #define THREADS	8
 // #define DEBUG_EXCEPTION
 #define PASSTHROUGH_EXCEPTION
+// #define HANDLE_SEGFAULT
 
 typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
@@ -39,6 +40,8 @@ vector <singlet> rig {
 
 vector <singlet> failed;
 
+#ifdef HANDLE_SEGFAULT
+
 // Segfault handler
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 {
@@ -46,12 +49,16 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 	exit(-1);
 }
 
+#endif
+
 // Timers
 tclk clk;
 
 // Main program
 int main()
 {
+#ifdef HANDLE_SEGFAULT
+
 	// Setup segfault handler
 	struct sigaction sa;
 
@@ -63,6 +70,8 @@ int main()
 	sa.sa_flags = SA_SIGINFO;
 
 	sigaction(SIGSEGV, &sa, NULL);
+
+#endif
 
 	// Setup times
 	tpoint epoch = clk.now();

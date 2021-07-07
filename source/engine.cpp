@@ -48,8 +48,8 @@ Engine &Engine::operator=(const Engine &other)
 
 Engine::~Engine()
 {
-	for (auto pair : _var_table)
-		delete pair.second;
+	/* for (auto pair : _var_table)
+		delete pair.second; */
 }
 
 // Methods

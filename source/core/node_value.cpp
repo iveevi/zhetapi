@@ -1,7 +1,7 @@
 #include "../../engine/core/common.hpp"
 #include "../../engine/engine.hpp"
 #include "../../engine/core/node_manager.hpp"
-#include <stdexcept>
+#include "../../engine/core/operation_base.hpp"
 
 namespace zhetapi {
 
@@ -400,7 +400,19 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	Targs values = proper_args(ctx, tree);
 
 	if (t == Token::oph) {
-		tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
+		try {
+			// tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
+			tptr = detail::compute((tree.cast <operation_holder> ())->rep, values);
+		} catch (const detail::bad_overload &e) {
+			std::cout << "FIXME: Error evaluating tree:" << std::endl;
+			tree.print();
+			std::cout << "values:" << std::endl;
+			for (auto tok : values)
+				std::cout << "\ttok = " << tok->dbg_str() << std::endl;
+
+			std::cout << e.what() << std::endl;
+			abort();
+		}
 
 		if (tree.label() == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();

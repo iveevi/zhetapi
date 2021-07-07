@@ -35,6 +35,7 @@ set(ZHETAPI_SOURCE
 	source/core/node_value.cpp
 	source/core/object.cpp
 	source/core/operation.cpp
+	source/core/operation_base.cpp
 	source/core/operation_holder.cpp
 	source/core/primitive.cpp
 	source/core/primoptns.cpp
