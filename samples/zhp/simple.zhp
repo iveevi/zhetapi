@@ -14,3 +14,4 @@ println("final x = ", x)
 println("~operation = ", n)
 
 println([3, 4, 5] + [4.76, 6, 7])
+println([[3, 4], [5, 6]] + [[6.32, 5.78], [6, 8]])

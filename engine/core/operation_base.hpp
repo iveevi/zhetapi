@@ -63,6 +63,28 @@ public:
 		}							\
 	}
 
+#define unary_operation_ftn(in, out, ftn)				\
+	{								\
+		{typeid(Operand <in>)},					\
+		[](const Targs &args) {					\
+			Operand <in> *a = dynamic_cast			\
+				<Operand <in> *> (args[0]);		\
+									\
+			return new Operand <out> (ftn(a->get()));	\
+		}							\
+	}
+
+#define casted_unary_operation_ftn(in, out, ftn)			\
+	{								\
+		{typeid(Operand <in>)},					\
+		[](const Targs &args) {					\
+			Operand <in> *a = dynamic_cast			\
+				<Operand <in> *> (args[0]);		\
+									\
+			return new Operand <out> (ftn((out) a->get()));	\
+		}							\
+	}
+
 #define binary_operation(in1, in2, out, str)				\
 	{								\
 		{typeid(Operand <in1>), typeid(Operand <in2>)},		\

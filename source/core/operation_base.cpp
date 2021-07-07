@@ -127,13 +127,24 @@ std::unordered_map <std::string, Operation> universals {
 	}
 };
 
+// Functions for the operations
+long double lg(long double x) {return std::log(x)/std::log(2);}
+long double csc(long double x) {return 1.0/std::sin(x);}
+long double sec(long double x) {return 1.0/std::cos(x);}
+long double cot(long double x) {return 1.0/std::tan(x);}
+
 // Operations
 std::unordered_map <std::string, Overload> operations {
 	{"+", {
 		casted_binary_operation_set(+),
-		casted_vector_binary_operation_set(+)
+		casted_vector_binary_operation_set(+),
+		casted_matrix_binary_operation_set(+)
 	}},
-	{"-", {casted_binary_operation_set(-)}},
+	{"-", {
+		casted_binary_operation_set(-),
+		casted_vector_binary_operation_set(-),
+		casted_matrix_binary_operation_set(-)
+	}},
 	{"*", {casted_binary_operation_set(*)}},
 	{"/", {casted_binary_operation_set(/)}},
 	{"^", {
@@ -164,6 +175,47 @@ std::unordered_map <std::string, Overload> operations {
 		unary_operation_blank(Z, Z, a->get() - 1),
 		unary_operation_blank(Q, Q, a->get() - 1),
 		unary_operation_blank(R, R, a->get() - 1)
+	}},
+	{"sin", {
+		casted_unary_operation_ftn(Z, R, std::sin),
+		casted_unary_operation_ftn(Q, R, std::sin),
+		casted_unary_operation_ftn(R, R, std::sin)
+	}},
+	{"cos", {
+		casted_unary_operation_ftn(Z, R, std::cos),
+		casted_unary_operation_ftn(Q, R, std::cos),
+		casted_unary_operation_ftn(R, R, std::cos)
+	}},
+	{"tan", {
+		casted_unary_operation_ftn(Z, R, std::tan),
+		casted_unary_operation_ftn(Q, R, std::tan),
+		casted_unary_operation_ftn(R, R, std::tan)
+	}},
+	{"csc", {
+		casted_unary_operation_ftn(Z, R, csc),
+		casted_unary_operation_ftn(Q, R, csc),
+		casted_unary_operation_ftn(R, R, csc)
+	}},
+	{"sec", {
+		casted_unary_operation_ftn(Z, R, sec),
+		casted_unary_operation_ftn(Q, R, sec),
+		casted_unary_operation_ftn(R, R, sec)
+	}},
+	{"cot", {
+		casted_unary_operation_ftn(Z, R, cot),
+		casted_unary_operation_ftn(Q, R, cot),
+		casted_unary_operation_ftn(R, R, cot)
+	}},
+	{"ln", {
+		casted_unary_operation_ftn(Z, R, std::log),
+		casted_unary_operation_ftn(Q, R, std::log),
+		casted_unary_operation_ftn(R, R, std::log)
+	}},
+	{"lg", {
+		// TODO: add a static lg function
+		casted_unary_operation_ftn(Z, R, lg),
+		casted_unary_operation_ftn(Q, R, lg),
+		casted_unary_operation_ftn(R, R, lg)
 	}}
 };
 

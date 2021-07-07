@@ -41,6 +41,7 @@ class Vector;
 #ifndef __AVR	// Does not support AVR
 
 // Tensor_type operations
+// TODO: remove, useless
 template <class T>
 struct Vector_type : std::false_type {};
 

@@ -19,6 +19,7 @@
 namespace zhetapi {
 
 // TODO: add distinct coloring
+// TODO: replace with dearimgui
 
 /**
  * @brief A canvas that be used to graph functions, plot points, etc.

@@ -55,6 +55,7 @@ Vector <T> ::Vector(const Vector <A> &other)
 {
 	// TODO: Add a new function for this
 	// TODO: put this function into primitives
+	// TODO: use member initializer list
 	this->_array = new T[other.size()];
 	this->_rows = other.get_rows();
 	this->_cols = other.get_cols();
