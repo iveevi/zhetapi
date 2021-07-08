@@ -21,3 +21,6 @@ str = "frint lead
 println"
 
 println("str = ", str)
+
+println([3, 4]^T)
+println([[3.876, 4.43], [6.432, 7.324]]^T)

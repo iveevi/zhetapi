@@ -53,7 +53,8 @@ enum codes {
 	round_int,
 	floor_int,
 	ceil_int,
-	cast_int
+	cast_int,
+	transpose
 };
 
 extern std::string strcodes[];
@@ -72,7 +73,11 @@ struct operation_holder : public Token {
 	bool operator==(Token *) const override;
 
 	// Exceptions
-	class bad_operation {};
+	class bad_operation : public std::runtime_error {
+	public:
+		bad_operation(const std::string &str)
+			: std::runtime_error(str) {}
+	};
 };
 
 }

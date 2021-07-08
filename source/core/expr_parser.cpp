@@ -70,6 +70,7 @@ parser::parser(Engine *ctx)
 	_add_operation_symbol(_or, ||);
 	_add_operation_symbol(_plus, +);
 	_add_operation_symbol(_times, *);
+	_add_operation_symbol(_transpose, ^T);
 	_add_operation_heter_symbol(_post_decr, --, p--);
 	_add_operation_heter_symbol(_post_incr, ++, p++);
 	_add_operation_heter_symbol(_pre_decr, --, r--);
@@ -212,11 +213,13 @@ parser::parser(Engine *ctx)
 	);
 
 	// Full factors
-	_full_factor = (
-		// Prioritize the "in" operation to avoid it being interpreted as
-		// an identifier
+	_full_factor = (	
 		(_closed_factor >> "in" >> _full_factor) [
 			_val = construct <node> (nullptr, l_generator_in, _1, _2)
+		]
+
+		| (_closed_factor >> _transpose) [
+			_val = construct <node> (_2, _1)
 		]
 
 		| (_closed_factor >> _exponent >> _full_factor) [

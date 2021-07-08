@@ -106,6 +106,7 @@ private:
 	Rule <Siter, Token *(), Space>		_neq;
 	Rule <Siter, Token *(), Space>		_or;
 	Rule <Siter, Token *(), Space>		_plus;
+	Rule <Siter, Token *(), Space>		_transpose;
 	Rule <Siter, Token *(), Space>		_post_decr;
 	Rule <Siter, Token *(), Space>		_post_incr;
 	Rule <Siter, Token *(), Space>		_pre_decr;

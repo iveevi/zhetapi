@@ -14,7 +14,9 @@ TEST(compile_const_exprs)
 		"564", "7/5", "false", "\"my string\"",
 		"[1, 2, 3, 5, 8]", "[[1, 2, 3], [4, 5, 6]]",
 		// First come the binary operations
-		"7 + 5", "7 - 5", "7 * 5", "7 / 5"
+		"7 + 5", "7 - 5", "7 * 5", "7 / 5",
+		// Miscellaneous
+		"[3, 4, 5]^T", "[[1, 3], [4, 5]]^T"
 	};
 
 	// List of their values
@@ -24,7 +26,10 @@ TEST(compile_const_exprs)
 		new OpS("my string"), new OpVecZ(VecZ({1, 2, 3, 5, 8})),
 		new OpMatZ(MatZ({{1, 2, 3}, {4, 5, 6}})),
 		// Binary operations
-		new OpZ(12), new OpZ(2), new OpZ(35), new OpQ(Q(7, 5))
+		new OpZ(12), new OpZ(2), new OpZ(35), new OpQ(Q(7, 5)),
+		// Miscellaneous
+		new OpMatZ(MatZ {{3LL, 4LL, 5LL}}),
+		new OpMatZ({{1, 4}, {3, 5}})
 	};
 
 	// Comparing the values

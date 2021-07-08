@@ -1,4 +1,5 @@
 #include "../../engine/core/operation_base.hpp"
+#include "../../engine/std/combinatorial.hpp"
 
 namespace zhetapi {
 
@@ -290,6 +291,27 @@ std::unordered_map <std::string, Overload> operations {
 		unary_operation_ftn(Q, R, (long double)),
 		unary_operation_ftn(R, R, (long double))
 	}},
+	{{"!"}, {
+		unary_operation_ftn(Z, Z, utility::integral_factorial)
+	}},
+	{{"^T"}, {
+		unary_operation_blank(VecZ, MatZ, a->get().transpose()),
+		unary_operation_blank(VecQ, MatQ, a->get().transpose()),
+		unary_operation_blank(VecR, MatR, a->get().transpose()),
+		unary_operation_blank(MatZ, MatZ, a->get().transpose()),
+		unary_operation_blank(MatQ, MatQ, a->get().transpose()),
+		unary_operation_blank(MatR, MatR, a->get().transpose())
+	}},
+	{{"."}, {
+		binary_operation_ftn(VecZ, VecZ, Z, inner),
+		binary_operation_ftn(VecQ, VecQ, Q, inner),
+		binary_operation_ftn(VecR, VecR, R, inner),
+		binary_operation_ftn(VecCmpZ, VecCmpZ, CmpZ, inner),
+		binary_operation_ftn(VecCmpQ, VecCmpQ, CmpQ, inner),
+		binary_operation_ftn(VecCmpR, VecCmpR, CmpR, inner),
+		het_binary_operation_ftn(VecZ, VecQ, Q, inner),
+		het_binary_operation_ftn(VecZ, VecR, R, inner)
+	}}
 };
 
 }

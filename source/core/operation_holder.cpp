@@ -46,7 +46,8 @@ std::string strcodes[] = {
 	"round",
 	"floor",
 	"ceil",
-	"int"
+	"int",
+	"transpose"
 };
 
 // TODO: avoid overhead by using integer input (straight from the parser)
@@ -143,8 +144,10 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 		code = ceil_int;
 	else if (str == "int")
 		code = cast_int;
+	else if (str == "^T")
+		code = transpose;
 	else
-		throw bad_operation();
+		throw bad_operation(str);
 }
 
 Token::type operation_holder::caller() const
@@ -159,7 +162,7 @@ Token *operation_holder::copy() const
 	return new operation_holder(rep);
 }
 
-::std::string operation_holder::dbg_str() const
+std::string operation_holder::dbg_str() const
 {
 	return rep + " [" + strcodes[code] + "]";
 }

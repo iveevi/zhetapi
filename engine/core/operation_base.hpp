@@ -135,9 +135,27 @@ public:
 		}							\
 	}
 
+#define casted_binary_operation_ftn(in1, in2, out, ftn)			\
+	{								\
+		{typeid(Operand <in1>), typeid(Operand <in2>)},		\
+		[](const Targs &args) {					\
+			Operand <in1> *a = dynamic_cast			\
+				<Operand <in1> *> (args[0]);		\
+			Operand <in2> *b = dynamic_cast			\
+				<Operand <in2> *> (args[1]);		\
+									\
+			return new Operand <out>			\
+				(ftn(out(a->get()), out(b->get())));	\
+		}							\
+	}
+
 #define het_casted_binary_operation(in1, in2, out, str)			\
 	casted_binary_operation(in1, in2, out, str),			\
 	casted_binary_operation(in2, in1, out, str)
+
+#define het_casted_binary_operation_ftn(in1, in2, out, ftn)		\
+	casted_binary_operation_ftn(in1, in2, out, ftn),		\
+	casted_binary_operation_ftn(in2, in1, out, ftn)
 
 #define casted_binary_operation_set(str)				\
 	casted_binary_operation(Z, Z, Z, str),				\
