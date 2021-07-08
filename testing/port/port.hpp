@@ -35,12 +35,13 @@
 #include "../../engine/lang/feeder.hpp"
 
 #include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/operation_base.hpp"
 #include "../../engine/core/raw_types.hpp"
 #include "../../engine/core/collection.hpp"
 
 // Macros
 #define TEST(name)	bool name(ostringstream &oss, int cout)
-#define RIG(name)	{#name, &name}	
+#define RIG(name)	{#name, &name}
 
 // Namespaces
 using namespace std;

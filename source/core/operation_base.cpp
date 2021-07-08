@@ -11,10 +11,10 @@ Token *compute(const std::string &str, const Targs &args)
 	// Check presence in universal operation sets
 	if (universals.find(str) != universals.end())
 		return universals[str](args);
-	
+
 	if (operations.find(str) == operations.end())
 		throw bad_operation(str);
-	
+
 	// Generature the signature
 	Signature sig = gen_signature(args);
 	Overload ovld = operations[str];
@@ -23,7 +23,7 @@ Token *compute(const std::string &str, const Targs &args)
 	for (const auto &pair : ovld) {
 		if (pair.first.size() != sig.size())
 			continue;
-		
+
 		bool matches = true;
 		for (size_t i = 0; i < sig.size(); i++) {
 			if (sig[i] != pair.first[i]) {
@@ -36,8 +36,14 @@ Token *compute(const std::string &str, const Targs &args)
 		if (matches)
 			return pair.second(args);
 	}
-	
+
 	throw bad_overload(gen_overload_msg(sig, str));
+}
+
+bool present(const std::string &str)
+{
+	return (operations.find(str) != operations.end())
+		|| (universals.find(str) != universals.end());
 }
 
 std::string overload_catalog(const std::string &str)
@@ -63,7 +69,7 @@ std::string overload_catalog(const std::string &str)
 		tmp += ")";
 		if (i < ovld[i].first.size() - 1)
 			tmp += ", ";
-		
+
 		if (tmp.length() > linelen) {
 			tmp += "\n";
 
@@ -74,7 +80,7 @@ std::string overload_catalog(const std::string &str)
 
 	if (!tmp.empty())
 		out += "\t" + tmp;
-	
+
 	return out + "\n\t}";
 }
 
@@ -92,11 +98,11 @@ std::string gen_signature_str(const Signature &sig)
 	for (size_t i = 0; i < sig.size(); i++) {
 		// TODO: change types to detail
 		out += types::symbol(sig[i]);
-		
+
 		if (i < sig.size() - 1)
 			out += ", ";
 	}
-	
+
 	return out + ")";
 }
 
@@ -107,7 +113,7 @@ Signature gen_signature(const Targs &args)
 	for (const Token *tptr : args) {
 		if (!tptr)
 			throw bad_signature();
-		
+
 		sig.push_back(typeid(*tptr));
 	}
 

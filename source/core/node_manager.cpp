@@ -1,6 +1,7 @@
 #include "../../engine/engine.hpp"
 #include "../../engine/core/common.hpp"
 #include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/operation_base.hpp"
 
 namespace zhetapi {
 
@@ -52,7 +53,7 @@ node_manager::node_manager(Engine *context, const node &tree, const Args &args)
 
 	// Label the tree
 	label(_tree);
-	
+
 	rereference(_tree);
 
 	// Simplify
@@ -83,7 +84,7 @@ node_manager::node_manager(Engine *ctx, const std::string &str)
 
 	// Label the tree
 	label(_tree);
-	
+
 	// Simplify
 	simplify(ctx, _tree);
 	// cout << string(50, '=') << endl;
@@ -167,7 +168,7 @@ const node &node_manager::tree() const
 // Writing to a file
 void node_manager::write(std::ostream &os) const
 {
-	_tree.write(os);	
+	_tree.write(os);
 }
 
 // Properties
@@ -264,15 +265,15 @@ void node_manager::compress_branches(node &tree)
 {
 	if (tree.label() != l_sequential)
 		return;
-	
+
 	// Add a dummy node to flush
 	tree.append(node());
-	
+
 	int n;
 	int start;
 
 	start = -1;
-	
+
 	n = tree.child_count();
 	for (size_t i = 0; i < n; i++) {
 		switch (tree[i].label()) {
@@ -290,7 +291,7 @@ void node_manager::compress_branches(node &tree)
 		default:
 			if (start != -1)
 				create_branch(tree, start, i);
-			
+
 			start = -1;
 			break;
 		}
@@ -336,7 +337,7 @@ void node_manager::add_args(const std::vector <std::string> &args)
 
 		_refs.push_back(tmp);
 	}
-	
+
 	// Add the arguments
 	_params.insert(_params.end(), args.begin(), args.end());
 
@@ -381,6 +382,8 @@ void attribute_invert(node &ref)
 {
 	std::vector <node> unfolded {ref[0]};
 
+	std::cout << std::string(50, '=') << std::endl;
+	ref.print();
 	node current = ref[1];
 	while (true) {
 		operation_holder *ophptr = current.cast <operation_holder> ();
@@ -404,8 +407,6 @@ void attribute_invert(node &ref)
 				variable_cluster *vclptr = current.cast <variable_cluster> ();
 				lvalue *lv = new lvalue(vclptr->_cluster);
 				current.retokenize(lv);
-
-				delete lv;
 			}
 
 			unfolded.push_back(current);
@@ -414,17 +415,8 @@ void attribute_invert(node &ref)
 		}
 	}
 
-	/* using namespace std;
-	cout << string(50, '=') << endl;
-	cout << "UNFODLED:" << endl;
-	for (auto nd : unfolded)
-		nd.print();
-	cout << string(50, '=') << endl; */
-
-	operation_holder *atmptr = new operation_holder(".");
-
 	while (unfolded.size() > 1) {
-		unfolded[0] = node(atmptr->copy(), {
+		unfolded[0] = node(new operation_holder("."), {
 			unfolded[0],
 			unfolded[1]
 		});
@@ -434,8 +426,7 @@ void attribute_invert(node &ref)
 
 	ref = unfolded[0];
 
-	// Free resources
-	delete atmptr;
+	std::cout << std::string(50, '=') << std::endl;
 }
 
 void node_manager::expand(
@@ -469,7 +460,7 @@ node node_manager::expand(
 		const std::set <std::string> &pardon)
 {
 	typedef std::vector <std::pair <std::vector <node>, std::string>> ctx;
-		
+
 	ctx contexts;
 
 	contexts.push_back({{}, ""});
@@ -494,7 +485,7 @@ node node_manager::expand(
 
 		for (auto &pr : contexts) {
 			pr.second += str[i];
-		
+
 			auto itr = std::find(_params.begin(), _params.end(), pr.second);
 
 			size_t index = std::distance(_params.begin(), itr);
@@ -523,7 +514,7 @@ node node_manager::expand(
 
 			// TODO: must we wait till here to finish?
 			node t;
-			if (context->present(pr.second)) {
+			if (detail::present(pr.second)) {
 				t = node(new operation_holder(pr.second), {});
 			} else if (itr != _params.end()) {
 				t = node(new node_reference(&_refs[index], pr.second, index, true), {});
@@ -581,7 +572,7 @@ node node_manager::expand(
 				choice = pr.first;
 		}
 	}
-	
+
 	/*
 	 * If tmp is not empty, it implies that we could not find a
 	 * match for it, and therefore the parsing is incomplete.
@@ -613,7 +604,7 @@ node node_manager::expand(
 
 		if (n % 2)
 			tmp.push_back(choice[n - 1]);
-	
+
 		choice = tmp;
 	}
 
@@ -674,7 +665,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 		operation_holder *ophptr = topn.cast <operation_holder> ();
 
 		// Add is_separable code check
-		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {			
+		if (ophptr && (ophptr->code == add || ophptr->code == sub)) {
 			process.push({top.first, topn[0]});
 			process.push({
 				(ophptr->code == add) ? top.first : !top.first,
@@ -689,11 +680,11 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 	}
 
 	size_t i;
-	
+
 	i = 0;
 	while (i < plus.size()) {
 		if (is_constant(plus[i].label())) {
-			opd = context->compute("+", {
+			opd = detail::compute("+", {
 				opd,
 				node_value(context, plus[i])
 			});
@@ -707,7 +698,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 	i = 0;
 	while (i < minus.size()) {
 		if (is_constant(minus[i].label())) {
-			opd = context->compute("-", {
+			opd = detail::compute("-", {
 				opd,
 				node_value(context, minus[i])
 			});
@@ -719,8 +710,8 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 	}
 
 	if (!tokcmp(opd, zero)) {
-		Token *tptr = context->compute(">", {opd, zero});
-		Token *nopd = context->compute("*", {opd, new OpZ(-1)});
+		Token *tptr = detail::compute(">", {opd, zero});
+		Token *nopd = detail::compute("*", {opd, new OpZ(-1)});
 
 		if (tokcmp(tptr, true_token))
 			plus.push_back(node(opd));
@@ -747,7 +738,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 
 		if (n % 2)
 			tmp.push_back(plus[n - 1]);
-	
+
 		plus = tmp;
 	}
 
@@ -769,12 +760,12 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 
 		if (n % 2)
 			tmp.push_back(minus[n - 1]);
-	
+
 		minus = tmp;
 	}
 
 	node all;
-	
+
 	if (!plus.empty()) {
 		if (!minus.empty()) {
 			all.retokenize(new operation_holder("-"));
@@ -792,7 +783,7 @@ void node_manager::simplify_separable(Engine *context, node &ref, codes c)
 			all.append(minus[0]);
 		}
 	}
-	
+
 	ref.transfer(all);
 
 	// Simplify rest
@@ -824,13 +815,13 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 
 			if (t1->caller() == Token::ftn)
 				ftn = dynamic_cast <Function *> (t1);
-			
+
 			// TODO: add a token base for tokens with a .symbol() method
 			if (t2->caller() == Token::ndr)
 				var = (dynamic_cast <node_reference *> (t2))->symbol();
 			else if (t2->caller() == Token::token_lvalue)
 				var = (dynamic_cast <lvalue *> (t2))->symbol();
-			
+
 			if (ftn && ftn->is_variable(var)) {
 				Function f = ftn->differentiate(var);
 
@@ -866,7 +857,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 		operation_holder *ophptr = topn.cast <operation_holder> ();
 
 		// Add is_separable code check
-		if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {			
+		if (ophptr && (ophptr->code == mul || ophptr->code == dvs)) {
 			process.push({top.first, topn[0]});
 			process.push({
 				(ophptr->code == mul) ? top.first : !top.first,
@@ -881,11 +872,11 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 	}
 
 	size_t i;
-	
+
 	i = 0;
 	while (i < mult.size()) {
 		if (is_constant(mult[i].label())) {
-			opd = context->compute("*", {
+			opd = detail::compute("*", {
 				opd,
 				node_value(context, mult[i])
 			});
@@ -899,7 +890,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 	i = 0;
 	while (i < divs.size()) {
 		if (is_constant(divs[i].label())) {
-			opd = context->compute("/", {
+			opd = detail::compute("/", {
 				opd,
 				node_value(context, divs[i])
 			});
@@ -935,7 +926,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 
 		if (n % 2)
 			tmp.push_back(mult[n - 1]);
-	
+
 		mult = tmp;
 	}
 
@@ -957,12 +948,12 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 
 		if (n % 2)
 			tmp.push_back(divs[n - 1]);
-	
+
 		divs = tmp;
 	}
 
 	node all;
-	
+
 	if (!mult.empty()) {
 		if (!divs.empty()) {
 			all.retokenize(new operation_holder("/"));
@@ -980,7 +971,7 @@ void node_manager::simplify_mult_div(Engine *context, node &ref, codes c)
 			all.append(divs[0]);
 		}
 	}
-	
+
 	ref.transfer(all);
 
 	// Simplify rest
@@ -1086,7 +1077,7 @@ void node_manager::refactor_reference(
 		Token *tptr)
 {
 	node_reference *ndr = dynamic_cast <node_reference *> (ref.ptr());
-	
+
 	if (ndr && ndr->symbol() == str)
 		ref.retokenize(tptr->copy());
 
@@ -1110,7 +1101,7 @@ std::string node_manager::display(node ref) const
 	case Token::ndr:
 		if ((dynamic_cast <node_reference *> (ref.ptr()))->is_variable())
 			return (dynamic_cast <node_reference *> (ref.ptr()))->symbol();
-		
+
 		return display(*(dynamic_cast <node_reference *> (ref.ptr())->get()));
 	default:
 		break;
@@ -1176,13 +1167,13 @@ std::string node_manager::display_pemdas(node ref, node child) const
 	case sub:
 		if (cophptr->code == add)
 			return "(" + display(child) + ")";
-		
-		return display(child); 
+
+		return display(child);
 	case mul:
 		// TODO: What is this?
 		if ((cophptr->code == add) || (cophptr->code == sub))
 			return display(child);
-		
+
 		return display(child);
 	case dvs:
 		return "(" + display(child) + ")";
@@ -1190,12 +1181,12 @@ std::string node_manager::display_pemdas(node ref, node child) const
 		if ((cophptr->code == add) || (cophptr->code == sub)
 			|| (cophptr->code == mul) || (cophptr->code == dvs))
 			return "(" + display(child) + ")";
-		
+
 		return display(child);
 	default:
 		break;
 	}
-	
+
 	return display(child);
 }
 
@@ -1206,12 +1197,12 @@ void node_manager::print(bool address) const
 
 	if (address)
 		_tree.print();
-	else	
+	else
 		_tree.print_no_address();
 
 	if (_refs.size()) {
 		std::cout << "Refs [" << _refs.size() << "]" << std::endl;
-		
+
 		for (auto &ref : _refs) {
 			if (address)
 				ref.print();
@@ -1227,12 +1218,12 @@ void node_manager::print(std::ostream &os, bool address) const
 
 	if (address)
 		_tree.print(os);
-	else	
+	else
 		_tree.print_no_address(os);
 
 	if (_refs.size()) {
 		std::cout << "Refs [" << _refs.size() << "]" << std::endl;
-		
+
 		for (auto &ref : _refs) {
 			if (address)
 				ref.print(os);
@@ -1266,8 +1257,9 @@ void node_manager::label(node &ref)
 	case Token::ftn:
 		for (node &leaf : ref)
 			label(leaf);
-		
-		/* Also add a different labeling if it is constant,
+
+		/*
+		 * Also add a different labeling if it is constant,
 		 * probably needs to be called an operation constant
 		 */
 		ref.relabel(l_function);

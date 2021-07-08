@@ -1,7 +1,5 @@
 #include "../engine/core/node_manager.hpp"
 #include "../engine/core/enode.hpp"
-#include "../engine/core/engine_base.hpp"
-#include "../engine/engine.hpp"
 #include "../engine/timer.hpp"
 #include "../engine/core/enode_parser.hpp"
 #include "../engine/lang/parser.hpp"
@@ -39,7 +37,7 @@ int main()
 
 	std::cout << "Tree:" << std::endl;
 	nm.print();
-	
+
 	nm = node_manager(ctx, "12 in dex", {"dex", "index"}); // cc_run("x=x+3", ctx, {"x"}, pardon);
 
 	std::cout << "Tree:" << std::endl;

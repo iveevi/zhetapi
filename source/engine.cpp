@@ -7,7 +7,7 @@
 
 namespace zhetapi {
 
-Engine::Engine(bool defaults) : engine_base()
+Engine::Engine(bool defaults)
 {
 	if (defaults) {
 		// Default present
@@ -24,8 +24,7 @@ Engine::Engine(bool defaults) : engine_base()
 }
 
 Engine::Engine(const Engine &other)
-		: engine_base(other),
-		_stack(other._stack),
+		: _stack(other._stack),
 		_alg_table(other._alg_table),
 		_reg_table(other._reg_table),
 		_ftr_table(other._ftr_table),
@@ -34,8 +33,6 @@ Engine::Engine(const Engine &other)
 Engine &Engine::operator=(const Engine &other)
 {
 	if (this != &other) {
-		engine_base::operator=(other);
-
 		_stack = other._stack;
 		_var_table = other._var_table;
 		_ftr_table = other._ftr_table;
@@ -141,7 +138,7 @@ Token *Engine::get(const std::string &str)
 	// Prioritize algorithms
 	if (_alg_table.count(str))
 		return _alg_table[str].copy();
-	
+
 	if (_reg_table.count(str))
 		return &(_reg_table[str]);
 	//	return _reg_table[str].copy();
@@ -149,11 +146,11 @@ Token *Engine::get(const std::string &str)
 	// Return modifiable references (TODO: do the same with others)
 	if (_var_table.count(str))
 		return _var_table[str];
-	
+
 	if (_ftr_table.count(str))
 		return _ftr_table[str].copy();
-	
-	if (_stack) 
+
+	if (_stack)
 		return _stack->get(str);
 
 	return nullptr;
@@ -166,15 +163,15 @@ void Engine::list() const
 		std::cout << "\t\t" << spr.first << " ["
 			<< spr.second->dbg_str() << "]" << std::endl;
 	}
-	
+
 	std::cout << "\tFunctions:" << std::endl;
 	for (auto spr : _ftr_table)
 		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
-	
+
         std::cout << "\tRegistrables:" << std::endl;
 	for (auto spr : _reg_table)
 		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
-	
+
         std::cout << "\tAlgorithms:" << std::endl;
 	for (auto spr : _alg_table)
 		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;

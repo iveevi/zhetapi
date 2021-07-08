@@ -39,7 +39,7 @@ TEST(compile_const_exprs)
 	for (size_t i = 0; i < size; i++) {
 		node_manager nm;
 		Token *tptr;
-	
+
 		// Construction
 		try {
 			nm = node_manager(ctx, exprs[i]);
@@ -47,7 +47,7 @@ TEST(compile_const_exprs)
 			oss << err << "\tBad input exception was thrown with \""
 				<< exprs[i] << "\"" << endl;
 			continue;
-		} catch (const engine_base::unknown_op_overload &e) {
+		} catch (const detail::bad_operation &e) {
 			oss << err << "\tUnknown operation overload with \""
 				<< exprs[i] << "\"" << endl;
 			oss << e.what() << endl;
@@ -59,7 +59,7 @@ TEST(compile_const_exprs)
 		// Evaluation
 		try {
 			tptr = nm.value(ctx);
-		} catch (const engine_base::unknown_op_overload &e) {
+		} catch (const detail::bad_operation &e) {
 			oss << err << e.what() << endl;
 			oss << "Tree:" << endl;
 			nm.print();
@@ -69,7 +69,7 @@ TEST(compile_const_exprs)
 		oss << "Value of \"" << exprs[i] << "\" = "
 			<< (tptr ? tptr->dbg_str() : "[Null]")
 			<< " <=> " << values[i]->dbg_str() << endl;
-		
+
 		if (tokcmp(tptr, values[i])) {
 			oss << ok << "\tValues are equal." << endl;
 			count++;
@@ -114,7 +114,7 @@ TEST(compile_var_exprs)
 	size_t size = exprs.size();
 	for (size_t i = 0; i < size; i++) {
 		node_manager nm(ctx, exprs[i], {"x"});
-		
+
 		if (node::loose_match(nm.tree(), trees[i])) {
 			oss << ok << "\tTrees are matching." << endl;
 			count++;

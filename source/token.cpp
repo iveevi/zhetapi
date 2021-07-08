@@ -31,6 +31,9 @@ bool Token::operator!=(Token *tptr) const
 
 bool tokcmp(Token *a, Token *b)
 {
+	if (!a || !b)
+		return false;
+
 	return *a == b;
 }
 

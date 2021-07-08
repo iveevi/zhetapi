@@ -213,7 +213,7 @@ parser::parser(Engine *ctx)
 	);
 
 	// Full factors
-	_full_factor = (	
+	_full_factor = (
 		(_closed_factor >> "in" >> _full_factor) [
 			_val = construct <node> (nullptr, l_generator_in, _1, _2)
 		]

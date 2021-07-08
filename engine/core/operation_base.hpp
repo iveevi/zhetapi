@@ -25,6 +25,8 @@ extern std::unordered_map <std::string, Overload> operations;
 
 Token *compute(const std::string&, const Targs &);
 
+bool present(const std::string &);
+
 std::string gen_signature_str(const Signature &);
 std::string overload_catalog(const std::string &);
 std::string gen_overload_msg(const Signature &, const std::string &);

@@ -1,26 +1,29 @@
-#ifndef BARN_H_
-#define BARN_H_
+#ifndef ENGINE_H_
+#define ENGINE_H_
+
+// C/C++ headers
+#include <unordered_map>
 
 // Engine headers
 #include "function.hpp"
 #include "registration.hpp"
 
 #include "core/algorithm.hpp"
-#include "core/engine_base.hpp"
 #include "core/common.hpp"
 
 namespace zhetapi {
 
-// struct NULLPTR {};
+template <class T>
+using Symtab = std::unordered_map <std::string, T>;
 
-class Engine : public engine_base {
+class Engine {
 	// Broader scope
 	Engine *		_stack = nullptr;
 
-	symtab <algorithm>	_alg_table;
-	symtab <Function>	_ftr_table;
-	symtab <Registrable>	_reg_table;
-	symtab <Token *>	_var_table;
+	Symtab <algorithm>	_alg_table;
+	Symtab <Function>	_ftr_table;
+	Symtab <Registrable>	_reg_table;
+	Symtab <Token *>	_var_table;
 
 	// Private methods
 	void set_origin_stack(Engine *);

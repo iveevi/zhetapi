@@ -1,5 +1,6 @@
 #include "../engine/function.hpp"
 #include "../engine/engine.hpp"
+#include "../engine/core/operation_base.hpp"
 
 namespace zhetapi {
 
@@ -15,7 +16,7 @@ ZHP_TOKEN_METHOD(ftn_deriv_method)
 {
 	// TODO: remove assert (and use a special one that throw mistch errs)
 	assert(args.size() == 0);
-	
+
 	Function *fptr = dynamic_cast <Function *> (tptr);
 
 	// Differentiate on first arg by default
@@ -92,7 +93,7 @@ Function::Function(const std::string &str, Engine *context)
 	for (i = 0; i < pack.length(); i++) {
 		if (pack[i] == ',' && !tmp.empty()) {
 			_params.push_back(tmp);
-			
+
 			tmp.clear();
 		} else if (!isspace(pack[i])) {
 			tmp += pack[i];
@@ -101,7 +102,7 @@ Function::Function(const std::string &str, Engine *context)
 
 	if (!tmp.empty())
 		_params.push_back(tmp);
-	
+
 	// Determine function's symbol
 	_symbol = _symbol.substr(0, start);
 
@@ -188,19 +189,19 @@ Token *Function::derivative(const std::string &str, A ... args)
 	// Right
 	Token *right;
 
-	Tokens[i] = shared_context->compute("+", {Tokens[i], new Operand <double> (h)});
+	Tokens[i] = detail::compute("+", {Tokens[i], new Operand <double> (h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
 			Tokens[k] = Tokens[k]->copy();
 	}
-	
+
 	right = _manager.substitute_and_compute(shared_context, Tokens);
-	
+
 	// Left
 	Token *left;
 
-	Tokens[i] = shared_context->compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
+	Tokens[i] = detail::compute("-", {Tokens[i], new Operand <double> (2.0 * h)});
 
 	for (size_t k = 0; k < Tokens.size(); k++) {
 		if (k != i)
@@ -210,9 +211,9 @@ Token *Function::derivative(const std::string &str, A ... args)
 	left = _manager.substitute_and_compute(shared_context, Tokens);
 
 	// Compute
-	Token *diff = shared_context->compute("-", {right, left});
+	Token *diff = detail::compute("-", {right, left});
 
-	diff = shared_context->compute("/", {diff, new Operand <double> (2.0 * h)});
+	diff = detail::compute("/", {diff, new Operand <double> (2.0 * h)});
 
 	return diff;
 }
@@ -253,7 +254,7 @@ bool Function::operator==(Token *tptr) const
 
 	if (!ftn)
 		return false;
-	
+
 	return ftn->_symbol == _symbol;
 }
 
@@ -270,7 +271,7 @@ std::string Function::display() const
 	size_t n = _params.size();
 	for (size_t i = 0; i < n; i++) {
 		str += _params[i];
-		
+
 		if (i < n - 1)
 			str += ", ";
 	}

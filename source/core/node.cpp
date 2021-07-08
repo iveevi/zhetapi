@@ -23,32 +23,16 @@ node::node(Token *tptr, lbl label)
 
 // TODO: Remove this bool
 node::node(Token *tptr, const node &a)
-		: _leaves({a})
-{
-	if (tptr)
-		_tptr = tptr->copy();
-}
+		: _tptr(tptr), _leaves({a}) {}
 
 node::node(Token *tptr, const node &a, const node &b)
-		: _leaves({a, b})
-{
-	if (tptr)
-		_tptr = tptr->copy();
-}
+		: _tptr(tptr), _leaves({a, b}) {}
 
 node::node(Token *tptr, const std::vector <node> &leaves)
-		: _leaves(leaves)
-{
-	if (tptr)
-		_tptr = tptr->copy();
-}
+		: _tptr(tptr), _leaves(leaves) {}
 
 node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
-		: _label(label), _leaves(leaves)
-{
-	if (tptr)
-		_tptr = tptr->copy();
-}
+		: _tptr(tptr), _label(label), _leaves(leaves) {}
 
 node::node(Token *tptr, lbl label, const node &n1, const node &n2)
 		: node(tptr, label, {n1, n2}) {}
@@ -62,10 +46,10 @@ node &node::operator=(const node &other)
 
 			_tptr = nullptr;
 		}
-		
+
 		if (other._tptr)
 			_tptr = other._tptr->copy();
-		
+
 		_label = other._label;
 		_leaves = other._leaves;
 	}
@@ -77,7 +61,7 @@ node::~node()
 {
 	if (_tptr)
 		delete _tptr;
-	
+
 	_tptr = nullptr;
 }
 
@@ -193,8 +177,9 @@ void node::retokenize(Token *tptr)
 	// Delete the current token
 	if (_tptr)
 		delete _tptr;
-	
-	_tptr = tptr->copy();
+
+	// _tptr = tptr->copy();
+	_tptr = tptr;
 }
 
 void node::releaf(const node::Leaves &lvs)
@@ -207,7 +192,7 @@ void node::transfer(const node &ref)
 	if (ref._tptr) {
 		if (_tptr)
 			delete _tptr;
-		
+
 		_tptr = ref._tptr->copy();
 	}
 
@@ -249,7 +234,7 @@ void node::print(int num, int lev) const
 	if (_tptr) {
 		std::cout << "#" << num << ": " << _tptr->dbg_str()
 			<< " (" << _tptr << ", " << strlabs[_label]
-			<< ") @ " << this << std::endl;	
+			<< ") @ " << this << std::endl;
 	} else {
 		std::cout << "#" << num << ": null ("
 			<< _tptr << ", " << strlabs[_label] << ") @ "
@@ -273,7 +258,7 @@ void node::print(std::ostream &os, int num, int lev) const
 	if (_tptr) {
 		os << "#" << num << ": " << _tptr->dbg_str()
 			<< " (" << _tptr << ", " << strlabs[_label]
-			<< ") @ " << this << std::endl;	
+			<< ") @ " << this << std::endl;
 	} else {
 		os << "#" << num << ": null ("
 			<< _tptr << ", " << strlabs[_label] << ") @ "
@@ -360,7 +345,7 @@ bool node::loose_match(const node &a, const node &b)
 	// Check the Token
 	if (!tokcmp(a.ptr(), b.ptr()))
 		return false;
-	
+
 	// Check the leaves
 	if (a.child_count() != b.child_count())
 		return false;
@@ -397,7 +382,7 @@ node factorize(const node &ref, const node &factor)
 		cout << "\tRETURN UNIT" << endl;
 		return node(new OpZ(1));
 	}
-	
+
 	// Proceed normally
 	std::vector <node> factors;
 	std::stack <node> process;
@@ -424,7 +409,7 @@ node factorize(const node &ref, const node &factor)
 	cout << "Factors:" << endl;
 	for (auto nd : factors)
 		nd.print();
-	
+
 	std::vector <node> remaining;
 	bool factorable = false;
 
@@ -448,7 +433,7 @@ node factorize(const node &ref, const node &factor)
 
 	if (!factorable)
 		return node(nullptr);
-	
+
 	cout << "rem.size = " << remaining.size() << endl;
 
 	// Fold into multiplication
@@ -470,7 +455,7 @@ node factorize(const node &ref, const node &factor)
 
 		if (n % 2)
 			tmp.push_back(remaining[n - 1]);
-	
+
 		remaining = tmp;
 	}
 

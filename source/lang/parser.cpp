@@ -1,6 +1,7 @@
 #include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/error_handling.hpp"
 #include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/operation_base.hpp"
 #include "../../engine/core/common.hpp"
 
 namespace zhetapi {
@@ -57,7 +58,7 @@ void run_normal(const std::string &cache, Engine *context, bool line)
 		// TODO: add a real str method
 		if (line && tptr)
 			std::cout << "\t" << tptr->dbg_str() << std::endl;
-	} catch (const Engine::unknown_op_overload &e)  {
+	} catch (const detail::bad_operation &e)  {
 		std::cerr << "FIXME: Error evaluating \'" << cache << "\'\n"
 			<< e.what() << std::endl;
 		exit(-1);

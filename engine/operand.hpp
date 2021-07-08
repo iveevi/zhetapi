@@ -103,10 +103,9 @@ Token *Operand <T> ::copy() const
 template <class T>
 bool Operand <T> ::operator==(Token *tptr) const
 {
-	using namespace std;
 	Operand *opd = dynamic_cast <Operand *> (tptr);
 
-	if (opd == nullptr)
+	if (!opd)
 		return false;
 
 	return (opd->_val == _val);
