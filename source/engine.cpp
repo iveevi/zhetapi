@@ -16,18 +16,15 @@ Engine::Engine(bool defaults)
 		put("null", new Operand <Token *> (nullptr));	// TODO: typedef for this
 		put("i", new OpCmpQ(CmpQ(0, 1ll)));
 
-		put(Registrable("print", &bt_print));
-		put(Registrable("println", &bt_println));
-		put(Registrable("range", &bt_range));
-		put(Registrable("dict", &bt_dict));
+		put("print", new Registrable("print", &bt_print));
+		put("println", new Registrable("println", &bt_println));
+		put("range", new Registrable("range", &bt_range));
+		put("dict", new Registrable("dict", &bt_dict));
 	}
 }
 
 Engine::Engine(const Engine &other)
 		: _stack(other._stack),
-		_alg_table(other._alg_table),
-		_reg_table(other._reg_table),
-		_ftr_table(other._ftr_table),
 		_var_table(other._var_table) {}
 
 Engine &Engine::operator=(const Engine &other)
@@ -35,9 +32,6 @@ Engine &Engine::operator=(const Engine &other)
 	if (this != &other) {
 		_stack = other._stack;
 		_var_table = other._var_table;
-		_ftr_table = other._ftr_table;
-		_reg_table = other._reg_table;
-		_alg_table = other._alg_table;
 	}
 
 	return *this;
@@ -53,13 +47,6 @@ Engine::~Engine()
 Args Engine::symbol_list() const
 {
 	Args syms;
-
-	for (const auto &p : _alg_table)
-		syms.push_back(p.first);
-	for (const auto &p : _ftr_table)
-		syms.push_back(p.first);
-	for (const auto &p : _reg_table)
-		syms.push_back(p.first);
 	for (const auto &p : _var_table)
 		syms.push_back(p.first);
 
@@ -104,52 +91,13 @@ void Engine::put(const std::string &str, Token *tptr)
 		_var_table.insert(std::make_pair(str, tptr->copy()));
 }
 
-void Engine::put(Function ftr)
-{
-	if (_ftr_table.count(ftr.symbol()))
-		_ftr_table[ftr.symbol()] = ftr;
-	else
-		_ftr_table.insert(std::make_pair(ftr.symbol(), ftr));
-}
-
-void Engine::put(Registrable reg)
-{
-	if (_reg_table.find(reg.dbg_str()) != _reg_table.end())
-		_reg_table[reg.dbg_str()] = reg;
-	else
-		_reg_table.insert(std::make_pair(reg.dbg_str(), reg));
-}
-
-void Engine::put(algorithm alg)
-{
-	if (_alg_table.find(alg.symbol()) != _alg_table.end())
-		_alg_table[alg.symbol()] = alg;
-	else
-		_alg_table.insert(std::make_pair(alg.symbol(), alg));
-}
-
-Function &Engine::retrieve_function(const std::string &str)
-{
-	return _ftr_table[str];
-}
-
 Token *Engine::get(const std::string &str)
 {
-	// Prioritize algorithms
-	if (_alg_table.count(str))
-		return _alg_table[str].copy();
-
-	if (_reg_table.count(str))
-		return &(_reg_table[str]);
-	//	return _reg_table[str].copy();
-
 	// Return modifiable references (TODO: do the same with others)
 	if (_var_table.count(str))
 		return _var_table[str];
-
-	if (_ftr_table.count(str))
-		return _ftr_table[str].copy();
-
+	
+	// Check higher stacks
 	if (_stack)
 		return _stack->get(str);
 
@@ -163,29 +111,14 @@ void Engine::list() const
 		std::cout << "\t\t" << spr.first << " ["
 			<< spr.second->dbg_str() << "]" << std::endl;
 	}
-
-	std::cout << "\tFunctions:" << std::endl;
-	for (auto spr : _ftr_table)
-		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
-
-        std::cout << "\tRegistrables:" << std::endl;
-	for (auto spr : _reg_table)
-		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
-
-        std::cout << "\tAlgorithms:" << std::endl;
-	for (auto spr : _alg_table)
-		std::cout << "\t\t" << spr.second.dbg_str() << std::endl;
 }
 
+// TODO: this is useless
 void Engine::list_registered(std::string file) const
 {
 	printf("Symbols recorded in %s:\n", file.c_str());
-	for (auto spr : _reg_table)
-		std::cout << "\t" << spr.second.dbg_str() << std::endl;
 	for (auto spr : _var_table)
 		std::cout << "\t" << spr.second->dbg_str() << std::endl;
-	for (auto spr : _ftr_table)
-		std::cout << "\t" << spr.second.dbg_str() << std::endl;
 }
 
 // Non-member functions

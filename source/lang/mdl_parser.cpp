@@ -193,8 +193,7 @@ static void mdl_alg(Feeder *feeder,
 	nbody.compress_branches();
 
 	algorithm alg(sig.first, "", sig.second, nbody);
-
-	ctx->put(alg);
+	ctx->put(sig.first, alg.copy());
 	module->add({sig.first, alg.copy()});
 
 	// Reset terminal

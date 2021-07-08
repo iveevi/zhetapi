@@ -447,9 +447,7 @@ static OpZ *check_alg(Feeder *feeder,
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();
 
-	algorithm alg(sig.first, "", sig.second, nbody);
-
-	ctx->put(alg);
+	ctx->put(sig.first, new algorithm(sig.first, "", sig.second, nbody));
 
 	// Reset terminal
 	feeder->set_end(end);

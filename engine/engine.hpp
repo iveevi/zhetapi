@@ -13,16 +13,14 @@
 
 namespace zhetapi {
 
+// Aliases
 template <class T>
 using Symtab = std::unordered_map <std::string, T>;
 
 class Engine {
 	// Broader scope
 	Engine *		_stack = nullptr;
-
-	Symtab <algorithm>	_alg_table;
-	Symtab <Function>	_ftr_table;
-	Symtab <Registrable>	_reg_table;
+	
 	Symtab <Token *>	_var_table;
 
 	// Private methods
@@ -42,13 +40,7 @@ public:
 	Engine *new_stack();
 	Engine *get_stack();
 
-	void put(Function);
-	void put(Registrable);
-	void put(algorithm);
 	void put(const std::string &, Token *);
-
-	// Are these necessary?
-	Function &retrieve_function(const std::string &);
 
 	Token *get(const std::string &);
 

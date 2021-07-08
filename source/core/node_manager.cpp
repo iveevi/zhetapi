@@ -382,8 +382,6 @@ void attribute_invert(node &ref)
 {
 	std::vector <node> unfolded {ref[0]};
 
-	std::cout << std::string(50, '=') << std::endl;
-	ref.print();
 	node current = ref[1];
 	while (true) {
 		operation_holder *ophptr = current.cast <operation_holder> ();
@@ -425,8 +423,6 @@ void attribute_invert(node &ref)
 	}
 
 	ref = unfolded[0];
-
-	std::cout << std::string(50, '=') << std::endl;
 }
 
 void node_manager::expand(

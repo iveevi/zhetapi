@@ -182,10 +182,10 @@ public:
 	};
 
 	// Undefined symbol error
-	class undefined_symbol : public error {
+	class undefined_symbol : public std::runtime_error {
 	public:
-		explicit undefined_symbol(const std::string &s)
-				: error(s) {}
+		explicit undefined_symbol(const std::string &str)
+			: std::runtime_error(str) {}
 	};
 
         class bad_input : public std::runtime_error {
