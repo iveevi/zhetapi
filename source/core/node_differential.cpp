@@ -6,6 +6,12 @@ namespace zhetapi {
 
 node_differential::node_differential(Token *tptr) : _ref(tptr) {}
 
+node_differential::~node_differential()
+{
+	if (_ref)
+		delete _ref;
+}
+
 Token *node_differential::get() const
 {
 	return _ref;

@@ -9,14 +9,12 @@ namespace zhetapi {
 // Macros
 #define _add_operation_symbol(name, str)				\
 	name = boost::spirit::qi::lit(#str) [				\
-		boost::spirit::qi::_val = boost::phoenix::new_		\
-			<operation_holder> (std::string(#str))		\
+		boost::spirit::qi::_val = #str				\
 	];
 
 #define _add_operation_heter_symbol(name, str, act)			\
 	name = boost::spirit::qi::lit(#str) [				\
-		boost::spirit::qi::_val = boost::phoenix::new_		\
-			<operation_holder> (std::string(#act))		\
+		boost::spirit::qi::_val = #act				\
 	];
 
 #define _new_oph(str)							\
@@ -219,16 +217,24 @@ parser::parser(Engine *ctx)
 		]
 
 		| (_closed_factor >> _transpose) [
-			_val = construct <node> (_2, _1)
+			_val = construct <node> (
+				new_ <operation_holder> (_2), _1
+			)
 		]
 
 		| (_closed_factor >> _exponent >> _full_factor) [
-			_val = construct <node> (_2, _1, _3)
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
 		]
 
 		// Relax the grammar here, allows for garbage like foo.23
 		| (_closed_factor >> _attribute >> _closed_factor) [
-			_val = construct <node> (_2, _1, _3)
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
 		]
 
 		| (_closed_factor >> '[' >> _start >> ']') [
@@ -236,11 +242,15 @@ parser::parser(Engine *ctx)
 		]
 
 		| (_closed_factor >> _post_operations) [
-			_val = construct <node> (_2, _1)
+			_val = construct <node> (
+				new_ <operation_holder> (_2), _1
+			)
 		]
 
 		| (_pre_operations >> _closed_factor) [
-			_val = construct <node> (_1, _2)
+			_val = construct <node> (
+				new_ <operation_holder> (_1), _2
+			)
 		]
 
 		| _closed_factor [_val = _1]
@@ -269,7 +279,10 @@ parser::parser(Engine *ctx)
 		]
 
 		| (_factor >> _term_operation >> _term) [
-			_val = construct <node> (_2, _1, _3)
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
 		]
 
 		| _factor [_val = _1]
@@ -278,7 +291,10 @@ parser::parser(Engine *ctx)
 	// Simple expression
 	_simple_expression = (
 		(_term >> _start_operation >> _start) [
-			_val = construct <node> (_2, _1, _3)
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
 		]
 
 		| _term [_val = _1]
@@ -287,7 +303,10 @@ parser::parser(Engine *ctx)
 	// Starting expression
 	_start = (
 		(_simple_expression >> _expression_operation >> _start) [
-			_val = construct <node> (_2, _1, _3)
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
 		]
 
 		| _simple_expression [_val = _1]

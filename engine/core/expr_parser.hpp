@@ -83,35 +83,35 @@ private:
 	NSRule <Siter, std::string ()>		_identifier;
 
 	// Categories of operations
-	Rule <Siter, Token *(), Space>		_term_operation;
-	Rule <Siter, Token *(), Space>		_start_operation;
-	Rule <Siter, Token *(), Space>		_expression_operation;
-	Rule <Siter, Token *(), Space>		_post_operations;
-	Rule <Siter, Token *(), Space>		_pre_operations;
+	Rule <Siter, std::string(), Space>	_term_operation;
+	Rule <Siter, std::string(), Space>	_start_operation;
+	Rule <Siter, std::string(), Space>	_expression_operation;
+	Rule <Siter, std::string(), Space>	_post_operations;
+	Rule <Siter, std::string(), Space>	_pre_operations;
 
 	// Operations
-	Rule <Siter, Token *(), Space>		_and;
-	Rule <Siter, Token *(), Space>		_attribute;
-	Rule <Siter, Token *(), Space>		_divide;
-	Rule <Siter, Token *(), Space>		_dot;
-	Rule <Siter, Token *(), Space>		_eq;
-	Rule <Siter, Token *(), Space>		_exponent;
-	Rule <Siter, Token *(), Space>		_factorial;
-	Rule <Siter, Token *(), Space>		_ge;
-	Rule <Siter, Token *(), Space>		_geq;
-	Rule <Siter, Token *(), Space>		_le;
-	Rule <Siter, Token *(), Space>		_leq;
-	Rule <Siter, Token *(), Space>		_minus;
-	Rule <Siter, Token *(), Space>		_mod;
-	Rule <Siter, Token *(), Space>		_neq;
-	Rule <Siter, Token *(), Space>		_or;
-	Rule <Siter, Token *(), Space>		_plus;
-	Rule <Siter, Token *(), Space>		_transpose;
-	Rule <Siter, Token *(), Space>		_post_decr;
-	Rule <Siter, Token *(), Space>		_post_incr;
-	Rule <Siter, Token *(), Space>		_pre_decr;
-	Rule <Siter, Token *(), Space>		_pre_incr;
-	Rule <Siter, Token *(), Space>		_times;
+	Rule <Siter, std::string(), Space>	_and;
+	Rule <Siter, std::string(), Space>	_attribute;
+	Rule <Siter, std::string(), Space>	_divide;
+	Rule <Siter, std::string(), Space>	_dot;
+	Rule <Siter, std::string(), Space>	_eq;
+	Rule <Siter, std::string(), Space>	_exponent;
+	Rule <Siter, std::string(), Space>	_factorial;
+	Rule <Siter, std::string(), Space>	_ge;
+	Rule <Siter, std::string(), Space>	_geq;
+	Rule <Siter, std::string(), Space>	_le;
+	Rule <Siter, std::string(), Space>	_leq;
+	Rule <Siter, std::string(), Space>	_minus;
+	Rule <Siter, std::string(), Space>	_mod;
+	Rule <Siter, std::string(), Space>	_neq;
+	Rule <Siter, std::string(), Space>	_or;
+	Rule <Siter, std::string(), Space>	_plus;
+	Rule <Siter, std::string(), Space>	_transpose;
+	Rule <Siter, std::string(), Space>	_post_decr;
+	Rule <Siter, std::string(), Space>	_post_incr;
+	Rule <Siter, std::string(), Space>	_pre_decr;
+	Rule <Siter, std::string(), Space>	_pre_incr;
+	Rule <Siter, std::string(), Space>	_times;
 public:
 	parser(Engine *ctx);
 };

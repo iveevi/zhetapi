@@ -28,20 +28,20 @@ int main()
 
 	// cout << "veq[0] = " << veq[0] << endl;
 	// cout << "veq[1] = " << veq[1] << endl;
-	nm = node_manager(ctx, "x^T", {"x"}); // cc_run("x=x+3", ctx, {"x"}, pardon);
+	nm = node_manager(ctx, "x^T", {"x"});
 
 	std::cout << "Tree:" << std::endl;
 	nm.print();
 
-	/* nm = node_manager(ctx, "12 * index", {"dex", "index"}); // cc_run("x=x+3", ctx, {"x"}, pardon);
+	nm = node_manager(ctx, "12 * index", {"dex", "index"});
 
 	std::cout << "Tree:" << std::endl;
 	nm.print();
 
-	nm = node_manager(ctx, "12 in dex", {"dex", "index"}); // cc_run("x=x+3", ctx, {"x"}, pardon);
+	nm = node_manager(ctx, "12 in dex", {"dex", "index"});
 
 	std::cout << "Tree:" << std::endl;
-	nm.print(); */
+	nm.print();
 
 	/* nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
 

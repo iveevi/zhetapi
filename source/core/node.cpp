@@ -16,26 +16,48 @@ node::node(const node &other)
 }
 
 node::node(Token *tptr)
-		: _tptr(tptr->copy()) {}
+{
+	if (tptr)
+		_tptr = tptr;
+}
 
 node::node(Token *tptr, lbl label)
-		: _tptr(tptr->copy()), _label(label) {}
+		: _label(label)
+{
+	if (tptr)
+		_tptr = tptr;
+}
 
-// TODO: Remove this bool
 node::node(Token *tptr, const node &a)
-		: _tptr(tptr->copy()), _leaves({a}) {}
+		:  _leaves({a})
+{
+	if (tptr)
+		_tptr = tptr;
+}
 
 node::node(Token *tptr, const node &a, const node &b)
-		: _tptr(tptr->copy()), _leaves({a, b}) {}
+		: _leaves({a, b})
+{
+	if (tptr)
+		_tptr = tptr->copy();
+}
 
 node::node(Token *tptr, const std::vector <node> &leaves)
-		: _tptr(tptr->copy()), _leaves(leaves) {}
+		: _leaves(leaves)
+{
+	if (tptr)
+		_tptr = tptr->copy();
+}
 
 node::node(Token *tptr, lbl label, const std::vector <node> &leaves)
-		: _tptr(tptr->copy()), _label(label), _leaves(leaves) {}
+		: _label(label), _leaves(leaves)
+{
+	if (tptr)
+		_tptr = tptr->copy();
+}
 
 node::node(Token *tptr, lbl label, const node &n1, const node &n2)
-		: node(tptr->copy(), label, {n1, n2}) {}
+		: node(tptr, label, {n1, n2}) {}
 
 node &node::operator=(const node &other)
 {
