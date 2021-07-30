@@ -279,10 +279,11 @@ public:
 		);
 	}
 
-#warning "The derivative for the SoftmaxInterval activation has not yet been properly configured."
-
 	Activation <T> *derivative() const {
-		return new _DSoftmax <T> ();
+		throw std::runtime_error("Activation SoftmaxInterval does "
+			"not have an appropriate derivative.");
+
+		return nullptr;
 	}
 };
 

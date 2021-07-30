@@ -120,11 +120,6 @@ Token *Collection::index(Token *tptr, bool mref)
 	return nullptr;
 }
 
-uint8_t Collection::id() const
-{
-	return get_zhp_id(Collection);
-}
-
 Token *Collection::copy() const
 {
 	return new Collection(_tokens);

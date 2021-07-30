@@ -20,8 +20,10 @@ Token *rvalue::get(Engine *context) const
 	Token *tptr = context->get(_symbol);
 
 	// Get the right line number
-	if (!tptr)
+	if (!tptr) {
+		context->list();
 		throw node_manager::undefined_symbol(_symbol);
+	}
 
 	return tptr;
 }

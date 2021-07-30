@@ -9,6 +9,13 @@ bool is_terminal(char c)
 }
 
 // Feeder functions
+Feeder::Feeder(const std::string &loc) : _location(loc) {}
+
+const std::string &Feeder::location() const
+{
+	return _location;
+}
+
 void Feeder::set_end(char c, int count)
 {
 	this->set_end({c, count});
@@ -52,6 +59,10 @@ std::string Feeder::extract_quote()
 	std::string out;
 	char c;
 
+	// TODO: get line number at the start
+	size_t line = this->line();
+	bool warned = false;
+
 	while ((c = feed()) != EOF) {
 		if (c == '\\' && peek() == '\"') {
 			feed();
@@ -60,6 +71,16 @@ std::string Feeder::extract_quote()
 		} else {
 			if (c == '\"')
 				break;
+			
+			// Don't warn multiple times
+			if (c == '\n' && !warned) {
+				warned = true;
+				std::cout << detail::warning
+					<< " string literal at "
+					<< location() << ":" << line
+					<< " is unterminated in"
+					<< " that line." << std::endl;
+			}
 
 			out += c;
 		}

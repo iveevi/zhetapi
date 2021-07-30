@@ -1,7 +1,6 @@
 #include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/error_handling.hpp"
 #include "../../engine/core/node_manager.hpp"
-#include <cstdlib>
 
 namespace zhetapi {
 
@@ -84,8 +83,7 @@ static void import_dll(const std::string &file, Module &module, const char *lint
 	exporter(&module);
 }
 
-// Importing libraries
-static void import_as(const std::string &lib, Engine *ctx, State *state)
+static Module *fetch_module(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
 {
 	// First check the possible locations and warn on ambiguity
 	std::string fname = lib.substr(0, lib.find_last_of("."));
@@ -122,7 +120,7 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 		std::cout << "Error: could not find library \"" << lib << "\"" << std::endl;
 
 		// TODO: throw
-		return;
+		return nullptr;
 	} else if (lpaths.size() > 1) {
 		std::cout << "Ambiguity in importing \"" << lib << "\"" << std::endl;
 
@@ -130,22 +128,43 @@ static void import_as(const std::string &lib, Engine *ctx, State *state)
 			std::cout << "\tCandidate " << str << std::endl;
 
 		// TODO: throw
-		return;
+		return nullptr;
 	}
 
-	// TODO: deal with lib
-
 	// Create, read and load library (depending on file or lib)
-	Module *module = new Module(fname);
+	Module *module = new Module(alias);
 
 	if (dll) {
 		import_dll(lpaths[0], *module, state->lver);
 	} else {
+		Engine *nctx = push_and_ret_stack(ctx);
+
 		StringFeeder sf = file_feeder(lpaths[0]);
-		mdl_parse(&sf, ctx, module);
+		mdl_parse(&sf, nctx, module);
+
+		delete nctx;
 	}
+
+	return module;
+}
+
+// Importing libraries
+static void import_as(const std::string &lib, const std::string &alias, Engine *ctx, State *state)
+{
+	// Create, read and load library (depending on file or lib)
+	Module *module = fetch_module(lib, alias, ctx, state);
 	
-	ctx->put(lib, module);
+	// TODO: remove name info from modules
+	ctx->put(alias, module);
+}
+
+static void import_from(const std::string &lib, const Args &syms, Engine *ctx, State *state)
+{
+	// Create, read and load library (depending on file or lib)
+	Module *module = fetch_module(lib, lib, ctx, state);
+
+	// Really should be a semi-regex (* or name)
+	module->from_add(ctx, syms);
 }
 
 // TODO: make sure state->branch gets reset
@@ -178,7 +197,7 @@ static OpZ *check_if(Feeder *feeder,
 		// TODO: Gotta free or something
 		ncond[0].retokenize(new rvalue(lv->symbol()));
 	}
-
+	
 	Token *tptr = ncond.value(context);
 
 	// TODO: Add a skip whitespace
@@ -319,6 +338,9 @@ static OpZ *check_while(Feeder *feeder,
 		nwhile.set_label(l_while_loop);
 		nwhile.append(ncond);
 		nwhile.append(nloop);
+		
+		/* std::cout << "while loop:" << std::endl;
+		nwhile.print(); */
 
 		nwhile.value(ctx);
 
@@ -425,9 +447,7 @@ static OpZ *check_alg(Feeder *feeder,
 	nbody.set_label(l_sequential);
 	nbody.compress_branches();
 
-	algorithm alg(sig.first, "", sig.second, nbody);
-
-	ctx->put(alg);
+	ctx->put(sig.first, new algorithm(sig.first, "", sig.second, nbody));
 
 	// Reset terminal
 	feeder->set_end(end);
@@ -485,13 +505,38 @@ static OpZ *check_import(Feeder *feeder,
 	// TODO: also allow 'as' clause
 	char c;
 
+	// TODO: Combine all here instead of using all the helpers (and reparsing...)
 	std::string line;
 	while ((c = feeder->feed()) != '\n' && c != EOF)
 		line += c;
 
-	Args vcomma = comma_split(line);
-	for (auto str : vcomma)
-		import_as(str, ctx, state);
+	Args vcomma = comma_split(line, false);
+	for (auto str : vcomma) {
+		// TODO: alias please
+		std::pair <std::string, std::string> pstr = as_split(str);
+
+		import_as(pstr.first, pstr.second, ctx, state);
+	}
+
+	return nullptr;
+}
+
+static OpZ *check_from(Feeder *feeder,
+		Engine *ctx,
+		State *state)
+{
+	// TODO: Allow multiline
+	// TODO: also allow 'as' clause
+	char c;
+
+	// TODO: Combine all here instead of using all the helpers (and reparsing...)
+	std::string line;
+	while ((c = feeder->feed()) != '\n' && c != EOF)
+		line += c;
+
+	std::pair <std::string, Args> pstrs = from_split(line);
+
+	import_from(pstrs.first, pstrs.second, ctx, state);
 
 	return nullptr;
 }
@@ -537,6 +582,7 @@ OpZ *check_keyword(std::string &cache,
 		{"return", check_return},
 		{"include", check_include},
 		{"import", check_import},
+		{"from", check_from},
 		{"global", check_global}
 	};
 

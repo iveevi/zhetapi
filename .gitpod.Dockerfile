@@ -4,6 +4,7 @@ USER root
 
 RUN apt-get -yq update \
 	&& apt-get install -yq gcc-8 g++-8 \
+	&& apt-get install -yq clang-8 \
 	&& apt-get install -yq valgrind \
 	&& apt-get install -yq libboost-all-dev \
 	&& apt-get install -yq asciidoctor \

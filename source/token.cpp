@@ -31,6 +31,9 @@ bool Token::operator!=(Token *tptr) const
 
 bool tokcmp(Token *a, Token *b)
 {
+	if (!a || !b)
+		return false;
+
 	return *a == b;
 }
 
@@ -55,12 +58,6 @@ std::ostream &operator<<(std::ostream &os, const std::vector <Token *> &toks)
 	os << "}";
 
 	return os;
-}
-
-// Defaulting virtual functions
-uint8_t Token::id() const
-{
-	return 0;
 }
 
 Token::type Token::caller() const

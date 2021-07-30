@@ -1,55 +1,95 @@
 #include "../engine/core/node_manager.hpp"
 #include "../engine/core/enode.hpp"
-#include "../engine/core/engine_base.hpp"
-#include "../engine/engine.hpp"
 #include "../engine/timer.hpp"
 #include "../engine/core/enode_parser.hpp"
+#include "../engine/lang/parser.hpp"
 
 using namespace std;
 using namespace zhetapi;
 
-// Bench program
-const size_t iters = 10000;
+Engine *ctx = new Engine();
 
-const std::string str = "64564 * 543 / 43432 + 54 + 423434 - 331232 * 4324234";
+Pardon pardon;
 
 int main()
 {
-	Timer timer;
+	node_manager nm;
 
-	// Etrees (new name for node_manager)
-	Engine *ctx = new Engine();
+	// Test factorial
+	// nm = node_manager(ctx, "x++", {"x"});
+	// nm = node_manager(ctx, "x[10]", {"x"});
+	/* nm = node_manager(ctx, "x + 3", {"x"});
 
-	timer.start();
-	for (size_t i = 0; i < iters; i++) {
-		node_manager etree1(ctx, str);
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
 
-		etree1.value(ctx);
-	}
-	timer.stop();
+	// Args veq = eq_split("x=x+3");
 
-	long double t1 = timer.dt();
+	// cout << "veq[0] = " << veq[0] << endl;
+	// cout << "veq[1] = " << veq[1] << endl;
+	nm = node_manager(ctx, "x^T", {"x"});
 
-	cout << "node_manager time = " << t1/1000.0 << "ms." << endl;
-	
-	timer.start();
-	for (size_t i = 0; i < iters; i++) {
-		enode_value(strmake(str));
-	}
-	timer.stop();
+	std::cout << "Tree:" << std::endl;
+	nm.print();
 
-	long double t2 = timer.dt();
+	nm = node_manager(ctx, "12 * index", {"dex", "index"});
 
-	cout << "enode (undercut) time = " << t2/1000.0 << "ms." << endl;
+	std::cout << "Tree:" << std::endl;
+	nm.print();
 
-	cout << "ratio: " << t1/t2 << endl;
+	nm = node_manager(ctx, "12 in dex", {"dex", "index"});
 
-	cout << "Simple test:" << endl;
+	std::cout << "Tree:" << std::endl;
+	nm.print();
 
-	Enode en = strmake("5.0 * 7.0 / 320.0");
-	en.print();
+	/* nm = node_manager(ctx, "[[2 + 54, 2 * 76], [90 * 9, 60]]");
 
-	Variant v = enode_value(en);
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
 
-	cout << "v = " << v.str() << endl;
+	/* nm = node_manager(ctx, "2.987 / 7 + 59.45");
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	/* nm = node_manager(ctx, "{}");
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "12 index", {"dex"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	/* nm = node_manager(ctx, "\"fdfsdffsf\\t\"", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	/* nm = node_manager(ctx, "3/x^2", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	/* nm = node_manager(ctx, "3x^2", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print();
+
+	nm = node_manager(ctx, "x^2 + 10^2", {"x"});
+
+	std::cout << "==============" << std::endl;
+	std::cout << "Compiled tree:" << std::endl;
+	nm.print(); */
+
+	// cout << "value = " << nm.value(ctx)->dbg_str() << std::endl;
 }

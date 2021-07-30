@@ -1,9 +1,11 @@
 #include "port.hpp"
 
 #define THREADS	8
-#define DEBUG_EXCEPTION
+// #define DEBUG_EXCEPTION
+#define PASSTHROUGH_EXCEPTION
+// #define HANDLE_SEGFAULT
 
-typedef pair <string, bool (*)(ostringstream &)> singlet;
+typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
 // Testing rig
 vector <singlet> rig {
@@ -31,10 +33,14 @@ vector <singlet> rig {
 	RIG(act_sigmoid),
 	RIG(module_construction),
 	RIG(parsing_global_assignment),
-	RIG(parsing_global_branching)
+	RIG(parsing_global_branching),
+	RIG(compile_const_exprs),
+	RIG(compile_var_exprs)
 };
 
 vector <singlet> failed;
+
+#ifdef HANDLE_SEGFAULT
 
 // Segfault handler
 void segfault_sigaction(int signal, siginfo_t *si, void *arg)
@@ -43,12 +49,16 @@ void segfault_sigaction(int signal, siginfo_t *si, void *arg)
 	exit(-1);
 }
 
+#endif
+
 // Timers
 tclk clk;
 
 // Main program
 int main()
 {
+#ifdef HANDLE_SEGFAULT
+
 	// Setup segfault handler
 	struct sigaction sa;
 
@@ -60,6 +70,8 @@ int main()
 	sa.sa_flags = SA_SIGINFO;
 
 	sigaction(SIGSEGV, &sa, NULL);
+
+#endif
 
 	// Setup times
 	tpoint epoch = clk.now();
@@ -84,17 +96,38 @@ int main()
 
 		bool tmp = true;
 		
-#ifdef DEBUG_EXCEPTION
+#if defined(DEBUG_EXCEPTION)
 			
 		oss << string(100, '-') << endl;
-		tmp = s.second(oss);	
+		tmp = s.second(oss, 0);	
 		oss << string(100, '-') << endl;
+
+#elif defined(PASSTHROUGH_EXCEPTION)
+		
+		try {
+			oss << string(100, '-') << endl;
+			tmp = s.second(oss, 0);	
+			oss << string(100, '-') << endl;
+		} catch (const std::runtime_error &e) {
+			oss << bred << "CAUGHT RUNTIME EXCEPTION (in test \""
+				<< s.first << "\"):" << endl;
+			oss << "\t" << e.what() << endl;
+			oss << "PASSING THROUGH FOR NOW." << reset << endl;
+
+			tmp = false;
+		} catch (...) {
+			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""
+				<< s.first << "\"), PASSING THROUGH FOR NOW."
+				<< reset << endl;
+
+			tmp = false;
+		}
 
 #else
 
 		try {
 			oss << string(100, '-') << endl;
-			tmp = s.second(oss);	
+			tmp = s.second(oss, 0);	
 			oss << string(100, '-') << endl;
 		} catch (...) {
 			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""

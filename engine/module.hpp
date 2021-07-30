@@ -2,6 +2,7 @@
 #define MODULE_H_
 
 // C/C++ headers
+#include <regex>
 #include <unordered_map>
 
 // Engine headers
@@ -35,9 +36,10 @@ public:
 	void add(const char *, Token *);
 	void add(const std::string &, Token *);
 
+	void from_add(Engine *, const Args &);
+
 	// Virtual functions
 	virtual type caller() const override;
-	virtual uint8_t id() const override;
 	virtual std::string dbg_str() const override;
 	virtual Token *copy() const override;
 	virtual bool operator==(Token *) const override;

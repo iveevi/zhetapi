@@ -173,7 +173,7 @@ void Plot::run()
 				_axes.ymax += dy;
 				_axes.ymin += dy;
 
-				_origin += {dpos.x, dpos.y};
+				_origin += {(float) dpos.x, (float) dpos.y};
 
 				redraw();
 
@@ -221,7 +221,7 @@ void Plot::init_axes()
 
 	_axes.x = sf::VertexArray(sf::LinesStrip, 2);
 	_axes.x[0].position = {0, cx};
-	_axes.x[1].position = {_width, cx};
+	_axes.x[1].position = {(float) _width, cx};
 	_axes.x[0].color = _axes.color;
 	_axes.x[1].color = _axes.color;
 
@@ -230,7 +230,7 @@ void Plot::init_axes()
 	
 	_axes.y = sf::VertexArray(sf::LinesStrip, 2);
 	_axes.y[0].position = {cy, 0};
-	_axes.y[1].position = {cy, _height};
+	_axes.y[1].position = {cy, (float) _height};
 	_axes.y[0].color = _axes.color;
 	_axes.y[1].color = _axes.color;
 
@@ -249,17 +249,17 @@ void Plot::init_axes()
 	_axes.xleft.setPoint(1, {10, cx - 5});
 	_axes.xleft.setPoint(2, {0, cx});
 
-	_axes.xright.setPoint(0, {_width - 10, cx + 5});
-	_axes.xright.setPoint(1, {_width - 10, cx - 5});
-	_axes.xright.setPoint(2, {_width, cx});
+	_axes.xright.setPoint(0, {(float) _width - 10, cx + 5});
+	_axes.xright.setPoint(1, {(float) _width - 10, cx - 5});
+	_axes.xright.setPoint(2, {(float) _width, cx});
 
 	_axes.yup.setPoint(0, {cy + 5, 10});
 	_axes.yup.setPoint(1, {cy - 5, 10});
 	_axes.yup.setPoint(2, {cy, 0});
 
-	_axes.ydown.setPoint(0, {cy + 5, _height - 10});
-	_axes.ydown.setPoint(1, {cy - 5, _height - 10});
-	_axes.ydown.setPoint(2, {cy, _height});
+	_axes.ydown.setPoint(0, {cy + 5, (float) _height - 10});
+	_axes.ydown.setPoint(1, {cy - 5, (float) _height - 10});
+	_axes.ydown.setPoint(2, {cy, (float) _height});
 
 	// Axis labels
 	_axes.xtext.setFont(_axes.font);
@@ -313,7 +313,7 @@ sf::Vector2f Plot::true_coords(const Vector <double> &coords)
 	double i = _width * (coords[0] - _axes.xmin)/(_axes.xmax - _axes.xmin);
 	double j = _height * (1 - (coords[1] - _axes.ymin)/(_axes.ymax - _axes.ymin));
 
-	return {i, j};
+	return {(float) i, (float) j};
 }
 
 // Private methods

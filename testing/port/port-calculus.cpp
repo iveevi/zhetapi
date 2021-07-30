@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool integration(ostringstream &oss)
+TEST(integration)
 {
 	using namespace zhetapi::utility;
 

@@ -1,4 +1,5 @@
 #include "../engine/module.hpp"
+#include "../engine/engine.hpp"
 #include "../engine/core/types.hpp"
 #include "../engine/core/functor.hpp"
 
@@ -103,15 +104,46 @@ void Module::add(const std::string &name, Token *tptr)
 	_attributes[name] = tptr;
 }
 
+void Module::from_add(Engine *ctx, const Args &syms)
+{
+	bool all = (std::find(syms.begin(), syms.end(), "*") != syms.end());
+
+	if (all) {
+		for (const auto &attr : _attributes)
+			ctx->put(attr.first, attr.second);
+		
+		return;
+	}
+
+	// TODO: add to common
+	Pardon set_syms;
+	for (const std::string &sym : syms)
+		set_syms.insert(set_syms.begin(), sym);
+
+	for (const std::string &sym : set_syms) {
+		bool found = false;
+
+		for (const auto &attr : _attributes) {
+			if (sym == attr.first) {
+				ctx->put(attr.first, attr.second);
+				found = true;
+
+				break;
+			}
+		}
+
+		if (!found) {
+			throw std::runtime_error("FIXME: Library \"" + _name
+				+ "\" does not contain any member \""
+				+ sym + "\"");
+		}
+	}
+}
+
 // Virtual functions
 Token::type Module::caller() const
 {
 	return Token::token_module;
-}
-
-uint8_t Module::id() const
-{
-	return zhp_id <Module> ();
 }
 
 std::string Module::dbg_str() const

@@ -68,7 +68,7 @@ class Vector;
 template <class T>
 class Matrix : public Tensor <T> {
 protected:
-	// TODO: Remove later
+	// TODO: Remove later (REMOOOOOVE)
 	size_t  _rows	= 0;
 	size_t  _cols	= 0;
 public:
@@ -78,7 +78,7 @@ public:
 
 	// Scaled
 	__cuda_dual__ Matrix(const Matrix &, T);
-
+	
 	__cuda_dual__ Matrix(size_t, size_t, T = T());
 
 	// Lambda constructors
@@ -108,9 +108,13 @@ public:
 	AVR_IGNORE(Matrix(const std::initializer_list <Vector <T>> &));
 	AVR_IGNORE(Matrix(const std::initializer_list <std::initializer_list <T>> &));
 
-	__cuda_dual__
-	Matrix(size_t, size_t, T *, bool = true);
+	__cuda_dual__ Matrix(size_t, size_t, T *, bool = true);
 
+	// Cross type operations
+	template <class A>
+	__cuda_dual__ explicit Matrix(const Matrix <A> &);
+
+	// Methods
 	inline T &get(size_t, size_t);
 	inline const T &get(size_t, size_t) const;
 

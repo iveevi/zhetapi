@@ -16,7 +16,7 @@ protected:
 	size_t		_index;
 	bool		_var;
 public:
-	node_reference(node *, const ::std::string &, size_t, bool = false);
+	node_reference(node *, const std::string &, size_t, bool = false);
 
 	void set(node *);
 

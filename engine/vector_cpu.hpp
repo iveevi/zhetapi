@@ -53,22 +53,21 @@ template <class T>
 template <class A>
 Vector <T> ::Vector(const Vector <A> &other)
 {
-	// TODO: remove this if and put into primitives
-	if (is_vector_type <A> ()) {
-		// Add a new function for this
-		this->_array = new T[other.size()];
-		this->_rows = other.get_rows();
-		this->_cols = other.get_cols();
+	// TODO: Add a new function for this
+	// TODO: put this function into primitives
+	// TODO: use member initializer list
+	this->_array = new T[other.size()];
+	this->_rows = other.get_rows();
+	this->_cols = other.get_cols();
 
-		this->_size = other.size();
-		for (size_t i = 0; i < this->_size; i++)
-			this->_array[i] = other[i];
+	this->_size = other.size();
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = other[i];
 
-		this->_dims = 1;
-		this->_dim = new size_t[1];
+	this->_dims = 1;
+	this->_dim = new size_t[1];
 
-		this->_dim[0] = this->_size;
-	}
+	this->_dim[0] = this->_size;
 }
 
 template <class T>

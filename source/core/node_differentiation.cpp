@@ -1,5 +1,5 @@
-#include <core/node_manager.hpp>
-#include <engine.hpp>
+#include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/operation_base.hpp"
 
 namespace zhetapi {
 
@@ -28,7 +28,7 @@ void node_manager::differentiate_mul(node &ref)
 void node_manager::differentiate_pow(node &ref)
 {
 	Token *mul = ref[1].copy_token();
-	Token *exp = shared_context->compute("-", {mul, new OpZ(1)});
+	Token *exp = detail::compute("-", {mul, new OpZ(1)});
 
 	node diffed(ref[0]);
 	differentiate(diffed);
@@ -68,7 +68,7 @@ void node_manager::differentiate_lg(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(shared_context->compute("ln", {new OpZ(2)}), l_none, {}),
+			node(detail::compute("ln", {new OpZ(2)}), l_none, {}),
 			node(ref[0])
 		})
 	});
@@ -84,7 +84,7 @@ void node_manager::differentiate_const_log(node &ref)
 	node tmp(new operation_holder("/"), l_divided, {
 		diffed,
 		node(new operation_holder("*"), l_multiplied, {
-			node(shared_context->compute("ln", {
+			node(detail::compute("ln", {
 				node_value(shared_context, ref[0])
 			}), l_none, {}),
 			node(ref[1])
@@ -121,7 +121,7 @@ void node_manager::differentiate_trig(node &ref)
 			node(new operation_holder("sec"), l_trigonometric, {
 				node(ref[0])
 			}),
-			node(new OpZ(2), l_constant_integer, {})	
+			node(new OpZ(2), l_constant_integer, {})
 		});
 		break;
 	case sec:
@@ -153,7 +153,7 @@ void node_manager::differentiate_trig(node &ref)
 				node(new operation_holder("cot"), l_trigonometric, {
 					node(ref[0])
 				}),
-				node(new OpZ(2), l_constant_integer, {})	
+				node(new OpZ(2), l_constant_integer, {})
 			}),
 			node(new OpZ(-1), l_constant_integer, {})
 		});
@@ -197,7 +197,7 @@ void node_manager::differentiate_hyp(node &ref)
 			node(new operation_holder("sech"), l_hyperbolic, {
 				node(ref[0])
 			}),
-			node(new OpZ(2), l_constant_integer, {})	
+			node(new OpZ(2), l_constant_integer, {})
 		});
 		break;
 	case sch:
@@ -229,7 +229,7 @@ void node_manager::differentiate_hyp(node &ref)
 				node(new operation_holder("coth"), l_hyperbolic, {
 					node(ref[0])
 				}),
-				node(new OpZ(2), l_constant_integer, {})	
+				node(new OpZ(2), l_constant_integer, {})
 			}),
 			node(new OpZ(-1), l_constant_integer, {})
 		});

@@ -1,7 +1,7 @@
 #include "../../engine/core/common.hpp"
 #include "../../engine/engine.hpp"
 #include "../../engine/core/node_manager.hpp"
-#include <stdexcept>
+#include "../../engine/core/operation_base.hpp"
 
 namespace zhetapi {
 
@@ -32,8 +32,37 @@ static void substitute(Engine *ctx, node &tree)
 		substitute(ctx, child);
 }
 
+static Token *vector_expr_node(Engine *ctx, const node &tree)
+{
+	Targs tokens;
+	for (const node &child : tree) {
+		// TODO: add error handling here
+		tokens.push_back(node_value(ctx, child));
+	}
+
+	// TODO: add a typedef for this
+	return new Operand <Vector <Token *>> (Vector <Token *> (tokens));
+}
+
+static Token *matrix_expr_node(Engine *ctx, const node &tree)
+{
+	std::vector <std::vector <Token *>> tokens1;
+	for (const node &child1 : tree) {
+		Targs tokens2;
+		for (const node &child2 : child1) {
+			// TODO: add error handling here
+			tokens2.push_back(node_value(ctx, child2));
+		}
+
+		tokens1.push_back(tokens2);
+	}
+
+	// TODO: add a typedef for this
+	return new Operand <Matrix <Token *>> (Matrix <Token *> (tokens1));
+}
+
 static Token *assignment_node(Engine *ctx, const node &tree)
-{	
+{
 	// Evaluate first node
 	Token *tmp = nullptr;
 	// Assign for the other nodes
@@ -164,6 +193,8 @@ static Token *while_node(Engine *context, const node &tree)
 
 				break;
 			}
+
+			delete eval;
 		} else {
 			break;
 		}
@@ -234,7 +265,7 @@ static Token *set_in_node(Engine *ctx, const node &tree)
 
 	// if (!rv) throw
 	// if (!set) throw
-	
+
 	// TODO: use token factories to return
 	if (set->present(rv->get(ctx)))
 		return new OpB(true);
@@ -244,8 +275,11 @@ static Token *set_in_node(Engine *ctx, const node &tree)
 
 static Token *node_null_value(Engine *context, const node &tree)
 {
-	Token *output = nullptr;
 	switch (tree.label()) {
+	case l_vector_expr:
+		return vector_expr_node(context, tree);
+	case l_matrix_expr:
+		return matrix_expr_node(context, tree);
 	case l_assignment_chain:
 		return assignment_node(context, tree);
 	case l_branch:
@@ -280,19 +314,11 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 {
 	// TODO: clean up these variables
 	Token *tptr;
-	Token *vptr;
-
-	// Variable v;
-
-	rvalue *rv;
-
 	algorithm *aptr;
-
-	std::string ident;
-
 	int size;
-
 	node reffed;
+	rvalue *rv;
+	std::string ident;
 
 	// Check for operation
 	if (tree.null())
@@ -307,9 +333,13 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	case Token::token_collection:
 		return tree.copy_token();
 	case Token::token_rvalue:
-		tree.retokenize((tree.cast <rvalue> ())->get(ctx));
+		if (tree.child_count()) {
+			tree.retokenize((tree.cast <rvalue> ())->get(ctx)->copy());
 
-		return node_value(ctx, tree);
+			return node_value(ctx, tree);
+		}
+
+		return (tree.cast <rvalue> ())->get(ctx);
 	case Token::token_node_list:
 		return (tree.cast <node_list> ())->evaluate(ctx);
 	case Token::ndr:
@@ -362,8 +392,21 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 	// else: this func
 	Targs values = proper_args(ctx, tree);
 
+	// TODO: separate function
 	if (t == Token::oph) {
-		tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
+		try {
+			// tptr = ctx->compute((tree.cast <operation_holder> ())->rep, values);
+			tptr = detail::compute((tree.cast <operation_holder> ())->rep, values);
+		} catch (const detail::bad_overload &e) {
+			std::cout << "FIXME: Error evaluating tree:" << std::endl;
+			tree.print();
+			std::cout << "values:" << std::endl;
+			for (auto tok : values)
+				std::cout << "\ttok = " << tok->dbg_str() << std::endl;
+
+			std::cout << e.what() << std::endl;
+			abort();
+		}
 
 		if (tree.label() == l_post_modifier) {
 			rv = tree[0].cast <rvalue> ();
@@ -377,16 +420,26 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 			ctx->put(rv->symbol(), tptr);
 		}
 
+		/* Delete values
+		for (Token *token : values)
+			delete token;
+		values.clear(); */
+
 		return tptr;
 	}
 
 	Functor *ftr = tree.cast <Functor> ();
 	if (!ftr)
-		throw node_manager::bad_token_type();
+		throw node_manager::bad_token_type(tree.ptr());
 
 	// Return the functor itself if there were no arguments
 	if (tree.child_count() || values.size())
 		return ftr->evaluate(ctx, values);
+
+	// Delete values
+	for (Token *token : values)
+		delete token;
+	values.clear();
 
 	return tree.copy_token();
 }
@@ -394,23 +447,21 @@ Token *node_value(Engine *ctx, node tree, bool mref)
 // TODO: use const tree instead
 Token *node_sequential_value(Engine *context, node tree)
 {
-	// Assumes that the top node is a sequential
-	// TODO: dont make these static pointers (stupid)
-	static Token *break_token = new Operand <Token *> ((Token *) 0x1);
-	static Token *continue_token = new Operand <Token *> ((Token *) 0x2);
-
 	Token *tptr;
-	for (node nd : tree) {
-		tptr = node_value(context, nd);
+	for (const node &child : tree) {
+		tptr = node_value(context, child);
 
-		// Check value for special cases (early returns)
 		// TODO: helper func
-		if (tptr && tokcmp(break_token, tptr))
+		if (tptr && is_break_token(tptr))
 			return tptr;
-		if (tptr && tokcmp(continue_token, tptr))
+		if (tptr && is_continue_token(tptr))
 			return tptr;
 		if (dynamic_cast <Operand <Token *> *> (tptr))
 			return tptr;
+
+		/* Delete the evaluated token if it is not neededs
+		if (tptr)
+			delete tptr; */
 	}
 
 	return nullptr;

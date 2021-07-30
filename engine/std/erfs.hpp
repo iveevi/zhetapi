@@ -2,17 +2,16 @@
 #define STD_ERFS_H_
 
 // Engine headers
-#include "erf.hpp"
-
-#include "std/erf_derivatives.hpp"
+#include "../erf.hpp"
+#include "../std/erf_derivatives.hpp"
 
 // Engine CUDA headers
-#include "cuda/essentials.cuh"
+#include "../cuda/essentials.cuh"
 
 namespace zhetapi {
-		
+
 namespace ml {
-	
+
 /*
 * All Erf classes have inlined member functions for the same
 * reason that the activation classes are inlined. Obscure naming is
@@ -24,18 +23,18 @@ class SE : public Erf <T> {
 public:
 	__cuda_dual__
 	SE() {
-		this->kind = Erf <T> ::OPT_SE; 
+		this->kind = Erf <T> ::OPT_SE;
 	}
 
 	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		Erf <T> ::assert_size(comp, in);
-		
+
 		T sum = 0;
 
 		for (size_t i = 0; i < comp.size(); i++)
 			sum += (comp[i] - in[i]) * (comp[i] - in[i]);
-		
+
 		return Vector <T> (1, sum);
 	}
 
@@ -57,12 +56,12 @@ public:
 	__cuda_dual__
 	Vector <T> operator()(const Vector <T> &comp, const Vector <T> &in) const {
 		Erf <T> ::assert_size(comp, in);
-		
+
 		T sum = 0;
 
 		for (size_t i = 0; i < comp.size(); i++)
 			sum += (comp[i] - in[i]) * (comp[i] - in[i]);
-		
+
 		return Vector <T> (1, sum / T(comp.size()));
 	}
 

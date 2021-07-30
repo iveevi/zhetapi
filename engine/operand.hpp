@@ -37,7 +37,6 @@ public:
 	std::string dbg_str() const override;
 	Token *copy() const override;
 	bool operator==(Token *) const override;
-	uint8_t id() const override;
 };
 
 // Constructors
@@ -104,19 +103,12 @@ Token *Operand <T> ::copy() const
 template <class T>
 bool Operand <T> ::operator==(Token *tptr) const
 {
-	using namespace std;
 	Operand *opd = dynamic_cast <Operand *> (tptr);
 
-	if (opd == nullptr)
+	if (!opd)
 		return false;
 
 	return (opd->_val == _val);
-}
-
-template <class T>
-uint8_t Operand <T> ::id() const
-{
-	return 0;
 }
 
 // Forward declare specializations
@@ -126,33 +118,11 @@ std::string Operand <bool> ::dbg_str() const;
 template <>
 std::string Operand <Args> ::dbg_str() const;
 
-// Forward declare ID specializations
-forward_ids(Z);
-forward_ids(Q);
-forward_ids(R);
+template <>
+std::string Operand <Vector <Token *>> ::dbg_str() const;
 
-forward_ids(B);
-forward_ids(S);
-
-forward_ids(CmpZ);
-forward_ids(CmpQ);
-forward_ids(CmpR);
-
-forward_ids(VecZ);
-forward_ids(VecQ);
-forward_ids(VecR);
-
-forward_ids(VecCmpZ);
-forward_ids(VecCmpQ);
-forward_ids(VecCmpR);
-
-forward_ids(MatZ);
-forward_ids(MatQ);
-forward_ids(MatR);
-
-forward_ids(MatCmpZ);
-forward_ids(MatCmpQ);
-forward_ids(MatCmpR);
+template <>
+std::string Operand <Matrix <Token *>> ::dbg_str() const;
 
 }
 

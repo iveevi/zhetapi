@@ -5,11 +5,16 @@ namespace zhetapi {
 // TODO: iostream here
 
 // String feeder
-StringFeeder::StringFeeder(const std::string &str)
-		: _source(str) {}
+StringFeeder::StringFeeder(const std::string &str, const std::string &loc)
+		: Feeder(loc), _source(str) {}
 
 StringFeeder::StringFeeder(const std::string &str, size_t i, char end)
 		: _source(str), _index(i), _end(end) {}
+
+size_t StringFeeder::line() const
+{
+	return _line;
+}
 
 // TODO: fix this +1 index offset
 char StringFeeder::feed()
@@ -23,6 +28,10 @@ char StringFeeder::feed()
 
 	if (_source[_index] == _end)
 		_count--;
+	
+	// Only increment the line number on feeds
+	if (_source[_index] == '\n')
+		_line++;
 
 	if (_index >= _source.length()
 		|| _count <= 0)
@@ -98,7 +107,7 @@ StringFeeder file_feeder(const std::string &fpath)
 			std::istreambuf_iterator <char> ());
 
 	// TODO: fix the offset issue
-	return StringFeeder('\n' + str);
+	return StringFeeder('\n' + str, fpath);
 }
 
 }

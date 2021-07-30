@@ -35,6 +35,10 @@ std::string strlabs[] = {
 
 	"constant boolean",
 	"constant string",
+
+	"vector expression",
+	"matrix expression",
+	"partial matrix expression",
 	
 	// References
 	"variable reference",

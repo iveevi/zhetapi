@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool matrix_construction_and_memory(ostringstream &oss)
+TEST(matrix_construction_and_memory)
 {
 	using namespace zhetapi;
 

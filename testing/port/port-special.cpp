@@ -1,6 +1,6 @@
 #include "port.hpp"
 
-bool gamma_and_factorial(ostringstream &oss)
+TEST(gamma_and_factorial)
 {
 	using namespace zhetapi::special;
 

@@ -1,6 +1,7 @@
 #include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/error_handling.hpp"
 #include "../../engine/core/node_manager.hpp"
+#include "../../engine/core/operation_base.hpp"
 #include "../../engine/core/common.hpp"
 
 namespace zhetapi {
@@ -14,7 +15,7 @@ static node_manager cc_run_normal(const std::string &cache,
 
 	try {
 		mg = node_manager(context, cache, args, pardon);
-	} catch (const Engine::unknown_op_overload &e)  {
+	} catch (const detail::bad_operation &e)  {
 		std::cerr << "err evaluating \'" << cache << "\'\n"
 			<< e.what() << std::endl;
 		exit(-1);
@@ -47,9 +48,9 @@ node_manager cc_run_assignment(
 		const Args &args,
 		Pardon &pardon)
 {
-	std::cout << "cc assignmnet:" << std::endl;
+	/* std::cout << "cc assignment:" << std::endl;
 	for (auto str : veq)
-		std::cout << "\t" << str << std::endl;
+		std::cout << "\t" << str << std::endl; */
 
 	node_manager out;
 
@@ -57,15 +58,22 @@ node_manager cc_run_assignment(
 
 	Args fout = get_args(veq[n - 2]);
 	Args fargs(fout.begin() + 1, fout.end());
-	
+
 	node_manager nm;
 	if (fout.size() > 1) {
 		nm = node_manager(ctx, veq[n - 1],
 				args_union(args, fargs),
 				pardon);
 		nm.nullify_refs(fargs);
+
+		/* std::cout << "post nullified nm:" << std::endl;
+		nm.print(); */
 	} else {
 		nm = node_manager(ctx, veq[n - 1], args, pardon);
+
+		/* std::cout << "veq[n - 1] = " << veq[n - 1] << std::endl;
+		std::cout << "Second branch:" << std::endl;
+		nm.print(); */
 	}
 
 	out.append(nm);
@@ -76,7 +84,7 @@ node_manager cc_run_assignment(
 
 		if (fout.size() > 1)
 			ftn.append(node(new Operand <Args> (fargs)));
-		
+
 		out.append(ftn);
 	} else {
 		// TODO: make a function (WHAT IS THIS???)
@@ -84,6 +92,9 @@ node_manager cc_run_assignment(
 			node_manager tmp(ctx, veq[n - 2],
 				args_union(args, fargs), pardon);
 			tmp.nullify_refs(fargs);
+
+			// std::cout << "post nullified tmp:" << std::endl;
+			// tmp.print();
 
 			out.append(tmp);
 		} catch (const node_manager::undefined_symbol &e) {
@@ -105,7 +116,7 @@ node_manager cc_run_assignment(
 
 			if (fout.size() > 1)
 				ftn.append(node(new Operand <Args> (fargs)));
-			
+
 			out.append(ftn);
 		} else {
 			// TODO: make a function
@@ -120,11 +131,11 @@ node_manager cc_run_assignment(
 			}
 		}
 	}
-	
+
 	out.set_label(l_assignment_chain);
 
-	std::cout << "resulting chain:" << std::endl;
-	out.print();
+	// std::cout << "resulting chain:" << std::endl;
+	// out.print();
 
 	return out;
 }
@@ -134,8 +145,7 @@ node_manager cc_run(const std::string &cache,
 		const Args &args,
 		Pardon &pardon)
 {
-	std::vector <std::string> veq = eq_split(cache);
-
+	Args veq = eq_split(cache);
 	if (veq.size() > 1)
 		return cc_run_assignment(veq, context, args, pardon);
 
@@ -152,7 +162,7 @@ node_manager cc_parse(Feeder *feeder,
 	struct State state;
 
 	char c;
-	
+
 	// TODO: remove using
 	while ((c = feeder->feed()) != EOF) {
 		// Check for commented line
@@ -206,10 +216,10 @@ node_manager cc_parse(Feeder *feeder,
 
 		if (!isspace(c))
 			state.cached += c;
-		
+
 		node_manager nkey = cc_keyword(state.cached, feeder,
 				ctx, args, pardon, &state);
-		
+
 		if (!nkey.empty())
 			out.append(nkey);
 		// check_keyword(state.cached, feeder, context, &state);

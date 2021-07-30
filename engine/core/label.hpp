@@ -45,6 +45,10 @@ enum lbl {
 	l_constant_boolean,
 	l_constant_string,
 
+	l_vector_expr,
+	l_matrix_expr,
+	l_partial_matrix_expr,
+
 	// References
 	l_variable_reference,
 	l_node_reference,

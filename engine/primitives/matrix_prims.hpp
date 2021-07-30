@@ -1,6 +1,7 @@
 #ifndef MATRIX_PRIMITIVES_H_
 #define MATRIX_PRIMITIVES_H_
 
+// TODO: reorganize this file
 namespace zhetapi {
 
 // Static
@@ -463,6 +464,17 @@ Matrix <T> ::Matrix(const Matrix <T> &other)
 		this->_array[i] = other._array[i];
 }
 
+template <class T>
+template <class A>
+Matrix <T> ::Matrix(const Matrix <A> &other)
+		: Tensor <T> (other.get_rows(), other.get_cols()),
+		_rows(other.get_rows()), _cols(other.get_cols())
+{
+	const A *array = other[0];
+	for (size_t i = 0; i < this->_size; i++)
+		this->_array[i] = array[i];
+}
+
 // TODO: Do all initialization inline or use Tensor copy constructor
 template <class T>
 Matrix <T> ::Matrix(const Vector <T> &other)
@@ -662,23 +674,17 @@ void Matrix <T> ::operator/=(const T &x)
 template <class T>
 Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
 {
-	assert(a._rows == b._rows && a._cols == b._cols);
-	return Matrix <T> (a._rows, a._cols,
-		[&](size_t i, size_t j) {
-			return a[i][j] + b[i][j];
-		}
-	);
+	Matrix <T> c = a;
+	c += b;
+	return c;
 }
 
 template <class T>
 Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 {
-	assert(a._rows == b._rows && a._cols == b._cols);
-	return Matrix <T> (a._rows, a._cols,
-		[&](size_t i, size_t j) {
-			return a[i][j] - b[i][j];
-		}
-	);
+	Matrix <T> c = a;
+	c -= b;
+	return c;
 }
 
 /*

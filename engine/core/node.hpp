@@ -24,8 +24,6 @@ private:
 	// Members
 	Token *		_tptr		= nullptr;
 	lbl		_label		= l_none;
-	cls		_class		= c_none;
-	size_t		_nodes		= 0;
 	Leaves		_leaves;
 public:
 	// Constructors
@@ -80,8 +78,6 @@ public:
 	void relabel(lbl);
 	void retokenize(Token *);
 	void releaf(const Leaves &);
-
-	void set_count(size_t);
 	
 	// Member functions
 	void transfer(const node &);
@@ -94,7 +90,9 @@ public:
 
 	// Printing
 	void print(int = 1, int = 0) const;
+	void print(std::ostream &, int = 1, int = 0) const;
 	void print_no_address(int = 1, int = 0) const;
+	void print_no_address(std::ostream &, int = 1, int = 0) const;
 
 	std::string display(int = 1, int = 0) const;
 

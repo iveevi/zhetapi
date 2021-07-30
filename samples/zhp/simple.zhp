@@ -1,42 +1,28 @@
-/* alg get_func(n)
-{
-	f(x) = nx
+/* l = {}
+x = 0
 
-	x = 3
+println("l = ", l)
 
-	println("x = ", x)
-	println("f: ", f)
-
-	return f
+i = 0
+n = 0
+while (i < 10) {
+	l.append(i)
+	x += i^2
+	n += 3
+	i++
 }
 
-g = get_func(3)
+println("final x = ", x)
+println("~operation = ", n) */
 
-println("g = ", g) */
+println([3, 4, 5] + [4.76, 6, 7])
+println([[3, 4], [5, 6]] + [[6.32, 5.78], [6, 8]])
 
-alg function_assignment()
-{
-	f(x) = 3 * x^2
+str = "frint lead
 
-	println("f: ", f)
-	println("f(2) = ", f(2))
-	println("f(3) = ", f(3))
-}
+println"
 
-g(x) = 2x^3 + xsin(x)
+println("str = ", str)
 
-function_assignment()
-
-println("g: ", g)
-println("g(1) = ", g(1))
-println("g(2) = ", g(2))
-println("g(3) = ", g(3))
-
-g(x) = 3 * x^2
-
-function_assignment()
-
-println("g: ", g)
-println("g(1) = ", g(1))
-println("g(2) = ", g(2))
-println("g(3) = ", g(3))
+println([3, 4]^T)
+println([[3.876, 4.43], [6.432, 7.324]]^T)

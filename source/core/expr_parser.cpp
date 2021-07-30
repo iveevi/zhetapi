@@ -1,731 +1,355 @@
+#include "../../engine/core/node_manager.hpp"
 #include "../../engine/core/expr_parser.hpp"
 #include "../../engine/core/lvalue.hpp"
 #include "../../engine/core/rvalue.hpp"
-#include <boost/spirit/home/support/common_terminals.hpp>
+#include "../../engine/core/collection.hpp"
 
 namespace zhetapi {
 
-parser::parser() : parser::base_type(_start)
+// Macros
+#define _add_operation_symbol(name, str)				\
+	name = boost::spirit::qi::lit(#str) [				\
+		boost::spirit::qi::_val = #str				\
+	];
+
+#define _add_operation_heter_symbol(name, str, act)			\
+	name = boost::spirit::qi::lit(#str) [				\
+		boost::spirit::qi::_val = #act				\
+	];
+
+#define _new_oph(str)							\
+	new zhetapi::operation_holder(str)
+
+// TODO: will need to create two parsers
+// - one for immediate parsing and evaluation (all symbols are assumed to be
+// defined)
+// - another for delayed execution: creating funtions/algorithms
+// welp, this is for the new parser set...
+parser::parser(Engine *ctx)
+		: parser::base_type(_start)
 {
-	_esc.add("\\a", '\a')("\\b", '\b')("\\f", '\f')("\\n", '\n')
-		("\\r", '\r')("\\t", '\t')("\\v", '\v')("\\\\", '\\')
-		("\\\'", '\'')("\\\"", '\"');
+	// Using declarations
+	using boost::phoenix::new_;
+	using boost::phoenix::construct;
+	using boost::spirit::qi::char_;
+	using boost::spirit::qi::lit;
+	using boost::spirit::qi::_val;
+	using boost::spirit::qi::_1;
+	using boost::spirit::qi::_2;
+	using boost::spirit::qi::_3;
 
-	/*
-	 * Parser for an identifier. Used to construct variable
-	 * clusters.
-	 */
-        _ident = qi::char_("a-zA-Z$_") >> *qi::char_("0-9a-zA-Z$_");
-
-	_str = +(_esc | (qi::char_ - '\"'));
+	// Escape characters
+	_esc.add("\\a", '\a')
+		("\\b", '\b')
+		("\\f", '\f')
+		("\\n", '\n')
+		("\\r", '\r')
+		("\\t", '\t')
+		("\\v", '\v')
+		("\\\\", '\\')
+		("\\\'", '\'')
+		("\\\"", '\"');
 
 	// Operation parsers
-	_add_operation_symbol(_plus, +);
-	_add_operation_symbol(_minus, -);
-	_add_operation_symbol(_times, *);
-	_add_operation_symbol(_divide, /);
-	_add_operation_symbol(_power, ^);
-	_add_operation_symbol(_dot, @);
-	_add_operation_symbol(_mod, %);
-	_add_operation_symbol(_factorial, !);
-	// _add_operation_symbol(_in, in);
-	
-	// Binary comparison
-	_add_operation_symbol(_eq, ==);
-	_add_operation_symbol(_neq, !=);
-	_add_operation_symbol(_ge, >);
-	_add_operation_symbol(_le, <);
-	_add_operation_symbol(_geq, >=);
-	_add_operation_symbol(_leq, <=);
-
-	// Boolean ooperations
-	_add_operation_symbol(_or, ||);
 	_add_operation_symbol(_and, &&);
-
-	// Unary increment/decrement
-	_add_operation_heter_symbol(_post_incr, ++, p++);
-	_add_operation_heter_symbol(_post_decr, --, p--);
-	
-	_add_operation_heter_symbol(_pre_incr, ++, r++);
-	_add_operation_heter_symbol(_pre_decr, --, r--);
-
-	// Miscellaenous
 	_add_operation_symbol(_attribute, .);
+	_add_operation_symbol(_divide, /);
+	_add_operation_symbol(_dot, @);
+	_add_operation_symbol(_eq, ==);
+	_add_operation_symbol(_exponent, ^);
+	_add_operation_symbol(_factorial, !);
+	_add_operation_symbol(_ge, >);
+	_add_operation_symbol(_geq, >=);
+	_add_operation_symbol(_le, <);
+	_add_operation_symbol(_leq, <=);
+	_add_operation_symbol(_minus, -);
+	_add_operation_symbol(_mod, %);
+	_add_operation_symbol(_neq, !=);
+	_add_operation_symbol(_or, ||);
+	_add_operation_symbol(_plus, +);
+	_add_operation_symbol(_times, *);
+	_add_operation_symbol(_transpose, ^T);
+	_add_operation_heter_symbol(_post_decr, --, p--);
+	_add_operation_heter_symbol(_post_incr, ++, p++);
+	_add_operation_heter_symbol(_pre_decr, --, r--);
+	_add_operation_heter_symbol(_pre_incr, ++, r++);
 
-	/*
-	 * Represents a binary operation of lowest priotrity.
-	 * These are used to combine terms into expressions.
-	 * Exmaples of such operations are addition,
-	 * subtraction and the dot product.
-	 */
-	_t0_bin = _plus | _minus | _dot | _mod
-			| _eq | _neq | _geq
-			| _leq | _ge | _le
-			| _or | _and;
+	// Categorizing operations
+	_term_operation = _times | _divide | _mod | _dot | _and;
+	_start_operation = _plus | _minus | _or;
+	_expression_operation = _le | _leq | _ge | _geq | _eq | _neq;
+	_post_operations = _factorial | _post_decr | _post_incr;
+	_pre_operations = _pre_decr | _pre_incr;
 
-	/*
-	 * Represents a binary operation of second to lowest
-	 * priority. Connects factors into term. Examples are
-	 * multiplication and division.
-	 */
-	_t1_bin = _times | _divide;
-	
-	/*
-	 * Represents other binary operations with precedence
-	 * higher than that of _t1_bin. Examples are the
-	 * exponentiation operation.
-	 */
-	_t2_bin = _attribute | _power;
+	// Type parsers (real can be integer as well)
+	_integer = boost::spirit::qi::ulong_long;
 
-	_t_post = _post_incr | _post_decr;
-	_t_pre = _pre_incr | _pre_decr;
+	_pure_real = boost::spirit::qi::real_parser
+		<R, boost::spirit::qi::strict_ureal_policies <R>> ();
 
-	// Reals
-	_z = long_long;
+	_real = _pure_real | _integer;
 
-	_q = (long_long >> '/' >> long_long) [
-		_val = phoenix::construct <Q> (_1, _2)
-	];
-
-	// _r = double_;
-	_r = qi::real_parser <R, qi::strict_real_policies <R>> ();
-
-	// Generalized
-	_gq = _q | _z;
-	_gr = _r | _gq;
-	
-	// Complex
-	_cz = (_z >> 'i') [
-		_val = phoenix::construct <CmpZ> (0, _1)
-	];
-	
-	_cq = (_q >> 'i') [
-		_val = phoenix::construct <CmpQ> (0, _1)
-	];
-	
-	_cr = (_r >> 'i') [
-		_val = phoenix::construct <CmpR> (0, _1)
-	];
-	
-	_cgq = (_gq >> 'i') [
-		_val = phoenix::construct <CmpQ> (0, _1)
-	];
-	
-	_cgr = (_gr >> 'i') [
-		_val = phoenix::construct <CmpR> (0, _1)
+	// TODO: add general vectors (made of expressions)
+	_vector_integer = (_integer % ',') [
+		_val = construct <VecZ> (_1)
 	];
 
-	// Vector
-
-	_vz_inter = _z % ',';
-	_vq_inter = _q % ',';
-	_vr_inter = _r % ',';
-	_vgq_inter = _gq % ',';
-	_vgr_inter = _gr % ',';
-	_vcz_inter = _cz % ',';
-	_vcq_inter = _cq % ',';
-	_vcr_inter = _cr % ',';
-	_vcgq_inter = _cgq % ',';
-	_vcgr_inter = _cgr % ',';
-	
-	_vz = ('[' >> _vz_inter >> ']') [
-		_val = _1
-	];
-	
-	_vq = ('[' >> _vq_inter >> ']') [
-		_val = _1
-	];
-	
-	_vr = ('[' >> _vr_inter >> ']') [
-		_val = _1
-	];
-	
-	_vgq = ('[' >> _vgq_inter >> ']') [
-		_val = _1
-	];
-	
-	_vgr = ('[' >> _vgr_inter >> ']') [
-		_val = _1
-	];
-	
-	_vcz = ('[' >> _vcz_inter >> ']') [
-		_val = _1
-	];
-	
-	_vcq = ('[' >> _vcq_inter >> ']') [
-		_val = _1
-	];
-	
-	_vcr = ('[' >> _vcr_inter >> ']') [
-		_val = _1
-	];
-	
-	_vcgq = ('[' >> _vcgq_inter >> ']') [
-		_val = _1
-	];
-	
-	_vcgr = ('[' >> _vcgr_inter >> ']') [
-		_val = _1
+	// Second priority over vector integer
+	_vector_real = (_real % ',') [
+		_val = construct <VecR> (_1)
 	];
 
-	// Matrix
-	_mz_inter = _vz % ',';
-	_mq_inter = _vq % ',';
-	_mr_inter = _vr % ',';
-	_mgq_inter = _vgq % ',';
-	_mgr_inter = _vgr % ',';
-	_mcz_inter = _vcz % ',';
-	_mcq_inter = _vcq % ',';
-	_mcr_inter = _vcr % ',';
-	_mcgq_inter = _vcgq % ',';
-	_mcgr_inter = _vcgr % ',';
-	
-	_mz = ('[' >> _mz_inter >> ']') [
-		_val = _1
-	];
-	
-	_mq = ('[' >> _mq_inter >> ']') [
-		_val = _1
-	];
-	
-	_mr = ('[' >> _mr_inter >> ']') [
-		_val = _1
-	];
-	
-	_mgq = ('[' >> _mgq_inter >> ']') [
-		_val = _1
-	];
-	
-	_mgr = ('[' >> _mgr_inter >> ']') [
-		_val = _1
-	];
-	
-	_mcz = ('[' >> _mcz_inter >> ']') [
-		_val = _1
-	];
-	
-	_mcq = ('[' >> _mcq_inter >> ']') [
-		_val = _1
-	];
-	
-	_mcr = ('[' >> _mcr_inter >> ']') [
-		_val = _1
-	];
-	
-	_mcgq = ('[' >> _mcgq_inter >> ']') [
-		_val = _1
-	];
-	
-	_mcgr = ('[' >> _mcgr_inter >> ']') [
-		_val = _1
-	];
-	
-	// Token parsers
-
-	// Reals
-	_o_str = qi::lit('\"') >> _str [
-		_val = phoenix::new_ <OpS> (_1)
-	] >> qi::lit('\"');
-
-	_o_z = _z [
-		_val = phoenix::new_ <OpZ> (_1)
-	];
-	
-	_o_q = _q [
-		_val = phoenix::new_ <OpQ> (_1)
+	// Use V2 constructor instead of vector constructor
+	_matrix_integer = (('[' >> (_integer % ',') >> ']')
+			[_val = _1] % ',') [
+		_val = construct <MatZ> (_1)
 	];
 
-	_o_r = _r [
-		_val = phoenix::new_ <OpR> (_1)
-	];
-	
-	// Complex
-	_o_cz = _cz [
-		_val = phoenix::new_ <OpCmpZ> (_1)
-	];
-	
-	_o_cq = _cq [
-		_val = phoenix::new_ <OpCmpQ> (_1)
+	// Use V2 constructor instead of vector constructor
+	_matrix_real = (('[' >> (_real % ',') >> ']')
+			[_val = _1] % ',') [
+		_val = construct <MatR> (_1)
 	];
 
-	_o_cr = _cr [
-		_val = phoenix::new_ <OpCmpR> (_1)
+	// Generic vectors and matrices
+	_vector_expr = _start % ',';
+
+	_partial_matrix_expr = ('[' >> (_start % ',') >> ']') [
+		_val = construct <node> (nullptr, l_partial_matrix_expr, _1)
 	];
 
-	// Vector (whats all this mess??)
-	_o_vz = _vz [
-		_val = phoenix::new_ <OpVecZ> (_1)
-	];
-	
-	_o_vq = _vq [
-		_val = phoenix::new_ <OpVecQ> (_1)
-	];
-	
-	_o_vr = _vr [
-		_val = phoenix::new_ <OpVecR> (_1)
-	];
-	
-	_o_vgq = _vgq [
-		_val = phoenix::new_ <OpVecQ> (_1)
-	];
-	
-	_o_vgr = _vgr [
-		_val = phoenix::new_ <OpVecR> (_1)
-	];
-	
-	_o_vcz = _vcz [
-		_val = phoenix::new_ <OpVecCmpZ> (_1)
-	];
-	
-	_o_vcq = _vcq [
-		_val = phoenix::new_ <OpVecCmpQ> (_1)
-	];
-	
-	_o_vcr = _vcr [
-		_val = phoenix::new_ <OpVecCmpR> (_1)
-	];
-	
-	// TODO: why all general??
-	_o_vcgq = _vcgq [
-		_val = phoenix::new_ <OpVecCmpQ> (_1)
-	];
-	
-	_o_vcgr = _vcgr [
-		_val = phoenix::new_ <OpVecCmpR> (_1)
-	];
+	_matrix_expr = _partial_matrix_expr % ',';
 
-	// Matrix
-	_o_mz = _mz [
-		_val = phoenix::new_ <OpMatZ> (_1)
-	];
-	
-	_o_mq = _mq [
-		_val = phoenix::new_ <OpMatQ> (_1)
-	];
-	
-	_o_mr = _mr [
-		_val = phoenix::new_ <OpMatR> (_1)
-	];
-	
-	_o_mgq = _mgq [
-		_val = phoenix::new_ <OpMatQ> (_1)
-	];
-	
-	_o_mgr = _mgr [
-		_val = phoenix::new_ <OpMatR> (_1)
-	];
-	
-	_o_mcz = _mcz [
-		_val = phoenix::new_ <OpMatCmpZ> (_1)
-	];
-	
-	_o_mcq = _mcq [
-		_val = phoenix::new_ <OpMatCmpQ> (_1)
-	];
-	
-	_o_mcr = _mcr [
-		_val = phoenix::new_ <OpMatCmpR> (_1)
-	];
-	
-	_o_mcgq = _mcgq [
-		_val = phoenix::new_ <OpMatCmpQ> (_1)
-	];
-	
-	_o_mcgr = _mcgr [
-		_val = phoenix::new_ <OpMatCmpR> (_1)
-	];
+	// Quoted strings
+	_string = +(_esc | (char_ - '\"'));
 
-	// Nodes
-	_node_pack = _start % ',' | eps;
+	// Identifier (TODO: keep outside this scope later)
+	_identifier = char_("a-zA-Z$_") >> *char_("0-9a-zA-Z$_");
 
-	_collection =  ('{' >> _node_pack >> '}') [
-		_val = phoenix::new_ <node_list> (_1)
-	];
+	_collection = (
+		lit("{}") [
+			_val = new_ <Collection> (V1 <Token *> {})
+		]
 
-	/*
-	 * Pure numerical Operands, representing the 18
-	 * primitive types of computation. The exceptions are
-	 * rational numbers, which are excluded so that the
-	 * order of operations can be applied. This exclusion
-	 * should not cause any trouble, as integer division
-	 * will yield a rational result.
-	 */
-	_node_opd = (
-			_o_str
-			| _o_cr | _o_cz
-			| _o_r | _o_z
-			| _o_vcr | _o_vcz
-			| _o_vr | _o_vz
-			| _o_vcgr
-			| _o_vgr
-			| _o_mcr | _o_mcz
-			| _o_mr | _o_mz
-			| _o_mcgr
-			| _o_mgr
-		) [
-		_val = phoenix::construct <zhetapi::node> (_1,
-				::std::vector <zhetapi::node> {})
-	];
+		| ('{' >> (_start % ',') >> '}') [
+			_val = new_ <node_list> (_1)
+		]
+	);
 
-	// Rvalue and lvalues nodes
-	_node_rvalue = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <rvalue> (_1)
-		)
-	];
-	
-	_node_lvalue = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <lvalue> (_1)
-		)
-	];
+	// Operands (TODO: can also be a operation of operands)
+	_operand = (
+		_pure_real [
+			_val = construct <node> (new_ <OpR> (_1))
+		]
 
-	/*
-	 * A variable cluster, which is just a string of
-	 * characters. The expansion/unpakcing of this variable
-	 * cluster is done in the higher node_manager class,
-	 * where access to the engine object is present.
-	 */
-	_node_var = (
-			// Empty call
-			(_ident >> '(' >> ')') [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1),
-					node(blank_token())
-				)
-			]
+		// TODO: does real go after?
+		| _integer [
+			_val = construct <node> (new_ <OpZ> (_1))
+		]
 
-			| (_ident >> '(' >> _node_pack >> ')') [
-				_val = phoenix::construct <zhetapi::node> (
-					phoenix::new_ <variable_cluster> (_1),
-					_2
-				)
-			]
+		| _collection [
+			_val = construct <node> (_1)
+		]
 
-			// Index
-			| (_ident >> '[' >> _node_expr >> ']') [
-				_val = phoenix::construct <zhetapi::node> (
-					new operation_holder("[]"),
-					phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1)),
-					_2
-				)
-			]
+		| ('\"' >> _string >> '\"') [
+			_val = construct <node> (new_ <OpS> (_1))
+		]
 
-			| _ident [
-				_val = phoenix::construct <zhetapi::node> (phoenix::new_ <variable_cluster> (_1), std::vector <zhetapi::node> {})
-			]
-		);
+		| ('[' >> _vector_integer >> ']') [
+			_val = construct <node> (new_ <OpVecZ> (_1))
+		]
 
-	/*
-	 * Represents a parenthesized expression.
-	 */
-	_node_prth = "(" >> _start [_val = _1] >> ")";
+		| ('[' >> _vector_real >> ']') [
+			_val = construct <node> (new_ <OpVecR> (_1))
+		]
 
-	/*
-	 * Represents a repeatable factor. Examples are
-	 * variables and parenthesized expressions. The reason
-	 * is because terms like x3(5 + 3) are much more awkward
-	 * compared to 3x(5 + 3)
-	 */
-	// TODO: the or is useless
-	_node_rept = _node_var | _node_prth;
-	
-	/*
-	 * Represents a series of parenthesized expression,
-	 * which are mutlilpied through the use of
-	 * juxtaposition.
-	 */
-	_node_prep = _node_rept [_val = _1] >> *(
-			(_node_rept) [_val = phoenix::construct
-			<zhetapi::node> (phoenix::new_
-				<operation_holder>
-				(std::string("*")), _val, _1)]
-		);
+		| ('[' >> _matrix_integer >> ']') [
+			_val = construct <node> (new_ <OpMatZ> (_1))
+		]
 
-	/*
-	 * Represents a part of a term. For example, in the term
-	 * 3x, 3 and x are both collectibles.
-	 */
-	_node_factor = (
-			_node_prep [_val = _1]
+		| ('[' >> _matrix_real >> ']') [
+			_val = construct <node> (new_ <OpMatR> (_1))
+		]
 
-			| (_node_opd >> _factorial) [
-				_val = phoenix::construct <zhetapi::node> (
-					_2,
-					_1
-				)
-			]
+		// Matrix of expressions
+		| ('[' >> _matrix_expr >> ']') [
+			_val = construct <node> (nullptr, l_matrix_expr, _1)
+		]
 
-			| _node_opd [_val = _1] >> *(
-				(_node_rept) [
-					_val = phoenix::construct <zhetapi::node> (
-						phoenix::new_ <operation_holder> (std::string("*")),
-						_val,
-						_1
-					)
-				]
+		// Vector of expressions
+		| ('[' >> _vector_expr >> ']') [
+			_val = construct <node> (nullptr, l_vector_expr, _1)
+		]
+	);
+
+	// Closed factors: tighter than factors and full factors
+	_closed_factor = (
+		_operand [_val = _1]
+
+		// Prioritize function with aruments (or blank)
+		// TODO: extended _identifier with closed factor
+		| (_identifier >> "()") [
+			_val = construct <node> (
+				new_ <variable_cluster> (_1),
+				V1 <node> {node(blank_token())}
 			)
+		]
 
-			| _collection [_val = _1]
-		);
-	
-	_attr = _ident [
-		_val = phoenix::construct <zhetapi::node> (
-			phoenix::new_ <variable_cluster> (_1)
-		)
-	];
+		| (_identifier >> '(' >> (_start % ',') >> ')') [
+			_val = construct <node> (new_ <variable_cluster> (_1), _2)
+		]
 
-	/*
-	 * Represents a term as in any mathematical expression.
-	 * Should be written without addition or subtraction
-	 * unless in parenthesis.
-	 */
-	_node_term = (
-			// TODO: must rearrange attribute chains
-			(_node_factor >> _power >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-			]
+		// TODO: expand right (if immediate) here using ctx and args
+		| _identifier [
+			_val = construct <node> (new_ <variable_cluster> (_1))
+		]
 
-			| (_node_factor >> _attribute >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1, _3)
-			]
-			
-			| (_t_pre >> _node_var) [
-				_val = phoenix::construct <zhetapi::node> (_1, _2)
-			]
+		// Parenthesized expressions
+		| ('(' >> _start >> ')') [
+			_val = _1
+		]
+	);
 
-			| (_node_var >> _t_post) [
-				_val = phoenix::construct <zhetapi::node> (_2, _1)
-			]
+	// Full factors
+	_full_factor = (
+		(_closed_factor >> "in" >> _full_factor) [
+			_val = construct <node> (nullptr, l_generator_in, _1, _2)
+		]
 
-			| (_minus >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (
-					new operation_holder("*"), _2, node(new OpZ(-1))
-				)
-			]
-
-			| _node_factor [_val = _1] >> *(
-				(_t1_bin >> _node_factor)
-				[_val = phoenix::construct
-				<zhetapi::node> (_1, _val, _2)]
+		| (_closed_factor >> _transpose) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2), _1
 			)
-		);
+		]
 
-	/*
-	 * A full expression or function definition.
-	 */
-	_node_expr = (
-			// TODO: use expression instead of rvalue
-			(_node_lvalue >> "in" >> _node_term) [
-				_val = phoenix::construct <zhetapi::node> (
-					nullptr, l_generator_in, _1, _2
-				)
-			]
-
-			// TODO: add "in" for expr in expr (actually add as a
-			// node_factor 
-			
-			| _node_term [_val = _1] >> *(
-				(_t0_bin >> _node_term) [
-					_val = phoenix::construct <zhetapi::node> (_1, _val, _2)
-				]
+		| (_closed_factor >> _exponent >> _full_factor) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
 			)
-		);
-	
-	// Entry point
-	_start = _node_expr;
+		]
 
-	// Naming rules
-	_start.name("start");
+		// Relax the grammar here, allows for garbage like foo.23
+		| (_closed_factor >> _attribute >> _closed_factor) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
+		]
 
-	_node_expr.name("node expression");
-	_node_term.name("node term");
-	_node_opd.name("node Operand");
-	_node_pack.name("node pack");
+		| (_closed_factor >> '[' >> _start >> ']') [
+			_val = construct <node> (_new_oph("[]"), _1, _2)
+		]
 
-	_plus.name("addition");
-	_minus.name("subtraction");
-	_times.name("multiplication");
-	_divide.name("division");
-	_power.name("exponentiation");
-	_attribute.name("attribute/method");
+		| (_closed_factor >> _post_operations) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2), _1
+			)
+		]
 
-	_collection.name("collection");
-	
-	_o_str.name("literal operand");
+		| (_pre_operations >> _closed_factor) [
+			_val = construct <node> (
+				new_ <operation_holder> (_1), _2
+			)
+		]
 
-	_o_z.name("integer operand");
-	_o_q.name("rational operand");
-	_o_r.name("real operand");
-	_o_cz.name("complex integer operand");
-	_o_cq.name("complex rational operand");
-	_o_cr.name("complex real operand");
-	
-	_o_vz.name("vector integer operand");
-	_o_vq.name("vector rational operand");
-	_o_vr.name("vector real operand");
-	_o_vgq.name("vector general rational operand");
-	_o_vgr.name("vector general real operand");
-	_o_vcz.name("vector complex integer operand");
-	_o_vcq.name("vector complex rational operand");
-	_o_vcr.name("vector complex real operand");
-	_o_vcgq.name("vector complex general rational operand");
-	_o_vcgr.name("vector complex general real operand");
-	
-	_o_mz.name("matrix integer Operand");
-	_o_mq.name("matrix rational Operand");
-	_o_mr.name("matrix real Operand");
-	_o_mgq.name("matrix general rational Operand");
-	_o_mgr.name("matrix general real Operand");
-	_o_mcz.name("matrix complex integer Operand");
-	_o_mcq.name("matrix complex rational Operand");
-	_o_mcr.name("matrix complex real Operand");
-	_o_mcgq.name("matrix complex general rational Operand");
-	_o_mcgr.name("matrix complex general real Operand");
+		| _closed_factor [_val = _1]
+	);
 
-	_str.name("literal");
+	// Factors: juxtaposition of full factors
+	_factor = (
+		(_full_factor >> _factor) [
+			_val = construct <node> (_new_oph("*"), _1, _2)
+		]
 
-	_z.name("integer");
-	_q.name("rational");
-	_r.name("real");
-	_gq.name("general rational");
-	_gr.name("general real");
-	_cz.name("complex integer");
-	_cq.name("complex rational");
-	_cr.name("complex real");
-	_cgq.name("complex general rational");
-	_cgr.name("complex general real");
-	
-	_vz.name("vector integer");
-	_vq.name("vector rational");
-	_vr.name("vector real");
-	_vgq.name("vector general rational");
-	_vgr.name("vector general real");
-	_vcz.name("vector complex integer");
-	_vcq.name("vector complex rational");
-	_vcr.name("vector complex real");
-	_vcgq.name("vector complex general rational");
-	_vcgr.name("vector complex general real");
-	
-	_mz.name("matrix integer");
-	_mq.name("matrix rational");
-	_mr.name("matrix real");
-	_mgq.name("matrix general rational");
-	_mgr.name("matrix general real");
-	_mcz.name("matrix complex integer");
-	_mcq.name("matrix complex rational");
-	_mcr.name("matrix complex real");
-	_mcgq.name("matrix complex general rational");
-	_mcgr.name("matrix complex general real");
-	
-	_vz_inter.name("intermediate vector integer");
-	_vq_inter.name("intermediate vector rational");
-	_vr_inter.name("intermediate vector real");
-	_vgq_inter.name("intermediate vector general rational");
-	_vgr_inter.name("intermediate vector general real");
-	_vcz_inter.name("intermediate vector complex integer");
-	_vcq_inter.name("intermediate vector complex rational");
-	_vcr_inter.name("intermediate vector complex real");
-	_vcgq_inter.name("intermediate vector complex general rational");
-	_vcgr_inter.name("intermediate vector complex general real");
-	
-	_mz_inter.name("intermediate matrix integer");
-	_mq_inter.name("intermediate matrix rational");
-	_mr_inter.name("intermediate matrix real");
-	_mgq_inter.name("intermediate matrix general rational");
-	_mgr_inter.name("intermediate matrix general real");
-	_mcz_inter.name("intermediate matrix complex integer");
-	_mcq_inter.name("intermediate matrix complex rational");
-	_mcr_inter.name("intermediate matrix complex real");
-	_mcgq_inter.name("intermediate matrix complex general rational");
-	_mcgr_inter.name("intermediate matrix complex general real");
+		| _full_factor [_val = _1]
+	);
 
-// #define ZHP_DEBUG
-#ifdef ZHP_DEBUG
+	// Terms: series of factors under multiplication or division
+	_term = (
+		(_plus >> _term) [
+			_val = _2
+		]
 
-	debug(_start);
+		// TODO: add a constant for -1
+		| (_minus >> _term) [
+			_val = construct <node> (
+				_new_oph("*"), _2, node(new OpZ(-1))
+			)
+		]
 
-	debug(_node_expr);
-	debug(_node_term);
-	debug(_node_opd);
-	debug(_node_pack);
+		| (_factor >> _term_operation >> _term) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
+		]
 
-	/* debug(_plus);
-	debug(_minus);
-	debug(_times);
-	debug(_divide);
-	debug(_power);
-	debug(_attr); */
-	debug(_collection);
-	
-	/* debug(_o_str);
+		| _factor [_val = _1]
+	);
 
-	debug(_o_z);
-	debug(_o_q);
-	debug(_o_r);
-	debug(_o_cz);
-	debug(_o_cq);
-	debug(_o_cr);
+	// Simple expression
+	_simple_expression = (
+		(_term >> _start_operation >> _start) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
+		]
 
-	debug(_o_vz);
-	debug(_o_vq);
-	debug(_o_vr);
-	debug(_o_vgq);
-	debug(_o_vgr);
-	debug(_o_vcz);
-	debug(_o_vcq);
-	debug(_o_vcr);
-	debug(_o_vcgq);
-	debug(_o_vcgr);
+		| _term [_val = _1]
+	);
 
-	debug(_o_mz);
-	debug(_o_mq);
-	debug(_o_mr);
-	debug(_o_mgq);
-	debug(_o_mgr);
-	debug(_o_mz);
-	debug(_o_mcq);
-	debug(_o_mcr);
-	debug(_o_mcgq);
-	debug(_o_mcgr);
+	// Starting expression
+	_start = (
+		(_simple_expression >> _expression_operation >> _start) [
+			_val = construct <node> (
+				new_ <operation_holder> (_2),
+				_1, _3
+			)
+		]
 
-	debug(_str);
-	
-	debug(_z);
-	debug(_q);
-	debug(_r);
-	debug(_gq);
-	debug(_gr);
-	debug(_cz);
-	debug(_cq);
-	debug(_cr);
-	debug(_cgq);
-	debug(_cgr);
+		| _simple_expression [_val = _1]
+	);
 
-	debug(_vz);
-	debug(_vq);
-	debug(_vr);
-	debug(_vgq);
-	debug(_vgr);
-	debug(_vcz);
-	debug(_vcq);
-	debug(_vcr);
-	debug(_vcgq);
-	debug(_vcgr);
+// #define ZHETAPI_PARSER_DEBUG
+#ifdef ZHETAPI_PARSER_DEBUG
 
-	debug(_mz);
-	debug(_mq);
-	debug(_mr);
-	debug(_mgq);
-	debug(_mgr);
-	debug(_mz);
-	debug(_mcq);
-	debug(_mcr);
-	debug(_mcgq);
-	debug(_mcgr); */
+	// Debugging name information
+	_integer.name("Integer parser");
+	_pure_real.name("Pure real (decimal) parser");
+	_real.name("Real parser");
+	_collection.name("Collection parser");
+	_identifier.name("Indentifier parser");
+
+	_operand.name("Operand");
+	_closed_factor.name("Closed Factor");
+	_full_factor.name("Full Factor");
+	_factor.name("Factor");
+	_term.name("Term");
+	_start.name("Start");
+
+	_plus.name("Plus");
+	_times.name("Times");
+
+	// Confirming debug
+	debug(_integer);
+	debug(_pure_real);
+	// debug(_real);
+	// debug(_collection);
+	// debug(_identifier);
+
+	// debug(_operand);
+	// debug(_closed_factor);
+	// debug(_full_factor);
+	// debug(_factor);
+	// debug(_term);
+	// debug(_start);
+
+	// debug(_plus);
+	// debug(_times);
 
 #endif
-
 }
 
 }

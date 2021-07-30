@@ -27,13 +27,13 @@ if (false)
 px = 0
 py = 2
 
-if (px^2 + py^2 == 4)
+if ((px^2 + py^2) == 4)
 	px = 24
 
-if (x^2 + 5^2 == 12^2)
+if ((x^2 + 5^2) == 12^2)
 	x = 5
 
-if (x^2 + 10^2 == 26^2) {
+if ((x^2 + 10^2) == 26^2) {
 	py = 27
 
 	px = py + px
@@ -149,7 +149,8 @@ TEST(parsing_global_branching)
 	if (OpZ (51) == tptr6) {
 		oss << ok << " Correct value found for px." << endl;
 	} else {
-		oss << err << " Wrong value for px." << endl;
+		oss << err << " Wrong value for px: "
+			<< ((tptr6) ? tptr6->dbg_str() : "[Null]") << endl;
 
 		return false;
 	}

@@ -107,6 +107,7 @@ public:
 	std::string display() const;
 
 	void print(bool = false) const;
+	void print(std::ostream &, bool = false) const;
 
 	// Arithmetic
 	friend node_manager operator+(
@@ -123,8 +124,6 @@ private:
 	void create_branch(node &, size_t, size_t);
 
 	void unpack(node &);
-
-	size_t count_up(node &);
 
 	void label(node &);
 	void label_operation(node &);
@@ -183,15 +182,17 @@ public:
 	};
 
 	// Undefined symbol error
-	class undefined_symbol : public error {
+	class undefined_symbol : public std::runtime_error {
 	public:
-		explicit undefined_symbol(const std::string &s)
-				: error(s) {}
+		explicit undefined_symbol(const std::string &str)
+			: std::runtime_error(str) {}
 	};
 
         class bad_input : public std::runtime_error {
         public:
-                bad_input() : std::runtime_error("bad input") {}
+                bad_input(const std::string &str)
+				: std::runtime_error("Fatal error: bad input \""
+				+ str + "\"") {}
         };
 
 	class null_attributee : public std::runtime_error {
@@ -201,7 +202,13 @@ public:
 
 	class bad_token_type : public std::runtime_error {
 	public:
-		bad_token_type() : std::runtime_error("Bad token type for evaluation") {}
+		bad_token_type(Token *tptr)
+				: std::runtime_error(
+					std::string("Bad token type for ")
+					+ "evaluation "
+					+ (tptr ? tptr->dbg_str() : "[Null]")
+					+ " <" + typeid(tptr).name() + ">"
+				) {}
 	};
 
 	class bad_indexable : public std::runtime_error {

@@ -15,6 +15,8 @@ protected:
 public:
 	explicit node_differential(Token *);
 
+	~node_differential();
+
 	Token *get() const;
 
 	type caller() const override;

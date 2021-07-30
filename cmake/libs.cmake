@@ -19,7 +19,6 @@ set(ZHETAPI_SOURCE
 	source/core/collection.cpp
 	source/core/common.cpp
 	source/core/dictionary.cpp
-	source/core/engine_base.cpp
 	source/core/enode.cpp
 	source/core/enode_parser.cpp
 	source/core/expr_parser.cpp
@@ -35,6 +34,7 @@ set(ZHETAPI_SOURCE
 	source/core/node_value.cpp
 	source/core/object.cpp
 	source/core/operation.cpp
+	source/core/operation_base.cpp
 	source/core/operation_holder.cpp
 	source/core/primitive.cpp
 	source/core/primoptns.cpp
@@ -47,6 +47,7 @@ set(ZHETAPI_SOURCE
 
 	source/lang/cc_keywords.cpp
 	source/lang/cc_parser.cpp
+	source/lang/colors.cpp
 	source/lang/compilation.cpp
 	source/lang/default_feeders.cpp
 	source/lang/error_handling.cpp
@@ -55,7 +56,6 @@ set(ZHETAPI_SOURCE
 	source/lang/keywords.cpp
 	source/lang/mdl_parser.cpp
 	source/lang/parser.cpp
-	source/lang/vm.cpp
 
 	source/std/functions.cpp
 	source/std/interval.cpp

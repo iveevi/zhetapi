@@ -81,11 +81,11 @@ Equation::Equation(const std::vector <std::string> &exprs)
 
 	if (A_newton_iter.empty())
 		A_newton_iter.compile(_engine);
-        _engine->put(A_newton_iter);
+        _engine->put("newton_iter", &A_newton_iter);
 
 	if (A_newton.empty())
 		A_newton.compile(_engine);
-        _engine->put(A_newton);
+        _engine->put("newton", &A_newton);
 
         // Separating the sides of the equation
 	std::set <std::string> excl;
