@@ -6,7 +6,7 @@
 // Essentials
 #include "../avr/essentials.hpp"
 
-#ifdef __AVR	// Does not support AVR
+#ifdef __AVR		// AVR support
 
 #include "../avr/random.hpp"
 
@@ -19,14 +19,17 @@
 #include <set>
 #include <vector>
 
-#endif		// Does not support AVR
+#endif			// AVR support
+
+// Engine headers
+#include "../fixed_vector.hpp"
 
 namespace zhetapi {
 
 // TODO: inspect the random-ness of the interval class
 namespace utility {
 
-#ifdef __AVR
+#ifdef __AVR		// AVR support
 
 // Blank dummy struct
 struct random_generator {};
@@ -45,43 +48,37 @@ using udb = distro_engine;
 
 #else
 
-extern std::random_device	rd;
+extern std::random_device rd;
 
 // Typedefs for sanity
 using dre = std::mt19937;
 using udb = std::uniform_real_distribution <double>;
 
-#endif
+#endif			// AVR support
 
-// N is the number of dimensions
-template <size_t N = 1>
-class Interval {
-	AVR_IGNORE(
-		template <size_t M>
-		friend std::ostream &operator<<(std::ostream &, const Interval <M> &)
-	);
-};
+// TODO: extend to long double
 
 // Keep inlined here for header only purposes
 struct disjoint {
 	static dre gen;
 	static udb distro;
 
-#ifdef __AVR
+#ifdef __AVR		// AVR support
 
 	using pflt = _avr_pair <double, double>;
 
-#else
+#else			// AVR support
 
 	using pflt = std::pair <double, double>;
 
-#endif
+#endif			// AVR support
 
 	double left = 0;
 	double right = 0;
 	bool closed = true;
 
-	disjoint(double l, double r, bool c)
+	// c should represent compact instead of closed?
+	disjoint(double l = 0.0, double r = 0.0, bool c = true)
 			: left(l), right(r), closed(c) {}
 
 	double length() const
@@ -137,10 +134,60 @@ struct disjoint {
 	}
 };
 
+// N is the number of dimensions
+// NOTE: for now multidim intervals
+// can only be one "box", see the TODO
+// below
+template <size_t N = 1>
+class Interval {
+	// TODO: this will not work,
+	// we need a disjoint equivalent for N dimensions
+	// (think about boxes as N-dim intervals)
+	disjoint *axes = nullptr;
+public:
+	Interval() : Interval(1.0L) {}
+
+	Interval(long double x) {
+		axes = new disjoint[N];
+
+		for (size_t i = 0; i < N; i++)
+			axes[i] = disjoint(0, x, true);
+	}
+
+	FixedVector <double, N> operator()() const {
+		return uniform();
+	}
+
+	FixedVector <double, N> uniform() const {
+		// First check that the axes are not null
+		if (axes == nullptr)
+			throw null_axes();
+
+		return FixedVector <double, N> (
+			[&](size_t i) -> double {
+				return axes[i].uniform();
+			}, N
+		);
+	}
+
+	AVR_IGNORE(
+		template <size_t M>
+		friend std::ostream &operator<<(std::ostream &,
+			const Interval <M> &)
+	);
+
+	// Exceptions
+	class null_axes : public std::runtime_error {
+	public:
+		null_axes() : std::runtime_error("Axes of Interval <N>"
+			" are null") {}
+	};
+};
+
 AVR_MASK(dre disjoint::gen = dre());
 AVR_MASK(udb disjoint::distro = udb());
 
-#ifndef __AVR	// Does not support AVR
+#ifndef __AVR		// AVR support
 
 // TODO: Switch from double to long double
 template <>
@@ -186,12 +233,16 @@ public:
 
 		for (disjoint dj : _union)
 			len += dj.length();
-		
+
 		return len;
 	}
 
 	operator bool() const {
 		return size() > 0;
+	}
+
+	double operator()() const {
+		return uniform();
 	}
 
 	// Sampling
@@ -258,7 +309,43 @@ std::ostream &operator<<(std::ostream &, const Interval <1> &);
 Interval <1> operator""_I(unsigned long long int);
 Interval <1> operator""_I(long double);
 
-#else		// AVR support
+#ifdef __APPLE__	// Apple support
+
+#warning Including Interval <1> operator""_I from the header, \
+	should be fine as long as the zhp shared library will not linked
+
+// TODO: Remove this (only temporary because of
+// issues compiling the library on OSX)
+
+// Literal constructor
+Interval <1> operator""_I(unsigned long long int x)
+{
+	return Interval <1> (x);
+}
+
+Interval <1> operator""_I(long double x)
+{
+	return Interval <1> (x);
+}
+
+// Don't forward declare if on OSX
+std::random_device rd;
+
+dre disjoint::gen(rd());
+udb disjoint::distro = udb(0, 1);
+
+dre Interval <1> ::gen(rd());
+udb Interval <1> ::distro = udb(0, 1);
+
+Interval <1> runit;
+
+#else			// Apple support
+
+extern Interval <1> runit;
+
+#endif			// Apple support
+
+#else			// AVR support
 
 #warning Zhetapi does not support the all of zhetapi::utility::Interval for AVR systems.
 
@@ -288,7 +375,7 @@ public:
 	}
 };
 
-#endif		// AVR support switch
+#endif			// AVR support switch
 
 }
 

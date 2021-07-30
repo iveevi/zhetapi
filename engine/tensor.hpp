@@ -24,7 +24,7 @@
 namespace zhetapi {
 
 // Type aliases
-AVR_IGNORE(using utility::Interval;)
+// AVR_IGNORE(using utility::Interval;)
 
 // Forward declarations
 template <class T>
@@ -35,6 +35,13 @@ class Matrix;
 
 template <class T>
 class Vector;
+
+namespace utility {
+
+template <size_t N>
+class Interval;
+
+}
 
 #ifdef __CUDACC__
 
@@ -113,7 +120,7 @@ public:
 	bool good() const;
 
 	// Actions
-	AVR_IGNORE(void nullify(long double, const Interval <1> &));
+	AVR_IGNORE(void nullify(long double, const utility::Interval <1> &));
 
 	// Boolean operators (generalize with prefix)
 	template <class U>

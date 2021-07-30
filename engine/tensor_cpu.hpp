@@ -90,7 +90,7 @@ bool Tensor <T> ::good() const
 
 // Actions
 template <class T>
-void Tensor <T> ::nullify(long double p, const Interval <1> &i)
+void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
 {
 	for (size_t k = 0; k < _size; k++) {
 		if (p > i.uniform())
