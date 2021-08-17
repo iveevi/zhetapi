@@ -17,7 +17,7 @@ enum codes {
 	shr,
 	fct,	// Factorial
 	pwr,
-	dot,	// Dot product
+	dtp,	// Dot product
 	mod,	// Modulo operator
 	sxn,
 	cxs,

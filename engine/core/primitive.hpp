@@ -8,7 +8,7 @@
 namespace zhetapi {
 
 // Maximum ID of a primitive
-#define MAX_PIDS	3
+#define MAX_PRIMITIVE_IDS	3
 
 // ID type alias
 using TypeId = uint32_t;

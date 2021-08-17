@@ -10,7 +10,7 @@ std::string strcodes[] = {
 	"shur",
 	"factorial",
 	"power",
-	"dot",
+	"dot product",
 	"mod",
 	"sin",
 	"cos",
@@ -71,7 +71,7 @@ operation_holder::operation_holder(const std::string &str) : rep(str)
 	else if (str == "^")
 		code = pwr;
 	else if (str == "@")
-		code = dot;
+		code = dtp;
 	else if (str == "%")
 		code = mod;
 	else if (str == "sin")

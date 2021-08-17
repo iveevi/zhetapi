@@ -4,9 +4,9 @@
 // C/C++ headers
 #include <cstdint>
 #include <unordered_map>
+#include <vector>
 
 // Engine headers
-#include "method_table.hpp"
 #include "primitive.hpp"
 
 namespace zhetapi {
@@ -14,12 +14,16 @@ namespace zhetapi {
 // TODO: need some global object (vector) to hold the size for each type id
 
 // Number of special operations
-#define NSPOPS 5
+#define NSPECIAL_OPERATIONS 5
 
 // Object type
 struct Object {
+	// Type aliases
+	using IdVec = std::vector <size_t>;
+	using Debugger = void (*)(const Object *);
+
         // ID header
-        TypeId		id;
+        TypeId 		id;
 
         // Data
         void *		data;
@@ -27,7 +31,7 @@ struct Object {
 
 	// Fixed size table for special operations
 	// as an array of function pointers
-	void *		spops[NSPOPS];
+	void *		spops[NSPECIAL_OPERATIONS];
 
 	// Indexes for special operations
 	enum Spidx : size_t {
@@ -38,10 +42,17 @@ struct Object {
 		sp_end			// Generator (in) end
 	};
 
-        // Methods and members
-        MethodTable *	mtable;
-        size_t *	memoffs;	// TODO: also need some information on the type of each member (id)
-        size_t		nmems;
+	// Method table object
+	struct {
+
+	} *		methods;
+	IdVec 		meminfo;
+
+	// Debugging information only
+	// TODO: enclose in macro statements
+	Debugger	dbg;
+
+	void debug() const;
 
 	// "Inheritance" checks
 	inline bool is_functor() const;
@@ -50,14 +61,20 @@ struct Object {
 	inline bool is_generator() const;
 
 	// ID assignment counter (starts from the last primitive id)
-	static size_t nid;
-
-	static size_t get_nid();
+	static TypeId nid;
+	static TypeId get_nid();
 
 	// Hash table from type name to id (for structs)
 	// TODO: add an alias from symtab
 	static std::unordered_map <std::string, TypeId> idtable;
 };
+
+// TYPE SPECIFICATION:
+//
+// Characters are just integers (value corresponds to ASCII code)
+
+// Builtin types
+Object mk_str(const char *);
 
 }
 

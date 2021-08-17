@@ -12,7 +12,7 @@ Variant null_variant()
 TypeId variant_type(Variant var)
 {
 	TypeId id = *((TypeId *) var);
-	return (id) ? (1 + (id > MAX_PIDS)) : 0;
+	return (id) ? (1 + (id > MAX_PRIMITIVE_IDS)) : 0;
 }
 
 std::string variant_str(Variant var)
