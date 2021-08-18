@@ -8,9 +8,15 @@ using namespace zhetapi;
 int main()
 {
 	Object str = mk_str("hello world!");
-
-	cout << "str = \"" << (const char *) str.data << "\"" << endl;
-	cout << "id = " << str.id << endl;
-
 	str.debug();
+
+	Object arr[4] {
+		str,
+		mk_str("one"),
+		mk_str("four"),
+		mk_str("three hundred")
+	};
+
+	Object col = mk_col(arr, 4);
+	col.debug();
 }
