@@ -8,7 +8,7 @@
 #include "erf.hpp"
 #include "optimizer.hpp"
 
-#include "std/linalg.hpp"
+#include "linalg.hpp"
 
 namespace zhetapi {
 
@@ -56,8 +56,8 @@ void fit(
 	Vector <T> delta = derf->compute(out, actual);
 
 	Matrix <T> *J;
-	
-	J = dnn.jacobian_delta(in, delta);	
+
+	J = dnn.jacobian_delta(in, delta);
 	J = opt->update(J, dnn.size());
 
 	dnn.apply_gradient(J);
@@ -82,12 +82,12 @@ void fit(
 
 	if (!_opt)
 		throw null_optimizer();
-	
+
 	if (!_cost)
 		throw null_loss_function(); */
 
 	Matrix <T> *J;
-	
+
 	// Put batch gradient (multithread and etc) in dnn method (batch jacobian)
 	J = simple_batch_gradient(dnn.layers(),
 		dnn.size(), dnn.acache(), dnn.zcache(),
@@ -118,12 +118,12 @@ void multithreaded_fit(
 
 	if (!_opt)
 		throw null_optimizer();
-	
+
 	if (!_cost)
 		throw null_loss_function(); */
 
 	Matrix <T> *J;
-	
+
 	J = simple_multithreaded_batch_gradient(
 			dnn.layers(),
 			dnn.size(),
@@ -231,7 +231,7 @@ PerformanceStatistics <T> train_dataset_perf(
 	PerformanceStatistics <T> ns;
 	PerformanceStatistics <T> bs;
 	size_t n;
-	
+
 	n = input_batches.size();
 	for (size_t i = 0; i < n; i++) {
 		bs = train_mini_batch_perf(dnn,

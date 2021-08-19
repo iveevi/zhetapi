@@ -41,8 +41,6 @@
 #define inline_init_mat(mat, rs, cs)			\
 	Matrix <T> mat;					\
 							\
-	mat._rows = rs;				\
-	mat._cols = cs;				\
 	mat._size = rs * cs;				\
 							\
 	mat._array = new T[rs * cs];			\
@@ -67,10 +65,6 @@ class Vector;
  */
 template <class T>
 class Matrix : public Tensor <T> {
-protected:
-	// TODO: Remove later (REMOOOOOVE)
-	size_t  _rows	= 0;
-	size_t  _cols	= 0;
 public:
 	__cuda_dual__ Matrix();
 	__cuda_dual__ Matrix(const Matrix &);

@@ -74,7 +74,7 @@ public:
 	size_t get_fan_out() const;
 
 	void set_fan_in(size_t);
-	
+
 	// Enable and disable dropout
 	void enable_dropout() const;
 	void disable_dropout() const;
@@ -91,7 +91,7 @@ public:
 
 	// Computation with dropout
 	void forward_propogate(Vector <T> &, Vector <T> &);
-	
+
 	void apply_gradient(const Matrix <T> &);
 
 	// Diagnosing methods
@@ -106,7 +106,7 @@ public:
 		Vector <U> *,
 		const Vector <U> &
 	);
-	
+
 	template <class U>
 	friend Matrix <U> *jacobian_kernel(
 		Layer <U> *,
@@ -136,7 +136,7 @@ public:
 		const Vector <U> &,
 		Erf <U> *
 	);
-	
+
 	template <class U>
 	friend Matrix <U> *simple_gradient(
 		Layer <U> *,
@@ -152,7 +152,7 @@ public:
 
 	template <class U>
 	friend Layer <U> operator-(const Layer <U> &, const Matrix <U> &);
-	
+
 	template <class U>
 	friend Layer <U> operator+(const Layer <U> &, const Matrix <U> &);
 };
@@ -246,7 +246,6 @@ template <class T>
 void Layer <T> ::set_fan_in(size_t fan_in)
 {
 	_fan_in = fan_in;
-	
 	if (_fan_in * _fan_out > 0)
 		_mat = Matrix <T> (_fan_out, _fan_in + 1);
 }

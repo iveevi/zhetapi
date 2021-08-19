@@ -7,20 +7,20 @@ template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
 {
 	if (columns.size() > 0) {
-		_rows = columns[0].size();
-		_cols = columns.size();
+		get_rows() = columns[0].size();
+		get_cols() = columns.size();
 
-		this->_size = _rows * _cols;
+		this->_size = get_rows() * get_cols();
 
 		this->_dim = new size_t[2];
-		this->_dim[0] = _rows;
-		this->_dim[1] = _cols;
+		this->_dim[0] = get_rows();
+		this->_dim[1] = get_cols();
 
 		this->_array = new T[this->_size];
 
-		for (size_t i = 0; i < _rows; i++) {
-			for (size_t j = 0; j < _cols; j++)
-				this->_array[_cols * i + j] = columns[j][i];
+		for (size_t i = 0; i < get_rows(); i++) {
+			for (size_t j = 0; j < get_cols(); j++)
+				this->_array[get_cols() * i + j] = columns[j][i];
 		}
 	}
 }
@@ -30,15 +30,11 @@ Matrix <T> ::Matrix(const std::initializer_list <Vector <T>> &columns)
 		: Matrix(std::vector <Vector <T>> (columns)) {}
 
 template <class T>
-Matrix <T> ::Matrix(const std::vector <T> &ref) : Tensor <T> ({ref.size(), 1}, T())
+Matrix <T> ::Matrix(const std::vector <T> &ref)
+		: Tensor <T> ({ref.size(), 1}, T())
 {
-	_rows = ref.size();
-
-	assert(_rows > 0);
-
-	_cols = 1;
-	
-	for (size_t i = 0; i < _rows; i++)
+	assert(get_rows() > 0);
+	for (size_t i = 0; i < get_rows(); i++)
 		this->_array[i] = ref[i];
 }
 
@@ -46,19 +42,14 @@ template <class T>
 Matrix <T> ::Matrix(const std::vector <std::vector <T>> &ref)
 		: Tensor <T> (ref.size(), ref[0].size())
 {
-	_rows = ref.size();
+	assert(get_rows() > 0);
+	assert(get_cols() > 0);
 
-	assert(_rows > 0);
+	for (int i = 0; i < get_rows(); i++) {
+		for (int j = 0; j < get_cols(); j++) {
+			assert(i < get_rows() && j < ref[i].size());
 
-	_cols = ref[0].size();
-
-	assert(_cols > 0);
-	
-	for (int i = 0; i < _rows; i++) {
-		for (int j = 0; j < _cols; j++) {
-			assert(i < _rows && j < ref[i].size());
-			
-			this->_array[_cols * i + j] = ref[i][j];
+			this->_array[get_cols() * i + j] = ref[i][j];
 		}
 	}
 }
@@ -67,22 +58,22 @@ template <class T>
 Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
                 : Tensor <T> (sq.size(), sq.begin()->size())
 {
-	_rows = sq.size();
+	get_rows() = sq.size();
 
-	assert(_rows > 0);
+	assert(get_rows() > 0);
 
-	_cols = sq.begin()->size();
+	get_cols() = sq.begin()->size();
 
-	assert(_cols > 0);
-	
+	assert(get_cols() > 0);
+
 	size_t i = 0;
 	for (auto lt : sq) {
 
 		size_t j = 0;
 		for (auto t : lt) {
-			assert(i < _rows && j < lt.size());
+			assert(i < get_rows() && j < lt.size());
 
-			this->_array[_cols * i + (j++)] = t;
+			this->_array[get_cols() * i + (j++)] = t;
 		}
 
 		i++;
@@ -91,31 +82,31 @@ Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen)
-                : _rows(rs), _cols(cs), Tensor <T> (rs, cs)
-{	
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = gen(i);
+                : Tensor <T> (rs, cs)
+{
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
-                : _rows(rs), _cols(cs), Tensor <T> (rs, cs)
+                : Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = *gen(i);
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = *gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
-		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+		: Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = gen(i, j);
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = gen(i, j);
 	}
 }
 
@@ -123,13 +114,13 @@ template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen)
 		: Tensor <T> (rs, cs)
 {
-	_rows = rs;
-	_cols = cs;
+	get_rows() = rs;
+	get_cols() = cs;
 
-	this->_array = new T[_rows * _cols];
-	for (int i = 0; i < _rows; i++) {
-		for (int j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = *gen(i, j);
+	this->_array = new T[get_rows() * get_cols()];
+	for (int i = 0; i < get_rows(); i++) {
+		for (int j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = *gen(i, j);
 	}
 }
 
@@ -150,37 +141,37 @@ void Matrix <T> ::read(std::ifstream &fin)
 template <class T>
 void Matrix <T> ::randomize(std::function <T ()> ftr)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[i * _cols + j] = ftr();
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[i * get_cols() + j] = ftr();
 	}
 }
 
 template <class T>
 Matrix <T> Matrix <T> ::append_above(const Matrix &m)
 {
-	assert(_cols == m._cols);
+	assert(get_cols() == m.get_cols());
 
-	size_t t_rows = _rows;
-	size_t m_rows = m._rows;
+	size_t trows = get_rows();
+	size_t mrows = m.get_rows();
 
 	std::vector <std::vector <T>> row;
 
 	std::vector <T> total;
 
-	for (size_t i = 0; i < m_rows; i++) {
+	for (size_t i = 0; i < mrows; i++) {
 		total.clear();
 
-		for (size_t j = 0; j < _cols; j++)
+		for (size_t j = 0; j < get_cols(); j++)
 			total.push_back(m[i][j]);
 
 		row.push_back(total);
 	}
 
-	for (size_t i = 0; i < t_rows; i++) {
+	for (size_t i = 0; i < trows; i++) {
 		total.clear();
 
-		for (size_t j = 0; j < _cols; j++)
+		for (size_t j = 0; j < get_cols(); j++)
 			total.push_back(this->_array[i][j]);
 
 		row.push_back(total);
@@ -192,28 +183,28 @@ Matrix <T> Matrix <T> ::append_above(const Matrix &m)
 template <class T>
 Matrix <T> Matrix <T> ::append_below(const Matrix &m)
 {
-	assert(_cols == m._cols);
+	assert(get_cols() == m.get_cols());
 
-	size_t t_rows = _rows;
-	size_t m_rows = m._rows;
+	size_t trows = get_rows();
+	size_t mrows = m.get_rows();
 
 	std::vector <std::vector <T>> row;
 
 	std::vector <T> total;
 
-	for (size_t i = 0; i < t_rows; i++) {
+	for (size_t i = 0; i < trows; i++) {
 		total.clear();
 
-		for (size_t j = 0; j < _cols; j++)
+		for (size_t j = 0; j < get_cols(); j++)
 			total.push_back(this->_array[i][j]);
 
 		row.push_back(total);
 	}
 
-	for (size_t i = 0; i < m_rows; i++) {
+	for (size_t i = 0; i < mrows; i++) {
 		total.clear();
 
-		for (size_t j = 0; j < _cols; j++)
+		for (size_t j = 0; j < get_cols(); j++)
 			total.push_back(m[i][j]);
 
 		row.push_back(total);
@@ -225,26 +216,26 @@ Matrix <T> Matrix <T> ::append_below(const Matrix &m)
 template <class T>
 Matrix <T> Matrix <T> ::append_left(const Matrix &m)
 {
-	assert(_rows == m._rows);
+	assert(get_rows() == m.get_rows());
 
-	size_t t_cols = _cols;
-	size_t m_cols = m._cols;
+	size_t tcols = get_cols();
+	size_t mcols = m.get_cols();
 
 	std::vector <std::vector <T>> row;
 
 	std::vector <T> total;
 
-	for (size_t i = 0; i < _rows; i++) {
+	for (size_t i = 0; i < get_rows(); i++) {
 		total.clear();
 
-		for (size_t j = 0; j < m_cols; j++)
+		for (size_t j = 0; j < mcols; j++)
 			total.push_back(m[i][j]);
 
 		row.push_back(total);
 	}
 
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < t_cols; j++)
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < tcols; j++)
 			row[i].push_back(this->_array[i][j]);
 	}
 
@@ -254,26 +245,26 @@ Matrix <T> Matrix <T> ::append_left(const Matrix &m)
 template <class T>
 Matrix <T> Matrix <T> ::append_right(const Matrix &m)
 {
-	assert(_rows == m._rows);
+	assert(get_rows() == m.get_rows());
 
-	size_t t_cols = _cols;
-	size_t m_cols = m._cols;
+	size_t tcols = get_cols();
+	size_t mcols = m.get_cols();
 
 	std::vector <std::vector <T>> row;
 
 	std::vector <T> total;
 
-	for (size_t i = 0; i < _rows; i++) {
+	for (size_t i = 0; i < get_rows(); i++) {
 		total.clear();
 
-		for (size_t j = 0; j < t_cols; j++)
+		for (size_t j = 0; j < tcols; j++)
 			total.push_back(this->_array[i][j]);
 
 		row.push_back(total);
 	}
 
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < m_cols; j++)
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < mcols; j++)
 			row[i].push_back(m[i][j]);
 	}
 
@@ -284,17 +275,17 @@ template <class T>
 void Matrix <T> ::swap_rows(size_t a, size_t b)
 {
 	// Assumes that a and b are in bounds
-	T *arr = &(this->_array[a * _cols]);
-	T *brr = &(this->_array[b * _cols]);
+	T *arr = &(this->_array[a * get_cols()]);
+	T *brr = &(this->_array[b * get_cols()]);
 
-	for (size_t i = 0; i < _cols; i++)
+	for (size_t i = 0; i < get_cols(); i++)
 		std::swap(arr[i], brr[i]);
 }
 
 template <class T>
 void Matrix <T> ::pow(const T &x)
 {
-	size_t s = _cols * _rows;
+	size_t s = get_cols() * get_rows();
 	for (size_t i = 0; i < s; i++)
 		this->_array[i] = std::pow(this->_array[i], x);
 }
@@ -314,22 +305,22 @@ std::string Matrix <T> ::display() const
 
 	oss << "[";
 
-	for (size_t i = 0; i < _rows; i++) {
-		if (_cols > 1) {
+	for (size_t i = 0; i < get_rows(); i++) {
+		if (get_cols() > 1) {
 			oss << '[';
 
-			for (size_t j = 0; j < _cols; j++) {
-				oss << this->_array[i * _cols + j];
-				if (j != _cols - 1)
+			for (size_t j = 0; j < get_cols(); j++) {
+				oss << this->_array[i * get_cols() + j];
+				if (j != get_cols() - 1)
 					oss << ", ";
 			}
 
 			oss << ']';
 		} else {
-			oss << this->_array[i * _cols];
+			oss << this->_array[i * get_cols()];
 		}
 
-		if (i < _rows - 1)
+		if (i < get_rows() - 1)
 			oss << ", ";
 	}
 
@@ -343,22 +334,22 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 {
 	os << "[";
 
-	for (size_t i = 0; i < mat._rows; i++) {
-		if (mat._cols > 1) {
+	for (size_t i = 0; i < mat.get_rows(); i++) {
+		if (mat.get_cols() > 1) {
 			os << '[';
 
-			for (size_t j = 0; j < mat._cols; j++) {
+			for (size_t j = 0; j < mat.get_cols(); j++) {
 				os << mat[i][j];
-				if (j != mat._cols - 1)
+				if (j != mat.get_cols() - 1)
 					os << ", ";
 			}
 
 			os << ']';
 		} else {
-			os << mat._array[i * mat._cols];
+			os << mat._array[i * mat.get_cols()];
 		}
 
-		if (i < mat._rows - 1)
+		if (i < mat.get_rows() - 1)
 			os << ", ";
 	}
 

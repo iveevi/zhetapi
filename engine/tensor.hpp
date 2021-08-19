@@ -111,6 +111,7 @@ public:
 	__cuda_dual__ size_t size() const;
 	__cuda_dual__ size_t dimensions() const;
 	__cuda_dual__ size_t dim_size(size_t) const;
+	__cuda_dual__ size_t safe_dim_size(size_t) const;
 
 	// TODO: private?
 	__cuda_dual__

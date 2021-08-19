@@ -21,8 +21,8 @@ namespace zhetapi {
 template <class T>
 Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 {
-	size_t rs = M._rows;
-	size_t cs = M._cols;
+	size_t rs = M.get_rows();
+	size_t cs = M.get_cols();
 
 	Vector <T> out(rs, T(0));
 
@@ -46,8 +46,8 @@ Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 template <class T>
 Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 {
-	size_t rs = M._rows;
-	size_t cs = M._cols;
+	size_t rs = M.get_rows();
+	size_t cs = M.get_cols();
 
 	Vector <T> out(cs - 1, T(0));
 	/* for (size_t i = 1; i < cs; i++) {
@@ -80,7 +80,7 @@ Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 {
 	size_t rs = V._size;
 	size_t cs = Vt._size;
-	
+
 	size_t n = rs * cs;
 
 	T *tmp = new T[n];

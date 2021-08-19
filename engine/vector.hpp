@@ -94,6 +94,9 @@ public:
 	Vector &operator=(const Vector &);
 	Vector &operator=(const Matrix <T> &);
 
+	// Getters
+	inline size_t get_cols() const;
+
 	// Indexing
 	__cuda_dual__ inline T &get(size_t);
 	__cuda_dual__ inline const T &get(size_t) const;

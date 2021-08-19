@@ -194,7 +194,7 @@ size_t Tensor <T> ::dimensions() const
 }
 
 /**
- * @brief Returns the size of a specific dimension.
+ * @brief Returns the size of a specific dimension. Does not check bounds.
  *
  * @param i the desired index.
  *
@@ -205,6 +205,21 @@ __cuda_dual__
 size_t Tensor <T> ::dim_size(size_t i) const
 {
 	return _dim[i];
+}
+
+/**
+ * @brief Returns the size of a specific dimension. If the index is out of
+ * bounds of the number of dimensions, then 1 is returned.
+ *
+ * @param i the desired index.
+ *
+ * @return the size of dimension \p i.
+ */
+template <class T>
+__cuda_dual__
+size_t Tensor <T> ::safe_dim_size(size_t i) const
+{
+	return (_dims > i) ? _dim[i] : 1;
 }
 
 // Comparison

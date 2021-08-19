@@ -44,6 +44,8 @@ Vector <T> simple_compute_cached(
 		Vector <T> *z,
 		const Vector <T> &in)
 {
+	using namespace std;
+
 	Vector <T> prv = in;
 	Vector <T> tmp = in;
 
@@ -51,8 +53,16 @@ Vector <T> simple_compute_cached(
 	while (i < size) {
 		a[i] = tmp.append_above(T (1));
 
+		/* cout << "tmp: " << "\n\trows = "
+			<< tmp.get_rows() << ", cols = "
+			<< tmp.get_cols() << endl; */
+
 		layers[i].forward_propogate(tmp, prv);
-		
+
+		/* cout << "prv = " << prv << "\n\trows = "
+			<< prv.get_rows() << ", cols = "
+			<< prv.get_cols() << endl; */
+
 		z[i++] = layers[i]._dact->compute(prv);
 	}
 
@@ -78,7 +88,7 @@ Matrix <T> *jacobian_kernel(
 	Matrix <T> *J = new Matrix <T> [size];
 
 	Vector <T> delta(osize, 1);
-	
+
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1) {
 			delta = AVR_SWITCH(
@@ -115,7 +125,7 @@ Matrix <T> *jacobian_kernel(
 
 	// Construction the Jacobian using backpropogation
 	Matrix <T> *J = new Matrix <T> [size];
-	
+
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1) {
 			delta = AVR_SWITCH(
@@ -211,7 +221,11 @@ Matrix <T> *simple_gradient(
 	Matrix <T> *J = new Matrix <T> [size];
 
 	Vector <T> delta = dcost->compute(out, actual);
-	
+
+	/* using namespace std;
+	cout << "delta = " << delta << endl;
+	cout << "\trows = " << delta.get_rows() << ", cols = " << delta.get_cols() << endl; */
+
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1) {
 			delta = AVR_SWITCH(
@@ -219,6 +233,11 @@ Matrix <T> *simple_gradient(
 				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
 			);
 		}
+
+		/* std::cout << "Index = " << i  << ", size = " << size << std::endl;
+		std::cout << "\tdelta = " << delta << std::endl;
+		std::cout << "\tz[i] = " << z[i] << std::endl;
+		cout << "\t\trows = " << z[i].get_rows() << ", cols = " << z[i].get_cols() << endl; */
 
 		delta.stable_shur(z[i]);
 
@@ -300,9 +319,9 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 
 	size_t task = 1;
 	auto ftn = [&]() {
-		Vector <T> *a = new Vector <T> [size + 1]; 
-		Vector <T> *z = new Vector <T> [size]; 
-		
+		Vector <T> *a = new Vector <T> [size + 1];
+		Vector <T> *z = new Vector <T> [size];
+
 		Matrix <T> *Q;
 		int t;
 
@@ -324,7 +343,7 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 
 			Q = simple_gradient(layers, size, a,
 					z, ins[t], outs[t], cost);
-			
+
 			addm_mtx.lock();
 
 			for (size_t k = 0; k < size; k++)
@@ -348,7 +367,7 @@ Matrix <T> *simple_multithreaded_batch_gradient(
 
 	for (size_t i = 0; i < size; i++)
 		J[i] /= T(ds);
-	
+
 	delete[] ta;
 	delete[] tz;
 

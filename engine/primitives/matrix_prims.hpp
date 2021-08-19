@@ -9,49 +9,49 @@ template <class T>
 T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
 
 template <class T>
-Matrix <T> ::Matrix() : Tensor <T> (), _rows(0), _cols(0) {}
+Matrix <T> ::Matrix() : Tensor <T> (0, 0) {}
 
 #ifdef __AVR
 
 // Lambda constructors
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t))
-                : Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+                : Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = gen(i);
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t))
-                : Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+                : Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = *gen(i);
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = *gen(i);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t, size_t))
-		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+		: Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = gen(i, j);
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = gen(i, j);
 	}
 }
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t, size_t))
-		: Tensor <T> (rs, cs), _rows(rs), _cols(cs)
+		: Tensor <T> (rs, cs)
 {
-	this->_array = new T[_rows * _cols];
-	for (int i = 0; i < _rows; i++) {
-		for (int j = 0; j < _cols; j++)
-			this->_array[_cols * i + j] = *gen(i, j);
+	this->_array = new T[get_rows() * get_cols()];
+	for (int i = 0; i < get_rows(); i++) {
+		for (int j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = *gen(i, j);
 	}
 }
 
@@ -63,9 +63,6 @@ __cuda_dual__
 Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 {
 	this->_size = rs * cs;
-
-	_rows = rs;
-	_cols = cs;
 
 	this->_dim = new size_t[2];
 
@@ -88,7 +85,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 template <class T>
 inline T &Matrix <T> ::get(size_t i, size_t j)
 {
-	return this->_array[i * _cols + j];
+	return this->_array[i * get_cols() + j];
 }
 
 /**
@@ -102,7 +99,7 @@ inline T &Matrix <T> ::get(size_t i, size_t j)
 template <class T>
 inline const T &Matrix <T> ::get(size_t i, size_t j) const
 {
-	return this->_array[i * _cols + j];
+	return this->_array[i * get_cols() + j];
 }
 
 template <class T>
@@ -119,7 +116,7 @@ T Matrix <T> ::norm() const
 template <class T>
 psize_t Matrix <T> ::get_dimensions() const
 {
-	return {_rows, _cols};
+	return {get_rows(), get_cols()};
 }
 
 template <class T>
@@ -131,8 +128,8 @@ Matrix <T> Matrix <T> ::slice(const psize_t &start, const psize_t &end) const
 	 */
 	assert(start.first <= end.first && start.second <= end.second);
 
-	assert(start.first < _rows && start.second < _cols);
-	assert(end.first < _rows && end.second < _cols);
+	assert(start.first < get_rows() && start.second < get_cols());
+	assert(end.first < get_rows() && end.second < get_cols());
 
 	/* Slicing is inclusive of the last
 	 * Vector passed.
@@ -141,7 +138,7 @@ Matrix <T> Matrix <T> ::slice(const psize_t &start, const psize_t &end) const
 		end.first - start.first + 1,
 		end.second - start.second + 1,
 		[&](size_t i, size_t j) {
-			return this->_array[_cols * (i + start.first) + j + start.second];
+			return this->_array[get_cols() * (i + start.first) + j + start.second];
 		}
 	);
 }
@@ -162,9 +159,9 @@ const T &Matrix <T> ::get(size_t row, size_t col) const
 template <class T>
 Vector <T> Matrix <T> ::get_column(size_t r) const
 {
-	return Vector <T> (_rows,
+	return Vector <T> (get_rows(),
 		[&](size_t i) {
-			return this->_array[_cols * i + r];
+			return this->_array[get_cols() * i + r];
 		}
 	);
 }
@@ -179,14 +176,14 @@ void Matrix <T> ::operator*=(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::add_rows(size_t a, size_t b, T k)
 {
-	for (size_t i = 0; i < _cols; i++)
+	for (size_t i = 0; i < get_cols(); i++)
 		this->_array[a][i] += k * this->_array[b][i];
 }
 
 template <class T>
 void Matrix <T> ::multiply_row(size_t a, T k)
 {
-	for (size_t i = 0; i < _cols; i++)
+	for (size_t i = 0; i < get_cols(); i++)
 		this->_array[a][i] *= k;
 }
 
@@ -199,20 +196,20 @@ T Matrix <T> ::determinant() const
 template <class T>
 T Matrix <T> ::minor(const psize_t &pr) const
 {
-	Matrix <T> out(_rows - 1, _cols - 1);
+	Matrix <T> out(get_rows() - 1, get_cols() - 1);
 
 	size_t a = 0;
 
-	for (size_t i = 0; i < _rows; i++) {
+	for (size_t i = 0; i < get_rows(); i++) {
 		size_t b = 0;
 		if (i == pr.first)
 			continue;
 
-		for (size_t j = 0; j < _cols; j++) {
+		for (size_t j = 0; j < get_cols(); j++) {
 			if (j == pr.second)
 				continue;
 
-			out[a][b++] = this->_array[i * _cols + j];
+			out[a][b++] = this->_array[i * get_cols() + j];
 		}
 
 		a++;
@@ -254,7 +251,7 @@ Matrix <T> Matrix <T> ::adjugate() const
 template <class T>
 Matrix <T> Matrix <T> ::cofactor() const
 {
-	return Matrix(_rows, _cols,
+	return Matrix(get_rows(), get_cols(),
 		[&](size_t i, size_t j) {
 			return cofactor(i, j);
 		}
@@ -422,12 +419,12 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 	 * Matrix is defined only if it
 	 * is a square Matrix.
 	 */
-	assert((a._rows == a._cols) && (a._rows > 0));
+	assert((a.get_rows() == a.get_cols()) && (a.get_rows() > 0));
 
 	size_t n;
 	size_t t;
 
-	n = a._rows;
+	n = a.get_rows();
 
 	if (n == 1)
 		return a[0][0];
@@ -457,8 +454,7 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
-		: Tensor <T> (other._rows, other._cols),
-		_rows(other._rows), _cols(other._cols)
+		: Tensor <T> (other.get_rows(), other.get_cols())
 {
 	for (size_t i = 0; i < this->_size; i++)
 		this->_array[i] = other._array[i];
@@ -467,8 +463,7 @@ Matrix <T> ::Matrix(const Matrix <T> &other)
 template <class T>
 template <class A>
 Matrix <T> ::Matrix(const Matrix <A> &other)
-		: Tensor <T> (other.get_rows(), other.get_cols()),
-		_rows(other.get_rows()), _cols(other.get_cols())
+		: Tensor <T> (other.get_rows(), other.get_cols())
 {
 	const A *array = other[0];
 	for (size_t i = 0; i < this->_size; i++)
@@ -478,23 +473,20 @@ Matrix <T> ::Matrix(const Matrix <A> &other)
 // TODO: Do all initialization inline or use Tensor copy constructor
 template <class T>
 Matrix <T> ::Matrix(const Vector <T> &other)
-		: _rows(other._rows), _cols(1),
-		Tensor <T> (other._rows, 1)
+		: Tensor <T> (other.get_rows(), 1)
 {
-	for (size_t i = 0; i < _rows; i++)
+	for (size_t i = 0; i < get_rows(); i++)
 		this->_array[i] = other._array[i];
 }
 
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other, T k)
-		: _rows(other._rows),
-		_cols(other._cols)
 {
 	if (this != &other) {
 		// Use a macro
 		this->_array = new T[other._size];
-		this->_rows = other._rows;
-		this->_cols = other._cols;
+		this->get_rows() = other.get_rows();
+		this->get_cols() = other.get_cols();
 
 		this->_size = other._size;
 		for (size_t i = 0; i < this->_size; i++)
@@ -503,8 +495,8 @@ Matrix <T> ::Matrix(const Matrix <T> &other, T k)
 		this->_dims = 2;
 		this->_dim = new size_t[2];
 
-		this->_dim[0] = this->_rows;
-		this->_dim[1] = this->_cols;
+		this->_dim[0] = this->get_rows();
+		this->_dim[1] = this->get_cols();
 	}
 }
 
@@ -512,9 +504,6 @@ template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
 		: Tensor <T> (rs, cs)
 {
-	_rows = rs;
-	_cols = cs;
-
 	for (size_t i = 0; i < this->_size; i++)
 		this->_array[i] = val;
 }
@@ -525,20 +514,17 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 	if (this != &other) {
 		this->clear();
 
-		_rows = other._rows;
-		_cols = other._cols;
-
-		this->_size = _rows * _cols;
-
+		this->_size = other._size;
 		this->_array = new T[this->_size];
+
 		for (size_t i = 0; i < this->_size; i++)
 			this->_array[i] = other._array[i];
 
 		this->_dims = 2;
 		this->_dim = new size_t[2];
 
-		this->_dim[0] = _rows;
-		this->_dim[1] = _cols;
+		this->_dim[0] = other._dim[0];
+		this->_dim[1] = other._dim[1];
 	}
 
 	return *this;
@@ -547,10 +533,7 @@ const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::resize(size_t rs, size_t cs)
 {
-	if (rs != _rows || cs != _cols) {
-		_rows = rs;
-		_cols = cs;
-
+	if (rs != get_rows() || cs != get_cols()) {
 		this->_size = rs * cs;
 
 		this->clear();
@@ -561,8 +544,8 @@ void Matrix <T> ::resize(size_t rs, size_t cs)
 			this->_dims = 2;
 			this->_dim = new size_t[2];
 
-			this->_dim[0] = this->_rows;
-			this->_dim[1] = this->_cols;
+			this->_dim[0] = this->get_rows();
+			this->_dim[1] = this->get_cols();
 		}
 	}
 }
@@ -570,13 +553,13 @@ void Matrix <T> ::resize(size_t rs, size_t cs)
 template <class T>
 T *Matrix <T> ::operator[](size_t i)
 {
-	return (this->_array + i * _cols);
+	return (this->_array + i * get_cols());
 }
 
 template <class T>
 const T *Matrix <T> ::operator[](size_t i) const
 {
-	return (this->_array + i * _cols);
+	return (this->_array + i * get_cols());
 }
 
 template <class T>
@@ -594,9 +577,9 @@ inline size_t Matrix <T> ::get_cols() const
 template <class T>
 Matrix <T> Matrix <T> ::transpose() const
 {
-	return Matrix(_cols, _rows,
+	return Matrix(get_cols(), get_rows(),
 		[&](size_t i, size_t j) {
-			return this->_array[j * _cols + i];
+			return this->_array[j * get_cols() + i];
 		}
 	);
 }
@@ -605,10 +588,10 @@ template <class T>
 void Matrix <T> ::row_shur(const Vector <T> &other)
 {
 	// Not strict (yet)
-	for (size_t i = 0; i < _rows; i++) {
-		T *arr = &(this->_array[i * _cols]);
+	for (size_t i = 0; i < get_rows(); i++) {
+		T *arr = &(this->_array[i * get_cols()]);
 
-		for (size_t j = 0; j < _cols; j++)
+		for (size_t j = 0; j < get_cols(); j++)
 			arr[j] *= other._array[i];
 	}
 }
@@ -616,8 +599,9 @@ void Matrix <T> ::row_shur(const Vector <T> &other)
 template <class T>
 void Matrix <T> ::stable_shur(const Matrix <T> &other)
 {
-	if (!((other.get_rows() == _rows)
-		&& (other.get_cols() == _cols)))
+	// TODO: add a same_shape function
+	if (!((other.safe_dim_size(0) == this->safe_dim_size(0))
+		&& (other.safe_dim_size(1) == this->safe_dim_size(1))))
 		throw typename Matrix <T> ::dimension_mismatch();
 
 	for (size_t i = 0; i < this->_size; i++)
@@ -637,22 +621,22 @@ void Matrix <T> ::stable_shur_relaxed(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::operator+=(const Matrix <T> &other)
 {
-	assert(_rows == other._rows && _cols == other._cols);
+	assert(get_rows() == other.get_rows() && get_cols() == other.get_cols());
 
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[i * _cols + j] += other._array[i * _cols + j];
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[i * get_cols() + j] += other._array[i * get_cols() + j];
 	}
 }
 
 template <class T>
 void Matrix <T> ::operator-=(const Matrix <T> &other)
 {
-	assert(_rows == other._rows && _cols == other._cols);
+	assert(get_rows() == other.get_rows() && get_cols() == other.get_cols());
 
-	for (size_t i = 0; i < _rows; i++) {
-		for (size_t j = 0; j < _cols; j++)
-			this->_array[i * _cols + j] -= other._array[i * _cols + j];
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[i * get_cols() + j] -= other._array[i * get_cols() + j];
 	}
 }
 
@@ -691,13 +675,13 @@ Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 template <class T>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 {
-	if (A._cols != B._rows)
+	if (A.get_cols() != B.get_rows())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	size_t rs = A._rows;
-	size_t cs = B._cols;
+	size_t rs = A.get_rows();
+	size_t cs = B.get_cols();
 
-	size_t kmax = B._rows;
+	size_t kmax = B.get_rows();
 
 	inline_init_mat(C, rs, cs);
 
@@ -721,14 +705,14 @@ template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
 	AVR_IGNORE(
-		if (A._cols != B._rows)
+		if (A.get_cols() != B.get_rows())
 			throw typename Matrix <T> ::dimension_mismatch()
 	);
 
-        size_t rs = A._rows;
-        size_t cs = B._cols;
+        size_t rs = A.get_rows();
+        size_t cs = B.get_cols();
 
-        size_t kmax = B._rows;
+        size_t kmax = B.get_rows();
 
         inline_init_mat(C, rs, cs);
 
@@ -751,7 +735,7 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 template <class T>
 Matrix <T> operator*(const Matrix <T> &a, const T &scalar)
 {
-	return Matrix <T> (a._rows, a._cols,
+	return Matrix <T> (a.get_rows(), a.get_cols(),
 		[&](size_t i, size_t j) {
 			return a[i][j] * scalar;
 		}
@@ -767,7 +751,7 @@ Matrix <T> operator*(const T &scalar, const Matrix <T> &a)
 template <class T>
 Matrix <T> operator/(const Matrix <T> &a, const T &scalar)
 {
-	return Matrix <T> (a._rows, a._cols,
+	return Matrix <T> (a.get_rows(), a.get_cols(),
 		[&](size_t i, size_t j) {
 			return a[i][j] / scalar;
 		}
@@ -828,16 +812,16 @@ Matrix <T> inv_shur(const Matrix <T> &a, const Matrix <T> &b)
 template <class T, class U, class V>
 Matrix <T> fma(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C)
 {
-	if (A._cols != B._rows)
+	if (A.get_cols() != B.get_rows())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	if (A._rows != C._rows || B._cols != C._cols)
+	if (A.get_rows() != C.get_rows() || B.get_cols() != C.get_cols())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	size_t rs = A._rows;
-	size_t cs = B._cols;
+	size_t rs = A.get_rows();
+	size_t cs = B.get_cols();
 
-	size_t kmax = B._rows;
+	size_t kmax = B.get_rows();
 
 	Matrix <T> D = C;
 
@@ -861,16 +845,16 @@ Matrix <T> fma(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C)
 template <class T, class U, class V>
 Matrix <T> fmak(const Matrix <T> &A, const Matrix <U> &B, const Matrix <V> &C, T ka, T kb)
 {
-	if (A._cols != B._rows)
+	if (A.get_cols() != B.get_rows())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	if (A._rows != C._rows || B._cols != C._cols)
+	if (A.get_rows() != C.get_rows() || B.get_cols() != C.get_cols())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	size_t rs = A._rows;
-	size_t cs = B._cols;
+	size_t rs = A.get_rows();
+	size_t cs = B.get_cols();
 
-	size_t kmax = B._rows;
+	size_t kmax = B.get_rows();
 
 	Matrix <T> D(C, kb);
 
@@ -897,23 +881,23 @@ String Matrix <T> ::display() const
 {
 	String out = "[";
 
-	for (size_t i = 0; i < _rows; i++) {
-		if (_cols > 1) {
+	for (size_t i = 0; i < get_rows(); i++) {
+		if (get_cols() > 1) {
 			out += '[';
 
-			for (size_t j = 0; j < _cols; j++) {
-				out += String(this->_array[i * _cols + j]);
+			for (size_t j = 0; j < get_cols(); j++) {
+				out += String(this->_array[i * get_cols() + j]);
 
-				if (j != _cols - 1)
+				if (j != get_cols() - 1)
 					out += ", ";
 			}
 
 			out += ']';
 		} else {
-			out += String(this->_array[i * _cols]);
+			out += String(this->_array[i * get_cols()]);
 		}
 
-		if (i < _rows - 1)
+		if (i < get_rows() - 1)
 			out += ", ";
 	}
 

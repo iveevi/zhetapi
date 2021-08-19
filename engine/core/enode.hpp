@@ -44,7 +44,7 @@ struct Enode {
 	Enode();
 
 	Enode(OpCode);
-	Enode(OpCode, const Leaves &);	
+	Enode(OpCode, const Leaves &);
 	Enode(OpCode, const Enode &, const Enode &);
 
 	Enode(const Primitive &);

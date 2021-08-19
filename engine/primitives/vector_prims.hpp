@@ -89,8 +89,6 @@ Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 		this->clear();
 
 		this->_array = new T[other._size];
-		this->_rows = other._rows;
-		this->_cols = other._cols;
 
 		this->_size = other._size;
 		for (size_t i = 0; i < this->_size; i++)
@@ -116,6 +114,17 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	}
 
 	return *this;
+}
+
+/**
+ * Safety getter function.
+ *
+ * TODO: eliminate this somehow
+ */
+template <class T>
+inline size_t Vector <T> ::get_cols() const
+{
+	return 1;
 }
 
 /**
