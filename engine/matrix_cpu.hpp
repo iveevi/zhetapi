@@ -6,15 +6,16 @@ namespace zhetapi {
 template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
 {
-	if (columns.size() > 0) {
-		get_rows() = columns[0].size();
-		get_cols() = columns.size();
+	size_t r = columns.size();
 
-		this->_size = get_rows() * get_cols();
+	if (r > 0) {
+		size_t c = columns[0].size();
+
+		this->_size = r * c;
 
 		this->_dim = new size_t[2];
-		this->_dim[0] = get_rows();
-		this->_dim[1] = get_cols();
+		this->_dim[0] = r;
+		this->_dim[1] = c;
 
 		this->_array = new T[this->_size];
 
@@ -58,12 +59,7 @@ template <class T>
 Matrix <T> ::Matrix(const std::initializer_list <std::initializer_list <T>> &sq)
                 : Tensor <T> (sq.size(), sq.begin()->size())
 {
-	get_rows() = sq.size();
-
 	assert(get_rows() > 0);
-
-	get_cols() = sq.begin()->size();
-
 	assert(get_cols() > 0);
 
 	size_t i = 0;
