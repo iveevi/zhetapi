@@ -36,6 +36,7 @@ public:
 	virtual char feed() = 0;	// Reads, stores, returns and moves
 	virtual char peek() = 0;	// Reads, stores, returns but does not moves
 	virtual char prev() = 0;
+	virtual bool done() = 0;
 	
 	virtual size_t tellg() const = 0;
 
@@ -81,7 +82,8 @@ public:
 	char feed() override;
 	char peek() override;
 	char prev() override;
-	
+	bool done() override;
+
 	size_t tellg() const override;
 	
 	State get_end() const override;

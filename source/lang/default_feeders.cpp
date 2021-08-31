@@ -66,6 +66,11 @@ char StringFeeder::prev()
 	return _source[_index - 1];
 }
 
+bool StringFeeder::done()
+{
+	return (peek() == EOF);
+}
+
 size_t StringFeeder::tellg() const
 {
 	return _index;
