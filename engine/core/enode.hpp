@@ -33,8 +33,8 @@ struct Enode {
 	union Data {
 		OpCode code;
 		uint8_t misc;		// 1 for branching, 2 for while, ...
-		Primitive prim;
-		// Token *tok;		// representing special types
+		Primitive *prim;
+		Object *obj;		// representing special types
 	} data;
 
 	Type type; // 1 for op, 2 for prim, 3 for tok/spec type, 4 for misc
@@ -47,7 +47,7 @@ struct Enode {
 	Enode(OpCode, const Leaves &);
 	Enode(OpCode, const Enode &, const Enode &);
 
-	Enode(const Primitive &);
+	Enode(Primitive *);
 
 	// Debugging stuff
 	void print(int = 0, std::ostream & = std::cout) const;

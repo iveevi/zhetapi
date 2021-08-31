@@ -20,7 +20,6 @@ set(ZHETAPI_SOURCE
 	source/core/common.cpp
 	source/core/dictionary.cpp
 	source/core/enode.cpp
-	source/core/enode_parser.cpp
 	source/core/expr_parser.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp

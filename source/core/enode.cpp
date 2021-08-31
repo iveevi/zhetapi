@@ -13,7 +13,7 @@ Enode::Enode(OpCode code, const Enode &e1, const Enode &e2)
 		: data(Data {.code = code}), type(etype_operation),
 		leaves({e1, e2}) {}
 
-Enode::Enode(const Primitive &prim)
+Enode::Enode(Primitive *prim)
 		: data(Data {.prim = prim}), type(etype_primtive) {}
 
 void Enode::print(int indent, std::ostream &os) const
@@ -44,7 +44,7 @@ void Enode::print(int indent, std::ostream &os) const
 		main = op_strs[data.code];
 		break;
 	case etype_primtive:
-		main = data.prim.str();
+		main = data.prim->str();
 		break;
 	case etype_special:
 	case etype_miscellaneous:

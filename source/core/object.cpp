@@ -101,13 +101,13 @@ void col_dbg(const Object *obj)
 	std::string line(n, '-');
 
 	std::cout << line << '\n' << header << line;
-	
+
 	Object *arr = (Object *) obj->data;
 	for (size_t i = 0; i < obj->size; i++) {
 		std::cout << field("index " + std::to_string(i + 1))
 			<< arr[i].to_string();
 	}
-	
+
 	std::cout << field("id") << obj->id
 		<< field("to_string") << obj->to_string()
 		<< std::endl;
