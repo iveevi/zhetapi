@@ -1,28 +1,64 @@
 #include <iostream>
+#include <queue>
+#include <mutex>
 
 #include "../engine/core/enode.hpp"
 #include "../engine/core/object.hpp"
 #include "../engine/lang/feeder.hpp"
+#include "../engine/ads/tsqueue.hpp"
 
 using namespace std;
 using namespace zhetapi;
 
 // Lexer tag enumerations
 enum LexTag : size_t {
-	DONE,
-	LOGIC_AND,
-	BIT_AND,
-	LOGIC_OR,
-	BIT_OR,
-	LOGIC_EQ,
-	ASSIGN_EQ,
-	LOGIC_NOT,
-	BIT_NOT,
-	GEQ,
-	GE,
-	LEQ,
-	LE
+	DONE, LOGIC_AND, BIT_AND,
+	LOGIC_OR, BIT_OR, LOGIC_EQ,
+	ASSIGN_EQ, LOGIC_NOT,
+	BIT_NOT, GEQ, GE, LEQ, LE,
+	LBRACE, RBRACE,
+	IDENTIFIER, INTEGER
 };
+
+// String codes for enumerations
+std::string strlex[] = {
+	"DONE", "LOGIC AND", "BIT AND",
+	"LOGIC OR", "BIT OR", "LOGIC EQ",
+	"ASSIGN EQ", "LOGIC NOT",
+	"BIT NOT", "GEQ", "GE", "LEQ", "LE",
+	"LBRACE", "RBRACE",
+	"IDENTIFIER", "INTEGER"
+};
+
+// Tokens
+struct Normal {
+	size_t id;
+};
+
+struct Identifier {
+	size_t id = IDENTIFIER;
+	std::string ident;
+
+	Identifier(const std::string str) : ident(str) {}
+};
+
+struct Integer {
+	size_t id = INTEGER;
+	int value;
+
+	Integer(int i) : value(i) {}
+};
+
+void free_ltag(void *ltag)
+{
+	LexTag id = *((LexTag *) ltag);
+	if (id == IDENTIFIER)
+		delete (Identifier *) ltag;
+	else if (id == INTEGER)
+		delete (Integer *) ltag;
+	else
+		delete (Normal *) ltag;	
+}
 
 // Lexer
 class Lexer {
@@ -32,20 +68,35 @@ class Lexer {
 public:
 	Lexer(Feeder *fd) : _fd(fd) {}
 
-	inline LexTag check_dual(char expect, LexTag succcess, LexTag fail) {
+	inline void *check_dual(char expect, LexTag succcess, LexTag fail) const {
 		if (_fd->peek() == expect) {
 			_fd->feed();
 
-			return succcess;
+			return new Normal {succcess};
 		}
 
-		return fail;
+		return new Normal {fail};
 	}
 
-	// TODO: change return to "LexTag" type
-	size_t scan() {
+	inline size_t get_code(char c) const {
+		static const std::unordered_map <char, LexTag> ltags {
+			{'{', LBRACE},
+			{'}', RBRACE},
+			{-1, DONE}
+		};
+
+		if (ltags.find(c) != ltags.end())
+			return ltags.at(c);
+		
+		// Return offset character to avoid overlap
+		// TODO: fix a constant offset
+		cout << "c = " << (int) c << endl;
+		return (size_t) c + 128;
+	}
+
+	void *scan() {
 		if (_fd->done())
-			return DONE;
+			return (void *) DONE;
 		
 		// Read under non-space character
 		while ((_next = _fd->feed()) != EOF) {
@@ -78,13 +129,28 @@ public:
 		}
 		
 		// Identifier
-		std::string ident(1, _next);
-		while (!isspace((_next = _fd->feed())))
-			ident += _next;
-		
-		cout << "<ident>\"" << ident << "\"</ident>\n";
+		if ((_next == '_') || isalpha(_next)) {
+			std::string ident(1, _next);
+			while (!isspace((_next = _fd->feed())))
+				ident += _next;
+			
+			// cout << "<ident>\"" << ident << "\"</ident>\n";
 
-		return 20;
+			return (void *) (new Identifier(ident));
+		}
+
+		// Return normal symbol according to character-code table
+		return new Normal {get_code(_next)};
+	}
+};
+
+// AST class
+class AST {
+	Lexer *_lexer = nullptr;
+public:
+	AST(Lexer *lexer) : _lexer(lexer) {}
+
+	Enode generate() const {
 	}
 };
 
@@ -93,7 +159,12 @@ StringFeeder sf1(R"(
 ==
 myvar34
 >=
-myvar
+myvar myvar4690
+!mvar1
+
+{
+	thisisavar
+}
 )");
 
 StringFeeder sf2 = sf1;
@@ -114,11 +185,22 @@ int main()
 		cout << sf1.feed();
 	cout << "\"" << endl;
 
-	cout << "\nLexer test:" << endl;
+	void *ltag;
+	
+	// queue <void *> tags;
+	ads::TSQueue <void *> tags;
 
-	size_t i;
-	while ((i = lexer.scan()) != DONE)
-		cout << "\tLexTag: " << i << endl;
+	cout << "Pushing tags:" << endl;
+	while ((ltag = lexer.scan()) != (void *) DONE) {
+		cout << "\tLexTag: " << ltag << " -> " << strlex[*((LexTag *) ltag)] << endl;
+		tags.push(ltag);
+	}
+
+	while (!tags.empty()) {
+		ltag = tags.pop();
+
+		free_ltag(ltag);
+	}
 
 	/* Object tests
 	Object str = mk_str("hello world!");
