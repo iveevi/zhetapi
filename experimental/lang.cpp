@@ -1,11 +1,13 @@
 #include <iostream>
 #include <queue>
 #include <mutex>
+#include <vector>
 
 #include "../engine/core/enode.hpp"
 #include "../engine/core/object.hpp"
 #include "../engine/lang/feeder.hpp"
 #include "../engine/ads/tsqueue.hpp"
+#include "../engine/core/variant.hpp"
 
 using namespace std;
 using namespace zhetapi;
@@ -48,6 +50,11 @@ struct Integer {
 
 	Integer(int i) : value(i) {}
 };
+
+inline constexpr LexTag get_ltag(void *ltag)
+{
+	return *((LexTag *) ltag);
+}
 
 void free_ltag(void *ltag)
 {
@@ -144,13 +151,32 @@ public:
 	}
 };
 
-// AST class
-class AST {
-	Lexer *_lexer = nullptr;
-public:
-	AST(Lexer *lexer) : _lexer(lexer) {}
+// Parser class
+class Parser {
+	// TODO: should take the tsqueue, not the lexer itself
+	Lexer *			_lexer = nullptr;
 
-	Enode generate() const {
+	// Symbol table: string to index
+	Strtable <size_t>	_hash;
+
+	// Symbol table: index to value
+	std::vector <Variant>	_vregs;
+public:
+	Parser(Lexer *lexer) : _lexer(lexer) {}
+
+	void require(LexTag ltag) const {
+		void *ptr = _lexer->scan();
+
+		if (get_ltag(ptr) != ltag)
+			cout << "Did not match requirements..." << endl;
+		else
+			cout << "Matched requirements..." << endl;
+	}
+
+	void run() const {
+		require(IDENTIFIER);
+		require(ASSIGN_EQ);
+		require(IDENTIFIER);
 	}
 };
 
@@ -169,8 +195,16 @@ myvar myvar4690
 
 StringFeeder sf2 = sf1;
 
+StringFeeder sf3(R"(
+myvar1 = myvar2s
+)");
+
 // Lexers
-Lexer lexer(&sf2);
+Lexer lexer1(&sf2);
+Lexer lexer2(&sf3);
+
+// Parsers
+Parser parser(&lexer2);
 
 int main()
 {
@@ -191,7 +225,7 @@ int main()
 	ads::TSQueue <void *> tags;
 
 	cout << "Pushing tags:" << endl;
-	while ((ltag = lexer.scan()) != (void *) DONE) {
+	while ((ltag = lexer1.scan()) != (void *) DONE) {
 		cout << "\tLexTag: " << ltag << " -> " << strlex[*((LexTag *) ltag)] << endl;
 		tags.push(ltag);
 	}
@@ -201,6 +235,9 @@ int main()
 
 		free_ltag(ltag);
 	}
+
+	// Parser test
+	parser.run();
 
 	/* Object tests
 	Object str = mk_str("hello world!");

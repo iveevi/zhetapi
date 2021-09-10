@@ -24,7 +24,7 @@ struct Enode {
 		etype_null,
 		etype_operation,
 		etype_primtive,
-		etype_special,
+		etype_object,
 		etype_miscellaneous
 	};
 
@@ -42,12 +42,12 @@ struct Enode {
 
 	// Type specific constructors
 	Enode();
+	Enode(Primitive *);
+	Enode(Object *);
 
 	Enode(OpCode);
 	Enode(OpCode, const Leaves &);
 	Enode(OpCode, const Enode &, const Enode &);
-
-	Enode(Primitive *);
 
 	// Debugging stuff
 	void print(int = 0, std::ostream & = std::cout) const;

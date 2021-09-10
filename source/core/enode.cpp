@@ -5,6 +5,10 @@ namespace zhetapi {
 // Enode
 Enode::Enode() : data({.code = l_add}), type(etype_null) {}
 
+Enode::Enode(Primitive *prim) : data(Data {.prim = prim}), type(etype_null) {}
+
+Enode::Enode(Object *obj) : data(Data {.obj = obj}), type(etype_null) {}
+
 Enode::Enode(OpCode code, const Leaves &lvs)
 		: data(Data {.code = code}), type(etype_operation),
 		leaves(lvs) {}
@@ -12,9 +16,6 @@ Enode::Enode(OpCode code, const Leaves &lvs)
 Enode::Enode(OpCode code, const Enode &e1, const Enode &e2)
 		: data(Data {.code = code}), type(etype_operation),
 		leaves({e1, e2}) {}
-
-Enode::Enode(Primitive *prim)
-		: data(Data {.prim = prim}), type(etype_primtive) {}
 
 void Enode::print(int indent, std::ostream &os) const
 {
@@ -46,7 +47,7 @@ void Enode::print(int indent, std::ostream &os) const
 	case etype_primtive:
 		main = data.prim->str();
 		break;
-	case etype_special:
+	case etype_object:
 	case etype_miscellaneous:
 	default:
 		main = "?";
@@ -99,8 +100,8 @@ Variant enode_value(const Enode &en)
 		break;
 	case Enode::etype_primtive:
 		return Variant(&en.data.prim);
-	case Enode::etype_special:
-		return Variant();
+	case Enode::etype_object:
+		return Variant(&en.data.obj);
 	case Enode::etype_miscellaneous:
 		break;
 	default:

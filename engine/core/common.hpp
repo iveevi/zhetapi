@@ -19,7 +19,7 @@ using Targs = std::vector <Token *>;
 using Pardon = std::set <std::string>;
 
 template <class T>
-using Symtab = std::unordered_map <std::string, T>;
+using Strtable = std::unordered_map <std::string, T>;
 
 // This file contains miscellaneous functions that
 // do not really fit into any other header

@@ -36,6 +36,7 @@ struct Object {
 	void *		spops[NSPECIAL_OPERATIONS];
 
 	// Indexes for special operations
+	// TODO: to string method
 	enum Spidx : size_t {
 		sp_str,			// String print (to_string)
 		sp_functor,		// Functor call
