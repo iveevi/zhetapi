@@ -6,12 +6,16 @@
 #include "../engine/core/enode.hpp"
 #include "../engine/core/object.hpp"
 #include "../engine/lang/feeder.hpp"
+<<<<<<< Updated upstream
 #include "../engine/ads/tsqueue.hpp"
 #include "../engine/core/variant.hpp"
+=======
+>>>>>>> Stashed changes
 
 using namespace std;
 using namespace zhetapi;
 
+<<<<<<< Updated upstream
 // Lexer tag enumerations
 enum LexTag : size_t {
 	DONE, LOGIC_AND, BIT_AND,
@@ -206,6 +210,15 @@ Lexer lexer2(&sf3);
 // Parsers
 Parser parser(&lexer2);
 
+=======
+class Lexer {
+	size_t		_line	= 0;
+	Feeder *	_fd	= nullptr;
+public:
+	Lexer(Feeder *fd) : _fd(fd) {}
+};
+
+>>>>>>> Stashed changes
 int main()
 {
 	/* Object size test

@@ -144,7 +144,7 @@ FixedVector <T, N> &FixedVector <T, N> ::operator/=(const T &k)
 template <class T, size_t N>
 std::ostream &operator<<(std::ostream &os, const FixedVector <T, N> &fv)
 {
-	os << '[';
+	os << '<';
 
 	for (size_t i = 0; i < N; i++) {
 		os << fv[i];
@@ -153,7 +153,7 @@ std::ostream &operator<<(std::ostream &os, const FixedVector <T, N> &fv)
 			os << ", ";
 	}
 
-	return os << ']';
+	return os << '>';
 }
 
 // FixedVector for 3D
@@ -486,6 +486,27 @@ FixedVector <T, 2> &FixedVector <T, 2> ::operator/=(const T &k)
 	y /= k;
 
 	return *this;
+}
+
+// Binary operations
+template <class T>
+FixedVector <T, 2> operator+(const FixedVector <T, 2> &a,
+		const FixedVector <T, 2> &b)
+{
+	return {a.x + b.x, a.y + b.y};
+}
+
+template <class T>
+FixedVector <T, 2> operator-(const FixedVector <T, 2> &a,
+		const FixedVector <T, 2> &b)
+{
+	return {a.x - b.x, a.y - b.y};
+}
+
+template <class T>
+FixedVector <T, 2> operator*(T k, const FixedVector <T, 2> &v)
+{
+	return {k * v.x, k * v.y};
 }
 
 // Optimized dot product

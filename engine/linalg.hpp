@@ -111,29 +111,30 @@ Matrix <T> MatrixFactorization <T, N> ::product() const
  * @return the modified output stream.
  */
 template <class T>
-std::ostream &pretty(std::ostream &os, const Matrix <T> &mat)
+std::string pretty(const Matrix <T> &mat)
 {
 	// TODO: more convenient syntax
 	size_t r = mat.get_rows();
 	size_t c = mat.get_cols();
 
+	std::ostringstream oss;
 	for (size_t i = 0; i < r; i++) {
-		os << "|";
+		oss << "|";
 
 		for (size_t j = 0; j < c; j++) {
-			os << std::setw(8) << std::fixed
+			oss << std::setw(8) << std::fixed
 				<< std::setprecision(4) << mat[i][j];
 
 			if (j < c - 1)
-				os << "\t";
+				oss << "\t";
 		}
 
-		os << "|";
+		oss << "|";
 		if (i < r - 1)
-			os << "\n";
+			oss << "\n";
 	}
 
-	return os;
+	return oss.str();
 }
 
 // Checks
@@ -244,10 +245,10 @@ Tensor <T> reshape(const Vector <T> &);
 
 /**
  * @brief Constructs a diagonal matrix with components in a list.
- * 
+ *
  * @param cs the list of components on the diagonal (in order from top-left to
  * bottom-right).
- * 
+ *
  * @return a diagonal matrix with the listed components.
  */
 template <class T>
@@ -263,10 +264,10 @@ Matrix <T> diag(const std::vector <T> &cs)
 /**
  * @brief Constructs a diagonal matrix with components in a sequence. Same as
  * the \c diag function but is variadic.
- * 
+ *
  * @param x the first component of the sequence.
  * @param args the remaining components.
- * 
+ *
  * @return a diagonal matrix with components in the sequence.
  */
 template <class T, class ... U>

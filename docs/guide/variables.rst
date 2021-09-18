@@ -18,6 +18,22 @@ value of the expression :math:`y^2 + 5`. For example, if :math:`y = 5`, then
 Using Variables in ZHP
 ----------------------
 
+In ZHP, variables are created when they are assigned (and initialized).
+Assignment statements are of the form :code:`[identifier] = [value]` (identifier
+is a string of alphabets, digits and underscores which does not start with a
+digit). Examples are below:
+
+.. code_block::
+
+       x = 10
+       y = 10.10
+       z = 4/5
+
+       I = [[1, 0], [0, 1]]
+       X = [4, 5]
+
+       Y = IX // or Y = I * X
+
 Dynamically vs Statically Typed Languages
 -----------------------------------------
 
