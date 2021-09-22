@@ -6,34 +6,36 @@
 #include "../engine/core/enode.hpp"
 #include "../engine/core/object.hpp"
 #include "../engine/lang/feeder.hpp"
-<<<<<<< Updated upstream
 #include "../engine/ads/tsqueue.hpp"
 #include "../engine/core/variant.hpp"
-=======
->>>>>>> Stashed changes
 
 using namespace std;
 using namespace zhetapi;
 
-<<<<<<< Updated upstream
 // Lexer tag enumerations
 enum LexTag : size_t {
-	DONE, LOGIC_AND, BIT_AND,
+	DONE, COMMA,
+	LOGIC_AND, BIT_AND,
 	LOGIC_OR, BIT_OR, LOGIC_EQ,
 	ASSIGN_EQ, LOGIC_NOT,
 	BIT_NOT, GEQ, GE, LEQ, LE,
+	LPAREN, RPAREN,
 	LBRACE, RBRACE,
-	IDENTIFIER, INTEGER
+	IDENTIFIER, INTEGER,
+	ALGORITHM
 };
 
 // String codes for enumerations
 std::string strlex[] = {
-	"DONE", "LOGIC AND", "BIT AND",
+	"DONE", "COMMA",
+	"LOGIC AND", "BIT AND",
 	"LOGIC OR", "BIT OR", "LOGIC EQ",
 	"ASSIGN EQ", "LOGIC NOT",
 	"BIT NOT", "GEQ", "GE", "LEQ", "LE",
+	"LPAREN", "RPAREN",
 	"LBRACE", "RBRACE",
-	"IDENTIFIER", "INTEGER"
+	"IDENTIFIER", "INTEGER",
+	"ALGORITHM"
 };
 
 // Tokens
@@ -46,13 +48,24 @@ struct Identifier {
 	std::string ident;
 
 	Identifier(const std::string str) : ident(str) {}
+
+	// Value function
+	static std::string cast(void *ptr) {
+		return ((Identifier *) ptr)->ident;
+	}
 };
 
+// Should generalize to primitives
 struct Integer {
 	size_t id = INTEGER;
 	int value;
 
 	Integer(int i) : value(i) {}
+
+	// Value function
+	static int cast(void *ptr) {
+		return ((Integer *) ptr)->value;
+	}
 };
 
 inline constexpr LexTag get_ltag(void *ltag)
@@ -79,20 +92,12 @@ class Lexer {
 public:
 	Lexer(Feeder *fd) : _fd(fd) {}
 
-	inline void *check_dual(char expect, LexTag succcess, LexTag fail) const {
-		if (_fd->peek() == expect) {
-			_fd->feed();
-
-			return new Normal {succcess};
-		}
-
-		return new Normal {fail};
-	}
-
-	inline size_t get_code(char c) const {
+	static inline size_t get_code(char c) {
 		static const std::unordered_map <char, LexTag> ltags {
 			{'{', LBRACE},
 			{'}', RBRACE},
+			{'(', LPAREN},
+			{')', RPAREN},
 			{-1, DONE}
 		};
 
@@ -103,6 +108,33 @@ public:
 		// TODO: fix a constant offset
 		cout << "c = " << (int) c << endl;
 		return (size_t) c + 128;
+	}
+
+	static inline size_t get_code(const std::string &str) {
+		static const std::unordered_map <std::string, LexTag> ltags {
+			{"alg", ALGORITHM}
+		};
+
+		if (ltags.find(str) != ltags.end())
+			return ltags.at(str);
+		
+		cout << "str = " << str << endl;
+		return DONE;
+	}
+	
+	static inline bool good_ident(char c) {
+		// cout << "gic = " << c << endl;
+		return !isspace(c) && (isdigit(c) || isalpha(c) || c == '_');
+	}
+
+	inline void *check_dual(char expect, LexTag succcess, LexTag fail) const {
+		if (_fd->peek() == expect) {
+			_fd->feed();
+
+			return new Normal {succcess};
+		}
+
+		return new Normal {fail};
 	}
 
 	void *scan() {
@@ -120,6 +152,8 @@ public:
 		// Check the first non-space character
 		// TODO: put into another function
 		switch (_next) {
+		case ',':
+			return (void *) COMMA;
 		case '&':
 			return check_dual('&', LOGIC_AND, BIT_AND);
 		case '|':
@@ -137,15 +171,22 @@ public:
 		// Deal with numbers later
 		if (isdigit(_next)) {
 			while (isdigit((_next = _fd->feed())));
+
+			return (void *) (new Integer(1));
 		}
 		
 		// Identifier
 		if ((_next == '_') || isalpha(_next)) {
 			std::string ident(1, _next);
-			while (!isspace((_next = _fd->feed())))
+			while (good_ident(_next = _fd->feed()))
 				ident += _next;
+			_fd->backup(1);
 			
+			// cout << "_next = \'" << _next << '\'' << endl;
 			// cout << "<ident>\"" << ident << "\"</ident>\n";
+			size_t pos;
+			if (pos = get_code(ident))
+				return new Normal {pos};
 
 			return (void *) (new Identifier(ident));
 		}
@@ -156,32 +197,86 @@ public:
 };
 
 // Parser class
+// TODO: should only take a tsqueue of tags,
+// for parallelization
 class Parser {
 	// TODO: should take the tsqueue, not the lexer itself
-	Lexer *			_lexer = nullptr;
+	ads::TSQueue <void *>  *_tsq = nullptr;
 
 	// Symbol table: string to index
 	Strtable <size_t>	_hash;
 
 	// Symbol table: index to value
 	std::vector <Variant>	_vregs;
+
+	// Private structs
+	struct TagPair {
+		void *data;
+		LexTag tag;
+	};
 public:
-	Parser(Lexer *lexer) : _lexer(lexer) {}
+	Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
 
-	void require(LexTag ltag) const {
-		void *ptr = _lexer->scan();
+	TagPair require(LexTag ltag) const {
+		auto pr = get();
+		cout << "REQ-GOT Tag: " << strlex[pr.tag] << endl;
 
-		if (get_ltag(ptr) != ltag)
-			cout << "Did not match requirements..." << endl;
-		else
-			cout << "Matched requirements..." << endl;
+		if (pr.tag != ltag)
+			throw bad_tag(pr.tag, ltag);
+		
+		return pr;
+	}
+
+	TagPair get() const {
+		if (_tsq->empty())
+			throw eoq();
+
+		void *ptr = _tsq->pop();
+		return {ptr, get_ltag(ptr)};
+	}
+
+	void alg() const {
+		std::string ident;
+		
+		// TODO: need a get function that checks for empty-ness
+		auto pr = require(IDENTIFIER);
+		// if (pr.tag == IDENTIFIER)
+		cout << "Identifier! :) -> " << Identifier::cast(pr.data) << endl;
+
+		require(LPAREN);
+		require(RPAREN);
 	}
 
 	void run() const {
-		require(IDENTIFIER);
-		require(ASSIGN_EQ);
-		require(IDENTIFIER);
+		void *ptr;
+		while (!_tsq->empty()) {
+			ptr = _tsq->pop();
+
+			LexTag ltag = get_ltag(ptr);
+
+			cout << "Tag = " << strlex[ltag] << endl;
+			if (ltag == ALGORITHM) {
+				cout << "ALGORITHM!!" << endl;
+				alg();
+			}
+		}
+		
+		cout << "Done." << endl;
 	}
+
+	// Exceptions
+	class eoq : public std::runtime_error {
+	public:
+		eoq() : std::runtime_error("Parser: end of tag queue") {}
+	};
+
+	class bad_tag : public std::runtime_error {
+	public:
+		bad_tag(LexTag got, LexTag exp)
+			: std::runtime_error("Parser: unexpected tag <"
+				+ strlex[got] + ">, expected <"
+				+ strlex[exp] + ">") {}
+	};
 };
 
 // Sources
@@ -200,25 +295,15 @@ myvar myvar4690
 StringFeeder sf2 = sf1;
 
 StringFeeder sf3(R"(
-myvar1 = myvar2s
+alg myalg() {
+	x = 21
+}
 )");
 
 // Lexers
 Lexer lexer1(&sf2);
 Lexer lexer2(&sf3);
 
-// Parsers
-Parser parser(&lexer2);
-
-=======
-class Lexer {
-	size_t		_line	= 0;
-	Feeder *	_fd	= nullptr;
-public:
-	Lexer(Feeder *fd) : _fd(fd) {}
-};
-
->>>>>>> Stashed changes
 int main()
 {
 	/* Object size test
@@ -227,10 +312,10 @@ int main()
 	cout << "sizeof Enode::Data = " << sizeof(Enode::Data) << endl; */
 
 	// Lexer test
-	cout << "Contents of sf1: \"";
+	/* cout << "Contents of sf1: \"";
 	while (!sf1.done())
 		cout << sf1.feed();
-	cout << "\"" << endl;
+	cout << "\"" << endl; */
 
 	void *ltag;
 	
@@ -238,31 +323,21 @@ int main()
 	ads::TSQueue <void *> tags;
 
 	cout << "Pushing tags:" << endl;
-	while ((ltag = lexer1.scan()) != (void *) DONE) {
+	while ((ltag = lexer2.scan()) != (void *) DONE) {
 		cout << "\tLexTag: " << ltag << " -> " << strlex[*((LexTag *) ltag)] << endl;
 		tags.push(ltag);
 	}
 
+	// Parser test
+	Parser parser(&tags);
+
+	cout << "Parser-------------------------->" << endl;
+	parser.run();
+
+	// Free the elements of the queue
 	while (!tags.empty()) {
 		ltag = tags.pop();
 
 		free_ltag(ltag);
 	}
-
-	// Parser test
-	parser.run();
-
-	/* Object tests
-	Object str = mk_str("hello world!");
-	str.debug();
-
-	Object arr[4] {
-		str,
-		mk_str("one"),
-		mk_str("four"),
-		mk_str("three hundred")
-	};
-
-	Object col = mk_col(arr, 4);
-	col.debug(); */
 }
