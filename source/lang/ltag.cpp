@@ -3,9 +3,13 @@
 namespace zhetapi {
 
 std::string strlex[] = {
-	"DONE", "COMMA",
-	"PLUS", "MINUS",
-	"PLUS_EQ", "MINUS_EQ",
+	"DONE", "NEWLINE", "COMMA",
+
+	// TODO: order operations in terms of precedence
+	"PLUS", "MINUS", "TIMES", "DIVIDE",
+
+	// op = operations
+	"PLUS_EQ", "MINUS_EQ", "TIMES_EQ", "DIVIDE_EQ",
 	"LOGIC AND", "BIT AND",
 	"LOGIC OR", "BIT OR", "LOGIC EQ",
 	"ASSIGN EQ", "LOGIC NOT",
@@ -25,7 +29,7 @@ void free_ltag(void *ltag)
 	else if (id == INTEGER)
 		delete (Integer *) ltag;
 	else
-		delete (Normal *) ltag;	
+		delete (Normal *) ltag;
 }
 
 }

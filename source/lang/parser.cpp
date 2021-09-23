@@ -1,5 +1,8 @@
 #include "../../engine/lang/parser.hpp"
 
+// Standard headers
+#include <iostream>
+
 namespace zhetapi {
 
 Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
@@ -9,32 +12,40 @@ Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
 Parser::~Parser() {}
 
 // Backup transfer from _store to _tsq
-void Parser::backup() {
+void Parser::backup()
+{
 	void *ptr = _store.top();
 	_store.pop();
 	_tsq->push_front(ptr);
 }
 
-void Parser::backup(size_t n) {
+void Parser::backup(size_t n)
+{
 	for (size_t i = 0; i < n; i++)
 		backup();
 }
 
 // Requirement function
-Parser::TagPair Parser::require(LexTag ltag) {
+Parser::TagPair Parser::require(LexTag ltag)
+{
 	auto pr = get();
 	std::cout << "REQ-GOT Tag: " << strlex[pr.tag] << std::endl;
 
 	if (pr.tag != ltag)
 		throw bad_tag(pr.tag, ltag);
-	
+
 	return pr;
 }
 
 // Try grammar function
-bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes) {
+bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes)
+{
 	for (LexTag c : codes) {
+		// Get the next non-newline tag
 		auto pr = get();
+		while (pr.tag == NEWLINE)
+			pr = get();
+
 		std::cout << "try-pr -> " << strlex[pr.tag] << std::endl;
 		if (pr.tag != c) {
 			// Backup all the tags read in the attempt
@@ -50,7 +61,8 @@ bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes) {
 }
 
 // Getter helper
-Parser::TagPair Parser::get() {
+Parser::TagPair Parser::get()
+{
 	if (_tsq->empty())
 		throw eoq();
 
@@ -59,11 +71,81 @@ Parser::TagPair Parser::get() {
 	return {ptr, get_ltag(ptr)};
 }
 
+// Parser expression (immediate: shunting-yard algorithm)
+static inline bool is_operation(LexTag ltag)
+{
+	return (ltag == PLUS);
+}
+
+void Parser::expression_imm()
+{
+	// Shunting yard algorithm (stack)
+	std::stack <TagPair> stack;
+	std::queue <TagPair> queue;		// TODO: should this be tsqueue?
+
+	std::cout << "Immediate expression" << std::endl;
+	while (true) {
+		auto pr = get();
+		std::cout << pr.tag << std::endl;
+
+		// First check for the newline
+		if (pr.tag == NEWLINE) {
+			std::cout << "\tEnd of expression" << std::endl;
+			break;
+		}
+
+		if (is_operation(pr.tag)) {
+			while (!stack.empty()) {
+				auto pr2 = stack.top();
+
+				if (pr2.tag >= pr.tag) {
+					stack.pop();
+					queue.push(pr2);
+				}
+			}
+
+			stack.push(pr);
+		} else {
+			queue.push(pr);
+		}
+	}
+
+	// Transfer the remaining tags
+	while (!stack.empty()) {
+		queue.push(stack.top());
+		stack.pop();
+	}
+
+	// Show all the tokens in the queue
+	std::cout << "Resulting queue..." << std::endl;
+	while (!queue.empty()) {
+		auto pr = queue.front();
+		queue.pop();
+
+		std::cout << "\ttag -> " << strlex[pr.tag] << std::endl;
+	}
+
+	// TODO: phase 2, computation
+}
+
+// Parse statement
+void Parser::statement()
+{
+	VTags vt;
+
+	if (try_grammar(vt, {IDENTIFIER, ASSIGN_EQ})) {
+		std::cout << "\tlooking for an expression now..." << std::endl;
+		std::cout << "\tident was " << Identifier::cast(vt[0].data) << std::endl;
+		expression_imm();
+	}
+}
+
 // Parse algorithms
-void Parser::alg() {
+void Parser::algorithm()
+{
 	std::string ident;
 	Args args;
-	
+
 	// TODO: need a get function that checks for empty-ness
 	TagPair pr = require(IDENTIFIER);
 	ident = Identifier::cast(pr.data);
@@ -96,18 +178,9 @@ void Parser::alg() {
 	std::cout << "]" << std::endl;
 }
 
-// Parse statement
-void Parser::statement() {
-	VTags vt;
-
-	if (try_grammar(vt, {IDENTIFIER, ASSIGN_EQ})) {
-		std::cout << "\tlooking for an expression now..." << std::endl;
-		std::cout << "\tident was " << Identifier::cast(vt[0].data) << std::endl;
-	}
-}
-
 // Final run function
-void Parser::run() {
+void Parser::run()
+{
 	while (!_tsq->empty()) {
 		auto pr = get();
 
@@ -115,7 +188,7 @@ void Parser::run() {
 
 		if (pr.tag == ALGORITHM) {
 			std::cout << "ALGORITHM!!" << std::endl;
-			alg();
+			algorithm();
 		} /* else if (pr.tag == IDENTIFIER) {
 			cout << "STATEMENT!!" << endl;
 			// statement
@@ -123,7 +196,7 @@ void Parser::run() {
 			statement();
 		} */
 	}
-	
+
 	std::cout << "Done." << std::endl;
 }
 

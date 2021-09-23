@@ -8,9 +8,13 @@ namespace zhetapi {
 // Lexer tag enumerations
 // TODO: organize this list
 enum LexTag : size_t {
-	DONE, COMMA,
-	PLUS, MINUS,
-	PLUS_EQ, MINUS_EQ,
+	DONE, NEWLINE, COMMA,
+
+	// regular binary operations
+	PLUS, MINUS, TIMES, DIVIDE,
+
+	// op = operations
+	PLUS_EQ, MINUS_EQ, TIMES_EQ, DIVIDE_EQ,
 	LOGIC_AND, BIT_AND,
 	LOGIC_OR, BIT_OR, LOGIC_EQ,
 	ASSIGN_EQ, LOGIC_NOT,

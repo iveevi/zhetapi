@@ -71,7 +71,7 @@ std::string Feeder::extract_quote()
 		} else {
 			if (c == '\"')
 				break;
-			
+
 			// Don't warn multiple times
 			if (c == '\n' && !warned) {
 				warned = true;

@@ -9,6 +9,7 @@
 #include "ltag.hpp"
 #include "lexer.hpp"
 #include "../ads/tsqueue.hpp"
+#include "../core/common.hpp"
 
 namespace zhetapi {
 
@@ -48,12 +49,13 @@ public:
 
 	void backup();
 	void backup(size_t);
-	
+
 	bool try_grammar(VTags &, const std::vector <LexTag> &);
 
 	// Grammatical functions
-	void alg();
+	void expression_imm();		// Private
 	void statement();
+	void algorithm();
 
 	// Ultimate function
 	void run();

@@ -3,6 +3,7 @@
 
 // Standard headers
 #include <queue>
+#include <mutex>
 
 namespace zhetapi {
 

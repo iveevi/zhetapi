@@ -1,13 +1,13 @@
 #include <iostream>
 
 // Engine headers
-#include <dnn.hpp>
-#include <training.hpp>
+#include "../engine/dnn.hpp"
+#include "../engine/training.hpp"
+#include "../engine/linalg.hpp"
 
-#include <std/activations.hpp>
-#include <std/optimizers.hpp>
-#include <std/erfs.hpp>
-#include <std/linalg.hpp>
+#include "../engine/std/activations.hpp"
+#include "../engine/std/optimizers.hpp"
+#include "../engine/std/erfs.hpp"
 
 using namespace std;
 using namespace zhetapi;
@@ -48,7 +48,7 @@ int main()
 				return unit.uniform();
 			}
 		);
-	
+
 		cout << "sig = " << sig << endl;
 		cout << "encrypted sig = " << F(sig) << endl;
 

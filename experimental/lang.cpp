@@ -16,18 +16,16 @@
 using namespace std;
 using namespace zhetapi;
 
-// Sources
-StringFeeder sf(R"(
-myvar = 21 + 21
-)");
-
 // Lexers
-Lexer lexer(&sf);
+Lexer lexer(R"(
+myvar = 21 + 21 * 53454 - x
+myvar2 = 210
+)");
 
 int main()
 {
 	void *ltag;
-	
+
 	// queue <void *> tags;
 	ads::TSQueue <void *> tags;
 
