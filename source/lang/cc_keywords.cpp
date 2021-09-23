@@ -1,4 +1,4 @@
-#include "../../engine/lang/parser.hpp"
+#include "../../engine/lang/old_parser.hpp"
 
 namespace zhetapi {
 

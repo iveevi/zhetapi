@@ -1,183 +1,76 @@
 #ifndef PARSER_H_
 #define PARSER_H_
 
-// C/C++ headers
-#include <iostream>
-#include <exception>
+// Standard headers
+#include <stack>
 #include <stdexcept>
 
 // Engine headers
-#include "feeder.hpp"
-#include "../engine.hpp"
-#include "../module.hpp"
+#include "ltag.hpp"
+#include "lexer.hpp"
+#include "../ads/tsqueue.hpp"
 
 namespace zhetapi {
 
-// Parsing state (put in another file)
-struct State {
-	std::string	cached;
+// Parser class
+// TODO: should only take a tsqueue of tags,
+// for parallelization
+class Parser {
+	// _tsq for retrieving tokens
+	// _store for storing these tokens
+	//	so that we can restore them to
+	//	the tsq later
+	ads::TSQueue <void *> *	_tsq = nullptr;
+	std::stack <void *>	_store;
 
-	size_t		line		= 0;
+	/* Symbol table: string to index
+	Strtable <size_t>	_hash;
 
-	// Nesting states
-	size_t		parenthesis	= 0;
-	size_t		braces		= 0;
-	size_t		brackets	= 0;
+	// Symbol table: index to value
+	std::vector <Variant>	_vregs; */
 
-	bool		branch		= false;
-	bool		bdone		= false;
+	// Private structs
+	struct TagPair {
+		void *data;
+		LexTag tag;
+	};
 
-	bool		alg		= false;
-
-	Args		idirs;
-
-	const char *	lver;
-
-	State(bool = false);
-
-	void check_nest(char);
-	bool is_nested();
-};
-
-// Helper functions
-bool is_vaild_ident_char(char, size_t);
-bool is_valid_ident(const std::string &);
-bool in_args(const Args &, const Args &);
-Args get_args(const std::string &);
-Args eq_split(const std::string &);
-Args comma_split(const std::string &, bool = true);
-
-// TODO: alias for SS
-std::pair <std::string, std::string> as_split(const std::string &);
-std::pair <std::string, Args> from_split(const std::string &);
-
-// No forwarding needed
-void run(const std::string &, Engine *, bool = false);
-void run_normal(const std::string &, Engine *, bool = false);
-void run_assignment(const Args &, Engine *, bool = false);
-
-OpZ *check_keyword(std::string &, Feeder *, Engine *, State *);
-
-// Make part of public API so others and I can use
-int parse_global(Feeder *, Engine *, const Args & = {".", "/usr/local/include/zhp"}, const char * = "Untitled", bool = false);
-
-// Make part of public API so others and I can use
-void mdl_parse(Feeder *, Engine *, Module *);
-
-// Compile parsers and runners
-node_manager cc_run_assignment(
-		const Args &,
-		Engine *,
-		const Args &,
-		Pardon &);
-
-node_manager cc_run(
-		const std::string &,
-		Engine *,
-		const Args &,
-		Pardon &);
-
-node_manager cc_keyword(
-		std::string &,
-		Feeder *,
-		Engine *,
-		const Args &,
-		Pardon &,
-		State *);
-
-node_manager cc_parse(
-		Feeder *,
-		Engine *,
-		const Args &,
-		Pardon &);
-
-// TODO: Exceptions (put into another header)
-// It is to be noted that branching does not count as nesting
-class bad_identifier : public std::runtime_error {
+	// Private aliases
+	using VTags = std::vector <TagPair>;
 public:
-	bad_identifier(const std::string &str)
-		: std::runtime_error(str) {}
-};
+	Parser(ads::TSQueue <void *> *);
 
-class bad_line : public std::runtime_error {
-public:
-	bad_line(const std::string &str)
-		: std::runtime_error(str) {}
-};
+	~Parser();
 
-class args_mismatch : public std::runtime_error {
-public:
-	args_mismatch(const std::string &str)
-		: std::runtime_error(str) {}
-};
+	// Helper functions
+	TagPair get();
+	TagPair require(LexTag);
 
-class bad_elif : public std::runtime_error {
-public:
-	bad_elif()
-		: std::runtime_error("Cannot have elif without if before") {}
-};
+	void backup();
+	void backup(size_t);
+	
+	bool try_grammar(VTags &, const std::vector <LexTag> &);
 
-class bad_else : public std::runtime_error {
-public:
-	bad_else()
-		: std::runtime_error("Cannot have else without if before") {}
-};
+	// Grammatical functions
+	void alg();
+	void statement();
 
-class bad_for : public std::runtime_error {
-public:
-	bad_for()
-		: std::runtime_error("Expected ([identifier] in [expression]) inside the clause of for-loop") {}
-};
+	// Ultimate function
+	void run();
 
-class global_break : public std::runtime_error {
-public:
-	global_break()
-		: std::runtime_error("Cannot break in global scope") {}
-};
+	// Exceptions
+	class eoq : public std::runtime_error {
+	public:
+		eoq() : std::runtime_error("Parser: end of tag queue") {}
+	};
 
-class global_continue : public std::runtime_error {
-public:
-	global_continue()
-		: std::runtime_error("Cannot use continue in global scope") {}
-};
-
-class nested_alg : public std::runtime_error {
-public:
-	nested_alg()
-		: std::runtime_error("Cannot define an algorithm in a nested scope") {}
-};
-
-class global_int_return : public std::runtime_error {
-public:
-	global_int_return()
-		: std::runtime_error("Can only return integer codes at global scope") {}
-};
-
-class nested_include : public std::runtime_error {
-public:
-	nested_include()
-		: std::runtime_error("Cannot include directories from a nested scope") {}
-};
-
-class nested_import : public std::runtime_error {
-public:
-	nested_import()
-		: std::runtime_error("Cannot import from a nested scope") {}
-};
-
-class nested_global : public std::runtime_error {
-public:
-	nested_global()
-		: std::runtime_error("Cannot use \"global\" in a nested scope") {}
-};
-
-class fatal_error : public std::runtime_error {
-public:
-	fatal_error(const char *file, const char *function)
-		: std::runtime_error("Fatal error: at " + std::string(file)
-				+ " : " + std::string(function)
-				+ "\n\t\tPlease report this to "
-				"https://github.com/vedavamadathil/zhetapi/issues") {}
+	class bad_tag : public std::runtime_error {
+	public:
+		bad_tag(LexTag got, LexTag exp)
+			: std::runtime_error("Parser: unexpected tag <"
+				+ strlex[got] + ">, expected <"
+				+ strlex[exp] + ">") {}
+	};
 };
 
 }

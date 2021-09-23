@@ -53,7 +53,10 @@ set(ZHETAPI_SOURCE
 	source/lang/feeder.cpp
 	source/lang/helpers.cpp
 	source/lang/keywords.cpp
+	source/lang/lexer.cpp
+	source/lang/ltag.cpp
 	source/lang/mdl_parser.cpp
+	source/lang/old_parser.cpp
 	source/lang/parser.cpp
 
 	source/std/functions.cpp

@@ -12,7 +12,7 @@ namespace ads {
 // wrapper to std::queue <T>
 template <class T>
 class TSQueue {
-	std::queue <T>	_queue;
+	std::deque <T>	_queue;
 	std::mutex	_lock;
 public:
 	TSQueue() {}
@@ -20,7 +20,7 @@ public:
 	T pop() {
 		_lock.lock();
 		T ret = _queue.front();
-		_queue.pop();
+		_queue.pop_front();
 		_lock.unlock();
 
 		return ret;
@@ -29,7 +29,13 @@ public:
 	// Returns true if it had to resize
 	void push(T val) {
 		_lock.lock();
-		_queue.push(val);
+		_queue.push_back(val);
+		_lock.unlock();
+	}
+
+	void push_front(T val) {
+		_lock.lock();
+		_queue.push_front(val);
 		_lock.unlock();
 	}
 
