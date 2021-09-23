@@ -31,8 +31,8 @@
 #include "../../engine/std/activations.hpp"
 #include "../../engine/std/erfs.hpp"
 
-#include "../../engine/lang/parser.hpp"
 #include "../../engine/lang/feeder.hpp"
+#include "../../engine/lang/old_parser.hpp"
 
 #include "../../engine/core/node_manager.hpp"
 #include "../../engine/core/operation_base.hpp"

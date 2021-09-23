@@ -74,7 +74,34 @@ Parser::TagPair Parser::get()
 // Parser expression (immediate: shunting-yard algorithm)
 static inline bool is_operation(LexTag ltag)
 {
-	return (ltag == PLUS);
+	switch (ltag) {
+	case PLUS: case MINUS:
+	case TIMES: case DIVIDE:
+		return true;
+	default:
+		return false;
+	}
+
+	return false;
+}
+
+// Checks equality is both combinations
+static inline bool excheq(LexTag ltag1, LexTag ltag2,
+		LexTag eq1, LexTag eq2)
+{
+	return (ltag1 == eq1 && ltag2 == eq2)
+		|| (ltag1 == eq2 && ltag2 == eq1);
+}
+
+// True if greater than or equal
+static inline bool opcmp(LexTag ltag1, LexTag ltag2)
+{
+	if (excheq(ltag1, ltag2, PLUS, MINUS))
+		return true;
+	if (excheq(ltag1, ltag2, TIMES, DIVIDE))
+		return true;
+
+	return (ltag1 >= ltag2);
 }
 
 void Parser::expression_imm()
@@ -98,9 +125,11 @@ void Parser::expression_imm()
 			while (!stack.empty()) {
 				auto pr2 = stack.top();
 
-				if (pr2.tag >= pr.tag) {
+				if (opcmp(pr2.tag, pr.tag)) {
 					stack.pop();
 					queue.push(pr2);
+				} else {
+					break;
 				}
 			}
 
