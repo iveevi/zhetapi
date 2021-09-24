@@ -18,7 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-f(x) = 2*x
+f(x, y, z) = 2 * x + 25 + y - 3 * z
 myvar = 21 + 21 * 53454 / 3
 myvar2 = 210
 )");

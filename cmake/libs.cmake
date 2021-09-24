@@ -52,6 +52,7 @@ set(ZHETAPI_SOURCE
 	source/lang/error_handling.cpp
 	source/lang/feeder.cpp
 	source/lang/helpers.cpp
+	source/lang/iseq.cpp
 	source/lang/keywords.cpp
 	source/lang/lexer.cpp
 	source/lang/ltag.cpp

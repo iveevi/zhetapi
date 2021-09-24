@@ -14,6 +14,9 @@ namespace zhetapi {
 
 // TODO: need some global object (vector) to hold the size for each type id
 
+// Forward declarations
+class ISeq;
+
 // Number of special operations
 #define NSPECIAL_OPERATIONS 6
 
@@ -128,6 +131,9 @@ Object mk_str(const char *);
 
 // Collection type
 Object mk_col(Object *, size_t);
+
+// Instruction sequence type
+Object mk_iseq(ISeq *);
 
 }
 

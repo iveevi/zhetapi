@@ -1,11 +1,14 @@
 #include "../../engine/core/object.hpp"
 
-// C/C++ headers
+// Standard headers
 #include <cstring>
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+
+// Engine headers
+#include "../../engine/lang/iseq.hpp"
 
 namespace zhetapi {
 
@@ -126,6 +129,24 @@ Object mk_col(Object *arr, size_t len)
 		.methods = {},
 		.meminfo = {},
 		.dbg = col_dbg
+	};
+}
+
+// ISeq
+Object mk_iseq(ISeq *iseq)
+{
+	static TypeId iseq_id = Object::get_nid();
+
+	// TODO: copy raw data
+	return Object {
+		.id = iseq_id,
+		.data = (void *) iseq,
+		.size = 0,
+		.spops = {
+		},
+		.methods = {},
+		.meminfo = {},
+		.dbg = nullptr
 	};
 }
 

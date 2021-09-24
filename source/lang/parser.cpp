@@ -76,53 +76,20 @@ bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes)
 	return true;
 }
 
-// Parser expression (immediate: shunting-yard algorithm)
-static inline bool is_operation(LexTag ltag)
-{
-	switch (ltag) {
-	case PLUS: case MINUS:
-	case TIMES: case DIVIDE:
-		return true;
-	default:
-		return false;
-	}
-
-	return false;
-}
-
-// Checks equality is both combinations
-static inline bool excheq(LexTag ltag1, LexTag ltag2,
-		LexTag eq1, LexTag eq2)
-{
-	return (ltag1 == eq1 && ltag2 == eq2)
-		|| (ltag1 == eq2 && ltag2 == eq1);
-}
-
-// True if greater than or equal
-static inline bool opcmp(LexTag ltag1, LexTag ltag2)
-{
-	if (excheq(ltag1, ltag2, PLUS, MINUS))
-		return true;
-	if (excheq(ltag1, ltag2, TIMES, DIVIDE))
-		return true;
-
-	return (ltag1 >= ltag2);
-}
-
 std::queue <Parser::TagPair> Parser::shunting_yard()
 {
 	// Shunting yard algorithm (stack)
 	std::stack <TagPair> stack;
 	std::queue <TagPair> queue;		// TODO: should this be tsqueue?
 
-	std::cout << "Immediate expression" << std::endl;
+	// std::cout << "Immediate expression" << std::endl;
 	while (true) {
 		TagPair pr = get();
-		std::cout << pr.tag << std::endl;
+		// std::cout << pr.tag << std::endl;
 
 		// First check for the newline
 		if (pr.tag == NEWLINE) {
-			std::cout << "\tEnd of expression" << std::endl;
+			// std::cout << "\tEnd of expression" << std::endl;
 			break;
 		}
 
@@ -168,14 +135,14 @@ Variant Parser::expression_imm()
 	std::stack <TagPair> stack;
 	std::queue <TagPair> queue;		// TODO: should this be tsqueue?
 
-	std::cout << "Immediate expression" << std::endl;
+	// std::cout << "Immediate expression" << std::endl;
 	while (true) {
 		TagPair pr = get();
-		std::cout << pr.tag << std::endl;
+		// std::cout << pr.tag << std::endl;
 
 		// First check for the newline
 		if (pr.tag == NEWLINE) {
-			std::cout << "\tEnd of expression" << std::endl;
+			// std::cout << "\tEnd of expression" << std::endl;
 			break;
 		}
 
@@ -285,14 +252,14 @@ void Parser::function()
 		}
 	} while (pr.tag != RPAREN);
 	
-	// Post analysis
+	/* Post analysis
 	std::cout << "FINAL: [" << ident << "][";
 	for (size_t i = 0; i < args.size(); i++) {
 		std::cout << args[i];
 		if (i < args.size() - 1)
 			std::cout << ", ";
 	}
-	std::cout << "]" << std::endl;
+	std::cout << "]" << std::endl; */
 
 	// Require equals after, etc
 	require(ASSIGN_EQ);
@@ -300,57 +267,11 @@ void Parser::function()
 	// Convert the remaining expression into postfix
 	std::queue <TagPair> postfix = shunting_yard();
 
-	// For now dont compress constant
-	// TODO: need to fix the above - save space on constants...
-	std::vector <uint8_t> code;
-	std::vector <Variant> consts;
-
-	size_t nargs = args.size();
-	Variant *argv = new Variant[nargs];
-
-	// Get index ftn
-	auto arg_index = [&](const std::string &str) {
-		for (int i = 0; i < args.size(); i++) {
-			if (args[i] == str)
-				return i;
-		}
-
-		return -1;
-	};
-
-	while (!postfix.empty()) {
-		TagPair pr = postfix.front();
-		postfix.pop();
-
-		std::cout << "pr = " << to_string(pr.data) << std::endl;
-
-		if (pr.tag == PRIMITIVE) {
-			Primitive prim = PrimitiveTag::cast(pr.data);
-			size_t index = consts.size();
-			consts.push_back(new Primitive(prim));
-			code.push_back(l_const);
-			code.push_back(index);
-		} else if (pr.tag == IDENTIFIER) {
-			// For now only variables
-			std::string var = IdentifierTag::cast(pr.data);
-			size_t index = arg_index(var);
-			code.push_back(l_get);
-			code.push_back(index);
-		} else if (is_operation(pr.tag)) {
-			code.push_back(pr.tag);
-		} else {
-			// Throw
-		}
-	}
-
-	// Print info
-	std::cout << "CODE: ";
-	for (uint8_t is : code)
-		std::cout << (int) is << " ";
-	std::cout << std::endl;
-
-	// Construct the object
-	ISeq iseq {code, consts, argv, nargs};
+	// Store the function in the symbol table
+	ISeq *iseq = new ISeq(postfix, args);
+	iseq->dump();
+	Variant vt = (Variant) new Object(mk_iseq(iseq));
+	symtab[ident] = vt;
 }
 
 // Parse statement
@@ -432,7 +353,7 @@ void Parser::dump()
 	std::cout << "Parser Dump:" << std::endl;
 	for (const auto &pr : symtab) {
 		std::cout << pr.first << "\t"
-			<< pr.second << std::endl;
+			<< variant_str(pr.second) << std::endl;
 	}
 }
 
