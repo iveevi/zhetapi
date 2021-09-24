@@ -5,24 +5,9 @@
 
 // Engine headers
 #include "../../engine/core/primoptns.hpp"
+#include "../../engine/lang/iseq.hpp"
 
 namespace zhetapi {
-
-// Symbol table class
-void SymbolTable::push(const std::string &str, Variant vt)
-{
-	// Create the slot in the registers
-	size_t i = _vregs.size();
-	_vregs.push_back(vt);
-
-	// Add the index to the hash table
-	_hash[str] = i;
-}
-
-void SymbolTable::dump()
-{
-	std::cout << "Registers:" << std::endl;
-}
 
 // Parser class
 Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
@@ -30,6 +15,29 @@ Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
 // TODO: at the end, deallocate only from both _store
 // the _tsq will be freed outside of this parser
 Parser::~Parser() {}
+
+// Getter helper
+Parser::TagPair Parser::get()
+{
+	if (_tsq->empty())
+		throw eoq();
+
+	void *ptr = _tsq->pop();
+	_store.push(ptr);
+	return {ptr};
+}
+
+// Requirement function
+Parser::TagPair Parser::require(LexTag ltag)
+{
+	auto pr = get();
+	std::cout << "REQ-GOT Tag: " << strlex[pr.tag] << std::endl;
+
+	if (pr.tag != ltag)
+		throw bad_tag(pr.tag, ltag);
+
+	return pr;
+}
 
 // Backup transfer from _store to _tsq
 void Parser::backup()
@@ -43,18 +51,6 @@ void Parser::backup(size_t n)
 {
 	for (size_t i = 0; i < n; i++)
 		backup();
-}
-
-// Requirement function
-Parser::TagPair Parser::require(LexTag ltag)
-{
-	auto pr = get();
-	std::cout << "REQ-GOT Tag: " << strlex[pr.tag] << std::endl;
-
-	if (pr.tag != ltag)
-		throw bad_tag(pr.tag, ltag);
-
-	return pr;
 }
 
 // Try grammar function
@@ -78,17 +74,6 @@ bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes)
 	}
 
 	return true;
-}
-
-// Getter helper
-Parser::TagPair Parser::get()
-{
-	if (_tsq->empty())
-		throw eoq();
-
-	void *ptr = _tsq->pop();
-	_store.push(ptr);
-	return {ptr};
 }
 
 // Parser expression (immediate: shunting-yard algorithm)
@@ -122,6 +107,59 @@ static inline bool opcmp(LexTag ltag1, LexTag ltag2)
 		return true;
 
 	return (ltag1 >= ltag2);
+}
+
+std::queue <Parser::TagPair> Parser::shunting_yard()
+{
+	// Shunting yard algorithm (stack)
+	std::stack <TagPair> stack;
+	std::queue <TagPair> queue;		// TODO: should this be tsqueue?
+
+	std::cout << "Immediate expression" << std::endl;
+	while (true) {
+		TagPair pr = get();
+		std::cout << pr.tag << std::endl;
+
+		// First check for the newline
+		if (pr.tag == NEWLINE) {
+			std::cout << "\tEnd of expression" << std::endl;
+			break;
+		}
+
+		if (is_operation(pr.tag)) {
+			while (!stack.empty()) {
+				auto pr2 = stack.top();
+
+				if (opcmp(pr2.tag, pr.tag)) {
+					stack.pop();
+					queue.push(pr2);
+				} else {
+					break;
+				}
+			}
+
+			stack.push(pr);
+		} else {
+			queue.push(pr);
+		}
+	}
+
+	// Transfer the remaining tags
+	while (!stack.empty()) {
+		queue.push(stack.top());
+		stack.pop();
+	}
+
+	/* Show all the tokens in the queue
+	std::cout << "Resulting queue..." << std::endl;
+	while (!queue.empty()) {
+		auto pr = queue.front();
+		queue.pop();
+
+		std::cout << "\ttag -> " << to_string(pr.data) << std::endl;
+	} */
+
+	return queue;
 }
 
 Variant Parser::expression_imm()
@@ -216,6 +254,105 @@ Variant Parser::expression_imm()
 	return Variant(out);
 }
 
+// Parse a function
+void Parser::function()
+{
+	// skip newline for now
+	require(NEWLINE);
+
+	// Parse argument pack
+	// TODO: new function, it is reused elsewhere
+	std::string ident;
+	Args args;
+
+	// TODO: need a get function that checks for empty-ness
+	TagPair pr = require(IDENTIFIER);
+	ident = IdentifierTag::cast(pr.data);
+
+	require(LPAREN);
+	do {
+		pr = get();
+		if (pr.tag == IDENTIFIER) {
+			args.push_back(IdentifierTag::cast(pr.data));
+
+			pr = get();
+			if (pr.tag != COMMA && pr.tag != RPAREN) {
+				throw std::runtime_error(
+					"Parser: expected <COMMA> or"
+					" <RPAREN> after parameter"
+				);
+			}
+		}
+	} while (pr.tag != RPAREN);
+	
+	// Post analysis
+	std::cout << "FINAL: [" << ident << "][";
+	for (size_t i = 0; i < args.size(); i++) {
+		std::cout << args[i];
+		if (i < args.size() - 1)
+			std::cout << ", ";
+	}
+	std::cout << "]" << std::endl;
+
+	// Require equals after, etc
+	require(ASSIGN_EQ);
+
+	// Convert the remaining expression into postfix
+	std::queue <TagPair> postfix = shunting_yard();
+
+	// For now dont compress constant
+	// TODO: need to fix the above - save space on constants...
+	std::vector <uint8_t> code;
+	std::vector <Variant> consts;
+
+	size_t nargs = args.size();
+	Variant *argv = new Variant[nargs];
+
+	// Get index ftn
+	auto arg_index = [&](const std::string &str) {
+		for (int i = 0; i < args.size(); i++) {
+			if (args[i] == str)
+				return i;
+		}
+
+		return -1;
+	};
+
+	while (!postfix.empty()) {
+		TagPair pr = postfix.front();
+		postfix.pop();
+
+		std::cout << "pr = " << to_string(pr.data) << std::endl;
+
+		if (pr.tag == PRIMITIVE) {
+			Primitive prim = PrimitiveTag::cast(pr.data);
+			size_t index = consts.size();
+			consts.push_back(new Primitive(prim));
+			code.push_back(l_const);
+			code.push_back(index);
+		} else if (pr.tag == IDENTIFIER) {
+			// For now only variables
+			std::string var = IdentifierTag::cast(pr.data);
+			size_t index = arg_index(var);
+			code.push_back(l_get);
+			code.push_back(index);
+		} else if (is_operation(pr.tag)) {
+			code.push_back(pr.tag);
+		} else {
+			// Throw
+		}
+	}
+
+	// Print info
+	std::cout << "CODE: ";
+	for (uint8_t is : code)
+		std::cout << (int) is << " ";
+	std::cout << std::endl;
+
+	// Construct the object
+	ISeq iseq {code, consts, argv, nargs};
+}
+
 // Parse statement
 void Parser::statement()
 {
@@ -287,6 +424,16 @@ void Parser::run()
 	}
 
 	std::cout << "Done." << std::endl;
+}
+
+// Debugging
+void Parser::dump()
+{
+	std::cout << "Parser Dump:" << std::endl;
+	for (const auto &pr : symtab) {
+		std::cout << pr.first << "\t"
+			<< pr.second << std::endl;
+	}
 }
 
 }

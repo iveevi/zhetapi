@@ -33,6 +33,8 @@ Primitive optn_div_int_int(const Primitive &v1, const Primitive &v2)
 
 // Filling out the operation base
 const ovlbase opbase[] {
+	{},			// Get operation
+	{},			// Const operation
 	{
 		{ovlid(id_int, id_int), &optn_add_int_int}
 	},

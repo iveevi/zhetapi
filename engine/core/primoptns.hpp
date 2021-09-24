@@ -12,6 +12,8 @@
 namespace zhetapi {
 
 enum OpCode : uint8_t {
+	l_get,
+	l_const,
 	l_add,
 	l_sub,
 	l_mul,
@@ -65,8 +67,8 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 				+ op_strs[code] + "\"") {}
 	};
 
-	// Function
-	const ovlbase *ovb = &(opbase[code]);
+	// Function (offset is l_add)
+	const ovlbase *ovb = &(opbase[code + l_add]);
 
 	for (uint8_t i = 0; i < ovb->size(); i++) {
 		uint8_t ovid = (*ovb)[i].ovid;

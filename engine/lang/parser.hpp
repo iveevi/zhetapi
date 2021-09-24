@@ -14,20 +14,6 @@
 
 namespace zhetapi {
 
-// Symbol table struct
-class SymbolTable {
-	// Symbol table: string to index
-	Strtable <size_t>	_hash;
-
-	// Symbol table: index to value
-	std::vector <Variant>	_vregs;
-public:
-	void push(const std::string &, Variant);
-
-	// Debugging functions
-	void dump();
-};
-
 // Parser class
 // TODO: should only take a tsqueue of tags,
 // for parallelization
@@ -38,6 +24,9 @@ class Parser {
 	//	the tsq later
 	ads::TSQueue <void *> *	_tsq = nullptr;
 	std::stack <void *>	_store;
+
+	// Symbol table
+	Strtable <Variant> symtab;
 
 	// Private structs
 	struct TagPair {
@@ -60,14 +49,21 @@ public:
 	void backup(size_t);
 
 	bool try_grammar(VTags &, const std::vector <LexTag> &);
+	// TODO: need a require grammar function as well
+
+	std::queue <TagPair> shunting_yard();
 
 	// Grammatical functions
 	Variant expression_imm();		// Private
+	void function();
 	void statement();
-	void algorithm();
+	void algorithm();			// Return bool?
 
 	// Ultimate function
 	void run();
+
+	// Debugging functions
+	void dump();
 
 	// Exceptions
 	class eoq : public std::runtime_error {
@@ -82,9 +78,6 @@ public:
 				+ strlex[got] + ">, expected <"
 				+ strlex[exp] + ">") {}
 	};
-
-	// Public variables
-	SymbolTable symtab;
 };
 
 }

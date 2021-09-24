@@ -18,6 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
+f(x) = 2*x
 myvar = 21 + 21 * 53454 / 3
 myvar2 = 210
 )");
@@ -41,7 +42,8 @@ int main()
 
 	cout << "Parser-------------------------->" << endl;
 	// parser.run();
-	parser.statement();
+	parser.function();
+	parser.dump();
 
 	// Free the elements of the queue
 	while (!tags.empty()) {
