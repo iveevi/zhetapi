@@ -81,32 +81,49 @@ inline void *Lexer::check_dual(char expect, LexTag succcess, LexTag fail)
 	if (peek() == expect) {
 		feed();
 
-		return new Normal {succcess};
+		return new NormalTag {succcess};
 	}
 
-	return new Normal {fail};
+	return new NormalTag {fail};
 }
 
-void *Lexer::scan()
+// Lexing helper functions
+void *Lexer::read_space()
 {
-	if (done())
-		return (void *) DONE;
-
-	// Read under non-space character
+	// Read until non-space character
 	while ((_next = feed()) != EOF) {
 		if (_next == '\n') {
 			_line++;
-			return new Normal {NEWLINE};
+			return new NormalTag {NEWLINE};
 		} else if (!isspace(_next)) {
 			break;
 		}
 	}
 
-	// Check the first non-space character
-	// TODO: put into another function
+	return nullptr;
+}
+
+void *Lexer::read_number()
+{
+	// TODO: deal with negatives
+	if (isdigit(_next)) {
+		// TODO: check for overflow, etc
+		long long int ll = (_next - '0');
+		while (isdigit((_next = feed())))
+			ll = 10 * ll + (_next - '0');
+		backup(1);
+
+		return (void *) (new PrimitiveTag(Primitive(ll)));
+	}
+
+	return nullptr;
+}
+
+void *Lexer::read_spec_sym()
+{
 	switch (_next) {
 	case ',':
-		return new Normal {COMMA};
+		return new NormalTag {COMMA};
 	case '&':
 		return check_dual('&', LOGIC_AND, BIT_AND);
 	case '|':
@@ -129,15 +146,11 @@ void *Lexer::scan()
 		return check_dual('=', DIVIDE_EQ, DIVIDE);
 	}
 
-	// Deal with numbers later
-	if (isdigit(_next)) {
-		while (isdigit((_next = feed())));
-		backup(1);
+	return nullptr;
+}
 
-		return (void *) (new Integer(1));
-	}
-
-	// Identifier
+void *Lexer::read_identifier()
+{
 	if ((_next == '_') || isalpha(_next)) {
 		std::string ident(1, _next);
 		while (good_ident(_next = feed()))
@@ -148,13 +161,34 @@ void *Lexer::scan()
 		// cout << "<ident>\"" << ident << "\"</ident>\n";
 		size_t pos;
 		if ((pos = get_code(ident)))
-			return new Normal {pos};
+			return new NormalTag {pos};
 
-		return (void *) (new Identifier(ident));
+		return (void *) (new IdentifierTag(ident));
 	}
 
+	return nullptr;
+}
+
+// Main lexing routine
+void *Lexer::scan()
+{
+	// Check for buffer completion
+	if (done())
+		return (void *) DONE;
+
+	// Check for number before operations
+	// to account for +/- at the start
+	_cache = read_space();
+	_cache = _cache ?: read_number();
+	_cache = _cache ?: read_spec_sym();
+	_cache = _cache ?: read_identifier();
+
+	// Returning
+	if (_cache)
+		return _cache;
+
 	// Return normal symbol according to character-code table
-	return new Normal {get_code(_next)};
+	return new NormalTag {get_code(_next)};
 }
 
 }

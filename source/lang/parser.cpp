@@ -68,7 +68,7 @@ Parser::TagPair Parser::get()
 
 	void *ptr = _tsq->pop();
 	_store.push(ptr);
-	return {ptr, get_ltag(ptr)};
+	return {ptr};
 }
 
 // Parser expression (immediate: shunting-yard algorithm)
@@ -151,7 +151,7 @@ void Parser::expression_imm()
 		auto pr = queue.front();
 		queue.pop();
 
-		std::cout << "\ttag -> " << strlex[pr.tag] << std::endl;
+		std::cout << "\ttag -> " << to_string(pr.data) << std::endl;
 	}
 
 	// TODO: phase 2, computation
@@ -164,7 +164,7 @@ void Parser::statement()
 
 	if (try_grammar(vt, {IDENTIFIER, ASSIGN_EQ})) {
 		std::cout << "\tlooking for an expression now..." << std::endl;
-		std::cout << "\tident was " << Identifier::cast(vt[0].data) << std::endl;
+		std::cout << "\tident was " << IdentifierTag::cast(vt[0].data) << std::endl;
 		expression_imm();
 	}
 }
@@ -177,7 +177,7 @@ void Parser::algorithm()
 
 	// TODO: need a get function that checks for empty-ness
 	TagPair pr = require(IDENTIFIER);
-	ident = Identifier::cast(pr.data);
+	ident = IdentifierTag::cast(pr.data);
 
 	require(LPAREN);
 
@@ -185,7 +185,7 @@ void Parser::algorithm()
 	do {
 		pr = get();
 		if (pr.tag == IDENTIFIER) {
-			args.push_back(Identifier::cast(pr.data));
+			args.push_back(IdentifierTag::cast(pr.data));
 
 			pr = get();
 			if (pr.tag != COMMA && pr.tag != RPAREN) {

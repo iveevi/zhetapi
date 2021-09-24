@@ -48,7 +48,7 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 		"int",
 		"double"
 	};
-	
+
 	static std::string op_strs[] {
 		"addition",
 		"subtraction",

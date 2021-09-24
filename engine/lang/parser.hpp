@@ -33,7 +33,7 @@ class Parser {
 	// Private structs
 	struct TagPair {
 		void *data;
-		LexTag tag;
+		LexTag tag = get_ltag(data);
 	};
 
 	// Private aliases

@@ -16,20 +16,36 @@ std::string strlex[] = {
 	"BIT NOT", "GEQ", "GE", "LEQ", "LE",
 	"LPAREN", "RPAREN",
 	"LBRACE", "RBRACE",
-	"IDENTIFIER", "INTEGER",
+
+	"IDENTIFIER", "PRIMITIVE",
 	"ALGORITHM"
 };
 
 // Functions
-void free_ltag(void *ltag)
+void free_ltag(void *data)
 {
-	LexTag id = *((LexTag *) ltag);
-	if (id == IDENTIFIER)
-		delete (Identifier *) ltag;
-	else if (id == INTEGER)
-		delete (Integer *) ltag;
+	LexTag ltag = get_ltag(data);
+	if (ltag == IDENTIFIER)
+		delete (IdentifierTag *) data;
+	else if (ltag == PRIMITIVE)
+		delete (PrimitiveTag *) data;
 	else
-		delete (Normal *) ltag;
+		delete (NormalTag *) data;
+}
+
+std::string to_string(void *data)
+{
+	LexTag ltag = get_ltag(data);
+	switch (ltag) {
+	case PRIMITIVE:
+		return "PRIMITIVE (" + PrimitiveTag::cast(data).str() + ")";
+	case IDENTIFIER:
+		return "IDENTIFIER (" + IdentifierTag::cast(data) + ")";
+	default:
+		break;
+	}
+
+	return strlex[ltag];
 }
 
 }

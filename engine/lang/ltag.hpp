@@ -1,7 +1,11 @@
 #ifndef LTAG_H_
 #define LTAG_H_
 
+// Standard headers
 #include <string>
+
+// Engine headers
+#include "../core/primitive.hpp"
 
 namespace zhetapi {
 
@@ -21,7 +25,8 @@ enum LexTag : size_t {
 	BIT_NOT, GEQ, GE, LEQ, LE,
 	LPAREN, RPAREN,
 	LBRACE, RBRACE,
-	IDENTIFIER, INTEGER,
+
+	IDENTIFIER, PRIMITIVE,
 	ALGORITHM
 };
 
@@ -29,32 +34,32 @@ enum LexTag : size_t {
 extern std::string strlex[];
 
 // Tokens
-struct Normal {
+struct NormalTag {
 	size_t id;
 };
 
-struct Identifier {
+struct IdentifierTag {
 	size_t id = IDENTIFIER;
 	std::string ident;
 
-	Identifier(const std::string str) : ident(str) {}
+	IdentifierTag(const std::string str) : ident(str) {}
 
 	// Value function
 	static std::string cast(void *ptr) {
-		return ((Identifier *) ptr)->ident;
+		return ((IdentifierTag *) ptr)->ident;
 	}
 };
 
 // Should generalize to primitives
-struct Integer {
-	size_t id = INTEGER;
-	int value;
+struct PrimitiveTag {
+	size_t id = PRIMITIVE;
+	Primitive value;
 
-	Integer(int i) : value(i) {}
+	PrimitiveTag(Primitive x) : value(x) {}
 
 	// Value function
-	static int cast(void *ptr) {
-		return ((Integer *) ptr)->value;
+	static Primitive cast(void *ptr) {
+		return ((PrimitiveTag *) ptr)->value;
 	}
 };
 
@@ -71,6 +76,7 @@ inline std::string str_ltag(void *ltag)
 
 // Forward declarations
 void free_ltag(void *);
+std::string to_string(void *);
 
 }
 

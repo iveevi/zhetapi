@@ -14,6 +14,7 @@ class Lexer {
 	size_t 		_line	= 1;
 	size_t		_index	= 0;
 	char   		_next	= ' ';
+	void *		_cache	= nullptr;
 	std::string	_source;
 public:
 	Lexer(const std::string &str);
@@ -31,6 +32,12 @@ public:
 	static inline bool good_ident(char);
 
 	inline void *check_dual(char, LexTag, LexTag);
+
+	// Lexing helper functions
+	void *read_space();
+	void *read_number();
+	void *read_spec_sym();
+	void *read_identifier();
 
 	// Main routine
 	void *scan();
