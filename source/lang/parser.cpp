@@ -3,8 +3,28 @@
 // Standard headers
 #include <iostream>
 
+// Engine headers
+#include "../../engine/core/primoptns.hpp"
+
 namespace zhetapi {
 
+// Symbol table class
+void SymbolTable::push(const std::string &str, Variant vt)
+{
+	// Create the slot in the registers
+	size_t i = _vregs.size();
+	_vregs.push_back(vt);
+
+	// Add the index to the hash table
+	_hash[str] = i;
+}
+
+void SymbolTable::dump()
+{
+	std::cout << "Registers:" << std::endl;
+}
+
+// Parser class
 Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
 
 // TODO: at the end, deallocate only from both _store
@@ -104,7 +124,7 @@ static inline bool opcmp(LexTag ltag1, LexTag ltag2)
 	return (ltag1 >= ltag2);
 }
 
-void Parser::expression_imm()
+Variant Parser::expression_imm()
 {
 	// Shunting yard algorithm (stack)
 	std::stack <TagPair> stack;
@@ -112,7 +132,7 @@ void Parser::expression_imm()
 
 	std::cout << "Immediate expression" << std::endl;
 	while (true) {
-		auto pr = get();
+		TagPair pr = get();
 		std::cout << pr.tag << std::endl;
 
 		// First check for the newline
@@ -146,15 +166,54 @@ void Parser::expression_imm()
 	}
 
 	// Show all the tokens in the queue
-	std::cout << "Resulting queue..." << std::endl;
+	/* std::cout << "Resulting queue..." << std::endl;
 	while (!queue.empty()) {
 		auto pr = queue.front();
 		queue.pop();
 
 		std::cout << "\ttag -> " << to_string(pr.data) << std::endl;
-	}
+	} */
 
 	// TODO: phase 2, computation
+	// TODO: combine these two phases
+
+	// TODO: stack should be variants
+	std::stack <Primitive> operands;
+
+	while (!queue.empty()) {
+		TagPair pr = queue.front();
+		queue.pop();
+
+		// TODO: need to check if operands has enough operands!!
+		if (is_operation(pr.tag)) {
+			// TODO: need to check for number of operations
+			OpCode code = OpCode(pr.tag - PLUS);
+
+			// TODO: should be for variants instead
+			// TODO: use functions (lambda) for popping
+
+			// Note that the second argument comes first
+			Primitive arg2 = operands.top();
+			operands.pop();
+
+			Primitive arg1 = operands.top();
+			operands.pop();
+
+			Primitive out = do_prim_optn(code, arg1, arg2);
+
+			std::cout << "OP (" << strlex[pr.tag] << ") A1=" << arg1.str()
+				<< ", A2=" << arg2.str() << ", OUT=" << out.str() << std::endl;
+
+			// Push output back onto stack
+			operands.push(out);
+		} else {
+			operands.push(PrimitiveTag::cast(pr.data));
+		}
+	}
+
+	// TODO: need to make sure there is only one element in the stack
+	Primitive *out = new Primitive(operands.top());
+	return Variant(out);
 }
 
 // Parse statement
@@ -165,7 +224,8 @@ void Parser::statement()
 	if (try_grammar(vt, {IDENTIFIER, ASSIGN_EQ})) {
 		std::cout << "\tlooking for an expression now..." << std::endl;
 		std::cout << "\tident was " << IdentifierTag::cast(vt[0].data) << std::endl;
-		expression_imm();
+		Variant vt = expression_imm();
+		std::cout << "RESULT=" << variant_str(vt) << std::endl;
 	}
 }
 

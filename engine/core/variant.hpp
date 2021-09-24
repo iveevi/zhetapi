@@ -22,7 +22,7 @@ struct Variant {
 	Variant();			// Null variant
 	Variant(const Primitive &);
 	Variant(const Object &);
-	
+
 	// Variant type
 	size_t variant_type() const;
 

@@ -10,8 +10,23 @@
 #include "lexer.hpp"
 #include "../ads/tsqueue.hpp"
 #include "../core/common.hpp"
+#include "../core/variant.hpp"
 
 namespace zhetapi {
+
+// Symbol table struct
+class SymbolTable {
+	// Symbol table: string to index
+	Strtable <size_t>	_hash;
+
+	// Symbol table: index to value
+	std::vector <Variant>	_vregs;
+public:
+	void push(const std::string &, Variant);
+
+	// Debugging functions
+	void dump();
+};
 
 // Parser class
 // TODO: should only take a tsqueue of tags,
@@ -23,12 +38,6 @@ class Parser {
 	//	the tsq later
 	ads::TSQueue <void *> *	_tsq = nullptr;
 	std::stack <void *>	_store;
-
-	/* Symbol table: string to index
-	Strtable <size_t>	_hash;
-
-	// Symbol table: index to value
-	std::vector <Variant>	_vregs; */
 
 	// Private structs
 	struct TagPair {
@@ -53,7 +62,7 @@ public:
 	bool try_grammar(VTags &, const std::vector <LexTag> &);
 
 	// Grammatical functions
-	void expression_imm();		// Private
+	Variant expression_imm();		// Private
 	void statement();
 	void algorithm();
 
@@ -73,6 +82,9 @@ public:
 				+ strlex[got] + ">, expected <"
 				+ strlex[exp] + ">") {}
 	};
+
+	// Public variables
+	SymbolTable symtab;
 };
 
 }

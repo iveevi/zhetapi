@@ -18,7 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-myvar = 21 + 21 * 53454 - x
+myvar = 21 + 21 * 53454 / 3
 myvar2 = 210
 )");
 
