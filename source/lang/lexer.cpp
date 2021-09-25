@@ -1,6 +1,7 @@
 #include "../../engine/lang/lexer.hpp"
 
 // Standard headers
+#include <cmath>
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
@@ -109,11 +110,26 @@ void *Lexer::read_number()
 	if (isdigit(_next)) {
 		// TODO: check for overflow, etc
 		long long int ll = (_next - '0');
+		long double ld = 0;
+
 		while (isdigit((_next = feed())))
 			ll = 10 * ll + (_next - '0');
-		backup(1);
 
-		return (void *) (new PrimitiveTag(Primitive(ll)));
+		if (_next != '.') {
+			backup(1);
+			return (void *) (new PrimitiveTag(Primitive(ll)));
+		}
+
+		ld = ll;
+		long double depth = -1;
+		while (isdigit((_next = feed()))) {
+			ld += ((long double) (_next - '0')) * std::pow(10, depth);
+			depth--;
+		}
+
+		// Return the double
+		backup(1);
+		return (void *) (new PrimitiveTag(Primitive(ld)));
 	}
 
 	return nullptr;

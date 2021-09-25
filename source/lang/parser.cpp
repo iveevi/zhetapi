@@ -1,7 +1,9 @@
 #include "../../engine/lang/parser.hpp"
 
 // Standard headers
+#include <iomanip>
 #include <iostream>
+#include <stdexcept>
 
 // Engine headers
 #include "../../engine/core/primoptns.hpp"
@@ -251,7 +253,7 @@ void Parser::function()
 			}
 		}
 	} while (pr.tag != RPAREN);
-	
+
 	/* Post analysis
 	std::cout << "FINAL: [" << ident << "][";
 	for (size_t i = 0; i < args.size(); i++) {
@@ -271,20 +273,24 @@ void Parser::function()
 	ISeq *iseq = new ISeq(postfix, args);
 	iseq->dump();
 	Variant vt = (Variant) new Object(mk_iseq(iseq));
-	symtab[ident] = vt;
+	_symtab[ident] = vt;
 }
 
 // Parse statement
-void Parser::statement()
+bool Parser::statement()
 {
-	VTags vt;
+	VTags vtags;
 
-	if (try_grammar(vt, {IDENTIFIER, ASSIGN_EQ})) {
-		std::cout << "\tlooking for an expression now..." << std::endl;
-		std::cout << "\tident was " << IdentifierTag::cast(vt[0].data) << std::endl;
-		Variant vt = expression_imm();
-		std::cout << "RESULT=" << variant_str(vt) << std::endl;
-	}
+	if (!try_grammar(vtags, {IDENTIFIER, ASSIGN_EQ}))
+		return false;
+
+	std::string ident = IdentifierTag::cast(vtags[0].data);
+	std::cout << "\tlooking for an expression now..." << std::endl;
+	std::cout << "\tident was " << ident << std::endl;
+	Variant vt = expression_imm();
+	_symtab[ident] = vt;
+	std::cout << "RESULT=" << variant_str(vt) << std::endl;
+	return true;
 }
 
 // Parse algorithms
@@ -336,12 +342,12 @@ void Parser::run()
 		if (pr.tag == ALGORITHM) {
 			std::cout << "ALGORITHM!!" << std::endl;
 			algorithm();
-		} /* else if (pr.tag == IDENTIFIER) {
-			cout << "STATEMENT!!" << endl;
-			// statement
-			backup();
-			statement();
-		} */
+		} else {
+			// The line must be a statement
+			backup(1);
+			if (!statement())
+				throw bad_require("statement");
+		}
 	}
 
 	std::cout << "Done." << std::endl;
@@ -350,11 +356,37 @@ void Parser::run()
 // Debugging
 void Parser::dump()
 {
-	std::cout << "Parser Dump:" << std::endl;
-	for (const auto &pr : symtab) {
-		std::cout << pr.first << "\t"
-			<< variant_str(pr.second) << std::endl;
+	// Dashes
+	std::string dash1;
+	std::string dash2;
+	std::string dash3;
+
+	// Creating the dashes
+	for (size_t i = 0; i < 55; i++) dash1 += "\u2500";
+	for (size_t i = 0; i < 27; i++) dash2 += "\u2500";
+	for (size_t i = 0; i < 27; i++) dash3 += "\u2500";
+
+	std::cout << "\u250C" << dash1
+		<< "\u2510" << std::endl;
+	std::cout << "\u2502 " << std::left
+		<< std::setw(53) << "Parser Dump"
+		<< " \u2502" << std::endl;
+	std::cout << "\u251C" << dash2 << "\u252C"
+		<< dash3 << "\u2524" << std::endl;
+	std::cout << "\u2502 "
+		<< std::setw(25) << "Variable"
+		<< " \u2502 " << std::setw(25) << "Value"
+		<< " \u2502" << std::endl;
+	std::cout << "\u251C" << dash2 << "\u253C"
+		<< dash3 << "\u2524" << std::endl;
+	for (const auto &pr : _symtab) {
+		std::cout << "\u2502 " << std::setw(25)
+			<< pr.first << " \u2502 "
+			<< std::setw(25) << variant_str(pr.second)
+			<< " \u2502 " << std::endl;
 	}
+	std::cout << "\u2514" << dash2 << "\u2534"
+		<< dash3 << "\u2518" << std::endl;
 }
 
 }

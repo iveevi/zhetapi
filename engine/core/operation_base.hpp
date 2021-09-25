@@ -32,7 +32,7 @@ std::string overload_catalog(const std::string &);
 std::string gen_overload_msg(const Signature &, const std::string &);
 
 Signature gen_signature(const Targs &);
-	
+
 // Exceptions
 class bad_operation : public std::runtime_error {
 public:

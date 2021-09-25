@@ -68,7 +68,7 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 	};
 
 	// Function (offset is l_add)
-	const ovlbase *ovb = &(opbase[code + l_add]);
+	const ovlbase *ovb = &(opbase[code]);
 
 	for (uint8_t i = 0; i < ovb->size(); i++) {
 		uint8_t ovid = (*ovb)[i].ovid;

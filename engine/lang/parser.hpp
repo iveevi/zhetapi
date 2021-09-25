@@ -2,6 +2,7 @@
 #define PARSER_H_
 
 // Standard headers
+#include <functional>
 #include <stack>
 #include <stdexcept>
 
@@ -48,8 +49,7 @@ inline bool opcmp(LexTag ltag1, LexTag ltag2)
 }
 
 // Parser class
-// TODO: should only take a tsqueue of tags,
-// for parallelization
+// TODO: add builtin functions, etc
 class Parser {
 	// _tsq for retrieving tokens
 	// _store for storing these tokens
@@ -58,10 +58,15 @@ class Parser {
 	ads::TSQueue <void *> *	_tsq = nullptr;
 	std::stack <void *>	_store;
 
+	// Operation stack
+	// TODO: change to Variant later
+	std::stack <Primitive>	_stack;
+
 	// Symbol table
-	Strtable <Variant> symtab;
+	Strtable <Variant>	_symtab;
 public:
 	// Public structs
+	// TODO: add line number to this (and possibly char)
 	struct TagPair {
 		void *data;
 		LexTag tag = get_ltag(data);
@@ -89,7 +94,7 @@ public:
 	// Grammatical functions
 	Variant expression_imm();		// Private
 	void function();
-	void statement();
+	bool statement();
 	void algorithm();			// Return bool?
 
 	// Ultimate function
@@ -98,7 +103,7 @@ public:
 	// Debugging functions
 	void dump();
 
-	// Exceptions
+	// Exceptions: TODO: need to add line numbers
 	class eoq : public std::runtime_error {
 	public:
 		eoq() : std::runtime_error("Parser: end of tag queue") {}
@@ -110,6 +115,12 @@ public:
 			: std::runtime_error("Parser: unexpected tag <"
 				+ strlex[got] + ">, expected <"
 				+ strlex[exp] + ">") {}
+	};
+
+	class bad_require : public std::runtime_error {
+	public:
+		bad_require(const std::string &str)
+			: std::runtime_error("Parser: expected " + str) {}
 	};
 };
 

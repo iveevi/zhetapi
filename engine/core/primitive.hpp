@@ -16,8 +16,8 @@ using TypeId = uint32_t;
 // Enode type IDs (at most 16) TODO: put inside primitive
 enum PrimIds : TypeId {
 	id_null,
-	id_int,
 	id_bool,
+	id_int,
 	id_double
 };
 

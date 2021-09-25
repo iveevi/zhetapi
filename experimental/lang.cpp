@@ -18,10 +18,12 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-f(x, y, z) = 2 * x + 25 + y - 3 * z
-myvar = 21 + 21 * 53454 / 3
-myvar2 = 210
+myvar = 21.14 + 21 * 53454 / 3
+x = 0
 )");
+
+// f(x, y, z) = 2 * x + 25.423 + y - 3.0 * z
+// myvar2 = 210
 
 int main()
 {
@@ -32,8 +34,7 @@ int main()
 
 	cout << "Pushing tags:" << endl;
 	while ((ltag = lexer.scan()) != (void *) DONE) {
-		cout << "\tLexTag: " << ltag << "(" << get_ltag(ltag)
-			<< ") -> " << str_ltag(ltag) << endl;
+		cout << "\tLexTag: " << to_string(ltag) << endl;
 		tags.push(ltag);
 	}
 
@@ -41,8 +42,9 @@ int main()
 	Parser parser(&tags);
 
 	cout << "Parser-------------------------->" << endl;
-	// parser.run();
-	parser.function();
+	parser.run();
+	// parser.function();
+	// parser.statement();
 	parser.dump();
 
 	// Free the elements of the queue
