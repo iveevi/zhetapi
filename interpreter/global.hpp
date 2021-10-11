@@ -12,7 +12,7 @@
 // Engine headers
 #include "../engine/all/zhplib.hpp"
 #include "../engine/core/algorithm.hpp"
-#include "../engine/lang/parser.hpp"
+#include "../engine/lang/old_parser.hpp"
 #include "../engine/lang/error_handling.hpp"
 
 // Namespaces
