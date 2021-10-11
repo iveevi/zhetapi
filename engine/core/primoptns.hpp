@@ -46,7 +46,6 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 	// Static str tables (TODO: keep else where (str_tables...))
 	static std::string id_strs[] {
 		"null",
-		"bool",
 		"int",
 		"double"
 	};
@@ -78,6 +77,8 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 	}
 
 	// Throw here
+	std::cout << "arg1.id = " << arg1.id << std::endl;
+	std::cout << "arg2.id = " << arg2.id << std::endl;
 	throw bad_overload(code, arg1.id, arg2.id);
 
 	return Primitive();

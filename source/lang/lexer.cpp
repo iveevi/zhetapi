@@ -67,7 +67,7 @@ inline size_t Lexer::get_code(const std::string &str)
 	if (ltags.find(str) != ltags.end())
 		return ltags.at(str);
 
-	std::cout << "str = " << str << std::endl;
+	// std::cout << "str = " << str << std::endl;
 	return DONE;
 }
 

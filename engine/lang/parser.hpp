@@ -48,6 +48,87 @@ inline bool opcmp(LexTag ltag1, LexTag ltag2)
 	return (ltag1 >= ltag2);
 }
 
+// Symbol table class
+class SymbolTable {
+public:
+	// Index type: (scope offset, index)
+	using Index = std::pair <int, int>;
+private:
+	// Upper/previous level
+	SymbolTable *		_next = nullptr;
+
+	// Value array and index map
+	std::vector <Variant>	_values;
+	Strtable <size_t>	_indices;
+
+	// TODO: print function for debugging
+
+	// Private find function
+	void _find(const std::string &str, Index &index) {
+		Index ni = {-1, -1};
+		if (_indices.find(str) != _indices.end()) {
+			index.second = _indices[str];
+		} else if (_next) {
+			index.first++;
+			_next->_find(str, index);
+		} else {
+			index = ni;
+		}
+	}
+public:
+	void link_up(SymbolTable *symtab) {
+		_next = symtab;
+	}
+
+	Index find(const std::string &str) {
+		Index index;
+		_find(str, index);
+		return index;
+	}
+
+	// Get values/variables
+	Variant get(int soff, int index) const {
+		if (soff > 0)
+			return _next->get(soff - 1, index);
+		else if (soff < 0)
+			return nullptr;
+		
+		// TODO: need to check bounds
+		return _values[index];
+	}
+
+	Variant get(const Index &index) const {
+		return get(index.first, index.second);
+	}
+
+	Variant get(const std::string &str) {
+		Index index = find(str);
+		if (index.first != -1)
+			return get(index);
+		return nullptr;
+	}
+
+	// Set values/variables
+	void set(Variant vptr, int soff, int index) {
+		if (soff > 0)
+			_next->set(vptr, soff - 1, index);
+		else if (soff == 0) // TODO: need to check bounds
+			_values[index] = vptr;
+
+		// TODO: Warning here?
+	}
+
+	void set(Variant vptr, const Index &index) {
+		return set(vptr, index.first, index.second);
+	}
+
+	void set(Variant vptr, const std::string &str) {
+		Index index = find(str);
+		if (index.first != -1)
+			set(vptr, index.first, index.second);
+	}
+};
+
 // Parser class
 // TODO: add builtin functions, etc
 class Parser {
@@ -63,7 +144,10 @@ class Parser {
 	std::stack <Primitive>	_stack;
 
 	// Symbol table
-	Strtable <Variant>	_symtab;
+	SymbolTable		_symtab;
+
+	// Lexing variables
+	LexTag			_bp;
 public:
 	// Public structs
 	// TODO: add line number to this (and possibly char)
@@ -75,11 +159,13 @@ public:
 	// Public aliases
 	using VTags = std::vector <TagPair>;
 
+	// Constructors
 	Parser(ads::TSQueue <void *> *);
 
 	~Parser();
 
 	// Helper functions
+	void set_bp(LexTag = DONE);
 	TagPair get();
 	TagPair require(LexTag);
 

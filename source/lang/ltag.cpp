@@ -16,6 +16,7 @@ std::string strlex[] = {
 	"BIT NOT", "GEQ", "GE", "LEQ", "LE",
 	"LPAREN", "RPAREN",
 	"LBRACE", "RBRACE",
+	"ARG PACK",
 
 	"IDENTIFIER", "PRIMITIVE",
 	"ALGORITHM"

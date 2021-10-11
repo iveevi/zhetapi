@@ -19,6 +19,11 @@ Parser::Parser(ads::TSQueue <void *> *queue) : _tsq(queue) {}
 Parser::~Parser() {}
 
 // Getter helper
+void Parser::set_bp(LexTag ltag)
+{
+	_bp = ltag;
+}
+
 Parser::TagPair Parser::get()
 {
 	if (_tsq->empty())
@@ -26,6 +31,14 @@ Parser::TagPair Parser::get()
 
 	void *ptr = _tsq->pop();
 	_store.push(ptr);
+
+	if (get_ltag(ptr) == _bp) {
+		std::cout << "HIT BREAKPOINT TOKEN" << std::endl;
+
+		// TODO: need to allocate this in extra vector
+		return {new NormalTag {DONE}};
+	}
+
 	return {ptr};
 }
 
@@ -64,7 +77,7 @@ bool Parser::try_grammar(VTags &tags, const std::vector <LexTag> &codes)
 		while (pr.tag == NEWLINE)
 			pr = get();
 
-		std::cout << "try-pr -> " << strlex[pr.tag] << std::endl;
+		std::cout << "try-tag -> " << strlex[pr.tag] << std::endl;
 		if (pr.tag != c) {
 			// Backup all the tags read in the attempt
 			//	plus one for the current one
@@ -137,14 +150,15 @@ Variant Parser::expression_imm()
 	std::stack <TagPair> stack;
 	std::queue <TagPair> queue;		// TODO: should this be tsqueue?
 
-	// std::cout << "Immediate expression" << std::endl;
+	std::cout << "Immediate expression" << std::endl;
 	while (true) {
 		TagPair pr = get();
-		// std::cout << pr.tag << std::endl;
 
 		// First check for the newline
-		if (pr.tag == NEWLINE) {
+		if (pr.tag == NEWLINE || pr.tag == DONE) {
 			// std::cout << "\tEnd of expression" << std::endl;
+
+			// TODO: backup
 			break;
 		}
 
@@ -162,6 +176,8 @@ Variant Parser::expression_imm()
 
 			stack.push(pr);
 		} else {
+			std::cout << "must be operand: " << strlex[pr.tag] << " = "
+				<< PrimitiveTag::cast(pr.data).str() << std::endl;
 			queue.push(pr);
 		}
 	}
@@ -205,11 +221,12 @@ Variant Parser::expression_imm()
 
 			Primitive arg1 = operands.top();
 			operands.pop();
+			std::cout << "OP (" << strlex[pr.tag] << ") A1=" << arg1.str()
+				<< ", A2=" << arg2.str() << std::endl;
 
 			Primitive out = do_prim_optn(code, arg1, arg2);
 
-			std::cout << "OP (" << strlex[pr.tag] << ") A1=" << arg1.str()
-				<< ", A2=" << arg2.str() << ", OUT=" << out.str() << std::endl;
+			std::cout << "\tOUT=" << out.str() << std::endl;
 
 			// Push output back onto stack
 			operands.push(out);
@@ -273,7 +290,8 @@ void Parser::function()
 	ISeq *iseq = new ISeq(postfix, args);
 	iseq->dump();
 	Variant vt = (Variant) new Object(mk_iseq(iseq));
-	_symtab[ident] = vt;
+	// _symtab[ident] = vt;
+	_symtab.set(vt, ident);
 }
 
 // Parse statement
@@ -281,16 +299,39 @@ bool Parser::statement()
 {
 	VTags vtags;
 
-	if (!try_grammar(vtags, {IDENTIFIER, ASSIGN_EQ}))
-		return false;
+	if (try_grammar(vtags, {IDENTIFIER, ASSIGN_EQ})) {
+		std::string ident = IdentifierTag::cast(vtags[0].data);
+		std::cout << "\tlooking for an expression now..." << std::endl;
+		std::cout << "\tident was " << ident << std::endl;
+		Variant vt = expression_imm();
+		// _symtab[ident] = vt;
+		_symtab.set(vt, ident);
+		std::cout << "RESULT=" << variant_str(vt) << std::endl;
+		return true;
+	} else if (try_grammar(vtags, {IDENTIFIER, LPAREN})) {
+		std::cout << "Function call..." << std::endl;
+		auto pr = get();
 
-	std::string ident = IdentifierTag::cast(vtags[0].data);
-	std::cout << "\tlooking for an expression now..." << std::endl;
-	std::cout << "\tident was " << ident << std::endl;
-	Variant vt = expression_imm();
-	_symtab[ident] = vt;
-	std::cout << "RESULT=" << variant_str(vt) << std::endl;
-	return true;
+		std::string ident = IdentifierTag::cast(vtags[0].data);
+		std::cout << "Ident: " << ident << std::endl;
+		if (pr.tag == RPAREN) {
+			std::cout << "Empty function call..." << std::endl;
+		} else {
+			backup(1);
+			set_bp(RPAREN);
+			
+			std::cout << "Expression: " << std::endl;
+			Variant vt = expression_imm();
+			std::cout << "RESULT=" << variant_str(vt) << std::endl;
+		}
+
+		// Reset break point
+		set_bp();
+	} else if (expression_imm()) {
+		std::cout << "Expression as last resort succeeded" << std::endl;
+	}
+
+	return false;
 }
 
 // Parse algorithms
@@ -337,7 +378,7 @@ void Parser::run()
 	while (!_tsq->empty()) {
 		auto pr = get();
 
-		std::cout << "Tag = " << strlex[pr.tag] << std::endl;
+		std::cout << "tag = " << strlex[pr.tag] << std::endl;
 
 		if (pr.tag == ALGORITHM) {
 			std::cout << "ALGORITHM!!" << std::endl;
@@ -379,12 +420,13 @@ void Parser::dump()
 		<< " \u2502" << std::endl;
 	std::cout << "\u251C" << dash2 << "\u253C"
 		<< dash3 << "\u2524" << std::endl;
-	for (const auto &pr : _symtab) {
+	/* for (const auto &pr : _symtab) {
 		std::cout << "\u2502 " << std::setw(25)
 			<< pr.first << " \u2502 "
 			<< std::setw(25) << variant_str(pr.second)
 			<< " \u2502 " << std::endl;
-	}
+	} */
+	// TODO: should go into a print function for symtab
 	std::cout << "\u2514" << dash2 << "\u2534"
 		<< dash3 << "\u2518" << std::endl;
 }
