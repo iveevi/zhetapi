@@ -23,6 +23,7 @@ __pycache__
 bin
 build
 cmake_install.cmake
+compile_commands.json
 coverage.info
 data
 debug
