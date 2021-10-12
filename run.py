@@ -81,7 +81,7 @@ def run_and_check(suppress, *args):
             print(FAIL + f'Error executing command \'{cmd}\', see install.log'
                     + RESET)
             clean_and_exit(-1)
-    
+
     # Success
     result.append(1)
 

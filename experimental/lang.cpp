@@ -20,11 +20,11 @@ using namespace zhetapi;
 Lexer lexer(R"(
 myvar = 21.14 + 21 * 53454 / 3
 x = 10
-println(10 + 13)
 )");
 
 // f(x, y, z) = 2 * x + 25.423 + y - 3.0 * z
 // myvar2 = 210
+// println(10 + 13)
 
 int main()
 {

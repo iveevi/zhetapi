@@ -61,8 +61,6 @@ private:
 	std::vector <Variant>	_values;
 	Strtable <size_t>	_indices;
 
-	// TODO: print function for debugging
-
 	// Private find function
 	void _find(const std::string &str, Index &index) {
 		Index ni = {-1, -1};
@@ -124,9 +122,16 @@ public:
 
 	void set(Variant vptr, const std::string &str) {
 		Index index = find(str);
-		if (index.first != -1)
+		if (index.first != -1) {
 			set(vptr, index.first, index.second);
+		} else {
+			_indices[str] = _values.size();
+			_values.push_back(vptr);
+		}
 	}
+
+	// Print function
+	void dump() const;
 };
 
 // Parser class

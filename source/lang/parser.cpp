@@ -319,7 +319,7 @@ bool Parser::statement()
 		} else {
 			backup(1);
 			set_bp(RPAREN);
-			
+
 			std::cout << "Expression: " << std::endl;
 			Variant vt = expression_imm();
 			std::cout << "RESULT=" << variant_str(vt) << std::endl;
@@ -395,40 +395,25 @@ void Parser::run()
 }
 
 // Debugging
+void SymbolTable::dump() const
+{
+	// TODO: add a size function
+	std::cout << std::string(50, '-') << std::endl;
+	std::cout << "Symbol table dump:" << std::endl;
+	std::cout << "Size: " << _indices.size() << std::endl;
+	std::cout << std::string(50, '-') << std::endl;
+
+	size_t i = 0;
+	for (const auto &pr : _indices) {
+		std::cout << pr.first << "\t" << pr.second
+			<< "\t|\t" << i << "\t" << variant_str(_values[i++])
+			<< std::endl;
+	}
+}
+
 void Parser::dump()
 {
-	// Dashes
-	std::string dash1;
-	std::string dash2;
-	std::string dash3;
-
-	// Creating the dashes
-	for (size_t i = 0; i < 55; i++) dash1 += "\u2500";
-	for (size_t i = 0; i < 27; i++) dash2 += "\u2500";
-	for (size_t i = 0; i < 27; i++) dash3 += "\u2500";
-
-	std::cout << "\u250C" << dash1
-		<< "\u2510" << std::endl;
-	std::cout << "\u2502 " << std::left
-		<< std::setw(53) << "Parser Dump"
-		<< " \u2502" << std::endl;
-	std::cout << "\u251C" << dash2 << "\u252C"
-		<< dash3 << "\u2524" << std::endl;
-	std::cout << "\u2502 "
-		<< std::setw(25) << "Variable"
-		<< " \u2502 " << std::setw(25) << "Value"
-		<< " \u2502" << std::endl;
-	std::cout << "\u251C" << dash2 << "\u253C"
-		<< dash3 << "\u2524" << std::endl;
-	/* for (const auto &pr : _symtab) {
-		std::cout << "\u2502 " << std::setw(25)
-			<< pr.first << " \u2502 "
-			<< std::setw(25) << variant_str(pr.second)
-			<< " \u2502 " << std::endl;
-	} */
-	// TODO: should go into a print function for symtab
-	std::cout << "\u2514" << dash2 << "\u2534"
-		<< dash3 << "\u2518" << std::endl;
+	_symtab.dump();
 }
 
 }
