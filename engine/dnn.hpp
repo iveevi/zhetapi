@@ -145,6 +145,14 @@ public:
 	Matrix <T> *jacobian_check(const Vector <T> &,
 			const Vector <T> &,
 			Erf <T> *);
+		
+	template <class U>
+	friend void fit(
+		DNN <U> &,
+		const Vector <U> &,
+		const Vector <U> &,
+		Erf <U> *,
+		Optimizer <U> *);
 };
 
 // Constructors and other memory related operations

@@ -46,11 +46,11 @@ Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 template <class T>
 Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 {
-	size_t rs = M.get_rows();
+	/*size_t rs = M.get_rows();
 	size_t cs = M.get_cols();
 
 	Vector <T> out(cs - 1, T(0));
-	/* for (size_t i = 1; i < cs; i++) {
+	for (size_t i = 1; i < cs; i++) {
 		T acc = 0;
 
 		for (size_t k = 0; k < rs; k++)
@@ -59,7 +59,7 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 		out._array[i - 1] = acc;
 	} */
 
-	// Reverse loops
+	/* Reverse loops
 	for (size_t k = 0; k < rs; k++) {
 		const T *arr = &(M._array[k * cs]);
 		T v = V._array[k];
@@ -68,7 +68,9 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 			out._array[i - 1] = arr[i] * v;
 	}
 
-	return out;
+	return out; */
+
+	return Vector <T> (M.transpose() * V).remove_top();
 }
 
 /**

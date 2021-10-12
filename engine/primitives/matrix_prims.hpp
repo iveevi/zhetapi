@@ -571,6 +571,12 @@ inline size_t Matrix <T> ::get_rows() const
 template <class T>
 inline size_t Matrix <T> ::get_cols() const
 {
+	// TODO: do we absolutely need this check?
+	// do we need to check for rows?
+	// or do we assume that every matrix (including vectors)
+	// have at least a row
+	if (this->_dims < 2)
+		return 1;
 	return this->_dim[1];
 }
 

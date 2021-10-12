@@ -14,7 +14,7 @@
 // Engine headers
 #include <training.hpp>
 
-#define TRAIN_IMAGES	100
+#define TRAIN_IMAGES	60000
 #define VALID_IMAGES	10000
 #define SIZE		28
 
@@ -139,13 +139,13 @@ int main()
 	}
 
 	ml::Erf <double> *erf = new ml::MSE <double> ();
-	ml::Optimizer <double> *opt = new ml::SGD <double> ();// Adam <double> ();
+	ml::Optimizer <double> *opt = new ml::Adam <double> ();
 
-	for (int i = 0; i < 10000; i++) {
+	for (int i = 0; i < 100; i++) {
 		train_dataset_perf(model,
 				train_imgs,
 				train_exps,
-				20,
+				128,
 				erf,
 				opt,
 				Display::batch,

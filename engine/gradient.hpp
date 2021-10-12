@@ -91,18 +91,20 @@ Matrix <T> *jacobian_kernel(
 
 	for (int i = size - 1; i >= 0; i--) {
 		if (i < size - 1) {
-			delta = AVR_SWITCH(
+			/* delta = AVR_SWITCH(
 				vvt_mult(delta, a[i]),
 				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
-			);
+			); */
+			delta = std::move(rmt_and_mult(layers[i + 1]._mat, delta));
 		}
 
 		delta.stable_shur(z[i]);
 
-		J[i] = AVR_SWITCH(
+		/* J[i] = AVR_SWITCH(
 			vvt_mult(delta, a[i]),
 			std::move(vvt_mult(delta, a[i]))
-		);
+		); */
+		J[i] = std::move(vvt_mult(delta, a[i]));
 	}
 
 	// Return the gradient
@@ -127,20 +129,40 @@ Matrix <T> *jacobian_kernel(
 	Matrix <T> *J = new Matrix <T> [size];
 
 	for (int i = size - 1; i >= 0; i--) {
+		// std::cout << std::string(50, '#') << std::endl;
+		// std::cout << "LOOP: " << i << std::endl;
 		if (i < size - 1) {
-			delta = AVR_SWITCH(
+			/* delta = AVR_SWITCH(
 				rmt_and_mult(layers[i + 1]._mat, delta),
 				std::move(rmt_and_mult(layers[i + 1]._mat, delta))
-			);
+			); */
+			/* std::cout << "alt comp delta =\t"
+				<< layers[i + 1]._mat.transpose() << "\ndelta = \t\t"
+				<< delta << std::endl; */
+
+			/* std::cout << "delta-fake = \t\t" << Vector <T> (layers[i + 1]._mat.transpose() * delta).remove_top() << std::endl;
+			std::cout << "delta-post =\t\t" << rmt_and_mult(layers[i + 1]._mat, delta) << std::endl; */
+			delta = rmt_and_mult(layers[i + 1]._mat, delta);
+			// delta = Vector <T> (layers[i + 1]._mat.transpose() * delta).remove_top();
 		}
 
 		delta.stable_shur(z[i]);
 
-		J[i] = AVR_SWITCH(
+		/* std::cout << "delta = " << delta << std::endl;
+		std::cout << "a[i] = " << a[i] << std::endl;
+		std::cout << "a[i]^T = " << a[i].transpose() << std::endl; 8/
+
+		/* J[i] = AVR_SWITCH(
 			vvt_mult(delta, a[i]),
 			std::move(vvt_mult(delta, a[i]))
-		);
+		); */
+		// J[i] = delta * a[i].transpose();
+		J[i] = vvt_mult(delta, a[i]);
+
+		/* std::cout << "delta * a^T =\t\t" << delta * a[i].transpose() << std::endl;
+		std::cout << "J[i] =\t\t\t" << J[i] << std::endl; */
 	}
+	// std::cout << std::string(50, '#') << std::endl;
 
 	// Return the gradient
 	return J;
@@ -169,9 +191,9 @@ Matrix <T> *jacobian_kernel_check(
 	for (size_t i = 0; i < size; i++) {
 		size_t rows = layers[i]._mat.get_rows();
 		size_t cols = layers[i]._mat.get_cols();
-		cout << "Processing index = " << i << endl;
+		/* cout << "Processing index = " << i << endl;
 		cout << "\trow = " << rows << endl;
-		cout << "\tcols = " << cols << endl;
+		cout << "\tcols = " << cols << endl; */
 
 		J[i] = Matrix <T> (rows, cols);
 		// for (size_t)

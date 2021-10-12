@@ -328,7 +328,8 @@ std::string Matrix <T> ::display() const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 {
-	os << "[";
+	// TODO: option for debug printing
+	os << "(" << mat.get_rows() << " x " << mat.get_cols() << ") [";
 
 	for (size_t i = 0; i < mat.get_rows(); i++) {
 		if (mat.get_cols() > 1) {

@@ -14,7 +14,7 @@ using namespace zhetapi;
 using namespace zhetapi::ml;
 using namespace zhetapi::utility;
 
-const size_t rounds = 1000000;
+const size_t rounds = 10;
 const size_t channels = 1;
 const size_t actions = 1;
 
@@ -43,9 +43,10 @@ int main()
 
 	// Process
 	for (size_t i = 0; i < rounds; i++) {
+		std::cout << std::string(50, '-') << std::endl;
 		Vector <double> sig(actions,
 			[&](size_t i) {
-				return unit.uniform();
+				return 0.5; // unit.uniform();
 			}
 		);
 
@@ -61,7 +62,5 @@ int main()
 		cout << "\terror = " << mse->compute(sig, out) << endl;
 
 		fit(decryptor, in, sig, mse, opt);
-
-		// Graph this
 	}
 }

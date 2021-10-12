@@ -45,7 +45,7 @@ class NumericalData {
 			Vector <T> dx = (vec - _mean);
 			sum += shur(dx, dx);
 		}
-		return sum/(dataset.size() - _sample);
+		return sum/(dataset.size() - sample);
 	}
 
 	// TODO: fixed vector?
@@ -56,21 +56,21 @@ class NumericalData {
 		return sum/dataset.size();
 	}
 public:
-	DataSet		dataset;
+	DataSet	<T>	dataset;
 	Vector <T>	mean;
 	Vector <T>	stddev;
 	bool		sample;
 
 	// Sample indicates whether the dataset is a
 	// sample or the entire population
-	Data(const DataSet &set, bool sample = false)
+	NumericalData(const DataSet <T> &set, bool sample = false)
 		: dataset(set), mean(_mean()),
 		stddev(_stddev()), sample(sample) {}
 };
 
 // Dimensional
 template <class T>
-using BivariateData <T> = NumericalData <T, 2>;
+using BivariateData = NumericalData <T, 2>;
 
 }
 

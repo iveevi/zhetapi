@@ -55,11 +55,37 @@ void fit(
 	Vector <T> actual = dnn(in);
 	Vector <T> delta = derf->compute(out, actual);
 
+	// TODO: should be a vector of matrices
 	Matrix <T> *J;
+	/* Matrix <T> *Jp;
+	Matrix <T> *Q; */
 
 	J = dnn.jacobian_delta(in, delta);
-	J = opt->update(J, dnn.size());
 
+	// Checked
+	// Q = dnn.jacobian_check(in, out, erf);
+	
+	/* std::cout << "Diff:" << std::endl;
+	for (size_t i = 0; i < dnn.size(); i++)
+		std::cout << "Diff[i] = " << Q[i] - J[i] << std::endl;
+
+	// TODO: gotta free
+	Vector <T> *ta = new Vector <T> [dnn._size + 1];
+	Vector <T> *tz = new Vector <T> [dnn._size];
+	Jp = simple_gradient(
+		dnn._layers,
+		dnn._size,
+		ta, tz,
+		in, out,
+		erf
+	);
+
+	std::cout << "Diff2:" << std::endl;
+	for (size_t i = 0; i < dnn.size(); i++)
+		std::cout << "Diff2[i] = " << Q[i] - Jp[i] << std::endl; */
+
+	// Continue regardless
+	J = opt->update(J, dnn.size());
 	dnn.apply_gradient(J);
 
 	delete[] J;
