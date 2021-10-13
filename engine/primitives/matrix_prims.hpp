@@ -637,7 +637,6 @@ void Matrix <T> ::operator+=(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::operator-=(const Matrix <T> &other)
 {
-	std::cerr << "other = " << other << ", this = " << *this << std::endl;
 	assert(get_rows() == other.get_rows() && get_cols() == other.get_cols());
 
 	for (size_t i = 0; i < get_rows(); i++) {

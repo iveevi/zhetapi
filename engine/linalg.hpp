@@ -446,12 +446,9 @@ QR <T> qr_decompose(const Matrix <T> &A)
 		es.push_back(u.normalized());
 	}
 
-	for (auto e : es)
-		std::cout << "e in es = " << e << std::endl;
 	Matrix <T> Q(es);
-	std::cout << "Q = " << Q << std::endl;
-
 	Matrix <T> R(n, n);
+
 	for (size_t i = 0; i < n; i++) {
 		for (size_t j = i; j < n; j++)
 			R[i][j] = inner(es[i], A.get_column(j));
@@ -478,7 +475,6 @@ LQ <T> lq_decompose(const Matrix <T> &A)
 	// Use a more verbose method for better
 	// accuracy and efficiency
 	auto qr = qr_decompose(A);
-	std::cout << "qr ret:\n\t" << qr.q() << "\n\t" << qr.r() << std::endl;
 
 	return LQ <T> (qr.q().transpose(), qr.r().transpose());
 }

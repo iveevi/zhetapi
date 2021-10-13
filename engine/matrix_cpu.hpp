@@ -6,15 +6,13 @@ namespace zhetapi {
 template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
 {
-	std::cout << "columns constructor!" << std::endl;
 	size_t r = columns.size();
-	std::cout << "\tr = " << r << std::endl;
 
 	if (r > 0) {
 		size_t c = columns[0].size();
-		std::cout << "\tc = " << c << std::endl;
 
 		this->_size = r * c;
+		this->_dims = 2;
 
 		this->_dim = new size_t[2];
 		this->_dim[0] = r;
@@ -331,8 +329,16 @@ std::string Matrix <T> ::display() const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 {
-	// TODO: option for debug printing
+
+#ifdef ZHETAPI_DEBUG
+
 	os << "(" << mat.get_rows() << " x " << mat.get_cols() << ") [";
+
+#else
+
+	os << "[";
+
+#endif
 
 	for (size_t i = 0; i < mat.get_rows(); i++) {
 		if (mat.get_cols() > 1) {

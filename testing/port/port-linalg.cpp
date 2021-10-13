@@ -71,8 +71,6 @@ TEST(lq_decomp)
 	oss << "\tQ = " << lq.q() << endl;
 	oss << "\tLQ = " << lq.product() << endl;
 
-	std::cout << "LQ prod = " << lq.product() << std::endl;
-
 	oss << "Error = " << (lq.product() - A).norm() << endl;
 
 	if ((lq.product() - A).norm() > 1e-10) {

@@ -4,7 +4,7 @@
 #define DEBUG_EXCEPTION
 // #define PASSTHROUGH_EXCEPTION
 // #define HANDLE_SEGFAULT
-#define SINGLET			lq_decomp
+// #define SINGLET			lq_decomp
 
 // TODO: need a method to conduct a single test
 typedef pair <string, bool (*)(ostringstream &, int)> singlet;
