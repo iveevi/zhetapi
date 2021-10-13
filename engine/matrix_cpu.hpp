@@ -6,10 +6,13 @@ namespace zhetapi {
 template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
 {
+	std::cout << "columns constructor!" << std::endl;
 	size_t r = columns.size();
+	std::cout << "\tr = " << r << std::endl;
 
 	if (r > 0) {
 		size_t c = columns[0].size();
+		std::cout << "\tc = " << c << std::endl;
 
 		this->_size = r * c;
 

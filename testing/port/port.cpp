@@ -1,10 +1,12 @@
 #include "port.hpp"
 
-#define THREADS	8
-// #define DEBUG_EXCEPTION
-#define PASSTHROUGH_EXCEPTION
+#define THREADS			8
+#define DEBUG_EXCEPTION
+// #define PASSTHROUGH_EXCEPTION
 // #define HANDLE_SEGFAULT
+#define SINGLET			lq_decomp
 
+// TODO: need a method to conduct a single test
 typedef pair <string, bool (*)(ostringstream &, int)> singlet;
 
 // Testing rig
@@ -57,6 +59,7 @@ tclk clk;
 // Main program
 int main()
 {
+
 #ifdef HANDLE_SEGFAULT
 
 	// Setup segfault handler
@@ -73,6 +76,16 @@ int main()
 
 #endif
 
+#ifdef SINGLET
+
+	ostringstream oss;
+	SINGLET(oss, 0);
+
+	std::cout << "OUTPUT:\n" << oss.str();
+	return 0;
+
+#else
+
 	// Setup times
 	tpoint epoch = clk.now();
 
@@ -88,25 +101,25 @@ int main()
 	size_t size = rig.size();
 	auto singleter = [&](singlet s, size_t t) {
 		ostringstream oss;
-		
+
 		oss << string(100, '=') << endl;
 		oss << mark << "Running \"" << s.first
 			<< "\" test [" << t << "/"
 			<< size << "]:\n" << endl;
 
 		bool tmp = true;
-		
+
 #if defined(DEBUG_EXCEPTION)
-			
+
 		oss << string(100, '-') << endl;
-		tmp = s.second(oss, 0);	
+		tmp = s.second(oss, 0);
 		oss << string(100, '-') << endl;
 
 #elif defined(PASSTHROUGH_EXCEPTION)
-		
+
 		try {
 			oss << string(100, '-') << endl;
-			tmp = s.second(oss, 0);	
+			tmp = s.second(oss, 0);
 			oss << string(100, '-') << endl;
 		} catch (const std::runtime_error &e) {
 			oss << bred << "CAUGHT RUNTIME EXCEPTION (in test \""
@@ -127,12 +140,12 @@ int main()
 
 		try {
 			oss << string(100, '-') << endl;
-			tmp = s.second(oss, 0);	
+			tmp = s.second(oss, 0);
 			oss << string(100, '-') << endl;
 		} catch (...) {
 			cout << bred << "CAUGHT UNKNOWN EXCEPTION (in test \""
 				<< s.first << "\"), TERMINATING." << reset << endl;
-			
+
 			throw;
 		}
 
@@ -152,9 +165,9 @@ int main()
 			oss << endl << bred << "\"" << s.first
 				<< "\" test FAILED." << reset << endl;
 		}
-		
+
 		oss << string(100, '=') << endl;
-		
+
 		io_mtx.lock();
 
 		cout << oss.str() << endl;
@@ -198,7 +211,7 @@ int main()
 	if (failed.size()) {
 		cout << endl << string(100, '=') << endl;
 
-		cout << "Failed tests [" << failed.size() 
+		cout << "Failed tests [" << failed.size()
 			<< "/" << rig.size() << "]:" << endl;
 
 		for (auto task : failed) {
@@ -209,4 +222,7 @@ int main()
 	}
 
 	return (failed.size() == 0) ? 0 : 1;
+
+#endif
+
 }

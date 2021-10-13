@@ -357,6 +357,8 @@ public:
 	QR(const Matrix <T> &Q, const Matrix <T> &R)
 			: MatrixFactorization <T, 2> (Q, R) {}
 
+	// TODO: q and r should be members
+
 	/**
 	 * @return Q, the orthogonal matrix.
 	 */
@@ -417,7 +419,6 @@ template <class T>
 QR <T> qr_decompose(const Matrix <T> &A)
 {
 	// Assume that A is square for now
-	//
 	// TODO: Add a method .is_square()
 	assert(A.get_rows() == A.get_cols());
 
@@ -445,7 +446,10 @@ QR <T> qr_decompose(const Matrix <T> &A)
 		es.push_back(u.normalized());
 	}
 
+	for (auto e : es)
+		std::cout << "e in es = " << e << std::endl;
 	Matrix <T> Q(es);
+	std::cout << "Q = " << Q << std::endl;
 
 	Matrix <T> R(n, n);
 	for (size_t i = 0; i < n; i++) {
@@ -474,6 +478,7 @@ LQ <T> lq_decompose(const Matrix <T> &A)
 	// Use a more verbose method for better
 	// accuracy and efficiency
 	auto qr = qr_decompose(A);
+	std::cout << "qr ret:\n\t" << qr.q() << "\n\t" << qr.r() << std::endl;
 
 	return LQ <T> (qr.q().transpose(), qr.r().transpose());
 }

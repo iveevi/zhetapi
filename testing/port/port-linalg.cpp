@@ -71,6 +71,8 @@ TEST(lq_decomp)
 	oss << "\tQ = " << lq.q() << endl;
 	oss << "\tLQ = " << lq.product() << endl;
 
+	std::cout << "LQ prod = " << lq.product() << std::endl;
+
 	oss << "Error = " << (lq.product() - A).norm() << endl;
 
 	if ((lq.product() - A).norm() > 1e-10) {
@@ -110,7 +112,7 @@ TEST(qr_alg)
 	A = {{1, 1}, {1, 0}};
 
 	E = qr_algorithm(A);
-	
+
 	Vector <double> G {
 		(double) (1 + sqrt(5.0))/2.0,
 		(double) (1 - sqrt(5.0))/2.0
@@ -142,28 +144,28 @@ TEST(matrix_props)
 
 		return false;
 	}
-	
+
 	oss << "Is I identity? " << (is_identity(I) ? "yes" : "no") << endl;
 	if (!is_identity(I)) {
 		oss << "\tWrong answer..." << endl;
 
 		return false;
 	}
-	
+
 	oss << "Is Q orthogonal? " << (is_orthogonal(qr.q()) ? "yes" : "no") << endl;
 	if (!is_orthogonal(qr.q())) {
 		oss << "\tWrong answer..." << endl;
 
 		return false;
 	}
-	
+
 	oss << "Is R upper triangular? " << (is_upper_triangular(qr.r()) ? "yes" : "no") << endl;
 	if (!is_upper_triangular(qr.r())) {
 		oss << "\tWrong answer..." << endl;
 
 		return false;
 	}
-	
+
 	oss << "Is L lower triangular? " << (is_lower_triangular(lq.l()) ? "yes" : "no") << endl;
 	if (!is_lower_triangular(lq.l())) {
 		oss << "\tWrong answer..." << endl;

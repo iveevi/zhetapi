@@ -127,7 +127,6 @@ Matrix <T> Matrix <T> ::slice(const psize_t &start, const psize_t &end) const
 	 * are in order.
 	 */
 	assert(start.first <= end.first && start.second <= end.second);
-
 	assert(start.first < get_rows() && start.second < get_cols());
 	assert(end.first < get_rows() && end.second < get_cols());
 
@@ -137,7 +136,7 @@ Matrix <T> Matrix <T> ::slice(const psize_t &start, const psize_t &end) const
 	return Matrix <T> (
 		end.first - start.first + 1,
 		end.second - start.second + 1,
-		[&](size_t i, size_t j) {
+		[&] (size_t i, size_t j) {
 			return this->_array[get_cols() * (i + start.first) + j + start.second];
 		}
 	);
@@ -638,6 +637,7 @@ void Matrix <T> ::operator+=(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::operator-=(const Matrix <T> &other)
 {
+	std::cerr << "other = " << other << ", this = " << *this << std::endl;
 	assert(get_rows() == other.get_rows() && get_cols() == other.get_cols());
 
 	for (size_t i = 0; i < get_rows(); i++) {
