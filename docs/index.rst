@@ -1,7 +1,7 @@
 Welcome to Zhetapi's documentation!
 ===================================
 
-Zhetapi is a ``C++17`` machine learning and numerical analysis API that was
+Zhetapi is a ``C++14`` machine learning and numerical analysis API that was
 built in the hopes of making mathematical computation and algorithmic research
 more convenient to users. In the name of convenience and beginner-friendliness,
 the API comes with a scripting language, ZHP.
@@ -30,10 +30,13 @@ Explore these two parts using the links below:
         api/api
         zhp/zhp
 
-As a bonus, the following is an introduction series to programming for
-beginnners that uses the ZHP scripting language.
+Lessons
+-------
+
+This site also provides lessons on various things related to computer science.
+Check them out to learn more and gain practice with programming.
 
 .. toctree::
         :maxdepth: 2
 
-        guide/guide
+        lessons/index

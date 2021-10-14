@@ -1,17 +1,16 @@
-Introduction to Programming: Learning the Fundamentals wih the ZHP Scripting language
-=====================================================================================
+Introduction to Programming
+===========================
 
 Introduction
 ------------
 
-This introduction to programming series is targetted towards middle school
-students and young mathematicians.
+This lesson will teach you the basics of programming, including conventional
+programming constructs and ways to think about programming by using the novel
+ZHP scripting langauge. A mild knowledge of mathematics will help progress
+through the leson.
 
-Basic Concepts
---------------
-
-Why Programming?
-~~~~~~~~~~~~~~~~
+Why?
+----
 
 First of all, what is programming? Programming, or rather computer programming,
 is the process of creating a computer application to achieve some result: a
@@ -26,21 +25,10 @@ deeper understanding of how computers work.
 
 Even if you are not planning on studying computer science or engineering in the
 future, there are many fields that use computers or computer programming to
-solve problems (protein folding, fluid dynamics, etc.).
-
-What Are Algorithms?
-~~~~~~~~~~~~~~~~~~~~
-
-To put simply, an algorithm is a process, usually consisting of multiple steps,
-that leads to certain result. Examples of algorithms in daily life are cooking
-recipes and building manuals.
-
-Programming Paradigms
-~~~~~~~~~~~~~~~~~~~~~
+solve problems (protein folding, fluid dynamics, e.t.c.).
 
 .. toctree::
         :maxdepth: 2
         :hidden:
 
-        ..
-        variables
+        languages
