@@ -70,14 +70,14 @@ public:
 		__cuda_dual__
 		Activation(const std::vector <T> &)			// Argument constructor
 	);
-	
+
 	AVR_IGNORE(
 		__cuda_dual__
 		Activation(activation_type, const std::vector <T> &)	// Type and argument constructor
 	);
 
 	virtual Activation *copy() const;
-	
+
 	// Computation
 	__cuda_dual__
 	virtual Vector <T> compute(const Vector <T> &) const;
@@ -87,7 +87,7 @@ public:
 
 	__cuda_dual__
 	virtual Activation *derivative() const;
-	
+
 	__cuda_dual__
 	int get_activation_type() const;
 
@@ -117,7 +117,7 @@ public:
 
 protected:
 	activation_type	_kind = AT_Default;
-	
+
 	// Arguments, empty by default
 	AVR_IGNORE(std::vector <T>	_args = {});
 };
@@ -207,7 +207,7 @@ void Activation <T> ::write_args(std::ofstream &fout) const
 	size_t argc = _args.size();
 
 	fout.write((char *) &argc, sizeof(size_t));
-	
+
 	for (size_t i = 0; i < argc; i++)
 		fout.write((char *) &(_args[i]), sizeof(T));
 }
@@ -236,7 +236,7 @@ Activation <T> *Activation <T> ::load(std::ifstream &fin)
 	std::string name = aname;
 
 	size_t argc;
-	
+
 	fin.read((char *) &argc, sizeof(size_t));
 
 	std::vector <T> args;
@@ -261,7 +261,7 @@ Activation <T> *Activation <T> ::load(const std::string &name, const std::vector
 {
 	if (_act_loaders_name.find(name) == _act_loaders_name.end())
 		throw undefined_loader();
-	
+
 	Loader <T> loader = _act_loaders_name[name];
 
 	return loader(args);

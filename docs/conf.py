@@ -62,3 +62,4 @@ html_logo = "../zhetapi-logo.png"
 # Breathe setup
 breathe_projects = {'Zhetapi': 'xml'}
 breathe_default_project = 'Zhetapi'
+breathe_debug_trace_directives = True

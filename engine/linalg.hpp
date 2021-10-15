@@ -35,9 +35,13 @@ protected:
 public:
 	MatrixFactorization(const std::vector <Matrix <T>> &);
 
+#ifndef SKIP_DOXYGEN	// Breathe cannot parse variadics
+
 	// Variadic constructor
 	template <class ... U>
 	MatrixFactorization(const Matrix <T> &, U ...);
+
+#endif
 
 	Matrix <T> product() const;
 };
@@ -55,13 +59,8 @@ MatrixFactorization <T, N> ::MatrixFactorization(
 		_terms[i] = terms[i];
 }
 
-/**
- * @brief Constructs a matric factorization from a sequence of matrices. Same as
- * the list constructor, but is variadic.
- *
- * @param A the first matrix of the sequence
- * @param args the rest of the seqeuence.
- */
+#ifndef SKIP_DOXYGEN	// Breathe cannot parse variadics
+
 template <class T, size_t N>
 template <class ... U>
 MatrixFactorization <T, N> ::MatrixFactorization(
@@ -77,6 +76,8 @@ MatrixFactorization <T, N> ::MatrixFactorization(
 	for (size_t i = 0; i < N; i++)
 		_terms[i] = terms[i];
 }
+
+#endif
 
 /**
  * @brief Computes the product of the factorization.
@@ -261,15 +262,8 @@ Matrix <T> diag(const std::vector <T> &cs)
 	);
 }
 
-/**
- * @brief Constructs a diagonal matrix with components in a sequence. Same as
- * the \c diag function but is variadic.
- *
- * @param x the first component of the sequence.
- * @param args the remaining components.
- *
- * @return a diagonal matrix with components in the sequence.
- */
+#ifndef SKIP_DOXYGEN	// Breathe cannot parse variadics
+
 template <class T, class ... U>
 Matrix <T> diag(T x, U ... args)
 {
@@ -279,6 +273,8 @@ Matrix <T> diag(T x, U ... args)
 
 	return diag(bin);
 }
+
+#endif
 
 /**
  * @brief Projects one vector onto another.
