@@ -37,7 +37,10 @@ vector <singlet> rig {
 	RIG(parsing_global_assignment),
 	RIG(parsing_global_branching),
 	RIG(compile_const_exprs),
-	RIG(compile_var_exprs)
+	RIG(compile_var_exprs),
+	RIG(kernel_apt_and_mult),
+	RIG(kernel_rmt_and_mult),
+	RIG(kernel_vvt_mult)
 };
 
 vector <singlet> failed;

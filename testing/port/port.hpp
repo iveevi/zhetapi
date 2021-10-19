@@ -38,6 +38,7 @@
 #include "../../engine/core/operation_base.hpp"
 #include "../../engine/core/raw_types.hpp"
 #include "../../engine/core/collection.hpp"
+#include "../../engine/core/kernels.hpp"
 
 // Macros
 #define TEST(name)	bool name(ostringstream &oss, int cout)
@@ -93,6 +94,10 @@ TEST(vector_construction_and_memory);
 TEST(vector_operations);
 
 TEST(matrix_construction_and_memory);
+TEST(kernel_apt_and_mult);
+TEST(kernel_rmt_and_mult);
+TEST(kernel_vvt_mult);
+
 TEST(tensor_construction_and_memory);
 
 TEST(integration);
