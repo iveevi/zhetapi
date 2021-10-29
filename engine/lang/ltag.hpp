@@ -28,7 +28,17 @@ enum LexTag : size_t {
 	ARG_PACK,
 
 	IDENTIFIER, PRIMITIVE,
-	ALGORITHM
+	ALGORITHM,
+
+	// Grammatical structures
+	gr_statements,
+	gr_statement,
+	gr_assignment,
+	gr_expression,
+	gr_term,
+	gr_factor,
+	gr_full_factor,
+	gr_closed_factor
 };
 
 // String codes for enumerations

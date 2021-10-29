@@ -90,7 +90,7 @@ public:
 			return _next->get(soff - 1, index);
 		else if (soff < 0)
 			return nullptr;
-		
+
 		// TODO: need to check bounds
 		return _values[index];
 	}
@@ -137,6 +137,18 @@ public:
 // Parser class
 // TODO: add builtin functions, etc
 class Parser {
+public:
+	// Public structs
+	// TODO: add line number to this (and possibly char)
+	struct TagPair {
+		void *data;
+		LexTag tag = get_ltag(data);
+	};
+
+	// Public aliases
+	using VTags = std::vector <TagPair>;
+	using Values = std::vector <Variant>;
+private:
 	// _tsq for retrieving tokens
 	// _store for storing these tokens
 	//	so that we can restore them to
@@ -153,17 +165,35 @@ class Parser {
 
 	// Lexing variables
 	LexTag			_bp;
-public:
-	// Public structs
-	// TODO: add line number to this (and possibly char)
-	struct TagPair {
-		void *data;
-		LexTag tag = get_ltag(data);
+
+	// Multigrammar private structs
+	template <LexTag ... Codes>
+	struct _multigrammar {
+		_multigrammar(Parser *) {}
+		void operator()(Values &) {}
 	};
 
-	// Public aliases
-	using VTags = std::vector <TagPair>;
+	template <LexTag code, LexTag ... Codes>
+	class _multigrammar <code, Codes...> {
+		Parser *_parser;
+	public:
+		_multigrammar(Parser *parser)
+				: _parser(parser) {}
 
+		void operator()(Values &values) {
+			// Check and add
+			Variant vt;
+
+			_multigrammar <Codes...> next(_parser);
+			if ((vt = _parser->grammar <code> ())) {
+				values.push_back(vt);
+				next(values);
+			} else {
+				_parser->backup();
+			}
+		}
+	};
+public:
 	// Constructors
 	Parser(ads::TSQueue <void *> *);
 
@@ -187,6 +217,43 @@ public:
 	void function();
 	bool statement();
 	void algorithm();			// Return bool?
+
+	// Generic grammar function:
+	// 	default specialization checks if
+	// 	the next tag has the specified code
+	//
+	// 	specializations are used to build
+	// 	up the grammar
+	template <LexTag code>
+	Variant grammar() {
+		auto pr = get();
+
+		// TODO: should we do this once at the start of
+		// the grammar or allow whitespace between tokens?
+		// TODO: use a function is_whitespace
+		while (pr.tag == NEWLINE) pr = get();
+
+		if (pr.tag == code)
+			return (Variant) code;
+
+		backup();
+		return nullptr;
+	}
+
+	// Multigrammar struct
+	template <LexTag ... Codes>
+	struct multigrammar {
+		Parser *_parser;
+	public:
+		multigrammar(Parser *parser)
+				: _parser(parser) {}
+
+		bool operator()(Values &values) {
+			_multigrammar <Codes...> mg(_parser);
+			mg(values);
+			return (values.size() > 0);
+		};
+	};
 
 	// Ultimate function
 	void run();
@@ -214,6 +281,22 @@ public:
 			: std::runtime_error("Parser: expected " + str) {}
 	};
 };
+
+// Grammar specializations
+template <>
+Variant Parser::grammar <gr_closed_factor> ();
+
+template <>
+Variant Parser::grammar <gr_full_factor> ();
+
+template <>
+Variant Parser::grammar <gr_factor> ();
+
+template <>
+Variant Parser::grammar <gr_term> ();
+
+template <>
+Variant Parser::grammar <gr_expression> ();
 
 }
 

@@ -19,7 +19,17 @@ std::string strlex[] = {
 	"ARG PACK",
 
 	"IDENTIFIER", "PRIMITIVE",
-	"ALGORITHM"
+	"ALGORITHM",
+
+	// Grammatical structures
+	"GR-STATEMENTS",
+	"GR-STATEMENT",
+	"GR-ASSIGNMENT",
+	"GR-EXPRESSION",
+	"GR-TERM",
+	"GR-FACTOR",
+	"GR-FULL-FACTOR",
+	"GR-CLOSED-FACTOR"
 };
 
 // Functions

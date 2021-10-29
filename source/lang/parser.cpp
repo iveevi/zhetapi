@@ -372,6 +372,77 @@ void Parser::algorithm()
 	std::cout << "]" << std::endl;
 }
 
+// Specialized grammars
+template <>
+Variant Parser::grammar <gr_closed_factor> ()
+{
+	Variant vt = nullptr;
+	vt = vt ? vt : grammar <PRIMITIVE> ();
+
+	return vt;
+}
+
+template <>
+Variant Parser::grammar <gr_full_factor> ()
+{
+	Variant vt = nullptr;
+
+	// Last case
+	if ((vt = grammar <gr_closed_factor> ()))
+		return vt;
+
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_factor> ()
+{
+	Variant vt = nullptr;
+
+	// Juxtaposition of factors as multiplication
+	Values values;
+	multigrammar <gr_full_factor, gr_factor> mg(this);
+	if (mg(values)) {
+		std::cout << "Juxtaposition of multiplication: need to implement" << std::endl;
+		throw int(1);
+	}
+
+	// Last case
+	if ((vt = grammar <gr_full_factor> ()))
+		return vt;
+
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_term> ()
+{
+	Variant vt = nullptr;
+
+	// Last case
+	if ((vt = grammar <gr_factor> ()))
+		return vt;
+
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_expression> ()
+{
+	std::cout << "In expression grammar" << std::endl;
+
+	/* if (grammar <PRIMITIVE> ())
+		std::cout << "Confirmed primitive." << std::endl; */
+
+	multigrammar <gr_term, PLUS, gr_term> plus_gr(this);
+
+	Values values;
+	if (plus_gr(values))
+		std::cout << "PLUS GR!!" << std::endl;
+
+	return nullptr;
+}
+
 // Final run function
 void Parser::run()
 {
