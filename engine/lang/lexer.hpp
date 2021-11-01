@@ -36,6 +36,7 @@ public:
 	// Lexing helper functions
 	void *read_space();
 	void *read_number();
+	void *read_string();
 	void *read_spec_sym();
 	void *read_identifier();
 

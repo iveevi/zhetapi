@@ -58,6 +58,7 @@ Parser::TagPair Parser::require(LexTag ltag)
 void Parser::backup()
 {
 	void *ptr = _store.top();
+	// std::cout << "BACKUP: " << str_ltag(ptr) << std::endl;
 	_store.pop();
 	_tsq->push_front(ptr);
 }
@@ -374,12 +375,49 @@ void Parser::algorithm()
 
 // Specialized grammars
 template <>
-Variant Parser::grammar <gr_closed_factor> ()
+Variant Parser::grammar <PRIMITIVE> ()
+{
+	auto pr = get();
+
+	// TODO: should we do this once at the start of
+	// the grammar or allow whitespace between tokens?
+	// TODO: use a function is_whitespace
+	while (pr.tag == NEWLINE) pr = get();
+
+	if (pr.tag == PRIMITIVE)
+		return pr.data;
+
+	backup();
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_operand> ()
 {
 	Variant vt = nullptr;
-	vt = vt ? vt : grammar <PRIMITIVE> ();
+	if ((vt = do_grammar <PRIMITIVE> ()))
+		return vt;
+	if ((vt = do_grammar <STRING> ()))
+		return vt;
 
-	return vt;
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_closed_factor> ()
+{
+	// Multigrammars
+	multigrammar <LPAREN, gr_expression, RPAREN> paren(this);
+
+	Variant vt = nullptr;
+	if ((vt = do_grammar <gr_operand> ()))
+		return vt;
+
+	Values values;
+	if (paren(values))
+		return values[0];
+
+	return nullptr;
 }
 
 template <>
@@ -388,7 +426,7 @@ Variant Parser::grammar <gr_full_factor> ()
 	Variant vt = nullptr;
 
 	// Last case
-	if ((vt = grammar <gr_closed_factor> ()))
+	if ((vt = do_grammar <gr_closed_factor> ()))
 		return vt;
 
 	return nullptr;
@@ -399,16 +437,18 @@ Variant Parser::grammar <gr_factor> ()
 {
 	Variant vt = nullptr;
 
-	// Juxtaposition of factors as multiplication
+	/* Juxtaposition of factors as multiplication
+	// std::cout << "\nFACTOR (1st branch)" << std::string(50, '=') << std::endl;
 	Values values;
 	multigrammar <gr_full_factor, gr_factor> mg(this);
 	if (mg(values)) {
-		std::cout << "Juxtaposition of multiplication: need to implement" << std::endl;
+	//	std::cout << "Size of values = " << values.size() << std::endl;
+	//	std::cout << "Juxtaposition of multiplication: need to implement" << std::endl;
 		throw int(1);
-	}
+	} */
 
 	// Last case
-	if ((vt = grammar <gr_full_factor> ()))
+	if ((vt = do_grammar <gr_full_factor> ()))
 		return vt;
 
 	return nullptr;
@@ -420,8 +460,30 @@ Variant Parser::grammar <gr_term> ()
 	Variant vt = nullptr;
 
 	// Last case
-	if ((vt = grammar <gr_factor> ()))
+	if ((vt = do_grammar <gr_factor> ()))
 		return vt;
+
+	return nullptr;
+}
+
+template <>
+Variant Parser::grammar <gr_simple_expression> ()
+{
+	multigrammar <gr_term, PLUS, gr_term> plus_gr(this);
+
+	Values values;
+	if (plus_gr(values)) {
+		std::cout << "PLUS GR: #values = " << values.size() << std::endl;
+		Primitive p1 = PrimitiveTag::cast(values[0]);
+		Primitive p2 = PrimitiveTag::cast(values[2]);
+
+		std::cout << "\tp1 = " << p1.str() << std::endl;
+		std::cout << "\tp2 = " << p2.str() << std::endl;
+
+		Primitive out = do_prim_optn(l_add, p1, p2);
+
+		std::cout << "\tout = " << out.str() << std::endl;
+	}
 
 	return nullptr;
 }
@@ -429,16 +491,9 @@ Variant Parser::grammar <gr_term> ()
 template <>
 Variant Parser::grammar <gr_expression> ()
 {
-	std::cout << "In expression grammar" << std::endl;
-
-	/* if (grammar <PRIMITIVE> ())
-		std::cout << "Confirmed primitive." << std::endl; */
-
-	multigrammar <gr_term, PLUS, gr_term> plus_gr(this);
-
-	Values values;
-	if (plus_gr(values))
-		std::cout << "PLUS GR!!" << std::endl;
+	Variant vt;
+	if ((vt = do_grammar <gr_simple_expression> ()))
+		return vt;
 
 	return nullptr;
 }

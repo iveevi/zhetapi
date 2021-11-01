@@ -18,7 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-10+10
+(10 + 10)
 )");
 
 // f(x, y, z) = 2 * x + 25.423 + y - 3.0 * z
@@ -48,7 +48,7 @@ int main()
 	// parser.function();
 	// parser.statement();
 	// parser.dump();
-	parser.grammar <gr_expression> ();
+	parser.do_grammar <gr_closed_factor> ();
 
 	// Free the elements of the queue
 	while (!tags.empty()) {

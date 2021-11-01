@@ -13,6 +13,12 @@
 #include "../core/common.hpp"
 #include "../core/variant.hpp"
 
+// Colors
+#define RESET        "\033[0m"
+#define RED          "\033[31;1m"
+#define GREEN        "\033[32;1m"
+#define YELLOW       "\033[33;1m"
+
 namespace zhetapi {
 
 // Helper functions for Parser
@@ -134,6 +140,8 @@ public:
 	void dump() const;
 };
 
+#define ZHP_PARSER_DEBUG
+
 // Parser class
 // TODO: add builtin functions, etc
 class Parser {
@@ -170,7 +178,7 @@ private:
 	template <LexTag ... Codes>
 	struct _multigrammar {
 		_multigrammar(Parser *) {}
-		void operator()(Values &) {}
+		bool operator()(Values &) {}
 	};
 
 	template <LexTag code, LexTag ... Codes>
@@ -180,19 +188,31 @@ private:
 		_multigrammar(Parser *parser)
 				: _parser(parser) {}
 
-		void operator()(Values &values) {
+		bool operator()(Values &values) {
+			// std::cout << "_multigrammar @ " << strlex[code] << std::endl;
+
 			// Check and add
 			Variant vt;
 
 			_multigrammar <Codes...> next(_parser);
-			if ((vt = _parser->grammar <code> ())) {
+			if ((vt = _parser->do_grammar <code> ())) {
+			//	std::cout << "\tGOT VALUE vt = " << vt << std::endl;
 				values.push_back(vt);
-				next(values);
-			} else {
+				return next(values);
+			} /* else {
 				_parser->backup();
-			}
+			} */
+
+			return false;
 		}
 	};
+
+#ifdef ZHP_PARSER_DEBUG
+
+	size_t			_indents = 0;
+
+#endif
+
 public:
 	// Constructors
 	Parser(ads::TSQueue <void *> *);
@@ -233,11 +253,52 @@ public:
 		// TODO: use a function is_whitespace
 		while (pr.tag == NEWLINE) pr = get();
 
+		// std::cout << "@GRAMMAR <" << strlex[code] << "> actually is " << strlex[pr.tag] << std::endl;
 		if (pr.tag == code)
-			return (Variant) code;
+			return new NormalTag {code};
 
 		backup();
 		return nullptr;
+	}
+
+	// Debug wrapped of grammar:
+	// 	use while debugging to
+	// 	print tracebacks of parsing
+	template <LexTag code>
+	Variant do_grammar(Variant fail = nullptr) {
+
+#ifdef ZHP_PARSER_DEBUG
+
+		static const int spacing = 4;
+
+		// Store returns here
+		Variant vt;
+
+		std::cout << std::string((spacing * _indents++), ' ')
+			<< "<" << strlex[code] << ">" << std::endl;
+
+		vt = grammar <code> ();
+
+		std::string indent(spacing * _indents, ' ');
+		if (vt != fail) {
+			std::cout << indent << GREEN << "SUCCESS: "
+				<< RESET << vt << std::endl;
+		} else {
+			std::cout << indent << RED << "FAIL"
+				<< RESET << std::endl;
+		}
+
+		std::cout << std::string((spacing * (--_indents)), ' ')
+			<< "</" << strlex[code] << ">" << std::endl;
+
+		return vt;
+
+#else
+
+		return grammar <code> ();
+
+#endif
+
 	}
 
 	// Multigrammar struct
@@ -248,11 +309,60 @@ public:
 		multigrammar(Parser *parser)
 				: _parser(parser) {}
 
+#ifdef ZHP_PARSER_DEBUG
+
+		bool kernel(Values &values) {
+			_multigrammar <Codes...> mg(_parser);
+
+			if (mg(values))
+				return true;
+
+			// Need to empty values if not successful
+			values.clear();
+			return false;
+		};
+
+		bool operator()(Values &values) {
+			static const int spacing = 4;
+
+			// Store returns here
+			bool bl;
+
+			std::cout << std::string((spacing * _parser->_indents++), ' ')
+				<< "<multigrammar>" << std::endl;
+
+			bl = kernel(values);
+
+			std::string indent(spacing * _parser->_indents, ' ');
+			if (bl) {
+				std::cout << indent << GREEN << "SUCCESS"
+					<< RESET << std::endl;
+			} else {
+				std::cout << indent << RED << "FAIL"
+					<< RESET << std::endl;
+			}
+
+			std::cout << std::string((spacing * (--_parser->_indents)), ' ')
+				<< "</multigrammar>" << std::endl;
+
+			return bl;
+
+		}
+
+#else
+
 		bool operator()(Values &values) {
 			_multigrammar <Codes...> mg(_parser);
-			mg(values);
-			return (values.size() > 0);
+
+			if (mg(values))
+				return true;
+
+			// Need to empty values if not successful
+			values.clear();
+			return false;
 		};
+#endif
+
 	};
 
 	// Ultimate function
@@ -284,6 +394,12 @@ public:
 
 // Grammar specializations
 template <>
+Variant Parser::grammar <PRIMITIVE> ();
+
+template <>
+Variant Parser::grammar <gr_operand> ();
+
+template <>
 Variant Parser::grammar <gr_closed_factor> ();
 
 template <>
@@ -294,6 +410,9 @@ Variant Parser::grammar <gr_factor> ();
 
 template <>
 Variant Parser::grammar <gr_term> ();
+
+template <>
+Variant Parser::grammar <gr_simple_expression> ();
 
 template <>
 Variant Parser::grammar <gr_expression> ();

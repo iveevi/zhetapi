@@ -18,18 +18,26 @@ std::string strlex[] = {
 	"LBRACE", "RBRACE",
 	"ARG PACK",
 
-	"IDENTIFIER", "PRIMITIVE",
+	"IDENTIFIER",
 	"ALGORITHM",
 
+	// Built-in operands
+	"PRIMITIVE",
+	"STRING",
+	"OBJECT",
+
 	// Grammatical structures
+	"GR-START",
 	"GR-STATEMENTS",
 	"GR-STATEMENT",
 	"GR-ASSIGNMENT",
 	"GR-EXPRESSION",
+	"GR-SIMPLE-EXPRESSION",
 	"GR-TERM",
 	"GR-FACTOR",
 	"GR-FULL-FACTOR",
-	"GR-CLOSED-FACTOR"
+	"GR-CLOSED-FACTOR",
+	"GR-OPERAND"
 };
 
 // Functions

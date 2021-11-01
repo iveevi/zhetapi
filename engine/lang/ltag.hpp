@@ -6,6 +6,7 @@
 
 // Engine headers
 #include "../core/primitive.hpp"
+#include "../core/object.hpp"
 
 namespace zhetapi {
 
@@ -27,18 +28,26 @@ enum LexTag : size_t {
 	LBRACE, RBRACE,
 	ARG_PACK,
 
-	IDENTIFIER, PRIMITIVE,
+	IDENTIFIER,
 	ALGORITHM,
 
+	// Built-in operands
+	PRIMITIVE,
+	STRING,
+	OBJECT,		// Non-built-in type
+
 	// Grammatical structures
+	gr_start,
 	gr_statements,
 	gr_statement,
 	gr_assignment,
 	gr_expression,
+	gr_simple_expression,
 	gr_term,
 	gr_factor,
 	gr_full_factor,
-	gr_closed_factor
+	gr_closed_factor,
+	gr_operand
 };
 
 // String codes for enumerations
@@ -61,7 +70,6 @@ struct IdentifierTag {
 	}
 };
 
-// Should generalize to primitives
 struct PrimitiveTag {
 	size_t id = PRIMITIVE;
 	Primitive value;
@@ -71,6 +79,19 @@ struct PrimitiveTag {
 	// Value function
 	static Primitive cast(void *ptr) {
 		return ((PrimitiveTag *) ptr)->value;
+	}
+};
+
+struct ObjectTag {
+	size_t id;
+	Object value;
+
+	ObjectTag(Object x, size_t type = OBJECT)
+		: value(x), id(type) {}
+
+	// Value function
+	static Object cast(void *ptr) {
+		return ((ObjectTag *) ptr)->value;
 	}
 };
 
