@@ -1,6 +1,12 @@
 Overview of Programming Languages
 =================================
 
+.. toctree::
+        :maxdepth: 2
+        :hidden:
+
+        variables
+
 What is a Programming Language?
 -------------------------------
 
@@ -13,9 +19,3 @@ recipes and building manuals.
 
 Programming Paradigms
 ~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-        :maxdepth: 2
-        :hidden:
-
-        variables

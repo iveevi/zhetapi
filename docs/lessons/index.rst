@@ -1,3 +1,5 @@
+.. _lessons_page:
+
 Lessons
 =======
 

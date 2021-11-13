@@ -1,5 +1,13 @@
+.. _libs_page:
+
 Compiling Libraries as Modules
 ==============================
+
+.. toctree::
+        :maxdepth: 2
+        :hidden:
+
+        ..
 
 Of the two methods to create modules, through source files and shared libraries,
 the later is the more powerful and generic approach. One can create ZHP bindings

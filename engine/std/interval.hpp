@@ -138,6 +138,15 @@ struct disjoint {
 // NOTE: for now multidim intervals
 // can only be one "box", see the TODO
 // below
+
+/**
+ * @brief Random generator class, that can uniformly generated Vectors (or
+ * scalars) with elements that are randomly sampled from a distribution
+ * (currently each element can be sampled only from a uniform distribution
+ * that is the union of disjoint intervals).
+ *
+ * @tparam N the dimension that the corresponding random Vectors should have.
+ */
 template <size_t N = 1>
 class Interval {
 	// TODO: this will not work,
@@ -190,6 +199,10 @@ AVR_MASK(udb disjoint::distro = udb());
 #ifndef __AVR		// AVR support
 
 // TODO: Switch from double to long double
+/**
+ * @brief Single dimensional (scalar) random generator. Can sample uniformly
+ * from a union of intervals.
+ */
 template <>
 class Interval <1> {
 	// For random generation

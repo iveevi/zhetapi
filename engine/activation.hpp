@@ -45,9 +45,11 @@ using Loader = Activation <T> *(*)(const std::vector <T> &);
 
 #endif		// Does not support AVR
 
-/*
- * Represents an activation in machine learning. Takes a vector of type T as an
- * input and returns a vector of type T.
+/**
+ * @brief Represents an activation in machine learning. Takes a vector of type T
+ * as an input and returns a vector of type T.
+ *
+ * @tparam T the type that the activation performs its operations on.
  */
 template <class T>
 class Activation {
@@ -70,14 +72,14 @@ public:
 		__cuda_dual__
 		Activation(const std::vector <T> &)			// Argument constructor
 	);
-	
+
 	AVR_IGNORE(
 		__cuda_dual__
 		Activation(activation_type, const std::vector <T> &)	// Type and argument constructor
 	);
 
 	virtual Activation *copy() const;
-	
+
 	// Computation
 	__cuda_dual__
 	virtual Vector <T> compute(const Vector <T> &) const;
@@ -87,7 +89,7 @@ public:
 
 	__cuda_dual__
 	virtual Activation *derivative() const;
-	
+
 	__cuda_dual__
 	int get_activation_type() const;
 
@@ -111,13 +113,17 @@ public:
 	static std::map <std::string, Loader <T>> _act_loaders_id;
 	static std::map <std::string, Loader <T>> _act_loaders_name;
 
-	// Exceptions
-	class undefined_loader {};
+	/**
+	 * @brief Exception thrown when trying to read activation data from a
+	 * file that is not registered in the activation database.
+	 */
+	class undefined_loader {}; // TODO: need to derive from std::runtime_error
+
 #endif		// Does not support AVR
 
 protected:
 	activation_type	_kind = AT_Default;
-	
+
 	// Arguments, empty by default
 	AVR_IGNORE(std::vector <T>	_args = {});
 };
@@ -154,6 +160,10 @@ Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
 
 #endif		// Does not support AVR
 
+/**
+ * @brief Default copy method for activations. Displays warning if this method
+ * is not overriden by a subclass.
+ */
 template <class T>
 Activation <T> *Activation <T> ::copy() const
 {
@@ -207,7 +217,7 @@ void Activation <T> ::write_args(std::ofstream &fout) const
 	size_t argc = _args.size();
 
 	fout.write((char *) &argc, sizeof(size_t));
-	
+
 	for (size_t i = 0; i < argc; i++)
 		fout.write((char *) &(_args[i]), sizeof(T));
 }
@@ -236,7 +246,7 @@ Activation <T> *Activation <T> ::load(std::ifstream &fin)
 	std::string name = aname;
 
 	size_t argc;
-	
+
 	fin.read((char *) &argc, sizeof(size_t));
 
 	std::vector <T> args;
@@ -261,7 +271,7 @@ Activation <T> *Activation <T> ::load(const std::string &name, const std::vector
 {
 	if (_act_loaders_name.find(name) == _act_loaders_name.end())
 		throw undefined_loader();
-	
+
 	Loader <T> loader = _act_loaders_name[name];
 
 	return loader(args);

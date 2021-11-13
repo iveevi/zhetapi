@@ -1,5 +1,13 @@
+.. _zhp_page:
+
 The ZHP Scripting Language
 ==========================
+
+.. toctree::
+        :maxdepth: 2
+        :hidden:
+
+        ..
 
 The ZHP scripting language is a dynamically typed language, and as of writing
 this documentation, it is an interpreted language (for increased performace, it
@@ -108,10 +116,6 @@ Conditions must evaluate to boolean expressions (``true`` or ``false``) or other
 must be of the form ``[variable1] in [variable2]``, where ``[variable2]`` must be a
 Set primitive type. Implicit conditions from C/C++ (ie. ``if (1)`` or ``if([pointer])``)
 may be added in the future.
-
-.. toctree::
-        :maxdepth: 2
-        :hidden:
 
 Loops
 -----
@@ -227,12 +231,7 @@ Modules as Shared Libraries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Aside from source files, shared libraries compiled with a specific set of
-functions can also be used as modules. See more below:
-
-.. toctree::
-        :maxdepth: 1
-
-        libs
+functions can also be used as modules. See more :ref:`here <libs_page>`.
 
 Include Directories
 ~~~~~~~~~~~~~~~~~~~
