@@ -178,7 +178,9 @@ private:
 	template <LexTag ... Codes>
 	struct _multigrammar {
 		_multigrammar(Parser *) {}
-		bool operator()(Values &) {}
+		bool operator()(Values &) {
+			return false;
+		}
 	};
 
 	template <LexTag code, LexTag ... Codes>
