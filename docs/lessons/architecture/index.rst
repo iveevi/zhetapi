@@ -1,5 +1,10 @@
 Computer Architecture and Organization
 ======================================
 
-Why?
-----
+.. toctree::
+        :maxdepth: 2
+        :hidden:
+
+        why
+
+This lesson will cover

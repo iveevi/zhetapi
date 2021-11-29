@@ -45,9 +45,11 @@ using Loader = Activation <T> *(*)(const std::vector <T> &);
 
 #endif		// Does not support AVR
 
-/*
- * Represents an activation in machine learning. Takes a vector of type T as an
- * input and returns a vector of type T.
+/**
+ * @brief Represents an activation in machine learning. Takes a vector of type T
+ * as an input and returns a vector of type T.
+ *
+ * @tparam T the type that the activation performs its operations on.
  */
 template <class T>
 class Activation {
@@ -111,8 +113,12 @@ public:
 	static std::map <std::string, Loader <T>> _act_loaders_id;
 	static std::map <std::string, Loader <T>> _act_loaders_name;
 
-	// Exceptions
-	class undefined_loader {};
+	/**
+	 * @brief Exception thrown when trying to read activation data from a
+	 * file that is not registered in the activation database.
+	 */
+	class undefined_loader {}; // TODO: need to derive from std::runtime_error
+
 #endif		// Does not support AVR
 
 protected:
@@ -154,6 +160,10 @@ Activation <T> ::Activation(activation_type kind, const std::vector <T> &args)
 
 #endif		// Does not support AVR
 
+/**
+ * @brief Default copy method for activations. Displays warning if this method
+ * is not overriden by a subclass.
+ */
 template <class T>
 Activation <T> *Activation <T> ::copy() const
 {

@@ -36,6 +36,8 @@ Variant null_variant();
 TypeId variant_type(const Variant);
 std::string variant_str(const Variant);
 
+// TODO: is_primitive function (inline)
+
 }
 
 #endif

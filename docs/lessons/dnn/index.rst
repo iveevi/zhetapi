@@ -1,5 +1,11 @@
-How to Implement Your Own Deep Neural Network Class
-===================================================
+Implement Your Own Deep Neural Network Class
+============================================
 
-Why?
-----
+.. toctree::
+        :maxdepth: 2
+        :hidden:
+
+        why
+
+In this lesson, we will go through the steps to implementing your own deep
+neural network class.

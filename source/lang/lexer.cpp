@@ -135,9 +135,52 @@ void *Lexer::read_number()
 	return nullptr;
 }
 
+inline char escape(char c)
+{
+	switch (c) {
+	case 'n':
+		return '\n';
+	case 't':
+		return '\t';
+	case '\"':
+		return '\"';
+	case '\\':
+		return '\\';
+	default:
+		break;
+	}
+
+	return 0;
+}
+
+void *Lexer::read_string()
+{
+	std::string out;
+
+	char c;
+	char n;
+	while ((c = feed()) != EOF) {
+		if (c == '\\' && (n = escape(feed())))
+			out += n;
+		else if (c == '\"')
+			break;
+		else
+			out += c;
+	}
+
+	// std::cout << "String is \"" << out << "\"" << std::endl;
+	// Object *optr = new Object(mk_str(out.c_str()));
+	// ObjectTag *optr = new ObjectTag(mk_str(out.c_str()), STRING);
+	// std::cout << "\tTO STRING: " << ObjectTag::cast(optr).to_string() << std::endl;
+
+	return new ObjectTag(mk_str(out.c_str()), STRING);
+}
+
 void *Lexer::read_spec_sym()
 {
 	switch (_next) {
+	case '\"':
+		return read_string();
 	case ',':
 		return new NormalTag {COMMA};
 	case '&':
@@ -159,6 +202,7 @@ void *Lexer::read_spec_sym()
 	case '*':
 		return check_dual('=', TIMES_EQ, TIMES);
 	case '/':
+		// TODO: gotta check for another /
 		return check_dual('=', DIVIDE_EQ, DIVIDE);
 	}
 

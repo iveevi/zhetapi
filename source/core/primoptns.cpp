@@ -44,6 +44,8 @@ Primitive optn_div_int_int(const Primitive &v1, const Primitive &v2)
 
 // Filling out the operation base
 const ovlbase opbase[] {
+	{},
+	{},
 	{
 		{ovlid(id_int, id_int), &gt_optn(add, int, int)},
 		{ovlid(id_int, id_double), &gt_optn(add, int, double)},
