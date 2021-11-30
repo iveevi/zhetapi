@@ -166,10 +166,16 @@ template <>
 Variant Parser::grammar <gr_simple_expression> ()
 {
 	multigrammar <gr_term, PLUS, gr_term> plus_gr(this);
+	multigrammar <gr_term, MINUS, gr_term> minus_gr(this);
 
 	Values values;
 	if (plus_gr(values)) {
 		return core::compute(core::l_add,
+			vt_cast(values[0]),
+			vt_cast(values[2])
+		);
+	} else if (minus_gr(values)) {
+		return core::compute(core::l_sub,
 			vt_cast(values[0]),
 			vt_cast(values[2])
 		);

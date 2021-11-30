@@ -178,7 +178,7 @@ private:
 	template <LexTag ... Codes>
 	struct _multigrammar {
 		_multigrammar(Parser *) {}
-
+		
 		bool operator()(Values &) {
 			return true;
 		}
@@ -192,19 +192,16 @@ private:
 				: _parser(parser) {}
 
 		bool operator()(Values &values) {
-			// std::cout << "_multigrammar @ " << strlex[code] << std::endl;
-
 			// Check and add
 			Variant vt;
 
 			_multigrammar <Codes...> next(_parser);
 			if ((vt = _parser->do_grammar <code> ())) {
-			//	std::cout << "\tGOT VALUE vt = " << vt << std::endl;
 				values.push_back(vt);
 				return next(values);
-			} /* else {
+			} else {
 				_parser->backup();
-			} */
+			}
 
 			return false;
 		}

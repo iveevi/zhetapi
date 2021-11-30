@@ -18,7 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-(10 + 10)
+10.43 - 14.01
 )");
 
 // f(x, y, z) = 2 * x + 25.423 + y - 3.0 * z
@@ -44,11 +44,11 @@ int main()
 	Parser parser(&tags);
 
 	cout << "Parser-------------------------->" << endl;
-	// parser.run();
-	// parser.function();
-	// parser.statement();
-	// parser.dump();
-	parser.do_grammar <gr_closed_factor> ();
+	
+	Variant vt = parser.do_grammar <gr_simple_expression> ();
+	parser.dump();
+
+	std::cout << "vt: " << variant_str(vt) << std::endl;
 
 	// Free the elements of the queue
 	while (!tags.empty()) {

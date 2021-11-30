@@ -14,23 +14,37 @@ namespace zhetapi {
 // Lexer tag enumerations
 // TODO: organize this list
 enum LexTag : size_t {
-	DONE, NEWLINE, COMMA,
+	DONE,
 
-	// regular binary operations
+	// Regular binary operations
 	PLUS, MINUS, TIMES, DIVIDE,
+	FACTORIAL,
+	
+	// Dual character binary operations
+	LOGIC_AND, LOGIC_OR,
+	LOGIC_EQ,
 
-	// op = operations
+	// Operation equals
 	PLUS_EQ, MINUS_EQ, TIMES_EQ, DIVIDE_EQ,
-	LOGIC_AND, BIT_AND,
-	LOGIC_OR, BIT_OR, LOGIC_EQ,
-	ASSIGN_EQ, LOGIC_NOT,
-	BIT_NOT, GEQ, GE, LEQ, LE,
+
+	// Bitwise operations
+	BIT_AND, BIT_OR, BIT_XOR, BIT_NOT,
+
+	// Comparison operations
+	EQ, NEQ, GT, LT, GTE, LTE,
+
+	// Keywords
+	ALG,
+
+	// Miscelaneous
 	LPAREN, RPAREN,
 	LBRACE, RBRACE,
-	ARG_PACK,
+	LBRACKET, RBRACKET,
 
+	NEWLINE,
+	COMMA,
+	ASSIGN_EQ,
 	IDENTIFIER,
-	ALGORITHM,
 
 	// Built-in operands
 	PRIMITIVE,

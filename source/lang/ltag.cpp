@@ -3,23 +3,37 @@
 namespace zhetapi {
 
 std::string strlex[] = {
-	"DONE", "NEWLINE", "COMMA",
+	"DONE",
 
 	// TODO: order operations in terms of precedence
 	"PLUS", "MINUS", "TIMES", "DIVIDE",
+	"FACTORIAL",
 
-	// op = operations
+	// Dual character binary operations
+	"LOGIC_AND", "LOGIC_OR",
+	"LOGIC_EQ",
+
+	// Operation equals
 	"PLUS_EQ", "MINUS_EQ", "TIMES_EQ", "DIVIDE_EQ",
-	"LOGIC AND", "BIT AND",
-	"LOGIC OR", "BIT OR", "LOGIC EQ",
-	"ASSIGN EQ", "LOGIC NOT",
-	"BIT NOT", "GEQ", "GE", "LEQ", "LE",
+
+	// Bitwise operations
+	"BITWISE_AND", "BITWISE_OR", "BITWISE_XOR", "BITWISE_NOT",
+
+	// Comparison operations
+	"EQ", "NEQ", "GT", "LT", "GTE", "LTE",
+
+	// Kewords
+	"ALGORITHM",
+
+	// Miscelaneous
 	"LPAREN", "RPAREN",
 	"LBRACE", "RBRACE",
-	"ARG PACK",
+	"LBRACKET", "RBRACKET",
 
+	"NEWLINE",
+	"COMMA",
+	"ASSIGNMENT",
 	"IDENTIFIER",
-	"ALGORITHM",
 
 	// Built-in operands
 	"PRIMITIVE",

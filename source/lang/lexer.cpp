@@ -61,7 +61,7 @@ inline size_t Lexer::get_code(char c)
 inline size_t Lexer::get_code(const std::string &str)
 {
 	static const std::unordered_map <std::string, LexTag> ltags {
-		{"alg", ALGORITHM}
+		{"alg", ALG}
 	};
 
 	if (ltags.find(str) != ltags.end())
@@ -79,7 +79,8 @@ inline bool Lexer::good_ident(char c)
 
 inline void *Lexer::check_dual(char expect, LexTag succcess, LexTag fail)
 {
-	if (peek() == expect) {
+	// TODO: add a current() method
+	if (_source[_index] == expect) {
 		feed();
 
 		return new NormalTag {succcess};
@@ -190,11 +191,11 @@ void *Lexer::read_spec_sym()
 	case '=':
 		return check_dual('=', LOGIC_EQ, ASSIGN_EQ);
 	case '!':
-		return check_dual('=', LOGIC_NOT, BIT_NOT);
+		return check_dual('=', NEQ, FACTORIAL);
 	case '>':
-		return check_dual('=', GEQ, GE);
+		return check_dual('=', GTE, GT);
 	case '<':
-		return check_dual('=', LEQ, LE);
+		return check_dual('=', LTE, LT);
 	case '+':
 		return check_dual('=', PLUS_EQ, PLUS);
 	case '-':
