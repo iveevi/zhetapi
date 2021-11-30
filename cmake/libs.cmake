@@ -21,6 +21,7 @@ set(ZHETAPI_SOURCE
 	source/core/dictionary.cpp
 	source/core/enode.cpp
 	source/core/expr_parser.cpp
+	source/core/genoptns.cpp
 	source/core/label.cpp
 	source/core/lvalue.cpp
 	source/core/method_table.cpp

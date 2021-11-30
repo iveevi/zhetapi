@@ -2,6 +2,8 @@
 
 namespace zhetapi {
 
+namespace core {
+
 // Enode
 Enode::Enode() : data({.code = l_add}), type(etype_null) {}
 
@@ -69,7 +71,7 @@ std::ostream &operator<<(std::ostream &os, const Enode &en)
 Variant op_prim_prim(OpCode code, const Variant &v1, const Variant &v2)
 {
 	// TODO: add cast functions (returning objects, not pointers)
-	return new Primitive(do_prim_optn(code, *((Primitive *) v1), *((Primitive *) v2)));
+	return new Primitive(primitive::compute(code, *((Primitive *) v1), *((Primitive *) v2)));
 }
 
 Variant enode_value(const Enode &en)
@@ -109,6 +111,8 @@ Variant enode_value(const Enode &en)
 	}
 
 	throw std::runtime_error("enode_value err");
+}
+
 }
 
 }

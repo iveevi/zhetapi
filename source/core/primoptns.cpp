@@ -14,6 +14,10 @@
 
 namespace zhetapi {
 
+namespace core {
+
+namespace primitive {
+
 // TODO: macro-fy, and make inline
 
 // Addition
@@ -43,7 +47,7 @@ Primitive optn_div_int_int(const Primitive &v1, const Primitive &v2)
 }
 
 // Filling out the operation base
-const ovlbase opbase[] {
+const VOverload operations[] {
 	{},
 	{},
 	{
@@ -61,5 +65,9 @@ const ovlbase opbase[] {
 		{ovlid(id_int, id_int), &optn_div_int_int}
 	}
 };
+
+}
+
+}
 
 }

@@ -34,13 +34,13 @@ ISeq::ISeq(std::queue <Parser::TagPair> &postfix, const Args &args)
 			Primitive prim = PrimitiveTag::cast(pr.data);
 			size_t index = _consts.size();
 			_consts.push_back(new Primitive(prim));
-			_code.push_back(l_const);
+			_code.push_back(core::l_add);
 			_code.push_back(index);
 		} else if (pr.tag == IDENTIFIER) {
 			// For now only variables
 			std::string var = IdentifierTag::cast(pr.data);
 			size_t index = arg_index(var);
-			_code.push_back(l_get);
+			_code.push_back(core::l_get);
 			_code.push_back(index);
 		} else if (is_operation(pr.tag)) {
 			_code.push_back(pr.tag);

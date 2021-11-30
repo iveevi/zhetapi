@@ -7,6 +7,7 @@
 // Engine headers
 #include "../core/primitive.hpp"
 #include "../core/object.hpp"
+#include "../core/variant.hpp"
 
 namespace zhetapi {
 
@@ -53,6 +54,17 @@ enum LexTag : size_t {
 // String codes for enumerations
 extern std::string strlex[];
 
+// Helper functions
+inline constexpr LexTag get_ltag(void *ltag)
+{
+	return *((LexTag *) ltag);
+}
+
+inline std::string str_ltag(void *ltag)
+{
+	return strlex[get_ltag(ltag)];
+}
+
 // Tokens
 struct NormalTag {
 	size_t id;
@@ -95,15 +107,19 @@ struct ObjectTag {
 	}
 };
 
-// Helper functions
-inline constexpr LexTag get_ltag(void *ltag)
+// Casting variant tags
+constexpr Variant vt_cast(void *ptr)
 {
-	return *((LexTag *) ltag);
-}
+	switch (get_ltag(ptr)) {
+	case PRIMITIVE:
+		return &((PrimitiveTag *) ptr)->value;
+	case OBJECT:
+		return &((ObjectTag *) ptr)->value;
+	default:
+		break;
+	}
 
-inline std::string str_ltag(void *ltag)
-{
-	return strlex[get_ltag(ltag)];
+	return nullptr;
 }
 
 // Forward declarations

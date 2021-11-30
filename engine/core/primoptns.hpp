@@ -8,40 +8,28 @@
 
 // Engine headers
 #include "primitive.hpp"
+#include "operations.hpp"
 
 namespace zhetapi {
 
-enum OpCode : uint8_t {
-	l_get,
-	l_const,
-	l_add,
-	l_sub,
-	l_mul,
-	l_div
-};
+namespace core {
 
-// 8 bits is sufficient
-using OvlId = uint8_t;
-
-constexpr OvlId ovlid(TypeId a, TypeId b)
-{
-	return a + (b << 4);
-}
+namespace primitive {
 
 // operation type
-using optn = Primitive (*)(const Primitive &, const Primitive &);
+using Operation = Primitive (*)(const Primitive &, const Primitive &);
 
-struct ovl {
-	uint8_t ovid;
-	optn main;
+struct Overload {
+	OID		ovid;
+	Operation	main;
 };
 
 // Opbase
-using ovlbase = std::vector <ovl>;
+using VOverload = std::vector <Overload>;
 
-extern const ovlbase opbase[];
+extern const VOverload operations[];
 
-inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitive &arg2)
+inline Primitive compute(OpCode code, const Primitive &a, const Primitive &b)
 {
 	// Static str tables (TODO: keep else where (str_tables...))
 	static std::string id_strs[] {
@@ -69,21 +57,26 @@ inline Primitive do_prim_optn(OpCode code, const Primitive &arg1, const Primitiv
 	};
 
 	// Function (offset is l_add)
-	const ovlbase *ovb = &(opbase[code]);
+	const VOverload *ovb = &(operations[code]);
 
-	for (uint8_t i = 0; i < ovb->size(); i++) {
-		uint8_t ovid = (*ovb)[i].ovid;
+	for (OID i = 0; i < ovb->size(); i++) {
+		OID ovid = (*ovb)[i].ovid;
 
-		if (((ovid & 0x0F) == arg1.id) && (((ovid & 0xF0) >> 4) == arg2.id))
-			return (*ovb)[i].main(arg1, arg2);
+		if (ovlid(a.id, b.id) == ovid)
+			return (*ovb)[i].main(a, b);
 	}
 
 	// Throw here
-	std::cout << "arg1.id = " << arg1.id << std::endl;
-	std::cout << "arg2.id = " << arg2.id << std::endl;
-	throw bad_overload(code, arg1.id, arg2.id);
+	std::cout << "arg1.id = " << a.id << std::endl;
+	std::cout << "arg2.id = " << b.id << std::endl;
+	std::cout << "code = " << ovlid(a.id, b.id) << std::endl;
+	throw bad_overload(code, a.id, b.id);
 
 	return Primitive();
+}
+
+}
+
 }
 
 }

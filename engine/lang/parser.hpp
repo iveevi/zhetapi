@@ -178,8 +178,9 @@ private:
 	template <LexTag ... Codes>
 	struct _multigrammar {
 		_multigrammar(Parser *) {}
+
 		bool operator()(Values &) {
-			return false;
+			return true;
 		}
 	};
 
@@ -228,17 +229,6 @@ public:
 
 	void backup();
 	void backup(size_t);
-
-	bool try_grammar(VTags &, const std::vector <LexTag> &);
-	// TODO: need a require grammar function as well
-
-	std::queue <TagPair> shunting_yard();
-
-	// Grammatical functions
-	Variant expression_imm();		// Private
-	void function();
-	bool statement();
-	void algorithm();			// Return bool?
 
 	// Generic grammar function:
 	// 	default specialization checks if

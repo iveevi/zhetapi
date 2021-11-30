@@ -15,6 +15,8 @@
 // TODO: separate source and header
 namespace zhetapi {
 
+namespace core {
+
 // New node (expression node)
 struct Enode {
 	using Leaves = std::vector <Enode>;
@@ -58,6 +60,8 @@ std::ostream &operator<<(std::ostream &, const Enode &);
 
 // TODO: add symtab
 Variant enode_value(const Enode &);
+
+}
 
 }
 
