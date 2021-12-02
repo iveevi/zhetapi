@@ -36,7 +36,7 @@ Parser::TagPair Parser::get()
 		std::cout << "HIT BREAKPOINT TOKEN" << std::endl;
 
 		// TODO: need to allocate this in extra vector
-		return {new NormalTag {DONE}};
+		return {new NormalTag {DONE::id}};
 	}
 
 	return {ptr};
@@ -71,22 +71,23 @@ void Parser::backup(size_t n)
 
 // Specialized grammars
 template <>
-Variant Parser::grammar <PRIMITIVE> ()
+Variant Parser::grammar <PRIMITIVE::id> ()
 {
 	auto pr = get();
 
 	// TODO: should we do this once at the start of
 	// the grammar or allow whitespace between tokens?
 	// TODO: use a function is_whitespace
-	while (pr.tag == NEWLINE) pr = get();
+	while (pr.tag == NEWLINE::id) pr = get();
 
-	if (pr.tag == PRIMITIVE)
+	if (pr.tag == PRIMITIVE::id)
 		return pr.data;
 
 	backup();
 	return nullptr;
 }
 
+/*
 template <>
 Variant Parser::grammar <gr_operand> ()
 {
@@ -141,7 +142,7 @@ Variant Parser::grammar <gr_factor> ()
 	//	std::cout << "Size of values = " << values.size() << std::endl;
 	//	std::cout << "Juxtaposition of multiplication: need to implement" << std::endl;
 		throw int(1);
-	} */
+	} *
 
 	// Last case
 	if ((vt = do_grammar <gr_full_factor> ()))
@@ -192,7 +193,7 @@ Variant Parser::grammar <gr_expression> ()
 		return vt;
 
 	return nullptr;
-}
+} */
 
 // Debugging
 void SymbolTable::dump() const

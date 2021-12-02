@@ -35,7 +35,7 @@ int main()
 	ads::TSQueue <void *> tags;
 
 	cout << "Pushing tags:" << endl;
-	while ((ltag = lexer.scan()) != (void *) DONE) {
+	while ((ltag = lexer.scan()) != (void *) DONE::id) {
 		cout << "\tLexTag: " << to_string(ltag) << endl;
 		tags.push(ltag);
 	}
@@ -45,10 +45,10 @@ int main()
 
 	cout << "Parser-------------------------->" << endl;
 	
-	Variant vt = parser.do_grammar <gr_simple_expression> ();
+	// Variant vt = parser.do_grammar <gr_simple_expression> ();
 	parser.dump();
 
-	std::cout << "vt: " << variant_str(vt) << std::endl;
+	// std::cout << "vt: " << variant_str(vt) << std::endl;
 
 	// Free the elements of the queue
 	while (!tags.empty()) {

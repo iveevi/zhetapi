@@ -58,9 +58,9 @@ std::string strlex[] = {
 void free_ltag(void *data)
 {
 	LexTag ltag = get_ltag(data);
-	if (ltag == IDENTIFIER)
+	if (ltag == IDENTIFIER::id)
 		delete (IdentifierTag *) data;
-	else if (ltag == PRIMITIVE)
+	else if (ltag == PRIMITIVE::id)
 		delete (PrimitiveTag *) data;
 	else
 		delete (NormalTag *) data;
@@ -70,9 +70,9 @@ std::string to_string(void *data)
 {
 	LexTag ltag = get_ltag(data);
 	switch (ltag) {
-	case PRIMITIVE:
+	case PRIMITIVE::id:
 		return "PRIMITIVE (" + PrimitiveTag::cast(data).str() + ")";
-	case IDENTIFIER:
+	case IDENTIFIER::id:
 		return "IDENTIFIER (" + IdentifierTag::cast(data) + ")";
 	default:
 		break;

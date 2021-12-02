@@ -41,12 +41,13 @@ inline void Lexer::backup(size_t n)
 
 inline size_t Lexer::get_code(char c)
 {
+	// TODO: compile time maps?
 	static const std::unordered_map <char, LexTag> ltags {
-		{'{', LBRACE},
-		{'}', RBRACE},
-		{'(', LPAREN},
-		{')', RPAREN},
-		{-1, DONE}
+		{'{', LBRACE::id},
+		{'}', RBRACE::id},
+		{'(', LPAREN::id},
+		{')', RPAREN::id},
+		{-1, DONE::id}
 	};
 
 	if (ltags.find(c) != ltags.end())
@@ -61,14 +62,14 @@ inline size_t Lexer::get_code(char c)
 inline size_t Lexer::get_code(const std::string &str)
 {
 	static const std::unordered_map <std::string, LexTag> ltags {
-		{"alg", ALG}
+		{"alg", ALG::id}
 	};
 
 	if (ltags.find(str) != ltags.end())
 		return ltags.at(str);
 
 	// std::cout << "str = " << str << std::endl;
-	return DONE;
+	return DONE::id;
 }
 
 inline bool Lexer::good_ident(char c)
@@ -96,7 +97,7 @@ void *Lexer::read_space()
 	while ((_next = feed()) != EOF) {
 		if (_next == '\n') {
 			_line++;
-			return new NormalTag {NEWLINE};
+			return new NormalTag {NEWLINE::id};
 		} else if (!isspace(_next)) {
 			break;
 		}
@@ -174,7 +175,7 @@ void *Lexer::read_string()
 	// ObjectTag *optr = new ObjectTag(mk_str(out.c_str()), STRING);
 	// std::cout << "\tTO STRING: " << ObjectTag::cast(optr).to_string() << std::endl;
 
-	return new ObjectTag(mk_str(out.c_str()), STRING);
+	return new ObjectTag(mk_str(out.c_str()), STRING::id);
 }
 
 void *Lexer::read_spec_sym()
@@ -183,28 +184,28 @@ void *Lexer::read_spec_sym()
 	case '\"':
 		return read_string();
 	case ',':
-		return new NormalTag {COMMA};
+		return new NormalTag {COMMA::id};
 	case '&':
-		return check_dual('&', LOGIC_AND, BIT_AND);
+		return check_dual('&', LOGIC_AND::id, BIT_AND::id);
 	case '|':
-		return check_dual('|', LOGIC_OR, BIT_OR);
+		return check_dual('|', LOGIC_OR::id, BIT_OR::id);
 	case '=':
-		return check_dual('=', LOGIC_EQ, ASSIGN_EQ);
+		return check_dual('=', LOGIC_EQ::id, ASSIGN_EQ::id);
 	case '!':
-		return check_dual('=', NEQ, FACTORIAL);
+		return check_dual('=', NEQ::id, FACTORIAL::id);
 	case '>':
-		return check_dual('=', GTE, GT);
+		return check_dual('=', GTE::id, GT::id);
 	case '<':
-		return check_dual('=', LTE, LT);
+		return check_dual('=', LTE::id, LT::id);
 	case '+':
-		return check_dual('=', PLUS_EQ, PLUS);
+		return check_dual('=', PLUS_EQ::id, PLUS::id);
 	case '-':
-		return check_dual('=', MINUS_EQ, MINUS);
+		return check_dual('=', MINUS_EQ::id, MINUS::id);
 	case '*':
-		return check_dual('=', TIMES_EQ, TIMES);
+		return check_dual('=', TIMES_EQ::id, TIMES::id);
 	case '/':
 		// TODO: gotta check for another /
-		return check_dual('=', DIVIDE_EQ, DIVIDE);
+		return check_dual('=', DIVIDE_EQ::id, DIVIDE::id);
 	}
 
 	return nullptr;
@@ -235,7 +236,7 @@ void *Lexer::scan()
 {
 	// Check for buffer completion
 	if (done())
-		return (void *) DONE;
+		return (void *) DONE::id;
 
 	// Check for number before operations
 	// to account for +/- at the start

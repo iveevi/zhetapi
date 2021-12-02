@@ -3,67 +3,79 @@
 
 // Standard headers
 #include <string>
+#include <sys/types.h>
 
 // Engine headers
 #include "../core/primitive.hpp"
 #include "../core/object.hpp"
 #include "../core/variant.hpp"
 
+
 namespace zhetapi {
 
-// Lexer tag enumerations
-// TODO: organize this list
-enum LexTag : size_t {
-	DONE,
+// Lex tag identifier
+using LexTag = uint64_t;
 
-	// Regular binary operations
-	PLUS, MINUS, TIMES, DIVIDE,
-	FACTORIAL,
-	
-	// Dual character binary operations
-	LOGIC_AND, LOGIC_OR,
-	LOGIC_EQ,
-
-	// Operation equals
-	PLUS_EQ, MINUS_EQ, TIMES_EQ, DIVIDE_EQ,
-
-	// Bitwise operations
-	BIT_AND, BIT_OR, BIT_XOR, BIT_NOT,
-
-	// Comparison operations
-	EQ, NEQ, GT, LT, GTE, LTE,
-
-	// Keywords
-	ALG,
-
-	// Miscelaneous
-	LPAREN, RPAREN,
-	LBRACE, RBRACE,
-	LBRACKET, RBRACKET,
-
-	NEWLINE,
-	COMMA,
-	ASSIGN_EQ,
-	IDENTIFIER,
-
-	// Built-in operands
-	PRIMITIVE,
-	STRING,
-	OBJECT,		// Non-built-in type
-
-	// Grammatical structures
-	gr_start,
-	gr_statements,
-	gr_statement,
-	gr_assignment,
-	gr_expression,
-	gr_simple_expression,
-	gr_term,
-	gr_factor,
-	gr_full_factor,
-	gr_closed_factor,
-	gr_operand
+// Lex class structure
+template <LexTag code>
+struct LexClass {
+	static constexpr LexTag id = code;
 };
+
+// Import the lex classes
+#include "tokens_nota.hpp"
+
+// TODO: a macro to create a counter
+constexpr fameta::counter <__COUNTER__, 0> C;
+
+#define MK_TAG(tag) struct tag : public LexClass <C.next <__COUNTER__> ()> {};
+#define MK_TAGS(...) MK_TAG(_1)
+
+struct DONE : public LexClass <0> {};
+struct PLUS : public LexClass <1> {};
+struct MINUS : public LexClass <2> {};
+struct TIMES : public LexClass <3> {};
+struct DIVIDE : public LexClass <4> {};
+struct FACTORIAL : public LexClass <5> {};
+
+struct LOGIC_AND : public LexClass <6> {};
+struct LOGIC_OR : public LexClass <7> {};
+struct LOGIC_EQ : public LexClass <8> {};
+
+struct PLUS_EQ : public LexClass <9> {};
+struct MINUS_EQ : public LexClass <10> {};
+struct TIMES_EQ : public LexClass <11> {};
+struct DIVIDE_EQ : public LexClass <12> {};
+
+struct BIT_AND : public LexClass <13> {};
+struct BIT_OR : public LexClass <14> {};
+struct BT_XOR : public LexClass <15> {};
+struct BIT_NOT : public LexClass <16> {};
+
+struct EQ : public LexClass <17> {};
+struct NEQ : public LexClass <18> {};
+struct GT : public LexClass <19> {};
+struct LT : public LexClass <20> {};
+struct GTE : public LexClass <21> {};
+struct LTE : public LexClass <22> {};
+
+struct ALG : public LexClass <23> {};
+
+struct LPAREN : public LexClass <24> {};
+struct RPAREN : public LexClass <25> {};
+struct LBRACE : public LexClass <26> {};
+struct RBRACE : public LexClass <27> {};
+struct LBRACKET : public LexClass <28> {};
+struct RBRACKET : public LexClass <29> {};
+
+struct NEWLINE : public LexClass <30> {};
+struct COMMA : public LexClass <31> {};
+struct ASSIGN_EQ : public LexClass <32> {};
+struct IDENTIFIER : public LexClass <33> {};
+
+struct PRIMITIVE : public LexClass <34> {};
+struct STRING : public LexClass <35> {};
+struct OBJECT : public LexClass <36> {};
 
 // String codes for enumerations
 extern std::string strlex[];
@@ -85,7 +97,7 @@ struct NormalTag {
 };
 
 struct IdentifierTag {
-	size_t id = IDENTIFIER;
+	size_t id = IDENTIFIER::id;
 	std::string ident;
 
 	IdentifierTag(const std::string str) : ident(str) {}
@@ -97,7 +109,7 @@ struct IdentifierTag {
 };
 
 struct PrimitiveTag {
-	size_t id = PRIMITIVE;
+	size_t id = PRIMITIVE::id;
 	Primitive value;
 
 	PrimitiveTag(Primitive x) : value(x) {}
@@ -112,7 +124,7 @@ struct ObjectTag {
 	size_t id;
 	Object value;
 
-	ObjectTag(Object x, size_t type = OBJECT)
+	ObjectTag(Object x, size_t type = OBJECT::id)
 		: value(x), id(type) {}
 
 	// Value function
@@ -125,9 +137,9 @@ struct ObjectTag {
 constexpr Variant vt_cast(void *ptr)
 {
 	switch (get_ltag(ptr)) {
-	case PRIMITIVE:
+	case PRIMITIVE::id:
 		return &((PrimitiveTag *) ptr)->value;
-	case OBJECT:
+	case OBJECT::id:
 		return &((ObjectTag *) ptr)->value;
 	default:
 		break;

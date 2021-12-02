@@ -25,8 +25,8 @@ namespace zhetapi {
 inline bool is_operation(LexTag ltag)
 {
 	switch (ltag) {
-	case PLUS: case MINUS:
-	case TIMES: case DIVIDE:
+	case PLUS::id: case MINUS::id:
+	case TIMES::id: case DIVIDE::id:
 		return true;
 	default:
 		return false;
@@ -46,9 +46,9 @@ inline bool excheq(LexTag ltag1, LexTag ltag2,
 // True if greater than or equal
 inline bool opcmp(LexTag ltag1, LexTag ltag2)
 {
-	if (excheq(ltag1, ltag2, PLUS, MINUS))
+	if (excheq(ltag1, ltag2, PLUS::id, MINUS::id))
 		return true;
-	if (excheq(ltag1, ltag2, TIMES, DIVIDE))
+	if (excheq(ltag1, ltag2, TIMES::id, DIVIDE::id))
 		return true;
 
 	return (ltag1 >= ltag2);
@@ -220,7 +220,7 @@ public:
 	~Parser();
 
 	// Helper functions
-	void set_bp(LexTag = DONE);
+	void set_bp(LexTag = DONE::id);
 	TagPair get();
 	TagPair require(LexTag);
 
@@ -240,7 +240,7 @@ public:
 		// TODO: should we do this once at the start of
 		// the grammar or allow whitespace between tokens?
 		// TODO: use a function is_whitespace
-		while (pr.tag == NEWLINE) pr = get();
+		while (pr.tag == NEWLINE::id) pr = get();
 
 		// std::cout << "@GRAMMAR <" << strlex[code] << "> actually is " << strlex[pr.tag] << std::endl;
 		if (pr.tag == code)
@@ -381,7 +381,7 @@ public:
 	};
 };
 
-// Grammar specializations
+/* Grammar specializations
 template <>
 Variant Parser::grammar <PRIMITIVE> ();
 
@@ -404,7 +404,7 @@ template <>
 Variant Parser::grammar <gr_simple_expression> ();
 
 template <>
-Variant Parser::grammar <gr_expression> ();
+Variant Parser::grammar <gr_expression> (); */
 
 }
 
