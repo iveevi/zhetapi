@@ -18,7 +18,7 @@ using namespace zhetapi;
 
 // Lexers
 Lexer lexer(R"(
-10.43 - 14.01
+(10.43 - 14.01)
 )");
 
 // f(x, y, z) = 2 * x + 25.423 + y - 3.0 * z

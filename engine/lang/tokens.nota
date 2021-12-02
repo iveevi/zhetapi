@@ -18,7 +18,7 @@ BIT_AND, BIT_OR, BIT_XOR, BIT_NOT,
 EQ, NEQ, GT, LT, GTE, LTE,
 
 # Keywords
-ALG,
+ALGORITHM,
 
 # Miscelaneous
 LPAREN, RPAREN,

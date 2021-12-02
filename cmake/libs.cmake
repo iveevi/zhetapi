@@ -60,6 +60,7 @@ set(ZHETAPI_SOURCE
 	source/lang/mdl_parser.cpp
 	source/lang/old_parser.cpp
 	source/lang/parser.cpp
+	source/lang/tokens_nota.cpp
 
 	source/std/functions.cpp
 	source/std/interval.cpp

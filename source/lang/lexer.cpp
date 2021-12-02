@@ -62,7 +62,7 @@ inline size_t Lexer::get_code(char c)
 inline size_t Lexer::get_code(const std::string &str)
 {
 	static const std::unordered_map <std::string, LexTag> ltags {
-		{"alg", ALG::id}
+		{"alg", ALGORITHM::id}
 	};
 
 	if (ltags.find(str) != ltags.end())

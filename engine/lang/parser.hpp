@@ -7,7 +7,6 @@
 #include <stdexcept>
 
 // Engine headers
-#include "ltag.hpp"
 #include "lexer.hpp"
 #include "../ads/tsqueue.hpp"
 #include "../core/common.hpp"
