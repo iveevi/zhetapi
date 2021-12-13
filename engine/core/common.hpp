@@ -12,15 +12,6 @@
 
 namespace zhetapi {
 
-// Type aliases
-using Args = std::vector <std::string>;
-using Targs = std::vector <Token *>;
-
-using Pardon = std::set <std::string>;
-
-template <class T>
-using Strtable = std::unordered_map <std::string, T>;
-
 // This file contains miscellaneous functions that
 // do not really fit into any other header
 template <class T>
@@ -36,8 +27,6 @@ void collect(std::vector <T> &bin, T x, U ... rest)
 
 	collect(bin, rest...);
 }
-
-Args args_union(const Args &, const Args &);
 
 }
 

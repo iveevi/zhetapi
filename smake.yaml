@@ -1,0 +1,29 @@
+definitions:
+  - tests: 'tests/activation.cpp,
+    tests/calculus.cpp,
+    tests/fourier.cpp,
+    tests/interval.cpp,
+    tests/linalg.cpp,
+    tests/main.cpp,
+    tests/matrix.cpp,
+    tests/polynomial.cpp,
+    tests/printing.cpp,
+    tests/special.cpp,
+    tests/tensor.cpp,
+    tests/timers.cpp,
+    tests/vector.cpp'
+  - sources: 'sources/image.cpp,
+    sources/linalg.cpp,
+    sources/polynomial.cpp,
+    sources/timer.cpp,
+    sources/std/functions.cpp,
+    sources/std/interval.cpp'
+
+builds:
+  - tests:
+    - sources: tests, sources
+
+targets:
+  - tests:
+    - builds:
+      - default: tests
