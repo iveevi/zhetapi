@@ -1,6 +1,0 @@
-import assignment
-import classes
-
-assignment.function_assignment()
-classes.test_collection()
-classes.test_dictionary()

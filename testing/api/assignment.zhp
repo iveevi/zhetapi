@@ -1,8 +1,0 @@
-alg function_assignment()
-{
-	f(x) = 3 * x^2
-
-	println("f: ", f)
-	println("f(2) = ", f(2))
-	println("f(3) = ", f(3))
-}
