@@ -19,5 +19,6 @@ RUN apt-get -yq update \
 	&& apt-get install -yq lcov \
 	&& apt-get install -yq ninja-build \
 	&& apt-get install -yq libsfml-dev \
+	&& pip install smake \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
