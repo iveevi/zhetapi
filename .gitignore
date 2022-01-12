@@ -41,7 +41,6 @@ gcov-files
 gcov-out
 gen
 htests
-include
 portability
 samples/rl/res
 zhetapi
