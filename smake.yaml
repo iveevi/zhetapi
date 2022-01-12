@@ -1,29 +1,29 @@
 definitions:
-  - tests: 'tests/activation.cpp,
-    tests/calculus.cpp,
-    tests/fourier.cpp,
-    tests/interval.cpp,
-    tests/linalg.cpp,
-    tests/main.cpp,
-    tests/matrix.cpp,
-    tests/polynomial.cpp,
-    tests/printing.cpp,
-    tests/special.cpp,
-    tests/tensor.cpp,
-    tests/timers.cpp,
-    tests/vector.cpp'
-  - sources: 'sources/image.cpp,
-    sources/linalg.cpp,
-    sources/polynomial.cpp,
-    sources/timer.cpp,
-    sources/std/functions.cpp,
-    sources/std/interval.cpp'
+  - testing: 'testing/activation.cpp,
+    testing/calculus.cpp,
+    testing/fourier.cpp,
+    testing/interval.cpp,
+    testing/linalg.cpp,
+    testing/main.cpp,
+    testing/matrix.cpp,
+    testing/polynomial.cpp,
+    testing/printing.cpp,
+    testing/special.cpp,
+    testing/tensor.cpp,
+    testing/timers.cpp,
+    testing/vector.cpp'
+  - source: 'source/image.cpp,
+    source/linalg.cpp,
+    source/polynomial.cpp,
+    source/timer.cpp,
+    source/std/functions.cpp,
+    source/std/interval.cpp'
 
 builds:
-  - tests:
-    - sources: tests, sources
+  - testing:
+    - sources: testing, source
 
 targets:
-  - tests:
+  - testing:
     - builds:
-      - default: tests
+      - default: testing
