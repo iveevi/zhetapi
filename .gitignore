@@ -11,9 +11,11 @@
 *ubyte
 *ubyte
 *~
+.cache
 .env
 .ninja_deps
 .ninja_log
+.smake
 .vscode
 /Makefile
 CMakeCache.txt
