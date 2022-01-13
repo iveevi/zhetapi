@@ -3,6 +3,7 @@
 
 // Standard headers
 #include <memory>
+#include <sstream>
 #include <stack>
 #include <vector>
 
@@ -17,12 +18,26 @@ namespace autograd {
 using Constant = Tensor <long double>;
 
 // Basic structure of a function
-struct _function {
+class _function {
+	// String versions of operations
+	static constexpr const char *_spec_strs[] {
+		"GET", "CONST",
+
+		"VAR", "ISEQ",
+
+		"ADD", "SUB",
+		"MUL", "DIV"
+	};
+public:
 	// Special operations
 	enum Special {
 		op_none = -1,
+
 		op_get,
 		op_const,
+
+		op_var,
+		op_iseq,
 
 		// Basic math operations
 		op_add,
@@ -44,8 +59,22 @@ struct _function {
 
 	// Not pure virtual so that special operations
 	//	can get away without implementing it
-	virtual Constant compute(const Input &) {
+	virtual Constant compute(const Input &) const {
 		return Constant();
+	}
+
+	// Copy pointer
+	virtual _function *copy() const {
+		return new _function(inputs, spop);
+	}
+
+	// Summary for each function
+	virtual std::string summary() const {
+		if (spop > op_none)
+			return _spec_strs[spop];
+
+		return "_function(#inputs = "
+			+ std::to_string(inputs) + ")";
 	}
 };
 
@@ -69,7 +98,13 @@ class Function {
 public:
 	// Constructors
 	Function() : fptr(nullptr) {}
+	Function(_function *f) : fptr(f) {}
 	Function(const _fptr &f) : fptr(f) {}
+
+	// Get raw handle
+	_function *get() const {
+		return fptr.get();
+	}
 
 	// Operator overloading
 	Constant operator()(const std::vector <Constant> &ins) {
@@ -83,6 +118,11 @@ public:
 		_process(ins, args...);
 		return fptr->compute(ins);
 	}
+
+	// Summary of functiooon
+	std::string summary() const {
+		return fptr->summary();
+	}
 };
 
 // Allocate function
@@ -94,10 +134,50 @@ Function new_(Args ... args)
 }
 
 // Get function
+// TODO: underscore convention?
 struct Get : public _function {
 	int index;
 
 	Get(int i) : _function(1, op_get), index(i) {}
+
+	_function *copy() const override {
+		return new Get(index);
+	}
+
+	// Overload summary to include index
+	std::string summary() const override {
+		return "GET (" + std::to_string(index) + ")";
+	}
+};
+
+// Variables are just placeholders
+class _variable : public _function {
+	static int gid() {
+		static int cid = 0;
+		return cid++;
+	}
+
+	_variable(int x, const Constant &c)
+		: _function(0, op_var), id(x), value(c) {}
+public:
+	// Unique variable id
+	int id;
+
+	// Value of the variable
+	Constant value;
+
+	_variable() : _function(0, op_var), id(gid()) {}
+
+	_function *copy() const override {
+		return new _variable(id, value);
+	}
+};
+
+// Wrapper around _variable for convenience
+class Variable : public Function {
+public:
+	// Constructors
+	Variable() : Function(new_ <_variable> ()) {}
 };
 
 // Constant getter
@@ -110,23 +190,24 @@ struct Const : public _function {
 // Instruction sequence for a function
 class ISeq : public _function {
 	// Instructions are a sequence of functions
-	std::vector <_function *> _instrs;
+	std::vector <const _function *> _instrs;
 
 	// Variables
 	//	must be filled out before computation
-	std::vector <Constant> _vars;
+	std::vector <_variable *> _vars;
 
 	// Constants
 	std::vector <Constant> _consts;
 
 	// Load inputs to _vars
-	void _load(const Input &ins) {
+	void _load(const Input &ins) const {
 		// TODO: should make sure that the ins == inputs
-		_vars = ins;
+		for (int i = 0; i < ins.size(); i++)
+			_vars[i]->value = ins[i];
 	}
 
 	// Deal with special instructions
-	bool _ispec(_function *ftn, std::stack <Constant> &ops) {
+	bool _ispec(const _function *ftn, std::stack <Constant> &ops) const {
 		// Operation kernels (for math)
 		using Kernel = Constant (*)(std::stack <Constant> &);
 
@@ -153,12 +234,12 @@ class ISeq : public _function {
 		switch (ftn->spop) {
 		case op_get:
 			// Get index and push the corresponding variable
-			index = reinterpret_cast <Get *> (ftn)->index;
-			ops.push(_vars[index]);
+			index = reinterpret_cast <const Get *> (ftn)->index;
+			ops.push(_vars[index]->value);
 			return true;
 		case op_const:
 			// Get index and push the corresponding constant
-			index = reinterpret_cast <Get *> (ftn)->index;
+			index = reinterpret_cast <const Const *> (ftn)->index;
 			ops.push(_consts[index]);
 			return true;
 		case op_add: case op_sub:
@@ -174,7 +255,8 @@ class ISeq : public _function {
 	}
 
 	// Execute an instruction
-	void _exec(_function *ftn, std::stack <Constant> &ops) {
+	// TODO: static?
+	void _exec(const _function *ftn, std::stack <Constant> &ops) const {
 		// Check if the instruction is a special operation
 		if (_ispec(ftn, ops))
 			return;
@@ -197,16 +279,100 @@ class ISeq : public _function {
 		// Push new value onto stack
 		ops.push(n);
 	}
+
+	// Get index of variable
+	int index_of(_variable *v) {
+		int index = -1;
+		for (int i = 0; i < _vars.size(); i++) {
+			if (v->id == _vars[i]->id) {
+				index = i;
+				break;
+			}
+		}
+
+		return index;
+	}
+
+	// Append helpers
+	void append_variable(_variable *v) {
+		// Check if the variable exists already
+		int index = index_of(v);
+
+		// Add the variable (and increment inputs) if not found
+		int gindex = index;
+		if (index < 0) {
+			gindex = _vars.size();
+			_vars.push_back(v);
+		}
+
+		_instrs.push_back(new Get(gindex));
+	}
+
+	void append_iseq(ISeq *iseq) {
+		for (const _function *fptr : iseq->_instrs) {
+			_function *nptr = fptr->copy();
+			if (nptr->spop == op_get) {
+				int i = reinterpret_cast <Get *> (nptr)->index;
+				_variable *v = iseq->_vars[i];
+
+				// TODO: should create a new value as well
+				i = index_of(v);
+
+				if (i == -1) {
+					// Add a variable
+					i = _vars.size();
+					_vars.push_back((_variable *) v->copy());
+				}
+
+				append(new Get (i));
+				continue;
+			}
+
+			append(nptr);
+		}
+	}
 protected:
 	// Protected constructor
-	ISeq(std::vector <_function *> instrs,
-		std::vector <Constant> consts, 
-		int nins) : _function(nins),
+	ISeq(std::vector <const _function *> instrs,
+		std::vector <Constant> consts,
+		int nins) : _function(nins, op_iseq),
 			_instrs(instrs),
-			_consts(consts) {}
+			_consts(consts) {
+		// Fill the _vars with variables
+		_vars.resize(nins);
+	}
 public:
+	// TODO: check function to make sure only
+	// one element remains on the stack
+
+	// Empty constructor
+	ISeq() : _function(0, op_iseq) {}
+
+	// Inserting instructions and functions
+	void append(const _function *fptr) {
+		switch (fptr->spop) {
+		case op_var:
+			append_variable((_variable *) fptr);
+			break;
+		case op_iseq:
+			append_iseq((ISeq *) fptr);
+			break;
+		default:
+			// Just add the function to the instructions
+			_instrs.push_back(fptr);
+			break;
+		}
+	}
+
+	// Append a sequence of instructions
+	template <class ... Args>
+	void append(const _function *fptr, Args ... args) {
+		append(fptr);
+		append(args...);
+	}
+
 	// Evaluate the sequence
-	Constant compute(const Input &ins) {
+	Constant compute(const Input &ins) const {
 		// Load inputs
 		_load(ins);
 
@@ -214,11 +380,28 @@ public:
 		std::stack <Constant> ops;
 
 		// Execute all the instructions
-		for (_function *ftn : _instrs)
+		for (const _function *ftn : _instrs)
 			_exec(ftn, ops);
-		
+
 		// Return top-most value on the stack
 		return ops.top();
+	}
+
+	_function *copy() const override {
+		return new ISeq(_instrs, _consts, inputs);
+	}
+
+	// Dump instructions for debugging
+	std::string summary() const override {
+		std::ostringstream oss;
+
+		oss << "ISeq Instructions\n";
+		for (int i = 0; i < _instrs.size(); i++) {
+			oss << i << "\t" << _instrs[i]->summary()
+				<< "\t" << _instrs[i] << std::endl;
+		}
+
+		return oss.str();
 	}
 };
 
@@ -237,14 +420,9 @@ binop(Sub, op_sub)
 binop(Mul, op_mul)
 binop(Div, op_div)
 
-// Variables are just placeholders
-struct Variable {};
-
-// TODO: variable should be a type of Iseq (with no instructions)
-
 // Overloaded operators to create functions
-Function operator+(const Variable &, const Variable &);
-Function operator-(const Variable &, const Variable &);
+Function operator+(const Function &, const Function &);
+// Function operator-(const Variable &, const Variable &);
 
 }
 

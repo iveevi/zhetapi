@@ -2,11 +2,6 @@
 
 using namespace zhetapi::autograd;
 
-Function add(Variable a, Variable b)
-{
-	return a + b;
-}
-
 int main()
 {
 	Constant a = Constant(1.0);
@@ -15,11 +10,20 @@ int main()
 	std::cout << a << std::endl;
 	std::cout << b << std::endl;
 
-	Function f = add({}, {});
-	std::cout << f(a, b) << std::endl;
-
 	Variable x, y, z;
-	Function g = x + y;
+	Function f = x + y;
+	Function g = x + z;
 
-	std::cout << g(a, b) << std::endl;
+	std::cout << "G: " << g(a, b) << std::endl;
+
+	// std::cout << f.summary() << std::endl;
+	// std::cout << g.summary() << std::endl;
+
+	Function h = f + g;
+	// std::cout << h.summary() << std::endl;
+	std::cout << "H: " << h(a, b, b) << std::endl;
+
+	Function k = f + z;
+	std::cout << k.summary() << std::endl;
+	std::cout << "K: " << k(a, b, b) << std::endl;
 }
