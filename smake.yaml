@@ -12,8 +12,7 @@ definitions:
     testing/tensor.cpp,
     testing/timers.cpp,
     testing/vector.cpp'
-  - source: 'source/image.cpp,
-    source/linalg.cpp,
+  - source: 'source/linalg.cpp,
     source/polynomial.cpp,
     source/timer.cpp,
     source/std/functions.cpp,
@@ -22,8 +21,18 @@ definitions:
 builds:
   - testing:
     - sources: testing, source
+    - libraries: '-lpthread'
+  - testing_release:
+    - sources: testing, source
+    - libraries: '-lpthread'
+    - flags: '-g'
 
 targets:
   - testing:
+    - modes: gdb
     - builds:
       - default: testing
+      - gdb: testing_release
+    - postbuilds:
+      - default: '{}'
+      - gdb: 'gdb {}'

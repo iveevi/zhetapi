@@ -1,4 +1,4 @@
-#include <linalg.hpp>
+#include "../include/linalg.hpp"
 
 namespace zhetapi {
 

@@ -78,8 +78,6 @@ TEST(tensor_construction_and_memory);
 
 TEST(integration);
 
-TEST(function_computation);
-
 TEST(interval_construction);
 TEST(interval_sampling);
 
@@ -99,13 +97,5 @@ TEST(act_linear);
 TEST(act_relu);
 TEST(act_leaky_relu);
 TEST(act_sigmoid);
-
-TEST(module_construction);
-
-TEST(parsing_global_assignment);
-TEST(parsing_global_branching);
-
-TEST(compile_const_exprs);
-TEST(compile_var_exprs);
 
 #endif

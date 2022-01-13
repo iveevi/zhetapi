@@ -1,4 +1,4 @@
-#include <polynomial.hpp>
+#include "../include/polynomial.hpp"
 
 namespace zhetapi {
 
