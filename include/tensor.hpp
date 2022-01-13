@@ -49,28 +49,11 @@ class NVArena;
 
 #endif
 
-// TODO: is this even needed
-#ifndef __AVR
-
-// Tensor_type operations
-template <class T>
-struct Tensor_type : std::false_type {};
-
-template <class T>
-struct Tensor_type <Tensor <T>> : std::true_type {};
-
-template <class T>
-bool is_tensor_type()
-{
-	return Tensor_type <T> ::value;
-}
-
-#endif
-
 // Tensor class
 template <class T>
 class Tensor {
 protected:
+	// TODO: dimension as a vector
 	size_t	_dims		= 0;
 	size_t *_dim		= nullptr;
 	bool	_dim_sliced	= false;
@@ -94,6 +77,9 @@ public:
 	template <class A>
 	Tensor(const Tensor <A> &);
 
+	// Single element
+	Tensor(const T &);
+
 	Tensor(size_t, size_t);
 	Tensor(size_t, size_t *, size_t, T *, bool = true);
 
@@ -104,14 +90,19 @@ public:
 	// Indexing
 	Tensor <T> operator[](size_t);
 
+	// TODO: iterators
+	// TODO: this type of indexing is very tedious with the [], use anotehr
+	// method like .get(...)
 	AVR_IGNORE(T &operator[](const std::vector <size_t> &));
 	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const);
 
 	// TODO: remove size term from vector and matrix classes
 	__cuda_dual__ size_t size() const;
-	__cuda_dual__ size_t dimensions() const;
+	// __cuda_dual__ size_t dimensions() const;
 	__cuda_dual__ size_t dim_size(size_t) const;
 	__cuda_dual__ size_t safe_dim_size(size_t) const;
+
+	std::vector <size_t> dimensions() const;
 
 	// TODO: private?
 	__cuda_dual__
@@ -176,6 +167,12 @@ public:
 
 #endif
 
+	// Arithmetic
+	template <class U>
+	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
+	
+	template <class U>
+	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
 };
 
 }

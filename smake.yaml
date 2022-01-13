@@ -12,7 +12,8 @@ definitions:
     testing/tensor.cpp,
     testing/timers.cpp,
     testing/vector.cpp'
-  - source: 'source/linalg.cpp,
+  - source: 'source/autograd.cpp,
+    source/linalg.cpp,
     source/polynomial.cpp,
     source/timer.cpp,
     source/std/functions.cpp,
@@ -22,9 +23,14 @@ builds:
   - testing:
     - sources: testing, source
     - libraries: '-lpthread'
-  - testing_release:
+  - testing_debug:
     - sources: testing, source
     - libraries: '-lpthread'
+    - flags: '-g'
+  - experimental:
+    - sources: 'experimental/experimental.cpp, source'
+  - experimental_debug:
+    - sources: 'experimental/experimental.cpp, source'
     - flags: '-g'
 
 targets:
@@ -32,7 +38,15 @@ targets:
     - modes: gdb
     - builds:
       - default: testing
-      - gdb: testing_release
+      - gdb: testing_debug
+    - postbuilds:
+      - default: '{}'
+      - gdb: 'gdb {}'
+  - exp:
+    - modes: gdb
+    - builds:
+      - default: experimental
+      - gdb: experimental_debug
     - postbuilds:
       - default: '{}'
       - gdb: 'gdb {}'

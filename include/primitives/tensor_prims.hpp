@@ -1,6 +1,8 @@
 #ifndef TENSOR_PRIMITIVES_H_
 #define TENSOR_PRIMITIVES_H_
 
+// TODO: just merge this with the original file
+
 #ifdef __CUDACC__
 
 #include "cuda/nvarena.cuh"
@@ -48,6 +50,18 @@ Tensor <T> ::Tensor(const Tensor <A> &other)
 	_array = new T[_size];
 	for (size_t i = 0; i < _size; i++)
 		_array[i] = static_cast <T> (other._array[i]);
+}
+
+// Single element
+template <class T>
+Tensor <T> ::Tensor(const T &value)
+		: _size(1), _dims(1)
+{
+	_dim = new size_t[1];
+	_dim[0] = 1;
+
+	_array = new T[1];
+	_array[0] = value;
 }
 
 template <class T>
@@ -181,16 +195,27 @@ size_t Tensor <T> ::size() const
 	return _size;
 }
 
-/**
+/*
  * @brief Returns the number of dimensions in the tensor.
  *
  * @return the number of dimensions in the tensor.
- */
+ *
 template <class T>
 __cuda_dual__
 size_t Tensor <T> ::dimensions() const
 {
 	return _dims;
+} */
+
+// Return dimensions as a vector
+template <class T>
+std::vector <size_t> Tensor <T> ::dimensions() const
+{
+	std::vector <size_t> dims(_dims);
+	for (size_t i = 0; i < _dims; i++)
+		dims[i] = _dim[i];
+
+	return dims;
 }
 
 /**
@@ -243,6 +268,37 @@ bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 	return !(a == b);
 }
 
+// Addition and subtraction
+template <class T>
+Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// TODO: make an exception class
+	if (a._size != b._size)		// TODO: this doesnt fully check, make a struct for size info
+		throw "Tensor sizes do not match";
+
+	Tensor <T> c(a.dimensions());
+
+	for (size_t i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] + b._array[i];
+
+	return c;
 }
 
-#endif
+// TODO: make += and -= instead
+template <class T>
+Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a._size != b._size)
+		throw "Tensor size mismatch";
+
+	Tensor <T> c(a._dims, a._dim, a._size, nullptr, false);
+
+	for (size_t i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] - b._array[i];
+
+	return c;
+}
+
+}
+
+#endif // TODO: what is this doing?
