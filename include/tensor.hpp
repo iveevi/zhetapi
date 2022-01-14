@@ -167,6 +167,9 @@ public:
 
 	// TODO: start reworking tensor from here
 
+	// Get scalar element
+	const T &get(size_t) const;
+
 	// Apply a function to each element of the tensor
 	Tensor <T> transform(T (*)(const T &)) const;
 	Tensor <T> transform(const std::function <T (const T &)> &) const;
@@ -185,6 +188,13 @@ public:
 	template <class U>
 	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
 };
+
+// Indexing
+template <class T>
+const T &Tensor <T> ::get(size_t i) const
+{
+	return _array[i];
+}
 
 // Applying element-wise transformations
 template <class T>

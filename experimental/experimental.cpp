@@ -14,29 +14,16 @@ int main()
 
 	Variable x;
 
-	std::cout << autograd::exp.summary() << std::endl;
-	std::cout << autograd::sqrt.summary() << std::endl;
+	// TODO: benchmark program
+	Function f = autograd::pow(x, x);
+	Function pf1 = autograd::pow(2.0, x);
+	Function pf2 = autograd::pow(x, 2.0);
+	std::cout << "--> " << autograd::pow(2.0, 5.0) << std::endl;
+	std::cout << "--> " << pf1(5.0) << std::endl;
+	std::cout << "--> " << pf2(2.0) << std::endl;
 
-	std::cout << autograd::exp(10) << std::endl;
-
-	// Function f = x * x + a * x + b;
-	Function f = autograd::sqrt(autograd::exp);
-
+	/* std::cout << autograd::pow.summary() << std::endl;
 	std::cout << f.summary() << std::endl;
-	std::cout << "f(2.0) = " << f(2.0) << std::endl;
-
-	std::cout << io::table(
-		{"x", "f(x)", "error"}, {
-			{ "2.0", "f(2.0)", "0.0" },
-			{ "3.0", "f(3.0)", "0.0" },
-			{ "4.0", "f(4.0)", "0.0" },
-			{ "5.0", "f(5.0)", "0.0" },
-			{ "6.0", "f(6.0)", "0.0" },
-			{ "7.0", "f(7.0)", "0.0" },
-			{ "8.0", "f(8.0)", "0.0" },
-			{ "9.0", "f(9.0)", "0.0" },
-			{ "10.0", "f(10.0)", "0.0" },
-			{ "11.0", "f(11.0)", "0.0" },
-			{ "12.0", "f(12.0)", "0.0" },
-		}) << std::endl;
+	std::cout << pf1.summary() << std::endl;
+	std::cout << pf2.summary() << std::endl; */
 }

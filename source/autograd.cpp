@@ -88,6 +88,18 @@ KERNEL(tan)
 	return ins[0].transform(tanf);
 }
 
+KERNEL(pow)
+{
+	// Use only the first element
+	long double e = ins[1].get(0);
+
+	return ins[0].transform(
+		[e](long double x) -> long double {
+			return powl(x, e);
+		}
+	);
+}
+
 }
 
 }

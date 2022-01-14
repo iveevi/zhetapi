@@ -29,6 +29,7 @@ public:
 		// Key ISeq operations
 		op_get,
 		op_const,
+		op_repl_const,
 		op_store_cache,
 		op_get_cache,
 
@@ -53,7 +54,7 @@ public:
 private:
 	// String versions of operations
 	static constexpr const char *_spec_strs[] {
-		"GET", "CONST",
+		"GET", "CONST", "REPLACE CONST",
 		"STORE CACHE", "GET CACHE",
 
 		"VAR", "ISEQ",
@@ -101,92 +102,6 @@ public:
 	}
 };
 
-// Function alias is a wrapper around shared ptr
-using _fptr = std::shared_ptr <_function>;
-
-class Function {
-	// Function pointer
-	_fptr fptr;
-
-	// Process variadic arguments for compute
-	template <class ... Args>
-	static void _cmp_process(_function::Input &input, const Constant &c, Args ... args) {
-		input.push_back(c);
-		_cmp_process(input, args...);
-	}
-
-	template <class ... Args>
-	static void _cmp_process(_function::Input &input, const Constant::value_type &c, Args ... args) {
-		input.push_back(c);
-		_cmp_process(input, args...);
-	}
-
-	static void _cmp_process(_function::Input &input, const Constant &c) {
-		input.push_back(c);
-	}
-
-	static void _cmp_process(_function::Input &input, const Constant::value_type &c) {
-		input.push_back(c);
-	}
-
-	// Process variadic arguments for compose
-	template <class ... Args>
-	static void _ftr_process(_function::Compositions &cs, const Function &f, Args ... args) {
-		cs.push_back(f.get());
-		_ftr_process(cs, args...);
-	}
-
-	static void _ftr_process(_function::Compositions &cs, const Function &f) {
-		cs.push_back(f.get());
-	}
-public:
-	// Constructors
-	Function() : fptr(nullptr) {}
-	Function(_function *f) : fptr(f) {}
-	Function(const _fptr &f) : fptr(f) {}
-
-	// Get raw handle
-	_function *get() const {
-		return fptr.get();
-	}
-
-	// Operator overloading
-	Constant operator()(const std::vector <Constant> &ins) {
-		return fptr->compute(ins);
-	}
-
-	// Variadic operator overloading
-	//	needs at least one argument
-	template <class ...Args>
-	Constant operator()(const Constant &c, Args ...args) {
-		_function::Input ins;
-		_cmp_process(ins, c, args...);
-		return fptr->compute(ins);
-	}
-
-	// Variadic operator overloading
-	//	for composition
-	template <class ...Args>
-	Function operator()(const Function &f, Args ...args) {
-		_function::Compositions cs;
-		_ftr_process(cs, f, args...);
-		return Function(fptr->compose(cs));
-	}
-
-	// Summary of functiooon
-	std::string summary() const {
-		return fptr->summary();
-	}
-};
-
-// Allocate function
-template <class T, class... Args>
-Function new_(Args ... args)
-{
-	_function *f = new T(args...);
-	return Function(_fptr(f));
-}
-
 // Get function
 // TODO: underscore convention?
 struct Get : public _function {
@@ -209,6 +124,26 @@ struct Const : public _function {
 	int index;
 
 	Const(int i) : _function(1, op_const), index(i) {}
+
+	// Overload summary to include index
+	std::string summary() const override {
+		return "CONST (" + std::to_string(index) + ")";
+	}
+};
+
+// Replace a variable with a constant
+struct _repl_const : public _function {
+	int index;
+
+	Constant value;
+
+	_repl_const(const Constant &v, int i)
+		: _function(0, op_repl_const), value(v), index(i) {}
+	
+	// Overload summary to show index
+	std::string summary() const override {
+		return "REPLACE CONST (" + std::to_string(index) + ")";
+	}
 };
 
 // Store into cache
@@ -270,13 +205,6 @@ public:
 	std::string summary() const override {
 		return "variable (id: " + std::to_string(id) + ")";
 	}
-};
-
-// Wrapper around _variable for convenience
-class Variable : public Function {
-public:
-	// Constructors
-	Variable() : Function(new_ <_variable> ()) {}
 };
 
 // Instruction sequence for a function
@@ -515,6 +443,18 @@ protected:
 		// Append all the _functions
 		int i = 0;
 		for (const _function *fptr : cs) {
+			// Get if the fptr is repl const
+			if (fptr->spop == op_repl_const) {
+				// TODO: method
+				const _repl_const *rc = reinterpret_cast <const _repl_const *> (fptr);
+
+				int ci = iseq->_consts.size();
+				iseq->_consts.push_back(rc->value);
+				iseq->_instrs.push_back(new Const(ci));
+				iseq->_instrs.push_back(new _store_cache(i++));
+				continue;
+			}
+
 			iseq->append(fptr);
 
 			// Then store into cache
@@ -598,36 +538,6 @@ public:
 
 	// Dump instructions for debugging
 	std::string summary() const override {
-		/* std::ostringstream oss;
-
-		// Longest instruction name
-		int max_name = 0;
-
-		std::vector <std::string> names;
-		for (const _function *fptr : _instrs) {
-			std::string name = fptr->summary();
-			names.push_back(name);
-
-			if (name.size() > max_name)
-				max_name = name.size();
-		}
-
-		// TODO: ascii table printer
-		oss << "\nISeq Instructions\n";
-		oss << "| Index | Instruction | Variable | Constant |\n";
-		for (int i = 0; i < names.size(); i++) {
-			oss << i << "\t" << names[i] << "\t";
-
-			if (i < _vars.size())
-				oss << _vars[i]->summary();
-
-			oss << "\t";
-			if (i < _consts.size())
-				oss << _consts[i];
-
-			oss << "\n";
-		} */
-
 		// Headers
 		io::Args args {
 			"Index",
@@ -661,6 +571,113 @@ public:
 		// Return formatted table
 		return io::table(args, rows);
 	}
+};
+
+// Function alias is a wrapper around shared ptr
+using _fptr = std::shared_ptr <_function>;
+
+// Foward declarations
+// TODO: at the top
+class Function;
+
+// Templated return type
+//	to distinguish between
+//	Cosntant or Function return
+template <class T, class ... Args>
+struct fret_helper {
+	static constexpr bool compose = std::is_base_of <Function, T> ::value
+		|| fret_helper <Args...> ::compose;
+};
+
+template <class T>
+struct fret_helper <T> {
+	static constexpr bool compose = std::is_base_of <Function, T> ::value;
+};
+
+template <class ... Args>
+struct fret {
+	static constexpr bool compose = fret_helper <Args...> ::compose;
+};
+
+class Function {
+	// Function pointer
+	_fptr fptr;
+
+	// Process variadic arguments for compute
+	template <class ... Args>
+	static void _cmp_process(_function::Input &input, const Constant &c, Args ... args) {
+		input.push_back(c);
+		_cmp_process(input, args...);
+	}
+
+	template <class ... Args>
+	static void _cmp_process(_function::Input &input, const Constant::value_type &c, Args ... args) {
+		input.push_back(c);
+		_cmp_process(input, args...);
+	}
+
+	static void _cmp_process(_function::Input &input) {}
+
+	// Process variadic arguments for compose
+	template <class ... Args>
+	static void _ftr_process(_function::Compositions &cs, int &i, const Function &f, Args ... args) {
+		cs.push_back(f.get());
+		_ftr_process(cs, ++i, args...);
+	}
+	
+	template <class ... Args>
+	static void _ftr_process(_function::Compositions &cs, int &i, const Constant &c, Args ... args) {
+		cs.push_back(new _repl_const(c, i));
+		_ftr_process(cs, ++i, args...);
+	}
+
+	static void _ftr_process(_function::Compositions &cs, int &i) {}
+public:
+	// Constructors
+	Function() : fptr(nullptr) {}
+	Function(_function *f) : fptr(f) {}
+	Function(const _fptr &f) : fptr(f) {}
+
+	// Get raw handle
+	_function *get() const {
+		return fptr.get();
+	}
+
+	template <class ... Args, typename = typename std::enable_if <fret <Args...> ::compose> ::type>
+	Function operator()(Args ... args) {
+		_function::Compositions cs;
+		int i = 0;
+
+		_ftr_process(cs, i, args...);
+		return fptr->compose(cs);
+	}
+	
+	template <class ... Args, typename = typename std::enable_if <!fret <Args...> ::compose> ::type>
+	Constant operator()(Args ... args) {
+		_function::Input inputs;
+		_cmp_process(inputs, args...);
+		return fptr->compute(inputs);
+	}
+
+	// Summary of functiooon
+	std::string summary() const {
+		return fptr->summary();
+	}
+};
+
+// Allocate function
+template <class T, class... Args>
+Function new_(Args ... args)
+{
+	_function *f = new T(args...);
+	return Function(_fptr(f));
+}
+
+// Wrapper around _variable for convenience
+class Variable : public Function {
+public:
+	// Constructors
+	Variable() : Function(new_ <_variable> ()) {}
 };
 
 // Overloaded operators
@@ -702,6 +719,7 @@ FUNCTION_CLASS(log, 1, "LOG")
 FUNCTION_CLASS(sin, 1, "SIN")
 FUNCTION_CLASS(cos, 1, "COS")
 FUNCTION_CLASS(tan, 1, "TAN")
+FUNCTION_CLASS(pow, 2, "POW")
 
 }
 
