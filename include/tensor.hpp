@@ -70,6 +70,9 @@ protected:
 #endif
 
 public:
+	// Public type aliases
+	using shape_type = std::vector <std::size_t>;
+
 	// Essential constructors
 	Tensor();
 	Tensor(const Tensor &);
@@ -169,17 +172,64 @@ public:
 #endif
 
 	// Arithmetic
+	// TODO: heterogneous versions?
 	template <class U>
 	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
 	
 	template <class U>
 	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend Tensor <U> multiply(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
 };
+
+// Allow comparison of Tensor shapes
+template <class A, class B>
+bool operator==(const typename Tensor <A> ::shape_type &s1,
+		const typename Tensor <B> ::shape_type &s2)
+{
+	// Ensure same dimension
+	if (s1.size() != s2.size())
+		return false;
+	
+	// Compare each dimension
+	for (int i = 0; i < s1.size(); i++) {
+		if (s1[i] != s2[i])
+			return false;
+	}
+
+	return true;
+}
+
+// Element-wise operations
+template <class T>
+Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// TODO: check dimensions (make a helper function for this)
+	Tensor <T> c(a.dimensions());
+	for (int i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] * b._array[i];
+	return c;
+}
+
+template <class T>
+Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// TODO: check dimensions (make a helper function for this)
+	Tensor <T> c(a.dimensions());
+	for (int i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] / b._array[i];
+	return c;
+}
 
 }
 
 #include "primitives/tensor_prims.hpp"
 
+// TODO: remove this branch, screw AVR
 #ifndef __AVR
 
 #include "tensor_cpu.hpp"

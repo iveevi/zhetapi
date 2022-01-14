@@ -23,7 +23,9 @@ int main()
 	// std::cout << h.summary() << std::endl;
 	std::cout << "H: " << h(a, b, b) << std::endl;
 
-	Function k = f + z;
+	Function k = f * z;
 	std::cout << k.summary() << std::endl;
 	std::cout << "K: " << k(a, b, b) << std::endl;
+
+	// TODO: benchmark program
 }

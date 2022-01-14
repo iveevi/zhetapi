@@ -206,6 +206,16 @@ class ISeq : public _function {
 			_vars[i]->value = ins[i];
 	}
 
+	// Get constant from the stack and handle any errors
+	static Constant getc(std::stack <Constant> &ops)
+	{
+		// TODO: check empty
+		Constant c = ops.top();
+		ops.pop();
+
+		return c;
+	}
+
 	// Deal with special instructions
 	bool _ispec(const _function *ftn, std::stack <Constant> &ops) const {
 		// Operation kernels (for math)
@@ -227,6 +237,25 @@ class ISeq : public _function {
 				Constant a = ops.top();
 				ops.pop();
 				return a - b;
+			},
+
+			[](std::stack <Constant> &ops) -> Constant {
+				Constant b = getc(ops);
+				Constant a = getc(ops);
+
+				/* if (a.dimensions() == )
+				return a - b; */
+
+				// TODO: use matrix multiplication if dims == 2
+				// or if dim== 2 and dim == 1 -> user must do hammard
+				// for element-wise multiplication
+				return multiply(a, b);
+			},
+
+			[](std::stack <Constant> &ops) -> Constant {
+				Constant b = getc(ops);
+				Constant a = getc(ops);
+				return divide(a, b);
 			}
 		};
 
@@ -405,24 +434,11 @@ public:
 	}
 };
 
-// Standard ISeqs
-#define binop(op, spop) 			\
-	struct op : public ISeq {		\
-		op() : ISeq ({			\
-			new Get(0),		\
-			new Get(1),		\
-			new _function(2, spop)	\
-		}, {}, 2) {}			\
-	};
-
-binop(Add, op_add)
-binop(Sub, op_sub)
-binop(Mul, op_mul)
-binop(Div, op_div)
-
 // Overloaded operators to create functions
 Function operator+(const Function &, const Function &);
-// Function operator-(const Variable &, const Variable &);
+Function operator-(const Function &, const Function &);
+Function operator*(const Function &, const Function &);
+Function operator/(const Function &, const Function &);
 
 }
 
