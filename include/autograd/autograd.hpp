@@ -2,6 +2,7 @@
 #define ZHETAPI_FUNCTION_H_
 
 // Standard headers
+#include <cmath>
 #include <memory>
 #include <sstream>
 #include <stack>
@@ -19,22 +20,16 @@ using Constant = Tensor <long double>;
 
 // Basic structure of a function
 class _function {
-	// String versions of operations
-	static constexpr const char *_spec_strs[] {
-		"GET", "CONST",
-
-		"VAR", "ISEQ",
-
-		"ADD", "SUB",
-		"MUL", "DIV"
-	};
 public:
 	// Special operations
 	enum Special {
 		op_none = -1,
 
+		// Key ISeq operations
 		op_get,
 		op_const,
+		op_store_cache,
+		op_get_cache,
 
 		op_var,
 		op_iseq,
@@ -45,7 +40,7 @@ public:
 		op_mul,
 		op_div
 	};
-
+	
 	// Special operation code (defualt -1 = none)
 	int spop = op_none;
 
@@ -53,14 +48,41 @@ public:
 
 	// Type of input
 	using Input = std::vector <Constant>;
+	using Compositions = std::vector <_function *>;
+private:
+	// String versions of operations
+	static constexpr const char *_spec_strs[] {
+		"GET", "CONST",
+		"STORE CACHE", "GET CACHE",
 
+		"VAR", "ISEQ",
+
+		"ADD", "SUB",
+		"MUL", "DIV"
+	};
+protected:
+	// By default, function composition returns null
+	virtual _function *_compose(const Compositions &) const {
+		return nullptr;
+	}
+public:
 	// Constructors
 	_function(int nins, int op = op_none) : inputs(nins), spop(op) {}
 
 	// Not pure virtual so that special operations
 	//	can get away without implementing it
 	virtual Constant compute(const Input &) const {
+		// TODO: separate into _compute, like compose?
 		return Constant();
+	}
+
+	// Wrapper around _compose that checks #inputs
+	_function *compose(const Compositions &cs) const {
+		// TODO: add argsize exception
+		if (cs.size() != inputs)
+			throw "_function::compose size mismatch";
+		
+		return this->_compose(cs);
 	}
 
 	// Copy pointer
@@ -86,13 +108,14 @@ class Function {
 	_fptr fptr;
 
 	// Process variadic arguments
-	template <class ... Args>
-	static void _process(_function::Input &input, Constant &c, Args ... args) {
+	template <class T, class ... Args>
+	static void _process(_function::Input &input, const T &c, Args ... args) {
 		input.push_back(c);
 		_process(input, args...);
 	}
 
-	static void _process(_function::Input &input, Constant &c) {
+	template <class T>
+	static void _process(_function::Input &input, const T &c) {
 		input.push_back(c);
 	}
 public:
@@ -150,6 +173,46 @@ struct Get : public _function {
 	}
 };
 
+// Constant getter
+struct Const : public _function {
+	int index;
+
+	Const(int i) : _function(1, op_const), index(i) {}
+};
+
+// Store into cache
+// TODO: make a overview class -> index_spop(spop, index)
+struct _store_cache : public _function {
+	int index;
+
+	_store_cache(int i) : _function(1, op_store_cache), index(i) {}
+
+	_function *copy() const override {
+		return new _store_cache(index);
+	}
+
+	// Overload summary to include index
+	std::string summary() const override {
+		return "STORE-CACHE (" + std::to_string(index) + ")";
+	}
+};
+
+// Get from cache
+struct _get_cache : public _function {
+	int index;
+
+	_get_cache(int i) : _function(1, op_get_cache), index(i) {}
+
+	_function *copy() const override {
+		return new _get_cache(index);
+	}
+
+	// Overload summary to include index
+	std::string summary() const override {
+		return "GET-CACHE (" + std::to_string(index) + ")";
+	}
+};
+
 // Variables are just placeholders
 class _variable : public _function {
 	static int gid() {
@@ -180,15 +243,12 @@ public:
 	Variable() : Function(new_ <_variable> ()) {}
 };
 
-// Constant getter
-struct Const : public _function {
-	int index;
-
-	Const(int i) : _function(1, op_const), index(i) {}
-};
-
 // Instruction sequence for a function
 class ISeq : public _function {
+	// TODO: JIT function to compile into object code
+	//	this should be possible since the types
+	//	are homogenous
+
 	// Instructions are a sequence of functions
 	std::vector <const _function *> _instrs;
 
@@ -291,7 +351,7 @@ class ISeq : public _function {
 			return;
 
 		// Ensure that the stack has enough operands
-		if (ops.size() < ftn->inputs) {}	// TODO: throw
+		if (ops.size() < ftn->inputs) {}	// TODO: throw, except if #inputs = -1 (variadic)
 
 		// Load the inputs
 		Input fins;
@@ -370,6 +430,46 @@ protected:
 		// Fill the _vars with variables
 		_vars.resize(nins);
 	}
+
+	// Overload composition
+	_function *_compose(const Compositions &cs) const override {
+		// Composition returns a new ISeq
+		ISeq *iseq = new ISeq();
+
+		// Append all the _functions
+		int i = 0;
+		for (const _function *fptr : cs) {
+			iseq->append(fptr);
+
+			// Then store into cache
+			iseq->append(new _store_cache(i++));
+
+			// TODO: use append_scache -> int cache index
+			// when the cache is used for other things
+		}
+
+		// Add self
+		// TODO: need to strip all of the gets,
+		// and replace with the fptrs
+		// iseq->append_iseq((ISeq *) this);
+
+		// Iterate through our instructions
+		//	and replace get with get_cache
+		for (const _function *fptr : _instrs) {
+			if (fptr->spop == op_get) {
+				i = reinterpret_cast <const Get *> (fptr)->index;
+				iseq->_instrs.push_back(new _get_cache(i));
+				continue;
+			}
+
+			iseq->append(fptr);
+		}
+
+		// TODO: later optimize the sequence store-cache(i), get-cache(i)
+
+		// Return the sequence
+		return iseq;
+	}
 public:
 	// TODO: check function to make sure only
 	// one element remains on the stack
@@ -434,11 +534,44 @@ public:
 	}
 };
 
-// Overloaded operators to create functions
+// Overloaded operators
 Function operator+(const Function &, const Function &);
 Function operator-(const Function &, const Function &);
 Function operator*(const Function &, const Function &);
 Function operator/(const Function &, const Function &);
+
+// Specialized function classes
+// TODO: separate header
+// TODO: macros
+class _sqrt : public ISeq {
+	// Function kernel
+	struct kernel : public _function {
+		kernel() : _function(1) {}
+
+		// Evaluation is element-wise square root
+		Constant compute(const Input &ins) const {
+			return ins[0].transform(
+				[](long double x) -> long double {
+					return std::sqrt(x);
+				}
+			);
+		}
+
+		// Summary returns same thing as the kernel summary
+		std::string summary() const override {
+			return "SQRT";
+		}
+	};
+public:
+	_sqrt() : ISeq({
+			new Get(0),
+			new kernel()
+		}, {}, 1) {}
+};
+
+// Function classes objects
+//	all should be ISeqs, so that function composition
+//	works as expected
 
 }
 

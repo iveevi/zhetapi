@@ -1,9 +1,7 @@
 #ifndef TENSOR_H_
 #define TENSOR_H_
 
-// C/C++ headers
-#ifndef __AVR			// Does not support AVR
-
+// Standard headers
 #include <cassert>
 #include <cstddef>
 #include <cstdlib>
@@ -15,16 +13,11 @@
 // Engine headers
 #include "std/interval.hpp"
 
-#endif				// Does not support AVR
-
 // Engine headers
 #include "cuda/essentials.cuh"
 #include "avr/essentials.hpp"
 
 namespace zhetapi {
-
-// Type aliases
-// AVR_IGNORE(using utility::Interval;)
 
 // Forward declarations
 template <class T>
@@ -171,6 +164,11 @@ public:
 
 #endif
 
+	// TODO: start reworking tensor from here
+
+	// Apply a function to each element of the tensor
+	Tensor <T> transform(const std::function <T (const T &)> &) const;
+
 	// Arithmetic
 	// TODO: heterogneous versions?
 	template <class U>
@@ -186,22 +184,14 @@ public:
 	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
 };
 
-// Allow comparison of Tensor shapes
-template <class A, class B>
-bool operator==(const typename Tensor <A> ::shape_type &s1,
-		const typename Tensor <B> ::shape_type &s2)
+// Applying element-wise transformations
+template <class T>
+Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) const
 {
-	// Ensure same dimension
-	if (s1.size() != s2.size())
-		return false;
-	
-	// Compare each dimension
-	for (int i = 0; i < s1.size(); i++) {
-		if (s1[i] != s2[i])
-			return false;
-	}
-
-	return true;
+	Tensor <T> out = *this;
+	for (int i = 0; i < out._size; i++)
+		out._array[i] = ftn(out._array[i]);
+	return out;
 }
 
 // Element-wise operations
@@ -223,6 +213,24 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 	for (int i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] / b._array[i];
 	return c;
+}
+
+// Allow comparison of Tensor shapes
+template <class A, class B>
+bool operator==(const typename Tensor <A> ::shape_type &s1,
+		const typename Tensor <B> ::shape_type &s2)
+{
+	// Ensure same dimension
+	if (s1.size() != s2.size())
+		return false;
+	
+	// Compare each dimension
+	for (int i = 0; i < s1.size(); i++) {
+		if (s1[i] != s2[i])
+			return false;
+	}
+
+	return true;
 }
 
 }

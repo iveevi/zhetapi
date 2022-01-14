@@ -28,4 +28,11 @@ int main()
 	std::cout << "K: " << k(a, b, b) << std::endl;
 
 	// TODO: benchmark program
+	std::cout << "K: " << k(1.0, 2.0, 2.0) << std::endl;
+
+	_sqrt *sqrt = new _sqrt();
+	std::cout << "sqrt: " << sqrt->summary() << std::endl;
+
+	_function *composed = sqrt->compose({f.get()});
+	std::cout << "composed: " << composed->summary() << std::endl;
 }
