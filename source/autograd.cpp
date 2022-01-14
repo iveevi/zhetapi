@@ -1,5 +1,10 @@
 #include "../include/autograd/autograd.hpp"
 
+// Macros
+#define KERNEL(name)						\
+	Function name = new_ <_##name> ();			\
+	inline Constant _k##name(const _function::Input &ins)
+
 namespace zhetapi {
 
 namespace autograd {
@@ -52,8 +57,36 @@ Function operator/(const Function &lhs, const Function &rhs)
 	return Function(iseq);
 }
 
-// Standard functions
-Function sqrt = new_ <_sqrt> ();
+// Standard function kernels
+KERNEL(sqrt)
+{
+	return ins[0].transform(sqrtl);
+}
+
+KERNEL(exp)
+{
+	return ins[0].transform(expl);
+}
+
+KERNEL(log)
+{
+	return ins[0].transform(logl);
+}
+
+KERNEL(sin)
+{
+	return ins[0].transform(sinf);
+}
+
+KERNEL(cos)
+{
+	return ins[0].transform(cosf);
+}
+
+KERNEL(tan)
+{
+	return ins[0].transform(tanf);
+}
 
 }
 

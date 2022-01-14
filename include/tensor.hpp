@@ -168,6 +168,7 @@ public:
 	// TODO: start reworking tensor from here
 
 	// Apply a function to each element of the tensor
+	Tensor <T> transform(T (*)(const T &)) const;
 	Tensor <T> transform(const std::function <T (const T &)> &) const;
 
 	// Arithmetic
@@ -186,6 +187,17 @@ public:
 };
 
 // Applying element-wise transformations
+template <class T>
+Tensor <T> Tensor <T> ::transform(T (*func)(const T &)) const
+{
+	Tensor <T> result = *this;
+
+	for (size_t i = 0; i < _size; i++)
+		result._array[i] = func(_array[i]);
+
+	return result;
+}
+
 template <class T>
 Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) const
 {

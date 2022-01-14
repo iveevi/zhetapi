@@ -10,6 +10,7 @@
 
 // Library headers
 #include "../tensor.hpp"
+#include "../io/print.hpp"
 
 namespace zhetapi {
 
@@ -264,6 +265,11 @@ public:
 	_function *copy() const override {
 		return new _variable(id, value);
 	}
+
+	// Overload summary to include id
+	std::string summary() const override {
+		return "variable (id: " + std::to_string(id) + ")";
+	}
 };
 
 // Wrapper around _variable for convenience
@@ -451,6 +457,7 @@ class ISeq : public _function {
 		for (const _function *fptr : iseq->_instrs) {
 			_function *nptr = fptr->copy();
 			if (nptr->spop == op_get) {
+				// TODO: clean up
 				int i = reinterpret_cast <Get *> (nptr)->index;
 				_variable *v = iseq->_vars[i];
 
@@ -471,7 +478,7 @@ class ISeq : public _function {
 		}
 	}
 protected:
-	// Protected constructor
+	// Protected constructors
 	ISeq(std::vector <const _function *> instrs,
 		std::vector <Constant> consts,
 		int nins) : _function(nins, op_iseq),
@@ -479,6 +486,25 @@ protected:
 			_consts(consts) {
 		// Fill the _vars with variables
 		_vars.resize(nins);
+	}
+
+	// Kernel function and # of inputs
+	ISeq(const _function *ftn, int nins) : _function(nins, op_iseq) {
+		// Fill the _vars with variables
+		_vars.resize(nins);
+
+		for (int i = 0; i < ftn->inputs; i++)
+			_vars[i] = new _variable();
+
+		// Add the get instructions
+		_instrs.resize(nins + 1);
+
+		int i = 0;
+		for (; i < nins; i++)
+			_instrs[i] = new Get(i);
+
+		// Add the kernel
+		_instrs[i] = ftn;
 	}
 
 	// Overload composition
@@ -572,15 +598,68 @@ public:
 
 	// Dump instructions for debugging
 	std::string summary() const override {
-		std::ostringstream oss;
+		/* std::ostringstream oss;
 
-		oss << "\nISeq Instructions\n";
-		for (int i = 0; i < _instrs.size(); i++) {
-			oss << i << "\t" << _instrs[i]->summary()
-				<< "\t" << _instrs[i] << std::endl;
+		// Longest instruction name
+		int max_name = 0;
+
+		std::vector <std::string> names;
+		for (const _function *fptr : _instrs) {
+			std::string name = fptr->summary();
+			names.push_back(name);
+
+			if (name.size() > max_name)
+				max_name = name.size();
 		}
 
-		return oss.str();
+		// TODO: ascii table printer
+		oss << "\nISeq Instructions\n";
+		oss << "| Index | Instruction | Variable | Constant |\n";
+		for (int i = 0; i < names.size(); i++) {
+			oss << i << "\t" << names[i] << "\t";
+
+			if (i < _vars.size())
+				oss << _vars[i]->summary();
+
+			oss << "\t";
+			if (i < _consts.size())
+				oss << _consts[i];
+
+			oss << "\n";
+		} */
+
+		// Headers
+		io::Args args {
+			"Index",
+			"Instruction",
+			"Variable",
+			"Constant"
+		};
+
+		// Fill out the rows
+		std::vector <io::Args> rows;
+		for (int i = 0; i < _instrs.size(); i++) {
+			io::Args row;
+
+			row.push_back(std::to_string(i));
+			row.push_back(_instrs[i]->summary());
+
+			if (i < _vars.size())
+				row.push_back(_vars[i]->summary());
+			else
+				row.push_back("");
+
+			// TODO: should print shape, not value
+			if (i < _consts.size())
+				row.push_back("--shape--");
+			else
+				row.push_back("");
+
+			rows.push_back(row);
+		}
+
+		// Return formatted table
+		return io::table(args, rows);
 	}
 };
 
@@ -590,39 +669,39 @@ Function operator-(const Function &, const Function &);
 Function operator*(const Function &, const Function &);
 Function operator/(const Function &, const Function &);
 
+// Function class generating macro
+#define FUNCTION_CLASS(name, inputs, str)					\
+	Constant _k##name(const _function::Input &);				\
+										\
+	class _##name : public ISeq { 						\
+		struct kernel : public _function { 				\
+			kernel() : _function(inputs) {} 			\
+										\
+			Constant compute(const Input &ins) const override {	\
+				return _k##name(ins);				\
+			}							\
+										\
+			std::string summary() const override {			\
+				return str;					\
+			}							\
+										\
+			_function *copy() const override {			\
+				return new kernel();				\
+			}							\
+		}; 								\
+	public: 								\
+		_##name() : ISeq(new kernel(), inputs) {} 			\
+	};									\
+										\
+	extern Function name;
+
 // Specialized function classes
-// TODO: separate header
-// TODO: macros
-class _sqrt : public ISeq {
-	// Function kernel
-	struct kernel : public _function {
-		kernel() : _function(1) {}
-
-		// Evaluation is element-wise square root
-		Constant compute(const Input &ins) const override {
-			return ins[0].transform(
-				[](long double x) -> long double {
-					return std::sqrt(x);
-				}
-			);
-		}
-
-		// Summary returns same thing as the kernel summary
-		std::string summary() const override {
-			return "SQRT";
-		}
-	};
-public:
-	_sqrt() : ISeq({
-			new Get(0),
-			new kernel()
-		}, {}, 1) {}
-};
-
-// Function classes objects
-//	all should be ISeqs, so that function composition
-//	works as expected
-extern Function sqrt;
+FUNCTION_CLASS(sqrt, 1, "SQRT")
+FUNCTION_CLASS(exp, 1, "EXP")
+FUNCTION_CLASS(log, 1, "LOG")
+FUNCTION_CLASS(sin, 1, "SIN")
+FUNCTION_CLASS(cos, 1, "COS")
+FUNCTION_CLASS(tan, 1, "TAN")
 
 }
 

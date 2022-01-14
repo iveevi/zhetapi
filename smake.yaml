@@ -13,6 +13,7 @@ definitions:
     testing/timers.cpp,
     testing/vector.cpp'
   - source: 'source/autograd.cpp,
+    source/io.cpp,
     source/linalg.cpp,
     source/polynomial.cpp,
     source/timer.cpp,
