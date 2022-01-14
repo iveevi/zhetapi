@@ -64,6 +64,7 @@ protected:
 
 public:
 	// Public type aliases
+	using value_type = T;
 	using shape_type = std::vector <std::size_t>;
 
 	// Essential constructors

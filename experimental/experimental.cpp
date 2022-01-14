@@ -1,11 +1,12 @@
 #include "../include/autograd/autograd.hpp"
 
+using namespace zhetapi;
 using namespace zhetapi::autograd;
 
 int main()
 {
-	Constant a = Constant(1.0);
-	Constant b = Constant(2.0);
+	Constant a(1.0);
+	Constant b(2.0);
 
 	std::cout << a << std::endl;
 	std::cout << b << std::endl;
@@ -30,9 +31,17 @@ int main()
 	// TODO: benchmark program
 	std::cout << "K: " << k(1.0, 2.0, 2.0) << std::endl;
 
-	_sqrt *sqrt = new _sqrt();
-	std::cout << "sqrt: " << sqrt->summary() << std::endl;
+	_sqrt *my_sqrt = new _sqrt();
+	std::cout << "my_sqrt: " << my_sqrt->summary() << std::endl;
 
-	_function *composed = sqrt->compose({f.get()});
+	_function *composed = my_sqrt->compose({f.get()});
 	std::cout << "composed: " << composed->summary() << std::endl;
+
+	std::cout << "composed: " << composed->compute({a, b}) << std::endl;
+
+	std::cout << "sqrt: " << autograd::sqrt.summary() << std::endl;
+
+	Function cfun = autograd::sqrt(f);
+
+	std::cout << "cfun: " << cfun.summary() << std::endl;
 }

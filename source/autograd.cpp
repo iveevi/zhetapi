@@ -52,6 +52,9 @@ Function operator/(const Function &lhs, const Function &rhs)
 	return Function(iseq);
 }
 
+// Standard functions
+Function sqrt = new_ <_sqrt> ();
+
 }
 
 }

@@ -40,7 +40,7 @@ public:
 		op_mul,
 		op_div
 	};
-	
+
 	// Special operation code (defualt -1 = none)
 	int spop = op_none;
 
@@ -81,7 +81,7 @@ public:
 		// TODO: add argsize exception
 		if (cs.size() != inputs)
 			throw "_function::compose size mismatch";
-		
+
 		return this->_compose(cs);
 	}
 
@@ -107,16 +107,36 @@ class Function {
 	// Function pointer
 	_fptr fptr;
 
-	// Process variadic arguments
-	template <class T, class ... Args>
-	static void _process(_function::Input &input, const T &c, Args ... args) {
+	// Process variadic arguments for compute
+	template <class ... Args>
+	static void _cmp_process(_function::Input &input, const Constant &c, Args ... args) {
 		input.push_back(c);
-		_process(input, args...);
+		_cmp_process(input, args...);
 	}
 
-	template <class T>
-	static void _process(_function::Input &input, const T &c) {
+	template <class ... Args>
+	static void _cmp_process(_function::Input &input, const Constant::value_type &c, Args ... args) {
 		input.push_back(c);
+		_cmp_process(input, args...);
+	}
+
+	static void _cmp_process(_function::Input &input, const Constant &c) {
+		input.push_back(c);
+	}
+
+	static void _cmp_process(_function::Input &input, const Constant::value_type &c) {
+		input.push_back(c);
+	}
+
+	// Process variadic arguments for compose
+	template <class ... Args>
+	static void _ftr_process(_function::Compositions &cs, const Function &f, Args ... args) {
+		cs.push_back(f.get());
+		_ftr_process(cs, args...);
+	}
+
+	static void _ftr_process(_function::Compositions &cs, const Function &f) {
+		cs.push_back(f.get());
 	}
 public:
 	// Constructors
@@ -135,11 +155,21 @@ public:
 	}
 
 	// Variadic operator overloading
+	//	needs at least one argument
 	template <class ...Args>
-	Constant operator()(Args ...args) {
+	Constant operator()(const Constant &c, Args ...args) {
 		_function::Input ins;
-		_process(ins, args...);
+		_cmp_process(ins, c, args...);
 		return fptr->compute(ins);
+	}
+
+	// Variadic operator overloading
+	//	for composition
+	template <class ...Args>
+	Function operator()(const Function &f, Args ...args) {
+		_function::Compositions cs;
+		_ftr_process(cs, f, args...);
+		return Function(fptr->compose(cs));
 	}
 
 	// Summary of functiooon
@@ -250,14 +280,17 @@ class ISeq : public _function {
 	//	are homogenous
 
 	// Instructions are a sequence of functions
-	std::vector <const _function *> _instrs;
+	std::vector <const _function *>	_instrs;
 
 	// Variables
 	//	must be filled out before computation
-	std::vector <_variable *> _vars;
+	std::vector <_variable *>	_vars;
 
 	// Constants
-	std::vector <Constant> _consts;
+	std::vector <Constant>		_consts;
+
+	// Cache of constants
+	mutable std::vector <Constant>	_cache;
 
 	// Load inputs to _vars
 	void _load(const Input &ins) const {
@@ -267,13 +300,23 @@ class ISeq : public _function {
 	}
 
 	// Get constant from the stack and handle any errors
-	static Constant getc(std::stack <Constant> &ops)
-	{
+	static Constant getc(std::stack <Constant> &ops) {
 		// TODO: check empty
 		Constant c = ops.top();
 		ops.pop();
 
 		return c;
+	}
+
+	// Storing a constant into the cache
+	void storec(std::stack <Constant> &ops, int i) const {
+		// Get from the stack
+		Constant c = getc(ops);
+
+		if (i >= _cache.size())
+			_cache.resize(i + 1);
+
+		_cache[i] = c;
 	}
 
 	// Deal with special instructions
@@ -303,9 +346,6 @@ class ISeq : public _function {
 				Constant b = getc(ops);
 				Constant a = getc(ops);
 
-				/* if (a.dimensions() == )
-				return a - b; */
-
 				// TODO: use matrix multiplication if dims == 2
 				// or if dim== 2 and dim == 1 -> user must do hammard
 				// for element-wise multiplication
@@ -330,6 +370,16 @@ class ISeq : public _function {
 			// Get index and push the corresponding constant
 			index = reinterpret_cast <const Const *> (ftn)->index;
 			ops.push(_consts[index]);
+			return true;
+		case op_store_cache:
+			// Get index and push the corresponding constant
+			index = reinterpret_cast <const _store_cache *> (ftn)->index;
+			storec(ops, index);
+			return true;
+		case op_get_cache:
+			// Get index and push the corresponding constant
+			index = reinterpret_cast <const _get_cache *> (ftn)->index;
+			ops.push(_cache[index]);
 			return true;
 		case op_add: case op_sub:
 		case op_mul: case op_div:
@@ -524,7 +574,7 @@ public:
 	std::string summary() const override {
 		std::ostringstream oss;
 
-		oss << "ISeq Instructions\n";
+		oss << "\nISeq Instructions\n";
 		for (int i = 0; i < _instrs.size(); i++) {
 			oss << i << "\t" << _instrs[i]->summary()
 				<< "\t" << _instrs[i] << std::endl;
@@ -549,7 +599,7 @@ class _sqrt : public ISeq {
 		kernel() : _function(1) {}
 
 		// Evaluation is element-wise square root
-		Constant compute(const Input &ins) const {
+		Constant compute(const Input &ins) const override {
 			return ins[0].transform(
 				[](long double x) -> long double {
 					return std::sqrt(x);
@@ -572,6 +622,7 @@ public:
 // Function classes objects
 //	all should be ISeqs, so that function composition
 //	works as expected
+extern Function sqrt;
 
 }
 
