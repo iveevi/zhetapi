@@ -50,6 +50,9 @@ private:
 
 	using _cache_map = std::unordered_map <int, _cache_info>;
 
+	// Reindexing map
+	using _reindex_map = std::unordered_map <int, int>;
+
 	// TODO: JIT function to compile into object code
 	//	this should be possible since the types
 	//	are homogenous
@@ -88,12 +91,19 @@ protected:
 	ISeq(const _function *, int);
 	ISeq(std::vector <const _function *>,
 		std::vector <Constant>, int);
+	ISeq(std::vector <const _function *>,
+		std::vector <Constant>, int,
+		const _reindex_map &);
 public:
 	// TODO: check function to make sure only
 	// one element remains on the stack
 
 	// Empty constructor
 	ISeq();
+
+	// Get a variable
+	// TODO: protected?
+	_variable *get(int) const;
 
 	// Inserting instructions and functions
 	void append(const _function *);

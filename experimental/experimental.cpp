@@ -14,6 +14,9 @@ int main()
 
 	Variable x, y;
 
+	std::cout << "x = " << x.summary() << std::endl;
+	std::cout << "y = " << y.summary() << std::endl;
+
 	std::cout << autograd::pow.summary() << std::endl;
 
 	// TODO: benchmark program
@@ -22,7 +25,8 @@ int main()
 	std::cout << f.summary() << std::endl;
 	std::cout << "f(4.5) = " << f(4.5) << std::endl;
 
-	Function g = autograd::pow(y, f);
+	// NOTE: the first argument is y, not x
+	Function g = autograd::pow(y * y + x, f);
 	std::cout << g.summary() << std::endl;
-	std::cout << "\ng(2.0, 3.0) = " << g(2.0, 3.0) << std::endl;
+	std::cout << "g(2.0, 3.0) = " << g(2.0, 3.0) << std::endl;
 }

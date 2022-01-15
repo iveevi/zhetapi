@@ -191,6 +191,7 @@ public:
 	Constant value;
 
 	_variable() : _function(0, op_var), id(gid()) {}
+	_variable(int x) : _function(0, op_var), id(x) {}
 
 	_function *copy() const override {
 		return new _variable(id, value);

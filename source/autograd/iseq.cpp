@@ -11,6 +11,12 @@ namespace autograd {
 // Empty constructor
 ISeq::ISeq() : _function(0, op_iseq) {}
 
+// Get variable
+_variable *ISeq::get(int index) const
+{
+	return _vars[index];
+}
+
 // Inserting instructions and functions
 void ISeq::append(const _function *fptr)
 {
@@ -125,6 +131,20 @@ ISeq::ISeq(std::vector <const _function *> instrs,
 
 	for (int i = 0; i < nins; i++)
 		_vars[i] = new _variable();
+}
+
+ISeq::ISeq(std::vector <const _function *> instrs,
+	std::vector <Constant> consts, int nins,
+	const _reindex_map &reindex)
+		: _function(nins, op_iseq),
+		_instrs(instrs),
+		_consts(consts)
+{
+	// Fill the _vars with variables
+	_vars.resize(nins);
+
+	for (int i = 0; i < nins; i++)
+		_vars[i] = new _variable(reindex.at(i));
 }
 
 //////////////////////
@@ -339,10 +359,13 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 	if (ftn->spop == _function::op_get) {
 		int index = reinterpret_cast <const Get *> (ftn)->index;
 
+		// Get variable id from iseq
+		int id = iseq->get(index)->id;
+
 		// Check if the variable is already in reindex map
-		if (reindex.find(index) == reindex.end()) {
+		if (reindex.find(id) == reindex.end()) {
 			// Add the variable to the reindex map
-			reindex[index] = vindex;
+			reindex[id] = vindex;
 
 			// Add the variable to the instruction sequence
 			instrs.push_back(new Get(vindex));
@@ -351,7 +374,7 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 			vindex++;
 		} else {
 			// Add the variable to the instruction sequence
-			instrs.push_back(new Get(reindex[index]));
+			instrs.push_back(new Get(reindex[id]));
 		}
 	} else {
 		instrs.push_back(ftn);
@@ -370,23 +393,27 @@ _function *ISeq::_compose(const Compositions &cs) const
 
 	// Variable index
 	int vindex = 0;
+	
+	// Map for reindexing get operations
+	//	variable id -> get index
+	std::unordered_map <int, int> reindex;
 
 	// Iterate through inputs
 	for (int i = 0; i < cs.size(); i++) {
 		const _function *ftn = cs[i];
 
 		const ISeq *iseq;
+		int id;
 
 		// TODO: should not be composed get instructions, only var and
 		// iseq
 
-		// Map of reindexing for iseqs
 		// TODO: use if statement, not switch
-		std::unordered_map <int, int> reindex;
-
 		switch (ftn->spop) {
 		case op_var:
 			// Keep the variable
+			id = reinterpret_cast <const _variable *> (ftn)->id;
+			reindex[id] = vindex;
 			instrs.push_back(new Get(vindex++));
 			break;
 		case op_iseq:
@@ -423,8 +450,16 @@ _function *ISeq::_compose(const Compositions &cs) const
 		}
 	}
 
+	// Invert the reindex map
+	_reindex_map inv;
+
+	for (const auto &pair : reindex)
+		inv[pair.second] = pair.first;
+
 	// Composition returns a new ISeq
-	ISeq *iseq = new ISeq(instrs, consts, cs.size());
+	//	the variables are reused
+	//	according to the reindex map
+	ISeq *iseq = new ISeq(instrs, consts, vindex, inv);
 
 	// std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
 
@@ -448,7 +483,7 @@ void ISeq::_optimize()
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
-	// std::cout << "TREE:\n" << tree->str() << std::endl;
+	std::cout << "TREE:\n" << tree->str() << std::endl;
 
 	Instructions instrs;
 	_rebuild(tree, instrs, cache);
@@ -515,10 +550,7 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 
 	// Check type of operation
 	switch (ftn->spop) {
-	// Getter operations
 	case op_get:
-		// Add to the stack
-		nodes.push(new _node(ftn));
 		break;
 	case op_get_cache:
 		// Get index
@@ -531,9 +563,6 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 		cache[index].refs++;
 
 		children = {value};
-
-		// Add to the stack
-		nodes.push(new _node(ftn, children));
 		break;
 	case op_store_cache:
 		// Get index of cache
@@ -541,14 +570,10 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 
 		// Insert value in cache map
 		value = nodes.top();
-		cache[index] = _cache_info {0, value};
-
-		// Pop the stack
 		nodes.pop();
-
-		// Push the cache
+		
+		cache[index] = _cache_info {0, value};
 		children = {value};
-		nodes.push(new _node(ftn, children));
 		break;
 	default:
 		// Get number of inputs
@@ -565,9 +590,11 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 		}
 
 		// Add the node
-		nodes.push(new _node(ftn, children));
 		break;
 	}
+	
+	// Add the node
+	nodes.push(new _node(ftn, children));
 }
 
 // Rebuild the ISeq from the tree
