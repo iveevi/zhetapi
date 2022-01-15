@@ -1,3 +1,8 @@
+// Standard headers
+#include <deque>
+#include <map>
+
+// Library headers
 #include "../include/autograd/autograd.hpp"
 
 // Macros
@@ -126,15 +131,19 @@ void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 
 	// Load the inputs
 	Input fins;
+	std::cout << "PUSHING INPUTS (" << ftn->summary() << ")" << std::endl;
 	for (int i = 0; i < ftn->inputs; i++) {
 		Constant c = ops.top();
 		ops.pop();
 
 		fins.push_back(c);
+		std::cout << "\tPUSHED " << c << std::endl;
 	}
 
 	// Evaluate the instruction
 	Constant n = ftn->compute(fins);
+
+	std::cout << "PUSHING OUTPUT: " << n << std::endl;
 
 	// Push new value onto stack
 	ops.push(n);
@@ -205,6 +214,9 @@ ISeq::ISeq(std::vector <const _function *> instrs,
 {
 	// Fill the _vars with variables
 	_vars.resize(nins);
+
+	for (int i = 0; i < nins; i++)
+		_vars[i] = new _variable();
 }
 
 // Kernel function and # of inputs
@@ -228,64 +240,281 @@ ISeq::ISeq(const _function *ftn, int nins)
 	_instrs[i] = ftn;
 }
 
-// Overload composition
+// Composition helpers
+void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
+		const _function *ftn, std::unordered_map <int, int> &reindex,
+		int &vindex)
+{
+	// If the instruction is a get,
+	// add the corresponding variable
+	if (ftn->spop == _function::op_get) {
+		int index = reinterpret_cast <const Get *> (ftn)->index;
+
+		// Check if the variable is already in reindex map
+		if (reindex.find(index) == reindex.end()) {
+			// Add the variable to the reindex map
+			reindex[index] = vindex;
+
+			// Add the variable to the instruction sequence
+			instrs.push_back(new Get(vindex));
+
+			// Increment the variable index
+			vindex++;
+		} else {
+			// Add the variable to the instruction sequence
+			instrs.push_back(new Get(reindex[index]));
+		}
+	} else {
+		instrs.push_back(ftn);
+	}
+}
+
+// Override composition
 _function *ISeq::_compose(const Compositions &cs) const
 {
+	// ISeq variables
+	Instructions instrs;
+	std::vector <Constant> consts;
+
+	// Free cache offset
+	int fcache = cs.size();
+
+	// Variable index
+	int vindex = 0;
+
+	// Iterate through inputs
+	for (int i = 0; i < cs.size(); i++) {
+		const _function *ftn = cs[i];
+	
+		const ISeq *iseq;
+
+		// TODO: should not be composed get instructions, only var and
+		// iseq
+		
+		// Map of reindexing for iseqs
+		// TODO: use if statement, not switch
+		std::unordered_map <int, int> reindex;
+
+		switch (ftn->spop) {
+		case op_var:
+			// Keep the variable
+			instrs.push_back(new Get(vindex++));
+			break;
+		case op_iseq:
+			// Get the iseq, and append its instructions
+			iseq = reinterpret_cast <const ISeq *> (ftn);
+
+			for (const _function *fptr : iseq->_instrs)
+				_compose_iseq(instrs, iseq, fptr, reindex, vindex);
+			break;
+		default:
+			// Add the instruction
+			instrs.push_back(ftn->copy());
+			break;
+		}
+
+		// Add store cache instruction
+		instrs.push_back(new _store_cache(i));
+	}
+
+	// Add own instructions
+	for (const _function *ftn : _instrs) {
+		int index;
+
+		switch (ftn->spop) {
+		case op_get:
+			// Changes to get cache
+			index = reinterpret_cast <const Get *> (ftn)->index;
+			instrs.push_back(new _get_cache(index));
+			break;
+		default:
+			// Add the instruction
+			instrs.push_back(ftn->copy());
+			break;
+		}
+	}
+
 	// Composition returns a new ISeq
-	ISeq *iseq = new ISeq();
+	ISeq *iseq = new ISeq(instrs, consts, cs.size());
 
-	// Append all the _functions
-	int i = 0;
-	for (const _function *fptr : cs) {
-		// Get if the fptr is repl const
-		if (fptr->spop == op_repl_const) {
-			// TODO: method
-			const _repl_const *rc = reinterpret_cast <const _repl_const *> (fptr);
+	std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
 
-			int ci = iseq->_consts.size();
-			iseq->_consts.push_back(rc->value);
-			iseq->_instrs.push_back(new Const(ci));
-			iseq->_instrs.push_back(new _store_cache(i++));
-			continue;
-		}
+	// Optimize the ISeq
+	iseq->optimize();
+	
+	std::cout << "\n===Final ISeq===\n" << iseq->summary() << std::endl;
 
-		iseq->append(fptr);
-
-		// Then store into cache
-		iseq->append(new _store_cache(i++));
-
-		// TODO: use append_scache -> int cache index
-		// when the cache is used for other things
-	}
-
-	// Add self
-	// TODO: need to strip all of the gets,
-	// and replace with the fptrs
-	// iseq->append_iseq((ISeq *) this);
-
-	// Iterate through our instructions
-	//	and replace get with get_cache
-	for (const _function *fptr : _instrs) {
-		if (fptr->spop == op_get) {
-			i = reinterpret_cast <const Get *> (fptr)->index;
-			iseq->_instrs.push_back(new _get_cache(i));
-			continue;
-		}
-
-		iseq->append(fptr);
-	}
-
-	// TODO: later optimize the sequence store-cache(i), get-cache(i)
-
-	// Return the sequence
 	return iseq;
+}
+
+// Optimize the ISeq
+// TODO: separate source file for iseq/optimization
+void ISeq::optimize()
+{
+	// std::cout << "OPTIMIZING ISEQ" << std::endl;
+
+	_cache_map cache;
+	_node *tree = _tree(cache);
+
+	std::cout << "TREE:\n" << tree->str() << std::endl;
+
+	Instructions instrs;
+	_rebuild(tree, instrs, cache);
+
+	/* std::cout << "INSTRUCS:\n" << std::endl;
+	for (const _function *fptr : instrs)
+		std::cout << fptr->summary() << std::endl; */
+
+	// Replace the instructions
+	// TODO: clean up excess memory
+	_instrs = instrs;
+}
+
+// Constructors for the tree
+ISeq::_node::_node(const _function *f) : fptr(f) {}
+ISeq::_node::_node(const _function *f, const std::vector <_node *> &cs)
+		: fptr(f), children(cs) {}
+
+// Get string
+std::string ISeq::_node::str(int indent) const
+{
+	// Get string of current node
+	std::string s = fptr->summary();
+
+	// Indentation
+	std::string sindent(indent, '\t');
+
+	// If there are children
+	for (const _node *child : children) {
+		s += "\n" + sindent + "\u2514\u2500\u2500 "
+			+ child->str(indent + 1);
+	}
+
+	return s;
+}
+
+// Constructors for cache info
+ISeq::_cache_info::_cache_info() {}
+ISeq::_cache_info::_cache_info(int r, _node *tree)
+		: refs(r), value(tree) {}
+
+// Generating the tree
+ISeq::_node *ISeq::_tree(_cache_map &cache) const
+{
+	// Keep a stack of nodes,
+	// 	similar to computation
+	std::stack <_node *> nodes;
+
+	// Iterate through the instructions
+	for (const _function *ftn : _instrs)
+		_tree_walk(ftn, nodes, cache);
+
+	// Return the top node
+	return nodes.top();
+}
+
+// TODO: static method?
+void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_map &cache) const
+{
+	// Switch variables
+	std::vector <_node *> children;
+	_node *value;
+	int index;
+
+	// Check type of operation
+	switch (ftn->spop) {
+	// Getter operations
+	case op_get:
+		// Add to the stack
+		nodes.push(new _node(ftn));
+		break;
+	case op_get_cache:
+		// Get index
+		index = reinterpret_cast <const _get_cache *> (ftn)->index;
+
+		// Get value from cache map
+		value = cache[index].value;
+
+		// Increment the reference count
+		cache[index].refs++;
+
+		children = {value};
+
+		// Add to the stack
+		nodes.push(new _node(ftn, children));
+		break;
+	case op_store_cache:
+		// Get index of cache
+		index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		
+		// Insert value in cache map
+		value = nodes.top();
+		cache[index] = _cache_info {0, value};
+
+		// Pop the stack
+		nodes.pop();
+
+		// Push the cache
+		children = {value};
+		nodes.push(new _node(ftn, children));
+		break;
+	default:
+		// Get number of inputs
+		int nins = ftn->inputs;
+
+		// Pop and push the children
+		for (int i = 0; i < nins; i++) {
+			// Pop the child
+			_node *child = nodes.top();
+			nodes.pop();
+
+			// Push the child (to the front)
+			children.insert(children.begin(), child);
+		}
+
+		// Add the node
+		nodes.push(new _node(ftn, children));
+		break;
+	}
+}
+
+// Rebuild the ISeq from the tree
+void ISeq::_rebuild(const _node *tree, Instructions &instrs, _cache_map &cache) const
+{
+	// Iterate through the tree
+	const _function *ftn = tree->fptr;
+
+	if (ftn->spop == op_get_cache) {
+		// Get the index
+		int index = reinterpret_cast <const _get_cache *> (ftn)->index;
+
+		// Get the cache info
+		_cache_info info = cache[index];
+
+		// Check possible optimization
+		if (info.refs == 1) {
+			// Add value instead of get cache
+			_rebuild(info.value, instrs, cache);
+		} else {
+			// Add get cache
+			instrs.push_back(ftn);
+		}
+	} else {
+		// Add the operands
+		for (const _node *child : tree->children)
+			_rebuild(child, instrs, cache);
+
+		// Add the instruction
+		instrs.push_back(ftn);
+	}
 }
 	
 // Empty constructor
 ISeq::ISeq() : _function(0, op_iseq) {}
 
 // Inserting instructions and functions
-void ISeq::append(const _function *fptr) {
+void ISeq::append(const _function *fptr)
+{
 	switch (fptr->spop) {
 	case op_var:
 		append_variable((_variable *) fptr);
@@ -314,6 +543,10 @@ Constant ISeq::compute(const Input &ins) const
 	// Load inputs
 	_load(ins);
 
+	std::cout << "INPUTS:" << std::endl;
+	for (const Constant &c : ins)
+		std::cout << "\t" << c << std::endl;
+
 	// Stack of operands
 	std::stack <Constant> ops;
 
@@ -325,6 +558,7 @@ Constant ISeq::compute(const Input &ins) const
 	return ops.top();
 }
 
+// Make copy
 _function *ISeq::copy() const
 {
 	return new ISeq(_instrs, _consts, inputs);
@@ -449,9 +683,9 @@ KERNEL(tan)
 KERNEL(pow)
 {
 	// Use only the first element
-	long double e = ins[1].get(0);
+	long double e = ins[0].get(0);
 
-	return ins[0].transform(
+	return ins[1].transform(
 		[e](long double x) -> long double {
 			return powl(x, e);
 		}

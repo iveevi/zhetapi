@@ -12,18 +12,17 @@ int main()
 	std::cout << a << std::endl;
 	std::cout << b << std::endl;
 
-	Variable x;
-
-	// TODO: benchmark program
-	Function f = autograd::pow(x, x);
-	Function pf1 = autograd::pow(2.0, x);
-	Function pf2 = autograd::pow(x, 2.0);
-	std::cout << "--> " << autograd::pow(2.0, 5.0) << std::endl;
-	std::cout << "--> " << pf1(5.0) << std::endl;
-	std::cout << "--> " << pf2(2.0) << std::endl;
+	Variable x, y;
 
 	std::cout << autograd::pow.summary() << std::endl;
+
+	// TODO: benchmark program
+	Function f = autograd::sqrt(x); // autograd::pow(x, autograd::sqrt(y));
+
 	std::cout << f.summary() << std::endl;
-	/* std::cout << pf1.summary() << std::endl;
-	std::cout << pf2.summary() << std::endl; */
+	std::cout << "f(4.5) = " << f(4.5) << std::endl;
+
+	Function g = autograd::pow(y, f);
+	std::cout << g.summary() << std::endl;
+	std::cout << "\ng(2.0, 3.0) = " << g(2.0, 3.0) << std::endl;
 }

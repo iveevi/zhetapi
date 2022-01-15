@@ -2,6 +2,8 @@
 #define ZHETAPI_ISEQ_H_
 
 // Standard headers
+#include <stack>
+#include <unordered_map>
 #include <vector>
 
 // Library jeaders
@@ -15,6 +17,11 @@ namespace autograd {
 
 // Instruction sequence for a function
 class ISeq : public _function {
+public:
+	// Public aliases
+	// TODO: use this alias
+	using Instructions = std::vector <const _function *>;
+private:
 	// TODO: JIT function to compile into object code
 	//	this should be possible since the types
 	//	are homogenous
@@ -47,6 +54,40 @@ class ISeq : public _function {
 	// Append helpers
 	void append_variable(_variable *);
 	void append_iseq(ISeq *);
+
+	// Tree structure
+	struct _node {
+		const _function *fptr;
+		std::vector <_node *> children;
+
+		// Constructors
+		_node(const _function *);
+		_node(const _function *, const std::vector <_node *> &);
+
+		// Printing the tree
+		std::string str(int = 0) const;
+	};
+
+	// Optimization structures
+	// TODO: reorganize all of this
+	struct _cache_info {
+		int refs = 0;
+		_node *value;
+
+		// Constructor
+		_cache_info();
+		_cache_info(int, _node *);
+	};
+
+	using _cache_map = std::unordered_map <int, _cache_info>;
+
+	// Construct the tree structure
+	_node *_tree(_cache_map &) const;
+
+	void _tree_walk(const _function *, std::stack <_node *> &, _cache_map &) const;
+
+	// Rebuilding the tree
+	void _rebuild(const _node *, Instructions &, _cache_map &) const;
 protected:
 	// Kernel function and # of inputs
 	ISeq(const _function *, int);
@@ -56,6 +97,8 @@ protected:
 		std::vector <Constant>, int);
 
 	// Overload composition
+	// void _compose_iseq(Instructions &, const ISeq *, const _function *, int &) const;
+
 	_function *_compose(const Compositions &) const override;
 public:
 	// TODO: check function to make sure only
@@ -72,12 +115,17 @@ public:
 	void append(const _function *fptr, Args ...);
 
 	// Evaluate the sequence
-	Constant compute(const Input &ins) const;
+	Constant compute(const Input &ins) const override;
 
-	_function *copy() const;
+	// Optimize the ISeq
+	// TODO: protected
+	void optimize();
+
+	// Copy generator
+	_function *copy() const override;
 
 	// Dump instructions for debugging
-	std::string summary() const;
+	std::string summary() const override;
 };
 
 }
