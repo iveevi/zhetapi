@@ -12,7 +12,8 @@ definitions:
     testing/tensor.cpp,
     testing/timers.cpp,
     testing/vector.cpp'
-  - source: 'source/autograd.cpp,
+  - source: 'source/autograd/autograd.cpp,
+    source/autograd/iseq.cpp,
     source/io.cpp,
     source/linalg.cpp,
     source/polynomial.cpp,

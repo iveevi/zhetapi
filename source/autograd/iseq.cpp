@@ -1,20 +1,248 @@
-// Standard headers
-#include <deque>
-#include <map>
-
-// Library headers
-#include "../include/autograd/autograd.hpp"
-
-// Macros
-#define KERNEL(name)						\
-	Function name = new_ <_##name> ();			\
-	inline Constant _k##name(const _function::Input &ins)
+#include "../../include/autograd/iseq.hpp"
 
 namespace zhetapi {
 
 namespace autograd {
 
-// ISeq functions
+//////////////////////
+// Public interface //
+//////////////////////
+
+// Empty constructor
+ISeq::ISeq() : _function(0, op_iseq) {}
+
+// Inserting instructions and functions
+void ISeq::append(const _function *fptr)
+{
+	switch (fptr->spop) {
+	case op_var:
+		append_variable((_variable *) fptr);
+		break;
+	case op_iseq:
+		append_iseq((ISeq *) fptr);
+		break;
+	default:
+		// Just add the function to the instructions
+		_instrs.push_back(fptr);
+		break;
+	}
+}
+
+// Evaluate the sequence
+Constant ISeq::compute(const Input &ins) const
+{
+	// Load inputs
+	_load(ins);
+
+	// Stack of operands
+	std::stack <Constant> ops;
+
+	// Execute all the instructions
+	for (const _function *ftn : _instrs)
+		_exec(ftn, ops);
+
+	// Return top-most value on the stack
+	return ops.top();
+}
+
+// Make copy
+_function *ISeq::copy() const
+{
+	return new ISeq(_instrs, _consts, inputs);
+}
+
+// Dump instructions for debugging
+std::string ISeq::summary() const
+{
+	// Headers
+	io::Args args {
+		"Index",
+		"Instruction",
+		"Variable",
+		"Constant"
+	};
+
+	// Fill out the rows
+	std::vector <io::Args> rows;
+	for (int i = 0; i < _instrs.size(); i++) {
+		io::Args row;
+
+		row.push_back(std::to_string(i));
+		row.push_back(_instrs[i]->summary());
+
+		if (i < _vars.size())
+			row.push_back(_vars[i]->summary());
+		else
+			row.push_back("");
+
+		// TODO: should print shape, not value
+		if (i < _consts.size())
+			row.push_back("--shape--");
+		else
+			row.push_back("");
+
+		rows.push_back(row);
+	}
+
+	// Return formatted table
+	return io::table(args, rows);
+}
+
+/////////////////////////
+// Protected interface //
+/////////////////////////
+
+// Kernel function and # of inputs
+ISeq::ISeq(const _function *ftn, int nins)
+		: _function(nins, op_iseq)
+{
+	// Fill the _vars with variables
+	_vars.resize(nins);
+
+	for (int i = 0; i < ftn->inputs; i++)
+		_vars[i] = new _variable();
+
+	// Add the get instructions
+	_instrs.resize(nins + 1);
+
+	int i = 0;
+	for (; i < nins; i++)
+		_instrs[i] = new Get(i);
+
+	// Add the kernel
+	_instrs[i] = ftn;
+}
+
+// List of instructions and constants
+ISeq::ISeq(std::vector <const _function *> instrs,
+	std::vector <Constant> consts, int nins)
+		: _function(nins, op_iseq),
+		_instrs(instrs),
+		_consts(consts)
+{
+	// Fill the _vars with variables
+	_vars.resize(nins);
+
+	for (int i = 0; i < nins; i++)
+		_vars[i] = new _variable();
+}
+
+//////////////////////
+// Append functions //
+//////////////////////
+
+// Append helpers
+void ISeq::append_variable(_variable *v)
+{
+	// Check if the variable exists already
+	int index = index_of(v);
+
+	// Add the variable (and increment inputs) if not found
+	int gindex = index;
+	if (index < 0) {
+		gindex = _vars.size();
+		_vars.push_back(v);
+	}
+
+	_instrs.push_back(new Get(gindex));
+}
+
+void ISeq::append_iseq(ISeq *iseq)
+{
+	for (const _function *fptr : iseq->_instrs) {
+		_function *nptr = fptr->copy();
+		if (nptr->spop == op_get) {
+			// TODO: clean up
+			int i = reinterpret_cast <Get *> (nptr)->index;
+			_variable *v = iseq->_vars[i];
+
+			// TODO: should create a new value as well
+			i = index_of(v);
+
+			if (i == -1) {
+				// Add a variable
+				i = _vars.size();
+				_vars.push_back((_variable *) v->copy());
+			}
+
+			append(new Get (i));
+			continue;
+		}
+
+		append(nptr);
+	}
+}
+
+// Get index of variable
+int ISeq::index_of(_variable *v)
+{
+	int index = -1;
+	for (int i = 0; i < _vars.size(); i++) {
+		if (v->id == _vars[i]->id) {
+			index = i;
+			break;
+		}
+	}
+
+	return index;
+}
+
+/////////////////////////
+// Computation helpers //
+/////////////////////////
+
+// Get constant from the stack and handle any errors
+static Constant _get_operand(std::stack <Constant> &ops)
+{
+	// Check empty first
+	if (ops.empty())
+		throw std::runtime_error("ISeq::_get_operand: empty stack");
+
+	Constant c = ops.top();
+	ops.pop();
+
+	return c;
+}
+
+// Operation kernels
+using Kernel = Constant (*)(std::stack <Constant> &);
+
+// List of kernels
+static std::vector <Kernel> kernels = {
+	// Addition
+	[](std::stack <Constant> &ops) -> Constant {
+		Constant b = _get_operand(ops);
+		Constant a = _get_operand(ops);
+		return a + b;
+	},
+
+	// Subtraction
+	[](std::stack <Constant> &ops) -> Constant {
+		Constant b = _get_operand(ops);
+		Constant a = _get_operand(ops);
+		return a - b;
+	},
+
+	// Multiplication
+	[](std::stack <Constant> &ops) -> Constant {
+		Constant b = _get_operand(ops);
+		Constant a = _get_operand(ops);
+
+		// TODO: use matrix multiplication if dims == 2
+		// or if dim== 2 and dim == 1 -> user must do hammard
+		// for element-wise multiplication
+		return multiply(a, b);
+	},
+
+	// Division
+	[](std::stack <Constant> &ops) -> Constant {
+		Constant b = _get_operand(ops);
+		Constant a = _get_operand(ops);
+		return divide(a, b);
+	}
+};
+
+// Load inputs
 void ISeq::_load(const Input &ins) const
 {
 	// TODO: should make sure that the ins == inputs
@@ -22,21 +250,11 @@ void ISeq::_load(const Input &ins) const
 		_vars[i]->value = ins[i];
 }
 
-// Get constant from the stack and handle any errors
-Constant ISeq::getc(std::stack <Constant> &ops)
-{
-	// TODO: check empty
-	Constant c = ops.top();
-	ops.pop();
-
-	return c;
-}
-
 // Storing a constant into the cache
 void ISeq::storec(std::stack <Constant> &ops, int i) const
 {
 	// Get from the stack
-	Constant c = getc(ops);
+	Constant c = _get_operand(ops);
 
 	if (i >= _cache.size())
 		_cache.resize(i + 1);
@@ -47,44 +265,6 @@ void ISeq::storec(std::stack <Constant> &ops, int i) const
 // Deal with special instructions
 bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 {
-	// Operation kernels (for math)
-	using Kernel = Constant (*)(std::stack <Constant> &);
-
-	// List of kernels
-	static std::vector <Kernel> kernels = {
-		[](std::stack <Constant> &ops) -> Constant {
-			Constant b = ops.top();
-			ops.pop();
-			Constant a = ops.top();
-			ops.pop();
-			return a + b;
-		},
-
-		[](std::stack <Constant> &ops) -> Constant {
-			Constant b = ops.top();
-			ops.pop();
-			Constant a = ops.top();
-			ops.pop();
-			return a - b;
-		},
-
-		[](std::stack <Constant> &ops) -> Constant {
-			Constant b = getc(ops);
-			Constant a = getc(ops);
-
-			// TODO: use matrix multiplication if dims == 2
-			// or if dim== 2 and dim == 1 -> user must do hammard
-			// for element-wise multiplication
-			return multiply(a, b);
-		},
-
-		[](std::stack <Constant> &ops) -> Constant {
-			Constant b = getc(ops);
-			Constant a = getc(ops);
-			return divide(a, b);
-		}
-	};
-
 	int index;
 	switch (ftn->spop) {
 	case op_get:
@@ -131,114 +311,23 @@ void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 
 	// Load the inputs
 	Input fins;
-	std::cout << "PUSHING INPUTS (" << ftn->summary() << ")" << std::endl;
 	for (int i = 0; i < ftn->inputs; i++) {
 		Constant c = ops.top();
 		ops.pop();
 
 		fins.push_back(c);
-		std::cout << "\tPUSHED " << c << std::endl;
 	}
 
 	// Evaluate the instruction
 	Constant n = ftn->compute(fins);
 
-	std::cout << "PUSHING OUTPUT: " << n << std::endl;
-
 	// Push new value onto stack
 	ops.push(n);
 }
 
-// Get index of variable
-int ISeq::index_of(_variable *v)
-{
-	int index = -1;
-	for (int i = 0; i < _vars.size(); i++) {
-		if (v->id == _vars[i]->id) {
-			index = i;
-			break;
-		}
-	}
-
-	return index;
-}
-
-// Append helpers
-void ISeq::append_variable(_variable *v)
-{
-	// Check if the variable exists already
-	int index = index_of(v);
-
-	// Add the variable (and increment inputs) if not found
-	int gindex = index;
-	if (index < 0) {
-		gindex = _vars.size();
-		_vars.push_back(v);
-	}
-
-	_instrs.push_back(new Get(gindex));
-}
-
-void ISeq::append_iseq(ISeq *iseq)
-{
-	for (const _function *fptr : iseq->_instrs) {
-		_function *nptr = fptr->copy();
-		if (nptr->spop == op_get) {
-			// TODO: clean up
-			int i = reinterpret_cast <Get *> (nptr)->index;
-			_variable *v = iseq->_vars[i];
-
-			// TODO: should create a new value as well
-			i = index_of(v);
-
-			if (i == -1) {
-				// Add a variable
-				i = _vars.size();
-				_vars.push_back((_variable *) v->copy());
-			}
-
-			append(new Get (i));
-			continue;
-		}
-
-		append(nptr);
-	}
-}
-
-// Protected constructors
-ISeq::ISeq(std::vector <const _function *> instrs,
-	std::vector <Constant> consts, int nins)
-		: _function(nins, op_iseq),
-		_instrs(instrs),
-		_consts(consts)
-{
-	// Fill the _vars with variables
-	_vars.resize(nins);
-
-	for (int i = 0; i < nins; i++)
-		_vars[i] = new _variable();
-}
-
-// Kernel function and # of inputs
-ISeq::ISeq(const _function *ftn, int nins)
-		: _function(nins, op_iseq)
-{
-	// Fill the _vars with variables
-	_vars.resize(nins);
-
-	for (int i = 0; i < ftn->inputs; i++)
-		_vars[i] = new _variable();
-
-	// Add the get instructions
-	_instrs.resize(nins + 1);
-
-	int i = 0;
-	for (; i < nins; i++)
-		_instrs[i] = new Get(i);
-
-	// Add the kernel
-	_instrs[i] = ftn;
-}
+//////////////////////////
+// Function composition //
+//////////////////////////
 
 // Composition helpers
 void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
@@ -285,12 +374,12 @@ _function *ISeq::_compose(const Compositions &cs) const
 	// Iterate through inputs
 	for (int i = 0; i < cs.size(); i++) {
 		const _function *ftn = cs[i];
-	
+
 		const ISeq *iseq;
 
 		// TODO: should not be composed get instructions, only var and
 		// iseq
-		
+
 		// Map of reindexing for iseqs
 		// TODO: use if statement, not switch
 		std::unordered_map <int, int> reindex;
@@ -337,26 +426,29 @@ _function *ISeq::_compose(const Compositions &cs) const
 	// Composition returns a new ISeq
 	ISeq *iseq = new ISeq(instrs, consts, cs.size());
 
-	std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
+	// std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
 
 	// Optimize the ISeq
-	iseq->optimize();
-	
-	std::cout << "\n===Final ISeq===\n" << iseq->summary() << std::endl;
+	iseq->_optimize();
+
+	// std::cout << "\n===Final ISeq===\n" << iseq->summary() << std::endl;
 
 	return iseq;
 }
 
+/////////////////////////////////////////
+// Optimizing the instruction sequence //
+/////////////////////////////////////////
+
 // Optimize the ISeq
-// TODO: separate source file for iseq/optimization
-void ISeq::optimize()
+void ISeq::_optimize()
 {
 	// std::cout << "OPTIMIZING ISEQ" << std::endl;
 
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
-	std::cout << "TREE:\n" << tree->str() << std::endl;
+	// std::cout << "TREE:\n" << tree->str() << std::endl;
 
 	Instructions instrs;
 	_rebuild(tree, instrs, cache);
@@ -446,7 +538,7 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 	case op_store_cache:
 		// Get index of cache
 		index = reinterpret_cast <const _get_cache *> (ftn)->index;
-		
+
 		// Insert value in cache map
 		value = nodes.top();
 		cache[index] = _cache_info {0, value};
@@ -507,189 +599,6 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs, _cache_map &cache) 
 		// Add the instruction
 		instrs.push_back(ftn);
 	}
-}
-	
-// Empty constructor
-ISeq::ISeq() : _function(0, op_iseq) {}
-
-// Inserting instructions and functions
-void ISeq::append(const _function *fptr)
-{
-	switch (fptr->spop) {
-	case op_var:
-		append_variable((_variable *) fptr);
-		break;
-	case op_iseq:
-		append_iseq((ISeq *) fptr);
-		break;
-	default:
-		// Just add the function to the instructions
-		_instrs.push_back(fptr);
-		break;
-	}
-}
-
-// Append a sequence of instructions
-template <class ... Args>
-void ISeq::append(const _function *fptr, Args ... args)
-{
-	append(fptr);
-	append(args...);
-}
-
-// Evaluate the sequence
-Constant ISeq::compute(const Input &ins) const
-{
-	// Load inputs
-	_load(ins);
-
-	std::cout << "INPUTS:" << std::endl;
-	for (const Constant &c : ins)
-		std::cout << "\t" << c << std::endl;
-
-	// Stack of operands
-	std::stack <Constant> ops;
-
-	// Execute all the instructions
-	for (const _function *ftn : _instrs)
-		_exec(ftn, ops);
-
-	// Return top-most value on the stack
-	return ops.top();
-}
-
-// Make copy
-_function *ISeq::copy() const
-{
-	return new ISeq(_instrs, _consts, inputs);
-}
-
-// Dump instructions for debugging
-std::string ISeq::summary() const
-{
-	// Headers
-	io::Args args {
-		"Index",
-		"Instruction",
-		"Variable",
-		"Constant"
-	};
-
-	// Fill out the rows
-	std::vector <io::Args> rows;
-	for (int i = 0; i < _instrs.size(); i++) {
-		io::Args row;
-
-		row.push_back(std::to_string(i));
-		row.push_back(_instrs[i]->summary());
-
-		if (i < _vars.size())
-			row.push_back(_vars[i]->summary());
-		else
-			row.push_back("");
-
-		// TODO: should print shape, not value
-		if (i < _consts.size())
-			row.push_back("--shape--");
-		else
-			row.push_back("");
-
-		rows.push_back(row);
-	}
-
-	// Return formatted table
-	return io::table(args, rows);
-}
-
-// Static variables
-constexpr const char *_function::_spec_strs[];
-
-// Operators
-Function operator+(const Function &lhs, const Function &rhs)
-{
-	ISeq *iseq = new ISeq();
-	iseq->append(
-		lhs.get(), rhs.get(),
-		new _function(2, _function::op_add)
-	);
-
-	return Function(iseq);
-}
-
-Function operator-(const Function &lhs, const Function &rhs)
-{
-	ISeq *iseq = new ISeq();
-	iseq->append(
-		lhs.get(), rhs.get(),
-		new _function(2, _function::op_sub)
-	);
-
-	return Function(iseq);
-}
-
-Function operator*(const Function &lhs, const Function &rhs)
-{
-	ISeq *iseq = new ISeq();
-	iseq->append(
-		lhs.get(), rhs.get(),
-		new _function(2, _function::op_mul)
-	);
-
-	return Function(iseq);
-}
-
-Function operator/(const Function &lhs, const Function &rhs)
-{
-	ISeq *iseq = new ISeq();
-	iseq->append(
-		lhs.get(), rhs.get(),
-		new _function(2, _function::op_div)
-	);
-
-	return Function(iseq);
-}
-
-// Standard function kernels
-KERNEL(sqrt)
-{
-	return ins[0].transform(sqrtl);
-}
-
-KERNEL(exp)
-{
-	return ins[0].transform(expl);
-}
-
-KERNEL(log)
-{
-	return ins[0].transform(logl);
-}
-
-KERNEL(sin)
-{
-	return ins[0].transform(sinf);
-}
-
-KERNEL(cos)
-{
-	return ins[0].transform(cosf);
-}
-
-KERNEL(tan)
-{
-	return ins[0].transform(tanf);
-}
-
-KERNEL(pow)
-{
-	// Use only the first element
-	long double e = ins[0].get(0);
-
-	return ins[1].transform(
-		[e](long double x) -> long double {
-			return powl(x, e);
-		}
-	);
 }
 
 }

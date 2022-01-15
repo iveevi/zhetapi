@@ -19,42 +19,12 @@ namespace autograd {
 class ISeq : public _function {
 public:
 	// Public aliases
-	// TODO: use this alias
 	using Instructions = std::vector <const _function *>;
+	using ConstantCache = std::vector <Constant>;
 private:
-	// TODO: JIT function to compile into object code
-	//	this should be possible since the types
-	//	are homogenous
-
-	// Instructions are a sequence of functions
-	std::vector <const _function *>	_instrs;
-
-	// Variables
-	//	must be filled out before computation
-	std::vector <_variable *>	_vars;
-
-	// Constants
-	std::vector <Constant>		_consts;
-
-	// Cache of constants
-	mutable std::vector <Constant>	_cache;
-
-	// Load inputs to _vars
-	void _load(const Input &) const;
-
-	// Executing instructions
-	static Constant getc(std::stack <Constant> &);
-	void storec(std::stack <Constant> &, int) const;
-	bool _ispec(const _function *, std::stack <Constant> &) const;
-	void _exec(const _function *, std::stack <Constant> &) const;
-
-	// Get index of variable
-	int index_of(_variable *);
-
-	// Append helpers
-	void append_variable(_variable *);
-	void append_iseq(ISeq *);
-
+	// Private aliases
+	using Variables = std::vector <_variable *>;
+	
 	// Tree structure
 	struct _node {
 		const _function *fptr;
@@ -68,8 +38,7 @@ private:
 		std::string str(int = 0) const;
 	};
 
-	// Optimization structures
-	// TODO: reorganize all of this
+	// Information about cache usage, for optimization
 	struct _cache_info {
 		int refs = 0;
 		_node *value;
@@ -81,25 +50,44 @@ private:
 
 	using _cache_map = std::unordered_map <int, _cache_info>;
 
-	// Construct the tree structure
+	// TODO: JIT function to compile into object code
+	//	this should be possible since the types
+	//	are homogenous
+
+	// Member variables
+	Instructions		_instrs;	// Instruction sequence
+	Variables		_vars;		// Variables
+	ConstantCache		_consts;	// Fixed constants
+	mutable ConstantCache	_cache;		// More cache for flow of execution
+
+	// TODO: cache tree?
+
+	// Append helpers
+	void append_variable(_variable *);
+	void append_iseq(ISeq *);
+	int index_of(_variable *);	// TODO: is this necessary?
+
+	// Computation helpers
+	void _load(const Input &) const;
+	void storec(std::stack <Constant> &, int) const;
+	bool _ispec(const _function *, std::stack <Constant> &) const;
+	void _exec(const _function *, std::stack <Constant> &) const;
+
+	// Composing functions and variables
+	_function *_compose(const Compositions &) const override;
+
+	// Optimization functions
 	_node *_tree(_cache_map &) const;
-
-	void _tree_walk(const _function *, std::stack <_node *> &, _cache_map &) const;
-
-	// Rebuilding the tree
-	void _rebuild(const _node *, Instructions &, _cache_map &) const;
+	void _tree_walk(const _function *, std::stack <_node *> &,
+		_cache_map &) const;
+	void _rebuild(const _node *, Instructions &,
+		_cache_map &) const;
+	void _optimize();
 protected:
-	// Kernel function and # of inputs
-	ISeq(const _function *, int);
-	
 	// Protected constructors
+	ISeq(const _function *, int);
 	ISeq(std::vector <const _function *>,
 		std::vector <Constant>, int);
-
-	// Overload composition
-	// void _compose_iseq(Instructions &, const ISeq *, const _function *, int &) const;
-
-	_function *_compose(const Compositions &) const override;
 public:
 	// TODO: check function to make sure only
 	// one element remains on the stack
@@ -117,16 +105,21 @@ public:
 	// Evaluate the sequence
 	Constant compute(const Input &ins) const override;
 
-	// Optimize the ISeq
-	// TODO: protected
-	void optimize();
-
 	// Copy generator
 	_function *copy() const override;
 
 	// Dump instructions for debugging
 	std::string summary() const override;
 };
+
+// Append a sequence of instructions
+template <class ... Args>
+void ISeq::append(const _function *fptr, Args ... args)
+{
+	append(fptr);
+	append(args...);
+}
+
 
 }
 
