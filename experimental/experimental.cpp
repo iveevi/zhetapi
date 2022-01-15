@@ -22,8 +22,8 @@ int main()
 	std::cout << "--> " << pf1(5.0) << std::endl;
 	std::cout << "--> " << pf2(2.0) << std::endl;
 
-	/* std::cout << autograd::pow.summary() << std::endl;
+	std::cout << autograd::pow.summary() << std::endl;
 	std::cout << f.summary() << std::endl;
-	std::cout << pf1.summary() << std::endl;
+	/* std::cout << pf1.summary() << std::endl;
 	std::cout << pf2.summary() << std::endl; */
 }
