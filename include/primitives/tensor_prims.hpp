@@ -291,7 +291,7 @@ Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
 	if (a._size != b._size)
 		throw "Tensor size mismatch";
 
-	Tensor <T> c(a._dims, a._dim, a._size, nullptr, false);
+	Tensor <T> c(a.dimensions());
 
 	for (size_t i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] - b._array[i];

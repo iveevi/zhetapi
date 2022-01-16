@@ -18,6 +18,7 @@ using Constant = Tensor <long double>;
 class _function {
 public:
 	// Special operations
+	// TODO: keep output of this scope
 	enum Special {
 		op_none = -1,
 

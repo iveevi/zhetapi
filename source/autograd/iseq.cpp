@@ -20,18 +20,9 @@ _variable *ISeq::get(int index) const
 // Inserting instructions and functions
 void ISeq::append(const _function *fptr)
 {
-	switch (fptr->spop) {
-	case op_var:
-		append_variable((_variable *) fptr);
-		break;
-	case op_iseq:
-		append_iseq((ISeq *) fptr);
-		break;
-	default:
-		// Just add the function to the instructions
-		_instrs.push_back(fptr);
-		break;
-	}
+	// Append, then optimize
+	_append(fptr);
+	_optimize();
 }
 
 // Evaluate the sequence
@@ -152,6 +143,22 @@ ISeq::ISeq(std::vector <const _function *> instrs,
 //////////////////////
 
 // Append helpers
+void ISeq::_append(const _function *fptr)
+{
+	switch (fptr->spop) {
+	case op_var:
+		append_variable((_variable *) fptr);
+		break;
+	case op_iseq:
+		append_iseq((ISeq *) fptr);
+		break;
+	default:
+		// Just add the function to the instructions
+		_instrs.push_back(fptr);
+		break;
+	}
+}
+
 void ISeq::append_variable(_variable *v)
 {
 	// Check if the variable exists already
@@ -187,11 +194,11 @@ void ISeq::append_iseq(ISeq *iseq)
 				inputs++;
 			}
 
-			append(new Get (i));
+			_append(new Get (i));
 			continue;
 		}
 
-		append(nptr);
+		_append(nptr);
 	}
 }
 
@@ -478,12 +485,12 @@ _function *ISeq::_compose(const Compositions &cs) const
 //////////////////////////////////
 
 // Constructors for the tree
-ISeq::_node::_node(const _function *f) : fptr(f) {}
-ISeq::_node::_node(const _function *f, const std::vector <_node *> &cs)
+_node::_node(const _function *f) : fptr(f) {}
+_node::_node(const _function *f, const std::vector <_node *> &cs)
 		: fptr(f), children(cs) {}
 
 // Get string
-std::string ISeq::_node::str(int indent) const
+std::string _node::str(int indent) const
 {
 	// Get string of current node
 	std::string s = fptr->summary();
@@ -506,7 +513,7 @@ ISeq::_cache_info::_cache_info(int r, _node *tree)
 		: refs(r), value(tree) {}
 
 // Generating the tree
-ISeq::_node *ISeq::_tree(_cache_map &cache) const
+_node *ISeq::_tree(_cache_map &cache) const
 {
 	// Keep a stack of nodes,
 	// 	similar to computation
@@ -654,37 +661,88 @@ void ISeq::_optimize()
 // Differentiation //
 /////////////////////
 
-// Construct tree for special instructions
-ISeq::_node *ISeq::_diff_ispec(const _function *ftn,
-		const _node *tree, const int vindex) const
-{
-	// Switch variables
-	_function *fptr;
-	int index;
-	std::vector <_node *> children;
+// Forward declarations
+_node *_diff_tree(const _node *, int);
 
-	// TODO: lambda for each instruction?
+// Differentiation kernels
+_node *_diffk_get(const _function *fptr, const _node *tree, int vindex)
+{
+	// Get the index
+	int index = reinterpret_cast <const Get *> (fptr)->index;
+
+	// Check if the index is the same as the variable
+	if (index == vindex)
+		return new _node(new _repl_const(1, vindex));
+	
+	// Add the node
+	return new _node(new _repl_const(0, vindex));
+}
+
+_node *_diffk_add_sub(const _function *fptr, const _node *tree, int vindex)
+{
+	_function *f = new _function(1, fptr->spop);
+	_node *d1 = _diff_tree(tree->children[0], vindex);
+	_node *d2 = _diff_tree(tree->children[1], vindex);
+	return new _node(f, {d1, d2});
+}
+
+_node *_diffk_mul(const _function *fptr, const _node *tree, int vindex)
+{
+	_function *f1 = new _function(1, _function::op_add);
+	_function *f2 = new _function(1, _function::op_mul);
+
+	_node *c1 = tree->children[0];
+	_node *c2 = tree->children[1];
+
+	_node *d1 = _diff_tree(c1, vindex);
+	_node *d2 = _diff_tree(c2, vindex);
+
+	_node *c3 = new _node(f2, {c1, d2});
+	_node *c4 = new _node(f2, {c2, d1});
+
+	return new _node(f1, {c4, c3});
+}
+
+_node *_diffk_div(const _function *fptr, const _node *tree, int vindex)
+{
+	_function *f1 = new _function(1, _function::op_sub);
+	_function *f2 = new _function(1, _function::op_mul);
+	_function *f3 = new _function(1, _function::op_div);
+
+	_node *c1 = tree->children[0];
+	_node *c2 = tree->children[1];
+
+	_node *d1 = _diff_tree(c1, vindex);
+	_node *d2 = _diff_tree(c2, vindex);
+
+	_node *c3 = new _node(f2, {c2, d1});
+	_node *c4 = new _node(f2, {c1, d2});
+
+	_node *c5 = new _node(f1, {c3, c4});
+	_node *c6 = new _node(f2, {c2, c2});
+
+	return new _node(f3, {c5, c6});
+}
+
+// Construct tree for special instructions
+_node *_diff_ispec(const _function *ftn,
+		const _node *tree, int vindex)
+{
+	// TODO: operation factories (which return shared_ptr)
+	
+	// TODO: map for kernels?
 
 	// Check type of operation
 	switch (ftn->spop) {
-	case op_get:
-		// Get the index
-		index = reinterpret_cast <const Get *> (ftn)->index;
-
-		// Check if the index is the same as the variable
-		if (index == vindex)
-			return new _node(new _repl_const(1, vindex));
-		
-		// Add the node
-		return new _node(ftn->copy());
-	case op_add:
-		fptr = new _function(1, op_add);
-		children = {
-			_diff_tree(tree->children[0], vindex),
-			_diff_tree(tree->children[1], vindex)
-		};
-
-		return new _node(fptr, children);
+	case _function::op_get:
+		return _diffk_get(ftn, tree, vindex);
+	case _function::op_add:
+	case _function::op_sub:
+		return _diffk_add_sub(ftn, tree, vindex);
+	case _function::op_mul:
+		return _diffk_mul(ftn, tree, vindex);
+	case _function::op_div:
+		return _diffk_div(ftn, tree, vindex);
 	default:
 		break;
 	}
@@ -694,8 +752,7 @@ ISeq::_node *ISeq::_diff_ispec(const _function *ftn,
 }
 
 // Construct a new, differentiated tree
-// TODO: static method?
-ISeq::_node *ISeq::_diff_tree(const _node *tree, const int vindex) const
+_node *_diff_tree(const _node *tree, int vindex)
 {
 	// Get the function
 	const _function *ftn = tree->fptr;
@@ -715,8 +772,12 @@ _function *ISeq::diff(const int vindex) const
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
+	std::cout << "PRE TREE:\n" << tree->str() << std::endl;
+
 	// Differentiate the tree
 	_node *diff_tree = _diff_tree(tree, vindex);
+
+	std::cout << "DIFF TREE:\n" << diff_tree->str() << std::endl;
 
 	// Rebuild the instructions
 	Instructions instrs;
@@ -726,6 +787,9 @@ _function *ISeq::diff(const int vindex) const
 
 	// Return the function
 	ISeq *diff_iseq = new ISeq(instrs, ccache, inputs);
+
+	std::cout << "===== DIFF ISEQ =====\n"
+		<< diff_iseq->summary() << std::endl;
 
 	return diff_iseq;
 }

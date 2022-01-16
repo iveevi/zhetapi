@@ -14,6 +14,19 @@
 namespace zhetapi {
 
 namespace autograd {
+	
+// Tree structure
+struct _node {
+	const _function *fptr;
+	std::vector <_node *> children;
+
+	// Constructors
+	_node(const _function *);
+	_node(const _function *, const std::vector <_node *> &);
+
+	// Printing the tree
+	std::string str(int = 0) const;
+};
 
 // Instruction sequence for a function
 class ISeq : public _function {
@@ -24,19 +37,6 @@ public:
 private:
 	// Private aliases
 	using Variables = std::vector <_variable *>;
-	
-	// Tree structure
-	struct _node {
-		const _function *fptr;
-		std::vector <_node *> children;
-
-		// Constructors
-		_node(const _function *);
-		_node(const _function *, const std::vector <_node *> &);
-
-		// Printing the tree
-		std::string str(int = 0) const;
-	};
 
 	// Information about cache usage, for optimization
 	struct _cache_info {
@@ -68,7 +68,11 @@ private:
 	// Append helpers
 	void append_variable(_variable *);
 	void append_iseq(ISeq *);
-	int index_of(_variable *);	// TODO: is this necessary?
+	int index_of(_variable *);		// TODO: is this necessary?
+	void _append(const _function *);
+	
+	template <class ... Args>
+	void _append(const _function *fptr, Args ...);
 
 	// Computation helpers
 	void _load(const Input &) const;
@@ -89,10 +93,8 @@ private:
 	// Optimization functions
 	void _optimize();
 
+	// TODO: remove const
 	// Differentiation functions
-	_node *_diff_ispec(const _function *, const _node *, const int) const;
-	_node *_diff_tree(const _node *, const int) const;
-
 	_function *diff(const int) const override;
 protected:
 	// Protected constructors
@@ -118,7 +120,7 @@ public:
 
 	// Append a sequence of instructions
 	template <class ... Args>
-	void append(const _function *fptr, Args ...);
+	void append(Args ...);
 
 	// Evaluate the sequence
 	Constant compute(const Input &ins) const override;
@@ -132,10 +134,18 @@ public:
 
 // Append a sequence of instructions
 template <class ... Args>
-void ISeq::append(const _function *fptr, Args ... args)
+void ISeq::_append(const _function *fptr, Args ... args)
 {
-	append(fptr);
-	append(args...);
+	_append(fptr);
+	_append(args...);
+}
+
+template <class ... Args>
+void ISeq::append(Args ... args)
+{
+	// Append all, then optimize
+	_append(args...);
+	_optimize();
 }
 
 

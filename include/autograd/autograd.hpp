@@ -145,6 +145,7 @@ Function operator/(const Function &, const Function &);
 	Constant _k##name(const _function::Input &);				\
 										\
 	class _##name : public ISeq { 						\
+	public: 								\
 		struct kernel : public _function { 				\
 			kernel() : _function(inputs) {} 			\
 										\
@@ -160,7 +161,7 @@ Function operator/(const Function &, const Function &);
 				return new kernel();				\
 			}							\
 		}; 								\
-	public: 								\
+										\
 		_##name() : ISeq(new kernel(), inputs) {} 			\
 	};									\
 										\
