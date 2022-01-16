@@ -11,9 +11,11 @@ int main()
 	Variable x, y;
 
 	// Differentiation test
-	Function k = x/y;
+	// Function k = x/y;
+	Function k = autograd::sqrt(x + x);
 	Function h = k.differentiate(0);
 
-	std::cout << "h = " << h(2.0, 4.0) << std::endl;
-	std::cout << "h = " << h(4.0, 2.0) << std::endl;
+	// TODO: input size exception
+	std::cout << "h = " << h(2.0) << std::endl;
+	std::cout << "h = " << h(4.0) << std::endl;
 }

@@ -10,6 +10,9 @@
 	Function name = new_ <_##name> ();			\
 	inline Constant _k##name(const _function::Input &ins)
 
+#define DERIVATIVE(name)					\
+	inline _function *_diffk_##name(const int vindex)
+
 namespace zhetapi {
 
 namespace autograd {
@@ -104,6 +107,30 @@ KERNEL(pow)
 		}
 	);
 }
+
+// Standard function derivatives
+DERIVATIVE(sqrt)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		_iop::differential(vindex),
+		new _repl_const(2.0, -1),
+		new Get(0),
+		new _sqrt::kernel(),
+		new _function(2, _function::op_mul),
+		new _function(2, _function::op_div)
+	);
+
+	return iseq;
+}
+
+// TODO: fill out the rest
+DERIVATIVE(exp) {return nullptr;}
+DERIVATIVE(log) {return nullptr;}
+DERIVATIVE(sin) {return nullptr;}
+DERIVATIVE(cos) {return nullptr;}
+DERIVATIVE(tan) {return nullptr;}
+DERIVATIVE(pow) {return nullptr;}
 
 }
 

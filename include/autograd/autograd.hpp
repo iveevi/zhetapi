@@ -144,6 +144,8 @@ Function operator/(const Function &, const Function &);
 #define FUNCTION_CLASS(name, inputs, str)					\
 	Constant _k##name(const _function::Input &);				\
 										\
+	_function *_diffk_##name(const int);					\
+										\
 	class _##name : public ISeq { 						\
 	public: 								\
 		struct kernel : public _function { 				\
@@ -151,6 +153,10 @@ Function operator/(const Function &, const Function &);
 										\
 			Constant compute(const Input &ins) const override {	\
 				return _k##name(ins);				\
+			}							\
+										\
+			_function *diff(const int i) const override {		\
+				return _diffk_##name(i);			\
 			}							\
 										\
 			std::string summary() const override {			\

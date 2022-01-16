@@ -72,10 +72,14 @@ std::string ISeq::summary() const
 		else
 			row.push_back("");
 
+		std::ostringstream oss;
+
 		// TODO: should print shape, not value
-		if (i < _consts.size())
-			row.push_back("--shape--");
-		else
+		if (i < _consts.size()) {
+			oss << _consts[i];
+			row.push_back(oss.str());
+			// row.push_back("--shape--");
+		} else
 			row.push_back("");
 
 		rows.push_back(row);
@@ -636,7 +640,7 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 // Optimize the ISeq
 void ISeq::_optimize()
 {
-	// std::cout << "OPTIMIZING ISEQ" << std::endl;
+	// std::cout << "===OPTIMIZING ISEQ===" << std::endl;
 
 	_cache_map cache;
 	_node *tree = _tree(cache);
@@ -651,9 +655,10 @@ void ISeq::_optimize()
 	for (const _function *fptr : instrs)
 		std::cout << fptr->summary() << std::endl; */
 
-	// Replace the instructions
+	// Replace the instructions and constant cache
 	// TODO: clean up excess memory
 	_instrs = instrs;
+	_consts = ccache;
 }
 
 
@@ -751,6 +756,47 @@ _node *_diff_ispec(const _function *ftn,
 	return nullptr;
 }
 
+// Substitute a differentiated template
+_node *_diff_iseq(const _node *orig,
+		const std::vector <_node *> &ins,
+		const std::vector <Constant> &consts,
+		int vindex)
+{
+	// TODO: check that there are no more ISeqs
+	const _function *ftn = orig->fptr;
+
+	// Temporary indices
+	int index = -1;
+
+	// Any new children
+	std::vector <_node *> children;
+
+	// Switch special instructions
+	switch (ftn->spop) {
+	case _function::op_get:
+		// Get the index
+		index = reinterpret_cast <const Get *> (ftn)->index;
+		return ins[index];
+	case _function::op_const:
+		// Replace with _repl_const
+		index = reinterpret_cast <const Const *> (ftn)->index;
+		return new _node(new _repl_const(consts[index], -1));
+	case _function::op_differential:
+		// Get the index
+		index = reinterpret_cast <const _iop *> (ftn)->index;
+		return _diff_tree(ins[index], vindex);
+	default:
+		// Reiterate children
+		for (const _node *child : orig->children)
+			children.push_back(_diff_iseq(child, ins, consts, vindex));
+
+		// Create new node
+		return new _node(ftn, children);
+	}
+
+	return nullptr;
+}
+
 // Construct a new, differentiated tree
 _node *_diff_tree(const _node *tree, int vindex)
 {
@@ -762,6 +808,38 @@ _node *_diff_tree(const _node *tree, int vindex)
 	if ((diff_tree = _diff_ispec(ftn, tree, vindex)))
 		return diff_tree;
 
+	// Otherwise, it (should) has a derivate overloaded
+	// std::cout << "NONSPEC FUNCTION:\n" << ftn->summary() << std::endl;
+
+	_function *d = ftn->diff(vindex);
+
+	// std::cout << "DERIVATE:\n" << d->summary() << std::endl;
+
+	// TODO: what is d isnt iseq?
+	if (d->spop == _function::op_iseq) {
+		ISeq *diseq = reinterpret_cast <ISeq *> (d);
+
+		ISeq::_cache_map cache;
+		_node *dtree = diseq->_tree(cache);
+
+		// std::cout << "PARTIALLY DIFFED TREE:\n" << dtree->str() << std::endl;
+
+		/* std::cout << "CHILDREN:\n";
+		for (const _node *c : tree->children)
+			std::cout << c->str() << std::endl; */
+
+		_node *replaced = _diff_iseq(
+			dtree,
+			tree->children,
+			diseq->_consts,
+			vindex
+		);
+
+		// std::cout << "REPLACED:\n" << replaced->str() << std::endl;
+
+		return replaced;
+	}
+
 	return nullptr;
 }
 
@@ -772,12 +850,12 @@ _function *ISeq::diff(const int vindex) const
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
-	std::cout << "PRE TREE:\n" << tree->str() << std::endl;
+	// std::cout << "PRE TREE:\n" << tree->str() << std::endl;
 
 	// Differentiate the tree
 	_node *diff_tree = _diff_tree(tree, vindex);
 
-	std::cout << "DIFF TREE:\n" << diff_tree->str() << std::endl;
+	// std::cout << "DIFF TREE:\n" << diff_tree->str() << std::endl;
 
 	// Rebuild the instructions
 	Instructions instrs;

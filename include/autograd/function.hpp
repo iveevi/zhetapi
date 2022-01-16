@@ -28,6 +28,7 @@ public:
 		op_repl_const,
 		op_store_cache,
 		op_get_cache,
+		op_differential,
 
 		op_var,
 		op_iseq,
@@ -47,11 +48,12 @@ public:
 	// Type of input
 	using Input = std::vector <Constant>;
 	using Compositions = std::vector <_function *>;
-private:
+protected:
 	// String versions of operations
 	static constexpr const char *_spec_strs[] {
 		"GET", "CONST", "REPLACE CONST",
 		"STORE CACHE", "GET CACHE",
+		"DIFFERENTIAL",
 
 		"VAR", "ISEQ",
 
@@ -125,7 +127,7 @@ struct Get : public _function {
 struct Const : public _function {
 	int index;
 
-	Const(int i) : _function(1, op_const), index(i) {}
+	Const(int i) : _function(0, op_const), index(i) {}
 
 	// Overload summary to include index
 	std::string summary() const override {
@@ -178,6 +180,29 @@ struct _get_cache : public _function {
 	// Overload summary to include index
 	std::string summary() const override {
 		return "GET-CACHE (" + std::to_string(index) + ")";
+	}
+};
+
+// Operation with index
+struct _iop : public _function {
+	int index;
+
+	_iop(int i, int nins, int spop) : _function(nins, spop), index(i) {}
+
+	// Overload summary to include index
+	_function *copy() const override {
+		return new _iop(index, inputs, spop);
+	}
+
+	// Overload summary to include index
+	std::string summary() const override {
+		return std::string(_spec_strs[spop])
+			+ " (" + std::to_string(index) + ")";
+	}
+
+	// Factories
+	static _function *differential(int i) {
+		return new _iop(i, 0, op_differential);
 	}
 };
 

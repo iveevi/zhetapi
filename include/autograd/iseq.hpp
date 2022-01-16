@@ -18,6 +18,8 @@ namespace autograd {
 // Tree structure
 struct _node {
 	const _function *fptr;
+
+	// TODO: should be a vector of plain nodes
 	std::vector <_node *> children;
 
 	// Constructors
@@ -95,6 +97,8 @@ private:
 
 	// TODO: remove const
 	// Differentiation functions
+	friend _node *_diff_tree(const _node *, int);
+
 	_function *diff(const int) const override;
 protected:
 	// Protected constructors
