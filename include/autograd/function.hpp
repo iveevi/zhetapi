@@ -57,7 +57,7 @@ private:
 		"ADD", "SUB",
 		"MUL", "DIV"
 	};
-protected:
+
 	// By default, function composition returns null
 	virtual _function *_compose(const Compositions &) const {
 		return nullptr;
@@ -70,6 +70,7 @@ public:
 	//	can get away without implementing it
 	virtual Constant compute(const Input &) const {
 		// TODO: separate into _compute, like compose?
+		// then we can check size
 		return Constant();
 	}
 
@@ -80,6 +81,11 @@ public:
 			throw "_function::compose size mismatch";
 
 		return this->_compose(cs);
+	}
+
+	// By default, function differentiation returns null
+	virtual _function *diff(const int) const {
+		return nullptr;
 	}
 
 	// Copy pointer

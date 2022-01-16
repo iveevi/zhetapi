@@ -79,13 +79,21 @@ private:
 	// Composing functions and variables
 	_function *_compose(const Compositions &) const override;
 
-	// Optimization functions
+	// Tree building and rebuilding
 	_node *_tree(_cache_map &) const;
 	void _tree_walk(const _function *, std::stack <_node *> &,
 		_cache_map &) const;
 	void _rebuild(const _node *, Instructions &,
-		_cache_map &) const;
+		ConstantCache &, _cache_map &) const;
+
+	// Optimization functions
 	void _optimize();
+
+	// Differentiation functions
+	_node *_diff_ispec(const _function *, const _node *, const int) const;
+	_node *_diff_tree(const _node *, const int) const;
+
+	_function *diff(const int) const override;
 protected:
 	// Protected constructors
 	ISeq(const _function *, int);

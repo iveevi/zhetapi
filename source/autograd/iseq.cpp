@@ -162,6 +162,7 @@ void ISeq::append_variable(_variable *v)
 	if (index < 0) {
 		gindex = _vars.size();
 		_vars.push_back(v);
+		inputs++;
 	}
 
 	_instrs.push_back(new Get(gindex));
@@ -183,6 +184,7 @@ void ISeq::append_iseq(ISeq *iseq)
 				// Add a variable
 				i = _vars.size();
 				_vars.push_back((_variable *) v->copy());
+				inputs++;
 			}
 
 			append(new Get (i));
@@ -471,31 +473,9 @@ _function *ISeq::_compose(const Compositions &cs) const
 	return iseq;
 }
 
-/////////////////////////////////////////
-// Optimizing the instruction sequence //
-/////////////////////////////////////////
-
-// Optimize the ISeq
-void ISeq::_optimize()
-{
-	// std::cout << "OPTIMIZING ISEQ" << std::endl;
-
-	_cache_map cache;
-	_node *tree = _tree(cache);
-
-	std::cout << "TREE:\n" << tree->str() << std::endl;
-
-	Instructions instrs;
-	_rebuild(tree, instrs, cache);
-
-	/* std::cout << "INSTRUCS:\n" << std::endl;
-	for (const _function *fptr : instrs)
-		std::cout << fptr->summary() << std::endl; */
-
-	// Replace the instructions
-	// TODO: clean up excess memory
-	_instrs = instrs;
-}
+//////////////////////////////////
+// Tree building and rebuilding //
+//////////////////////////////////
 
 // Constructors for the tree
 ISeq::_node::_node(const _function *f) : fptr(f) {}
@@ -598,7 +578,8 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 }
 
 // Rebuild the ISeq from the tree
-void ISeq::_rebuild(const _node *tree, Instructions &instrs, _cache_map &cache) const
+void ISeq::_rebuild(const _node *tree, Instructions &instrs,
+		ConstantCache &ccache, _cache_map &cache) const
 {
 	// Iterate through the tree
 	const _function *ftn = tree->fptr;
@@ -613,19 +594,140 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs, _cache_map &cache) 
 		// Check possible optimization
 		if (info.refs == 1) {
 			// Add value instead of get cache
-			_rebuild(info.value, instrs, cache);
+			_rebuild(info.value, instrs, ccache, cache);
 		} else {
 			// Add get cache
 			instrs.push_back(ftn);
 		}
+	} else if (ftn->spop == op_repl_const) {
+		// Get the constant
+		Constant c = reinterpret_cast
+			<const _repl_const *> (ftn)->value;
+
+		// TODO: should optimize constants if there are a lot
+
+		// Add the constant
+		int index = ccache.size();
+		ccache.push_back(c);
+
+		// Add instruction
+		instrs.push_back(new Const(index));
 	} else {
 		// Add the operands
 		for (const _node *child : tree->children)
-			_rebuild(child, instrs, cache);
+			_rebuild(child, instrs, ccache, cache);
 
 		// Add the instruction
 		instrs.push_back(ftn);
 	}
+}
+
+/////////////////////////////////////////
+// Optimizing the instruction sequence //
+/////////////////////////////////////////
+
+// Optimize the ISeq
+void ISeq::_optimize()
+{
+	// std::cout << "OPTIMIZING ISEQ" << std::endl;
+
+	_cache_map cache;
+	_node *tree = _tree(cache);
+
+	// std::cout << "TREE:\n" << tree->str() << std::endl;
+
+	Instructions instrs;
+	ConstantCache ccache;
+	_rebuild(tree, instrs, ccache, cache);
+
+	/* std::cout << "INSTRUCS:\n" << std::endl;
+	for (const _function *fptr : instrs)
+		std::cout << fptr->summary() << std::endl; */
+
+	// Replace the instructions
+	// TODO: clean up excess memory
+	_instrs = instrs;
+}
+
+
+/////////////////////
+// Differentiation //
+/////////////////////
+
+// Construct tree for special instructions
+ISeq::_node *ISeq::_diff_ispec(const _function *ftn,
+		const _node *tree, const int vindex) const
+{
+	// Switch variables
+	_function *fptr;
+	int index;
+	std::vector <_node *> children;
+
+	// TODO: lambda for each instruction?
+
+	// Check type of operation
+	switch (ftn->spop) {
+	case op_get:
+		// Get the index
+		index = reinterpret_cast <const Get *> (ftn)->index;
+
+		// Check if the index is the same as the variable
+		if (index == vindex)
+			return new _node(new _repl_const(1, vindex));
+		
+		// Add the node
+		return new _node(ftn->copy());
+	case op_add:
+		fptr = new _function(1, op_add);
+		children = {
+			_diff_tree(tree->children[0], vindex),
+			_diff_tree(tree->children[1], vindex)
+		};
+
+		return new _node(fptr, children);
+	default:
+		break;
+	}
+
+	// Default return
+	return nullptr;
+}
+
+// Construct a new, differentiated tree
+// TODO: static method?
+ISeq::_node *ISeq::_diff_tree(const _node *tree, const int vindex) const
+{
+	// Get the function
+	const _function *ftn = tree->fptr;
+
+	// Quit early if is a special instruction
+	_node *diff_tree;
+	if ((diff_tree = _diff_ispec(ftn, tree, vindex)))
+		return diff_tree;
+
+	return nullptr;
+}
+
+// Differentiate the ISeq
+_function *ISeq::diff(const int vindex) const
+{
+	// Get the tree
+	_cache_map cache;
+	_node *tree = _tree(cache);
+
+	// Differentiate the tree
+	_node *diff_tree = _diff_tree(tree, vindex);
+
+	// Rebuild the instructions
+	Instructions instrs;
+	ConstantCache ccache;
+
+	_rebuild(diff_tree, instrs, ccache, cache);
+
+	// Return the function
+	ISeq *diff_iseq = new ISeq(instrs, ccache, inputs);
+
+	return diff_iseq;
 }
 
 }

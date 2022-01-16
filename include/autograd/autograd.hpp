@@ -15,12 +15,11 @@ namespace zhetapi {
 
 namespace autograd {
 
+// Foward declarations
+class Function;
+
 // Function alias is a wrapper around shared ptr
 using _fptr = std::shared_ptr <_function>;
-
-// Foward declarations
-// TODO: at the top
-class Function;
 
 // Templated return type
 //	to distinguish between
@@ -41,6 +40,7 @@ struct fret {
 	static constexpr bool compose = fret_helper <Args...> ::compose;
 };
 
+// Really should only be ISeq and _variable
 class Function {
 	// Function pointer
 	_fptr fptr;
@@ -85,7 +85,9 @@ public:
 		return fptr.get();
 	}
 
-	template <class ... Args, typename = typename std::enable_if <fret <Args...> ::compose> ::type>
+	// Composition
+	template <class ... Args, typename = typename std::enable_if
+		<fret <Args...> ::compose> ::type>
 	Function operator()(Args ... args) {
 		_function::Compositions cs;
 		int i = 0;
@@ -94,12 +96,22 @@ public:
 		return fptr->compose(cs);
 	}
 	
-	template <class ... Args, typename = typename std::enable_if <!fret <Args...> ::compose> ::type>
+	// Computation
+	template <class ... Args, typename = typename std::enable_if
+		<!fret <Args...> ::compose> ::type>
 	Constant operator()(Args ... args) {
 		_function::Input inputs;
 		_cmp_process(inputs, args...);
 		return fptr->compute(inputs);
 	}
+
+	// Differentiation
+	Function differentiate(const int i) const {
+		return fptr->diff(i);
+	}
+
+	// TODO: differentiate with respect to Variable,
+	// add another function, _diff_vid(const int)...
 
 	// Summary of functiooon
 	std::string summary() const {
