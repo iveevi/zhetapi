@@ -214,7 +214,7 @@ DERIVATIVE(pow)
 {
 	ISeq *iseq = new ISeq();
 
-	// TODO: gotta test all this
+	// TODO: gotta test all thi<F2><F2>s
 
 	// f(x)^e -> e * f(x)^(e-1) * f'(x)
 	iseq->append(

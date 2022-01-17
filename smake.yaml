@@ -34,6 +34,9 @@ builds:
   - experimental_debug:
     - sources: 'experimental/experimental.cpp, source'
     - flags: '-g'
+  - benchmark:
+    - sources: 'experimental/benchmark.cpp, source'
+    - flags: '-O3'
 
 targets:
   - testing:
@@ -52,3 +55,8 @@ targets:
     - postbuilds:
       - default: '{}'
       - gdb: 'gdb {}'
+  - bench:
+    - builds:
+      - default: benchmark
+    - postbuilds:
+      - default: '{}'
