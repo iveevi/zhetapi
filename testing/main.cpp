@@ -4,10 +4,10 @@
 #define DEBUG_EXCEPTION
 // #define PASSTHROUGH_EXCEPTION
 // #define HANDLE_SEGFAULT
-// #define SINGLET			lq_decomp
+// #define SINGLET			kernel_vvt_mult
 
 // TODO: need a method to conduct a single test
-typedef pair <string, bool (*)(ostringstream &, int)> singlet;
+typedef pair <string, bool (*)(ostream &, int)> singlet;
 
 // Testing rig
 vector <singlet> rig {
@@ -75,10 +75,10 @@ int main()
 
 #ifdef SINGLET
 
-	ostringstream oss;
-	SINGLET(oss, 0);
+	// ostringstream oss;
+	SINGLET(cout, 0);
 
-	std::cout << "OUTPUT:\n" << oss.str();
+	// std::cout << "OUTPUT:\n" << oss.str();
 	return 0;
 
 #else

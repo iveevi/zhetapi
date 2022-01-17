@@ -61,16 +61,10 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t, size_t))
 template <class T>
 __cuda_dual__
 Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
+		: Tensor <T> (rs, cs)
 {
-	this->_size = rs * cs;
-
-	this->_dim = new size_t[2];
-
-	this->_dim[0] = rs;
-	this->_dim[1] = cs;
-
+	// TODO: implement slice constructor on the Tensor class
 	this->_array = arr;
-
 	this->_arr_sliced = slice;
 }
 
@@ -510,6 +504,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
 template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
+	std::cout << "Matrix assignment operator called" << std::endl;
 	if (this != &other) {
 		this->clear();
 

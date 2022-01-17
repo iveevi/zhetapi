@@ -3,7 +3,7 @@
 using namespace zhetapi;
 using namespace zhetapi::ml;
 
-static bool act_general(ostringstream &oss,
+static bool act_general(ostream &oss,
 		const std::string &prefix,
 		const vector <Activation <double> *> &acts,
 		const vector <Vector <double>> &ins,

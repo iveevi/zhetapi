@@ -203,7 +203,6 @@ public:
 	class index_out_of_bounds {};
 };
 
-
 }
 
 // Primitive operations for all systems

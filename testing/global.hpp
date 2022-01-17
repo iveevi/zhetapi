@@ -17,7 +17,7 @@
 #include "../zhetapi.hpp"
 
 // Macros
-#define TEST(name)	bool name(ostringstream &oss, int cout)
+#define TEST(name)	bool name(ostream &oss, int cout)
 #define RIG(name)	{#name, &name}
 
 // Namespaces

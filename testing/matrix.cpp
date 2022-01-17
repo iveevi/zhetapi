@@ -127,7 +127,11 @@ TEST(kernel_vvt_mult)
 
 		oss << "Outputs:" << std::endl;
 		oss << "\tout1 = " << out1 << std::endl;
+		oss << "\tout1.rows = " << out1.get_rows() << std::endl;
+		oss << "\tout1.cols = " << out1.get_cols() << std::endl;
 		oss << "\tout2 = " << out2 << std::endl;
+		oss << "\tout2.rows = " << out2.get_rows() << std::endl;
+		oss << "\tout2.cols = " << out2.get_cols() << std::endl;
 
 		double error = (out1 - out2).norm();
 
