@@ -180,6 +180,296 @@ public:
 	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
 };
 
+// TODO: reorganize
+
+/**
+ * @brief Default constructor.
+ */
+template <class T>
+Tensor <T> ::Tensor() {}
+
+/**
+ * @brief Homogenous (with respect to the component type) copy constructor.
+ *
+ * @param other the reference vector (to be copied from).
+ */
+template <class T>
+Tensor <T> ::Tensor(const Tensor <T> &other)
+		: _size(other._size), _dims(other._dims)
+{
+	// Faster for homogenous types
+	_dim = new size_t[_dims];
+	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+	_array = new T[_size];
+	memcpy(_array, other._array, sizeof(T) * _size);
+}
+
+/**
+ * @brief Heterogenous (with respect to the component type) copy constructor.
+ *
+ * @param other the reference vector (to be copied from).
+ */
+template <class T>
+template <class A>
+Tensor <T> ::Tensor(const Tensor <A> &other)
+		: _size(other._size), _dims(other._dims)
+{
+	_dim = new size_t[_dims];
+	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+	_array = new T[_size];
+	for (size_t i = 0; i < _size; i++)
+		_array[i] = static_cast <T> (other._array[i]);
+}
+
+// Single element
+template <class T>
+Tensor <T> ::Tensor(const T &value)
+		: _size(1), _dims(1)
+{
+	_dim = new size_t[1];
+	_dim[0] = 1;
+
+	_array = new T[1];
+	_array[0] = value;
+}
+
+template <class T>
+Tensor <T> ::Tensor(size_t rows, size_t cols)
+		: _dims(2), _size(rows * cols)
+{
+	_dim = new size_t[2];
+	_dim[0] = rows;
+	_dim[1] = cols;
+
+	_array = new T[_size];
+}
+
+/**
+ * @brief Full slice constructor. Makes a Tensor out of existing (previously
+ * allocated memory), and the ownership can be decided. By default, the Tensor
+ * does not gain ownership over the memory. Note that the sizes given are not
+ * checked for validity.
+ *
+ * @param dims the number of dimensions to slice.
+ * @param dim the dimension size array.
+ * @param size the size of the Tensor.
+ * @param array the components of the Tensor.
+ * @param slice the slice flag. Set to \c true to make sure the memory is not
+ * deallocated by the resulting Tensor, and \c false otherwise.
+ */
+template <class T>
+Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
+		: _dims(dims), _dim(dim), _size(size), _array(array),
+		_dim_sliced(slice), _arr_sliced(slice) {}
+
+template <class T>
+template <class A>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
+{
+	if (this != &other) {
+		_dims = other._dims;
+		_size = other._size;
+
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+		_array = new T[_size];
+		for (size_t i = 0; i < _size; i++)
+			_array[i] = static_cast <T> (other._array[i]);
+	}
+
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+{
+	// Faster version for homogenous types (memcpy is faster)
+	if (this != &other) {
+		_dims = other._dims;
+		_size = other._size;
+
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+		_array = new T[_size];
+		memcpy(_array, other._array, sizeof(T) * _size);
+	}
+
+	return *this;
+}
+
+/**
+ * @brief Deconstructor.
+ */
+template <class T>
+Tensor <T> ::~Tensor()
+{
+	clear();
+}
+
+template <class T>
+void Tensor <T> ::clear()
+{
+	if (!_array && !_dim)
+		return;
+
+	if (!_dim_sliced) {
+
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+		if (_on_device) {
+			if (!_arena)
+				throw null_nvarena();
+
+			_arena->free(_dim);
+		} else {
+			delete[] _dim;
+		}
+#else
+		delete[] _dim;
+#endif
+
+	}
+
+	if (!_arr_sliced) {
+
+#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
+		if (_on_device) {
+			if (!_arena)
+				throw null_nvarena();
+
+			_arena->free(_array);
+		} else {
+			delete[] _array;
+		}
+#else
+		delete[] _array;
+#endif
+
+	}
+
+	_array = nullptr;
+	_dim = nullptr;
+}
+
+/**
+ * @brief Returns the size of the tensor.
+ *
+ * @return the size of the tensor (number of components in the tensor).
+ */
+template <class T>
+__cuda_dual__
+size_t Tensor <T> ::size() const
+{
+	return _size;
+}
+
+/*
+ * @brief Returns the number of dimensions in the tensor.
+ *
+ * @return the number of dimensions in the tensor.
+ *
+template <class T>
+__cuda_dual__
+size_t Tensor <T> ::dimensions() const
+{
+	return _dims;
+} */
+
+// Return dimensions as a vector
+template <class T>
+typename Tensor <T> ::shape_type Tensor <T> ::shape() const
+{
+	shape_type dims(_dims);
+	for (size_t i = 0; i < _dims; i++)
+		dims[i] = _dim[i];
+
+	return dims;
+}
+
+/**
+ * @brief Returns the size of a specific dimension. Does not check bounds.
+ *
+ * @param i the desired index.
+ *
+ * @return the size of dimension \p i.
+ */
+template <class T>
+__cuda_dual__
+size_t Tensor <T> ::dim_size(size_t i) const
+{
+	return _dim[i];
+}
+
+/**
+ * @brief Returns the size of a specific dimension. If the index is out of
+ * bounds of the number of dimensions, then 1 is returned.
+ *
+ * @param i the desired index.
+ *
+ * @return the size of dimension \p i.
+ */
+template <class T>
+__cuda_dual__
+size_t Tensor <T> ::safe_dim_size(size_t i) const
+{
+	return (_dims > i) ? _dim[i] : 1;
+}
+
+// Comparison
+template <class T>
+bool operator==(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a._size != b._size)
+		return false;
+
+	for (size_t i = 0; i < a._size; i++) {
+		if (a._array[i] != b._array[i])
+			return false;
+	}
+
+	return true;
+}
+
+template <class T>
+bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
+{
+	return !(a == b);
+}
+
+// Addition and subtraction
+template <class T>
+Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// TODO: make an exception class
+	if (a._size != b._size)		// TODO: this doesnt fully check, make a struct for size info
+		throw "Tensor sizes do not match";
+
+	Tensor <T> c(a.shape());
+
+	for (size_t i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] + b._array[i];
+
+	return c;
+}
+
+// TODO: make += and -= instead
+template <class T>
+Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a._size != b._size)
+		throw "Tensor size mismatch";
+
+	Tensor <T> c(a.shape());
+
+	for (size_t i = 0; i < a._size; i++)
+		c._array[i] = a._array[i] - b._array[i];
+
+	return c;
+}
+
 // Indexing
 template <class T>
 const T &Tensor <T> ::get(size_t i) const
@@ -247,9 +537,177 @@ bool operator==(const typename Tensor <A> ::shape_type &s1,
 	return true;
 }
 
+template <class T>
+Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
+		: _dims(dim.size())
+{
+
+#ifdef _CUDA_ARCH_
+
+	_on_device = false;
+
+#endif
+
+	_dim = new size_t[_dims];
+
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
+
+		_dim[i] = dim[i];
+	}
+
+	_size = prod;
+
+	if (_size <= 0)
+		throw bad_dimensions();
+
+	if (arr.size() != _size)
+		throw dimension_mismatch();
+
+	_array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		_array[i] = arr[i];
 }
 
-#include "primitives/tensor_prims.hpp"
-#include "tensor_cpu.hpp"
+template <class T>
+Tensor <T> ::Tensor(const std::vector <size_t> &dim)
+		: _dims(dim.size())
+{
+	_dim = new size_t[_dims];
+
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
+
+		_dim[i] = dim[i];
+	}
+
+	_size = prod;
+
+	if (!_size)
+		return;
+
+	_array = new T[prod];
+}
+
+template <class T>
+Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
+		: _dims(dim.size())
+{
+	_dim = new size_t[_dims];
+
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
+
+		_dim[i] = dim[i];
+	}
+
+	_size = prod;
+
+	if (!_size)
+		return;
+
+	_array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		_array[i] = def;
+}
+
+template <class T>
+bool Tensor <T> ::good() const
+{
+	return _array != nullptr;
+}
+
+// Actions
+template <class T>
+void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
+{
+	for (size_t k = 0; k < _size; k++) {
+		if (p > i.uniform())
+			_array[k] = T(0);
+	}
+}
+
+// Index
+template <class T>
+T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
+{
+	size_t full = 0;
+
+	assert(indices.size() == _dims);
+	for (size_t i = 0; i < _dims; i++)
+		full += indices[i] * _dim[_dims - (i + 1)];
+
+	return _array[full];
+}
+
+template <class T>
+const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
+{
+	size_t full = 0;
+
+	assert(indices.size() == _dims);
+	for (size_t i = 0; i < _dims; i++)
+		full += indices[i] * _dim[_dims - (i + 1)];
+
+	return _array[full];
+}
+
+// Arithmetic
+template <class T>
+void Tensor <T> ::operator*=(const T &x)
+{
+	for (size_t i = 0; i < _size; i++)
+		_array[i] *= x;
+}
+
+template <class T>
+void Tensor <T> ::operator/=(const T &x)
+{
+	for (size_t i = 0; i < _size; i++)
+		_array[i] /= x;
+}
+
+// Printing functions
+template <class T>
+std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
+{
+	if (size == 0)
+		return "[]";
+
+	std::string out = "[";
+
+	// Size of each dimension
+	size_t dsize = size / ds[dn];
+
+	T *current = arr;
+	for (size_t i = 0; i < ds[dn]; i++) {
+		if (dn == dmax)
+			out += std::to_string(*current);
+		else
+			out += print(current, dsize, ds, dn + 1, dmax);
+
+		if (i < ds[dn] - 1)
+			out += ", ";
+
+		current += dsize;
+	}
+
+	return out + "]";
+}
+
+template <class T>
+std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
+{
+	os << print(ts._array, ts._size, ts._dim, 0, ts._dims - 1);
+
+	return os;
+}
+
+}
 
 #endif

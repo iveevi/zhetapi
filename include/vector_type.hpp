@@ -1,12 +1,8 @@
 #ifndef VECTOR_TYPE_H_
 #define VECTOR_TYPE_H_
 
-#ifndef __AVR
-
-// C/C++ headers
+// Standard headers
 #include <cstdlib>
-
-#endif
 
 namespace zhetapi {
 
