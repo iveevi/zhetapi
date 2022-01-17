@@ -50,8 +50,8 @@ commands:
           name: Building essentials
           command: |
             sudo apt-get install python3
+            sudo apt-get install python-pip
             python3 --version
-            python3 -m ensurepip --upgrade
             pip3 install smake
 
 jobs:

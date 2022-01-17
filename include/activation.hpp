@@ -1,27 +1,18 @@
 #ifndef ACTIVATIONS_H_
 #define ACTIVATIONS_H_
 
-#ifndef __AVR	// Does not support AVR
-
-// C/C++ headers
+// Standard headers
 #include <algorithm>
 #include <functional>
+#include <fstream>
+#include <iostream>
 #include <map>
-
-#endif		// Does not support AVR
+#include <string>
+#include <vector>
 
 // Engine headers
-#ifdef ZHP_CUDA
-
-#include "cuda/vector.cuh"
-
-#else
-
-#include "vector.hpp"
-
-#endif
-
 #include "cuda/essentials.cuh"
+#include "vector.hpp"
 
 // A is class name, T is the type (template), L is the loader function
 #define _zhp_register_activation(A, T, L)			\
@@ -37,13 +28,9 @@ namespace ml {
 template <class T>
 class Activation;
 
-#ifndef __AVR	// Does not support AVR
-
 // Format of an activation loader
 template <class T>
 using Loader = Activation <T> *(*)(const std::vector <T> &);
-
-#endif		// Does not support AVR
 
 /**
  * @brief Represents an activation in machine learning. Takes a vector of type T
@@ -68,15 +55,11 @@ public:
 	__cuda_dual__
 	explicit Activation(activation_type);				// Type constructor
 
-	explicit AVR_IGNORE(
-		__cuda_dual__
-		Activation(const std::vector <T> &)			// Argument constructor
-	);
+	__cuda_dual__
+	explicit Activation(const std::vector <T> &);			// Argument constructor
 
-	AVR_IGNORE(
-		__cuda_dual__
-		Activation(activation_type, const std::vector <T> &)	// Type and argument constructor
-	);
+	__cuda_dual__
+	Activation(activation_type, const std::vector <T> &);		// Type and argument constructor
 
 	virtual Activation *copy() const;
 
@@ -125,7 +108,7 @@ protected:
 	activation_type	_kind = AT_Default;
 
 	// Arguments, empty by default
-	AVR_IGNORE(std::vector <T>	_args = {});
+	std::vector <T>	_args = {};
 };
 
 #ifndef __AVR	// Does not support AVR
@@ -168,12 +151,7 @@ template <class T>
 Activation <T> *Activation <T> ::copy() const
 {
 	static const char *msg = "Warning (from activation.hpp): using the default copy method.";
-
-	AVR_SWITCH(
-		Serial.println(msg),
-		std::cout << msg << std::endl;
-	);
-
+	std::cerr << msg << std::endl;
 	return new Activation <T> ();
 }
 
@@ -188,12 +166,7 @@ template <class T>
 Vector <T> Activation <T> ::compute(const Vector <T> &x) const
 {
 	static const char *msg = "Warning (from activation.hpp): using the default compute method.";
-
-	AVR_SWITCH(
-		Serial.println(msg),
-		std::cout << msg << std::endl
-	);
-
+	std::cerr << msg << std::endl;
 	return x;
 }
 

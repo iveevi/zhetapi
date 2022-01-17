@@ -1,9 +1,6 @@
 #ifndef VECTOR_H_
 #define VECTOR_H_
 
-// C/C++ headers
-#ifdef __AVR	// Does not support AVR
-
 #ifdef max
 #undef max
 #endif
@@ -12,49 +9,12 @@
 #undef min
 #endif
 
-#else
-
 #include <cmath>
 #include <functional>
-
-#endif		// Does not support AVR
-
-/* Engine headers
-#ifdef ZHP_CUDA
-
-#include "cuda/matrix.cuh"
-
-#else
-
-#include "matrix.hpp"
-
-#endif */
 
 #include "matrix.hpp"
 
 namespace zhetapi {
-
-// Forward declarations
-template <class T>
-class Vector;
-
-#ifndef __AVR	// Does not support AVR
-
-// Tensor_type operations
-// TODO: remove, useless
-template <class T>
-struct Vector_type : std::false_type {};
-
-template <class T>
-struct Vector_type <Vector <T>> : std::true_type {};
-
-template <class T>
-bool is_vector_type()
-{
-	return Vector_type <T> ::value;
-}
-
-#endif		// Does not support AVR
 
 /**
  * @brief Represents a vector whose components are of type T.
@@ -73,18 +33,11 @@ public:
 	Vector(size_t, T *, bool = true);
 
 	// Lambda constructors
-	AVR_SWITCH(
-		Vector(size_t, T (*)(size_t)),
-		Vector(size_t, std::function <T (size_t)>)
-	);
+	Vector(size_t, std::function <T (size_t)>);
+	Vector(size_t, std::function <T *(size_t)>);
 
-	AVR_SWITCH(
-		Vector(size_t, T *(*)(size_t)),
-		Vector(size_t, std::function <T *(size_t)>)
-	);
-
-	AVR_IGNORE(Vector(const std::vector <T> &));
-	AVR_IGNORE(Vector(const std::initializer_list <T> &));
+	Vector(const std::vector <T> &);
+	Vector(const std::initializer_list <T> &);
 
 	// Cross-type operations
 	template <class A>
@@ -125,20 +78,9 @@ public:
 	size_t imax() const;
 
 	// Functions
-	AVR_SWITCH(
-		Vector operator()(T (*)(T)),
-		Vector operator()(std::function <T (T)>)
-	);
-
-	AVR_SWITCH(
-		T sum(T (*)(T)),
-		T sum(std::function <T (T)>)
-	);
-
-	AVR_SWITCH(
-		T product(T (*)(T)),
-		T product(std::function <T (T)>)
-	);
+	Vector operator()(std::function <T (T)>);
+	T sum(std::function <T (T)>);
+	T product(std::function <T (T)>);
 
 	// TODO: operator(), product and sum
 
@@ -207,19 +149,6 @@ public:
 
 // Primitive operations for all systems
 #include "primitives/vector_prims.hpp"
-
-// Additional operations for common systems
-#ifndef __AVR
-
 #include "vector_cpu.hpp"
-
-#endif
-
-// Additional operations for CUDA
-#ifdef __CUDACC__
-
-#include "cuda/vector.cuh"
-
-#endif
 
 #endif

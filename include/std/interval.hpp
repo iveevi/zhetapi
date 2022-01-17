@@ -1,25 +1,12 @@
 #ifndef INTERVAL_H_
 #define INTERVAL_H_
 
-// TODO: move out of std
-
-// Essentials
-#include "../avr/essentials.hpp"
-
-#ifdef __AVR		// AVR support
-
-#include "../avr/random.hpp"
-
-#else
-
 // C/C++ headers
 #include <iostream>
 #include <iterator>
 #include <random>
 #include <set>
 #include <vector>
-
-#endif			// AVR support
 
 // Engine headers
 #include "../fixed_vector.hpp"
@@ -29,32 +16,11 @@ namespace zhetapi {
 // TODO: inspect the random-ness of the interval class
 namespace utility {
 
-#ifdef __AVR		// AVR support
-
-// Blank dummy struct
-struct random_generator {};
-
-// Cite Ran from Numerical Recipes
-struct distro_engine {
-	long double operator()(const random_generator &rgen) {
-		static avr::RandomEngine reng(16183LL);
-
-		return reng.ldouble();
-	}
-};
-
-using dre = random_generator;
-using udb = distro_engine;
-
-#else
-
 extern std::random_device rd;
 
 // Typedefs for sanity
 using dre = std::mt19937;
 using udb = std::uniform_real_distribution <double>;
-
-#endif			// AVR support
 
 // TODO: extend to long double
 
@@ -63,15 +29,7 @@ struct disjoint {
 	static dre gen;
 	static udb distro;
 
-#ifdef __AVR		// AVR support
-
-	using pflt = _avr_pair <double, double>;
-
-#else			// AVR support
-
 	using pflt = std::pair <double, double>;
-
-#endif			// AVR support
 
 	double left = 0;
 	double right = 0;
@@ -179,11 +137,9 @@ public:
 		);
 	}
 
-	AVR_IGNORE(
-		template <size_t M>
-		friend std::ostream &operator<<(std::ostream &,
-			const Interval <M> &)
-	);
+	template <size_t M>
+	friend std::ostream &operator<<(std::ostream &,
+		const Interval <M> &);
 
 	// Exceptions
 	class null_axes : public std::runtime_error {
@@ -192,11 +148,6 @@ public:
 			" are null") {}
 	};
 };
-
-AVR_MASK(dre disjoint::gen = dre());
-AVR_MASK(udb disjoint::distro = udb());
-
-#ifndef __AVR		// AVR support
 
 // TODO: Switch from double to long double
 /**
@@ -321,74 +272,6 @@ std::ostream &operator<<(std::ostream &, const Interval <1> &);
 // Literal constructor
 Interval <1> operator""_I(unsigned long long int);
 Interval <1> operator""_I(long double);
-
-#ifdef __APPLE__	// Apple support
-
-#warning Including Interval <1> operator""_I from the header, \
-	should be fine as long as the zhp shared library will not linked
-
-// TODO: Remove this (only temporary because of
-// issues compiling the library on OSX)
-
-// Literal constructor
-Interval <1> operator""_I(unsigned long long int x)
-{
-	return Interval <1> (x);
-}
-
-Interval <1> operator""_I(long double x)
-{
-	return Interval <1> (x);
-}
-
-// Don't forward declare if on OSX
-std::random_device rd;
-
-dre disjoint::gen(rd());
-udb disjoint::distro = udb(0, 1);
-
-dre Interval <1> ::gen(rd());
-udb Interval <1> ::distro = udb(0, 1);
-
-Interval <1> runit;
-
-#else			// Apple support
-
-extern Interval <1> runit;
-
-#endif			// Apple support
-
-#else			// AVR support
-
-#warning Zhetapi does not support the all of zhetapi::utility::Interval for AVR systems.
-
-// TODO: Add a singular disjoint
-template <>
-class Interval <1> {
-	disjoint dj;
-public:
-	// Defaults to [0, 1]
-	Interval() : Interval(1.0L) {}
-
-	explicit Interval(unsigned long long int x)
-			: Interval((long double) x) {}
-
-	explicit Interval(long double x)
-			: Interval(0, x) {}
-
-	Interval(double left, double right, bool closed = true)
-			: dj(left, right, closed) {}
-
-	double size() const {
-		return dj.length();
-	}
-
-	operator bool() const {
-		return size() > 0;
-	}
-};
-
-#endif			// AVR support switch
 
 }
 

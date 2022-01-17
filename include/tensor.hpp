@@ -10,12 +10,9 @@
 #include <string>
 #include <vector>
 
-// Engine headers
+// Library headers
 #include "std/interval.hpp"
-
-// Engine headers
 #include "cuda/essentials.cuh"
-#include "avr/essentials.hpp"
 
 namespace zhetapi {
 
@@ -35,12 +32,6 @@ template <size_t N>
 class Interval;
 
 }
-
-#ifdef __CUDACC__
-
-class NVArena;
-
-#endif
 
 // Tensor class
 template <class T>
@@ -80,9 +71,9 @@ public:
 	Tensor(size_t, size_t);
 	Tensor(size_t, size_t *, size_t, T *, bool = true);
 
-	AVR_IGNORE(explicit Tensor(const std::vector <std::size_t> &));
-	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const T &));
-	AVR_IGNORE(Tensor(const std::vector <std::size_t> &, const std::vector <T> &));
+	explicit Tensor(const std::vector <std::size_t> &);
+	Tensor(const std::vector <std::size_t> &, const T &);
+	Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
 
 	// Indexing
 	Tensor <T> operator[](size_t);
@@ -90,8 +81,8 @@ public:
 	// TODO: iterators
 	// TODO: this type of indexing is very tedious with the [], use anotehr
 	// method like .get(...)
-	AVR_IGNORE(T &operator[](const std::vector <size_t> &));
-	AVR_IGNORE(const T &operator[](const std::vector <size_t> &) const);
+	T &operator[](const std::vector <size_t> &);
+	const T &operator[](const std::vector <size_t> &) const;
 
 	// TODO: remove size term from vector and matrix classes
 	__cuda_dual__ size_t size() const;
@@ -100,7 +91,7 @@ public:
 	__cuda_dual__ size_t safe_dim_size(size_t) const;
 
 	// TODO: refactor to shape()
-	std::vector <size_t> dimensions() const;
+	shape_type shape() const;
 
 	// TODO: private?
 	__cuda_dual__
@@ -110,7 +101,7 @@ public:
 	bool good() const;
 
 	// Actions
-	AVR_IGNORE(void nullify(long double, const utility::Interval <1> &));
+	void nullify(long double, const utility::Interval <1> &);
 
 	// Boolean operators (generalize with prefix)
 	template <class U>
@@ -120,10 +111,10 @@ public:
 	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
 
 	// Printing functions
-	AVR_IGNORE(std::string print() const;)
+	std::string print() const;
 
-	AVR_IGNORE(template <class U>
-	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &));
+	template <class U>
+	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
 
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
@@ -178,7 +169,7 @@ public:
 	// TODO: heterogneous versions?
 	template <class U>
 	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
-	
+
 	template <class U>
 	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
 
@@ -222,7 +213,7 @@ template <class T>
 Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
 {
 	// TODO: check dimensions (make a helper function for this)
-	Tensor <T> c(a.dimensions());
+	Tensor <T> c(a.shape());
 	for (int i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] * b._array[i];
 	return c;
@@ -232,7 +223,7 @@ template <class T>
 Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 {
 	// TODO: check dimensions (make a helper function for this)
-	Tensor <T> c(a.dimensions());
+	Tensor <T> c(a.shape());
 	for (int i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] / b._array[i];
 	return c;
@@ -246,7 +237,7 @@ bool operator==(const typename Tensor <A> ::shape_type &s1,
 	// Ensure same dimension
 	if (s1.size() != s2.size())
 		return false;
-	
+
 	// Compare each dimension
 	for (int i = 0; i < s1.size(); i++) {
 		if (s1[i] != s2[i])
@@ -259,12 +250,6 @@ bool operator==(const typename Tensor <A> ::shape_type &s1,
 }
 
 #include "primitives/tensor_prims.hpp"
-
-// TODO: remove this branch, screw AVR
-#ifndef __AVR
-
 #include "tensor_cpu.hpp"
-
-#endif
 
 #endif

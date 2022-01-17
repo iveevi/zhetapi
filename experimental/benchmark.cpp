@@ -6,7 +6,7 @@
 #include "../include/autograd/autograd.hpp"
 
 // Number of iterations
-constexpr int N = 100000;
+constexpr int N = 1000000;
 
 int main()
 {
