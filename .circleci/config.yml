@@ -49,6 +49,7 @@ commands:
       - run:
           name: Building essentials
           command: |
+            sudo apt-get install python3
             python --version
             python -m ensurepip --upgrade
             pip install smake
