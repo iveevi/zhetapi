@@ -36,23 +36,122 @@ class Interval;
 // Tensor class
 template <class T>
 class Tensor {
-protected:
-	size_t	_dims		= 0;
-	size_t *_dim		= nullptr;
-	bool	_dim_sliced	= false;
-
-	// TODO: dimension is never sliced
-	size_t	_size		= 0;
-	T *	_array		= nullptr;
-	bool	_arr_sliced	= false;
-
-	// Private methods
-	void _clear();
 public:
 	// Public type aliases
 	using value_type = T;
 	using shape_type = std::vector <std::size_t>;
 
+// TODO: should be private, matrix and vector should not be able to access
+protected:
+	/* size_t	_dims		= 0;
+	size_t *_dim		= nullptr;
+	bool	_dim_sliced	= false; */
+
+	// size_t	_size		= 0;
+	T *	_array		= nullptr;
+	bool	_arr_sliced	= false;
+
+	// TODO: also wrap array in a struct
+
+	// Shape informations
+	struct _shape_info {
+		// Data
+		size_t dimensions = 0;
+		size_t elements = 0;
+		size_t *array = nullptr;
+
+		// TODO: slicing
+
+		// Constructors
+		_shape_info() = default;
+
+		// TODO: varaidic constructor
+		// TODO: initializer list
+
+		// From shape_type
+		_shape_info(const shape_type &shape) {
+			dimensions = shape.size();
+			elements = 1;
+
+			array = new size_t[dimensions];
+			for (size_t i = 0; i < dimensions; i++) {
+				array[i] = shape[i];
+				elements *= shape[i];
+			}
+
+			if (elements < 0) {
+				throw std::invalid_argument(
+					"Tensor::_shape_info:"
+					" shape is invalid"
+				);
+			}
+		}
+
+		// Copy constructor
+		_shape_info(const _shape_info &other) {
+			dimensions = other.dimensions;
+			elements = other.elements;
+
+			array = new size_t[dimensions];
+			for (size_t i = 0; i < dimensions; i++)
+				array[i] = other.array[i];
+		}
+
+		// Assignment operator
+		_shape_info &operator=(const _shape_info &other) {
+			if (this != &other) {
+				if (array != nullptr
+					&& dimensions != other.dimensions)
+					delete [] array;
+
+				dimensions = other.dimensions;
+				elements = other.elements;
+
+				array = new size_t[dimensions];
+				for (size_t i = 0; i < dimensions; i++)
+					array[i] = other.array[i];
+			}
+
+			return *this;
+		}
+
+		// Destructor
+		~_shape_info() {
+			if (array != nullptr)
+				delete [] array;
+		}
+
+		// Convert to shape_type
+		shape_type to_shape_type() const {
+			shape_type shape;
+
+			for (size_t i = 0; i < dimensions; i++)
+				shape.push_back(array[i]);
+
+			return shape;
+		}
+
+		// Boolean comparison
+		bool operator==(const _shape_info &other) const {
+			if (dimensions != other.dimensions)
+				return false;
+
+			for (size_t i = 0; i < dimensions; i++) {
+				if (array[i] != other.array[i])
+					return false;
+			}
+
+			return true;
+		}
+
+		bool operator!=(const _shape_info &other) const {
+			return !(*this == other);
+		}
+	} _shape;
+
+	// Private methods
+	void _clear();
+public:
 	// Essential constructors
 	Tensor();
 	Tensor(const Tensor &);
@@ -85,6 +184,8 @@ public:
 
 	// Getters and setters
 	size_t size() const;		// Get the # of elements
+	size_t dimensions() const;
+	size_t dimension(size_t) const;
 	shape_type shape() const;	// Get shape of tensor
 	const T &get(size_t) const;	// Get scalar element
 
@@ -136,8 +237,8 @@ public:
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
 
 	// Dimension mismatch exception
-	class dimension_mismatch {};
-	class bad_dimensions {};
+	// class dimension_mismatch {};
+	// class bad_dimensions {};
 
 	// Shape mismatch exception
 	class shape_mismatch : public std::runtime_error {
@@ -165,14 +266,10 @@ Tensor <T> ::Tensor() {}
  */
 template <class T>
 Tensor <T> ::Tensor(const Tensor <T> &other)
-		: _size(other._size), _dims(other._dims)
+		: _shape(other._shape)
 {
-	// Faster for homogenous types
-	_dim = new size_t[_dims];
-	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
-
-	_array = new T[_size];
-	memcpy(_array, other._array, sizeof(T) * _size);
+	_array = new T[_shape.elements];
+	memcpy(_array, other._array, sizeof(T) * _shape.elements);
 }
 
 /**
@@ -183,131 +280,66 @@ Tensor <T> ::Tensor(const Tensor <T> &other)
 template <class T>
 template <class A>
 Tensor <T> ::Tensor(const Tensor <A> &other)
-		: _size(other._size), _dims(other._dims)
+		: _shape(other._shape)
 {
-	_dim = new size_t[_dims];
-	memcpy(_dim, other._dim, sizeof(size_t) * _dims);
-
-	_array = new T[_size];
-	for (size_t i = 0; i < _size; i++)
+	_array = new T[_shape.elements];
+	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = static_cast <T> (other._array[i]);
 }
 
 // Single element
+// TODO: should delegate to another constructor
 template <class T>
 Tensor <T> ::Tensor(const T &value)
-		: _size(1), _dims(1)
+		: _shape({1})
 {
-	_dim = new size_t[1];
-	_dim[0] = 1;
-
 	_array = new T[1];
 	_array[0] = value;
 }
 
 template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
-		: _dims(2), _size(rows * cols)
+		: _shape({rows, cols})
 {
-	_dim = new size_t[2];
-	_dim[0] = rows;
-	_dim[1] = cols;
-
-	_array = new T[_size];
+	_array = new T[_shape.elements];
 }
 
-/**
- * @brief Full slice constructor. Makes a Tensor out of existing (previously
- * allocated memory), and the ownership can be decided. By default, the Tensor
- * does not gain ownership over the memory. Note that the sizes given are not
- * checked for validity.
- *
- * @param dims the number of dimensions to slice.
- * @param dim the dimension size array.
- * @param size the size of the Tensor.
- * @param array the components of the Tensor.
- * @param slice the slice flag. Set to \c true to make sure the memory is not
- * deallocated by the resulting Tensor, and \c false otherwise.
- */
+/*
 template <class T>
 Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
 		: _dims(dims), _dim(dim), _size(size), _array(array),
-		_dim_sliced(slice), _arr_sliced(slice) {}
+		_dim_sliced(slice), _arr_sliced(slice) {} */
 
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
-		: _dims(dim.size())
+		: _shape(dim)
 {
-	_dim = new size_t[_dims];
+	if (arr.size() != _shape.elements)
+		throw shape_mismatch();
 
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (_size <= 0)
-		throw bad_dimensions();
-
-	if (arr.size() != _size)
-		throw dimension_mismatch();
-
-	_array = new T[prod];
-
-	for (size_t i = 0; i < prod; i++)
+	_array = new T[_shape.elements];
+	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = arr[i];
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim)
-		: _dims(dim.size())
+		: _shape(dim)
 {
-	_dim = new size_t[_dims];
-
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (!_size)
-		return;
-
-	_array = new T[prod];
+	_array = new T[_shape.elements];
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const T &def)
-		: _dims(dim.size())
+		: _shape(dim)
 {
-	_dim = new size_t[_dims];
-
-	// TODO: _nelems() methods
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (!_size)
-		return;
-
-	_array = new T[prod];
-
-	for (size_t i = 0; i < prod; i++)
+	_array = new T[_shape.elements];
+	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = def;
 }
 
+// TODO: remove once _array in a struct
 /**
  * @brief Deconstructor.
  */
@@ -317,48 +349,12 @@ Tensor <T> ::~Tensor()
 	_clear();
 }
 
+// TODO: remove once _array in a struct
 template <class T>
 void Tensor <T> ::_clear()
 {
-	if (!_array && !_dim)
-		return;
-
-	if (!_dim_sliced) {
-
-#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
-		if (_on_device) {
-			if (!_arena)
-				throw null_nvarena();
-
-			_arena->free(_dim);
-		} else {
-			delete[] _dim;
-		}
-#else
-		delete[] _dim;
-#endif
-
-	}
-
-	if (!_arr_sliced) {
-
-#if defined(__CUDACC__) && !defined(__CUDA_ARCH__)
-		if (_on_device) {
-			if (!_arena)
-				throw null_nvarena();
-
-			_arena->free(_array);
-		} else {
-			delete[] _array;
-		}
-#else
+	if (_array && !_arr_sliced)
 		delete[] _array;
-#endif
-
-	}
-
-	_array = nullptr;
-	_dim = nullptr;
 }
 
 ///////////////////////
@@ -366,37 +362,29 @@ void Tensor <T> ::_clear()
 ///////////////////////
 
 template <class T>
-template <class A>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
+Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 {
+	// Faster version for homogenous types (memcpy is faster)
 	if (this != &other) {
-		_dims = other._dims;
-		_size = other._size;
+		_shape = other._shape;
 
-		_dim = new size_t[_dims];
-		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
-
-		_array = new T[_size];
-		for (size_t i = 0; i < _size; i++)
-			_array[i] = static_cast <T> (other._array[i]);
+		_array = new T[_shape.elements];
+		memcpy(_array, other._array, sizeof(T) * _shape.elements);
 	}
 
 	return *this;
 }
 
 template <class T>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+template <class A>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 {
-	// Faster version for homogenous types (memcpy is faster)
 	if (this != &other) {
-		_dims = other._dims;
-		_size = other._size;
+		_shape = other._shape;
 
-		_dim = new size_t[_dims];
-		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
-
-		_array = new T[_size];
-		memcpy(_array, other._array, sizeof(T) * _size);
+		_array = new T[_shape.elements];
+		for (size_t i = 0; i < _shape.elements; i++)
+			_array[i] = static_cast <T> (other._array[i]);
 	}
 
 	return *this;
@@ -414,18 +402,26 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 template <class T>
 size_t Tensor <T> ::size() const
 {
-	return _size;
+	return _shape.elements;
+}
+
+template <class T>
+size_t Tensor <T> ::dimensions() const
+{
+	return _shape.dimensions;
+}
+
+template <class T>
+size_t Tensor <T> ::dimension(size_t index) const
+{
+	return _shape.array[index];
 }
 
 // Return dimensions as a vector
 template <class T>
 typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 {
-	shape_type dims(_dims);
-	for (size_t i = 0; i < _dims; i++)
-		dims[i] = _dim[i];
-
-	return dims;
+	return _shape.to_shape_type();
 }
 
 // Indexing
@@ -453,7 +449,7 @@ bool Tensor <T> ::good() const
 template <class T>
 void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
 {
-	for (size_t k = 0; k < _size; k++) {
+	for (size_t k = 0; k < size(); k++) {
 		if (p > i.uniform())
 			_array[k] = T(0);
 	}
@@ -465,7 +461,7 @@ Tensor <T> Tensor <T> ::transform(T (*func)(const T &)) const
 {
 	Tensor <T> result = *this;
 
-	for (size_t i = 0; i < _size; i++)
+	for (size_t i = 0; i < result.size(); i++)
 		result._array[i] = func(_array[i]);
 
 	return result;
@@ -475,7 +471,7 @@ template <class T>
 Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) const
 {
 	Tensor <T> out = *this;
-	for (int i = 0; i < out._size; i++)
+	for (int i = 0; i < out.size(); i++)
 		out._array[i] = ftn(out._array[i]);
 	return out;
 }
@@ -487,7 +483,7 @@ Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) cons
 template <class T>
 Tensor <T> &Tensor <T> ::operator*=(const T &x)
 {
-	for (size_t i = 0; i < _size; i++)
+	for (size_t i = 0; i < size(); i++)
 		_array[i] *= x;
 	return *this;
 }
@@ -495,7 +491,7 @@ Tensor <T> &Tensor <T> ::operator*=(const T &x)
 template <class T>
 Tensor <T> &Tensor <T> ::operator/=(const T &x)
 {
-	for (size_t i = 0; i < _size; i++)
+	for (size_t i = 0; i < size(); i++)
 		_array[i] /= x;
 	return *this;
 }
@@ -503,10 +499,10 @@ Tensor <T> &Tensor <T> ::operator/=(const T &x)
 template <class T>
 Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
 {
-	if (shape() != ts.shape())
+	if (_shape != ts._shape)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	for (size_t i = 0; i < _size; i++)
+	for (size_t i = 0; i < size(); i++)
 		_array[i] += ts._array[i];
 
 	return *this;
@@ -518,7 +514,7 @@ Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
 	if (shape() != ts.shape())
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	for (size_t i = 0; i < _size; i++)
+	for (size_t i = 0; i < size(); i++)
 		_array[i] -= ts._array[i];
 
 	return *this;
@@ -549,7 +545,7 @@ Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
 		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
 
 	Tensor <T> c(a.shape());
-	for (int i = 0; i < a._size; i++)
+	for (int i = 0; i < a.size(); i++)
 		c._array[i] = a._array[i] * b._array[i];
 	return c;
 }
@@ -561,7 +557,7 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
 
 	Tensor <T> c(a.shape());
-	for (int i = 0; i < a._size; i++)
+	for (int i = 0; i < a.size(); i++)
 		c._array[i] = a._array[i] / b._array[i];
 	return c;
 }
@@ -570,10 +566,10 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 bool operator==(const Tensor <T> &a, const Tensor <T> &b)
 {
-	if (a._size != b._size)
+	if (a._shape != b._shape)
 		return false;
 
-	for (size_t i = 0; i < a._size; i++) {
+	for (size_t i = 0; i < a.size(); i++) {
 		if (a._array[i] != b._array[i])
 			return false;
 	}
@@ -622,7 +618,8 @@ std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
-	os << print(ts._array, ts._size, ts._dim, 0, ts._dims - 1);
+	// TODO: use the method
+	os << print(ts._array, ts.size(), ts._shape.array, 0, ts.dimensions() - 1);
 
 	return os;
 }

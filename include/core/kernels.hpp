@@ -26,7 +26,7 @@ Vector <T> apt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 
 	Vector <T> out(rs, T(0));
 
-	size_t k = V._size;
+	size_t k = V.size();
 	for (size_t i = 0; i < rs; i++) {
 		T acc = M._array[i * cs];
 
@@ -80,8 +80,8 @@ Vector <T> rmt_and_mult(const Matrix <T> &M, const Vector <T> &V)
 template <class T>
 Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 {
-	size_t rs = V._size;
-	size_t cs = Vt._size;
+	size_t rs = V.size();
+	size_t cs = Vt.size();
 
 	size_t n = rs * cs;
 

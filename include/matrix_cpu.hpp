@@ -5,25 +5,11 @@ namespace zhetapi {
 
 template <class T>
 Matrix <T> ::Matrix(const std::vector <Vector <T>> &columns)
+		: Matrix(columns.size(), columns[0].size())
 {
-	size_t r = columns.size();
-
-	if (r > 0) {
-		size_t c = columns[0].size();
-
-		this->_size = r * c;
-		this->_dims = 2;
-
-		this->_dim = new size_t[2];
-		this->_dim[0] = r;
-		this->_dim[1] = c;
-
-		this->_array = new T[this->_size];
-
-		for (size_t i = 0; i < get_rows(); i++) {
-			for (size_t j = 0; j < get_cols(); j++)
-				this->_array[get_cols() * i + j] = columns[j][i];
-		}
+	for (size_t i = 0; i < get_rows(); i++) {
+		for (size_t j = 0; j < get_cols(); j++)
+			this->_array[get_cols() * i + j] = columns[j][i];
 	}
 }
 

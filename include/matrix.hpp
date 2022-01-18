@@ -189,11 +189,11 @@ public:
 
 	Matrix transpose() const;
 
-	void operator+=(const Matrix &);
+	/* void operator+=(const Matrix &);
 	void operator-=(const Matrix &);
 
 	void operator*=(const T &);
-	void operator/=(const T &);
+	void operator/=(const T &); */
 
 	// Matrix and matrix operations
 	template <class U>
@@ -332,13 +332,14 @@ inline const T &Matrix <T> ::get(size_t i, size_t j) const
 	return this->_array[i * get_cols() + j];
 }
 
+// TODO: make a tensor method/function for this
 template <class T>
 T Matrix <T> ::norm() const
 {
 	T sum = 0;
 
-	for (size_t i = 0; i < this->_size; i++)
-		sum += this->_array[i] * this->_array[i];
+	for (size_t i = 0; i < this->size(); i++)
+		sum += Tensor <T> ::get(i) * Tensor <T> ::get(i);
 
 	return sqrt(sum);
 }
@@ -353,17 +354,13 @@ typename Matrix <T> ::index_type Matrix <T> ::get_dimensions() const
 template <class T>
 Matrix <T> Matrix <T> ::slice(const Matrix <T> ::index_type &start, const Matrix <T> ::index_type &end) const
 {
-	/* The following asserts make sure the pairs
-	 * are in bounds of the Matrix and that they
-	 * are in order.
-	 */
+	/* The following asserts make sure the pairs are in bounds of the Matrix
+	 * and that they are in order. */
 	assert(start.first <= end.first && start.second <= end.second);
 	assert(start.first < get_rows() && start.second < get_cols());
 	assert(end.first < get_rows() && end.second < get_cols());
 
-	/* Slicing is inclusive of the last
-	 * Vector passed.
-	 */
+	/* Slicing is inclusive of the last Vector passed. */
 	return Matrix <T> (
 		end.first - start.first + 1,
 		end.second - start.second + 1,
@@ -645,9 +642,8 @@ Matrix <T> Matrix <T> ::identity(size_t dim)
 template <class T>
 T Matrix <T> ::determinant(const Matrix <T> &a) const
 {
-	/* The determinant of an abitrary
-	 * Matrix is defined only if it
-	 * is a square Matrix.
+	/* The determinant of an abitrary Matrix is defined only if it is a
+	 * square Matrix.
 	 */
 	assert((a.get_rows() == a.get_cols()) && (a.get_rows() > 0));
 
@@ -686,7 +682,7 @@ template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
 		: Tensor <T> (other.get_rows(), other.get_cols())
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = other._array[i];
 }
 
@@ -696,7 +692,7 @@ Matrix <T> ::Matrix(const Matrix <A> &other)
 		: Tensor <T> (other.get_rows(), other.get_cols())
 {
 	const A *array = other[0];
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = array[i];
 }
 
@@ -718,8 +714,8 @@ Matrix <T> ::Matrix(const Matrix <T> &other, T k)
 		this->get_rows() = other.get_rows();
 		this->get_cols() = other.get_cols();
 
-		this->_size = other._size;
-		for (size_t i = 0; i < this->_size; i++)
+		this->size() = other._size;
+		for (size_t i = 0; i < this->size(); i++)
 			this->_array[i] = k * other._array[i];
 
 		this->_dims = 2;
@@ -734,28 +730,15 @@ template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, T val)
 		: Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = val;
 }
 
 template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
-	if (this != &other) {
-		this->_clear();
-
-		this->_size = other._size;
-		this->_array = new T[this->_size];
-
-		for (size_t i = 0; i < this->_size; i++)
-			this->_array[i] = other._array[i];
-
-		this->_dims = 2;
-		this->_dim = new size_t[2];
-
-		this->_dim[0] = other._dim[0];
-		this->_dim[1] = other._dim[1];
-	}
+	if (this != &other)
+		Tensor <T> ::operator=(other);
 
 	return *this;
 }
@@ -764,11 +747,11 @@ template <class T>
 void Matrix <T> ::resize(size_t rs, size_t cs)
 {
 	if (rs != get_rows() || cs != get_cols()) {
-		this->_size = rs * cs;
+		this->size() = rs * cs;
 
 		this->_clear();
 
-		this->_array = new T[this->_size];
+		this->_array = new T[this->size()];
 
 		if (!this->_dim) {
 			this->_dims = 2;
@@ -795,7 +778,7 @@ const T *Matrix <T> ::operator[](size_t i) const
 template <class T>
 inline size_t Matrix <T> ::get_rows() const
 {
-	return this->_dim[0];
+	return this->dimension(0);
 }
 
 template <class T>
@@ -805,9 +788,10 @@ inline size_t Matrix <T> ::get_cols() const
 	// do we need to check for rows?
 	// or do we assume that every matrix (including vectors)
 	// have at least a row
-	if (this->_dims < 2)
+	if (this->dimensions() < 2)
 		return 1;
-	return this->_dim[1];
+
+	return this->dimension(1);
 }
 
 template <class T>
@@ -840,7 +824,7 @@ void Matrix <T> ::stable_shur(const Matrix <T> &other)
 		&& (other.safe_dim_size(1) == this->safe_dim_size(1))))
 		throw typename Matrix <T> ::dimension_mismatch();
 
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] *= other._array[i];
 }
 
@@ -852,9 +836,7 @@ void Matrix <T> ::stable_shur_relaxed(const Matrix <T> &other)
 		this->_array[i] *= other._array[i];
 }
 
-
-
-template <class T>
+/* template <class T>
 void Matrix <T> ::operator+=(const Matrix <T> &other)
 {
 	assert(get_rows() == other.get_rows() && get_cols() == other.get_cols());
@@ -880,17 +862,18 @@ void Matrix <T> ::operator-=(const Matrix <T> &other)
 template <class T>
 void Matrix <T> ::operator*=(const T &x)
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] *= x;
 }
 
 template <class T>
 void Matrix <T> ::operator/=(const T &x)
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] /= x;
-}
+} */
 
+// TODO: Remove as it is done in tensor already
 template <class T>
 Matrix <T> operator+(const Matrix <T> &a, const Matrix <T> &b)
 {
@@ -943,25 +926,26 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 	if (A.get_cols() != B.get_rows())
 		throw typename Matrix <T> ::dimension_mismatch();
 
-        size_t rs = A.get_rows();
-        size_t cs = B.get_cols();
+	size_t rs = A.get_rows();
+	size_t cs = B.get_cols();
 
-        size_t kmax = B.get_rows();
+	size_t kmax = B.get_rows();
 
-        inline_init_mat(C, rs, cs);
+	// nline_init_mat(C, rs, cs);
+	Matrix <T> C(rs, cs);
 
-        for (size_t i = 0; i < rs; i++) {
-                const T *Ar = A[i];
-                T *Cr = C[i];
+	for (size_t i = 0; i < rs; i++) {
+		const T *Ar = A[i];
+		T *Cr = C[i];
 
-                for (size_t k = 0; k < kmax; k++) {
-                        const U *Br = B[k];
+		for (size_t k = 0; k < kmax; k++) {
+			const U *Br = B[k];
 
-                        T a = Ar[k];
-                        for (size_t j = 0; j < cs; j++)
-                                Cr[j] += T(a * Br[j]);
-                }
-        }
+			T a = Ar[k];
+			for (size_t j = 0; j < cs; j++)
+				Cr[j] += T(a * Br[j]);
+		}
+	}
 
 	return C;
 }

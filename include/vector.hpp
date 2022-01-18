@@ -213,7 +213,7 @@ template <class T>
 Vector <T> ::Vector(const Vector &other)
 		: Matrix <T> (other.size(), 1, T())
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = other._array[i];
 }
 
@@ -221,7 +221,7 @@ template <class T>
 Vector <T> ::Vector(const Matrix <T> &other)
 		: Matrix <T> (other.get_rows(), 1, T())
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = other[0][i];
 }
 
@@ -230,18 +230,19 @@ template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
 	if (this != &other) {
-		this->_clear();
+		/* this->_clear();
 
 		this->_array = new T[other._size];
 
-		this->_size = other._size;
-		for (size_t i = 0; i < this->_size; i++)
+		this->size() = other._size;
+		for (size_t i = 0; i < this->size(); i++)
 			this->_array[i] = other._array[i];
 
 		this->_dims = 1;
 		this->_dim = new size_t[1];
 
-		this->_dim[0] = this->_size;
+		this->_dim[0] = this->size(); */
+		Tensor <T> ::operator=(other);
 	}
 
 	return *this;
@@ -253,7 +254,7 @@ Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
 	if (this != &other) {
 		*this = Vector(other.get_rows(), T());
 
-		for (size_t i = 0; i < this->_size; i++)
+		for (size_t i = 0; i < this->size(); i++)
 			this->_array[i] = other[0][i];
 	}
 
@@ -333,7 +334,7 @@ inline const T &Vector <T> ::get(size_t i) const
 template <class T>
 T &Vector <T> ::x()
 {
-	if (this->_size < 1)
+	if (this->size() < 1)
 		throw index_out_of_bounds();
 
 	return this->_array[0];
@@ -345,7 +346,7 @@ T &Vector <T> ::x()
 template <class T>
 T &Vector <T> ::y()
 {
-	if (this->_size < 2)
+	if (this->size() < 2)
 		throw index_out_of_bounds();
 
 	return this->_array[1];
@@ -357,7 +358,7 @@ T &Vector <T> ::y()
 template <class T>
 T &Vector <T> ::z()
 {
-	if (this->_size < 3)
+	if (this->size() < 3)
 		throw index_out_of_bounds();
 
 	return this->_array[2];
@@ -369,7 +370,7 @@ T &Vector <T> ::z()
 template <class T>
 const T &Vector <T> ::x() const
 {
-	if (this->_size < 1)
+	if (this->size() < 1)
 		throw index_out_of_bounds();
 
 	return this->_array[0];
@@ -381,7 +382,7 @@ const T &Vector <T> ::x() const
 template <class T>
 const T &Vector <T> ::y() const
 {
-	if (this->_size < 2)
+	if (this->size() < 2)
 		throw index_out_of_bounds();
 
 	return this->_array[1];
@@ -393,7 +394,7 @@ const T &Vector <T> ::y() const
 template <class T>
 const T &Vector <T> ::z() const
 {
-	if (this->_size < 3)
+	if (this->size() < 3)
 		throw index_out_of_bounds();
 
 	return this->_array[2];
@@ -422,7 +423,7 @@ T Vector <T> ::min() const
 {
 	T mn = this->_array[0];
 
-	for (size_t j = 1; j < this->_size; j++) {
+	for (size_t j = 1; j < this->size(); j++) {
 		if (mn > this->_array[j])
 			mn = this->_array[j];
 	}
@@ -440,7 +441,7 @@ T Vector <T> ::max() const
 {
 	T mx = this->_array[0];
 
-	for (size_t j = 1; j < this->_size; j++) {
+	for (size_t j = 1; j < this->size(); j++) {
 		if (mx < this->_array[j])
 			mx = this->_array[j];
 	}
@@ -458,7 +459,7 @@ size_t Vector <T> ::imin() const
 {
 	size_t i = 0;
 
-	for (size_t j = 1; j < this->_size; j++) {
+	for (size_t j = 1; j < this->size(); j++) {
 		if (this->_array[i] > this->_array[j])
 			i = j;
 	}
@@ -476,7 +477,7 @@ size_t Vector <T> ::imax() const
 {
 	size_t i = 0;
 
-	for (size_t j = 1; j < this->_size; j++) {
+	for (size_t j = 1; j < this->size(); j++) {
 		if (this->_array[i] < this->_array[j])
 			i = j;
 	}
@@ -493,7 +494,7 @@ void Vector <T> ::normalize()
 {
 	T dt = this->norm();
 
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		(*this)[i] /= dt;
 }
 
@@ -502,39 +503,39 @@ void Vector <T> ::normalize()
 template <class T>
 Vector <T> Vector <T> ::append_above(const T &x) const
 {
-	T *arr = new T[this->_size + 1];
+	T *arr = new T[this->size() + 1];
 	arr[0] = x;
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		arr[i + 1] = this->_array[i];
-	return Vector(this->_size + 1, arr, false);
+	return Vector(this->size() + 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::append_below(const T &x)
 {
-	T *arr = new T[this->_size + 1];
-	for (size_t i = 0; i < this->_size; i++)
+	T *arr = new T[this->size() + 1];
+	for (size_t i = 0; i < this->size(); i++)
 		arr[i] = this->_array[i];
-	arr[this->_size] = x;
-	return Vector(this->_size + 1, arr, false);
+	arr[this->size()] = x;
+	return Vector(this->size() + 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::remove_top()
 {
-	T *arr = new T[this->_size - 1];
-	for (size_t i = 1; i < this->_size; i++)
+	T *arr = new T[this->size() - 1];
+	for (size_t i = 1; i < this->size(); i++)
 		arr[i - 1] = this->_array[i];
-	return Vector(this->_size - 1, arr, false);
+	return Vector(this->size() - 1, arr, false);
 }
 
 template <class T>
 Vector <T> Vector <T> ::remove_bottom()
 {
-	T *arr = new T[this->_size - 1];
-	for (size_t i = 0; i < this->_size - 1; i++)
+	T *arr = new T[this->size() - 1];
+	for (size_t i = 0; i < this->size() - 1; i++)
 		arr[i] = this->_array[i];
-	return Vector(this->_size - 1, arr, false);
+	return Vector(this->size() - 1, arr, false);
 }
 
 // Non-member operators
@@ -690,7 +691,8 @@ Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
 template <class T>
 Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 {
-	T *arr = new T[a._dim[0] + b._dim[0]];
+	// TODO: resort to cleaner allocation
+	T *arr = new T[a.dimension(0) + b.dimension(0)];
 
 	for (size_t i = 0; i < a.size(); i++)
 		arr[i] = a[i];
@@ -712,8 +714,8 @@ T inner(const Vector <T> &a, const Vector <T> &b)
 {
 	T acc = 0;
 
-	assert(a.size() == b.size());
-	for (size_t i = 0; i < a._size; i++)
+	assert(a._shape == b._shape);
+	for (size_t i = 0; i < a.size(); i++)
 		acc += a[i] * b[i];
 
 	return acc;
@@ -724,8 +726,8 @@ T inner(const Vector <T> &a, const Vector <U> &b)
 {
 	T acc = 0;
 
-	assert(a.size() == b.size());
-	for (size_t i = 0; i < a._size; i++)
+	assert(a._shape == b._shape);
+	for (size_t i = 0; i < a.size(); i++)
 		acc += (T) (a[i] * b[i]);	// Cast the result
 
 	return acc;
@@ -793,19 +795,19 @@ Vector <T> ::Vector(const Vector <A> &other)
 	// TODO: put this function into primitives
 	// TODO: use member initializer list
 	this->_array = new T[other.size()];
-	this->_size = other.size();
-	for (size_t i = 0; i < this->_size; i++)
+	this->size() = other.size();
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] = other[i];
 
 	this->_dims = 1;
 	this->_dim = new size_t[1];
-	this->_dim[0] = this->_size;
+	this->_dim[0] = this->size();
 }
 
 template <class T>
 Vector <T> Vector <T> ::operator()(std::function <T (T)> ftn)
 {
-	return Vector <T> (this->_size,
+	return Vector <T> (this->size(),
 		[&](size_t i) {
 			return ftn(this->_array[i]);
 		}
@@ -816,7 +818,7 @@ template <class T>
 T Vector <T> ::sum(std::function <T (T)> ftn)
 {
 	T s = 0;
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		s += ftn(this->_array[i]);
 
 	return s;
@@ -826,7 +828,7 @@ template <class T>
 T Vector <T> ::product(std::function <T (T)> ftn)
 {
 	T p = 1;
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		p *= ftn(this->_array[i]);
 
 	return p;
@@ -845,7 +847,7 @@ Vector <T> Vector <T> ::normalized() const
 
 	T dt = this->norm();
 
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		out.push_back((*this)[i]/dt);
 
 	return Vector(out);
@@ -861,7 +863,7 @@ Vector <T> Vector <T> ::normalized() const
 template <class T>
 void Vector <T> ::operator+=(const Vector <T> &a)
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] += a._array[i];
 }
 
@@ -875,7 +877,7 @@ void Vector <T> ::operator+=(const Vector <T> &a)
 template <class T>
 void Vector <T> ::operator-=(const Vector <T> &a)
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < this->size(); i++)
 		this->_array[i] -= a._array[i];
 }
 
