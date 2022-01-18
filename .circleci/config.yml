@@ -49,8 +49,7 @@ commands:
       - run:
           name: Building essentials
           command: |
-            sudo apt-get -y install pipenv
-            pipenv install smake
+            sudo python3 -m pip install smake
 
 jobs:
   testing:

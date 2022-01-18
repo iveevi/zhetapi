@@ -9,6 +9,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 // Library headers
@@ -43,11 +44,6 @@ public:
 
 // TODO: should be private, matrix and vector should not be able to access
 protected:
-	/* size_t	_dims		= 0;
-	size_t *_dim		= nullptr;
-	bool	_dim_sliced	= false; */
-
-	// size_t	_size		= 0;
 	T *	_array		= nullptr;
 	bool	_arr_sliced	= false;
 
@@ -236,10 +232,6 @@ public:
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
 
-	// Dimension mismatch exception
-	// class dimension_mismatch {};
-	// class bad_dimensions {};
-
 	// Shape mismatch exception
 	class shape_mismatch : public std::runtime_error {
 	public:
@@ -316,7 +308,7 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
 		: _shape(dim)
 {
 	if (arr.size() != _shape.elements)
-		throw shape_mismatch();
+		throw shape_mismatch(__PRETTY_FUNCTION__);
 
 	_array = new T[_shape.elements];
 	for (size_t i = 0; i < _shape.elements; i++)
@@ -564,14 +556,23 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 
 // Boolean operators
 template <class T>
+// TODO: SFINAE overload for floating types
 bool operator==(const Tensor <T> &a, const Tensor <T> &b)
 {
+	// TODO: static member (SFINAE)
+	static const T epsilon = 1e-5;
+
 	if (a._shape != b._shape)
 		return false;
 
 	for (size_t i = 0; i < a.size(); i++) {
-		if (a._array[i] != b._array[i])
-			return false;
+		if (std::is_floating_point <T> ::value) {
+			if (std::abs(a._array[i] - b._array[i]) > epsilon)
+				return false;
+		} else {
+			if (a._array[i] != b._array[i])
+				return false;
+		}
 	}
 
 	return true;

@@ -36,14 +36,49 @@ int main()
 	autograd::Function f_autograd = x * autograd::sqrt(x)
 		+ autograd::sin(x) - x;
 
+	// Input
+	autograd::Constant input = {
+		// Dimensions
+		{3, 3, 3},
+		// Values
+		{
+			1.0, 2.0, 3.0,
+			4.0, 5.0, 6.0,
+			7.0, 8.0, 9.0,
+
+			1.0, 2.0, 3.0,
+			4.0, 5.0, 6.0,
+			7.0, 8.0, 9.0,
+
+			1.0, 2.0, 3.0,
+			4.0, 5.0, 6.0,
+			7.0, 8.0, 9.0
+		}
+	};
+
+	// Check that the outputs are the same
+	std::cout << "Preliminary check:\n";
+	std::cout << "\tStandard: " << f_standard(input) << std::endl;
+	std::cout << "\tAutograd: " << f_autograd(input) << std::endl;
+
+	autograd::Constant out_standard = f_standard(input);
+	autograd::Constant out_autograd = f_autograd(input);
+
+	if (out_standard != out_autograd) {
+		std::cerr << "Outputs are not the same!\n";
+		return 1;
+	}
+
+	std::cout << "\nCheck passed!\n";
+
 	// Benchmarking
-	std::cout << "Benchmarking..." << std::endl;
+	std::cout << "\nBenchmarking..." << std::endl;
 
 	// Standard
 	start = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < N; i++)
-		f_standard(1.0);
+		f_standard(input);
 
 	end = std::chrono::high_resolution_clock::now();
 
@@ -54,7 +89,7 @@ int main()
 	start = std::chrono::high_resolution_clock::now();
 
 	for (int i = 0; i < N; i++)
-		f_autograd(1.0);
+		f_autograd(input);
 
 	end = std::chrono::high_resolution_clock::now();
 
