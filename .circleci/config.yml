@@ -49,6 +49,8 @@ commands:
       - run:
           name: Building essentials
           command: |
+            wget https://bootstrap.pypa.io/get-pip.py
+            sudo python3 get-pip.py
             sudo python3 -m pip install smake
 
 jobs:
