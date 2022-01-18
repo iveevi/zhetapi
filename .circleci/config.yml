@@ -51,7 +51,7 @@ commands:
           command: |
             wget https://bootstrap.pypa.io/get-pip.py
             sudo python3 get-pip.py
-            sudo python3 -m pip install smake
+            sudo python3 -m pip install pyyaml smake
 
 jobs:
   testing:
