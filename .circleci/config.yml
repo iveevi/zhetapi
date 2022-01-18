@@ -52,7 +52,7 @@ commands:
             sudo apt-get -y install python3
             sudo apt-get -y install python-pip
             python3 --version
-            pip3 install smake
+            pip install smake
 
 jobs:
   testing:

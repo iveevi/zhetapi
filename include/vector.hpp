@@ -230,7 +230,7 @@ template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
 	if (this != &other) {
-		this->clear();
+		this->_clear();
 
 		this->_array = new T[other._size];
 
@@ -731,13 +731,13 @@ T inner(const Vector <T> &a, const Vector <U> &b)
 	return acc;
 }
 
-// Externally defined methods
+/* Externally defined methods
 template <class T>
 Vector <T> Tensor <T> ::cast_to_vector() const
 {
 	// Return a slice-vector
 	return Vector <T> (_size, _array);
-}
+} */
 
 /**
  * @brief Constructs a vector out of a list of components.

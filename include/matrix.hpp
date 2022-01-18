@@ -742,7 +742,7 @@ template <class T>
 const Matrix <T> &Matrix <T> ::operator=(const Matrix <T> &other)
 {
 	if (this != &other) {
-		this->clear();
+		this->_clear();
 
 		this->_size = other._size;
 		this->_array = new T[this->_size];
@@ -766,7 +766,7 @@ void Matrix <T> ::resize(size_t rs, size_t cs)
 	if (rs != get_rows() || cs != get_cols()) {
 		this->_size = rs * cs;
 
-		this->clear();
+		this->_clear();
 
 		this->_array = new T[this->_size];
 
@@ -1140,13 +1140,13 @@ String Matrix <T> ::display() const
 
 #endif
 
-// Externally defined methods
+/* Externally defined methods
 template <class T>
 Matrix <T> Tensor <T> ::cast_to_matrix(size_t r, size_t c) const
 {
 	// Return a slice-vector
 	return Matrix <T> (r, c, _array);
-}
+} */
 
 }
 

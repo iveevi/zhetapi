@@ -7,12 +7,12 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
 // Library headers
 #include "std/interval.hpp"
-#include "cuda/essentials.cuh"
 
 namespace zhetapi {
 
@@ -37,22 +37,17 @@ class Interval;
 template <class T>
 class Tensor {
 protected:
-	// TODO: dimension as a vector
 	size_t	_dims		= 0;
 	size_t *_dim		= nullptr;
 	bool	_dim_sliced	= false;
 
+	// TODO: dimension is never sliced
 	size_t	_size		= 0;
 	T *	_array		= nullptr;
 	bool	_arr_sliced	= false;
 
-#ifdef __CUDACC__
-
-	NVArena *_arena		= nullptr;
-	bool	_on_device	= false;
-
-#endif
-
+	// Private methods
+	void _clear();
 public:
 	// Public type aliases
 	using value_type = T;
@@ -68,42 +63,66 @@ public:
 	// Single element
 	Tensor(const T &);
 
+	// TODO: replace with variadic size constructor
 	Tensor(size_t, size_t);
+
+	// TODO: make more memory safe
 	Tensor(size_t, size_t *, size_t, T *, bool = true);
 
-	explicit Tensor(const std::vector <std::size_t> &);
-	Tensor(const std::vector <std::size_t> &, const T &);
-	Tensor(const std::vector <std::size_t> &, const std::vector <T> &);
+	// Shape constructors
+	explicit Tensor(const shape_type &);
+	Tensor(const shape_type &, const T &);
+	Tensor(const shape_type &, const std::vector <T> &);
 
-	// Indexing
-	Tensor <T> operator[](size_t);
+	// Destructor
+	virtual ~Tensor();
+
+	// Essential methods
+	Tensor &operator=(const Tensor &);
+
+	template <class A>
+	Tensor &operator=(const Tensor <A> &);
+
+	// Getters and setters
+	size_t size() const;		// Get the # of elements
+	shape_type shape() const;	// Get shape of tensor
+	const T &get(size_t) const;	// Get scalar element
 
 	// TODO: iterators
-	// TODO: this type of indexing is very tedious with the [], use anotehr
-	// method like .get(...)
-	T &operator[](const std::vector <size_t> &);
-	const T &operator[](const std::vector <size_t> &) const;
-
-	// TODO: remove size term from vector and matrix classes
-	__cuda_dual__ size_t size() const;
-	// __cuda_dual__ size_t dimensions() const;
-	__cuda_dual__ size_t dim_size(size_t) const;
-	__cuda_dual__ size_t safe_dim_size(size_t) const;
-
-	// TODO: refactor to shape()
-	shape_type shape() const;
-
-	// TODO: private?
-	__cuda_dual__
-	void clear();
-
-	// Properties
-	bool good() const;
 
 	// Actions
 	void nullify(long double, const utility::Interval <1> &);
 
-	// Boolean operators (generalize with prefix)
+	// Apply a function to each element of the tensor
+	Tensor <T> transform(T (*)(const T &)) const;
+	Tensor <T> transform(const std::function <T (const T &)> &) const;
+
+	// Properties
+	// TODO: is this needed?
+	bool good() const; // operator bool() const; ?
+
+	// Arithmetic modifiers
+	Tensor <T> &operator*=(const T &);
+	Tensor <T> &operator/=(const T &);
+
+	Tensor <T> &operator+=(const Tensor <T> &);
+	Tensor <T> &operator-=(const Tensor <T> &);
+
+	// Arithmetic
+	template <class U>
+	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend Tensor <U> multiply(const Tensor <U> &, const Tensor <U> &);
+
+	template <class U>
+	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
+
+	// Boolean operators
+	// TODO: specialize for floating types to account for error
 	template <class U>
 	friend bool operator==(const Tensor <U> &, const Tensor <U> &);
 
@@ -116,71 +135,22 @@ public:
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
 
-	template <class A>
-	Tensor &operator=(const Tensor <A> &);
-
-	Tensor &operator=(const Tensor &);
-
-	~Tensor();
-
-	// TODO: Re-organize the methods
-	Vector <T> cast_to_vector() const;
-	Matrix <T> cast_to_matrix(size_t, size_t) const;
-
-	// Arithmetic
-	void operator*=(const T &);
-	void operator/=(const T &);
-
-	template <class U>
-	friend Matrix <U> operator*(const Matrix <U> &, const U &);
-
-	template <class U>
-	friend Matrix <U> operator*(const U &, const Matrix <U> &);
-
-	template <class U>
-	friend Matrix <U> operator/(const Matrix <U> &, const U &);
-
-	template <class U>
-	friend Matrix <U> operator/(const U &, const Matrix <U> &);
-
 	// Dimension mismatch exception
 	class dimension_mismatch {};
 	class bad_dimensions {};
 
-#ifdef __CUDACC__
-
-	class null_nvarena : public std::runtime_error {
+	// Shape mismatch exception
+	class shape_mismatch : public std::runtime_error {
 	public:
-		null_nvarena() : std::runtime_error("Tensor::clear: null NVArena.") {}
+		shape_mismatch(const std::string &loc)
+				: std::runtime_error(loc +
+				": shapes are not matching") {}
 	};
-
-#endif
-
-	// TODO: start reworking tensor from here
-
-	// Get scalar element
-	const T &get(size_t) const;
-
-	// Apply a function to each element of the tensor
-	Tensor <T> transform(T (*)(const T &)) const;
-	Tensor <T> transform(const std::function <T (const T &)> &) const;
-
-	// Arithmetic
-	// TODO: heterogneous versions?
-	template <class U>
-	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
-
-	template <class U>
-	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
-
-	template <class U>
-	friend Tensor <U> multiply(const Tensor <U> &, const Tensor <U> &);
-
-	template <class U>
-	friend Tensor <U> divide(const Tensor <U> &, const Tensor <U> &);
 };
 
-// TODO: reorganize
+/////////////////////////
+// Tensor constructors //
+/////////////////////////
 
 /**
  * @brief Default constructor.
@@ -264,41 +234,78 @@ Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
 		: _dims(dims), _dim(dim), _size(size), _array(array),
 		_dim_sliced(slice), _arr_sliced(slice) {}
 
+
 template <class T>
-template <class A>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
+Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
+		: _dims(dim.size())
 {
-	if (this != &other) {
-		_dims = other._dims;
-		_size = other._size;
+	_dim = new size_t[_dims];
 
-		_dim = new size_t[_dims];
-		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
 
-		_array = new T[_size];
-		for (size_t i = 0; i < _size; i++)
-			_array[i] = static_cast <T> (other._array[i]);
+		_dim[i] = dim[i];
 	}
 
-	return *this;
+	_size = prod;
+
+	if (_size <= 0)
+		throw bad_dimensions();
+
+	if (arr.size() != _size)
+		throw dimension_mismatch();
+
+	_array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		_array[i] = arr[i];
 }
 
 template <class T>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+Tensor <T> ::Tensor(const shape_type &dim)
+		: _dims(dim.size())
 {
-	// Faster version for homogenous types (memcpy is faster)
-	if (this != &other) {
-		_dims = other._dims;
-		_size = other._size;
+	_dim = new size_t[_dims];
 
-		_dim = new size_t[_dims];
-		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
 
-		_array = new T[_size];
-		memcpy(_array, other._array, sizeof(T) * _size);
+		_dim[i] = dim[i];
 	}
 
-	return *this;
+	_size = prod;
+
+	if (!_size)
+		return;
+
+	_array = new T[prod];
+}
+
+template <class T>
+Tensor <T> ::Tensor(const shape_type &dim, const T &def)
+		: _dims(dim.size())
+{
+	_dim = new size_t[_dims];
+
+	// TODO: _nelems() methods
+	size_t prod = 1;
+	for (size_t i = 0; i < _dims; i++) {
+		prod *= dim[i];
+
+		_dim[i] = dim[i];
+	}
+
+	_size = prod;
+
+	if (!_size)
+		return;
+
+	_array = new T[prod];
+
+	for (size_t i = 0; i < prod; i++)
+		_array[i] = def;
 }
 
 /**
@@ -307,11 +314,11 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 template <class T>
 Tensor <T> ::~Tensor()
 {
-	clear();
+	_clear();
 }
 
 template <class T>
-void Tensor <T> ::clear()
+void Tensor <T> ::_clear()
 {
 	if (!_array && !_dim)
 		return;
@@ -354,29 +361,61 @@ void Tensor <T> ::clear()
 	_dim = nullptr;
 }
 
+///////////////////////
+// Essential methods //
+///////////////////////
+
+template <class T>
+template <class A>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
+{
+	if (this != &other) {
+		_dims = other._dims;
+		_size = other._size;
+
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+		_array = new T[_size];
+		for (size_t i = 0; i < _size; i++)
+			_array[i] = static_cast <T> (other._array[i]);
+	}
+
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
+{
+	// Faster version for homogenous types (memcpy is faster)
+	if (this != &other) {
+		_dims = other._dims;
+		_size = other._size;
+
+		_dim = new size_t[_dims];
+		memcpy(_dim, other._dim, sizeof(size_t) * _dims);
+
+		_array = new T[_size];
+		memcpy(_array, other._array, sizeof(T) * _size);
+	}
+
+	return *this;
+}
+
+/////////////////////////
+// Getters and setters //
+/////////////////////////
+
 /**
  * @brief Returns the size of the tensor.
  *
  * @return the size of the tensor (number of components in the tensor).
  */
 template <class T>
-__cuda_dual__
 size_t Tensor <T> ::size() const
 {
 	return _size;
 }
-
-/*
- * @brief Returns the number of dimensions in the tensor.
- *
- * @return the number of dimensions in the tensor.
- *
-template <class T>
-__cuda_dual__
-size_t Tensor <T> ::dimensions() const
-{
-	return _dims;
-} */
 
 // Return dimensions as a vector
 template <class T>
@@ -389,92 +428,35 @@ typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 	return dims;
 }
 
-/**
- * @brief Returns the size of a specific dimension. Does not check bounds.
- *
- * @param i the desired index.
- *
- * @return the size of dimension \p i.
- */
-template <class T>
-__cuda_dual__
-size_t Tensor <T> ::dim_size(size_t i) const
-{
-	return _dim[i];
-}
-
-/**
- * @brief Returns the size of a specific dimension. If the index is out of
- * bounds of the number of dimensions, then 1 is returned.
- *
- * @param i the desired index.
- *
- * @return the size of dimension \p i.
- */
-template <class T>
-__cuda_dual__
-size_t Tensor <T> ::safe_dim_size(size_t i) const
-{
-	return (_dims > i) ? _dim[i] : 1;
-}
-
-// Comparison
-template <class T>
-bool operator==(const Tensor <T> &a, const Tensor <T> &b)
-{
-	if (a._size != b._size)
-		return false;
-
-	for (size_t i = 0; i < a._size; i++) {
-		if (a._array[i] != b._array[i])
-			return false;
-	}
-
-	return true;
-}
-
-template <class T>
-bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
-{
-	return !(a == b);
-}
-
-// Addition and subtraction
-template <class T>
-Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
-{
-	// TODO: make an exception class
-	if (a._size != b._size)		// TODO: this doesnt fully check, make a struct for size info
-		throw "Tensor sizes do not match";
-
-	Tensor <T> c(a.shape());
-
-	for (size_t i = 0; i < a._size; i++)
-		c._array[i] = a._array[i] + b._array[i];
-
-	return c;
-}
-
-// TODO: make += and -= instead
-template <class T>
-Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
-{
-	if (a._size != b._size)
-		throw "Tensor size mismatch";
-
-	Tensor <T> c(a.shape());
-
-	for (size_t i = 0; i < a._size; i++)
-		c._array[i] = a._array[i] - b._array[i];
-
-	return c;
-}
-
 // Indexing
 template <class T>
 const T &Tensor <T> ::get(size_t i) const
 {
 	return _array[i];
+}
+
+////////////////
+// Properties //
+////////////////
+
+template <class T>
+bool Tensor <T> ::good() const
+{
+	return _array != nullptr;
+}
+
+/////////////
+// Actions //
+/////////////
+
+// TODO: should not be a method
+template <class T>
+void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
+{
+	for (size_t k = 0; k < _size; k++) {
+		if (p > i.uniform())
+			_array[k] = T(0);
+	}
 }
 
 // Applying element-wise transformations
@@ -498,11 +480,74 @@ Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) cons
 	return out;
 }
 
-// Element-wise operations
+//////////////////////////
+// Arithmetic modifiers //
+//////////////////////////
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator*=(const T &x)
+{
+	for (size_t i = 0; i < _size; i++)
+		_array[i] *= x;
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator/=(const T &x)
+{
+	for (size_t i = 0; i < _size; i++)
+		_array[i] /= x;
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
+{
+	if (shape() != ts.shape())
+		throw shape_mismatch(__PRETTY_FUNCTION__);
+
+	for (size_t i = 0; i < _size; i++)
+		_array[i] += ts._array[i];
+
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
+{
+	if (shape() != ts.shape())
+		throw shape_mismatch(__PRETTY_FUNCTION__);
+
+	for (size_t i = 0; i < _size; i++)
+		_array[i] -= ts._array[i];
+
+	return *this;
+}
+
+///////////////////////////
+// Arithmetic operations //
+///////////////////////////
+
+template <class T>
+Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
+{
+	Tensor <T> c(a);
+	return (c += b);
+}
+
+template <class T>
+Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
+{
+	Tensor <T> c(a);
+	return (c -= b);
+}
+
 template <class T>
 Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
 {
-	// TODO: check dimensions (make a helper function for this)
+	if (a.shape() != b.shape())
+		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+
 	Tensor <T> c(a.shape());
 	for (int i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] * b._array[i];
@@ -512,25 +557,24 @@ Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 {
-	// TODO: check dimensions (make a helper function for this)
+	if (a.shape() != b.shape())
+		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+
 	Tensor <T> c(a.shape());
 	for (int i = 0; i < a._size; i++)
 		c._array[i] = a._array[i] / b._array[i];
 	return c;
 }
 
-// Allow comparison of Tensor shapes
-template <class A, class B>
-bool operator==(const typename Tensor <A> ::shape_type &s1,
-		const typename Tensor <B> ::shape_type &s2)
+// Boolean operators
+template <class T>
+bool operator==(const Tensor <T> &a, const Tensor <T> &b)
 {
-	// Ensure same dimension
-	if (s1.size() != s2.size())
+	if (a._size != b._size)
 		return false;
 
-	// Compare each dimension
-	for (int i = 0; i < s1.size(); i++) {
-		if (s1[i] != s2[i])
+	for (size_t i = 0; i < a._size; i++) {
+		if (a._array[i] != b._array[i])
 			return false;
 	}
 
@@ -538,141 +582,16 @@ bool operator==(const typename Tensor <A> ::shape_type &s1,
 }
 
 template <class T>
-Tensor <T> ::Tensor(const std::vector <size_t> &dim, const std::vector <T> &arr)
-		: _dims(dim.size())
+bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 {
-
-#ifdef _CUDA_ARCH_
-
-	_on_device = false;
-
-#endif
-
-	_dim = new size_t[_dims];
-
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (_size <= 0)
-		throw bad_dimensions();
-
-	if (arr.size() != _size)
-		throw dimension_mismatch();
-
-	_array = new T[prod];
-
-	for (size_t i = 0; i < prod; i++)
-		_array[i] = arr[i];
+	return !(a == b);
 }
 
-template <class T>
-Tensor <T> ::Tensor(const std::vector <size_t> &dim)
-		: _dims(dim.size())
-{
-	_dim = new size_t[_dims];
+////////////////////////
+// Printing functions //
+////////////////////////
 
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (!_size)
-		return;
-
-	_array = new T[prod];
-}
-
-template <class T>
-Tensor <T> ::Tensor(const std::vector <size_t> &dim, const T &def)
-		: _dims(dim.size())
-{
-	_dim = new size_t[_dims];
-
-	size_t prod = 1;
-	for (size_t i = 0; i < _dims; i++) {
-		prod *= dim[i];
-
-		_dim[i] = dim[i];
-	}
-
-	_size = prod;
-
-	if (!_size)
-		return;
-
-	_array = new T[prod];
-
-	for (size_t i = 0; i < prod; i++)
-		_array[i] = def;
-}
-
-template <class T>
-bool Tensor <T> ::good() const
-{
-	return _array != nullptr;
-}
-
-// Actions
-template <class T>
-void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
-{
-	for (size_t k = 0; k < _size; k++) {
-		if (p > i.uniform())
-			_array[k] = T(0);
-	}
-}
-
-// Index
-template <class T>
-T &Tensor <T> ::operator[](const std::vector <size_t> &indices)
-{
-	size_t full = 0;
-
-	assert(indices.size() == _dims);
-	for (size_t i = 0; i < _dims; i++)
-		full += indices[i] * _dim[_dims - (i + 1)];
-
-	return _array[full];
-}
-
-template <class T>
-const T &Tensor <T> ::operator[](const std::vector <size_t> &indices) const
-{
-	size_t full = 0;
-
-	assert(indices.size() == _dims);
-	for (size_t i = 0; i < _dims; i++)
-		full += indices[i] * _dim[_dims - (i + 1)];
-
-	return _array[full];
-}
-
-// Arithmetic
-template <class T>
-void Tensor <T> ::operator*=(const T &x)
-{
-	for (size_t i = 0; i < _size; i++)
-		_array[i] *= x;
-}
-
-template <class T>
-void Tensor <T> ::operator/=(const T &x)
-{
-	for (size_t i = 0; i < _size; i++)
-		_array[i] /= x;
-}
-
-// Printing functions
+// TODO: turn into a method
 template <class T>
 std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 {
@@ -706,6 +625,28 @@ std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 	os << print(ts._array, ts._size, ts._dim, 0, ts._dims - 1);
 
 	return os;
+}
+
+/////////////////////
+// Extra functions //
+/////////////////////
+
+// Allow comparison of Tensor shapes
+template <class A, class B>
+bool operator==(const typename Tensor <A> ::shape_type &s1,
+		const typename Tensor <B> ::shape_type &s2)
+{
+	// Ensure same dimension
+	if (s1.size() != s2.size())
+		return false;
+
+	// Compare each dimension
+	for (int i = 0; i < s1.size(); i++) {
+		if (s1[i] != s2[i])
+			return false;
+	}
+
+	return true;
 }
 
 }
