@@ -1,5 +1,6 @@
 #include "../include/autograd/autograd.hpp"
 #include "../include/io/print.hpp"
+#include "../include/range.hpp"
 
 using namespace zhetapi;
 using namespace zhetapi::autograd;
