@@ -39,7 +39,7 @@ static std::pair <size_t, Mat> bergman_swap(const Mat &H, long double gamma)
 
 	size_t r = -1;
 	for (size_t i = 0; i < n - 1; i++) {
-		long double tmp = pow(gamma, i) * fabs(H[i][i]);
+		long double tmp = pow(gamma, i) * std::abs(H[i][i]);
 
 		if (tmp > max) {
 			max = tmp;
@@ -67,7 +67,7 @@ static Mat corner(const Mat &H, size_t r)
 	// Orthonal matrix Q
 	return Mat(n - 1, n - 1,
 		[&](size_t i, size_t j) -> long double {
-			if ((i == j)) {
+			if (i == j) {
 				if ((i == r) || (i == r + 1))
 					return beta/delta;
 				else
@@ -145,7 +145,7 @@ Vec pslq(const Vec &a, long double gamma, long double epsilon)
 	update();
 
 	// Main loop
-	while (fabs(H[n - 1][n - 2]) >= epsilon) {
+	while (std::abs(H[n - 1][n - 2]) >= epsilon) {
 		auto Dr = bergman_swap(H, gamma);
 
 		D = Dr.second;

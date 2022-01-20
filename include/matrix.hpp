@@ -766,13 +766,13 @@ void Matrix <T> ::resize(size_t rs, size_t cs)
 template <class T>
 T *Matrix <T> ::operator[](size_t i)
 {
-	return (this->_array + i * get_cols());
+	return (this->_array.get() + i * get_cols());
 }
 
 template <class T>
 const T *Matrix <T> ::operator[](size_t i) const
 {
-	return (this->_array + i * get_cols());
+	return (this->_array.get() + i * get_cols());
 }
 
 template <class T>

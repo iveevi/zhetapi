@@ -7,12 +7,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <vector>
 
 // Library headers
+#include "range.hpp"
 #include "std/interval.hpp"
 
 namespace zhetapi {
@@ -41,20 +43,27 @@ public:
 	// Public type aliases
 	using value_type = T;
 	using shape_type = std::vector <std::size_t>;
+	using slice_type = Range <int>;
 
 // TODO: should be private, matrix and vector should not be able to access
 protected:
-	T *	_array		= nullptr;
-	bool	_arr_sliced	= false;
+	// T *	_array		= nullptr;
+	std::shared_ptr <T []> _array;
 
 	// TODO: also wrap array in a struct
 
 	// Shape informations
 	struct _shape_info {
 		// Data
-		size_t dimensions = 0;
 		size_t elements = 0;
+		size_t dimensions = 0;
+		
+		// The dimension sizes,
+		// partial sizes,
+		// slices
 		size_t *array = nullptr;
+		size_t *partials = nullptr;
+		slice_type *slices = nullptr;
 
 		// TODO: slicing
 
@@ -65,16 +74,22 @@ protected:
 		// TODO: initializer list
 
 		// From shape_type
-		_shape_info(const shape_type &shape) {
-			dimensions = shape.size();
-			elements = 1;
-
+		_shape_info(const shape_type &shape)
+				: elements(1),
+				dimensions(shape.size()) {
 			array = new size_t[dimensions];
-			for (size_t i = 0; i < dimensions; i++) {
+			partials = new size_t[dimensions];
+			slices = new slice_type[dimensions];
+
+			for (int i = dimensions - 1; i >= 0; i--) {
 				array[i] = shape[i];
+				slices[i] = all;
+				partials[i] = elements;
 				elements *= shape[i];
 			}
 
+			// TODO: this check is redundant...
+			// at least make elements an integer
 			if (elements < 0) {
 				throw std::invalid_argument(
 					"Tensor::_shape_info:"
@@ -89,23 +104,37 @@ protected:
 			elements = other.elements;
 
 			array = new size_t[dimensions];
-			for (size_t i = 0; i < dimensions; i++)
+			partials = new size_t[dimensions];
+			slices = new slice_type[dimensions];
+
+			for (size_t i = 0; i < dimensions; i++) {
 				array[i] = other.array[i];
+				slices[i] = other.slices[i];
+			}
 		}
 
 		// Assignment operator
 		_shape_info &operator=(const _shape_info &other) {
 			if (this != &other) {
 				if (array != nullptr
-					&& dimensions != other.dimensions)
+					&& dimensions != other.dimensions) {
 					delete [] array;
+					delete [] partials;
+					delete [] slices;
+				}
 
 				dimensions = other.dimensions;
 				elements = other.elements;
 
 				array = new size_t[dimensions];
-				for (size_t i = 0; i < dimensions; i++)
+				partials = new size_t[dimensions];
+				slices = new slice_type[dimensions];
+
+				for (size_t i = 0; i < dimensions; i++) {
 					array[i] = other.array[i];
+					partials[i] = other.partials[i];
+					slices[i] = other.slices[i];
+				}
 			}
 
 			return *this;
@@ -114,7 +143,41 @@ protected:
 		// Destructor
 		~_shape_info() {
 			if (array != nullptr)
-				delete [] array;
+				delete[] array;
+
+			if (slices != nullptr)
+				delete[] slices;
+
+			if (partials != nullptr)
+				delete[] partials;
+		}
+
+		// Recalculate properties based on slices
+		void recalculate() {
+			elements = 1;
+
+			for (int i = dimensions - 1; i >= 0; i--) {
+				partials[i] = elements;
+				if (slices[i] == all)
+					elements *= array[i];
+				else
+					elements *= slices[i].size();
+			}
+		}
+
+		// Slicing a shape info
+		_shape_info slice(const slice_type &slice, int dim) const {
+			// Skip if slice is all
+			if (slice == all)
+				return *this;
+
+			// Copy shape info
+			_shape_info new_shape(*this);
+			new_shape.array[dim] = slice.size();
+			new_shape.slices[dim] = slice;
+			new_shape.recalculate();
+
+			return new_shape;
 		}
 
 		// Convert to shape_type
@@ -146,11 +209,11 @@ protected:
 	} _shape;
 
 	// Private methods
-	void _clear();
+	// void _clear();
 public:
 	// Essential constructors
 	Tensor();
-	Tensor(const Tensor &);
+	Tensor(const Tensor &);		// TODO: this isnt needed with shared_ptr
 
 	template <class A>
 	Tensor(const Tensor <A> &);
@@ -161,19 +224,18 @@ public:
 	// TODO: replace with variadic size constructor
 	Tensor(size_t, size_t);
 
-	// TODO: make more memory safe
-	Tensor(size_t, size_t *, size_t, T *, bool = true);
-
 	// Shape constructors
 	explicit Tensor(const shape_type &);
 	Tensor(const shape_type &, const T &);
 	Tensor(const shape_type &, const std::vector <T> &);
+	Tensor(const shape_type &, const std::initializer_list <T> &);
+	Tensor(const shape_type &, const std::function <T (size_t)> &);
 
 	// Destructor
-	virtual ~Tensor();
+	// virtual ~Tensor();
 
 	// Essential methods
-	Tensor &operator=(const Tensor &);
+	Tensor &operator=(const Tensor &); // TODO: this isnt needed with shared_ptr
 
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
@@ -183,7 +245,11 @@ public:
 	size_t dimensions() const;
 	size_t dimension(size_t) const;
 	shape_type shape() const;	// Get shape of tensor
+
+	// Indexing and slicing
 	const T &get(size_t) const;	// Get scalar element
+
+	Tensor <T> operator[](const slice_type &) const;
 
 	// TODO: iterators
 
@@ -258,11 +324,7 @@ Tensor <T> ::Tensor() {}
  */
 template <class T>
 Tensor <T> ::Tensor(const Tensor <T> &other)
-		: _shape(other._shape)
-{
-	_array = new T[_shape.elements];
-	memcpy(_array, other._array, sizeof(T) * _shape.elements);
-}
+		: _array(other._array), _shape(other._shape) {}
 
 /**
  * @brief Heterogenous (with respect to the component type) copy constructor.
@@ -274,7 +336,7 @@ template <class A>
 Tensor <T> ::Tensor(const Tensor <A> &other)
 		: _shape(other._shape)
 {
-	_array = new T[_shape.elements];
+	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = static_cast <T> (other._array[i]);
 }
@@ -285,7 +347,7 @@ template <class T>
 Tensor <T> ::Tensor(const T &value)
 		: _shape({1})
 {
-	_array = new T[1];
+	_array.reset(new T[1]);
 	_array[0] = value;
 }
 
@@ -293,15 +355,24 @@ template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
 		: _shape({rows, cols})
 {
-	_array = new T[_shape.elements];
+	_array.reset(new T[_shape.elements]);
 }
 
-/*
 template <class T>
-Tensor <T> ::Tensor(size_t dims, size_t *dim, size_t size, T *array, bool slice)
-		: _dims(dims), _dim(dim), _size(size), _array(array),
-		_dim_sliced(slice), _arr_sliced(slice) {} */
+Tensor <T> ::Tensor(const shape_type &dim)
+		: _shape(dim)
+{
+	_array.reset(new T[_shape.elements]);
+}
 
+template <class T>
+Tensor <T> ::Tensor(const shape_type &dim, const T &def)
+		: _shape(dim)
+{
+	_array.reset(new T[_shape.elements]);
+	for (size_t i = 0; i < _shape.elements; i++)
+		_array[i] = def;
+}
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
@@ -310,31 +381,36 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	_array = new T[_shape.elements];
+	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = arr[i];
 }
 
 template <class T>
-Tensor <T> ::Tensor(const shape_type &dim)
+Tensor <T> ::Tensor(const shape_type &dim, const std::initializer_list <T> &arr)
 		: _shape(dim)
 {
-	_array = new T[_shape.elements];
+	if (arr.size() != _shape.elements)
+		throw shape_mismatch(__PRETTY_FUNCTION__);
+
+	_array.reset(new T[_shape.elements]);
+	size_t i = 0;
+	for (auto it = arr.begin(); it != arr.end(); it++)
+		_array[i++] = *it;
 }
 
 template <class T>
-Tensor <T> ::Tensor(const shape_type &dim, const T &def)
+Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		: _shape(dim)
 {
-	_array = new T[_shape.elements];
+	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
-		_array[i] = def;
+		_array[i] = f(i);
 }
 
+/*
+
 // TODO: remove once _array in a struct
-/**
- * @brief Deconstructor.
- */
 template <class T>
 Tensor <T> ::~Tensor()
 {
@@ -345,9 +421,9 @@ Tensor <T> ::~Tensor()
 template <class T>
 void Tensor <T> ::_clear()
 {
-	if (_array && !_arr_sliced)
+	if (_array)
 		delete[] _array;
-}
+} */
 
 ///////////////////////
 // Essential methods //
@@ -359,9 +435,10 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
 	// Faster version for homogenous types (memcpy is faster)
 	if (this != &other) {
 		_shape = other._shape;
+		_array = other._array;
 
-		_array = new T[_shape.elements];
-		memcpy(_array, other._array, sizeof(T) * _shape.elements);
+		// _array = new T[_shape.elements];
+		// memcpy(_array, other._array, sizeof(T) * _shape.elements);
 	}
 
 	return *this;
@@ -374,7 +451,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	if (this != &other) {
 		_shape = other._shape;
 
-		_array = new T[_shape.elements];
+		_array.reset(new T[_shape.elements]);
 		for (size_t i = 0; i < _shape.elements; i++)
 			_array[i] = static_cast <T> (other._array[i]);
 	}
@@ -416,11 +493,26 @@ typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 	return _shape.to_shape_type();
 }
 
-// Indexing
+//////////////////////////
+// Indexing and slicing //
+//////////////////////////
+
 template <class T>
 const T &Tensor <T> ::get(size_t i) const
 {
 	return _array[i];
+}
+
+template <class T>
+Tensor <T> Tensor <T> ::operator[](const Tensor <T> ::slice_type &slice) const
+{
+	// TODO: redirect to helper method
+	Tensor <T> ret;
+
+	// Set properties
+	ret._shape = _shape.slice(slice, 0);
+	ret._array = _array;
+	return ret;
 }
 
 ////////////////
@@ -588,9 +680,13 @@ bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 // Printing functions //
 ////////////////////////
 
-// TODO: turn into a method
+// Print helper
 template <class T>
-std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
+std::string print_tensor(T *array, size_t size,
+		size_t *dimension_array,
+		typename Tensor <T> ::slice_type *slice_array,
+		size_t dim,
+		size_t max_dim)
 {
 	if (size == 0)
 		return "[]";
@@ -598,29 +694,60 @@ std::string print(T *arr, size_t size, size_t *ds, size_t dn, size_t dmax)
 	std::string out = "[";
 
 	// Size of each dimension
-	size_t dsize = size / ds[dn];
+	size_t dim_size = size / dimension_array[dim];
 
-	T *current = arr;
-	for (size_t i = 0; i < ds[dn]; i++) {
-		if (dn == dmax)
+	// Get the range
+	typename Tensor <T> ::slice_type range = slice_array[dim];
+
+	// Change the range if it is all
+	if (range == all) {
+		range = typename Tensor <T> ::slice_type(
+			0, dimension_array[dim]
+		);
+	}
+
+	auto itr = range.begin();
+	auto end = range.end();
+
+	while (itr < end) {
+		T *current = array + (*itr) * dim_size;
+
+		if (dim == max_dim) {
 			out += std::to_string(*current);
-		else
-			out += print(current, dsize, ds, dn + 1, dmax);
+		} else {
+			out += print_tensor(
+				current, dim_size,
+				dimension_array,
+				slice_array,
+				dim + 1, max_dim
+			);
+		}
 
-		if (i < ds[dn] - 1)
+		itr++;
+		if (itr < end)
 			out += ", ";
-
-		current += dsize;
 	}
 
 	return out + "]";
+}
+
+
+// Printing method
+template <class T>
+std::string Tensor <T> ::print() const
+{
+	return print_tensor(
+		_array.get(), _shape.elements,
+		_shape.array, _shape.slices,
+		0, _shape.dimensions - 1
+	);
 }
 
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
 	// TODO: use the method
-	os << print(ts._array, ts.size(), ts._shape.array, 0, ts.dimensions() - 1);
+	os << ts.print();
 
 	return os;
 }

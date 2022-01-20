@@ -1,3 +1,6 @@
+default_compiler: clang++
+default_standard: c++17
+
 definitions:
   - testing: 'testing/activation.cpp,
     testing/calculus.cpp,
@@ -12,7 +15,8 @@ definitions:
     testing/tensor.cpp,
     testing/timers.cpp,
     testing/vector.cpp'
-  - source: 'source/autograd/autograd.cpp,
+  - source: 'source/range.cpp,
+    source/autograd/autograd.cpp,
     source/autograd/iseq.cpp,
     source/io.cpp,
     source/linalg.cpp,
@@ -33,7 +37,7 @@ builds:
     - sources: 'experimental/experimental.cpp, source'
   - experimental_debug:
     - sources: 'experimental/experimental.cpp, source'
-    - flags: '-g'
+    - flags: '-g -Wall'
   - benchmark:
     - sources: 'experimental/benchmark.cpp, source'
     - flags: '-O3'
