@@ -25,11 +25,16 @@ class _DReLU : public Activation <T> {
 public:
 	__cuda_dual__
 	Vector <T> compute(const Vector <T> &x) const {
-		T *arr = new T[x.size()];
+		/* T *arr = new T[x.size()];
 		for (size_t i = 0; i < x.size(); i++) {
 			arr[i] = (x[i] > 0) ? 1 : 0;
 		}
-		return Vector <T> (x.size(), arr, false);
+		return Vector <T> (x.size(), arr, false); */
+		return Vector <T> (x.size(),
+			[&](size_t i) {
+				return (x[i] > 0) ? 1 : 0;
+			}
+		);
 	}
 };
 

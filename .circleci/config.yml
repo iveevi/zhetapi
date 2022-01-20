@@ -62,7 +62,11 @@ jobs:
       - dependencies
       - run:
           name: Running Tests
-          command: smake testing -j8
+          command: |
+            mv smake.yaml smake_temp.yaml
+            iconv -f utf8 -t iso89 smake_temp.yaml > smake.yaml
+            tree
+            smake testing -j8
 
 workflows:
   ubuntu-18.04-installation-and-port:

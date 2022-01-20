@@ -22,20 +22,20 @@ TEST(vector_construction_and_memory)
 
 	oss << "Size and default value constructor: " << tmp << endl;
 
-	double *arr = new double[10];
+	/* double *arr = new double[10];
 	for (size_t i = 0; i < 10; i++)
 		arr[i] = pow(i, 3.14);
-	
+
 	tmp = Vector <double> (10, arr);
 
 	oss << "Size and pointer constructor: " << tmp << endl;
-	
+
 	tmp = Vector <double> (5, arr);
-	
+
 	oss << "Cropped size and pointer constructor: " << tmp << endl;
 
 	// Free resources
-	delete[] arr;
+	delete[] arr; */
 
 	return true;
 }
@@ -66,7 +66,7 @@ TEST(vector_operations)
 	} else {
 		oss << "Concatenation passed." << endl;
 	}
-	
+
 	oss << "\na o b = " << concat(a, b) << endl;
 	oss << "c = " << c << endl;
 

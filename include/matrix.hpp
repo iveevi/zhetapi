@@ -23,24 +23,8 @@
 
 #endif
 
-// In function initialization
-#define inline_init_mat(mat, rs, cs)			\
-	Matrix <T> mat;					\
-							\
-	mat._size = rs * cs;				\
-							\
-	mat._array = new T[rs * cs];			\
-							\
-	memset(mat._array, 0, rs * cs * sizeof(T));	\
-							\
-	mat._dims = 2;					\
-							\
-	mat._dim = new size_t[2];			\
-							\
-	mat._dim[0] = rs;				\
-	mat._dim[1] = cs;
-
 namespace zhetapi {
+
 template <class T>
 class Vector;
 
@@ -55,21 +39,21 @@ public:
 	// Public aliases
 	using index_type = std::pair <size_t, size_t>;
 
-	__cuda_dual__ Matrix();
-	__cuda_dual__ Matrix(const Matrix &);
-	__cuda_dual__ Matrix(const Vector <T> &);
+	Matrix();
+	Matrix(const Matrix &);
+	Matrix(const Vector <T> &);
 
 	// Scaled
-	__cuda_dual__ Matrix(const Matrix &, T);
+	Matrix(const Matrix &, T);
 
-	__cuda_dual__ Matrix(size_t, size_t, T = T());
+	Matrix(size_t, size_t, T = T());
 
 	// Lambda constructors
 	// TODO: remove the pointer constructors
 	Matrix(size_t, size_t, std::function <T (size_t)>);
-	Matrix(size_t, size_t, std::function <T *(size_t)>);
+	// Matrix(size_t, size_t, std::function <T *(size_t)>);
 	Matrix(size_t, size_t, std::function <T (size_t, size_t)>);
-	Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
+	// Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
 
 	Matrix(const std::vector <T> &);
 	Matrix(const std::vector <Vector <T>> &);
@@ -77,11 +61,11 @@ public:
 	Matrix(const std::initializer_list <Vector <T>> &);
 	Matrix(const std::initializer_list <std::initializer_list <T>> &);
 
-	__cuda_dual__ Matrix(size_t, size_t, T *, bool = true);
+	// __cuda_dual__ Matrix(size_t, size_t, T *, bool = true);
 
 	// Cross type operations
 	template <class A>
-	__cuda_dual__ explicit Matrix(const Matrix <A> &);
+	explicit Matrix(const Matrix <A> &);
 
 	// Methods
 	inline T &get(size_t, size_t);
@@ -247,53 +231,7 @@ T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
 template <class T>
 Matrix <T> ::Matrix() : Tensor <T> (0, 0) {}
 
-#ifdef __AVR
-
-// Lambda constructors
-template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t))
-                : Tensor <T> (rs, cs)
-{
-	for (size_t i = 0; i < get_rows(); i++) {
-		for (size_t j = 0; j < get_cols(); j++)
-			this->_array[get_cols() * i + j] = gen(i);
-	}
-}
-
-template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t))
-                : Tensor <T> (rs, cs)
-{
-	for (size_t i = 0; i < get_rows(); i++) {
-		for (size_t j = 0; j < get_cols(); j++)
-			this->_array[get_cols() * i + j] = *gen(i);
-	}
-}
-
-template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, T (*gen)(size_t, size_t))
-		: Tensor <T> (rs, cs)
-{
-	for (size_t i = 0; i < get_rows(); i++) {
-		for (size_t j = 0; j < get_cols(); j++)
-			this->_array[get_cols() * i + j] = gen(i, j);
-	}
-}
-
-template <class T>
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *(*gen)(size_t, size_t))
-		: Tensor <T> (rs, cs)
-{
-	this->_array = new T[get_rows() * get_cols()];
-	for (int i = 0; i < get_rows(); i++) {
-		for (int j = 0; j < get_cols(); j++)
-			this->_array[get_cols() * i + j] = *gen(i, j);
-	}
-}
-
-#endif
-
-// Owner implies that the vector object will take care of the deallocation
+/* Owner implies that the vector object will take care of the deallocation
 template <class T>
 __cuda_dual__
 Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
@@ -302,7 +240,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
 	// TODO: implement slice constructor on the Tensor class
 	this->_array = arr;
 	this->_arr_sliced = slice;
-}
+} */
 
 /**
  * @brief Component retrieval.

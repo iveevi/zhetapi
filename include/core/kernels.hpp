@@ -5,6 +5,8 @@
 #include "../matrix.hpp"
 #include "../vector.hpp"
 
+// TODO: remove this header, it is quite useless
+
 /**
  * @file kernels.hpp
  * @brief This file contains CPU "kernels" which speed up computation in other parts of
@@ -85,11 +87,15 @@ Matrix <T> vvt_mult(const Vector <T> &V, const Vector <T> &Vt)
 
 	size_t n = rs * cs;
 
-	T *tmp = new T[n];
+	/* T *tmp = new T[n];
 	for (size_t i = 0; i < n; i++)
 		tmp[i] = V._array[i / cs] * Vt._array[i % cs];
 
-	return Matrix <T> (rs, cs, tmp, false);
+	return Matrix <T> (rs, cs, tmp, false); */
+
+	return Matrix <T> (rs, cs, [&] (size_t i, size_t j) {
+		return V._array[i] * Vt._array[j];
+	});
 }
 
 }

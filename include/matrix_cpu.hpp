@@ -67,12 +67,12 @@ template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t)> gen)
                 : Tensor <T> (rs, cs)
 {
-	for (size_t i = 0; i < get_rows(); i++) {
-		for (size_t j = 0; j < get_cols(); j++)
-			this->_array[get_cols() * i + j] = gen(i);
-	}
+	// TODO: set function in tensor
+	for (size_t i = 0; i < this->size(); i++)
+		this->_array[i] = gen(i);
 }
 
+/*
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
                 : Tensor <T> (rs, cs)
@@ -81,7 +81,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t)> gen)
 		for (size_t j = 0; j < get_cols(); j++)
 			this->_array[get_cols() * i + j] = *gen(i);
 	}
-}
+} */
 
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen)
@@ -93,6 +93,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T (size_t, size_t)> gen
 	}
 }
 
+/*
 template <class T>
 Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> gen)
 		: Tensor <T> (rs, cs)
@@ -105,7 +106,7 @@ Matrix <T> ::Matrix(size_t rs, size_t cs, std::function <T *(size_t, size_t)> ge
 		for (int j = 0; j < get_cols(); j++)
 			this->_array[get_cols() * i + j] = *gen(i, j);
 	}
-}
+} */
 
 template <class T>
 void Matrix <T> ::write(std::ofstream &fout) const

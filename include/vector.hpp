@@ -32,7 +32,7 @@ public:
 
 	Vector(size_t);
 	Vector(size_t, T);
-	Vector(size_t, T *, bool = true);
+	// Vector(size_t, T *, bool = true);
 
 	// Lambda constructors
 	Vector(size_t, std::function <T (size_t)>);
@@ -200,9 +200,10 @@ Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
 
 #endif
 
+/*
 template <class T>
 Vector <T> ::Vector(size_t rs, T *ref, bool slice)
-		: Matrix <T> (rs, 1, ref, slice) {}
+		: Matrix <T> (rs, 1, ref, slice) {} */
 
 /**
  * @brief Copy constructor.
@@ -499,43 +500,46 @@ void Vector <T> ::normalize()
 }
 
 // TODO: rename these functions (or add): they imply modification (also add const)
-// TODO: use memcpy later
 template <class T>
 Vector <T> Vector <T> ::append_above(const T &x) const
 {
-	T *arr = new T[this->size() + 1];
-	arr[0] = x;
+	Vector <T> v(this->size() + 1);
+
+	v[0] = x;
 	for (size_t i = 0; i < this->size(); i++)
-		arr[i + 1] = this->_array[i];
-	return Vector(this->size() + 1, arr, false);
+		v[i + 1] = this->_array[i];
+	return v;
 }
 
 template <class T>
 Vector <T> Vector <T> ::append_below(const T &x)
 {
-	T *arr = new T[this->size() + 1];
+	Vector <T> v(this->size() + 1);
+
 	for (size_t i = 0; i < this->size(); i++)
-		arr[i] = this->_array[i];
-	arr[this->size()] = x;
-	return Vector(this->size() + 1, arr, false);
+		v[i] = this->_array[i];
+	v[this->size()] = x;
+	return v;
 }
 
+// TODO: replace with slices
 template <class T>
 Vector <T> Vector <T> ::remove_top()
 {
-	T *arr = new T[this->size() - 1];
+	Vector <T> v(this->size() - 1);
 	for (size_t i = 1; i < this->size(); i++)
-		arr[i - 1] = this->_array[i];
-	return Vector(this->size() - 1, arr, false);
+		v[i - 1] = this->_array[i];
+	return v;
 }
 
+// TODO: replace with slices
 template <class T>
 Vector <T> Vector <T> ::remove_bottom()
 {
-	T *arr = new T[this->size() - 1];
+	Vector <T> v(this->size() - 1);
 	for (size_t i = 0; i < this->size() - 1; i++)
-		arr[i] = this->_array[i];
-	return Vector(this->size() - 1, arr, false);
+		v[i] = this->_array[i];
+	return v;
 }
 
 // Non-member operators
@@ -691,16 +695,14 @@ Vector <T> cross(const Vector <T> &a, const Vector <T> &b)
 template <class T>
 Vector <T> concat(const Vector <T> &a, const Vector <T> &b)
 {
-	// TODO: resort to cleaner allocation
-	T *arr = new T[a.dimension(0) + b.dimension(0)];
-
+	Vector <T> out(a.size() + b.size());
 	for (size_t i = 0; i < a.size(); i++)
-		arr[i] = a[i];
+		out[i] = a[i];
 
 	for (size_t i = 0; i < b.size(); i++)
-		arr[a.size() + i] = b[i];
+		out[a.size() + i] = b[i];
 
-	return Vector <T> (a.size() + b.size(), arr);
+	return out;
 }
 
 template <class T, class ... U>

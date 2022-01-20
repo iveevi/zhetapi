@@ -20,7 +20,7 @@
 #include "../cuda/essentials.cuh"
 
 namespace zhetapi {
-		
+
 namespace ml {
 
 /*
@@ -35,7 +35,7 @@ template <class T>
 class Linear : public Activation <T> {
 	T	_alpha;
 public:
-	
+
 	__cuda_dual__
 	Linear(const T &alpha = T(1)) : _alpha(alpha),
 			Activation <T> (Activation <T> ::AT_Linear, {alpha}) {}
@@ -60,7 +60,7 @@ public:
 	}
 
 #else
-	
+
 	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
@@ -104,11 +104,11 @@ public:
 #ifndef ZHP_CUDA
 
 	Vector <T> compute(const Vector <T> &x) const {
-		T *arr = new T[x.size()];
-		for (size_t i = 0; i < x.size(); i++) {
-			arr[i] = (x[i] > 0) ? x[i] : 0;
-		}
-		return Vector <T> (x.size(), arr, false);
+		return Vector <T> (x.size(),
+			[&](size_t i) {
+				return (x[i] > 0) ? x[i] : 0;
+			}
+		);
 	}
 
 	Activation <T> *derivative() const {
@@ -116,7 +116,7 @@ public:
 	}
 
 #else
-	
+
 	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
@@ -143,7 +143,7 @@ public:
 	LeakyReLU(const T &alpha = 1) :
 			Activation <T> (Activation <T> ::AT_ReLU, {alpha}),
 			_alpha(alpha) {}
-	
+
 	__cuda_dual__
 	Activation <T> *copy() const {
 		return new LeakyReLU <T> (_alpha);
@@ -193,7 +193,7 @@ public:
 	_host_ _device_
 	Vector <T> compute(const Vector <T> &x) const {
 		return Vector <T> (x.size(),
-			[x] _host_ _device_ (size_t i) { 
+			[x] _host_ _device_ (size_t i) {
 				return 1/(1 + exp(-x[i]));
 			}
 		);
