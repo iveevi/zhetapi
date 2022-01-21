@@ -65,18 +65,18 @@ protected:
 		size_t *partials = nullptr;
 		slice_type *slices = nullptr;
 
-		// TODO: slicing
+		// Current dimension for consecutive slicing
+		//	always reset upon construction/copy
+		size_t cdim = 0;
 
 		// Constructors
 		_shape_info() = default;
 
-		// TODO: varaidic constructor
-		// TODO: initializer list
-
 		// From shape_type
 		_shape_info(const shape_type &shape)
 				: elements(1),
-				dimensions(shape.size()) {
+				dimensions(shape.size()),
+				cdim(0) {
 			array = new size_t[dimensions];
 			partials = new size_t[dimensions];
 			slices = new slice_type[dimensions];
@@ -110,6 +110,7 @@ protected:
 			for (size_t i = 0; i < dimensions; i++) {
 				array[i] = other.array[i];
 				slices[i] = other.slices[i];
+				partials[i] = other.partials[i];
 			}
 		}
 
@@ -150,6 +151,24 @@ protected:
 
 			if (partials != nullptr)
 				delete[] partials;
+		}
+
+		// Translate an index using the shape and slices
+		size_t translate(size_t index) const {
+			size_t result = 0;
+			size_t rem = index;
+
+			for (size_t i = 0; i < dimensions; i++) {
+				size_t q = rem / partials[i];
+				rem = rem % partials[i];
+
+				if (slices[i] == all)
+					result += q * partials[i];
+				else
+					result += slices[i].compute(q) * partials[i];
+			}
+
+			return result;
 		}
 
 		// Recalculate properties based on slices
@@ -207,13 +226,9 @@ protected:
 			return !(*this == other);
 		}
 	} _shape;
-
-	// Private methods
-	// void _clear();
 public:
 	// Essential constructors
 	Tensor();
-	Tensor(const Tensor &);		// TODO: this isnt needed with shared_ptr
 
 	template <class A>
 	Tensor(const Tensor <A> &);
@@ -230,12 +245,6 @@ public:
 	Tensor(const shape_type &, const std::vector <T> &);
 	Tensor(const shape_type &, const std::initializer_list <T> &);
 	Tensor(const shape_type &, const std::function <T (size_t)> &);
-
-	// Destructor
-	// virtual ~Tensor();
-
-	// Essential methods
-	Tensor &operator=(const Tensor &); // TODO: this isnt needed with shared_ptr
 
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
@@ -316,15 +325,6 @@ public:
  */
 template <class T>
 Tensor <T> ::Tensor() {}
-
-/**
- * @brief Homogenous (with respect to the component type) copy constructor.
- *
- * @param other the reference vector (to be copied from).
- */
-template <class T>
-Tensor <T> ::Tensor(const Tensor <T> &other)
-		: _array(other._array), _shape(other._shape) {}
 
 /**
  * @brief Heterogenous (with respect to the component type) copy constructor.
@@ -408,41 +408,9 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		_array[i] = f(i);
 }
 
-/*
-
-// TODO: remove once _array in a struct
-template <class T>
-Tensor <T> ::~Tensor()
-{
-	_clear();
-}
-
-// TODO: remove once _array in a struct
-template <class T>
-void Tensor <T> ::_clear()
-{
-	if (_array)
-		delete[] _array;
-} */
-
 ///////////////////////
 // Essential methods //
 ///////////////////////
-
-template <class T>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <T> &other)
-{
-	// Faster version for homogenous types (memcpy is faster)
-	if (this != &other) {
-		_shape = other._shape;
-		_array = other._array;
-
-		// _array = new T[_shape.elements];
-		// memcpy(_array, other._array, sizeof(T) * _shape.elements);
-	}
-
-	return *this;
-}
 
 template <class T>
 template <class A>
@@ -500,17 +468,19 @@ typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 template <class T>
 const T &Tensor <T> ::get(size_t i) const
 {
-	return _array[i];
+	size_t ti = _shape.translate(i);
+	return _array[ti];
 }
 
 template <class T>
 Tensor <T> Tensor <T> ::operator[](const Tensor <T> ::slice_type &slice) const
 {
-	// TODO: redirect to helper method
+	// TODO: redirect to helper method .slice()
 	Tensor <T> ret;
 
 	// Set properties
-	ret._shape = _shape.slice(slice, 0);
+	ret._shape = _shape.slice(slice, _shape.cdim);
+	ret._shape.cdim++;
 	ret._array = _array;
 	return ret;
 }
@@ -648,10 +618,10 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 
 // Boolean operators
 template <class T>
-// TODO: SFINAE overload for floating types
 bool operator==(const Tensor <T> &a, const Tensor <T> &b)
 {
 	// TODO: static member (SFINAE)
+	// TODO: use arithmetic_kernel
 	static const T epsilon = 1e-5;
 
 	if (a._shape != b._shape)
@@ -746,10 +716,7 @@ std::string Tensor <T> ::print() const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
-	// TODO: use the method
-	os << ts.print();
-
-	return os;
+	return (os << ts.print());
 }
 
 /////////////////////

@@ -52,13 +52,15 @@ targets:
       - default: '{}'
       - gdb: 'gdb {}'
   - exp:
-    - modes: gdb
+    - modes: gdb, valgrind
     - builds:
       - default: experimental
       - gdb: experimental_debug
+      - valgrind: experimental_debug
     - postbuilds:
       - default: '{}'
       - gdb: 'gdb {}'
+      - valgrind: 'valgrind --leak-check=full {}'
   - bench:
     - builds:
       - default: benchmark

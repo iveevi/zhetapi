@@ -37,13 +37,19 @@ int main()
 		std::cout << i << ", ";
 	std::cout << ")" << std::endl;
 	std::cout << "c.size = " << c.size() << std::endl;
+	std::cout << "c[9] = " << c.get(9) << std::endl;
 
-	Constant slice = c[all];
+	Constant slice = c[{0, 3, 2}];
 
-	std::cout << "slice = " << slice << std::endl;
+	std::cout << "\nslice = " << slice << std::endl;
 	std::cout << "slice.shape = (";
 	for (auto i : slice.shape())
 		std::cout << i << ", ";
 	std::cout << ")" << std::endl;
 	std::cout << "slice.size = " << slice.size() << std::endl;
+	std::cout << "slice[9] = " << slice.get(9) << std::endl;
+
+	Constant::slice_type s = {0, 3, 2};
+
+	std::cout << "\n2nd index of slice = " << s(2) << std::endl;
 }

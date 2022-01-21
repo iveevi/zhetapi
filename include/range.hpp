@@ -4,11 +4,40 @@
 // Standard headers
 #include <cmath>
 #include <cstddef>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <type_traits>
 
 namespace zhetapi {
+
+// Arithmetic kernel for comparison and arithmetic operations
+// TODO: should this go in a separate file?
+template <class T, class = typename std::is_floating_point <T>::type>
+struct arithmetic_kernel {
+	// Equality with tolerance
+	static bool eq(T a, T b, T tolerance = std::numeric_limits <T>::epsilon()) {
+		return std::abs(a - b) <= tolerance;
+	}
+
+	// Modulus
+	static T mod(T a, T b) {
+		return std::fmod(a, b);
+	}
+};
+
+template <class T>
+struct arithmetic_kernel <T, std::false_type> {
+	// Equality with tolerance
+	static bool eq(T a, T b, T tolerance = std::numeric_limits <T>::epsilon()) {
+		return a == b;
+	}
+
+	// Modulus
+	static T mod(T a, T b) {
+		return a % b;
+	}
+};
 
 // Range class
 template <class T>
@@ -96,13 +125,25 @@ struct Range {
 	Range(T pterm = T(0))
 		: start(T(0)), term(pterm), step(T(1)) {}
 
+	// Compute range at a given number of steps
+	T compute(size_t nsteps) const {
+		return start + step * nsteps;
+	}
+
+	T operator()(size_t nsteps) const {
+		return compute(nsteps);
+	}
+
 	// Properties
 	T length() const {
 		return (term - start);
 	}
 
 	size_t size() const {
-		return (size_t) (length() / step);
+		// T rem = std::modulus <T> {}.((term - start), step);
+		T rem = arithmetic_kernel <T> ::mod(term - start, step);
+		return (rem == 0) ? length() / step
+			: length() / step + 1;
 	}
 
 	// Iterators
@@ -137,8 +178,8 @@ extern Range <int> all;
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Range <T> &range)
 {
-	return os << "(" << range.start << ", " << range.step
-		<< ", " << range.term << ")";
+	return os << "(" << range.start << ", " << range.term
+		<< ", " << range.step << ")";
 }
 
 }
