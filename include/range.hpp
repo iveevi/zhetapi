@@ -134,6 +134,15 @@ struct Range {
 		return compute(nsteps);
 	}
 
+	// Compose two ranges
+	Range operator()(const Range &other) const {
+		T a = start + step * other.start;
+		T b = step * other.step;
+		T c = std::min(term, other.term);
+
+		return Range(a, c, b);
+	}
+
 	// Properties
 	T length() const {
 		return (term - start);

@@ -55,19 +55,16 @@ protected:
 	// Shape informations
 	struct _shape_info {
 		// Data
-		size_t elements = 0;
-		size_t dimensions = 0;
+		size_t		offset = 0;
+		size_t		elements = 0;
+		size_t		dimensions = 0;
 		
 		// The dimension sizes,
 		// partial sizes,
 		// slices
-		size_t *array = nullptr;
-		size_t *partials = nullptr;
-		slice_type *slices = nullptr;
-
-		// Current dimension for consecutive slicing
-		//	always reset upon construction/copy
-		size_t cdim = 0;
+		size_t		*array = nullptr;
+		size_t		*partials = nullptr;
+		slice_type	*slices = nullptr;
 
 		// Constructors
 		_shape_info() = default;
@@ -75,8 +72,7 @@ protected:
 		// From shape_type
 		_shape_info(const shape_type &shape)
 				: elements(1),
-				dimensions(shape.size()),
-				cdim(0) {
+				dimensions(shape.size()) {
 			array = new size_t[dimensions];
 			partials = new size_t[dimensions];
 			slices = new slice_type[dimensions];
@@ -100,8 +96,9 @@ protected:
 
 		// Copy constructor
 		_shape_info(const _shape_info &other) {
-			dimensions = other.dimensions;
+			offset = other.offset;
 			elements = other.elements;
+			dimensions = other.dimensions;
 
 			array = new size_t[dimensions];
 			partials = new size_t[dimensions];
@@ -124,8 +121,9 @@ protected:
 					delete [] slices;
 				}
 
-				dimensions = other.dimensions;
+				offset = other.offset;
 				elements = other.elements;
+				dimensions = other.dimensions;
 
 				array = new size_t[dimensions];
 				partials = new size_t[dimensions];
@@ -168,7 +166,7 @@ protected:
 					result += slices[i].compute(q) * partials[i];
 			}
 
-			return result;
+			return result + offset;
 		}
 
 		// Recalculate properties based on slices
@@ -184,19 +182,52 @@ protected:
 			}
 		}
 
-		// Slicing a shape info
-		_shape_info slice(const slice_type &slice, int dim) const {
+		// Slicing a shape info (dimenion remains the same)
+		_shape_info slice(const slice_type &slice) const {
 			// Skip if slice is all
 			if (slice == all)
 				return *this;
 
 			// Copy shape info
-			_shape_info new_shape(*this);
-			new_shape.array[dim] = slice.size();
-			new_shape.slices[dim] = slice;
-			new_shape.recalculate();
+			_shape_info result = *this;
 
-			return new_shape;
+			// Modify first dimension only
+			slice_type nrange = slices[0];
+			if (nrange == all)
+				nrange = slice;
+			else
+				nrange = nrange(slice);
+			
+			result.slices[0] = nrange;
+			result.array[0] = nrange.size();
+			result.recalculate();
+
+			return result;
+		}
+
+		// Indexing a shape info (dimenion - 1)
+		_shape_info index(size_t i) const {
+			// TODO: edge cases
+
+			// Copy shape info
+			_shape_info result;
+
+			result.elements = elements/array[0];
+			result.dimensions = dimensions - 1;
+
+			result.array = new size_t[dimensions - 1];
+			result.partials = new size_t[dimensions - 1];
+			result.slices = new slice_type[dimensions - 1];
+
+			for (size_t i = 0; i < dimensions - 1; i++) {
+				result.array[i] = array[i + 1];
+				result.partials[i] = partials[i + 1];
+				result.slices[i] = slices[i + 1];
+			}
+
+			result.offset = offset + i * partials[0];
+
+			return result;
 		}
 
 		// Convert to shape_type
@@ -258,6 +289,8 @@ public:
 	// Indexing and slicing
 	const T &get(size_t) const;	// Get scalar element
 
+	// Slices
+	Tensor <T> operator[](size_t) const;
 	Tensor <T> operator[](const slice_type &) const;
 
 	// TODO: iterators
@@ -307,12 +340,19 @@ public:
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
 
-	// Shape mismatch exception
+	// Exceptions
 	class shape_mismatch : public std::runtime_error {
 	public:
 		shape_mismatch(const std::string &loc)
 				: std::runtime_error(loc +
 				": shapes are not matching") {}
+	};
+
+	class index_out_of_range : public std::runtime_error {
+	public:
+		index_out_of_range(size_t i)
+				: std::runtime_error("Index " +
+				std::to_string(i) + " is out of range") {}
 	};
 };
 
@@ -468,19 +508,35 @@ typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 template <class T>
 const T &Tensor <T> ::get(size_t i) const
 {
+	if (i >= size())
+		throw index_out_of_range(i);
+
 	size_t ti = _shape.translate(i);
 	return _array[ti];
 }
 
 template <class T>
-Tensor <T> Tensor <T> ::operator[](const Tensor <T> ::slice_type &slice) const
+Tensor <T> Tensor <T> ::operator[](size_t i) const
 {
-	// TODO: redirect to helper method .slice()
+	// If only one dimension, return get
+	if (dimensions() == 1)
+		return get(i);
+
 	Tensor <T> ret;
 
 	// Set properties
-	ret._shape = _shape.slice(slice, _shape.cdim);
-	ret._shape.cdim++;
+	ret._shape = _shape.index(i);
+	ret._array = _array;
+	return ret;
+}
+
+template <class T>
+Tensor <T> Tensor <T> ::operator[](const Tensor <T> ::slice_type &slice) const
+{
+	Tensor <T> ret;
+
+	// Set properties
+	ret._shape = _shape.slice(slice);
 	ret._array = _array;
 	return ret;
 }
@@ -650,7 +706,7 @@ bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 // Printing functions //
 ////////////////////////
 
-// Print helper
+/* Print helper
 template <class T>
 std::string print_tensor(T *array, size_t size,
 		size_t *dimension_array,
@@ -699,18 +755,38 @@ std::string print_tensor(T *array, size_t size,
 	}
 
 	return out + "]";
-}
-
+} */
 
 // Printing method
 template <class T>
 std::string Tensor <T> ::print() const
 {
-	return print_tensor(
-		_array.get(), _shape.elements,
-		_shape.array, _shape.slices,
-		0, _shape.dimensions - 1
-	);
+	// If the tensor is empty, return "[]"
+	if (size() == 0)
+		return "[]";
+
+	// String to return
+	std::string out = "[";
+
+	// If only one dimension
+	if (dimensions() == 1) {
+		for (int i = 0; i < size(); i++) {
+			out += std::to_string(get(i));
+			if (i < size() - 1)
+				out += ", ";
+		}
+
+		return out + "]";
+	}
+
+	// Otherwise recurse through each slice
+	for (int i = 0; i < dimension(0); i++) {
+		out += this->operator[](i).print();
+		if (i < dimension(0) - 1)
+			out += ", ";
+	}
+
+	return out + "]";
 }
 
 template <class T>

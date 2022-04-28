@@ -39,17 +39,40 @@ int main()
 	std::cout << "c.size = " << c.size() << std::endl;
 	std::cout << "c[9] = " << c.get(9) << std::endl;
 
-	Constant slice = c[{0, 3, 2}];
+	Constant slice1 = c[{0, 3, 2}];
 
-	std::cout << "\nslice = " << slice << std::endl;
-	std::cout << "slice.shape = (";
-	for (auto i : slice.shape())
+	std::cout << "\nslice1 = " << slice1 << std::endl;
+	std::cout << "slice1.shape = (";
+	for (auto i : slice1.shape())
 		std::cout << i << ", ";
 	std::cout << ")" << std::endl;
-	std::cout << "slice.size = " << slice.size() << std::endl;
-	std::cout << "slice[9] = " << slice.get(9) << std::endl;
+	std::cout << "slice1.size = " << slice1.size() << std::endl;
+	std::cout << "slice1[9] = " << slice1.get(9) << std::endl;
 
-	Constant::slice_type s = {0, 3, 2};
+	Constant slice2 = c[{0, 3, 2}][{0, 3, 2}];
+	std::cout << "\nslice2 = " << slice2 << std::endl;
+	std::cout << "slice2.shape = (";
+	for (auto i : slice2.shape())
+		std::cout << i << ", ";
+	std::cout << ")" << std::endl;
+	std::cout << "slice2.size = " << slice2.size() << std::endl;
+	std::cout << "slice2[8] = " << slice2.get(8) << std::endl;
 
-	std::cout << "\n2nd index of slice = " << s(2) << std::endl;
+	Constant index1 = c[1];
+	std::cout << "\nindex1 = " << index1 << std::endl;
+	std::cout << "index1.shape = (";
+	for (auto i : index1.shape())
+		std::cout << i << ", ";
+	std::cout << ")" << std::endl;
+	std::cout << "index1.size = " << index1.size() << std::endl;
+	std::cout << "index1[9] = " << index1.get(9) << std::endl;
+
+	Constant index2 = c[1][1];
+	std::cout << "\nindex2 = " << index2 << std::endl;
+	std::cout << "index2.shape = (";
+	for (auto i : index2.shape())
+		std::cout << i << ", ";
+	std::cout << ")" << std::endl;
+
+	std::cout << "index3 = " << index2[1] << ", size = " << index2.size() << std::endl;
 }
