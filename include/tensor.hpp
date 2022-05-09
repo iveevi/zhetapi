@@ -280,6 +280,9 @@ public:
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
 
+	// Explicit copy
+	Tensor copy() const;
+
 	// Getters and setters
 	size_t size() const;		// Get the # of elements
 	size_t dimensions() const;
@@ -465,6 +468,18 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	}
 
 	return *this;
+}
+
+// Explicit copy method
+template <class T>
+Tensor <T> Tensor <T> ::copy() const
+{
+	return Tensor(
+		shape(),
+		[&](size_t i) -> T {
+			return get(i);
+		}
+	);
 }
 
 /////////////////////////

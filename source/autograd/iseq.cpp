@@ -303,12 +303,12 @@ bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 	case op_get:
 		// Get index and push the corresponding variable
 		index = reinterpret_cast <const Get *> (ftn)->index;
-		ops.push(_vars[index]->value);
+		ops.push(_vars[index]->value.copy());
 		return true;
 	case op_const:
 		// Get index and push the corresponding constant
 		index = reinterpret_cast <const Const *> (ftn)->index;
-		ops.push(_consts[index]);
+		ops.push(_consts[index].copy());
 		return true;
 	case op_store_cache:
 		// Get index and push the corresponding constant
@@ -318,12 +318,12 @@ bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 	case op_get_cache:
 		// Get index and push the corresponding constant
 		index = reinterpret_cast <const _get_cache *> (ftn)->index;
-		ops.push(_cache[index]);
+		ops.push(_cache[index].copy());
 		return true;
 	case op_add: case op_sub:
 	case op_mul: case op_div:
 		// Push the result of the operation
-		ops.push(kernels[ftn->spop - op_add](ops));
+		ops.push(kernels[ftn->spop - op_add](ops).copy());
 		return true;
 	default:
 		break;
@@ -336,8 +336,10 @@ bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 {
 	// Check if the instruction is a special operation
-	if (_ispec(ftn, ops))
+	if (_ispec(ftn, ops)) {
+		// std::cout << "Special op (" << ftn->summary() << "), value = " << ops.top() << std::endl;
 		return;
+	}
 
 	// Ensure that the stack has enough operands
 	if (ops.size() < ftn->inputs) {}	// TODO: throw, except if #inputs = -1 (variadic)
@@ -353,6 +355,9 @@ void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 
 	// Evaluate the instruction
 	Constant n = ftn->compute(fins);
+
+	// std::cout << "ISEQ: value = " << n << std::endl;
+	// std::cout << summary() << std::endl;
 
 	// Push new value onto stack
 	ops.push(n);
@@ -815,7 +820,7 @@ _node *_diff_tree(const _node *tree, int vindex)
 
 	// std::cout << "DERIVATE:\n" << d->summary() << std::endl;
 
-	// TODO: what is d isnt iseq?
+	// TODO: what if d isnt iseq?
 	if (d->spop == _function::op_iseq) {
 		ISeq *diseq = reinterpret_cast <ISeq *> (d);
 
@@ -823,10 +828,6 @@ _node *_diff_tree(const _node *tree, int vindex)
 		_node *dtree = diseq->_tree(cache);
 
 		// std::cout << "PARTIALLY DIFFED TREE:\n" << dtree->str() << std::endl;
-
-		/* std::cout << "CHILDREN:\n";
-		for (const _node *c : tree->children)
-			std::cout << c->str() << std::endl; */
 
 		_node *replaced = _diff_iseq(
 			dtree,
@@ -865,10 +866,6 @@ _function *ISeq::diff(const int vindex) const
 
 	// Return the function
 	ISeq *diff_iseq = new ISeq(instrs, ccache, inputs);
-
-	std::cout << "===== DIFF ISEQ =====\n"
-		<< diff_iseq->summary() << std::endl;
-
 	return diff_iseq;
 }
 
