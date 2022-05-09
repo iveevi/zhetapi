@@ -289,6 +289,9 @@ public:
 	size_t dimension(size_t) const;
 	shape_type shape() const;	// Get shape of tensor
 
+	// Reshape tensor
+	void reshape(const shape_type &);
+
 	// Indexing and slicing
 	const T &get(size_t) const;	// Get scalar element
 
