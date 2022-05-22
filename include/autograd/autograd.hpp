@@ -173,42 +173,6 @@ Function operator/(const Function &, const Function &);
 										\
 	extern Function name;
 
-// Templated function generator
-#define TEMPLATE_FUNCTION_KERNEL(name, targs)					\
-	template <targs>							\
-	Constant _k##name(const _function::Input &ins)
-
-#define TEMPLATE_FUNCTION_DIFFERENTIAL(name, targs)				\
-	template <targs>							\
-	_function *_diffk_##name(const int i)
-
-#define TEMPLATE_FUNCTION_CLASS(name, targs)					\
-	template <targs>							\
-	class _##name : public ISeq { 						\
-	public: 								\
-		struct kernel : public _function { 				\
-			kernel() : _function(inputs) {} 			\
-										\
-			Constant compute(const Input &ins) const override {	\
-				return _k##name <targs> (ins);			\
-			}							\
-										\
-			_function *diff(const int i) const override {		\
-				return _diffk_##name <targs> (i);		\
-			}							\
-										\
-			std::string summary() const override {			\
-				return str;					\
-			}							\
-										\
-			_function *copy() const override {			\
-				return new kernel();				\
-			}							\
-		}; 								\
-										\
-		_##name() : ISeq(new kernel(), inputs) {} 			\
-	};									\
-
 // Specialized function classes
 FUNCTION_CLASS(sqrt, 1, "SQRT")
 FUNCTION_CLASS(exp, 1, "EXP")
@@ -218,7 +182,7 @@ FUNCTION_CLASS(cos, 1, "COS")
 FUNCTION_CLASS(tan, 1, "TAN")
 FUNCTION_CLASS(pow, 2, "POW")
 
-// Specialized template function classes
+FUNCTION_CLASS(reshape, 2, "RESHAPE")
 
 }
 

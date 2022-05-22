@@ -80,8 +80,10 @@ public:
 	// Wrapper around _compose that checks #inputs
 	_function *compose(const Compositions &cs) const {
 		// TODO: add argsize exception
-		if (cs.size() != inputs)
-			throw "_function::compose size mismatch";
+		if (cs.size() != inputs) {
+			std::cout << "summary: " << summary() << std::endl;
+			throw std::runtime_error("_function::compose size mismatch");
+		}
 
 		return this->_compose(cs);
 	}
@@ -228,7 +230,7 @@ public:
 	_function *copy() const override {
 		return new _variable(id, value);
 	}
-
+ 
 	// Overload summary to include id
 	std::string summary() const override {
 		return "variable (id: " + std::to_string(id) + ")";

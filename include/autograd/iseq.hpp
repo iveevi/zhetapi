@@ -90,7 +90,8 @@ private:
 	void _tree_walk(const _function *, std::stack <_node *> &,
 		_cache_map &) const;
 	void _rebuild(const _node *, Instructions &,
-		ConstantCache &, _cache_map &) const;
+		ConstantCache &, _cache_map &,
+		const ConstantCache &) const;
 
 	// Optimization functions
 	void _optimize();

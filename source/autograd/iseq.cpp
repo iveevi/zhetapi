@@ -278,7 +278,13 @@ static std::vector <Kernel> kernels = {
 // Load inputs
 void ISeq::_load(const Input &ins) const
 {
-	// TODO: should make sure that the ins == inputs
+	// Ensure correct number of inputs
+	if (ins.size() != inputs) {
+		std::stringstream ss;
+		ss << "ISeq::_load: expected " << inputs << " inputs, got " << ins.size();
+		throw std::runtime_error(ss.str());
+	}
+
 	for (int i = 0; i < ins.size(); i++)
 		_vars[i]->value = ins[i];
 }
@@ -342,7 +348,9 @@ void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 	}
 
 	// Ensure that the stack has enough operands
-	if (ops.size() < ftn->inputs) {}	// TODO: throw, except if #inputs = -1 (variadic)
+	if (ops.size() < ftn->inputs) {
+		throw std::runtime_error("ISeq::_exec: not enough operands");
+	}	// TODO: throw, except if #inputs = -1 (variadic)
 
 	// Load the inputs
 	Input fins;
@@ -402,6 +410,8 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 // Override composition
 _function *ISeq::_compose(const Compositions &cs) const
 {
+	std::cout << "Composing\n" << summary() << std::endl;
+
 	// ISeq variables
 	Instructions instrs;
 	std::vector <Constant> consts;
@@ -420,7 +430,12 @@ _function *ISeq::_compose(const Compositions &cs) const
 	for (int i = 0; i < cs.size(); i++) {
 		const _function *ftn = cs[i];
 
+		std::cout << "ftn = " << ftn->summary() << std::endl;
+
+
+		// Switch variables
 		const ISeq *iseq;
+		const _repl_const *rc;
 		int id;
 
 		// TODO: should not be composed get instructions, only var and
@@ -440,6 +455,13 @@ _function *ISeq::_compose(const Compositions &cs) const
 
 			for (const _function *fptr : iseq->_instrs)
 				_compose_iseq(instrs, iseq, fptr, reindex, vindex);
+			break;
+		case op_repl_const:
+			std::cout << "*** Replacing constant\n";
+			rc = reinterpret_cast <const _repl_const *> (ftn);
+			std::cout << "\tvalue = " << rc->value << std::endl;
+			consts.push_back(rc->value);
+			instrs.push_back(new Const(rc->index));
 			break;
 		default:
 			// Add the instruction
@@ -479,12 +501,12 @@ _function *ISeq::_compose(const Compositions &cs) const
 	//	according to the reindex map
 	ISeq *iseq = new ISeq(instrs, consts, vindex, inv);
 
-	// std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
+	std::cout << "===New ISeq===\n" << iseq->summary() << std::endl;
 
 	// Optimize the ISeq
 	iseq->_optimize();
 
-	// std::cout << "\n===Final ISeq===\n" << iseq->summary() << std::endl;
+	std::cout << "\n===Final ISeq===\n" << iseq->summary() << std::endl;
 
 	return iseq;
 }
@@ -595,7 +617,8 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 
 // Rebuild the ISeq from the tree
 void ISeq::_rebuild(const _node *tree, Instructions &instrs,
-		ConstantCache &ccache, _cache_map &cache) const
+		ConstantCache &ccache, _cache_map &cache,
+		const ConstantCache &pconsts) const
 {
 	// Iterate through the tree
 	const _function *ftn = tree->fptr;
@@ -603,6 +626,7 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 	if (ftn->spop == op_get_cache) {
 		// Get the index
 		int index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		std::cout << "Rbuilding cache @" << index << std::endl;
 
 		// Get the cache info
 		_cache_info info = cache[index];
@@ -610,12 +634,14 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 		// Check possible optimization
 		if (info.refs == 1) {
 			// Add value instead of get cache
-			_rebuild(info.value, instrs, ccache, cache);
+			_rebuild(info.value, instrs, ccache, cache, pconsts);
 		} else {
 			// Add get cache
 			instrs.push_back(ftn);
 		}
 	} else if (ftn->spop == op_repl_const) {
+		std::cout << "Replacing constant " << reinterpret_cast <const _repl_const *> (ftn)->value << std::endl;
+
 		// Get the constant
 		Constant c = reinterpret_cast
 			<const _repl_const *> (ftn)->value;
@@ -628,10 +654,21 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 
 		// Add instruction
 		instrs.push_back(new Const(index));
+	} else if (ftn->spop == op_const) {
+		std::cout << "Adding constant @" << reinterpret_cast <const Const *> (ftn)->index << std::endl;
+		Constant c = pconsts[reinterpret_cast <const Const *> (ftn)->index];
+		std::cout << "Constant: " << c << std::endl;
+
+		// Add the constant
+		int index = ccache.size();
+		ccache.push_back(c);
+
+		// Add instruction
+		instrs.push_back(new Const(index));
 	} else {
 		// Add the operands
 		for (const _node *child : tree->children)
-			_rebuild(child, instrs, ccache, cache);
+			_rebuild(child, instrs, ccache, cache, pconsts);
 
 		// Add the instruction
 		instrs.push_back(ftn);
@@ -645,25 +682,27 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 // Optimize the ISeq
 void ISeq::_optimize()
 {
-	// std::cout << "===OPTIMIZING ISEQ===" << std::endl;
+	std::cout << "===OPTIMIZING ISEQ===" << std::endl;
 
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
-	// std::cout << "TREE:\n" << tree->str() << std::endl;
+	std::cout << "TREE:\n" << tree->str() << std::endl;
 
 	Instructions instrs;
 	ConstantCache ccache;
-	_rebuild(tree, instrs, ccache, cache);
+	_rebuild(tree, instrs, ccache, cache, _consts);
 
-	/* std::cout << "INSTRUCS:\n" << std::endl;
+	std::cout << "INSTRUCS:\n" << std::endl;
 	for (const _function *fptr : instrs)
-		std::cout << fptr->summary() << std::endl; */
+		std::cout << fptr->summary() << std::endl;
 
 	// Replace the instructions and constant cache
 	// TODO: clean up excess memory
 	_instrs = instrs;
 	_consts = ccache;
+
+	// TODO: prune duplicate constants
 }
 
 
@@ -862,7 +901,7 @@ _function *ISeq::diff(const int vindex) const
 	Instructions instrs;
 	ConstantCache ccache;
 
-	_rebuild(diff_tree, instrs, ccache, cache);
+	_rebuild(diff_tree, instrs, ccache, cache, _consts);
 
 	// Return the function
 	ISeq *diff_iseq = new ISeq(instrs, ccache, inputs);

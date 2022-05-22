@@ -230,6 +230,44 @@ protected:
 			return result;
 		}
 
+		// Reshape a shape info
+		void reshape(const shape_type &shape) {
+			// Make sure there are equal number of elements
+			size_t elements = 1;
+			for (size_t i = 0; i < shape.size(); i++)
+				elements *= shape[i];
+
+			if (elements != this->elements) {
+				throw std::invalid_argument(
+					"Tensor::_shape_info::reshape:"
+					" shape does not preserve size"
+				);
+			}
+
+			// Free previous arrays
+			if (array != nullptr)
+				delete[] array;
+
+			if (slices != nullptr)
+				delete[] slices;
+
+			if (partials != nullptr)
+				delete[] partials;
+
+			// Copy new arrays
+			dimensions = shape.size();
+
+			array = new size_t[dimensions];
+			partials = new size_t[dimensions];
+			slices = new slice_type[dimensions];
+
+			for (size_t i = 0; i < dimensions; i++) {
+				array[i] = shape[i];
+				partials[i] = 1;
+				slices[i] = all;
+			}
+		}
+
 		// Convert to shape_type
 		shape_type to_shape_type() const {
 			shape_type shape;
@@ -277,6 +315,9 @@ public:
 	Tensor(const shape_type &, const std::initializer_list <T> &);
 	Tensor(const shape_type &, const std::function <T (size_t)> &);
 
+	// Initializer list constructor
+	Tensor(const std::initializer_list <T> &);
+
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
 
@@ -298,6 +339,10 @@ public:
 	// Slices
 	Tensor <T> operator[](size_t) const;
 	Tensor <T> operator[](const slice_type &) const;
+
+	// As a vector
+	template <class U>
+	std::vector <U> as_vector() const;
 
 	// TODO: iterators
 
@@ -454,6 +499,16 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		_array[i] = f(i);
 }
 
+template <class T>
+Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
+		: _shape({arr.size()})
+{
+	_array.reset(new T[_shape.elements]);
+	size_t i = 0;
+	for (auto it = arr.begin(); it != arr.end(); it++)
+		_array[i++] = *it;
+}
+
 ///////////////////////
 // Essential methods //
 ///////////////////////
@@ -519,6 +574,13 @@ typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 	return _shape.to_shape_type();
 }
 
+// Reshape
+template <class T>
+void Tensor <T> ::reshape(const shape_type &dim)
+{
+	_shape.reshape(dim);
+}
+
 //////////////////////////
 // Indexing and slicing //
 //////////////////////////
@@ -556,6 +618,17 @@ Tensor <T> Tensor <T> ::operator[](const Tensor <T> ::slice_type &slice) const
 	// Set properties
 	ret._shape = _shape.slice(slice);
 	ret._array = _array;
+	return ret;
+}
+
+// As a vector
+template <class T>
+template <class U>
+std::vector <U> Tensor <T> ::as_vector() const
+{
+	std::vector <U> ret(size());
+	for (size_t i = 0; i < size(); i++)
+		ret[i] = static_cast <U> (get(i));
 	return ret;
 }
 
@@ -723,57 +796,6 @@ bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 ////////////////////////
 // Printing functions //
 ////////////////////////
-
-/* Print helper
-template <class T>
-std::string print_tensor(T *array, size_t size,
-		size_t *dimension_array,
-		typename Tensor <T> ::slice_type *slice_array,
-		size_t dim,
-		size_t max_dim)
-{
-	if (size == 0)
-		return "[]";
-
-	std::string out = "[";
-
-	// Size of each dimension
-	size_t dim_size = size / dimension_array[dim];
-
-	// Get the range
-	typename Tensor <T> ::slice_type range = slice_array[dim];
-
-	// Change the range if it is all
-	if (range == all) {
-		range = typename Tensor <T> ::slice_type(
-			0, dimension_array[dim]
-		);
-	}
-
-	auto itr = range.begin();
-	auto end = range.end();
-
-	while (itr < end) {
-		T *current = array + (*itr) * dim_size;
-
-		if (dim == max_dim) {
-			out += std::to_string(*current);
-		} else {
-			out += print_tensor(
-				current, dim_size,
-				dimension_array,
-				slice_array,
-				dim + 1, max_dim
-			);
-		}
-
-		itr++;
-		if (itr < end)
-			out += ", ";
-	}
-
-	return out + "]";
-} */
 
 // Printing method
 template <class T>

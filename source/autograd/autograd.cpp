@@ -108,6 +108,15 @@ KERNEL(pow)
 	);
 }
 
+KERNEL(reshape)
+{
+	// Get shape from second element
+	auto shape = ins[1].as_vector <size_t> ();
+	auto copy = ins[0].copy();
+	copy.reshape(shape);
+	return copy;
+}
+
 // Standard function derivatives
 DERIVATIVE(sqrt)
 {
@@ -225,6 +234,19 @@ DERIVATIVE(pow)
 		new Get(0),
 		new _pow::kernel(),
 		new _function(2, _function::op_mul)
+	);
+
+	return iseq;
+}
+
+DERIVATIVE(reshape)
+{
+	ISeq *iseq = new ISeq();
+
+	// Same function, with all ones
+	iseq->append(
+		new _repl_const(1.0, -1),
+		new Get(0)
 	);
 
 	return iseq;
