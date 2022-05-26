@@ -65,10 +65,113 @@ Function operator/(const Function &lhs, const Function &rhs)
 	return Function(iseq);
 }
 
+// With constants
+Function operator+(const Function &lhs, const Constant &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		lhs.get(),
+		new _repl_const(rhs, -1),
+		new _function(2, _function::op_add)
+	);
+
+	return Function(iseq);
+}
+
+Function operator-(const Function &lhs, const Constant &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		lhs.get(),
+		new _repl_const(rhs, -1),
+		new _function(2, _function::op_sub)
+	);
+
+	return Function(iseq);
+}
+
+Function operator*(const Function &lhs, const Constant &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		lhs.get(),
+		new _repl_const(rhs, -1),
+		new _function(2, _function::op_mul)
+	);
+
+	return Function(iseq);
+}
+
+Function operator/(const Function &lhs, const Constant &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		lhs.get(),
+		new _repl_const(rhs, -1),
+		new _function(2, _function::op_div)
+	);
+
+	return Function(iseq);
+}
+
+// Reverse operators
+Function operator+(const Constant &lhs, const Function &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		new _repl_const(lhs, -1),
+		rhs.get(),
+		new _function(2, _function::op_add)
+	);
+
+	return Function(iseq);
+}
+
+Function operator-(const Constant &lhs, const Function &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		new _repl_const(lhs, -1),
+		rhs.get(),
+		new _function(2, _function::op_sub)
+	);
+
+	return Function(iseq);
+}
+
+Function operator*(const Constant &lhs, const Function &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		new _repl_const(lhs, -1),
+		rhs.get(),
+		new _function(2, _function::op_mul)
+	);
+
+	return Function(iseq);
+}
+
+Function operator/(const Constant &lhs, const Function &rhs)
+{
+	ISeq *iseq = new ISeq();
+	iseq->append(
+		new _repl_const(lhs, -1),
+		rhs.get(),
+		new _function(2, _function::op_div)
+	);
+
+	return Function(iseq);
+}
+
 // Standard function kernels
 KERNEL(sqrt)
 {
 	return ins[0].transform(sqrtl);
+}
+
+KERNEL(norm)
+{
+	return Constant {ins[0].length()};
 }
 
 KERNEL(exp)
@@ -96,6 +199,15 @@ KERNEL(tan)
 	return ins[0].transform(tanf);
 }
 
+KERNEL(square)
+{
+	return ins[0].transform(
+		[](long double x) {
+			return x * x;
+		}
+	);
+}
+
 KERNEL(pow)
 {
 	// Use only the first element
@@ -118,6 +230,37 @@ KERNEL(reshape)
 }
 
 // Standard function derivatives
+DERIVATIVE(square)
+{
+	ISeq *iseq = new ISeq();
+
+	// f(x)^2 -> 2 * f(x) * f'(x)
+	iseq->append(
+		_iop::differential(0),
+		new Get(0),
+		new _function(2, _function::op_mul),
+		new _repl_const(2.0, -1),
+		new _function(2, _function::op_mul)
+	);
+
+	return iseq;
+}
+
+DERIVATIVE(norm)
+{
+	ISeq *iseq = new ISeq();
+
+	// norm(f(x)) -> f'(x) / norm(f(x))
+	iseq->append(
+		_iop::differential(0),
+		new Get(0),
+		new _norm::kernel(),
+		new _function(2, _function::op_div)
+	);
+
+	return iseq;
+}
+
 DERIVATIVE(sqrt)
 {
 	ISeq *iseq = new ISeq();

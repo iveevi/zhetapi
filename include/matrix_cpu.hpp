@@ -313,6 +313,7 @@ std::string Matrix <T> ::display() const
 	return oss.str();
 }
 
+/*
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 {
@@ -349,7 +350,7 @@ std::ostream &operator<<(std::ostream &os, const Matrix <T> &mat)
 	os << "]";
 
 	return os;
-}
+} */
 
 }
 

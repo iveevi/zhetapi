@@ -92,6 +92,14 @@ public:
 	virtual _function *diff(const int) const {
 		return nullptr;
 	}
+	
+	// Machine learning - by default, no gradient
+	virtual Input gradient(const Constant &, const Input &) const {
+		return {Constant {0}};
+	}
+
+	// Apply gradients
+	virtual void apply_gradient(const Input &) const {}
 
 	// Copy pointer
 	virtual _function *copy() const {
@@ -139,7 +147,7 @@ struct Const : public _function {
 
 // Replace a variable with a constant
 struct _repl_const : public _function {
-	int index;
+	int index; // TODO: what is this for?
 
 	Constant value;
 

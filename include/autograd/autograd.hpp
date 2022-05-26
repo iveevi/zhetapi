@@ -110,6 +110,18 @@ public:
 		return fptr->diff(i);
 	}
 
+	// Machine learning
+	template <class ... Args>
+	_function::Input gradient(const Constant &igrad, Args ... args) const {
+		_function::Input inputs;
+		_cmp_process(inputs, args...);
+		return fptr->gradient(igrad, inputs);
+	}
+
+	void apply_gradient(const _function::Input &grads) {
+		fptr->apply_gradient(grads);
+	}
+
 	// TODO: differentiate with respect to Variable,
 	// add another function, _diff_vid(const int)...
 
@@ -139,6 +151,16 @@ Function operator+(const Function &, const Function &);
 Function operator-(const Function &, const Function &);
 Function operator*(const Function &, const Function &);
 Function operator/(const Function &, const Function &);
+
+Function operator+(const Function &, const Constant &);
+Function operator-(const Function &, const Constant &);
+Function operator*(const Function &, const Constant &);
+Function operator/(const Function &, const Constant &);
+
+Function operator+(const Constant &, const Function &);
+Function operator-(const Constant &, const Function &);
+Function operator*(const Constant &, const Function &);
+Function operator/(const Constant &, const Function &);
 
 // Function class generating macro
 #define FUNCTION_CLASS(name, inputs, str)					\
@@ -175,11 +197,13 @@ Function operator/(const Function &, const Function &);
 
 // Specialized function classes
 FUNCTION_CLASS(sqrt, 1, "SQRT")
+FUNCTION_CLASS(norm, 1, "NORM")
 FUNCTION_CLASS(exp, 1, "EXP")
 FUNCTION_CLASS(log, 1, "LOG")
 FUNCTION_CLASS(sin, 1, "SIN")
 FUNCTION_CLASS(cos, 1, "COS")
 FUNCTION_CLASS(tan, 1, "TAN")
+FUNCTION_CLASS(square, 1, "SQUARE")
 FUNCTION_CLASS(pow, 2, "POW")
 
 FUNCTION_CLASS(reshape, 2, "RESHAPE")

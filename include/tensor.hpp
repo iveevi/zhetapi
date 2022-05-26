@@ -35,67 +35,79 @@ template <size_t N>
 class Interval;
 
 }
-
-// Tensor class
-template <class T>
-class Tensor {
-public:
-	// Public type aliases
-	using value_type = T;
+	
+// Shape information for tensors
+struct _shape_info {
 	using shape_type = std::vector <std::size_t>;
 	using slice_type = Range <int>;
 
-// TODO: should be private, matrix and vector should not be able to access
-protected:
-	// T *	_array		= nullptr;
-	std::shared_ptr <T []> _array;
+	// Data
+	size_t		offset = 0;
+	size_t		elements = 0;
+	size_t		dimensions = 0;
+	
+	// The dimension sizes,
+	// partial sizes,
+	// slices
+	size_t		*array = nullptr;
+	size_t		*partials = nullptr;
+	slice_type	*slices = nullptr;
 
-	// TODO: also wrap array in a struct
+	// Constructors
+	_shape_info() = default;
 
-	// Shape informations
-	struct _shape_info {
-		// Data
-		size_t		offset = 0;
-		size_t		elements = 0;
-		size_t		dimensions = 0;
-		
-		// The dimension sizes,
-		// partial sizes,
-		// slices
-		size_t		*array = nullptr;
-		size_t		*partials = nullptr;
-		slice_type	*slices = nullptr;
+	// From shape_type
+	_shape_info(const shape_type &shape)
+			: elements(1),
+			dimensions(shape.size()) {
+		array = new size_t[dimensions];
+		partials = new size_t[dimensions];
+		slices = new slice_type[dimensions];
 
-		// Constructors
-		_shape_info() = default;
-
-		// From shape_type
-		_shape_info(const shape_type &shape)
-				: elements(1),
-				dimensions(shape.size()) {
-			array = new size_t[dimensions];
-			partials = new size_t[dimensions];
-			slices = new slice_type[dimensions];
-
-			for (int i = dimensions - 1; i >= 0; i--) {
-				array[i] = shape[i];
-				slices[i] = all;
-				partials[i] = elements;
-				elements *= shape[i];
-			}
-
-			// TODO: this check is redundant...
-			// at least make elements an integer
-			if (elements < 0) {
-				throw std::invalid_argument(
-					"Tensor::_shape_info:"
-					" shape is invalid"
-				);
-			}
+		for (int i = dimensions - 1; i >= 0; i--) {
+			array[i] = shape[i];
+			slices[i] = all;
+			partials[i] = elements;
+			elements *= shape[i];
 		}
 
-		// Copy constructor
-		_shape_info(const _shape_info &other) {
+		// TODO: this check is redundant...
+		// at least make elements an integer
+		if (elements < 0) {
+			throw std::invalid_argument(
+				"Tensor::_shape_info:"
+				" shape is invalid"
+			);
+		}
+	}
+
+	// Copy constructor
+	_shape_info(const _shape_info &other) {
+		offset = other.offset;
+		elements = other.elements;
+		dimensions = other.dimensions;
+
+		array = new size_t[dimensions];
+		partials = new size_t[dimensions];
+		slices = new slice_type[dimensions];
+
+		for (size_t i = 0; i < dimensions; i++) {
+			array[i] = other.array[i];
+			slices[i] = other.slices[i];
+			partials[i] = other.partials[i];
+		}
+	}
+
+	// Assignment operator
+	_shape_info &operator=(const _shape_info &other) {
+		if (this != &other) {
+			if (array != nullptr
+				&& dimensions != other.dimensions) {
+				delete [] array;
+				delete [] partials;
+				delete [] slices;
+			}
+
 			offset = other.offset;
 			elements = other.elements;
 			dimensions = other.dimensions;
@@ -106,195 +118,183 @@ protected:
 
 			for (size_t i = 0; i < dimensions; i++) {
 				array[i] = other.array[i];
-				slices[i] = other.slices[i];
 				partials[i] = other.partials[i];
+				slices[i] = other.slices[i];
 			}
 		}
 
-		// Assignment operator
-		_shape_info &operator=(const _shape_info &other) {
-			if (this != &other) {
-				if (array != nullptr
-					&& dimensions != other.dimensions) {
-					delete [] array;
-					delete [] partials;
-					delete [] slices;
-				}
+		return *this;
+	}
 
-				offset = other.offset;
-				elements = other.elements;
-				dimensions = other.dimensions;
+	// Destructor
+	~_shape_info() {
+		if (array != nullptr)
+			delete[] array;
 
-				array = new size_t[dimensions];
-				partials = new size_t[dimensions];
-				slices = new slice_type[dimensions];
+		if (slices != nullptr)
+			delete[] slices;
 
-				for (size_t i = 0; i < dimensions; i++) {
-					array[i] = other.array[i];
-					partials[i] = other.partials[i];
-					slices[i] = other.slices[i];
-				}
-			}
+		if (partials != nullptr)
+			delete[] partials;
+	}
 
-			return *this;
-		}
+	// Translate an index using the shape and slices
+	size_t translate(size_t index) const {
+		size_t result = 0;
+		size_t rem = index;
 
-		// Destructor
-		~_shape_info() {
-			if (array != nullptr)
-				delete[] array;
+		for (size_t i = 0; i < dimensions; i++) {
+			size_t q = rem / partials[i];
+			rem = rem % partials[i];
 
-			if (slices != nullptr)
-				delete[] slices;
-
-			if (partials != nullptr)
-				delete[] partials;
-		}
-
-		// Translate an index using the shape and slices
-		size_t translate(size_t index) const {
-			size_t result = 0;
-			size_t rem = index;
-
-			for (size_t i = 0; i < dimensions; i++) {
-				size_t q = rem / partials[i];
-				rem = rem % partials[i];
-
-				if (slices[i] == all)
-					result += q * partials[i];
-				else
-					result += slices[i].compute(q) * partials[i];
-			}
-
-			return result + offset;
-		}
-
-		// Recalculate properties based on slices
-		void recalculate() {
-			elements = 1;
-
-			for (int i = dimensions - 1; i >= 0; i--) {
-				partials[i] = elements;
-				if (slices[i] == all)
-					elements *= array[i];
-				else
-					elements *= slices[i].size();
-			}
-		}
-
-		// Slicing a shape info (dimenion remains the same)
-		_shape_info slice(const slice_type &slice) const {
-			// Skip if slice is all
-			if (slice == all)
-				return *this;
-
-			// Copy shape info
-			_shape_info result = *this;
-
-			// Modify first dimension only
-			slice_type nrange = slices[0];
-			if (nrange == all)
-				nrange = slice;
+			if (slices[i] == all)
+				result += q * partials[i];
 			else
-				nrange = nrange(slice);
-			
-			result.slices[0] = nrange;
-			result.array[0] = nrange.size();
-			result.recalculate();
-
-			return result;
+				result += slices[i].compute(q) * partials[i];
 		}
 
-		// Indexing a shape info (dimenion - 1)
-		_shape_info index(size_t i) const {
-			// TODO: edge cases
+		return result + offset;
+	}
 
-			// Copy shape info
-			_shape_info result;
+	// Recalculate properties based on slices
+	void recalculate() {
+		elements = 1;
 
-			result.elements = elements/array[0];
-			result.dimensions = dimensions - 1;
+		for (int i = dimensions - 1; i >= 0; i--) {
+			partials[i] = elements;
+			if (slices[i] == all)
+				elements *= array[i];
+			else
+				elements *= slices[i].size();
+		}
+	}
 
-			result.array = new size_t[dimensions - 1];
-			result.partials = new size_t[dimensions - 1];
-			result.slices = new slice_type[dimensions - 1];
+	// Slicing a shape info (dimenion remains the same)
+	_shape_info slice(const slice_type &slice) const {
+		// Skip if slice is all
+		if (slice == all)
+			return *this;
 
-			for (size_t i = 0; i < dimensions - 1; i++) {
-				result.array[i] = array[i + 1];
-				result.partials[i] = partials[i + 1];
-				result.slices[i] = slices[i + 1];
-			}
+		// Copy shape info
+		_shape_info result = *this;
 
-			result.offset = offset + i * partials[0];
+		// Modify first dimension only
+		slice_type nrange = slices[0];
+		if (nrange == all)
+			nrange = slice;
+		else
+			nrange = nrange(slice);
+		
+		result.slices[0] = nrange;
+		result.array[0] = nrange.size();
+		result.recalculate();
 
-			return result;
+		return result;
+	}
+
+	// Indexing a shape info (dimenion - 1)
+	_shape_info index(size_t i) const {
+		// TODO: edge cases
+
+		// Copy shape info
+		_shape_info result;
+
+		result.elements = elements/array[0];
+		result.dimensions = dimensions - 1;
+
+		result.array = new size_t[dimensions - 1];
+		result.partials = new size_t[dimensions - 1];
+		result.slices = new slice_type[dimensions - 1];
+
+		for (size_t i = 0; i < dimensions - 1; i++) {
+			result.array[i] = array[i + 1];
+			result.partials[i] = partials[i + 1];
+			result.slices[i] = slices[i + 1];
 		}
 
-		// Reshape a shape info
-		void reshape(const shape_type &shape) {
-			// Make sure there are equal number of elements
-			size_t elements = 1;
-			for (size_t i = 0; i < shape.size(); i++)
-				elements *= shape[i];
+		result.offset = offset + i * partials[0];
 
-			if (elements != this->elements) {
-				throw std::invalid_argument(
-					"Tensor::_shape_info::reshape:"
-					" shape does not preserve size"
-				);
-			}
+		return result;
+	}
 
-			// Free previous arrays
-			if (array != nullptr)
-				delete[] array;
+	// Reshape a shape info
+	void reshape(const shape_type &shape) {
+		// Make sure there are equal number of elements
+		size_t elements = 1;
+		for (size_t i = 0; i < shape.size(); i++)
+			elements *= shape[i];
 
-			if (slices != nullptr)
-				delete[] slices;
-
-			if (partials != nullptr)
-				delete[] partials;
-
-			// Copy new arrays
-			dimensions = shape.size();
-
-			array = new size_t[dimensions];
-			partials = new size_t[dimensions];
-			slices = new slice_type[dimensions];
-
-			for (size_t i = 0; i < dimensions; i++) {
-				array[i] = shape[i];
-				partials[i] = 1;
-				slices[i] = all;
-			}
+		if (elements != this->elements) {
+			throw std::invalid_argument(
+				"Tensor::_shape_info::reshape:"
+				" shape does not preserve size"
+			);
 		}
 
-		// Convert to shape_type
-		shape_type to_shape_type() const {
-			shape_type shape;
+		// Free previous arrays
+		if (array != nullptr)
+			delete[] array;
 
-			for (size_t i = 0; i < dimensions; i++)
-				shape.push_back(array[i]);
+		if (slices != nullptr)
+			delete[] slices;
 
-			return shape;
+		if (partials != nullptr)
+			delete[] partials;
+
+		// Copy new arrays
+		dimensions = shape.size();
+
+		array = new size_t[dimensions];
+		partials = new size_t[dimensions];
+		slices = new slice_type[dimensions];
+
+		for (size_t i = 0; i < dimensions; i++) {
+			array[i] = shape[i];
+			partials[i] = 1;
+			slices[i] = all;
 		}
+	}
 
-		// Boolean comparison
-		bool operator==(const _shape_info &other) const {
-			if (dimensions != other.dimensions)
+	// Convert to shape_type
+	shape_type to_shape_type() const {
+		shape_type shape;
+
+		for (size_t i = 0; i < dimensions; i++)
+			shape.push_back(array[i]);
+
+		return shape;
+	}
+
+	// Boolean comparison
+	bool operator==(const _shape_info &other) const {
+		if (dimensions != other.dimensions)
+			return false;
+
+		for (size_t i = 0; i < dimensions; i++) {
+			if (array[i] != other.array[i])
 				return false;
-
-			for (size_t i = 0; i < dimensions; i++) {
-				if (array[i] != other.array[i])
-					return false;
-			}
-
-			return true;
 		}
 
-		bool operator!=(const _shape_info &other) const {
-			return !(*this == other);
-		}
-	} _shape;
+		return true;
+	}
+
+	bool operator!=(const _shape_info &other) const {
+		return !(*this == other);
+	}
+};
+
+// Tensor class
+template <class T>
+class Tensor {
+public:
+	// Public type aliases
+	using shape_type = std::vector <std::size_t>;
+	using slice_type = Range <int>;
+	using value_type = T;
+protected:
+	// TODO: should be private, matrix and vector should not be able to access
+	std::shared_ptr <T []>	_array;
+	_shape_info		_shape;
 public:
 	// Essential constructors
 	Tensor();
@@ -344,6 +344,9 @@ public:
 	template <class U>
 	std::vector <U> as_vector() const;
 
+	// Length (as a vector)
+	T length() const;
+
 	// TODO: iterators
 
 	// Actions
@@ -390,6 +393,10 @@ public:
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
+
+	// Friend other tensors
+	template <class U>
+	friend class Tensor;
 
 	// Exceptions
 	class shape_mismatch : public std::runtime_error {
@@ -640,6 +647,15 @@ template <class T>
 bool Tensor <T> ::good() const
 {
 	return _array != nullptr;
+}
+
+template <class T>
+T Tensor <T> ::length() const
+{
+	T sum = 0;
+	for (size_t i = 0; i < size(); i++)
+		sum += get(i) * get(i);
+	return std::sqrt(sum);
 }
 
 /////////////

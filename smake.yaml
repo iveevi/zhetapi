@@ -18,6 +18,7 @@ definitions:
   - source: 'source/range.cpp,
     source/autograd/autograd.cpp,
     source/autograd/iseq.cpp,
+    source/autograd/ml.cpp,
     source/io.cpp,
     source/linalg.cpp,
     source/polynomial.cpp,

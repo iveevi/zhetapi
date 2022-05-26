@@ -46,6 +46,9 @@ public:
 	// Scaled
 	Matrix(const Matrix &, T);
 
+	// Reshaping a tensor
+	Matrix(const Tensor <T> &, size_t, size_t);
+
 	Matrix(size_t, size_t, T = T());
 
 	// Lambda constructors
@@ -66,6 +69,9 @@ public:
 	// Cross type operations
 	template <class A>
 	explicit Matrix(const Matrix <A> &);
+
+	template <class A>
+	explicit Matrix(const Tensor <A> &, size_t, size_t);
 
 	// Methods
 	inline T &get(size_t, size_t);
@@ -141,8 +147,8 @@ public:
 
 	std::string display() const;
 
-	template <class U>
-	friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
+	// template <class U>
+	// friend std::ostream &operator<<(std::ostream &, const Matrix <U> &);
 
 	// Special matrix generation
 	static Matrix identity(size_t);
@@ -662,6 +668,36 @@ Matrix <T> ::Matrix(const Matrix <T> &other, T k)
 		this->_dim[0] = this->get_rows();
 		this->_dim[1] = this->get_cols();
 	}
+}
+
+// Tensor reshaper
+template <class T>
+Matrix <T> ::Matrix(const Tensor <T> &other, size_t rows, size_t cols)
+{
+	if (this != &other) {
+		this->_array.reset(new T[rows * cols]);
+		this->get_rows() = rows;
+		this->get_cols() = cols;
+
+		this->size() = rows * cols;
+		for (size_t i = 0; i < this->size(); i++)
+			this->_array[i] = other.get(i);
+
+		this->_dims = 2;
+		this->_dim = new size_t[2];
+
+		this->_dim[0] = this->get_rows();
+		this->_dim[1] = this->get_cols();
+	}
+}
+
+template <class T>
+template <class A>
+Matrix <T> ::Matrix(const Tensor <A> &other, size_t rows, size_t cols)
+		: Tensor <T> (rows, cols)
+{
+	for (size_t i = 0; i < this->size(); i++)
+		this->_array[i] = static_cast <T> (other.get(i));
 }
 
 template <class T>
