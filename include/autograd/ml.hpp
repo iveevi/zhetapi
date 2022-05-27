@@ -56,8 +56,12 @@ public:
 	virtual Input gradient(const Constant &igrad, const Input &ins) const override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
-		std::cout << "igrad: " << igrad << std::endl;
-		return {_w.transpose()};
+		Matrix <float> g(igrad[0], _osize, 1);
+
+		Matirx <float> wgrad = g * ins[0].transpose();
+		Matrix <float> bgrad = g;
+
+		return {wgrad, bgrad};
 	}
 
 	// Summary of the function
