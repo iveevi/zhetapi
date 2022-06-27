@@ -220,6 +220,13 @@ KERNEL(pow)
 	);
 }
 
+KERNEL(flatten)
+{
+	auto copy = ins[0].copy();
+	copy.flatten();
+	return copy;
+}
+
 KERNEL(reshape)
 {
 	// Get shape from second element
@@ -382,13 +389,26 @@ DERIVATIVE(pow)
 	return iseq;
 }
 
+DERIVATIVE(flatten)
+{
+	ISeq *iseq = new ISeq();
+
+	// flatten(f(x)) -> f(x)
+	iseq->append(
+		new _repl_const(1.0, 1),
+		new Get(0)
+	);
+
+	return iseq;
+}
+
 DERIVATIVE(reshape)
 {
 	ISeq *iseq = new ISeq();
 
-	// Same function, with all ones
+	// reshape(f(x), shape) -> f(x)
 	iseq->append(
-		new _repl_const(1.0, -1),
+		new _repl_const(1.0, 1),
 		new Get(0)
 	);
 

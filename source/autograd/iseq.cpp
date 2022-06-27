@@ -18,7 +18,7 @@ _variable *ISeq::get(int index) const
 }
 
 // Inserting instructions and functions
-void ISeq::append(const _function *fptr)
+void ISeq::append(_function *fptr)
 {
 	// Append, then optimize
 	_append(fptr);
@@ -26,7 +26,7 @@ void ISeq::append(const _function *fptr)
 }
 
 // Evaluate the sequence
-Constant ISeq::compute(const Input &ins) const
+Constant ISeq::compute(const Input &ins)
 {
 	// Load inputs
 	_load(ins);
@@ -35,11 +35,44 @@ Constant ISeq::compute(const Input &ins) const
 	std::stack <Constant> ops;
 
 	// Execute all the instructions
-	for (const _function *ftn : _instrs)
+	for (_function *ftn : _instrs)
 		_exec(ftn, ops);
 
 	// Return top-most value on the stack
 	return ops.top();
+}
+
+// Evaluate gradient
+_function::Gradient ISeq::gradient(const Input &igrads) const
+{
+	// Output gradient
+	Gradient g;
+	g.igrads = igrads;
+
+	// Loop through all kernel functions
+	for (int i = _instrs.size() - 1; i >= 0; i--) {
+		// Get function
+		const _function *ftn = _instrs[i];
+
+		// Get gradient
+		_function::Gradient g_ftn = ftn->gradient(g.igrads);
+
+		// Add to gradients
+		g.grads.insert(g.grads.end(), g_ftn.grads.begin(), g_ftn.grads.end());
+
+		// Set input gradients
+		g.igrads = g_ftn.igrads;
+	}
+
+	return g;
+}
+
+// Apply gradient
+void ISeq::apply_gradient(GradientQueue &grad_queue)
+{
+	// Loop through all kernel functions
+	for (_function *ftn : _instrs)
+		ftn->apply_gradient(grad_queue);
 }
 
 // Make copy
@@ -94,7 +127,7 @@ std::string ISeq::summary() const
 /////////////////////////
 
 // Kernel function and # of inputs
-ISeq::ISeq(const _function *ftn, int nins)
+ISeq::ISeq(_function *ftn, int nins)
 		: _function(nins, op_iseq)
 {
 	// Fill the _vars with variables
@@ -115,7 +148,7 @@ ISeq::ISeq(const _function *ftn, int nins)
 }
 
 // List of instructions and constants
-ISeq::ISeq(std::vector <const _function *> instrs,
+ISeq::ISeq(std::vector <_function *> instrs,
 	std::vector <Constant> consts, int nins)
 		: _function(nins, op_iseq),
 		_instrs(instrs),
@@ -128,7 +161,7 @@ ISeq::ISeq(std::vector <const _function *> instrs,
 		_vars[i] = new _variable();
 }
 
-ISeq::ISeq(std::vector <const _function *> instrs,
+ISeq::ISeq(std::vector <_function *> instrs,
 	std::vector <Constant> consts, int nins,
 	const _reindex_map &reindex)
 		: _function(nins, op_iseq),
@@ -147,9 +180,20 @@ ISeq::ISeq(std::vector <const _function *> instrs,
 //////////////////////
 
 // Append helpers
-void ISeq::_append(const _function *fptr)
+void ISeq::_append(_function *fptr)
 {
+	int index;
+
 	switch (fptr->spop) {
+	case op_get:
+		// If there are fewer inputs that requested,
+		// then add new variables
+		index = reinterpret_cast <const Get *> (fptr)->index;
+		for (int i = inputs; i <= index; i++)
+			_vars.push_back(new _variable());
+		_instrs.push_back(fptr);
+		inputs = index + 1;
+		break;
 	case op_var:
 		append_variable((_variable *) fptr);
 		break;
@@ -267,18 +311,14 @@ static std::vector <Kernel> kernels = {
 	[](std::stack <Constant> &ops) -> Constant {
 		Constant b = _get_operand(ops);
 		Constant a = _get_operand(ops);
-
-		// TODO: use matrix multiplication if dims == 2
-		// or if dim== 2 and dim == 1 -> user must do hammard
-		// for element-wise multiplication
-		return multiply(a, b);
+		return a * b;
 	},
 
 	// Division
 	[](std::stack <Constant> &ops) -> Constant {
 		Constant b = _get_operand(ops);
 		Constant a = _get_operand(ops);
-		return divide(a, b);
+		return a / b;
 	}
 };
 
@@ -346,7 +386,7 @@ bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 }
 
 // Execute an instruction
-void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
+void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
 {
 	// Check if the instruction is a special operation
 	if (_ispec(ftn, ops)) {
@@ -384,7 +424,7 @@ void ISeq::_exec(const _function *ftn, std::stack <Constant> &ops) const
 
 // Composition helpers
 void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
-		const _function *ftn, std::unordered_map <int, int> &reindex,
+		_function *ftn, std::unordered_map <int, int> &reindex,
 		int &vindex)
 {
 	// If the instruction is a get,
@@ -426,7 +466,7 @@ _function *ISeq::_compose(const Compositions &cs) const
 
 	// Variable index
 	int vindex = 0;
-	
+
 	// Map for reindexing get operations
 	//	variable id -> get index
 	std::unordered_map <int, int> reindex;
@@ -455,7 +495,7 @@ _function *ISeq::_compose(const Compositions &cs) const
 			// Get the iseq, and append its instructions
 			iseq = reinterpret_cast <const ISeq *> (ftn);
 
-			for (const _function *fptr : iseq->_instrs)
+			for (_function *fptr : iseq->_instrs)
 				_compose_iseq(instrs, iseq, fptr, reindex, vindex);
 			break;
 		case op_repl_const:
@@ -511,8 +551,8 @@ _function *ISeq::_compose(const Compositions &cs) const
 //////////////////////////////////
 
 // Constructors for the tree
-_node::_node(const _function *f) : fptr(f) {}
-_node::_node(const _function *f, const std::vector <_node *> &cs)
+_node::_node(_function *f) : fptr(f) {}
+_node::_node(_function *f, const std::vector <_node *> &cs)
 		: fptr(f), children(cs) {}
 
 // Get string
@@ -546,7 +586,7 @@ _node *ISeq::_tree(_cache_map &cache) const
 	std::stack <_node *> nodes;
 
 	// Iterate through the instructions
-	for (const _function *ftn : _instrs)
+	for (_function *ftn : _instrs)
 		_tree_walk(ftn, nodes, cache);
 
 	// Return the top node
@@ -554,7 +594,7 @@ _node *ISeq::_tree(_cache_map &cache) const
 }
 
 // TODO: static method?
-void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_map &cache) const
+void ISeq::_tree_walk(_function *ftn, std::stack <_node *> &nodes, _cache_map &cache) const
 {
 	// Switch variables
 	std::vector <_node *> children;
@@ -584,7 +624,7 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 		// Insert value in cache map
 		value = nodes.top();
 		nodes.pop();
-		
+
 		cache[index] = _cache_info {0, value};
 		children = {value};
 		break;
@@ -605,7 +645,7 @@ void ISeq::_tree_walk(const _function *ftn, std::stack <_node *> &nodes, _cache_
 		// Add the node
 		break;
 	}
-	
+
 	// Add the node
 	nodes.push(new _node(ftn, children));
 }
@@ -616,7 +656,7 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 		const ConstantCache &pconsts) const
 {
 	// Iterate through the tree
-	const _function *ftn = tree->fptr;
+	_function *ftn = tree->fptr;
 
 	if (ftn->spop == op_get_cache) {
 		// Get the index
@@ -723,7 +763,7 @@ _node *_diffk_get(const _function *fptr, const _node *tree, int vindex)
 	// Check if the index is the same as the variable
 	if (index == vindex)
 		return new _node(new _repl_const(1, vindex));
-	
+
 	// Add the node
 	return new _node(new _repl_const(0, vindex));
 }
@@ -779,7 +819,7 @@ _node *_diff_ispec(const _function *ftn,
 		const _node *tree, int vindex)
 {
 	// TODO: operation factories (which return shared_ptr)
-	
+
 	// TODO: map for kernels?
 
 	// Check type of operation
@@ -810,7 +850,7 @@ _node *_diff_iseq(const _node *orig,
 		int vindex)
 {
 	// TODO: check that there are no more ISeqs
-	const _function *ftn = orig->fptr;
+	_function *ftn = orig->fptr;
 
 	// Temporary indices
 	int index = -1;
@@ -859,7 +899,7 @@ _node *_diff_tree(const _node *tree, int vindex)
 	_function *d = ftn->diff(vindex);
 
 	// TODO: null check
-	
+
 	// TODO: what if d isnt iseq?
 	if (d->spop == _function::op_iseq) {
 		ISeq *diseq = reinterpret_cast <ISeq *> (d);

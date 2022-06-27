@@ -15,4 +15,18 @@ std::ostream &operator<<(std::ostream &os, const std::vector <T> &v)
 	return os << "}";
 }
 
+// Printing deques
+template <class T>
+std::ostream &operator<<(std::ostream &os, const std::deque <T> &v)
+{
+	os << "{";
+	for (size_t i = 0; i < v.size(); i++) {
+		os << v[i];
+		if (i != v.size() - 1)
+			os << ", ";
+	}
+
+	return os << "}";
+}
+
 #endif

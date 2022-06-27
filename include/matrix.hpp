@@ -897,8 +897,13 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
 template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
-	if (A.get_cols() != B.get_rows())
+	if (A.get_cols() != B.get_rows()) {
+		std::cout << "A.get_rows() = " << A.get_rows() << std::endl;
+		std::cout << "A.get_cols() = " << A.get_cols() << std::endl;
+		std::cout << "B.get_rows() = " << B.get_rows() << std::endl;
+		std::cout << "B.get_cols() = " << B.get_cols() << std::endl;
 		throw typename Matrix <T> ::dimension_mismatch();
+	}
 
 	size_t rs = A.get_rows();
 	size_t cs = B.get_cols();

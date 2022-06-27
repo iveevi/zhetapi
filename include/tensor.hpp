@@ -35,7 +35,7 @@ template <size_t N>
 class Interval;
 
 }
-	
+
 // Shape information for tensors
 struct _shape_info {
 	using shape_type = std::vector <std::size_t>;
@@ -45,7 +45,7 @@ struct _shape_info {
 	size_t		offset = 0;
 	size_t		elements = 0;
 	size_t		dimensions = 0;
-	
+
 	// The dimension sizes,
 	// partial sizes,
 	// slices
@@ -184,7 +184,7 @@ struct _shape_info {
 			nrange = slice;
 		else
 			nrange = nrange(slice);
-		
+
 		result.slices[0] = nrange;
 		result.array[0] = nrange.size();
 		result.recalculate();
@@ -251,8 +251,37 @@ struct _shape_info {
 		for (size_t i = 0; i < dimensions; i++) {
 			array[i] = shape[i];
 			partials[i] = 1;
+
+			// TODO: this isnt right, needs to consider all
+			// previous slices
 			slices[i] = all;
 		}
+	}
+
+	// Flatten a shape info (one dimension)
+	void flatten() {
+		// Free previous arrays
+		if (array != nullptr)
+			delete[] array;
+
+		if (slices != nullptr)
+			delete[] slices;
+
+		if (partials != nullptr)
+			delete[] partials;
+
+		// New shape info
+		dimensions = 1;
+
+		array = new size_t[dimensions];
+		partials = new size_t[dimensions];
+		slices = new slice_type[dimensions];
+
+		array[0] = elements;
+		partials[0] = 1;
+
+		// TODO: need to compose all teh slices
+		slices[0] = all;
 	}
 
 	// Convert to shape_type
@@ -280,6 +309,11 @@ struct _shape_info {
 
 	bool operator!=(const _shape_info &other) const {
 		return !(*this == other);
+	}
+
+	// Check if scalar
+	bool is_scalar() const {
+		return (dimensions == 1) && (elements == 1);
 	}
 };
 
@@ -332,6 +366,7 @@ public:
 
 	// Reshape tensor
 	void reshape(const shape_type &);
+	void flatten();
 
 	// Indexing and slicing
 	const T &get(size_t) const;	// Get scalar element
@@ -356,9 +391,12 @@ public:
 	Tensor <T> transform(T (*)(const T &)) const;
 	Tensor <T> transform(const std::function <T (const T &)> &) const;
 
+	Tensor <T> flat() const;
+
 	// Properties
 	// TODO: is this needed?
 	bool good() const; // operator bool() const; ?
+	bool is_scalar() const;
 
 	// Arithmetic modifiers
 	Tensor <T> &operator*=(const T &);
@@ -588,6 +626,12 @@ void Tensor <T> ::reshape(const shape_type &dim)
 	_shape.reshape(dim);
 }
 
+template <class T>
+void Tensor <T> ::flatten()
+{
+	_shape.flatten();
+}
+
 //////////////////////////
 // Indexing and slicing //
 //////////////////////////
@@ -650,6 +694,12 @@ bool Tensor <T> ::good() const
 }
 
 template <class T>
+bool Tensor <T> ::is_scalar() const
+{
+	return _shape.is_scalar();
+}
+
+template <class T>
 T Tensor <T> ::length() const
 {
 	T sum = 0;
@@ -691,6 +741,14 @@ Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) cons
 	for (int i = 0; i < out.size(); i++)
 		out._array[i] = ftn(out._array[i]);
 	return out;
+}
+
+template <class T>
+Tensor <T> Tensor <T> ::flat() const
+{
+	auto ret = copy();
+	ret.flatten();
+	return ret;
 }
 
 //////////////////////////
@@ -777,6 +835,47 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 	for (int i = 0; i < a.size(); i++)
 		c._array[i] = a._array[i] / b._array[i];
 	return c;
+}
+
+template <class T>
+Tensor <T> operator*(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// Check if scalar multiplication
+	if (a.shape() == b.shape()) {
+		// TODO: use matrix multiplication if dims == 2
+		// or if dim== 2 and dim == 1 -> user must do hammard
+		// for element-wise multiplication
+		return multiply(a, b);
+	} else if (a.is_scalar()) {
+		Tensor <T> out = b.copy();
+		out *= a.get(0);
+		return out;
+	} else if (b.is_scalar()) {
+		Tensor <T> out = a.copy();
+		out *= b.get(0);
+		return out;
+	}
+
+	throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+}
+
+template <class T>
+Tensor <T> operator/(const Tensor <T> &a, const Tensor <T> &b)
+{
+	// Check if scalar division
+	if (a.shape() == b.shape()) {
+		return divide(a, b);
+	} else if (a.is_scalar()) {
+		Tensor <T> out = b.copy();
+		out /= a.get(0);
+		return out;
+	} else if (b.is_scalar()) {
+		Tensor <T> out = a.copy();
+		out /= b.get(0);
+		return out;
+	}
+
+	throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
 }
 
 // Boolean operators

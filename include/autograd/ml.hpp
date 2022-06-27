@@ -24,10 +24,14 @@ class _kdense : public _function {
 	// Bias
 	Matrix <float>			_b;
 
+	// Cached
+	Matrix <float>			_cO;
+	Matrix <float>			_cI;
+
 	// Private constructor
-	_kdense (size_t isize, size_t osize, Matrix <float> w, Matrix <float> b)
-			: _function(1), _isize (isize), _osize (osize),
-			_w (w), _b (b) {}
+	_kdense(size_t isize, size_t osize, Matrix <float> w, Matrix <float> b)
+			: _function(1), _isize(isize), _osize(osize),
+			_w(w), _b(b) {}
 
 	// Static random number generator
 	static utility::Interval <1>	_rng;
@@ -38,7 +42,7 @@ class _kdense : public _function {
 public:
 	_kdense(size_t isize, size_t osize)
 			: _function(1), _isize(isize), _osize(osize),
-		_w(isize, osize, rgen), _b(osize, 1, rgen) {}
+		_w(osize, isize, rgen), _b(osize, 1, rgen) {}
 
 	// Copy overload
 	_function *copy() const override {
@@ -46,22 +50,39 @@ public:
 	}
 
 	// Forward pass
-	Constant compute(const Input &ins) const override {
+	Constant compute(const Input &ins) override {
 		// Convert first argument into a matrix
-		Matrix <float> x(ins[0], _isize, 1);
-		return _w * x + _b;
+		_cI = Matrix <float> (ins[0], _isize, 1);
+		_cO = _w * _cI + _b;
+		return Constant(_cO);
 	}
 
 	// Machine learning functions
-	virtual Input gradient(const Constant &igrad, const Input &ins) const override {
+	virtual Gradient gradient(const Input &igrads) const override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
-		Matrix <float> g(igrad[0], _osize, 1);
+		Matrix <float> dO(igrads[0], _osize, 1);
+		Matrix <float> wgrad = dO * _cI.transpose();
+		Matrix <float> bgrad = dO;
+		Matrix <float> igrad = _w.transpose() * dO;
 
-		Matirx <float> wgrad = g * ins[0].transpose();
-		Matrix <float> bgrad = g;
+		return Gradient {
+			.igrads = {igrad},
+			.grads = {wgrad, bgrad}
+		};
+	}
 
-		return {wgrad, bgrad};
+	// Apply gradient
+	virtual void apply_gradient(GradientQueue &grads) override {
+		// Convert first argument into a matrix
+		Matrix <float> bgrad(grads.back(), _osize, 1);
+		grads.pop_back();
+
+		Matrix <float> wgrad(grads.back(), _osize, _isize);
+		grads.pop_back();
+
+		_w += wgrad;
+		_b += bgrad;
 	}
 
 	// Summary of the function

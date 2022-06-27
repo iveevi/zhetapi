@@ -14,17 +14,17 @@
 namespace zhetapi {
 
 namespace autograd {
-	
+
 // Tree structure
 struct _node {
-	const _function *fptr;
+	_function *fptr;
 
 	// TODO: should be a vector of plain nodes
 	std::vector <_node *> children;
 
 	// Constructors
-	_node(const _function *);
-	_node(const _function *, const std::vector <_node *> &);
+	_node(_function *);
+	_node(_function *, const std::vector <_node *> &);
 
 	// Printing the tree
 	std::string str(int = 0) const;
@@ -34,7 +34,7 @@ struct _node {
 class ISeq : public _function {
 public:
 	// Public aliases
-	using Instructions = std::vector <const _function *>;
+	using Instructions = std::vector <_function *>;
 	using ConstantCache = std::vector <Constant>;
 private:
 	// Private aliases
@@ -71,23 +71,23 @@ private:
 	void append_variable(_variable *);
 	void append_iseq(ISeq *);
 	int index_of(_variable *);		// TODO: is this necessary?
-	void _append(const _function *);
-	
+	void _append(_function *);
+
 	template <class ... Args>
-	void _append(const _function *fptr, Args ...);
+	void _append(_function *fptr, Args ...);
 
 	// Computation helpers
 	void _load(const Input &) const;
 	void storec(std::stack <Constant> &, int) const;
 	bool _ispec(const _function *, std::stack <Constant> &) const;
-	void _exec(const _function *, std::stack <Constant> &) const;
+	void _exec(_function *, std::stack <Constant> &);
 
 	// Composing functions and variables
 	_function *_compose(const Compositions &) const override;
 
 	// Tree building and rebuilding
 	_node *_tree(_cache_map &) const;
-	void _tree_walk(const _function *, std::stack <_node *> &,
+	void _tree_walk(_function *, std::stack <_node *> &,
 		_cache_map &) const;
 	void _rebuild(const _node *, Instructions &,
 		ConstantCache &, _cache_map &,
@@ -103,10 +103,10 @@ private:
 	_function *diff(const int) const override;
 protected:
 	// Protected constructors
-	ISeq(const _function *, int);
-	ISeq(std::vector <const _function *>,
+	ISeq(_function *, int);
+	ISeq(std::vector <_function *>,
 		std::vector <Constant>, int);
-	ISeq(std::vector <const _function *>,
+	ISeq(std::vector <_function *>,
 		std::vector <Constant>, int,
 		const _reindex_map &);
 public:
@@ -121,14 +121,20 @@ public:
 	_variable *get(int) const;
 
 	// Inserting instructions and functions
-	void append(const _function *);
+	void append(_function *);
 
 	// Append a sequence of instructions
 	template <class ... Args>
 	void append(Args ...);
 
 	// Evaluate the sequence
-	Constant compute(const Input &ins) const override;
+	Constant compute(const Input &) override;
+
+	// Evaluate gradient
+	Gradient gradient(const Input &) const override;
+
+	// Apply gradients
+	void apply_gradient(GradientQueue &) override;
 
 	// Copy generator
 	_function *copy() const override;
@@ -139,7 +145,7 @@ public:
 
 // Append a sequence of instructions
 template <class ... Args>
-void ISeq::_append(const _function *fptr, Args ... args)
+void ISeq::_append(_function *fptr, Args ... args)
 {
 	_append(fptr);
 	_append(args...);

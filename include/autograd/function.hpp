@@ -2,6 +2,7 @@
 #define ZHETAPI_FUNCTION_H_
 
 // Standard headers
+#include <deque>
 #include <vector>
 
 // Library headers
@@ -48,6 +49,9 @@ public:
 	// Type of input
 	using Input = std::vector <Constant>;
 	using Compositions = std::vector <_function *>;
+
+	// Gradient queue
+	using GradientQueue = std::deque <Constant>;
 protected:
 	// String versions of operations
 	static constexpr const char *_spec_strs[] {
@@ -71,7 +75,7 @@ public:
 
 	// Not pure virtual so that special operations
 	//	can get away without implementing it
-	virtual Constant compute(const Input &) const {
+	virtual Constant compute(const Input &) {
 		// TODO: separate into _compute, like compose?
 		// then we can check size
 		return Constant();
@@ -92,14 +96,23 @@ public:
 	virtual _function *diff(const int) const {
 		return nullptr;
 	}
-	
+
+	// Gradient packet
+	struct Gradient {
+		Input		igrads;	// inputs
+		GradientQueue	grads;	// weights
+	};
+
 	// Machine learning - by default, no gradient
-	virtual Input gradient(const Constant &, const Input &) const {
-		return {Constant {0}};
+	virtual Gradient gradient(const Input &) const {
+		// NOTE: no inputs are provided (only igrad)
+		// inputs and any other information from the forward
+		// pass must be cached by the functions
+		return {};
 	}
 
 	// Apply gradients
-	virtual void apply_gradient(const Input &) const {}
+	virtual void apply_gradient(GradientQueue &) {}
 
 	// Copy pointer
 	virtual _function *copy() const {
@@ -123,6 +136,14 @@ struct Get : public _function {
 
 	Get(int i) : _function(1, op_get), index(i) {}
 
+	// Gradient
+	Gradient gradient(const Input &x) const override {
+		Gradient g;
+		g.igrads.push_back(x[index]);
+		return g;
+	}
+
+	// Copy pointer
 	_function *copy() const override {
 		return new Get(index);
 	}
@@ -153,7 +174,7 @@ struct _repl_const : public _function {
 
 	_repl_const(const Constant &v, int i)
 		: _function(0, op_repl_const), value(v), index(i) {}
-	
+
 	// Overload summary to show index
 	std::string summary() const override {
 		return "REPLACE CONST (" + std::to_string(index) + ")";
@@ -238,7 +259,7 @@ public:
 	_function *copy() const override {
 		return new _variable(id, value);
 	}
- 
+
 	// Overload summary to include id
 	std::string summary() const override {
 		return "variable (id: " + std::to_string(id) + ")";

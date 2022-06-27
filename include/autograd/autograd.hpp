@@ -66,7 +66,7 @@ class Function {
 		cs.push_back(f.get());
 		_ftr_process(cs, ++i, args...);
 	}
-	
+
 	template <class ... Args>
 	static void _ftr_process(_function::Compositions &cs, int &i, const Constant &c, Args ... args) {
 		cs.push_back(new _repl_const(c, i));
@@ -95,7 +95,7 @@ public:
 		_ftr_process(cs, i, args...);
 		return fptr->compose(cs);
 	}
-	
+
 	// Computation
 	template <class ... Args, typename = typename std::enable_if
 		<!fret <Args...> ::compose> ::type>
@@ -111,14 +111,11 @@ public:
 	}
 
 	// Machine learning
-	template <class ... Args>
-	_function::Input gradient(const Constant &igrad, Args ... args) const {
-		_function::Input inputs;
-		_cmp_process(inputs, args...);
-		return fptr->gradient(igrad, inputs);
+	_function::Gradient gradient(const _function::Input &igrads) const {
+		return fptr->gradient(igrads);
 	}
 
-	void apply_gradient(const _function::Input &grads) {
+	void apply_gradient(_function::GradientQueue &grads) {
 		fptr->apply_gradient(grads);
 	}
 
@@ -173,7 +170,7 @@ Function operator/(const Constant &, const Function &);
 		struct kernel : public _function { 				\
 			kernel() : _function(inputs) {} 			\
 										\
-			Constant compute(const Input &ins) const override {	\
+			Constant compute(const Input &ins) override {		\
 				return _k##name(ins);				\
 			}							\
 										\
@@ -206,6 +203,7 @@ FUNCTION_CLASS(tan, 1, "TAN")
 FUNCTION_CLASS(square, 1, "SQUARE")
 FUNCTION_CLASS(pow, 2, "POW")
 
+FUNCTION_CLASS(flatten, 1, "FLATTEN")
 FUNCTION_CLASS(reshape, 2, "RESHAPE")
 
 }
