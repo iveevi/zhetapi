@@ -75,6 +75,23 @@ void ISeq::update_parameters(GradientQueue &grad_queue)
 		ftn->update_parameters(grad_queue);
 }
 
+// Info about parameters
+int ISeq::parameters() const
+{
+	int n = 0;
+	for (_function *ftn : _instrs)
+		n += ftn->parameters();
+	return n;
+}
+
+int ISeq::tunable_parameters() const
+{
+	int n = 0;
+	for (_function *ftn : _instrs)
+		n += ftn->tunable_parameters();
+	return n;
+}
+
 // Make copy
 _function *ISeq::copy() const
 {

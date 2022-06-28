@@ -85,6 +85,15 @@ public:
 		_b += bgrad;
 	}
 
+	// Info about parameters
+	virtual int parameters() const override {
+		return 2;
+	}
+
+	virtual int tunable_parameters() const override {
+		return _w.size() + _b.size();
+	}
+
 	// Summary of the function
 	std::string summary() const override {
 		return "KDENSE (" + std::to_string(_isize) + " x " + std::to_string(_osize) + ")";

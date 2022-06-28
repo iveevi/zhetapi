@@ -13,7 +13,7 @@ namespace zhetapi {
 namespace autograd {
 
 // Constants are just tensors
-using Constant = Tensor <long double>;
+using Constant = Tensor <float>;
 
 // Basic structure of a function
 class _function {
@@ -113,6 +113,17 @@ public:
 
 	// Apply gradients
 	virtual void update_parameters(GradientQueue &) {}
+
+	// Info about parameters
+	virtual int parameters() const {
+		// This is the number of tensor parameters
+		return 0;
+	}
+
+	virtual int tunable_parameters() const {
+		// This is the number of individual (scalar) parameters
+		return 0;
+	}
 
 	// Copy pointer
 	virtual _function *copy() const {

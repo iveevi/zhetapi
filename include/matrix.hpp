@@ -671,24 +671,13 @@ Matrix <T> ::Matrix(const Matrix <T> &other, T k)
 }
 
 // Tensor reshaper
+// TODO: should not copy the data (or create new)
 template <class T>
 Matrix <T> ::Matrix(const Tensor <T> &other, size_t rows, size_t cols)
+		: Tensor <T> (rows, cols)
 {
-	if (this != &other) {
-		this->_array.reset(new T[rows * cols]);
-		this->get_rows() = rows;
-		this->get_cols() = cols;
-
-		this->size() = rows * cols;
-		for (size_t i = 0; i < this->size(); i++)
-			this->_array[i] = other.get(i);
-
-		this->_dims = 2;
-		this->_dim = new size_t[2];
-
-		this->_dim[0] = this->get_rows();
-		this->_dim[1] = this->get_cols();
-	}
+	for (size_t i = 0; i < this->size(); i++)
+		this->_array[i] = other.get(i);
 }
 
 template <class T>

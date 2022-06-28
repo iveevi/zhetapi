@@ -136,6 +136,10 @@ public:
 	// Apply gradients
 	void update_parameters(GradientQueue &) override;
 
+	// Info about parameters
+	int parameters() const override;
+	int tunable_parameters() const override;
+
 	// Copy generator
 	_function *copy() const override;
 

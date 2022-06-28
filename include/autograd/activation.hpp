@@ -16,7 +16,7 @@ public:
 
 		Constant compute(const Input &ins) override {
 			return ins[0].copy().transform(
-				[](long double x) {
+				[](float x) {
 					return x > 0 ? x : 0;
 				}
 			);
@@ -24,7 +24,7 @@ public:
 
 		Gradient gradient(const Input &igrads) const override {
 			Constant out = igrads[0].copy().transform(
-				[](long double x) {
+				[](float x) {
 					return (x > 0 ? 1 : 0) * x;
 				}
 			);
@@ -52,13 +52,13 @@ extern Function relu;
 class _leaky_relu : public ISeq {
 public:
 	struct kernel : public _function {
-		long double _alpha;
+		float _alpha;
 
-		kernel(long double alpha) : _function(1), _alpha(alpha) {}
+		kernel(float alpha) : _function(1), _alpha(alpha) {}
 
 		Constant compute(const Input &ins) override {
 			return ins[0].copy().transform(
-				[this](long double x) {
+				[this](float x) {
 					return x > 0 ? x : _alpha * x;
 				}
 			);
@@ -66,7 +66,7 @@ public:
 
 		Gradient gradient(const Input &igrads) const override {
 			Constant out = igrads[0].copy().transform(
-				[this](long double x) {
+				[this](float x) {
 					return (x > 0 ? 1 : _alpha) * x;
 				}
 			);
@@ -77,7 +77,7 @@ public:
 		}
 
 		std::string summary() const override {
-			return "Leaky RELU";
+			return "LEAKY RELU";
 		}
 
 		_function *copy() const override {
@@ -85,13 +85,95 @@ public:
 		}
 	};
 
-	_leaky_relu(long double alpha) : ISeq(new kernel(alpha), 1) {}
+	_leaky_relu(float alpha) : ISeq(new kernel(alpha), 1) {}
 };
 
-inline Function leaky_relu(long double alpha)
+inline Function leaky_relu(float alpha)
 {
 	return new_ <_leaky_relu> (alpha);
 }
+
+// Sigmoid activation function
+class _sigmoid : public ISeq {
+public:
+	struct kernel : public _function {
+		kernel() : _function(1) {}
+
+		Constant compute(const Input &ins) override {
+			return ins[0].copy().transform(
+				[](float x) {
+					return 1 / (1 + std::exp(-x));
+				}
+			);
+		}
+
+		Gradient gradient(const Input &igrads) const override {
+			Constant out = igrads[0].copy().transform(
+				[](float x) {
+					float y = 1 / (1 + std::exp(-x));
+					return y * (1 - y) * x;
+				}
+			);
+
+			return Gradient {
+				.igrads = {out}
+			};
+		}
+
+		std::string summary() const override {
+			return "SIGMOID";
+		}
+
+		_function *copy() const override {
+			return new kernel();
+		}
+	};
+
+	_sigmoid() : ISeq(new kernel(), 1) {}
+};
+
+extern Function sigmoid;
+
+// Tanh activation function
+class _tanh : public ISeq {
+public:
+	struct kernel : public _function {
+		kernel() : _function(1) {}
+
+		Constant compute(const Input &ins) override {
+			return ins[0].copy().transform(
+				[](float x) {
+					return std::tanh(x);
+				}
+			);
+		}
+
+		Gradient gradient(const Input &igrads) const override {
+			Constant out = igrads[0].copy().transform(
+				[](float x) {
+					float y = std::tanh(x);
+					return (1 - y * y) * x;
+				}
+			);
+
+			return Gradient {
+				.igrads = {out}
+			};
+		}
+
+		std::string summary() const override {
+			return "TANH";
+		}
+
+		_function *copy() const override {
+			return new kernel();
+		}
+	};
+
+	_tanh() : ISeq(new kernel(), 1) {}
+};
+
+extern Function tanh;
 
 }
 

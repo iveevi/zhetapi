@@ -802,14 +802,14 @@ Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
 template <class T>
 Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
 {
-	Tensor <T> c(a);
+	Tensor <T> c = a.copy();
 	return (c += b);
 }
 
 template <class T>
 Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
 {
-	Tensor <T> c(a);
+	Tensor <T> c = a.copy();
 	return (c -= b);
 }
 
@@ -862,14 +862,14 @@ Tensor <T> operator*(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 Tensor <T> operator*(const Tensor <T> &a, const T &b)
 {
-	Tensor <T> c(a);
+	Tensor <T> c = a.copy();
 	return (c *= b);
 }
 
 template <class T>
 Tensor <T> operator*(const T &a, const Tensor <T> &b)
 {
-	Tensor <T> c(b);
+	Tensor <T> c = b.copy();
 	return (c *= a);
 }
 

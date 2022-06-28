@@ -119,6 +119,15 @@ public:
 		fptr->update_parameters(grads);
 	}
 
+	// Info about parameters
+	int parameters() const {
+		return fptr->parameters();
+	}
+
+	int tunable_parameters() const {
+		return fptr->tunable_parameters();
+	}
+
 	// TODO: differentiate with respect to Variable,
 	// add another function, _diff_vid(const int)...
 
