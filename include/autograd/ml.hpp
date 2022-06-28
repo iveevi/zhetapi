@@ -73,7 +73,7 @@ public:
 	}
 
 	// Apply gradient
-	virtual void apply_gradient(GradientQueue &grads) override {
+	virtual void update_parameters(GradientQueue &grads) override {
 		// Convert first argument into a matrix
 		Matrix <float> bgrad(grads.back(), _osize, 1);
 		grads.pop_back();

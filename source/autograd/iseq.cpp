@@ -68,11 +68,11 @@ _function::Gradient ISeq::gradient(const Input &igrads) const
 }
 
 // Apply gradient
-void ISeq::apply_gradient(GradientQueue &grad_queue)
+void ISeq::update_parameters(GradientQueue &grad_queue)
 {
 	// Loop through all kernel functions
 	for (_function *ftn : _instrs)
-		ftn->apply_gradient(grad_queue);
+		ftn->update_parameters(grad_queue);
 }
 
 // Make copy

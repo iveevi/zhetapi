@@ -134,7 +134,7 @@ public:
 	Gradient gradient(const Input &) const override;
 
 	// Apply gradients
-	void apply_gradient(GradientQueue &) override;
+	void update_parameters(GradientQueue &) override;
 
 	// Copy generator
 	_function *copy() const override;

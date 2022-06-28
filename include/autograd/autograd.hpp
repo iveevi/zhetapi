@@ -115,8 +115,8 @@ public:
 		return fptr->gradient(igrads);
 	}
 
-	void apply_gradient(_function::GradientQueue &grads) {
-		fptr->apply_gradient(grads);
+	void update_parameters(_function::GradientQueue &grads) {
+		fptr->update_parameters(grads);
 	}
 
 	// TODO: differentiate with respect to Variable,

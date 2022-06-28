@@ -112,7 +112,7 @@ public:
 	}
 
 	// Apply gradients
-	virtual void apply_gradient(GradientQueue &) {}
+	virtual void update_parameters(GradientQueue &) {}
 
 	// Copy pointer
 	virtual _function *copy() const {

@@ -16,6 +16,7 @@ definitions:
     testing/timers.cpp,
     testing/vector.cpp'
   - source: 'source/range.cpp,
+    source/autograd/activation.cpp,
     source/autograd/autograd.cpp,
     source/autograd/iseq.cpp,
     source/autograd/ml.cpp,

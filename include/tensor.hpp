@@ -860,6 +860,20 @@ Tensor <T> operator*(const Tensor <T> &a, const Tensor <T> &b)
 }
 
 template <class T>
+Tensor <T> operator*(const Tensor <T> &a, const T &b)
+{
+	Tensor <T> c(a);
+	return (c *= b);
+}
+
+template <class T>
+Tensor <T> operator*(const T &a, const Tensor <T> &b)
+{
+	Tensor <T> c(b);
+	return (c *= a);
+}
+
+template <class T>
 Tensor <T> operator/(const Tensor <T> &a, const Tensor <T> &b)
 {
 	// Check if scalar division
@@ -876,6 +890,13 @@ Tensor <T> operator/(const Tensor <T> &a, const Tensor <T> &b)
 	}
 
 	throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+}
+
+template <class T>
+Tensor <T> operator/(const Tensor <T> &a, const T &b)
+{
+	Tensor <T> c(a);
+	return (c /= b);
 }
 
 // Boolean operators
