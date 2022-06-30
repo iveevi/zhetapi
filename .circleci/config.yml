@@ -37,16 +37,13 @@ commands:
             sudo make install
             cd ../
       - run:
-          name: Building essentials
+          name: Install Pip
           command: |
-            wget https://bootstrap.pypa.io/get-pip.py
-            sudo apt update install python3.9
-            sudo python3 get-pip.py
-            sudo python3 -m pip install pyyaml smake
+            sudo apt install -y python3-pip
       - run:
-          name: Installing smake
+          name: Install Packages
           command: |
-            pip install smake
+            sudo python3 -m pip install pyyaml smake
 
 jobs:
   testing:
@@ -61,7 +58,7 @@ jobs:
             mv smake.yaml smake_temp.yaml
             iconv -f utf8 -t ascii smake_temp.yaml > smake.yaml
             tree
-            smake testing -j8
+            smake -v testing -j8
 
 workflows:
   ubuntu-18.04-installation-and-port:
