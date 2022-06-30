@@ -85,6 +85,15 @@ public:
 		return fptr.get();
 	}
 
+	// As a convertion operator
+	operator const _function &() const {
+		return *fptr.get();
+	}
+	
+	operator _function &() {
+		return *fptr.get();
+	}
+
 	// Composition
 	template <class ... Args, typename = typename std::enable_if
 		<fret <Args...> ::compose> ::type>
@@ -105,6 +114,10 @@ public:
 		return fptr->compute(inputs);
 	}
 
+	Constant operator()(const _function::Input &inputs) {
+		return fptr->compute(inputs);
+	}
+
 	// Differentiation
 	Function differentiate(const int i) const {
 		return fptr->diff(i);
@@ -115,7 +128,7 @@ public:
 		return fptr->gradient(igrads);
 	}
 
-	void update_parameters(_function::GradientQueue &grads) {
+	void update_parameters(GradientQueue &grads) {
 		fptr->update_parameters(grads);
 	}
 

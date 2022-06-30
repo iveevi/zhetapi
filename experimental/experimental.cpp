@@ -1,9 +1,10 @@
+#include "../include/autograd/activation.hpp"
 #include "../include/autograd/autograd.hpp"
 #include "../include/autograd/ml.hpp"
-#include "../include/autograd/activation.hpp"
 #include "../include/autograd/optimizer.hpp"
-#include "../include/io/print.hpp"
+#include "../include/autograd/train.hpp"
 #include "../include/common.hpp"
+#include "../include/io/print.hpp"
 
 using namespace zhetapi;
 using namespace zhetapi::autograd;
@@ -36,7 +37,7 @@ int main()
 	output.flatten();
 
 	// Optimizer
-	auto optimizer = ml::Adam(model.parameters(), 0.01);
+	auto optimizer = ml::RMSprop(model.parameters(), 0.001);
 
 	std::cout << "\nOut: " << output << std::endl;
 	std::cout << "\terror = " << mse(output, target) << std::endl;
@@ -45,23 +46,8 @@ int main()
 
 	std::cout << "\nStarting training loop:" << std::endl;
 
-	// Training loop
-	for (int i = 0; i < 100; i++) {
-		auto output = model(input).flat();
-		auto igrad = true_dmse(output, target);
-		auto grads = model.gradient({igrad});
+	ml::fit(model, ml::Data {{input}}, {target}, optimizer, true_dmse, 100);
 
-		/* TOOD: optimizers
-		for (auto &J : grads.grads)
-			J *= -0.01; */
-
-		optimizer(grads.grads);
-
-		std::cout << "\nOutput after " << i << " iterations:\n" << output << std::endl;
-		std::cout << "\tDMSE = " << igrad << std::endl;
-		/* std::cout << "\tigrads = " << grads.igrads << std::endl;
-		std::cout << "\nGrads after " << i << " iterations:\n" << grads.grads << std::endl; */
-
-		model.update_parameters(grads.grads);
-	}
+	output = model(input);
+	std::cout << "\nOut: " << output << std::endl;
 }

@@ -401,6 +401,9 @@ public:
 	// Arithmetic modifiers
 	Tensor <T> &operator*=(const T &);
 	Tensor <T> &operator/=(const T &);
+	
+	Tensor <T> &operator*=(const Tensor &);
+	Tensor <T> &operator/=(const Tensor &);
 
 	Tensor <T> &operator+=(const Tensor <T> &);
 	Tensor <T> &operator-=(const Tensor <T> &);
@@ -772,6 +775,42 @@ Tensor <T> &Tensor <T> ::operator/=(const T &x)
 }
 
 template <class T>
+Tensor <T> &Tensor <T> ::operator*=(const Tensor <T> &other)
+{
+	// Either scalar multiplication or element-wise multiplication
+	if (shape() == other.shape()) {
+		for (size_t i = 0; i < size(); i++)
+			_array[i] *= other._array[i];
+	} else if (is_scalar()) {
+		*this = other * get(0);
+	} else if (other.is_scalar()) {
+		*this *= other.get(0);
+	} else {
+		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+	}
+
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator/=(const Tensor <T> &other)
+{
+	// Either scalar division or element-wise division
+	if (shape() == other.shape()) {
+		for (size_t i = 0; i < size(); i++)
+			_array[i] /= other._array[i];
+	} else if (is_scalar()) {
+		*this = other / get(0);
+	} else if (other.is_scalar()) {
+		*this /= other.get(0);
+	} else {
+		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+	}
+
+	return *this;
+}
+
+template <class T>
 Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
 {
 	if (_shape != ts._shape)
@@ -813,6 +852,7 @@ Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
 	return (c -= b);
 }
 
+// TODO: these are redundant now
 template <class T>
 Tensor <T> multiply(const Tensor <T> &a, const Tensor <T> &b)
 {
@@ -840,23 +880,8 @@ Tensor <T> divide(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 Tensor <T> operator*(const Tensor <T> &a, const Tensor <T> &b)
 {
-	// Check if scalar multiplication
-	if (a.shape() == b.shape()) {
-		// TODO: use matrix multiplication if dims == 2
-		// or if dim== 2 and dim == 1 -> user must do hammard
-		// for element-wise multiplication
-		return multiply(a, b);
-	} else if (a.is_scalar()) {
-		Tensor <T> out = b.copy();
-		out *= a.get(0);
-		return out;
-	} else if (b.is_scalar()) {
-		Tensor <T> out = a.copy();
-		out *= b.get(0);
-		return out;
-	}
-
-	throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+	Tensor <T> c = a.copy();
+	return (c *= b);
 }
 
 template <class T>
@@ -876,20 +901,8 @@ Tensor <T> operator*(const T &a, const Tensor <T> &b)
 template <class T>
 Tensor <T> operator/(const Tensor <T> &a, const Tensor <T> &b)
 {
-	// Check if scalar division
-	if (a.shape() == b.shape()) {
-		return divide(a, b);
-	} else if (a.is_scalar()) {
-		Tensor <T> out = b.copy();
-		out /= a.get(0);
-		return out;
-	} else if (b.is_scalar()) {
-		Tensor <T> out = a.copy();
-		out /= b.get(0);
-		return out;
-	}
-
-	throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+	Tensor <T> c = a.copy();
+	return (c /= b);
 }
 
 template <class T>

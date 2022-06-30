@@ -1,3 +1,6 @@
+#ifndef ZHETAPI_AUTOGRAD_OPTIMIZER_H_
+#define ZHETAPI_AUTOGRAD_OPTIMIZER_H_
+
 #include "function.hpp"
 
 namespace zhetapi {
@@ -17,9 +20,9 @@ public:
 		: _parameters(parameters), alpha(alpha_) {}
 
 	// Computation
-	virtual void optimize(_function::GradientQueue &) = 0;
+	virtual void optimize(GradientQueue &) = 0;
 
-	void operator()(_function::GradientQueue &gq) {
+	void operator()(GradientQueue &gq) {
 		optimize(gq);
 	}
 };
@@ -30,7 +33,7 @@ struct SGD : public _optimizer {
 		: _optimizer(parameters, alpha) {}
 
 	// Optimize
-	void optimize(_function::GradientQueue &gq) override {
+	void optimize(GradientQueue &gq) override {
 		for (auto &g : gq)
 			g *= -alpha;
 	}
@@ -38,7 +41,7 @@ struct SGD : public _optimizer {
 
 // Momentum
 class Momentum : public _optimizer {
-	_function::GradientQueue _v;
+	GradientQueue _v;
 public:
 	float mu;
 
@@ -48,7 +51,7 @@ public:
 	}
 
 	// Optimize
-	void optimize(_function::GradientQueue &gq) override {
+	void optimize(GradientQueue &gq) override {
 		// TODO: assert that gq.size() == _v.size()
 		for (size_t i = 0; i < _parameters; i++) {
 			if (_v[i].shape() != gq[i].shape())
@@ -62,7 +65,7 @@ public:
 
 // RMSprop
 class RMSprop : public _optimizer {
-	_function::GradientQueue _v;
+	GradientQueue _v;
 public:
 	float beta;
 
@@ -72,7 +75,7 @@ public:
 	}
 
 	// Optimize
-	void optimize(_function::GradientQueue &gq) override {
+	void optimize(GradientQueue &gq) override {
 		// TODO: assert that gq.size() == _v.size()
 		for (size_t i = 0; i < _parameters; i++) {
 			if (_v[i].shape() != gq[i].shape())
@@ -90,7 +93,7 @@ public:
 
 // Adam
 class Adam : public _optimizer {
-	_function::GradientQueue _v, _m;
+	GradientQueue _v, _m;
 	size_t _iter = 1;
 public:
 	float beta1, beta2;
@@ -107,7 +110,7 @@ public:
 	}
 
 	// Optimize
-	void optimize(_function::GradientQueue &gq) override {
+	void optimize(GradientQueue &gq) override {
 		// TODO: assert that gq.size() == _v.size()
 		for (size_t i = 0; i < _parameters; i++) {
 			if (_v[i].shape() != gq[i].shape())
@@ -115,17 +118,17 @@ public:
 			if (_m[i].shape() != gq[i].shape())
 				_m[i] = Constant(gq[i].shape(), 0);
 
-			_v[i] = beta1 * _v[i] - (1 - beta1) * gq[i];
+			_v[i] = beta1 * _v[i] + (1 - beta1) * gq[i];
 			_m[i] = beta2 * _m[i] + (1 - beta2) * gq[i] * gq[i];
 
 			auto _vh = _v[i]/float(1 - std::pow(beta1, _iter));
-			auto _mh = _m[i].transform(
-				[&](float x) -> float{
-					return std::sqrt(1e-10 + x/float(1.0 - std::pow(beta2, _iter)));
+			auto _mh = _m[i]/float(1 - std::pow(beta2, _iter));
+
+			gq[i] = -alpha * _vh / _mh.transform(
+				[](float x) {
+					return std::sqrt(x) + 1e-10;
 				}
 			);
-
-			gq[i] = alpha * _vh / _mh;
 		}
 
 		_iter++;
@@ -137,3 +140,5 @@ public:
 }
 
 }
+
+#endif

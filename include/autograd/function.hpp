@@ -6,14 +6,11 @@
 #include <vector>
 
 // Library headers
-#include "../tensor.hpp"
+#include "gradient_queue.hpp"
 
 namespace zhetapi {
 
 namespace autograd {
-
-// Constants are just tensors
-using Constant = Tensor <float>;
 
 // Basic structure of a function
 class _function {
@@ -49,9 +46,6 @@ public:
 	// Type of input
 	using Input = std::vector <Constant>;
 	using Compositions = std::vector <_function *>;
-
-	// Gradient queue
-	using GradientQueue = std::deque <Constant>;
 protected:
 	// String versions of operations
 	static constexpr const char *_spec_strs[] {
