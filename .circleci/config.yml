@@ -29,16 +29,6 @@ commands:
             sudo apt-get -y install lcov
             sudo apt-get -y install libsfml-dev
       - run:
-          name: Installing Cmake
-          command: |
-            mkdir -p $HOME/usr
-            export PATH="$HOME/usr/bin:/usr/local/bin:$PATH"
-            sudo apt purge --auto-remove -y cmake
-            wget https://cmake.org/files/v3.14/cmake-3.14.2-Linux-x86_64.sh
-            sudo mkdir /opt/cmake
-            sudo sh cmake-3.14.2-Linux-x86_64.sh --prefix=/opt/cmake --exclude-subdir --skip-license
-            sudo ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
-      - run:
           name: Install lcov-1.15
           command: |
             wget https://github.com/linux-test-project/lcov/releases/download/v1.15/lcov-1.15.tar.gz
@@ -50,8 +40,13 @@ commands:
           name: Building essentials
           command: |
             wget https://bootstrap.pypa.io/get-pip.py
+            sudo apt update install python3.9
             sudo python3 get-pip.py
             sudo python3 -m pip install pyyaml smake
+      - run:
+          name: Installing smake
+          command: |
+            pip install smake
 
 jobs:
   testing:

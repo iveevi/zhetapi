@@ -46,7 +46,7 @@ int main()
 
 	std::cout << "\nStarting training loop:" << std::endl;
 
-	ml::fit(model, ml::Data {{input}}, {target}, optimizer, true_dmse, 100);
+	ml::fit(model, ml::Data {{input}}, {target}, optimizer, true_dmse, 10000);
 
 	output = model(input);
 	std::cout << "\nOut: " << output << std::endl;

@@ -26,6 +26,7 @@ definitions:
     source/timer.cpp,
     source/std/functions.cpp,
     source/std/interval.cpp'
+  - includes: '., vendor, vendor/indicators/include'
 
 builds:
   - testing:
@@ -37,9 +38,13 @@ builds:
     - flags: '-g'
   - experimental:
     - sources: 'experimental/experimental.cpp, source'
+    - idirs: includes
   - experimental_debug:
     - sources: 'experimental/experimental.cpp, source'
     - flags: '-g -Wall'
+  - mnist:
+    - sources: 'experimental/mnist.cpp, source'
+    - idirs: includes
   - benchmark:
     - sources: 'experimental/benchmark.cpp, source'
     - flags: '-O3'
@@ -63,6 +68,11 @@ targets:
       - default: '{}'
       - gdb: 'gdb {}'
       - valgrind: 'valgrind --leak-check=full {}'
+  - mnist:
+    - builds:
+      - default: mnist
+    - postbuilds:
+      - default: '{}'
   - bench:
     - builds:
       - default: benchmark
