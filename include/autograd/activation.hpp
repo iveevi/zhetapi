@@ -175,6 +175,59 @@ public:
 
 extern Function tanh;
 
+// Softmax activation function
+class _softmax : public ISeq {
+public:
+	struct kernel : public _function {
+		kernel() : _function(1) {}
+
+		Constant compute(const Input &ins) override {
+			auto o = ins[0].copy();
+
+			float omax = max(o);
+			o -= omax;
+
+			float osum = sum(o, expf);
+			return o.transform(
+				[osum](float x) {
+					return std::exp(x)/osum;
+				}
+			);
+		}
+
+		Gradient gradient(const Input &igrads) const override {
+			auto o = igrads[0].copy();
+
+			auto omax = max(o);
+			o -= omax;
+
+			auto osum = sum(o, expf);
+			o = o.transform(
+				[osum](float x) {
+					float e = std::exp(x);
+					return e * (osum - e) / (osum * osum);
+				}
+			);
+
+			return Gradient {
+				.igrads = {o * igrads[0]}
+			};
+		}
+
+		std::string summary() const override {
+			return "SOFTMAX";
+		}
+
+		_function *copy() const override {
+			return new kernel();
+		}
+	};
+
+	_softmax() : ISeq(new kernel(), 1) {}
+};
+
+extern Function softmax;
+
 }
 
 }

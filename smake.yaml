@@ -42,6 +42,7 @@ builds:
   - experimental_debug:
     - sources: 'experimental/experimental.cpp, source'
     - flags: '-g -Wall'
+    - idirs: includes
   - mnist:
     - sources: 'experimental/mnist.cpp, source'
     - idirs: includes

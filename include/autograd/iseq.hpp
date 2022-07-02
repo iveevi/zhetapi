@@ -70,7 +70,7 @@ private:
 	// Append helpers
 	void append_variable(_variable *);
 	void append_iseq(ISeq *);
-	int index_of(_variable *);		// TODO: is this necessary?
+	int index_of(_variable *) const;
 	void _append(_function *);
 
 	template <class ... Args>
@@ -95,6 +95,7 @@ private:
 
 	// Optimization functions
 	void _optimize();
+	_reindex_map _generate_reindex_map() const;
 
 	// TODO: remove const
 	// Differentiation functions
@@ -135,6 +136,10 @@ public:
 
 	// Apply gradients
 	void update_parameters(GradientQueue &) override;
+
+	// Permute the order of variables
+	void refactor(const std::vector <_variable *> &);
+	_function *refactor(const std::vector <_variable *> &) const;
 
 	// Info about parameters
 	int parameters() const override;

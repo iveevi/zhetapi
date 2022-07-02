@@ -17,6 +17,7 @@ namespace autograd {
 
 // Foward declarations
 class Function;
+class Variable;
 
 // Function alias is a wrapper around shared ptr
 using _fptr = std::shared_ptr <_function>;
@@ -42,9 +43,6 @@ struct fret {
 
 // Really should only be ISeq and _variable
 class Function {
-	// Function pointer
-	_fptr fptr;
-
 	// Process variadic arguments for compute
 	template <class ... Args>
 	static void _cmp_process(_function::Input &input, const Constant &c, Args ... args) {
@@ -74,6 +72,15 @@ class Function {
 	}
 
 	static void _ftr_process(_function::Compositions &cs, int &i) {}
+
+	// Process variadic arguments for permute
+	template <class ... Args>
+	static void _prm_process(std::vector <_variable *> &, const Variable &, Args ...);
+
+	static void _prm_process(std::vector <_variable *> &) {}
+protected:
+	// Function pointer
+	_fptr fptr;
 public:
 	// Constructors
 	Function() : fptr(nullptr) {}
@@ -89,7 +96,7 @@ public:
 	operator const _function &() const {
 		return *fptr.get();
 	}
-	
+
 	operator _function &() {
 		return *fptr.get();
 	}
@@ -132,6 +139,39 @@ public:
 		fptr->update_parameters(grads);
 	}
 
+	// Permutation
+	template <class ... Args>
+	void refactor(Args ... args) {
+		// Permutation is only for op_iseq
+		if (fptr->spop != _function::op_iseq) {
+			// TODO: make a more decent error message
+			throw std::runtime_error("Permutation is only for op_iseq");
+		}
+
+		std::vector <_variable *> vars;
+		_prm_process(vars, args...);
+
+		// Cast and permute
+		ISeq *iseq = reinterpret_cast <ISeq *> (fptr.get());
+		iseq->refactor(vars);
+	}
+
+	template <class ... Args>
+	Function refactored(Args ... args) const {
+		// Permutation is only for op_iseq
+		if (fptr->spop != _function::op_iseq) {
+			// TODO: make a more decent error message
+			throw std::runtime_error("Permutation is only for op_iseq");
+		}
+
+		std::vector <_variable *> vars;
+		_prm_process(vars, args...);
+
+		// Cast and permute
+		const ISeq *iseq = reinterpret_cast <ISeq *> (fptr.get());
+		return Function(iseq->refactor(vars));
+	}
+
 	// Info about parameters
 	int parameters() const {
 		return fptr->parameters();
@@ -164,6 +204,16 @@ public:
 	// Constructors
 	Variable() : Function(new_ <_variable> ()) {}
 };
+
+// Permute function
+template <class ... Args>
+void Function::_prm_process(std::vector <_variable *> &vars, const Variable &v, Args ... args)
+{
+	// Get variable
+	assert(v.get()->spop == _function::op_var);
+	vars.push_back(reinterpret_cast <_variable *> (v.get()));
+	_prm_process(vars, args...);
+}
 
 // Overloaded operators
 Function operator+(const Function &, const Function &);
@@ -216,7 +266,7 @@ Function operator/(const Constant &, const Function &);
 
 // Specialized function classes
 FUNCTION_CLASS(sqrt, 1, "SQRT")
-FUNCTION_CLASS(norm, 1, "NORM")
+FUNCTION_CLASS(length, 1, "LENGTH")
 FUNCTION_CLASS(exp, 1, "EXP")
 FUNCTION_CLASS(log, 1, "LOG")
 FUNCTION_CLASS(sin, 1, "SIN")
@@ -224,6 +274,7 @@ FUNCTION_CLASS(cos, 1, "COS")
 FUNCTION_CLASS(tan, 1, "TAN")
 FUNCTION_CLASS(square, 1, "SQUARE")
 FUNCTION_CLASS(pow, 2, "POW")
+FUNCTION_CLASS(dot, 2, "DOT")
 
 FUNCTION_CLASS(flatten, 1, "FLATTEN")
 FUNCTION_CLASS(reshape, 2, "RESHAPE")

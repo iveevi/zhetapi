@@ -1,3 +1,4 @@
+// Library headers
 #include "../../include/autograd/iseq.hpp"
 
 namespace zhetapi {
@@ -75,6 +76,40 @@ void ISeq::update_parameters(GradientQueue &grad_queue)
 		ftn->update_parameters(grad_queue);
 }
 
+// Permute the order of variables
+void ISeq::refactor(const std::vector <_variable *> &vars)
+{
+	assert(vars.size() == _vars.size());
+
+	// Generate indices of each variable
+	_reindex_map reindex;
+	for (int i = 0; i < _vars.size(); i++) {
+		int j = index_of(vars[i]);
+		assert(j >= 0 && reindex.count(j) == 0);
+		reindex[j] = i;
+	}
+
+	// Reindex every Get instruction
+	for (_function *ftn : _instrs) {
+		if (ftn->spop != op_get)
+			continue;
+
+		// Get variable index
+		Get *get = reinterpret_cast <Get *> (ftn);
+		int j = get->index;
+		assert(reindex.count(j) > 0);
+		get->index = reindex[j];
+	}
+}
+
+_function *ISeq::refactor(const std::vector <_variable *> &vars) const
+{
+	// Create copy
+	ISeq *iseq = new ISeq(_instrs, _consts, inputs, _generate_reindex_map());
+	iseq->refactor(vars);
+	return iseq;
+}
+
 // Info about parameters
 int ISeq::parameters() const
 {
@@ -95,7 +130,7 @@ int ISeq::tunable_parameters() const
 // Make copy
 _function *ISeq::copy() const
 {
-	return new ISeq(_instrs, _consts, inputs);
+	return new ISeq(_instrs, _consts, inputs, _generate_reindex_map());
 }
 
 // Dump instructions for debugging
@@ -105,7 +140,7 @@ std::string ISeq::summary() const
 	io::Args args {
 		"Index",
 		"Instruction",
-		"Variable",
+		"Variable (inputs=" + std::to_string(inputs) + ")",
 		"Constant"
 	};
 
@@ -209,7 +244,7 @@ void ISeq::_append(_function *fptr)
 		for (int i = inputs; i <= index; i++)
 			_vars.push_back(new _variable());
 		_instrs.push_back(fptr);
-		inputs = index + 1;
+		inputs = _vars.size();
 		break;
 	case op_var:
 		append_variable((_variable *) fptr);
@@ -253,7 +288,7 @@ void ISeq::append_iseq(ISeq *iseq)
 			i = index_of(v);
 
 			if (i == -1) {
-				// Add a variable
+				// Add a variablei
 				i = _vars.size();
 				_vars.push_back((_variable *) v->copy());
 				inputs++;
@@ -275,7 +310,7 @@ void ISeq::append_iseq(ISeq *iseq)
 }
 
 // Get index of variable
-int ISeq::index_of(_variable *v)
+int ISeq::index_of(_variable *v) const
 {
 	int index = -1;
 	for (int i = 0; i < _vars.size(); i++) {
@@ -346,6 +381,11 @@ void ISeq::_load(const Input &ins) const
 	if (ins.size() != inputs) {
 		std::stringstream ss;
 		ss << "ISeq::_load: expected " << inputs << " inputs, got " << ins.size();
+		std::cout << "vars:" << std::endl;
+		for (const _variable *v : _vars) {
+			std::cout << "\t" << v->summary()
+				<< " (" << v->id << ")" << std::endl;
+		}
 		throw std::runtime_error(ss.str());
 	}
 
@@ -441,7 +481,10 @@ void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
 
 // Composition helpers
 void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
-		_function *ftn, std::unordered_map <int, int> &reindex,
+		_function *ftn,
+		std::vector <Constant> &dst_consts,
+		const std::vector <Constant> &src_consts,
+		std::unordered_map <int, int> &reindex,
 		int &vindex)
 {
 	// If the instruction is a get,
@@ -466,6 +509,14 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 			// Add the variable to the instruction sequence
 			instrs.push_back(new Get(reindex[id]));
 		}
+	} else if (ftn->spop == _function::op_const) {
+		// TODO: need to lookup if the constant is already in the cache
+		int index = reinterpret_cast <const Const *> (ftn)->index;
+
+		// Add the constant to the instruction sequence
+		// For now, duplicate consts are fine
+		instrs.push_back(new Const(dst_consts.size()));
+		dst_consts.push_back(src_consts[index]);
 	} else {
 		instrs.push_back(ftn);
 	}
@@ -474,6 +525,10 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 // Override composition
 _function *ISeq::_compose(const Compositions &cs) const
 {
+	/* std::cout << "Composing: " << std::endl;
+	for (const auto &c : cs)
+		std::cout << c->summary() << std::endl; */
+
 	// ISeq variables
 	Instructions instrs;
 	std::vector <Constant> consts;
@@ -513,7 +568,7 @@ _function *ISeq::_compose(const Compositions &cs) const
 			iseq = reinterpret_cast <const ISeq *> (ftn);
 
 			for (_function *fptr : iseq->_instrs)
-				_compose_iseq(instrs, iseq, fptr, reindex, vindex);
+				_compose_iseq(instrs, iseq, fptr, consts, iseq->_consts, reindex, vindex);
 			break;
 		case op_repl_const:
 			rc = reinterpret_cast <const _repl_const *> (ftn);
@@ -744,6 +799,9 @@ void ISeq::_optimize()
 	_cache_map cache;
 	_node *tree = _tree(cache);
 
+	// std::cout << "\nTree: " << std::endl;
+	// std::cout << tree->str() << std::endl;
+
 	Instructions instrs;
 	ConstantCache ccache;
 	_rebuild(tree, instrs, ccache, cache, _consts);
@@ -763,6 +821,14 @@ void ISeq::_optimize()
 	std::cout << "===========================" << std::endl; */
 }
 
+// Generate reindex map
+ISeq::_reindex_map ISeq::_generate_reindex_map() const
+{
+	_reindex_map reindex;
+	for (int i = 0; i < _vars.size(); i++)
+		reindex[i] = _vars[i]->id;
+	return reindex;
+}
 
 /////////////////////
 // Differentiation //

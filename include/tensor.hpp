@@ -399,21 +399,21 @@ public:
 	bool is_scalar() const;
 
 	// Arithmetic modifiers
-	Tensor <T> &operator*=(const T &);
-	Tensor <T> &operator/=(const T &);
-	
-	Tensor <T> &operator*=(const Tensor &);
-	Tensor <T> &operator/=(const Tensor &);
+	Tensor <T> &operator+=(const T &);
+	Tensor <T> &operator-=(const T &);
 
 	Tensor <T> &operator+=(const Tensor <T> &);
 	Tensor <T> &operator-=(const Tensor <T> &);
 
+	Tensor <T> &operator*=(const T &);
+	Tensor <T> &operator/=(const T &);
+
+	Tensor <T> &operator*=(const Tensor &);
+	Tensor <T> &operator/=(const Tensor &);
+
 	// Arithmetic
 	template <class U>
-	friend Tensor <U> operator+(const Tensor <U> &, const Tensor <U> &);
-
-	template <class U>
-	friend Tensor <U> operator-(const Tensor <U> &, const Tensor <U> &);
+	friend Tensor <U> operator-(const U &, const Tensor <U> &);
 
 	template <class U>
 	friend Tensor <U> multiply(const Tensor <U> &, const Tensor <U> &);
@@ -428,6 +428,28 @@ public:
 
 	template <class U>
 	friend bool operator!=(const Tensor <U> &, const Tensor <U> &);
+
+	// Additional functions
+	template <class U>
+	friend U max(const Tensor <U> &);
+
+	template <class U>
+	friend U min(const Tensor <U> &);
+
+	template <class U>
+	friend int argmax(const Tensor <U> &);
+
+	template <class U>
+	friend int argmin(const Tensor <U> &);
+
+	template <class U>
+	friend U sum(const Tensor <U> &);
+
+	template <class U, class F>
+	friend U sum(const Tensor <U> &, const F &);
+
+	template <class U>
+	friend U dot(const Tensor <U> &, const Tensor <U> &);
 
 	// Printing functions
 	std::string print() const;
@@ -759,6 +781,46 @@ Tensor <T> Tensor <T> ::flat() const
 //////////////////////////
 
 template <class T>
+Tensor <T> &Tensor <T> ::operator+=(const T &x)
+{
+	for (size_t i = 0; i < size(); i++)
+		_array[i] += x;
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator-=(const T &x)
+{
+	for (size_t i = 0; i < size(); i++)
+		_array[i] -= x;
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
+{
+	if (_shape != ts._shape)
+		throw shape_mismatch(__PRETTY_FUNCTION__);
+
+	for (size_t i = 0; i < size(); i++)
+		_array[i] += ts._array[i];
+
+	return *this;
+}
+
+template <class T>
+Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
+{
+	if (shape() != ts.shape())
+		throw shape_mismatch(__PRETTY_FUNCTION__);
+
+	for (size_t i = 0; i < size(); i++)
+		_array[i] -= ts._array[i];
+
+	return *this;
+}
+
+template <class T>
 Tensor <T> &Tensor <T> ::operator*=(const T &x)
 {
 	for (size_t i = 0; i < size(); i++)
@@ -810,30 +872,6 @@ Tensor <T> &Tensor <T> ::operator/=(const Tensor <T> &other)
 	return *this;
 }
 
-template <class T>
-Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
-{
-	if (_shape != ts._shape)
-		throw shape_mismatch(__PRETTY_FUNCTION__);
-
-	for (size_t i = 0; i < size(); i++)
-		_array[i] += ts._array[i];
-
-	return *this;
-}
-
-template <class T>
-Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
-{
-	if (shape() != ts.shape())
-		throw shape_mismatch(__PRETTY_FUNCTION__);
-
-	for (size_t i = 0; i < size(); i++)
-		_array[i] -= ts._array[i];
-
-	return *this;
-}
-
 ///////////////////////////
 // Arithmetic operations //
 ///////////////////////////
@@ -846,10 +884,40 @@ Tensor <T> operator+(const Tensor <T> &a, const Tensor <T> &b)
 }
 
 template <class T>
+Tensor <T> operator+(const Tensor <T> &a, const T &b)
+{
+	Tensor <T> c = a.copy();
+	return (c += b);
+}
+
+template <class T>
+Tensor <T> operator+(const T &a, const Tensor <T> &b)
+{
+	Tensor <T> c = b.copy();
+	return (c += a);
+}
+
+template <class T>
 Tensor <T> operator-(const Tensor <T> &a, const Tensor <T> &b)
 {
 	Tensor <T> c = a.copy();
 	return (c -= b);
+}
+
+template <class T>
+Tensor <T> operator-(const Tensor <T> &a, const T &b)
+{
+	Tensor <T> c = a.copy();
+	return (c -= b);
+}
+
+template <class T>
+Tensor <T> operator-(const T &a, const Tensor <T> &b)
+{
+	Tensor <T> c = b.copy();
+	for (size_t i = 0; i < c.size(); i++)
+		c._array[i] = a - c._array[i];
+	return c;
 }
 
 // TODO: these are redundant now
@@ -940,6 +1008,89 @@ template <class T>
 bool operator!=(const Tensor <T> &a, const Tensor <T> &b)
 {
 	return !(a == b);
+}
+
+// Additional functions
+template <class T>
+T max(const Tensor <T> &a)
+{
+	T max = a.get(0);
+	for (int i = 1; i < a.size(); i++)
+		if (a._array[i] > max)
+			max = a._array[i];
+	return max;
+}
+
+template <class T>
+T min(const Tensor <T> &a)
+{
+	T min = a.get(0);
+	for (int i = 1; i < a.size(); i++)
+		if (a._array[i] < min)
+			min = a._array[i];
+	return min;
+}
+
+template <class T>
+int argmax(const Tensor <T> &a)
+{
+	T max = a.get(0);
+
+	int argmax = 0;
+	for (int i = 1; i < a.size(); i++) {
+		if (a._array[i] > max) {
+			max = a._array[i];
+			argmax = i;
+		}
+	}
+
+	return argmax;
+}
+
+template <class T>
+int argmin(const Tensor <T> &a)
+{
+	T min = a.get(0);
+
+	int argmin = 0;
+	for (int i = 1; i < a.size(); i++) {
+		if (a._array[i] < min) {
+			min = a._array[i];
+			argmin = i;
+		}
+	}
+
+	return argmin;
+}
+
+template <class T>
+T sum(const Tensor <T> &a)
+{
+	T sum = 0;
+	for (int i = 0; i < a.size(); i++)
+		sum += a._array[i];
+	return sum;
+}
+
+template <class T, class F>
+T sum(const Tensor <T> &a, const F &f)
+{
+	T sum = 0;
+	for (int i = 0; i < a.size(); i++)
+		sum += f(a._array[i]);
+	return sum;
+}
+
+template <class T>
+T dot(const Tensor <T> &a, const Tensor <T> &b)
+{
+	if (a.shape() != b.shape())
+		throw typename Tensor <T> ::shape_mismatch(__PRETTY_FUNCTION__);
+
+	T dot = 0;
+	for (int i = 0; i < a.size(); i++)
+		dot += a._array[i] * b._array[i];
+	return dot;
 }
 
 ////////////////////////

@@ -169,7 +169,7 @@ KERNEL(sqrt)
 	return ins[0].transform(sqrtl);
 }
 
-KERNEL(norm)
+KERNEL(length)
 {
 	return Constant {ins[0].length()};
 }
@@ -220,6 +220,11 @@ KERNEL(pow)
 	);
 }
 
+KERNEL(dot)
+{
+	return zhetapi::dot(ins[0], ins[1]);
+}
+
 KERNEL(flatten)
 {
 	auto copy = ins[0].copy();
@@ -253,16 +258,17 @@ DERIVATIVE(square)
 	return iseq;
 }
 
-DERIVATIVE(norm)
+DERIVATIVE(length)
 {
 	ISeq *iseq = new ISeq();
 
-	// norm(f(x)) -> f'(x) / norm(f(x))
+	// length(f(x)) -> f(x) * f'(x)
 	iseq->append(
 		_iop::differential(0),
 		new Get(0),
-		new _norm::kernel(),
-		new _function(2, _function::op_div)
+		new _function(2, _function::op_mul),
+		new _repl_const(1.0, -1),
+		new _function(2, _function::op_mul)
 	);
 
 	return iseq;
@@ -373,7 +379,7 @@ DERIVATIVE(pow)
 {
 	ISeq *iseq = new ISeq();
 
-	// TODO: gotta test all thi<F2><F2>s
+	// TODO: gotta test all this
 
 	// f(x)^e -> e * f(x)^(e-1) * f'(x)
 	iseq->append(
@@ -387,6 +393,12 @@ DERIVATIVE(pow)
 	);
 
 	return iseq;
+}
+
+DERIVATIVE(dot)
+{
+	// TODO: implementing this
+	return nullptr;
 }
 
 DERIVATIVE(flatten)

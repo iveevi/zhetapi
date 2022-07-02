@@ -11,43 +11,45 @@ using namespace zhetapi::autograd;
 
 int main()
 {
-	// MSE function (5 inputs)
-	Variable x;
-	Variable y;
-
-	auto mse = square(norm(x - y))/Constant(5);
-	auto true_dmse = Constant(2) * (x - y)/Constant(5);
-	auto dmse = mse.differentiate(0);
-
 	// Target value
-	Constant target {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
-	Constant input {2.0, 2.0, 2.0, 2.0, 2.0};
+	utility::Interval<> rng(0, 1);
+	Constant x1 {2.0, 2.0, 2.0, 2.0, 2.0};
+	Constant x2 {1, 2, 3, 4, 5};
+	Constant x3 {{5}, [&](size_t) {return rng();}};
 
-	// Function API
-	auto model = ml::dense(5, 7)(x);
-	model = ml::tanh(model);
-	model = ml::dense(7, 7)(model);
-	model = ml::leaky_relu(0.1)(model);
+	std::cout << "softmax(x1) = " << ml::softmax(x1) << std::endl;
+	std::cout << "\tigrad = " << ml::softmax.gradient({x1}).igrads[0]/x1 << std::endl;
 
-	std::cout << "\nSummary:\n" << model.summary() << std::endl;
-	std::cout << "# of parameters = " << model.parameters() << std::endl;
-	std::cout << "# of tunable parameters = " << model.tunable_parameters() << std::endl;
+	std::cout << "softmax(x2) = " << ml::softmax(x2) << std::endl;
+	std::cout << "\tigrad = " << ml::softmax.gradient({x2}).igrads[0]/x2 << std::endl;
 
-	auto output = model(input);
-	output.flatten();
+	// std::cout << "Loop:\n";
 
-	// Optimizer
-	auto optimizer = ml::RMSprop(model.parameters(), 0.001);
+	Variable x, y;
+	auto mse = square(length(x - y))/Constant(5);
+	auto true_dmse = Constant(2) * (x - y)/Constant(5);
 
-	std::cout << "\nOut: " << output << std::endl;
-	std::cout << "\terror = " << mse(output, target) << std::endl;
-	std::cout << "\tderror = " << dmse(output, target) << std::endl;
-	std::cout << "\ttrue = " << true_dmse(output, target) << std::endl;
+	Constant target {0.1, 0.2, 0.2, 0.3, 0.2};
 
-	std::cout << "\nStarting training loop:" << std::endl;
+	// TODO: minus operator
+	auto cross_entropy = -1.0f * autograd::dot(autograd::log(x), y);
+	auto true_dcross_entropy = (y/x).refactored(x, y);
 
-	ml::fit(model, ml::Data {{input}}, {target}, optimizer, true_dmse, 10000);
+	std::cout << "true dce:\n";
+	std::cout << true_dcross_entropy.summary() << std::endl;
+	std::cout << true_dcross_entropy(1, 0) << std::endl;
 
-	output = model(input);
-	std::cout << "\nOut: " << output << std::endl;
+	/* for (int i = 0; i < 100; i++) {
+		std::cout << "\nx3 = " << x3 << std::endl;
+
+		auto o = ml::softmax(x3);
+		std::cout << "softmax(x3) = " << o << std::endl;
+		std::cout << "errf = " << mse(o, target) << std::endl;
+		std::cout << "cross = " << cross_entropy(o, target) << std::endl;
+
+		auto igrad = true_dcross_entropy(o.flat(), target);
+		std::cout << "\tigrad = " << igrad << std::endl;
+
+		x3 -= 0.1f * igrad;
+	} */
 }
