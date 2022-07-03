@@ -21,6 +21,7 @@ commands:
             sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
             sudo apt-get -y update
             sudo apt-get -y install clang
+            sudo apt-get -y install make
             sudo apt-get -y install libpng-dev
             sudo apt-get -y install tree
             sudo apt-get -y install wget

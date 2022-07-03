@@ -68,11 +68,11 @@ public:
 		if (normal)
 			lambda = [&](size_t i) { return dist(gen); };
 
-		// _w = Matrix <float> (_osize, _isize, lambda);
-		// _b = Matrix <float> (_osize, 1, lambda);
-
-		_w = Matrix <float> (_osize, _isize, 0);
-		_b = Matrix <float> (_osize, 1, 0);
+		_w = Matrix <float> (_osize, _isize, lambda);
+		_b = Matrix <float> (_osize, 1, lambda);
+		
+		// _w = Matrix <float> (_osize, _isize, 0);
+		// _b = Matrix <float> (_osize, 1, 0);
 	}
 
 	// Copy overload
@@ -91,7 +91,7 @@ public:
 	virtual Gradient gradient(const Input &ins, const Input &igrads) override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
-		Matrix <float> I(ins[0], _osize, 1);
+		Matrix <float> I(ins[0], _isize, 1);
 		Matrix <float> dO(igrads[0], _osize, 1);
 		Matrix <float> wgrad = dO * I.transpose();
 		Matrix <float> bgrad = dO;
@@ -111,6 +111,10 @@ public:
 
 		Matrix <float> wgrad(grads.back(), _osize, _isize);
 		grads.pop_back();
+
+		/* std::cout << "\nKDENSE GRADIENT:\n";
+		std::cout << "\tW = " << wgrad << "\n";
+		std::cout << "\tB = " << bgrad << "\n"; */
 
 		_w += wgrad;
 		_b += bgrad;

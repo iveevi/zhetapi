@@ -206,15 +206,18 @@ public:
 			o -= omax;
 
 			auto osum = sum(o, expf);
-			o = o.transform(
-				[osum](float x) {
+
+			Constant out({o.size()},
+				[&](size_t i) {
+					float x = o.get(i);
 					float e = std::exp(x);
-					return e * (osum - e) / (osum * osum);
+					float t = e * (osum - e) / (osum * osum);
+					return t * igrads[0].get(i);
 				}
 			);
 
 			return Gradient {
-				.igrads = {o * igrads[0]}
+				.igrads = {out}
 			};
 		}
 

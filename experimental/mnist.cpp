@@ -46,7 +46,7 @@ bool file_exists(const std::string &path)
 
 int main()
 {
-	const size_t TRAIN_IMAGES = 10;
+	const size_t TRAIN_IMAGES = 60000;
 	const size_t VALIDATION_IMAGES = 100;
 	const size_t DIMENSIONS = 784;
 
@@ -61,7 +61,7 @@ int main()
 	/* auto loss = -1.0f * autograd::dot(autograd::log(x), y);
 	auto dloss = (-1.0f * y/x).refactored(x, y); */
 
-	auto loss = 2 * square(length(x - y))/Constant {10};
+	auto loss = square(length(x - y))/Constant {10};
 	auto dloss = 2 * (x - y)/Constant {10};
 
 	std::cout << "Loss:\n" << loss.summary() << std::endl;
@@ -73,13 +73,10 @@ int main()
 	model = ml::dense(30, 10)(model);
 	model = ml::softmax(model);
 
-	// TODO: some method to propogate parameters through ftunctions,
-	// ie. {"dropout", 0.5}, {"batch_norm", true} (a map <string, float>)
-
 	std::cout << "\nModel:\n" << model.summary() << std::endl;
 
 	// Optimizer
-	auto optimizer = ml::Momentum(model.parameters(), 0.01, 0.9);
+	auto optimizer = ml::Adam(model.parameters(), 0.01);
 
 	// First load the MNIST dataset
 	system("mkdir -p data");
@@ -188,8 +185,8 @@ int main()
 	auto training_suite = ml::TrainingSuite {
 		.loss = loss,
 		.dloss = dloss,
-		.iterations = 10,
-		.batch_size = 10,
+		.iterations = 100,
+		.batch_size = 100,
 		.reporter = std::make_shared <ml::Validate> (validation_data, validation_labels, validator)
 	};
 
@@ -205,4 +202,8 @@ int main()
 
 	// TODO: some way to weight the gradients for each input (maybe by error)
 	// TODO: learning rate scheduling
+	// TODO: dropout and regularization
+	// TODO: some method to propogate parameters through ftunctions,
+	// ie. {"dropout", 0.5}, {"batch_norm", true} (a map <string, float> for now)
+
 }

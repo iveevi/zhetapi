@@ -751,18 +751,16 @@ void Tensor <T> ::nullify(long double p, const utility::Interval <1> &i)
 template <class T>
 Tensor <T> Tensor <T> ::transform(T (*func)(const T &)) const
 {
-	Tensor <T> result = *this;
-
+	Tensor <T> result = copy();
 	for (size_t i = 0; i < result.size(); i++)
 		result._array[i] = func(_array[i]);
-
 	return result;
 }
 
 template <class T>
 Tensor <T> Tensor <T> ::transform(const std::function <T (const T &)> &ftn) const
 {
-	Tensor <T> out = *this;
+	Tensor <T> out = copy();
 	for (int i = 0; i < out.size(); i++)
 		out._array[i] = ftn(out._array[i]);
 	return out;
@@ -976,7 +974,7 @@ Tensor <T> operator/(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 Tensor <T> operator/(const Tensor <T> &a, const T &b)
 {
-	Tensor <T> c(a);
+	Tensor <T> c = a.copy();
 	return (c /= b);
 }
 

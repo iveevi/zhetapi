@@ -56,12 +56,19 @@ _function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 	compute(ins);
 
 	// Loop through all kernel functions
+	// std::cout << "\nISeq gradient:\n";
 	for (int i = _instrs.size() - 1; i >= 0; i--) {
 		// Get function
 		_function *ftn = _instrs[i];
 
 		// Get gradient
 		Input ins = _cached_finputs[ftn];
+
+		/* std::cout << "function:\t" << ftn->summary() << std::endl;
+		std::cout << "Input:" << std::endl;
+		for (int j = 0; j < ins.size(); j++)
+			std::cout << "\t" << ins[j] << std::endl; */
+
 		_function::Gradient g_ftn = ftn->gradient(ins, g.igrads);
 
 		// Add to gradients

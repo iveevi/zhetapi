@@ -118,13 +118,13 @@ public:
 			if (_m[i].shape() != gq[i].shape())
 				_m[i] = Constant(gq[i].shape(), 0);
 
-			_v[i] = beta1 * _v[i] + (1 - beta1) * gq[i];
+			_v[i] = beta1 * _v[i] - (1 - beta1) * gq[i];
 			_m[i] = beta2 * _m[i] + (1 - beta2) * gq[i] * gq[i];
 
 			auto _vh = _v[i]/float(1 - std::pow(beta1, _iter));
 			auto _mh = _m[i]/float(1 - std::pow(beta2, _iter));
 
-			gq[i] = -alpha * _vh / _mh.transform(
+			gq[i] = alpha * _vh / _mh.transform(
 				[](float x) {
 					return std::sqrt(x) + 1e-10;
 				}
