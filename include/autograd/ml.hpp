@@ -28,10 +28,6 @@ class _kdense : public _function {
 	// Bias
 	Matrix <float>			_b;
 
-	// Cached
-	Matrix <float>			_cO;
-	Matrix <float>			_cI;
-
 	// Private constructor
 	_kdense(size_t isize, size_t osize, Matrix <float> w, Matrix <float> b,
 			const std::string &init)
@@ -50,7 +46,7 @@ public:
 
 		// Initializer
 		std::function <float (size_t)> lambda = [](size_t) { return _rng(); };
-	
+
 		std::random_device rd;
 		std::mt19937 gen(rd());
 
@@ -74,7 +70,7 @@ public:
 
 		// _w = Matrix <float> (_osize, _isize, lambda);
 		// _b = Matrix <float> (_osize, 1, lambda);
-		
+
 		_w = Matrix <float> (_osize, _isize, 0);
 		_b = Matrix <float> (_osize, 1, 0);
 	}
@@ -87,18 +83,17 @@ public:
 	// Forward pass
 	Constant compute(const Input &ins) override {
 		// Convert first argument into a matrix
-		_cI = Matrix <float> (ins[0], _isize, 1);
-		_cO = _w * _cI + _b;
-		return Constant(_cO);
+		Matrix <float> x(ins[0], _isize, 1);
+		return _w * x + _b;
 	}
 
 	// Machine learning functions
-	virtual Gradient gradient(const Input &igrads) const override {
+	virtual Gradient gradient(const Input &ins, const Input &igrads) override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
+		Matrix <float> I(ins[0], _osize, 1);
 		Matrix <float> dO(igrads[0], _osize, 1);
-		std::cout << "\ndO = " << dO << std::endl;
-		Matrix <float> wgrad = dO * _cI.transpose();
+		Matrix <float> wgrad = dO * I.transpose();
 		Matrix <float> bgrad = dO;
 		Matrix <float> igrad = _w.transpose() * dO;
 
@@ -119,10 +114,6 @@ public:
 
 		_w += wgrad;
 		_b += bgrad;
-
-		std::cout << "\ngrads:\n" << std::endl;
-		std::cout << "wgrad = " << wgrad << std::endl;
-		std::cout << "bgrad = " << bgrad << std::endl;
 	}
 
 	// Info about parameters

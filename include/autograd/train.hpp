@@ -120,7 +120,7 @@ inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
 		for (size_t j = 0; j < X.size(); j++) {
 			Constant y = f.compute(X[j]).flat();
 			Constant igrad = suite.dloss.compute({y, Y[j]});
-			_function::Gradient grads = f.gradient({igrad});
+			_function::Gradient grads = f.gradient(X[j], {igrad});
 			serror += suite.loss.compute({y, Y[j]}).length();
 
 			elements++;

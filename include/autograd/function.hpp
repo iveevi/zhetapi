@@ -98,7 +98,8 @@ public:
 	};
 
 	// Machine learning - by default, no gradient
-	virtual Gradient gradient(const Input &) const {
+	// TODO: do we need a vector of igrads?
+	virtual Gradient gradient(const Input &, const Input &) {
 		// NOTE: no inputs are provided (only igrad)
 		// inputs and any other information from the forward
 		// pass must be cached by the functions
@@ -142,7 +143,7 @@ struct Get : public _function {
 	Get(int i) : _function(1, op_get), index(i) {}
 
 	// Gradient
-	Gradient gradient(const Input &x) const override {
+	Gradient gradient(const Input &, const Input &x) override {
 		Gradient g;
 		g.igrads.push_back(x[index]);
 		return g;

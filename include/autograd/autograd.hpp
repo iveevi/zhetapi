@@ -131,8 +131,9 @@ public:
 	}
 
 	// Machine learning
-	_function::Gradient gradient(const _function::Input &igrads) const {
-		return fptr->gradient(igrads);
+	_function::Gradient gradient(const _function::Input &ins,
+			const _function::Input &igrads) const {
+		return fptr->gradient(ins, igrads);
 	}
 
 	void update_parameters(GradientQueue &grads) {

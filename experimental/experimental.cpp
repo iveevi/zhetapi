@@ -34,7 +34,7 @@ int main()
 	auto igrad = dloss(output.flat(), target);
 	std::cout << "Gradient: " << igrad << std::endl;
 
-	auto grads = model.gradient({igrad});
+	auto grads = model.gradient({input}, {igrad});
 	std::cout << "Gradients:" << std::endl;
 	for (auto &g : grads.grads)
 		std::cout << g << std::endl;

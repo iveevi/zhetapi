@@ -1,5 +1,6 @@
 // Library headers
 #include "../../include/autograd/iseq.hpp"
+#include "../../include/common.hpp"
 
 namespace zhetapi {
 
@@ -44,29 +45,30 @@ Constant ISeq::compute(const Input &ins)
 }
 
 // Evaluate gradient
-_function::Gradient ISeq::gradient(const Input &igrads) const
+_function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 {
 	// Output gradient
 	Gradient g;
 	g.igrads = igrads;
 
+	// TODO: possible extreme cache, check the input to previous input to
+	// see if recomputation can be avoided
+	compute(ins);
+
 	// Loop through all kernel functions
-	std::cout << "\nISeq gradient, igrad = " << igrads[0] << std::endl;
 	for (int i = _instrs.size() - 1; i >= 0; i--) {
 		// Get function
-		const _function *ftn = _instrs[i];
+		_function *ftn = _instrs[i];
 
 		// Get gradient
-		_function::Gradient g_ftn = ftn->gradient(g.igrads);
+		Input ins = _cached_finputs[ftn];
+		_function::Gradient g_ftn = ftn->gradient(ins, g.igrads);
 
 		// Add to gradients
 		g.grads.insert(g.grads.end(), g_ftn.grads.begin(), g_ftn.grads.end());
 
 		// Set input gradients
 		g.igrads = g_ftn.igrads;
-
-		std::cout << "function:\n\t" << ftn->summary() << std::endl;
-		std::cout << "Igrads = " << g.igrads[0] << std::endl;
 	}
 
 	return g;
@@ -332,54 +334,55 @@ int ISeq::index_of(_variable *v) const
 /////////////////////////
 
 // Get constant from the stack and handle any errors
-static Constant _get_operand(std::stack <Constant> &ops)
+static Constant _get_operand(std::stack <Constant> &ops, _function::Input &ins)
 {
 	// Check empty first
 	if (ops.empty())
 		throw std::runtime_error("ISeq::_get_operand: empty stack");
 
 	Constant c = ops.top();
+	ins.push_back(c);
 	ops.pop();
 
 	return c;
 }
 
 // Operation kernels
-using Kernel = Constant (*)(std::stack <Constant> &);
+using Kernel = Constant (*)(std::stack <Constant> &, _function::Input &);
 
 // List of kernels
 static std::vector <Kernel> kernels = {
 	// Addition
-	[](std::stack <Constant> &ops) -> Constant {
-		Constant b = _get_operand(ops);
-		Constant a = _get_operand(ops);
+	[](std::stack <Constant> &ops, _function::Input &ins) -> Constant {
+		Constant b = _get_operand(ops, ins);
+		Constant a = _get_operand(ops, ins);
 		return a + b;
 	},
 
 	// Subtraction
-	[](std::stack <Constant> &ops) -> Constant {
-		Constant b = _get_operand(ops);
-		Constant a = _get_operand(ops);
+	[](std::stack <Constant> &ops, _function::Input &ins) -> Constant {
+		Constant b = _get_operand(ops, ins);
+		Constant a = _get_operand(ops, ins);
 		return a - b;
 	},
 
 	// Multiplication
-	[](std::stack <Constant> &ops) -> Constant {
-		Constant b = _get_operand(ops);
-		Constant a = _get_operand(ops);
+	[](std::stack <Constant> &ops, _function::Input &ins) -> Constant {
+		Constant b = _get_operand(ops, ins);
+		Constant a = _get_operand(ops, ins);
 		return a * b;
 	},
 
 	// Division
-	[](std::stack <Constant> &ops) -> Constant {
-		Constant b = _get_operand(ops);
-		Constant a = _get_operand(ops);
+	[](std::stack <Constant> &ops, _function::Input &ins) -> Constant {
+		Constant b = _get_operand(ops, ins);
+		Constant a = _get_operand(ops, ins);
 		return a / b;
 	}
 };
 
 // Load inputs
-void ISeq::_load(const Input &ins) const
+void ISeq::_load(const Input &ins)
 {
 	// Ensure correct number of inputs
 	if (ins.size() != inputs) {
@@ -393,6 +396,7 @@ void ISeq::_load(const Input &ins) const
 		throw std::runtime_error(ss.str());
 	}
 
+	_cached_in = ins;
 	for (int i = 0; i < ins.size(); i++)
 		_vars[i]->value = ins[i];
 }
@@ -401,7 +405,9 @@ void ISeq::_load(const Input &ins) const
 void ISeq::storec(std::stack <Constant> &ops, int i) const
 {
 	// Get from the stack
-	Constant c = _get_operand(ops);
+	// TODO: should the input for this be cached?
+	_function::Input ins;
+	Constant c = _get_operand(ops, ins);
 
 	if (i >= _cache.size())
 		_cache.resize(i + 1);
@@ -410,13 +416,16 @@ void ISeq::storec(std::stack <Constant> &ops, int i) const
 }
 
 // Deal with special instructions
-bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
+bool ISeq::_ispec(_function *ftn, std::stack <Constant> &ops)
 {
+	_function::Input ins;
 	int index;
+
 	switch (ftn->spop) {
 	case op_get:
 		// Get index and push the corresponding variable
 		index = reinterpret_cast <const Get *> (ftn)->index;
+		_cached_finputs[ftn] = Input {_vars[index]->value.copy()};
 		ops.push(_vars[index]->value.copy());
 		return true;
 	case op_const:
@@ -437,7 +446,8 @@ bool ISeq::_ispec(const _function *ftn, std::stack <Constant> &ops) const
 	case op_add: case op_sub:
 	case op_mul: case op_div:
 		// Push the result of the operation
-		ops.push(kernels[ftn->spop - op_add](ops).copy());
+		ops.push(kernels[ftn->spop - op_add](ops, ins).copy());
+		_cached_finputs[ftn] = ins;
 		return true;
 	default:
 		break;
@@ -471,6 +481,13 @@ void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
 
 	// Evaluate the instruction
 	Constant n = ftn->compute(fins);
+
+	// Store input in cache
+	// TODO: this many copies may be expensive
+	Input copy;
+	for (const Constant &c : fins)
+		copy.push_back(c.copy());
+	_cached_finputs[ftn] = copy;
 
 	// std::cout << "ISEQ: value = " << n << std::endl;
 	// std::cout << summary() << std::endl;

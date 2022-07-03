@@ -64,6 +64,12 @@ private:
 	Variables		_vars;		// Variables
 	ConstantCache		_consts;	// Fixed constants
 	mutable ConstantCache	_cache;		// More cache for flow of execution
+	
+	// Input cache
+	using _input_cache = std::unordered_map <_function *, Input>;
+	
+	Input			_cached_in;
+	_input_cache		_cached_finputs;
 
 	// TODO: cache tree?
 
@@ -77,9 +83,9 @@ private:
 	void _append(_function *fptr, Args ...);
 
 	// Computation helpers
-	void _load(const Input &) const;
+	void _load(const Input &);
 	void storec(std::stack <Constant> &, int) const;
-	bool _ispec(const _function *, std::stack <Constant> &) const;
+	bool _ispec(_function *, std::stack <Constant> &);
 	void _exec(_function *, std::stack <Constant> &);
 
 	// Composing functions and variables
@@ -132,7 +138,7 @@ public:
 	Constant compute(const Input &) override;
 
 	// Evaluate gradient
-	Gradient gradient(const Input &) const override;
+	Gradient gradient(const Input &, const Input &) override;
 
 	// Apply gradients
 	void update_parameters(GradientQueue &) override;
