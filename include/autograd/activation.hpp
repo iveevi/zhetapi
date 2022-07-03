@@ -96,10 +96,13 @@ inline Function leaky_relu(float alpha)
 // Sigmoid activation function
 class _sigmoid : public ISeq {
 public:
-	struct kernel : public _function {
+	class kernel : public _function {
+		Constant _cI;
+	public:
 		kernel() : _function(1) {}
 
 		Constant compute(const Input &ins) override {
+			_cI = ins[0].copy();
 			return ins[0].copy().transform(
 				[](float x) {
 					return 1 / (1 + std::exp(-x));
@@ -108,10 +111,11 @@ public:
 		}
 
 		Gradient gradient(const Input &igrads) const override {
-			Constant out = igrads[0].copy().transform(
-				[](float x) {
+			Constant out = Constant(igrads[0].shape(),
+				[&](size_t i) {
+					float x = _cI.get(i);
 					float y = 1 / (1 + std::exp(-x));
-					return y * (1 - y) * x;
+					return y * (1 - y) * igrads[0].get(i);
 				}
 			);
 

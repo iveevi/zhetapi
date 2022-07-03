@@ -46,7 +46,7 @@ bool file_exists(const std::string &path)
 
 int main()
 {
-	const size_t TRAIN_IMAGES = 600;
+	const size_t TRAIN_IMAGES = 10;
 	const size_t VALIDATION_IMAGES = 100;
 	const size_t DIMENSIONS = 784;
 
@@ -58,14 +58,14 @@ int main()
 	Variable x;
 	Variable y;
 
-	// auto mse = square(length(x - y))/Constant(10);
-	// auto true_dmse = Constant(2) * (x - y)/Constant(10);
-	// auto dmse = mse.differentiate(0);
-	
-	auto loss = -1.0f * autograd::dot(autograd::log(x), y);
-	auto dloss = y/x;
+	/* auto loss = -1.0f * autograd::dot(autograd::log(x), y);
+	auto dloss = (-1.0f * y/x).refactored(x, y); */
 
-	// std::cout << "dmse:\n" << dmse.summary() << std::endl;
+	auto loss = 2 * square(length(x - y))/Constant {10};
+	auto dloss = 2 * (x - y)/Constant {10};
+
+	std::cout << "Loss:\n" << loss.summary() << std::endl;
+	std::cout << "dLoss:\n" << dloss.summary() << std::endl;
 
 	// Model
 	auto model = ml::dense(DIMENSIONS, 30)(x);
@@ -76,10 +76,10 @@ int main()
 	// TODO: some method to propogate parameters through ftunctions,
 	// ie. {"dropout", 0.5}, {"batch_norm", true} (a map <string, float>)
 
-	std::cout << "Model:\n" << model.summary() << std::endl;
+	std::cout << "\nModel:\n" << model.summary() << std::endl;
 
 	// Optimizer
-	auto optimizer = ml::RMSprop(model.parameters(), 0.01);
+	auto optimizer = ml::Momentum(model.parameters(), 0.01, 0.9);
 
 	// First load the MNIST dataset
 	system("mkdir -p data");
@@ -105,7 +105,7 @@ int main()
 
 	std::ifstream f_train_images("data/train-images-idx3-ubyte");
 	std::ifstream f_validation_images("data/t10k-images-idx3-ubyte");
-	
+
 	std::ifstream f_train_labels("data/train-labels-idx1-ubyte");
 	std::ifstream f_validation_labels("data/t10k-labels-idx1-ubyte");
 
@@ -114,7 +114,7 @@ int main()
 
 	f_train_images.read(header, 16);
 	f_validation_images.read(header, 16);
-	
+
 	f_train_labels.read(header, 8);
 	f_validation_labels.read(header, 8);
 
@@ -185,13 +185,12 @@ int main()
 	std::cout << "\tloss = " << loss(model(train_data[0]).flat(), train_labels[0]) << std::endl;
 	std::cout << "\tmatch? " << validator(model(train_data[0]), train_labels[0]) << std::endl;
 
-	auto reporter = ml::Validate(validation_data, validation_labels, validator);
 	auto training_suite = ml::TrainingSuite {
 		.loss = loss,
 		.dloss = dloss,
-		.iterations = 100,
-		.batch_size = 50,
-		.reporter = reporter
+		.iterations = 10,
+		.batch_size = 10,
+		.reporter = std::make_shared <ml::Validate> (validation_data, validation_labels, validator)
 	};
 
 	ml::fit(model, train_data, train_labels, optimizer, training_suite);

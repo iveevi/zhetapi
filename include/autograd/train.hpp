@@ -82,7 +82,7 @@ public:
 class Validate : public _reporter {
 	const Data &X;
 	const std::vector <Constant> &Y;
-	const Validator &validator;
+	Validator validator;
 public:
 	Validate(const Data &X_, const std::vector <Constant> &Y_, const Validator &validator_)
 		: X {X_}, Y {Y_}, validator {validator_} {}
@@ -104,7 +104,7 @@ struct TrainingSuite {
 	_function &dloss;
 	size_t iterations;
 	size_t batch_size;
-	const _reporter &reporter;
+	std::shared_ptr <_reporter> reporter = std::make_shared <ProgressBar> ();
 };
 
 inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
@@ -136,11 +136,10 @@ inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
 
 				gq.clear();
 				elements = 0;
-				exit(-1);
 			}
 		}
 
-		suite.reporter.report({i, 0, suite.iterations, serror/X.size(), f});
+		suite.reporter->report({i, 0, suite.iterations, serror/X.size(), f});
 	}
 }
 

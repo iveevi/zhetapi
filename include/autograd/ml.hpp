@@ -72,8 +72,11 @@ public:
 		if (normal)
 			lambda = [&](size_t i) { return dist(gen); };
 
-		_w = Matrix <float> (_osize, _isize, lambda);
-		_b = Matrix <float> (_osize, 1, lambda);
+		// _w = Matrix <float> (_osize, _isize, lambda);
+		// _b = Matrix <float> (_osize, 1, lambda);
+		
+		_w = Matrix <float> (_osize, _isize, 0);
+		_b = Matrix <float> (_osize, 1, 0);
 	}
 
 	// Copy overload
@@ -94,6 +97,7 @@ public:
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
 		Matrix <float> dO(igrads[0], _osize, 1);
+		std::cout << "\ndO = " << dO << std::endl;
 		Matrix <float> wgrad = dO * _cI.transpose();
 		Matrix <float> bgrad = dO;
 		Matrix <float> igrad = _w.transpose() * dO;
@@ -115,6 +119,10 @@ public:
 
 		_w += wgrad;
 		_b += bgrad;
+
+		std::cout << "\ngrads:\n" << std::endl;
+		std::cout << "wgrad = " << wgrad << std::endl;
+		std::cout << "bgrad = " << bgrad << std::endl;
 	}
 
 	// Info about parameters

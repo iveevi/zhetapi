@@ -51,6 +51,7 @@ _function::Gradient ISeq::gradient(const Input &igrads) const
 	g.igrads = igrads;
 
 	// Loop through all kernel functions
+	std::cout << "\nISeq gradient, igrad = " << igrads[0] << std::endl;
 	for (int i = _instrs.size() - 1; i >= 0; i--) {
 		// Get function
 		const _function *ftn = _instrs[i];
@@ -63,6 +64,9 @@ _function::Gradient ISeq::gradient(const Input &igrads) const
 
 		// Set input gradients
 		g.igrads = g_ftn.igrads;
+
+		std::cout << "function:\n\t" << ftn->summary() << std::endl;
+		std::cout << "Igrads = " << g.igrads[0] << std::endl;
 	}
 
 	return g;

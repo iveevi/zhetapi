@@ -45,6 +45,11 @@ builds:
     - idirs: includes
   - mnist:
     - sources: 'experimental/mnist.cpp, source'
+    - flags: '-O3'
+    - idirs: includes
+  - mnist_debug:
+    - sources: 'experimental/mnist.cpp, source'
+    - flags: '-g'
     - idirs: includes
   - benchmark:
     - sources: 'experimental/benchmark.cpp, source'
@@ -70,10 +75,13 @@ targets:
       - gdb: 'gdb {}'
       - valgrind: 'valgrind --leak-check=full {}'
   - mnist:
+    - modes: gdb
     - builds:
       - default: mnist
+      - gdb: mnist_debug
     - postbuilds:
       - default: '{}'
+      - gdb: 'gdb {}'
   - bench:
     - builds:
       - default: benchmark
