@@ -43,5 +43,6 @@ gen
 htests
 portability
 samples/rl/res
+tmp
 zhetapi
 zhetapi-header

@@ -20,6 +20,7 @@ definitions:
     source/autograd/autograd.cpp,
     source/autograd/iseq.cpp,
     source/autograd/ml.cpp,
+    source/image.cpp,
     source/io.cpp,
     source/linalg.cpp,
     source/polynomial.cpp,
@@ -39,10 +40,12 @@ builds:
   - experimental:
     - sources: 'experimental/experimental.cpp, source'
     - idirs: includes
+    - libraries: '-lpng'
   - experimental_debug:
     - sources: 'experimental/experimental.cpp, source'
-    - flags: '-g -Wall'
     - idirs: includes
+    - libraries: '-lpng'
+    - flags: '-g -Wall'
   - mnist:
     - sources: 'experimental/mnist.cpp, source'
     - flags: '-O3'

@@ -138,6 +138,11 @@ struct _shape_info {
 			delete[] partials;
 	}
 
+	// Index dimension
+	size_t operator[](size_t i) const {
+		return array[i];
+	}
+
 	// Translate an index using the shape and slices
 	size_t translate(size_t index) const {
 		size_t result = 0;

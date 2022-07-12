@@ -6,16 +6,6 @@
 #include <bitset>
 #include <stdexcept>
 
-#ifndef ZHP_NO_GUI
-
-#include <SFML/System.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-
-// #include "core/shader.hpp"
-
-#endif
-
 // PNG library
 #include <png.h>
 
@@ -121,15 +111,9 @@ public:
 
 	Image(const Vector <double> &, size_t, size_t);		// Grayscale from vector
 
-	Vector <size_t> size() const;
-
 	size_t width() const;
 	size_t height() const;
 	size_t channels() const;
-
-	// For SFML
-	sf::Image sfml_image() const;
-	sf::Texture sfml_texture() const;
 
 	// Pixel value setter
 	void set(const pixel &, const Color &);			// Color

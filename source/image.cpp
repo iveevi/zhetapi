@@ -136,7 +136,7 @@ Image::Image(size_t width, size_t height, size_t channels, byte def)
 		: Tensor <unsigned char> ({width, height, channels}, def) {}
 
 Image::Image(size_t width, size_t height, size_t channels, const Color &color)
-		: Tensor <unsigned char> ({width, height, channels})
+		: Tensor <unsigned char> (shape_type {width, height, channels})
 {
 	for (size_t r = 0; r < width; r++) {
 		for (size_t c = 0; c < height; c++)
@@ -145,7 +145,7 @@ Image::Image(size_t width, size_t height, size_t channels, const Color &color)
 }
 
 Image::Image(size_t width, size_t height, size_t channels, const std::string &hexs)
-		: Tensor <unsigned char> ({width, height, channels})
+		: Tensor <unsigned char> (shape_type {width, height, channels})
 {
 	Color color = hexs;
 	for (size_t r = 0; r < width; r++) {
@@ -156,78 +156,53 @@ Image::Image(size_t width, size_t height, size_t channels, const std::string &he
 
 // Reinterpret constructor (row-contingious data)
 Image::Image(byte *data, size_t width, size_t height, size_t channels)
-		: Tensor <unsigned char> ({width, height, channels})
+		: Tensor <unsigned char> (shape_type {width, height, channels})
 {
 	size_t nbytes = width * height * channels;
-	memcpy(_array, data, nbytes);
+	memcpy(_array.get(), data, nbytes);
 }
 
 Image::Image(byte **data, size_t width, size_t height, size_t channels)
-		: Tensor <unsigned char> ({width, height, channels})
+		: Tensor <unsigned char> (shape_type {width, height, channels})
 {
 	size_t rbytes = width * channels;
 	for (size_t i = 0; i < height; i++)
-		memcpy(_array + i * rbytes, data[i], rbytes);
+		memcpy(_array.get() + i * rbytes, data[i], rbytes);
 }
 
 // TODO: Resolve the similarity between this and the above constructor
 Image::Image(png_bytep *data, size_t width, size_t height, size_t channels, size_t rbytes)
-		: Tensor <unsigned char> ({width, height, channels})
+		: Tensor <unsigned char> (shape_type {width, height, channels})
 {
 	for (size_t i = 0; i < height; i++)
-		memcpy(_array + i * rbytes, data[i], rbytes);
+		memcpy(_array.get() + i * rbytes, data[i], rbytes);
 }
 
 Image::Image(const Vector <double> &values, size_t width, size_t height)
-		: Tensor <unsigned char> ({width, height, 1})
+		: Tensor <unsigned char> (shape_type {width, height, 1})
 {
-	for (size_t i = 0; i < this->_size; i++)
+	for (size_t i = 0; i < size(); i++)
 		_array[i] = (unsigned char) values[i];
-}
-
-Vector <size_t> Image::size() const
-{
-	return {
-		_dim[0],
-		_dim[1]
-	};
 }
 
 size_t Image::width() const
 {
-	return _dim[0];
+	return _shape[0];
 }
 
 size_t Image::height() const
 {
-	return _dim[1];
+	return _shape[1];
 }
 
 size_t Image::channels() const
 {
-	return _dim[2];
-}
-
-sf::Image Image::sfml_image() const
-{
-	sf::Image image;
-
-	// TODO: assert RGBA and/or fill
-	image.create(_dim[0], _dim[1], _array);
-
-	return image;
-}
-
-sf::Texture Image::sfml_texture() const
-{
-	sf::Texture texture;
-	texture.loadFromImage(sfml_image());
-	return texture;
+	return _shape[2];
 }
 
 void Image::set(const pixel &px, const Color &c)
 {
-	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
+	size_t index = channels() * (px.first * height() + px.second);
 
 	_array[index] = c.r;
 	_array[index + 1] = c.g;
@@ -236,17 +211,17 @@ void Image::set(const pixel &px, const Color &c)
 
 void Image::set(const pixel &px, size_t channel, byte bt)
 {
-	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
+	size_t index = channels() * (px.first * height() + px.second);
 
 	_array[index + channel] = bt;
 }
 
 void Image::set(const pixel &px, const Vector <byte> &bytes)
 {
-	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
+	size_t index = channels() * (px.first * height() + px.second);
 
 	size_t nbytes = bytes.size();
-	for (size_t i = 0; i < nbytes && i + index < _size; i++)
+	for (size_t i = 0; i < nbytes && i + index < size(); i++)
 		_array[i + index] = bytes[i];
 }
 
@@ -267,7 +242,8 @@ void Image::set_hex(const pixel &px, const std::string &hexs)
 // Pixel value getter (same value as Color::value)
 uint32_t Image::color(const pixel &px) const
 {
-	size_t index = _dim[2] * (px.first * _dim[1] + px.second);
+	// TODO: helper function for index?
+	size_t index = channels() * (px.first * height() + px.second);
 
 	uint32_t ur = _array[index];
 	uint32_t ug = _array[index + 1];
@@ -279,13 +255,13 @@ uint32_t Image::color(const pixel &px) const
 // Extract a single channel
 Image Image::channel(size_t channels) const
 {
-	size_t len = _dim[0] * _dim[1];
+	size_t len = size()/channels;
 
 	byte *data = new byte[len];
 	for (size_t i = 0; i < len; i++)
-		data[i] = _array[i * _dim[2] + channels];
+		data[i] = _array[i * _shape[2] + channels];
 
-	Image out(data, _dim[0], _dim[1]);
+	Image out(data, _shape[0], _shape[1]);
 
 	// Free memory
 	delete[] data;
@@ -302,19 +278,19 @@ Image Image::crop(const pixel &tr, const pixel &bl) const
 	if (!in_bounds(tr) || !in_bounds(bl))
 		throw out_of_bounds();
 
-	size_t s_index = tr.first * _dim[1] + tr.second;
-	// size_t e_index = bl.first * _dim[1] + bl.second;
+	size_t s_index = tr.first * _shape[1] + tr.second;
+	// size_t e_index = bl.first * _shape[1] + bl.second;
 
 	size_t n_width = bl.first - tr.first + 1;
 	size_t n_height = bl.second - tr.second + 1;
 
 	byte **rows = new byte *[n_height];
 	for (size_t i = 0; i < n_height; i++) {
-		size_t k = _dim[2] * (s_index + i * _dim[1]);
+		size_t k = _shape[2] * (s_index + i * _shape[1]);
 		rows[i] = &(_array[k]);
 	}
 
-	Image out(rows, n_width, n_height, _dim[2]);
+	Image out(rows, n_width, n_height, _shape[2]);
 
 	// Free the memory
 	delete[] rows;
@@ -324,15 +300,15 @@ Image Image::crop(const pixel &tr, const pixel &bl) const
 
 const unsigned char *const Image::raw() const
 {
-	return _array;
+	return _array.get();
 }
 
 unsigned char **Image::row_bytes() const
 {
-	unsigned char **rows = new unsigned char *[_dim[0]];
+	unsigned char **rows = new unsigned char *[_shape[0]];
 
-	size_t stride = _dim[1] * _dim[2];
-	for (size_t i = 0; i < _dim[0]; i++)
+	size_t stride = _shape[1] * _shape[2];
+	for (size_t i = 0; i < _shape[0]; i++)
 		rows[i] = &(_array[stride * i]);
 
 	return rows;
@@ -340,54 +316,9 @@ unsigned char **Image::row_bytes() const
 
 bool Image::in_bounds(const pixel &px) const
 {
-	return (px.first >= 0 && px.first < _dim[0])
-		&& (px.second >= 0 && px.second < _dim[1]);
+	return (px.first >= 0 && px.first < _shape[0])
+		&& (px.second >= 0 && px.second < _shape[1]);
 }
-
-#ifndef ZHP_NO_GUI
-
-int Image::show() const
-{
-	sf::ContextSettings glsettings;
-	glsettings.antialiasingLevel = 2;
-
-	// TODO: add optional names to images later
-	sf::RenderWindow window {
-		sf::VideoMode {
-			static_cast <unsigned int> (_dim[0]),
-			static_cast <unsigned int> (_dim[1])
-		},
-		"Image show",
-		sf::Style::Titlebar | sf::Style::Close,
-		glsettings
-	};
-
-	// TODO: this is RGBA only
-	sf::Image image;
-	image.create(_dim[0], _dim[1], _array);
-
-	sf::Texture texture;
-	texture.loadFromImage(image);
-
-	sf::Sprite sprite;
-	sprite.setTexture(texture);
-
-	while (window.isOpen()) {
-		sf::Event event;
-		while (window.pollEvent(event)) {
-			if (event.type == sf::Event::Closed)
-				window.close();
-		}
-
-		window.clear(sf::Color::Black);
-		window.draw(sprite);
-		window.display();
-	}
-
-	return 0;
-}
-
-#endif
 
 /*
  * PNG Parsing.
