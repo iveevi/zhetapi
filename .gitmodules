@@ -1,3 +1,6 @@
 [submodule "vendor/indicators"]
 	path = vendor/indicators
 	url = https://github.com/p-ranav/indicators
+[submodule "vendor/jitify"]
+	path = vendor/jitify
+	url = https://github.com/NVIDIA/jitify

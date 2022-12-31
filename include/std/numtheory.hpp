@@ -1,13 +1,15 @@
 #ifndef NUMBER_THEORY_H_
 #define NUMBER_THEORY_H_
 
-// C/C++ headers
+// Standard headers
 #include <cmath>
+#include <cstdint>
+#include <unordered_map>
 #include <vector>
 
 namespace zhetapi {
 
-namespace numtheory {
+namespace number_theory {
 
 // TODO: use f convention for gcd/lcm
 
@@ -114,7 +116,7 @@ T modexp(T base, T exp, T mod, T totient)
 } */
 
 // TODO: change to only integral types
-template <class T = long long>
+template <class T = long long int>
 std::vector <T> sieve(T lim)
 {
 	std::vector <T> primes = {2};
@@ -138,6 +140,41 @@ std::vector <T> sieve(T lim)
 	}
 
 	return primes;
+}
+
+// Prime factorization
+template <class T = long long int>
+std::unordered_map <T, uint32_t> factorize(T n)
+{
+	std::unordered_map <T, uint32_t> factors;
+
+	T low = 2;
+	while (n > 1) {
+		uint32_t exp = 0;
+
+		T lim = sqrt(n);
+		T i;
+
+		for (i = low; i <= lim; i++) {
+			if (n % i == 0) {
+				do {
+					n /= i;
+					exp++;
+				} while (n % i == 0);
+
+				break;
+			}
+		}
+
+		if (exp > 0) {
+			factors[i] = exp;
+		} else {
+			// No prime factors found
+			factors[n] = 1;
+		}
+	}
+
+	return factors;
 }
 
 }

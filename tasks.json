@@ -1,0 +1,5 @@
+[
+	{"directory": "build", "command": "ninja -j 8"},
+	{"directory": "build", "command": "./mnist"},
+	{"directory": "build", "command": "./experimental"}
+]
