@@ -21,6 +21,7 @@ class _kdense : public _function {
 	size_t				_isize;
 	size_t				_osize;
 	std::string			_init;
+	float				m_dropout;
 
 	// Weight matrix
 	Matrix <float>			_w;
@@ -124,6 +125,23 @@ public:
 
 	virtual int tunable_parameters() const override {
 		return _w.size() + _b.size();
+	}
+
+	// Method table
+	std::pair <_function *, const MethodTable &> method_table() override {
+		static const MethodTable _map {
+			{"dropout", [](_function  *f, const Arguments &args) {
+				_kdense *kf = dynamic_cast <_kdense *> (f);
+
+				assert(kf);
+				if (args.size() > 0)
+					kf->m_dropout = std::get <float> (args[0]);
+
+				return kf->m_dropout;
+			}}
+		};
+
+		return {this, _map};
 	}
 
 	// Summary of the function

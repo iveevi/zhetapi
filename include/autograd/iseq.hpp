@@ -118,6 +118,9 @@ protected:
 	ISeq(std::vector <_function *>,
 		std::vector <Constant>, int,
 		const _reindex_map &);
+
+	
+	std::pair <_function *, const MethodTable &> method_table() override;
 public:
 	// TODO: check function to make sure only
 	// one element remains on the stack

@@ -3,6 +3,7 @@
 
 // Standard headers
 #include <deque>
+#include <variant>
 #include <vector>
 
 // Library headers
@@ -126,6 +127,19 @@ public:
 	// Copy pointer
 	virtual _function *copy() const {
 		return new _function(inputs, spop);
+	}
+
+	// Pseudo-virtual methods for function properties
+	using Property = std::variant <bool, int, float>;
+	using Arguments = std::vector <Property>;
+	
+	using Method = std::function <Property (_function *, const Arguments &)>;
+	using MethodTable = std::unordered_map <std::string, Method>;
+
+	// Method table for function properties
+	virtual std::pair <_function *, const MethodTable &> method_table() {
+		const MethodTable _map {};
+		return {this, _map};
 	}
 
 	// Summary for each function

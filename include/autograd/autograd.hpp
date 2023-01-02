@@ -124,6 +124,22 @@ public:
 	Constant operator()(const _function::Input &inputs) {
 		return fptr->compute(inputs);
 	}
+	
+	// Invoking pseudo-virtual methods
+	_function::Property fn(const std::string &name, const _function::Arguments &args) {
+		const auto &[f, mt] = fptr->method_table();
+
+		auto it = mt.find(name);
+		if (it == mt.end())
+			throw std::runtime_error("_function: method " + name + " not found");
+
+		return it->second(f, args);
+	}
+
+	template <class ... Args>
+	_function::Property fn(const std::string &name, Args ... args) {
+		return fn(name, _function::Arguments {args...});
+	}
 
 	// Differentiation
 	Function differentiate(const int i) const {

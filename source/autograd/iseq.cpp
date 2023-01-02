@@ -253,6 +253,19 @@ ISeq::ISeq(std::vector <_function *> instrs,
 		_vars[i] = new _variable(reindex.at(i));
 }
 
+std::pair <_function *, const _function::MethodTable &> ISeq::method_table()
+{
+	// Choose the final instruction to request method table from
+	for (int i = _instrs.size() - 1; i >= 0; i--) {
+		if (_instrs[i]->spop != op_get)
+			return _instrs[i]->method_table();
+	}
+
+	// ISeq properties?
+	static const MethodTable _map {};
+	return {this, _map};
+}
+
 //////////////////////
 // Append functions //
 //////////////////////

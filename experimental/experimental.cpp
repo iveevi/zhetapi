@@ -4,11 +4,17 @@
 using namespace zhetapi;
 using namespace zhetapi::autograd;
 
-#include <unistd.h>
+#include <variant>
+#include <unordered_map>
+#include <functional>
 
 int main()
 {
-	{
+	auto layer = ml::dense(10, 5);
+	std::cout << "summary:\n" << layer.summary() << std::endl;
+	std::cout << "dropout: " << std::get <float> (layer.fn("dropout", 0.5f)) << std::endl;
+
+	/* {
 		Variable x;
 
 		auto model = ml::dense(10, 5)(x);
@@ -38,5 +44,5 @@ int main()
 		detail::MemoryTracker::report();
 	}
 
-	detail::MemoryTracker::report();
+	detail::MemoryTracker::report(); */
 }
