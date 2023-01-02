@@ -53,7 +53,7 @@ _function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 
 	// TODO: possible extreme cache, check the input to previous input to
 	// see if recomputation can be avoided
-	compute(ins);
+	// compute(ins);
 
 	// Loop through all kernel functions
 	// std::cout << "\nISeq gradient:\n";
@@ -62,6 +62,9 @@ _function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 		_function *ftn = _instrs[i];
 
 		// Get gradient
+		if (_cached_finputs.count(ftn) == 0)
+			throw std::runtime_error("ISeq::gradient: cached inputs not found");
+		
 		Input ins = _cached_finputs[ftn];
 
 		/* std::cout << "function:\t" << ftn->summary() << std::endl;

@@ -14,6 +14,7 @@
 #include <vector>
 
 // Library headers
+#include "allocator.hpp"
 #include "range.hpp"
 #include "std/interval.hpp"
 
@@ -31,6 +32,7 @@ class Vector;
 
 namespace utility {
 
+// TODO: move elsewhere
 template <size_t N>
 class Interval;
 
@@ -416,6 +418,16 @@ public:
 	Tensor <T> &operator*=(const Tensor &);
 	Tensor <T> &operator/=(const Tensor &);
 
+	// Configuring operative variants
+	enum Variant {
+		eCPU,
+		eCUDA
+	};
+
+	static void set_variant(Variant variant) {
+		s_variant = variant;
+	}
+
 	// Arithmetic
 	template <class U>
 	friend Tensor <U> operator-(const U &, const Tensor <U> &);
@@ -480,6 +492,10 @@ public:
 				: std::runtime_error("Index " +
 				std::to_string(i) + " is out of range") {}
 	};
+private:
+	// Static and member-wise variants
+	static Variant s_variant;
+	Variant m_variant;
 };
 
 /////////////////////////
@@ -521,6 +537,7 @@ template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
 		: _shape({rows, cols})
 {
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 }
 
@@ -528,6 +545,7 @@ template <class T>
 Tensor <T> ::Tensor(const shape_type &dim)
 		: _shape(dim)
 {
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 }
 
@@ -535,6 +553,7 @@ template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const T &def)
 		: _shape(dim)
 {
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = def;
@@ -547,6 +566,7 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = arr[i];
@@ -559,6 +579,7 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::initializer_list <T> &arr)
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
@@ -569,6 +590,7 @@ template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		: _shape(dim)
 {
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = f(i);
@@ -578,6 +600,7 @@ template <class T>
 Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
 		: _shape({arr.size()})
 {
+	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
 	_array.reset(new T[_shape.elements]);
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
@@ -595,6 +618,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	if (this != &other) {
 		_shape = other._shape;
 
+		// TODO: copy over if same size
 		_array.reset(new T[_shape.elements]);
 		for (size_t i = 0; i < _shape.elements; i++)
 			_array[i] = static_cast <T> (other._array[i]);
@@ -607,6 +631,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 template <class T>
 Tensor <T> Tensor <T> ::copy() const
 {
+	// TODO: manual copy helper method...
 	return Tensor(
 		shape(),
 		[&](size_t i) -> T {

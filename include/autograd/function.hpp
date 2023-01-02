@@ -135,6 +135,8 @@ public:
 	}
 };
 
+using Gradient = _function::Gradient;
+
 // Get function
 // TODO: underscore convention?
 struct Get : public _function {

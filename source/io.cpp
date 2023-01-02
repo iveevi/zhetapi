@@ -10,6 +10,7 @@ namespace zhetapi {
 
 namespace io {
 
+// TODO: create a separate (single header) library for this
 std::string table(const Args &headers,
 		const std::vector <Args> &rows)
 {

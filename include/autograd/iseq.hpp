@@ -15,6 +15,9 @@ namespace zhetapi {
 
 namespace autograd {
 
+// Cache structure for automatic differentiation
+using Cache = std::unordered_map <_function *, _function::Input>;
+
 // Tree structure
 struct _node {
 	_function *fptr;
@@ -65,11 +68,10 @@ private:
 	ConstantCache		_consts;	// Fixed constants
 	mutable ConstantCache	_cache;		// More cache for flow of execution
 	
-	// Input cache
-	using _input_cache = std::unordered_map <_function *, Input>;
-	
+	// TODO: should really be finput = nullptr
+	// TODO: actually cached input is currently obsolete
 	Input			_cached_in;
-	_input_cache		_cached_finputs;
+	Cache			_cached_finputs;
 
 	// TODO: cache tree?
 

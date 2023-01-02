@@ -1,5 +1,6 @@
 project(mnist)
 project(experimental)
+project(experimental_cuda CXX CUDA)
 
 # CXX options
 set(CMAKE_CXX_STANDARD 17)
@@ -39,6 +40,8 @@ set(Zhetapi_SOURCES
 
 add_executable(mnist experimental/mnist.cpp ${Zhetapi_SOURCES})
 add_executable(experimental experimental/experimental.cpp ${Zhetapi_SOURCES})
+add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
 
 target_link_libraries(mnist PNG::PNG)
 target_link_libraries(experimental PNG::PNG)
+target_link_libraries(experimental_cuda PNG::PNG cuda cudart nvrtc)
