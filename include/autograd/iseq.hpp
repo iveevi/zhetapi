@@ -125,6 +125,9 @@ public:
 	// Empty constructor
 	ISeq();
 
+	// Destructor
+	~ISeq();
+
 	// Get a variable
 	// TODO: protected?
 	_variable *get(int) const;

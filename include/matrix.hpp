@@ -39,6 +39,7 @@ public:
 	// Public aliases
 	using index_type = std::pair <size_t, size_t>;
 
+	// TODO: prune constructors
 	Matrix();
 	Matrix(const Matrix &);
 	Matrix(const Vector <T> &);
@@ -52,11 +53,8 @@ public:
 	Matrix(size_t, size_t, T = T());
 
 	// Lambda constructors
-	// TODO: remove the pointer constructors
 	Matrix(size_t, size_t, std::function <T (size_t)>);
-	// Matrix(size_t, size_t, std::function <T *(size_t)>);
 	Matrix(size_t, size_t, std::function <T (size_t, size_t)>);
-	// Matrix(size_t, size_t, std::function <T *(size_t, size_t)>);
 
 	Matrix(const std::vector <T> &);
 	Matrix(const std::vector <Vector <T>> &);
@@ -235,18 +233,7 @@ template <class T>
 T Matrix <T> ::EPSILON = static_cast <T> (1e-10);
 
 template <class T>
-Matrix <T> ::Matrix() : Tensor <T> (0, 0) {}
-
-/* Owner implies that the vector object will take care of the deallocation
-template <class T>
-__cuda_dual__
-Matrix <T> ::Matrix(size_t rs, size_t cs, T *arr, bool slice)
-		: Tensor <T> (rs, cs)
-{
-	// TODO: implement slice constructor on the Tensor class
-	this->_array = arr;
-	this->_arr_sliced = slice;
-} */
+Matrix <T> ::Matrix() : Tensor <T> () {}
 
 /**
  * @brief Component retrieval.
@@ -622,6 +609,7 @@ T Matrix <T> ::determinant(const Matrix <T> &a) const
 	return det;
 }
 
+// TODO: perform straight copy...
 template <class T>
 Matrix <T> ::Matrix(const Matrix <T> &other)
 		: Tensor <T> (other.get_rows(), other.get_cols())

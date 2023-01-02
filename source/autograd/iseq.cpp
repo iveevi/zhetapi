@@ -13,6 +13,16 @@ namespace autograd {
 // Empty constructor
 ISeq::ISeq() : _function(0, op_iseq) {}
 
+// Destructor
+ISeq::~ISeq()
+{
+	for (_function *fptr : _instrs)
+		delete fptr;
+
+	for (_variable *vptr : _vars)
+		delete vptr;
+}
+
 // Get variable
 _variable *ISeq::get(int index) const
 {
@@ -431,6 +441,7 @@ bool ISeq::_ispec(_function *ftn, std::stack <Constant> &ops)
 	_function::Input ins;
 	int index;
 
+	// TODO: be more conservative with memory...
 	switch (ftn->spop) {
 	case op_get:
 		// Get index and push the corresponding variable
@@ -549,7 +560,7 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 		instrs.push_back(new Const(dst_consts.size()));
 		dst_consts.push_back(src_consts[index]);
 	} else {
-		instrs.push_back(ftn);
+		instrs.push_back(ftn->copy());
 	}
 }
 

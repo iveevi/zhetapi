@@ -36,14 +36,6 @@ commands:
             cd lcov-1.15/
             sudo make install
             cd ../
-      - run:
-          name: Install Pip
-          command: |
-            sudo apt install -y python3-pip
-      - run:
-          name: Install Packages
-          command: |
-            sudo python3 -m pip install pyyaml smake
 
 jobs:
   testing:
@@ -55,10 +47,9 @@ jobs:
       - run:
           name: Running Tests
           command: |
-            mv smake.yaml smake_temp.yaml
-            iconv -f utf8 -t ascii smake_temp.yaml > smake.yaml
-            tree
-            smake -v testing -j8
+            mkdir build
+            cd build
+            ninja -j 8
 
 workflows:
   ubuntu-18.04-installation-and-port:

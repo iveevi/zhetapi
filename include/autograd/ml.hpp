@@ -70,9 +70,6 @@ public:
 
 		_w = Matrix <float> (_osize, _isize, lambda);
 		_b = Matrix <float> (_osize, 1, lambda);
-		
-		// _w = Matrix <float> (_osize, _isize, 0);
-		// _b = Matrix <float> (_osize, 1, 0);
 	}
 
 	// Copy overload

@@ -518,7 +518,7 @@ template <class A>
 Tensor <T> ::Tensor(const Tensor <A> &other)
 		: _shape(other._shape)
 {
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = static_cast <T> (other._array[i]);
 }
@@ -529,7 +529,7 @@ template <class T>
 Tensor <T> ::Tensor(const T &value)
 		: _shape({1})
 {
-	_array.reset(new T[1]);
+	_array = detail::make_shared_array <T> (1);
 	_array[0] = value;
 }
 
@@ -537,24 +537,21 @@ template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
 		: _shape({rows, cols})
 {
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim)
 		: _shape(dim)
 {
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const T &def)
 		: _shape(dim)
 {
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = def;
 }
@@ -566,8 +563,7 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = arr[i];
 }
@@ -579,8 +575,8 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::initializer_list <T> &arr)
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
+
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
 		_array[i++] = *it;
@@ -590,8 +586,7 @@ template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		: _shape(dim)
 {
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = f(i);
 }
@@ -600,8 +595,8 @@ template <class T>
 Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
 		: _shape({arr.size()})
 {
-	std::cout << "Allocating " << sizeof(T) * _shape.elements << " bytes" << std::endl;
-	_array.reset(new T[_shape.elements]);
+	_array = detail::make_shared_array <T> (_shape.elements);
+
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
 		_array[i++] = *it;
@@ -619,7 +614,8 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 		_shape = other._shape;
 
 		// TODO: copy over if same size
-		_array.reset(new T[_shape.elements]);
+		_array = detail::make_shared_array <T> (_shape.elements);
+		// _array = other._array;
 		for (size_t i = 0; i < _shape.elements; i++)
 			_array[i] = static_cast <T> (other._array[i]);
 	}

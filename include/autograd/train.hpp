@@ -91,6 +91,9 @@ public:
 		float accuracy = zhetapi::autograd::ml::accuracy(info.model, X, Y, validator);
 		std::cout << "Accuracy: " << accuracy
 			<< ", Average error = " << info.avg_error << std::endl;
+
+		// TODO: make this optional
+		detail::MemoryTracker::report();
 	}
 };
 

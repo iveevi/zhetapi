@@ -67,6 +67,9 @@ public:
 	// Constructors
 	_function(int nins, int op = op_none) : inputs(nins), spop(op) {}
 
+	// Virtual destructor for clean up of derived classes
+	virtual ~_function() {}
+
 	// Not pure virtual so that special operations
 	//	can get away without implementing it
 	virtual Constant compute(const Input &) {
