@@ -23,11 +23,11 @@ commands:
             sudo apt-get -y install clang
             sudo apt-get -y install make
             sudo apt-get -y install libpng-dev
-            sudo apt-get -y install tree
             sudo apt-get -y install wget
             sudo apt-get -y install curl
             sudo apt-get -y install lcov
             sudo apt-get -y install libsfml-dev
+            sudo apt-get -y install ninja-build 
       - run:
           name: Install lcov-1.15
           command: |
