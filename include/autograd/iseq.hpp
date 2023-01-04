@@ -20,14 +20,14 @@ using Cache = std::unordered_map <_function *, _function::Input>;
 
 // Tree structure
 struct _node {
-	_function *fptr;
+	_function::Ptr fptr;
 
 	// TODO: should be a vector of plain nodes
 	std::vector <_node *> children;
 
 	// Constructors
-	_node(_function *);
-	_node(_function *, const std::vector <_node *> &);
+	_node(const _function::Ptr &);
+	_node(const _function::Ptr &, const std::vector <_node *> &);
 
 	// Printing the tree
 	std::string str(int = 0) const;
@@ -37,11 +37,12 @@ struct _node {
 class ISeq : public _function {
 public:
 	// Public aliases
-	using Instructions = std::vector <_function *>;
+	using Instructions = std::vector <_function::Ptr>;
 	using ConstantCache = std::vector <Constant>;
 private:
 	// Private aliases
-	using Variables = std::vector <_variable *>;
+	using Var = std::shared_ptr <_variable>;
+	using Variables = std::vector <Var>;
 
 	// Information about cache usage, for optimization
 	struct _cache_info {
@@ -76,26 +77,26 @@ private:
 	// TODO: cache tree?
 
 	// Append helpers
-	void append_variable(_variable *);
-	void append_iseq(ISeq *);
-	int index_of(_variable *) const;
-	void _append(_function *);
+	void append_variable(const _variable *);
+	void append_iseq(const ISeq *const);
+	int index_of(const _variable *) const;
+	void _append_function(const Ptr &);
 
 	template <class ... Args>
-	void _append(_function *fptr, Args ...);
+	void _append(const _function::Ptr &, Args ...);
 
 	// Computation helpers
 	void _load(const Input &);
 	void storec(std::stack <Constant> &, int) const;
-	bool _ispec(_function *, std::stack <Constant> &);
-	void _exec(_function *, std::stack <Constant> &);
+	bool _ispec(const Ptr &, std::stack <Constant> &);
+	void _exec(const Ptr &, std::stack <Constant> &);
 
 	// Composing functions and variables
-	_function *_compose(const Compositions &) const override;
+	_function::Ptr _compose(const Compositions &) const override;
 
 	// Tree building and rebuilding
 	_node *_tree(_cache_map &) const;
-	void _tree_walk(_function *, std::stack <_node *> &,
+	void _tree_walk(const Ptr &, std::stack <_node *> &,
 		_cache_map &) const;
 	void _rebuild(const _node *, Instructions &,
 		ConstantCache &, _cache_map &,
@@ -109,17 +110,16 @@ private:
 	// Differentiation functions
 	friend _node *_diff_tree(const _node *, int);
 
-	_function *diff(const int) const override;
+	_function::Ptr diff(const int) const override;
 protected:
 	// Protected constructors
-	ISeq(_function *, int);
-	ISeq(std::vector <_function *>,
+	ISeq(const _function::Ptr &, int);
+	ISeq(const std::vector <_function::Ptr> &,
 		std::vector <Constant>, int);
-	ISeq(std::vector <_function *>,
+	ISeq(const std::vector <_function::Ptr> &,
 		std::vector <Constant>, int,
 		const _reindex_map &);
 
-	
 	std::pair <_function *, const MethodTable &> method_table() override;
 public:
 	// TODO: check function to make sure only
@@ -128,15 +128,9 @@ public:
 	// Empty constructor
 	ISeq();
 
-	// Destructor
-	~ISeq();
-
 	// Get a variable
 	// TODO: protected?
-	_variable *get(int) const;
-
-	// Inserting instructions and functions
-	void append(_function *);
+	const Var &get(int) const;
 
 	// Append a sequence of instructions
 	template <class ... Args>
@@ -152,15 +146,15 @@ public:
 	void update_parameters(GradientQueue &) override;
 
 	// Permute the order of variables
-	void refactor(const std::vector <_variable *> &);
-	_function *refactor(const std::vector <_variable *> &) const;
+	void refactor(const std::vector <const _variable *> &);
+	_function::Ptr refactor(const std::vector <const _variable *> &) const;
 
 	// Info about parameters
 	int parameters() const override;
 	int tunable_parameters() const override;
 
 	// Copy generator
-	_function *copy() const override;
+	_function::Ptr copy() const override;
 
 	// Dump instructions for debugging
 	std::string summary() const override;
@@ -168,10 +162,11 @@ public:
 
 // Append a sequence of instructions
 template <class ... Args>
-void ISeq::_append(_function *fptr, Args ... args)
+void ISeq::_append(const _function::Ptr &fptr, Args ... args)
 {
-	_append(fptr);
-	_append(args...);
+	_append_function(fptr);
+	if constexpr (sizeof ... (args) > 0)
+		_append(args ...);
 }
 
 template <class ... Args>

@@ -74,8 +74,8 @@ public:
 	}
 
 	// Copy overload
-	_function *copy() const override {
-		return new _kdense(_isize, _osize, _w, _b, _init);
+	_function::Ptr copy() const override {
+		return Ptr(new _kdense(_isize, _osize, _w, _b, _init));
 	}
 
 	// Forward pass
@@ -155,13 +155,13 @@ public:
 class _dense : public ISeq {
 public:
 	_dense(size_t isize, size_t osize, const std::string &initializer = "xavier")
-		: ISeq(new _kdense(isize, osize, initializer), 1) {}
+		: ISeq(new_ftn_ <_kdense> (isize, osize, initializer), 1) {}
 };
 
 // Dense layer factory
 inline Function dense(size_t isize, size_t osize, const std::string &initializer = "xavier")
 {
-	return Function(new _dense(isize, osize, initializer));
+	return Function(new_ftn_ <_dense> (isize, osize, initializer));
 }
 
 }

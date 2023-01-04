@@ -11,7 +11,7 @@
 	inline Constant _k##name(const _function::Input &ins)
 
 #define DERIVATIVE(name)					\
-	inline _function *_diffk_##name(const int vindex)
+	inline _function::Ptr _diffk_##name(const int vindex)
 
 namespace zhetapi {
 
@@ -26,10 +26,10 @@ Function operator+(const Function &lhs, const Function &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(), rhs.get(),
-		new _function(2, _function::op_add)
+		new_ftn_ <_function> (2, _function::op_add)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator-(const Function &lhs, const Function &rhs)
@@ -37,10 +37,10 @@ Function operator-(const Function &lhs, const Function &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(), rhs.get(),
-		new _function(2, _function::op_sub)
+		new_ftn_ <_function> (2, _function::op_sub)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator*(const Function &lhs, const Function &rhs)
@@ -48,10 +48,10 @@ Function operator*(const Function &lhs, const Function &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(), rhs.get(),
-		new _function(2, _function::op_mul)
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator/(const Function &lhs, const Function &rhs)
@@ -59,10 +59,10 @@ Function operator/(const Function &lhs, const Function &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(), rhs.get(),
-		new _function(2, _function::op_div)
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 // With constants
@@ -71,11 +71,11 @@ Function operator+(const Function &lhs, const Constant &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(),
-		new _repl_const(rhs, -1),
-		new _function(2, _function::op_add)
+		new_ftn_ <_repl_const> (rhs, -1),
+		new_ftn_ <_function> (2, _function::op_add)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator-(const Function &lhs, const Constant &rhs)
@@ -83,11 +83,11 @@ Function operator-(const Function &lhs, const Constant &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(),
-		new _repl_const(rhs, -1),
-		new _function(2, _function::op_sub)
+		new_ftn_ <_repl_const> (rhs, -1),
+		new_ftn_ <_function> (2, _function::op_sub)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator*(const Function &lhs, const Constant &rhs)
@@ -95,11 +95,11 @@ Function operator*(const Function &lhs, const Constant &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(),
-		new _repl_const(rhs, -1),
-		new _function(2, _function::op_mul)
+		new_ftn_ <_repl_const> (rhs, -1),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator/(const Function &lhs, const Constant &rhs)
@@ -107,11 +107,11 @@ Function operator/(const Function &lhs, const Constant &rhs)
 	ISeq *iseq = new ISeq();
 	iseq->append(
 		lhs.get(),
-		new _repl_const(rhs, -1),
-		new _function(2, _function::op_div)
+		new_ftn_ <_repl_const> (rhs, -1),
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 // Reverse operators
@@ -119,48 +119,48 @@ Function operator+(const Constant &lhs, const Function &rhs)
 {
 	ISeq *iseq = new ISeq();
 	iseq->append(
-		new _repl_const(lhs, -1),
+		new_ftn_ <_repl_const> (lhs, -1),
 		rhs.get(),
-		new _function(2, _function::op_add)
+		new_ftn_ <_function> (2, _function::op_add)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator-(const Constant &lhs, const Function &rhs)
 {
 	ISeq *iseq = new ISeq();
 	iseq->append(
-		new _repl_const(lhs, -1),
+		new_ftn_ <_repl_const> (lhs, -1),
 		rhs.get(),
-		new _function(2, _function::op_sub)
+		new_ftn_ <_function> (2, _function::op_sub)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator*(const Constant &lhs, const Function &rhs)
 {
 	ISeq *iseq = new ISeq();
 	iseq->append(
-		new _repl_const(lhs, -1),
+		new_ftn_ <_repl_const> (lhs, -1),
 		rhs.get(),
-		new _function(2, _function::op_mul)
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 Function operator/(const Constant &lhs, const Function &rhs)
 {
 	ISeq *iseq = new ISeq();
 	iseq->append(
-		new _repl_const(lhs, -1),
+		new_ftn_ <_repl_const> (lhs, -1),
 		rhs.get(),
-		new _function(2, _function::op_div)
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return Function(iseq);
+	return Function(_function::Ptr(iseq));
 }
 
 // Standard function kernels
@@ -249,13 +249,13 @@ DERIVATIVE(square)
 	// f(x)^2 -> 2 * f(x) * f'(x)
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _function(2, _function::op_mul),
-		new _repl_const(2.0, -1),
-		new _function(2, _function::op_mul)
+		new_ftn_ <Get> (0),
+		new_ftn_ <_function> (2, _function::op_mul),
+		new_ftn_ <_repl_const> (2.0, -1),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(length)
@@ -265,13 +265,13 @@ DERIVATIVE(length)
 	// length(f(x)) -> f(x) * f'(x)
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _function(2, _function::op_mul),
-		new _repl_const(1.0, -1),
-		new _function(2, _function::op_mul)
+		new_ftn_ <Get> (0),
+		new_ftn_ <_function> (2, _function::op_mul),
+		new_ftn_ <_repl_const> (1.0, -1),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(sqrt)
@@ -281,14 +281,14 @@ DERIVATIVE(sqrt)
 	// sqrt(f(x)) -> f'(x) / 2 * sqrt(f(x))
 	iseq->append(
 		_iop::differential(0),
-		new _repl_const(2.0, -1),
-		new Get(0),
-		new _sqrt::kernel(),
-		new _function(2, _function::op_mul),
-		new _function(2, _function::op_div)
+		new_ftn_ <_repl_const> (2.0, -1),
+		new_ftn_ <Get> (0),
+		new_ftn_ <_sqrt::kernel> (),
+		new_ftn_ <_function> (2, _function::op_mul),
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 // TODO: fill out the rest
@@ -298,13 +298,13 @@ DERIVATIVE(exp)
 
 	// e^f(x) -> f'(x) * e^f(x)
 	iseq->append(
-		new Get(0),
-		new _exp::kernel(),
+		new_ftn_ <Get> (0),
+		new_ftn_ <_exp::kernel> (),
 		_iop::differential(0),
-		new _function(2, _function::op_mul)
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(log)
@@ -314,12 +314,12 @@ DERIVATIVE(log)
 	// log(f(x)) -> f'(x) / f(x)
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _log::kernel(),
-		new _function(2, _function::op_div)
+		new_ftn_ <Get> (0),
+		new_ftn_ <_log::kernel> (),
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(sin)
@@ -329,12 +329,12 @@ DERIVATIVE(sin)
 	// sin(f(x)) -> f'(x) * cos(f(x))
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _cos::kernel(),
-		new _function(2, _function::op_mul)
+		new_ftn_ <Get> (0),
+		new_ftn_ <_cos::kernel> (),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(cos)
@@ -344,14 +344,14 @@ DERIVATIVE(cos)
 	// cos(f(x)) -> -f'(x) * sin(f(x))
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _sin::kernel(),
-		new _function(2, _function::op_mul),
-		new _repl_const(-1, -1),
-		new _function(2, _function::op_mul)
+		new_ftn_ <Get> (0),
+		new_ftn_ <_sin::kernel> (),
+		new_ftn_ <_function> (2, _function::op_mul),
+		new_ftn_ <_repl_const> (-1, -1),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 // TODO: seq operation
@@ -362,16 +362,16 @@ DERIVATIVE(tan)
 	// tan(f(x)) -> f'(x) / (cos(f(x))^2)
 	iseq->append(
 		_iop::differential(0),
-		new Get(0),
-		new _cos::kernel(),
-		new Get(0),
-		new _cos::kernel(),
-		new _function(2, _function::op_mul),
+		new_ftn_ <Get> (0),
+		new_ftn_ <_cos::kernel> (),
+		new_ftn_ <Get> (0),
+		new_ftn_ <_cos::kernel> (),
+		new_ftn_ <_function> (2, _function::op_mul),
 		_iop::differential(0),
-		new _function(2, _function::op_div)
+		new_ftn_ <_function> (2, _function::op_div)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 // TODO: also the case where f(x)^g(x) -> check this!
@@ -384,15 +384,15 @@ DERIVATIVE(pow)
 	// f(x)^e -> e * f(x)^(e-1) * f'(x)
 	iseq->append(
 		_iop::differential(0),
-		new _repl_const(-1.0, -1),
-		new Get(1),
-		new _function(2, _function::op_sub),
-		new Get(0),
-		new _pow::kernel(),
-		new _function(2, _function::op_mul)
+		new_ftn_ <_repl_const> (-1.0, -1),
+		new_ftn_ <Get> (1),
+		new_ftn_ <_function> (2, _function::op_sub),
+		new_ftn_ <Get> (0),
+		new_ftn_ <_pow::kernel> (),
+		new_ftn_ <_function> (2, _function::op_mul)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(dot)
@@ -407,11 +407,11 @@ DERIVATIVE(flatten)
 
 	// flatten(f(x)) -> f(x)
 	iseq->append(
-		new _repl_const(1.0, 1),
-		new Get(0)
+		new_ftn_ <_repl_const> (1.0, 1),
+		new_ftn_ <Get> (0)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 DERIVATIVE(reshape)
@@ -420,11 +420,11 @@ DERIVATIVE(reshape)
 
 	// reshape(f(x), shape) -> f(x)
 	iseq->append(
-		new _repl_const(1.0, 1),
-		new Get(0)
+		new_ftn_ <_repl_const> (1.0, 1),
+		new_ftn_ <Get> (0)
 	);
 
-	return iseq;
+	return _function::Ptr(iseq);
 }
 
 }

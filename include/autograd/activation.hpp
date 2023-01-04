@@ -39,12 +39,12 @@ public:
 			return "RELU";
 		}
 
-		_function *copy() const override {
-			return new kernel();
+		Ptr copy() const override {
+			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 
-	_relu() : ISeq(new kernel(), 1) {}
+	_relu() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
 extern Function relu;
@@ -82,12 +82,12 @@ public:
 			return "LEAKY RELU";
 		}
 
-		_function *copy() const override {
-			return new kernel(_alpha);
+		Ptr copy() const override {
+			return Ptr(new_ftn_ <kernel> (_alpha));
 		}
 	};
 
-	_leaky_relu(float alpha) : ISeq(new kernel(alpha), 1) {}
+	_leaky_relu(float alpha) : ISeq(new_ftn_ <kernel> (alpha), 1) {}
 };
 
 inline Function leaky_relu(float alpha)
@@ -127,12 +127,12 @@ public:
 			return "SIGMOID";
 		}
 
-		_function *copy() const override {
-			return new kernel();
+		Ptr copy() const override {
+			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 
-	_sigmoid() : ISeq(new kernel(), 1) {}
+	_sigmoid() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
 extern Function sigmoid;
@@ -169,12 +169,12 @@ public:
 			return "TANH";
 		}
 
-		_function *copy() const override {
-			return new kernel();
+		Ptr copy() const override {
+			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 
-	_tanh() : ISeq(new kernel(), 1) {}
+	_tanh() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
 extern Function tanh;
@@ -225,12 +225,12 @@ public:
 			return "SOFTMAX";
 		}
 
-		_function *copy() const override {
-			return new kernel();
+		Ptr copy() const override {
+			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 
-	_softmax() : ISeq(new kernel(), 1) {}
+	_softmax() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
 extern Function softmax;

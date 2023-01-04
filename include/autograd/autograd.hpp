@@ -19,9 +19,6 @@ namespace autograd {
 class Function;
 class Variable;
 
-// Function alias is a wrapper around shared ptr
-using _fptr = std::shared_ptr <_function>;
-
 // Templated return type
 //	to distinguish between
 //	Cosntant or Function return
@@ -67,7 +64,7 @@ class Function {
 
 	template <class ... Args>
 	static void _ftr_process(_function::Compositions &cs, int &i, const Constant &c, Args ... args) {
-		cs.push_back(new _repl_const(c, i));
+		cs.push_back(_function::Ptr(new _repl_const(c, i)));
 		_ftr_process(cs, ++i, args...);
 	}
 
@@ -80,25 +77,29 @@ class Function {
 	static void _prm_process(std::vector <_variable *> &) {}
 protected:
 	// Function pointer
-	_fptr fptr;
+	_function::Ptr fptr;
 public:
 	// Constructors
 	Function() : fptr(nullptr) {}
-	Function(_function *f) : fptr(f) {}
-	Function(const _fptr &f) : fptr(f) {}
+	// Function(_function *f) : fptr(f) {}
+	Function(const _function::Ptr &f) : fptr(f) {}
 
-	// Get raw handle
-	_function *get() const {
+	// Get raw and pointer handle
+	_function *raw() const {
 		return fptr.get();
 	}
 
-	// As a convertion operator
-	operator const _function &() const {
-		return *fptr.get();
+	const _function::Ptr &get() const {
+		return fptr;
 	}
 
-	operator _function &() {
-		return *fptr.get();
+	// As a convertion operator
+	operator const _function::Ptr &() const {
+		return fptr;
+	}
+
+	operator _function::Ptr &() {
+		return fptr;
 	}
 
 	// Composition
@@ -165,7 +166,7 @@ public:
 			throw std::runtime_error("Permutation is only for op_iseq");
 		}
 
-		std::vector <_variable *> vars;
+		std::vector <const _variable *> vars;
 		_prm_process(vars, args...);
 
 		// Cast and permute
@@ -181,7 +182,7 @@ public:
 			throw std::runtime_error("Permutation is only for op_iseq");
 		}
 
-		std::vector <_variable *> vars;
+		std::vector <const _variable *> vars;
 		_prm_process(vars, args...);
 
 		// Cast and permute
@@ -211,15 +212,14 @@ public:
 template <class T, class... Args>
 Function new_(Args ... args)
 {
-	_function *f = new T(args...);
-	return Function(_fptr(f));
+	return Function(new_ftn_ <T> (args...));
 }
 
 // Wrapper around _variable for convenience
 class Variable : public Function {
 public:
 	// Constructors
-	Variable() : Function(new_ <_variable> ()) {}
+	Variable() : Function(new_ftn_ <_variable> ()) {}
 };
 
 // Permute function
@@ -228,7 +228,7 @@ void Function::_prm_process(std::vector <_variable *> &vars, const Variable &v, 
 {
 	// Get variable
 	assert(v.get()->spop == _function::op_var);
-	vars.push_back(reinterpret_cast <_variable *> (v.get()));
+	vars.push_back(reinterpret_cast <_variable *> (v.raw()));
 	_prm_process(vars, args...);
 }
 
@@ -252,7 +252,7 @@ Function operator/(const Constant &, const Function &);
 #define FUNCTION_CLASS(name, inputs, str)					\
 	Constant _k##name(const _function::Input &);				\
 										\
-	_function *_diffk_##name(const int);					\
+	_function::Ptr _diffk_##name(const int);				\
 										\
 	class _##name : public ISeq { 						\
 	public: 								\
@@ -263,7 +263,7 @@ Function operator/(const Constant &, const Function &);
 				return _k##name(ins);				\
 			}							\
 										\
-			_function *diff(const int i) const override {		\
+			Ptr diff(const int i) const override 	{		\
 				return _diffk_##name(i);			\
 			}							\
 										\
@@ -271,12 +271,12 @@ Function operator/(const Constant &, const Function &);
 				return str;					\
 			}							\
 										\
-			_function *copy() const override {			\
-				return new kernel();				\
+			Ptr copy() const override {				\
+				return new_ftn_ <kernel> ();			\
 			}							\
 		}; 								\
 										\
-		_##name() : ISeq(new kernel(), inputs) {} 			\
+		_##name() : ISeq(new_ftn_ <kernel> (), inputs) {} 			\
 	};									\
 										\
 	extern Function name;

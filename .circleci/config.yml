@@ -49,6 +49,7 @@ jobs:
           command: |
             mkdir build
             cd build
+            cmake -GNinja ..
             ninja -j 8
 
 workflows:

@@ -13,28 +13,10 @@ namespace autograd {
 // Empty constructor
 ISeq::ISeq() : _function(0, op_iseq) {}
 
-// Destructor
-ISeq::~ISeq()
-{
-	for (_function *fptr : _instrs)
-		delete fptr;
-
-	for (_variable *vptr : _vars)
-		delete vptr;
-}
-
 // Get variable
-_variable *ISeq::get(int index) const
+const ISeq::Var &ISeq::get(int index) const
 {
 	return _vars[index];
-}
-
-// Inserting instructions and functions
-void ISeq::append(_function *fptr)
-{
-	// Append, then optimize
-	_append(fptr);
-	_optimize();
 }
 
 // Evaluate the sequence
@@ -47,7 +29,7 @@ Constant ISeq::compute(const Input &ins)
 	std::stack <Constant> ops;
 
 	// Execute all the instructions
-	for (_function *ftn : _instrs)
+	for (const Ptr &ftn : _instrs)
 		_exec(ftn, ops);
 
 	// Return top-most value on the stack
@@ -69,13 +51,13 @@ _function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 	// std::cout << "\nISeq gradient:\n";
 	for (int i = _instrs.size() - 1; i >= 0; i--) {
 		// Get function
-		_function *ftn = _instrs[i];
+		const Ptr &ftn = _instrs[i];
 
 		// Get gradient
-		if (_cached_finputs.count(ftn) == 0)
+		if (_cached_finputs.count(ftn.get()) == 0)
 			throw std::runtime_error("ISeq::gradient: cached inputs not found");
 		
-		Input ins = _cached_finputs[ftn];
+		Input ins = _cached_finputs[ftn.get()];
 
 		/* std::cout << "function:\t" << ftn->summary() << std::endl;
 		std::cout << "Input:" << std::endl;
@@ -98,12 +80,12 @@ _function::Gradient ISeq::gradient(const Input &ins, const Input &igrads)
 void ISeq::update_parameters(GradientQueue &grad_queue)
 {
 	// Loop through all kernel functions
-	for (_function *ftn : _instrs)
+	for (const Ptr &ftn : _instrs)
 		ftn->update_parameters(grad_queue);
 }
 
 // Permute the order of variables
-void ISeq::refactor(const std::vector <_variable *> &vars)
+void ISeq::refactor(const std::vector <const _variable *> &vars)
 {
 	assert(vars.size() == _vars.size());
 
@@ -116,31 +98,31 @@ void ISeq::refactor(const std::vector <_variable *> &vars)
 	}
 
 	// Reindex every Get instruction
-	for (_function *ftn : _instrs) {
+	for (const Ptr &ftn : _instrs) {
 		if (ftn->spop != op_get)
 			continue;
 
 		// Get variable index
-		Get *get = reinterpret_cast <Get *> (ftn);
+		Get *get = reinterpret_cast <Get *> (ftn.get());
 		int j = get->index;
 		assert(reindex.count(j) > 0);
 		get->index = reindex[j];
 	}
 }
 
-_function *ISeq::refactor(const std::vector <_variable *> &vars) const
+_function::Ptr ISeq::refactor(const std::vector <const _variable *> &vars) const
 {
 	// Create copy
 	ISeq *iseq = new ISeq(_instrs, _consts, inputs, _generate_reindex_map());
 	iseq->refactor(vars);
-	return iseq;
+	return Ptr(iseq);
 }
 
 // Info about parameters
 int ISeq::parameters() const
 {
 	int n = 0;
-	for (_function *ftn : _instrs)
+	for (const Ptr &ftn : _instrs)
 		n += ftn->parameters();
 	return n;
 }
@@ -148,15 +130,15 @@ int ISeq::parameters() const
 int ISeq::tunable_parameters() const
 {
 	int n = 0;
-	for (_function *ftn : _instrs)
+	for (const Ptr &ftn : _instrs)
 		n += ftn->tunable_parameters();
 	return n;
 }
 
 // Make copy
-_function *ISeq::copy() const
+_function::Ptr ISeq::copy() const
 {
-	return new ISeq(_instrs, _consts, inputs, _generate_reindex_map());
+	return Ptr(new ISeq(_instrs, _consts, inputs, _generate_reindex_map()));
 }
 
 // Dump instructions for debugging
@@ -205,28 +187,28 @@ std::string ISeq::summary() const
 /////////////////////////
 
 // Kernel function and # of inputs
-ISeq::ISeq(_function *ftn, int nins)
+ISeq::ISeq(const _function::Ptr &ftn, int nins)
 		: _function(nins, op_iseq)
 {
 	// Fill the _vars with variables
 	_vars.resize(nins);
 
 	for (int i = 0; i < ftn->inputs; i++)
-		_vars[i] = new _variable();
+		_vars[i] = std::make_shared <_variable> ();
 
 	// Add the get instructions
 	_instrs.resize(nins + 1);
 
 	int i = 0;
 	for (; i < nins; i++)
-		_instrs[i] = new Get(i);
+		_instrs[i] = new_ftn_ <Get> (i);
 
 	// Add the kernel
 	_instrs[i] = ftn;
 }
 
 // List of instructions and constants
-ISeq::ISeq(std::vector <_function *> instrs,
+ISeq::ISeq(const std::vector <_function::Ptr> &instrs,
 	std::vector <Constant> consts, int nins)
 		: _function(nins, op_iseq),
 		_instrs(instrs),
@@ -236,10 +218,10 @@ ISeq::ISeq(std::vector <_function *> instrs,
 	_vars.resize(nins);
 
 	for (int i = 0; i < nins; i++)
-		_vars[i] = new _variable();
+		_vars[i] = std::make_shared <_variable> ();
 }
 
-ISeq::ISeq(std::vector <_function *> instrs,
+ISeq::ISeq(const std::vector <_function::Ptr> &instrs,
 	std::vector <Constant> consts, int nins,
 	const _reindex_map &reindex)
 		: _function(nins, op_iseq),
@@ -250,7 +232,7 @@ ISeq::ISeq(std::vector <_function *> instrs,
 	_vars.resize(nins);
 
 	for (int i = 0; i < nins; i++)
-		_vars[i] = new _variable(reindex.at(i));
+		_vars[i] = std::make_shared <_variable> (reindex.at(i));
 }
 
 std::pair <_function *, const _function::MethodTable &> ISeq::method_table()
@@ -271,7 +253,7 @@ std::pair <_function *, const _function::MethodTable &> ISeq::method_table()
 //////////////////////
 
 // Append helpers
-void ISeq::_append(_function *fptr)
+void ISeq::_append_function(const _function::Ptr &fptr)
 {
 	int index;
 
@@ -279,17 +261,17 @@ void ISeq::_append(_function *fptr)
 	case op_get:
 		// If there are fewer inputs that requested,
 		// then add new variables
-		index = reinterpret_cast <const Get *> (fptr)->index;
+		index = reinterpret_cast <const Get *> (fptr.get())->index;
 		for (int i = inputs; i <= index; i++)
-			_vars.push_back(new _variable());
+			_vars.push_back(_variable::new_var());
 		_instrs.push_back(fptr);
 		inputs = _vars.size();
 		break;
 	case op_var:
-		append_variable((_variable *) fptr);
+		append_variable((_variable *) fptr.get());
 		break;
 	case op_iseq:
-		append_iseq((ISeq *) fptr);
+		append_iseq((ISeq *) fptr.get());
 		break;
 	default:
 		// Just add the function to the instructions
@@ -298,7 +280,7 @@ void ISeq::_append(_function *fptr)
 	}
 }
 
-void ISeq::append_variable(_variable *v)
+void ISeq::append_variable(const _variable *v)
 {
 	// Check if the variable exists already
 	int index = index_of(v);
@@ -307,41 +289,42 @@ void ISeq::append_variable(_variable *v)
 	int gindex = index;
 	if (index < 0) {
 		gindex = _vars.size();
-		_vars.push_back(v);
+		_vars.push_back(v->clone());
 		inputs++;
 	}
 
-	_instrs.push_back(new Get(gindex));
+	_instrs.push_back(new_ftn_ <Get> (gindex));
 }
 
-void ISeq::append_iseq(ISeq *iseq)
+void ISeq::append_iseq(const ISeq *const iseq)
 {
-	for (const _function *fptr : iseq->_instrs) {
-		_function *nptr = fptr->copy();
+	for (const Ptr &fptr : iseq->_instrs) {
+		// TODO: avoid copies
+		Ptr nptr = fptr->copy();
 		if (nptr->spop == op_get) {
 			// TODO: clean up
-			int i = reinterpret_cast <Get *> (nptr)->index;
-			_variable *v = iseq->_vars[i];
+			int i = reinterpret_cast <Get *> (nptr.get())->index;
+			const Var &v = iseq->_vars[i];
 
 			// TODO: should create a new value as well
-			i = index_of(v);
+			i = index_of(v.get());
 
 			if (i == -1) {
 				// Add a variablei
 				i = _vars.size();
-				_vars.push_back((_variable *) v->copy());
+				_vars.push_back(v->clone());
 				inputs++;
 			}
 
-			_append(new Get (i));
+			_append_function(new_ftn_ <Get> (i));
 			continue;
 		} else if (nptr->spop == op_const) {
-			int index = reinterpret_cast <const Const *> (nptr)->index;
+			int index = reinterpret_cast <const Const *> (nptr.get())->index;
 			Constant c = iseq->_consts[index];
 
 			// Add the constant to this ISeq
 			_consts.push_back(c);
-			_append(new Const(_consts.size() - 1));
+			_append_function(new_ftn_ <Const> (_consts.size() - 1));
 		}
 
 		_append(nptr);
@@ -349,7 +332,7 @@ void ISeq::append_iseq(ISeq *iseq)
 }
 
 // Get index of variable
-int ISeq::index_of(_variable *v) const
+int ISeq::index_of(const _variable *v) const
 {
 	int index = -1;
 	for (int i = 0; i < _vars.size(); i++) {
@@ -422,7 +405,7 @@ void ISeq::_load(const Input &ins)
 		std::stringstream ss;
 		ss << "ISeq::_load: expected " << inputs << " inputs, got " << ins.size();
 		std::cout << "vars:" << std::endl;
-		for (const _variable *v : _vars) {
+		for (const Var &v : _vars) {
 			std::cout << "\t" << v->summary()
 				<< " (" << v->id << ")" << std::endl;
 		}
@@ -449,7 +432,7 @@ void ISeq::storec(std::stack <Constant> &ops, int i) const
 }
 
 // Deal with special instructions
-bool ISeq::_ispec(_function *ftn, std::stack <Constant> &ops)
+bool ISeq::_ispec(const Ptr &ftn, std::stack <Constant> &ops)
 {
 	_function::Input ins;
 	int index;
@@ -458,30 +441,30 @@ bool ISeq::_ispec(_function *ftn, std::stack <Constant> &ops)
 	switch (ftn->spop) {
 	case op_get:
 		// Get index and push the corresponding variable
-		index = reinterpret_cast <const Get *> (ftn)->index;
-		_cached_finputs[ftn] = Input {_vars[index]->value.copy()};
+		index = reinterpret_cast <const Get *> (ftn.get())->index;
+		_cached_finputs[ftn.get()] = Input {_vars[index]->value.copy()};
 		ops.push(_vars[index]->value.copy());
 		return true;
 	case op_const:
 		// Get index and push the corresponding constant
-		index = reinterpret_cast <const Const *> (ftn)->index;
+		index = reinterpret_cast <const Const *> (ftn.get())->index;
 		ops.push(_consts[index].copy());
 		return true;
 	case op_store_cache:
 		// Get index and push the corresponding constant
-		index = reinterpret_cast <const _store_cache *> (ftn)->index;
+		index = reinterpret_cast <const _store_cache *> (ftn.get())->index;
 		storec(ops, index);
 		return true;
 	case op_get_cache:
 		// Get index and push the corresponding constant
-		index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		index = reinterpret_cast <const _get_cache *> (ftn.get())->index;
 		ops.push(_cache[index].copy());
 		return true;
 	case op_add: case op_sub:
 	case op_mul: case op_div:
 		// Push the result of the operation
 		ops.push(kernels[ftn->spop - op_add](ops, ins).copy());
-		_cached_finputs[ftn] = ins;
+		_cached_finputs[ftn.get()] = ins;
 		return true;
 	default:
 		break;
@@ -491,7 +474,7 @@ bool ISeq::_ispec(_function *ftn, std::stack <Constant> &ops)
 }
 
 // Execute an instruction
-void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
+void ISeq::_exec(const Ptr &ftn, std::stack <Constant> &ops)
 {
 	// Check if the instruction is a special operation
 	if (_ispec(ftn, ops)) {
@@ -521,7 +504,7 @@ void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
 	Input copy;
 	for (const Constant &c : fins)
 		copy.push_back(c.copy());
-	_cached_finputs[ftn] = copy;
+	_cached_finputs[ftn.get()] = copy;
 
 	// std::cout << "ISEQ: value = " << n << std::endl;
 	// std::cout << summary() << std::endl;
@@ -536,7 +519,7 @@ void ISeq::_exec(_function *ftn, std::stack <Constant> &ops)
 
 // Composition helpers
 void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
-		_function *ftn,
+		const _function::Ptr &ftn,
 		std::vector <Constant> &dst_consts,
 		const std::vector <Constant> &src_consts,
 		std::unordered_map <int, int> &reindex,
@@ -545,7 +528,7 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 	// If the instruction is a get,
 	// add the corresponding variable
 	if (ftn->spop == _function::op_get) {
-		int index = reinterpret_cast <const Get *> (ftn)->index;
+		int index = reinterpret_cast <const Get *> (ftn.get())->index;
 
 		// Get variable id from iseq
 		int id = iseq->get(index)->id;
@@ -556,21 +539,21 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 			reindex[id] = vindex;
 
 			// Add the variable to the instruction sequence
-			instrs.push_back(new Get(vindex));
+			instrs.push_back(new_ftn_ <Get> (vindex));
 
 			// Increment the variable index
 			vindex++;
 		} else {
 			// Add the variable to the instruction sequence
-			instrs.push_back(new Get(reindex[id]));
+			instrs.push_back(new_ftn_ <Get> (reindex[id]));
 		}
 	} else if (ftn->spop == _function::op_const) {
 		// TODO: need to lookup if the constant is already in the cache
-		int index = reinterpret_cast <const Const *> (ftn)->index;
+		int index = reinterpret_cast <const Const *> (ftn.get())->index;
 
 		// Add the constant to the instruction sequence
 		// For now, duplicate consts are fine
-		instrs.push_back(new Const(dst_consts.size()));
+		instrs.push_back(new_ftn_ <Const> (dst_consts.size()));
 		dst_consts.push_back(src_consts[index]);
 	} else {
 		instrs.push_back(ftn->copy());
@@ -578,7 +561,7 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 }
 
 // Override composition
-_function *ISeq::_compose(const Compositions &cs) const
+_function::Ptr ISeq::_compose(const Compositions &cs) const
 {
 	/* std::cout << "Composing: " << std::endl;
 	for (const auto &c : cs)
@@ -600,7 +583,7 @@ _function *ISeq::_compose(const Compositions &cs) const
 
 	// Iterate through inputs
 	for (int i = 0; i < cs.size(); i++) {
-		const _function *ftn = cs[i];
+		const _function::Ptr &ftn = cs[i];
 
 		// Switch variables
 		const ISeq *iseq;
@@ -614,21 +597,21 @@ _function *ISeq::_compose(const Compositions &cs) const
 		switch (ftn->spop) {
 		case op_var:
 			// Keep the variable
-			id = reinterpret_cast <const _variable *> (ftn)->id;
+			id = reinterpret_cast <const _variable *> (ftn.get())->id;
 			reindex[id] = vindex;
-			instrs.push_back(new Get(vindex++));
+			instrs.push_back(new_ftn_ <Get> (vindex++));
 			break;
 		case op_iseq:
 			// Get the iseq, and append its instructions
-			iseq = reinterpret_cast <const ISeq *> (ftn);
+			iseq = reinterpret_cast <const ISeq *> (ftn.get());
 
-			for (_function *fptr : iseq->_instrs)
+			for (const Ptr &fptr : iseq->_instrs)
 				_compose_iseq(instrs, iseq, fptr, consts, iseq->_consts, reindex, vindex);
 			break;
 		case op_repl_const:
-			rc = reinterpret_cast <const _repl_const *> (ftn);
+			rc = reinterpret_cast <const _repl_const *> (ftn.get());
 			consts.push_back(rc->value);
-			instrs.push_back(new Const(rc->index));
+			instrs.push_back(new_ftn_ <Const> (rc->index));
 			break;
 		default:
 			// Add the instruction
@@ -637,18 +620,18 @@ _function *ISeq::_compose(const Compositions &cs) const
 		}
 
 		// Add store cache instruction
-		instrs.push_back(new _store_cache(i));
+		instrs.push_back(new_ftn_ <_store_cache> (i));
 	}
 
 	// Add own instructions
-	for (const _function *ftn : _instrs) {
+	for (const Ptr &ftn : _instrs) {
 		int index;
 
 		switch (ftn->spop) {
 		case op_get:
 			// Changes to get cache
-			index = reinterpret_cast <const Get *> (ftn)->index;
-			instrs.push_back(new _get_cache(index));
+			index = reinterpret_cast <const Get *> (ftn.get())->index;
+			instrs.push_back(new_ftn_ <_get_cache> (index));
 			break;
 		default:
 			// Add the instruction
@@ -670,7 +653,7 @@ _function *ISeq::_compose(const Compositions &cs) const
 
 	// Optimize the ISeq
 	iseq->_optimize();
-	return iseq;
+	return Ptr(iseq);
 }
 
 //////////////////////////////////
@@ -678,8 +661,8 @@ _function *ISeq::_compose(const Compositions &cs) const
 //////////////////////////////////
 
 // Constructors for the tree
-_node::_node(_function *f) : fptr(f) {}
-_node::_node(_function *f, const std::vector <_node *> &cs)
+_node::_node(const _function::Ptr &f) : fptr(f) {}
+_node::_node(const _function::Ptr &f, const std::vector <_node *> &cs)
 		: fptr(f), children(cs) {}
 
 // Get string
@@ -713,7 +696,7 @@ _node *ISeq::_tree(_cache_map &cache) const
 	std::stack <_node *> nodes;
 
 	// Iterate through the instructions
-	for (_function *ftn : _instrs)
+	for (const Ptr &ftn : _instrs)
 		_tree_walk(ftn, nodes, cache);
 
 	// Return the top node
@@ -721,7 +704,7 @@ _node *ISeq::_tree(_cache_map &cache) const
 }
 
 // TODO: static method?
-void ISeq::_tree_walk(_function *ftn, std::stack <_node *> &nodes, _cache_map &cache) const
+void ISeq::_tree_walk(const Ptr &ftn, std::stack <_node *> &nodes, _cache_map &cache) const
 {
 	// Switch variables
 	std::vector <_node *> children;
@@ -734,7 +717,7 @@ void ISeq::_tree_walk(_function *ftn, std::stack <_node *> &nodes, _cache_map &c
 		break;
 	case op_get_cache:
 		// Get index
-		index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		index = reinterpret_cast <const _get_cache *> (ftn.get())->index;
 
 		// Get value from cache map
 		value = cache[index].value;
@@ -746,7 +729,7 @@ void ISeq::_tree_walk(_function *ftn, std::stack <_node *> &nodes, _cache_map &c
 		break;
 	case op_store_cache:
 		// Get index of cache
-		index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		index = reinterpret_cast <const _get_cache *> (ftn.get())->index;
 
 		// Insert value in cache map
 		value = nodes.top();
@@ -783,11 +766,12 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 		const ConstantCache &pconsts) const
 {
 	// Iterate through the tree
-	_function *ftn = tree->fptr;
+	const _function::Ptr &ftn = tree->fptr;
 
 	if (ftn->spop == op_get_cache) {
 		// Get the index
-		int index = reinterpret_cast <const _get_cache *> (ftn)->index;
+		int index = reinterpret_cast
+			<const _get_cache *> (ftn.get())->index;
 
 		// Get the cache info
 		_cache_info info = cache[index];
@@ -805,7 +789,7 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 
 		// Get the constant
 		Constant c = reinterpret_cast
-			<const _repl_const *> (ftn)->value;
+			<const _repl_const *> (ftn.get())->value;
 
 		// TODO: should optimize constants if there are a lot
 
@@ -814,18 +798,20 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 		ccache.push_back(c);
 
 		// Add instruction
-		instrs.push_back(new Const(index));
+		instrs.push_back(new_ftn_ <Const> (index));
 	} else if (ftn->spop == op_const) {
 		// std::cout << "Constant index = " << reinterpret_cast <const Const *> (ftn)->index << std::endl;
 		// std::cout << "\tpconsts size = " << pconsts.size() << std::endl;
-		Constant c = pconsts[reinterpret_cast <const Const *> (ftn)->index];
+		Constant c = pconsts[reinterpret_cast
+			<const Const *> (ftn.get())->index
+		];
 
 		// Add the constant
 		int index = ccache.size();
 		ccache.push_back(c);
 
 		// Add instruction
-		instrs.push_back(new Const(index));
+		instrs.push_back(new_ftn_ <Const> (index));
 	} else {
 		// Add the operands
 		for (const _node *child : tree->children)
@@ -893,31 +879,31 @@ ISeq::_reindex_map ISeq::_generate_reindex_map() const
 _node *_diff_tree(const _node *, int);
 
 // Differentiation kernels
-_node *_diffk_get(const _function *fptr, const _node *tree, int vindex)
+_node *_diffk_get(const _function::Ptr &fptr, const _node *tree, int vindex)
 {
 	// Get the index
-	int index = reinterpret_cast <const Get *> (fptr)->index;
+	int index = reinterpret_cast <const Get *> (fptr.get())->index;
 
 	// Check if the index is the same as the variable
 	if (index == vindex)
-		return new _node(new _repl_const(1, vindex));
+		return new _node(new_ftn_ <_repl_const> (1, vindex));
 
 	// Add the node
-	return new _node(new _repl_const(0, vindex));
+	return new _node(new_ftn_ <_repl_const> (0, vindex));
 }
 
-_node *_diffk_add_sub(const _function *fptr, const _node *tree, int vindex)
+_node *_diffk_add_sub(const _function::Ptr &fptr, const _node *tree, int vindex)
 {
-	_function *f = new _function(1, fptr->spop);
+	_function::Ptr f = new_ftn_ <_function> (1, fptr->spop);
 	_node *d1 = _diff_tree(tree->children[0], vindex);
 	_node *d2 = _diff_tree(tree->children[1], vindex);
 	return new _node(f, {d1, d2});
 }
 
-_node *_diffk_mul(const _function *fptr, const _node *tree, int vindex)
+_node *_diffk_mul(const _function::Ptr &fptr, const _node *tree, int vindex)
 {
-	_function *f1 = new _function(1, _function::op_add);
-	_function *f2 = new _function(1, _function::op_mul);
+	_function::Ptr f1 = new_ftn_ <_function> (1, _function::op_add);
+	_function::Ptr f2 = new_ftn_ <_function> (1, _function::op_mul);
 
 	_node *c1 = tree->children[0];
 	_node *c2 = tree->children[1];
@@ -931,11 +917,11 @@ _node *_diffk_mul(const _function *fptr, const _node *tree, int vindex)
 	return new _node(f1, {c4, c3});
 }
 
-_node *_diffk_div(const _function *fptr, const _node *tree, int vindex)
+_node *_diffk_div(const _function::Ptr &fptr, const _node *tree, int vindex)
 {
-	_function *f1 = new _function(1, _function::op_sub);
-	_function *f2 = new _function(1, _function::op_mul);
-	_function *f3 = new _function(1, _function::op_div);
+	_function::Ptr f1 = new_ftn_ <_function> (1, _function::op_sub);
+	_function::Ptr f2 = new_ftn_ <_function> (1, _function::op_mul);
+	_function::Ptr f3 = new_ftn_ <_function> (1, _function::op_div);
 
 	_node *c1 = tree->children[0];
 	_node *c2 = tree->children[1];
@@ -953,7 +939,7 @@ _node *_diffk_div(const _function *fptr, const _node *tree, int vindex)
 }
 
 // Construct tree for special instructions
-_node *_diff_ispec(const _function *ftn,
+_node *_diff_ispec(const _function::Ptr &ftn,
 		const _node *tree, int vindex)
 {
 	// TODO: operation factories (which return shared_ptr)
@@ -965,7 +951,7 @@ _node *_diff_ispec(const _function *ftn,
 	case _function::op_get:
 		return _diffk_get(ftn, tree, vindex);
 	case _function::op_const:
-		return new _node(new _repl_const(0, vindex));
+		return new _node(new_ftn_ <_repl_const> (0, vindex));
 	case _function::op_add:
 	case _function::op_sub:
 		return _diffk_add_sub(ftn, tree, vindex);
@@ -988,7 +974,7 @@ _node *_diff_iseq(const _node *orig,
 		int vindex)
 {
 	// TODO: check that there are no more ISeqs
-	_function *ftn = orig->fptr;
+	_function::Ptr ftn = orig->fptr;
 
 	// Temporary indices
 	int index = -1;
@@ -1000,15 +986,15 @@ _node *_diff_iseq(const _node *orig,
 	switch (ftn->spop) {
 	case _function::op_get:
 		// Get the index
-		index = reinterpret_cast <const Get *> (ftn)->index;
+		index = reinterpret_cast <const Get *> (ftn.get())->index;
 		return ins[index];
 	case _function::op_const:
 		// Replace with _repl_const
-		index = reinterpret_cast <const Const *> (ftn)->index;
-		return new _node(new _repl_const(consts[index], -1));
+		index = reinterpret_cast <const Const *> (ftn.get())->index;
+		return new _node(new_ftn_ <_repl_const> (consts[index], -1));
 	case _function::op_differential:
 		// Get the index
-		index = reinterpret_cast <const _iop *> (ftn)->index;
+		index = reinterpret_cast <const _iop *> (ftn.get())->index;
 		return _diff_tree(ins[index], vindex);
 	default:
 		// Reiterate children
@@ -1026,7 +1012,7 @@ _node *_diff_iseq(const _node *orig,
 _node *_diff_tree(const _node *tree, int vindex)
 {
 	// Get the function
-	const _function *ftn = tree->fptr;
+	const _function::Ptr &ftn = tree->fptr;
 
 	// Quit early if is a special instruction
 	_node *diff_tree;
@@ -1034,13 +1020,13 @@ _node *_diff_tree(const _node *tree, int vindex)
 		return diff_tree;
 
 	// Otherwise, it (should) has a derivate overloaded
-	_function *d = ftn->diff(vindex);
+	_function::Ptr d = ftn->diff(vindex);
 
 	// TODO: null check
 
 	// TODO: what if d isnt iseq?
 	if (d->spop == _function::op_iseq) {
-		ISeq *diseq = reinterpret_cast <ISeq *> (d);
+		ISeq *diseq = reinterpret_cast <ISeq *> (d.get());
 
 		ISeq::_cache_map cache;
 		_node *dtree = diseq->_tree(cache);
@@ -1063,7 +1049,7 @@ _node *_diff_tree(const _node *tree, int vindex)
 }
 
 // Differentiate the ISeq
-_function *ISeq::diff(const int vindex) const
+_function::Ptr ISeq::diff(const int vindex) const
 {
 	// Get the tree
 	_cache_map cache;
@@ -1083,8 +1069,7 @@ _function *ISeq::diff(const int vindex) const
 	_rebuild(diff_tree, instrs, ccache, cache, _consts);
 
 	// Return the function
-	ISeq *diff_iseq = new ISeq(instrs, ccache, inputs);
-	return diff_iseq;
+	return Ptr(new ISeq(instrs, ccache, inputs));
 }
 
 }

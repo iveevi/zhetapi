@@ -10,39 +10,20 @@ using namespace zhetapi::autograd;
 
 int main()
 {
-	auto layer = ml::dense(10, 5);
-	std::cout << "summary:\n" << layer.summary() << std::endl;
-	std::cout << "dropout: " << std::get <float> (layer.fn("dropout", 0.5f)) << std::endl;
-
-	/* {
+	{
 		Variable x;
-
-		auto model = ml::dense(10, 5)(x);
+		Variable y;
+	
+		auto loss = square(length(x - y))/Constant {10};
+		auto dloss = 2 * (x - y)/Constant {10};
+	
+		/* auto model = ml::dense(100, 30)(x);
 		model = ml::sigmoid(model);
-		model = ml::dense(5, 3)(model);
-		model = ml::softmax(model);
-
-		std::cout << "Model:\n" << model.summary() << std::endl;
-
-		GradientQueue gq;
-
-		Constant in {Constant::shape_type {10}, 0.1};
-
-		std::cout << "in = " << in << std::endl;
-		std::cout << "out = " << model(in) << std::endl;
-
-		Constant igrad {Constant::shape_type {3}, 1.0};
-
-		std::cout << "igrad = " << igrad << std::endl;
-
-		Gradient grads = model.gradient({in}, {igrad});
-
-		std::cout << "grads:" << std::endl;
-		for (auto &p : grads.grads)
-			std::cout << "\t" << p << std::endl;
+		model = ml::dense(30, 10)(model);
+		model = ml::softmax(model); */
 
 		detail::MemoryTracker::report();
 	}
 
-	detail::MemoryTracker::report(); */
+	detail::MemoryTracker::report();
 }

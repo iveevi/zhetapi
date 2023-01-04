@@ -26,14 +26,14 @@ using Validator = std::function <bool (const Constant &, const Constant &)>;
 
 // Check accuracy of model wrt data set, returns proportion
 // TODO: source file
-inline float accuracy(_function &model,
+inline float accuracy(_function::Ptr &model,
 		const Data &X, const std::vector <Constant> &Y,
 		const Validator &validator)
 {
 	int count = 0;
 	std::vector <int> indices;
 	for (int i = 0; i < X.size(); i++) {
-		Constant output = model.compute(X[i]);
+		Constant output = model->compute(X[i]);
 		if (validator(output, Y[i])) {
 			indices.push_back(i);
 			count++;
@@ -50,7 +50,7 @@ struct _reporter {
 		size_t		batch;
 		size_t		total_epochs;
 		float		avg_error;
-		_function	&model;
+		_function::Ptr	&model;
 	};
 
 	virtual void report(const Info &) const {}
@@ -103,14 +103,14 @@ public:
 
 // Information relevant to training
 struct TrainingSuite {
-	_function &loss;
-	_function &dloss;
+	_function::Ptr &loss;
+	_function::Ptr &dloss;
 	size_t iterations;
 	size_t batch_size;
 	std::shared_ptr <_reporter> reporter = std::make_shared <ProgressBar> ();
 };
 
-inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
+inline void fit(_function::Ptr &f, const Data &X, const std::vector <Constant> &Y,
 		_optimizer &optimizer, const TrainingSuite &suite)
 {
 	// TODO: assert that X.size() == Y.size()
@@ -121,10 +121,10 @@ inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
 
 		float serror = 0;
 		for (size_t j = 0; j < X.size(); j++) {
-			Constant y = f.compute(X[j]).flat();
-			Constant igrad = suite.dloss.compute({y, Y[j]});
-			_function::Gradient grads = f.gradient(X[j], {igrad});
-			serror += suite.loss.compute({y, Y[j]}).length();
+			Constant y = f->compute(X[j]).flat();
+			Constant igrad = suite.dloss->compute({y, Y[j]});
+			_function::Gradient grads = f->gradient(X[j], {igrad});
+			serror += suite.loss->compute({y, Y[j]}).length();
 
 			elements++;
 			if (gq.empty())
@@ -135,7 +135,7 @@ inline void fit(_function &f, const Data &X, const std::vector <Constant> &Y,
 			if (elements >= suite.batch_size) {
 				gq /= float(elements);
 				optimizer.optimize(gq);
-				f.update_parameters(gq);
+				f->update_parameters(gq);
 
 				gq.clear();
 				elements = 0;

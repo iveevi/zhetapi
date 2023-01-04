@@ -3,6 +3,7 @@
 
 // Standard headers
 #include <deque>
+#include <memory>
 #include <variant>
 #include <vector>
 
@@ -44,9 +45,12 @@ public:
 
 	int inputs = -1;
 
+	// Pointer type
+	using Ptr = std::shared_ptr <_function>;
+
 	// Type of input
 	using Input = std::vector <Constant>;
-	using Compositions = std::vector <_function *>;
+	using Compositions = std::vector <Ptr>;
 protected:
 	// String versions of operations
 	static constexpr const char *_spec_strs[] {
@@ -61,7 +65,7 @@ protected:
 	};
 
 	// By default, function composition returns null
-	virtual _function *_compose(const Compositions &) const {
+	virtual Ptr _compose(const Compositions &) const {
 		return nullptr;
 	}
 public:
@@ -80,7 +84,7 @@ public:
 	}
 
 	// Wrapper around _compose that checks #inputs
-	_function *compose(const Compositions &cs) const {
+	Ptr compose(const Compositions &cs) const {
 		// TODO: add argsize exception
 		if (cs.size() != inputs) {
 			std::cout << "summary: " << summary() << std::endl;
@@ -91,7 +95,7 @@ public:
 	}
 
 	// By default, function differentiation returns null
-	virtual _function *diff(const int) const {
+	virtual Ptr diff(const int) const {
 		return nullptr;
 	}
 
@@ -125,14 +129,15 @@ public:
 	}
 
 	// Copy pointer
-	virtual _function *copy() const {
-		return new _function(inputs, spop);
+	virtual Ptr copy() const {
+		// TODO: make this obsolete
+		return Ptr(new _function(inputs, spop));
 	}
 
 	// Pseudo-virtual methods for function properties
 	using Property = std::variant <bool, int, float>;
 	using Arguments = std::vector <Property>;
-	
+
 	using Method = std::function <Property (_function *, const Arguments &)>;
 	using MethodTable = std::unordered_map <std::string, Method>;
 
@@ -154,6 +159,16 @@ public:
 
 using Gradient = _function::Gradient;
 
+// Custom allocator
+template <class T, class... Args>
+_function::Ptr new_ftn_(Args ... args)
+{
+	// TODO: redirect to custom allocator which tracks
+	// memory usage, allocations, etc and organizes
+	// memory for efficient use
+	return std::make_shared <T> (args...);
+}
+
 // Get function
 // TODO: underscore convention?
 struct Get : public _function {
@@ -169,14 +184,16 @@ struct Get : public _function {
 	}
 
 	// Copy pointer
-	_function *copy() const override {
-		return new Get(index);
+	Ptr copy() const override {
+		return new_ftn_ <Get> (index);
 	}
 
 	// Overload summary to include index
 	std::string summary() const override {
 		return "GET (" + std::to_string(index) + ")";
 	}
+
+	// TODO: memoize/cache existing indices...
 };
 
 // Constant getter
@@ -213,8 +230,8 @@ struct _store_cache : public _function {
 
 	_store_cache(int i) : _function(1, op_store_cache), index(i) {}
 
-	_function *copy() const override {
-		return new _store_cache(index);
+	Ptr copy() const override {
+		return new_ftn_ <_store_cache> (index);
 	}
 
 	// Overload summary to include index
@@ -229,8 +246,8 @@ struct _get_cache : public _function {
 
 	_get_cache(int i) : _function(1, op_get_cache), index(i) {}
 
-	_function *copy() const override {
-		return new _get_cache(index);
+	Ptr copy() const override {
+		return new_ftn_ <_get_cache> (index);
 	}
 
 	// Overload summary to include index
@@ -246,8 +263,8 @@ struct _iop : public _function {
 	_iop(int i, int nins, int spop) : _function(nins, spop), index(i) {}
 
 	// Overload summary to include index
-	_function *copy() const override {
-		return new _iop(index, inputs, spop);
+	Ptr copy() const override {
+		return new_ftn_ <_iop> (index, inputs, spop);
 	}
 
 	// Overload summary to include index
@@ -257,8 +274,8 @@ struct _iop : public _function {
 	}
 
 	// Factories
-	static _function *differential(int i) {
-		return new _iop(i, 0, op_differential);
+	static Ptr differential(int i) {
+		return new_ftn_ <_iop> (i, 0, op_differential);
 	}
 };
 
@@ -281,13 +298,22 @@ public:
 	_variable() : _function(0, op_var), id(gid()) {}
 	_variable(int x) : _function(0, op_var), id(x) {}
 
-	_function *copy() const override {
-		return new _variable(id, value);
+	Ptr copy() const override {
+		return Ptr(new _variable(id, value));
+	}
+
+	std::shared_ptr <_variable> clone() const {
+		return std::shared_ptr <_variable> (new _variable(id, value));
 	}
 
 	// Overload summary to include id
 	std::string summary() const override {
 		return "variable (id: " + std::to_string(id) + ")";
+	}
+
+	// Factory
+	static std::shared_ptr <_variable> new_var() {
+		return std::make_shared <_variable> ();
 	}
 };
 
