@@ -327,7 +327,7 @@ void ISeq::append_iseq(const ISeq *const iseq)
 			_append_function(new_ftn_ <Const> (_consts.size() - 1));
 		}
 
-		_append(nptr);
+		_append_function(nptr);
 	}
 }
 
@@ -662,8 +662,18 @@ _function::Ptr ISeq::_compose(const Compositions &cs) const
 
 // Constructors for the tree
 _node::_node(const _function::Ptr &f) : fptr(f) {}
-_node::_node(const _function::Ptr &f, const std::vector <_node *> &cs)
+_node::_node(const _function::Ptr &f, const std::vector <Node> &cs)
 		: fptr(f), children(cs) {}
+
+Node _node::make(const _function::Ptr &f)
+{
+	return Node(new _node(f));
+}
+
+Node _node::make(const _function::Ptr &f, const std::vector <Node> &cs)
+{
+	return Node(new _node(f, cs));
+}
 
 // Get string
 std::string _node::str(int indent) const
@@ -675,7 +685,7 @@ std::string _node::str(int indent) const
 	std::string sindent(indent, '\t');
 
 	// If there are children
-	for (const _node *child : children) {
+	for (const Node &child : children) {
 		s += "\n" + sindent + "\u2514\u2500\u2500 "
 			+ child->str(indent + 1);
 	}
@@ -685,30 +695,33 @@ std::string _node::str(int indent) const
 
 // Constructors for cache info
 ISeq::_cache_info::_cache_info() {}
-ISeq::_cache_info::_cache_info(int r, _node *tree)
+ISeq::_cache_info::_cache_info(int r, const Node &tree)
 		: refs(r), value(tree) {}
 
 // Generating the tree
-_node *ISeq::_tree(_cache_map &cache) const
+Node ISeq::_tree(_cache_map &cache) const
 {
 	// Keep a stack of nodes,
 	// 	similar to computation
-	std::stack <_node *> nodes;
+	std::stack <Node> nodes;
 
 	// Iterate through the instructions
 	for (const Ptr &ftn : _instrs)
 		_tree_walk(ftn, nodes, cache);
 
-	// Return the top node
-	return nodes.top();
+	// Return the top node and free the stack
+	Node top = nodes.top();
+	nodes.pop();
+
+	return top;
 }
 
 // TODO: static method?
-void ISeq::_tree_walk(const Ptr &ftn, std::stack <_node *> &nodes, _cache_map &cache) const
+void ISeq::_tree_walk(const Ptr &ftn, std::stack <Node> &nodes, _cache_map &cache) const
 {
 	// Switch variables
-	std::vector <_node *> children;
-	_node *value;
+	std::vector <Node> children;
+	Node value;
 	int index;
 
 	// Check type of operation
@@ -745,7 +758,7 @@ void ISeq::_tree_walk(const Ptr &ftn, std::stack <_node *> &nodes, _cache_map &c
 		// Pop and push the children
 		for (int i = 0; i < nins; i++) {
 			// Pop the child
-			_node *child = nodes.top();
+			Node child = nodes.top();
 			nodes.pop();
 
 			// Push the child (to the front)
@@ -757,11 +770,11 @@ void ISeq::_tree_walk(const Ptr &ftn, std::stack <_node *> &nodes, _cache_map &c
 	}
 
 	// Add the node
-	nodes.push(new _node(ftn, children));
+	nodes.push(_node::make(ftn, children));
 }
 
 // Rebuild the ISeq from the tree
-void ISeq::_rebuild(const _node *tree, Instructions &instrs,
+void ISeq::_rebuild(const Node &tree, Instructions &instrs,
 		ConstantCache &ccache, _cache_map &cache,
 		const ConstantCache &pconsts) const
 {
@@ -814,7 +827,7 @@ void ISeq::_rebuild(const _node *tree, Instructions &instrs,
 		instrs.push_back(new_ftn_ <Const> (index));
 	} else {
 		// Add the operands
-		for (const _node *child : tree->children)
+		for (const Node &child : tree->children)
 			_rebuild(child, instrs, ccache, cache, pconsts);
 
 		// Add the instruction
@@ -838,10 +851,10 @@ void ISeq::_optimize()
 		std::cout << "\t" << i << ": " << _consts[i] << std::endl; */
 
 	_cache_map cache;
-	_node *tree = _tree(cache);
+	Node tree = _tree(cache);
 
-	// std::cout << "\nTree: " << std::endl;
-	// std::cout << tree->str() << std::endl;
+	/* std::cout << "\nTree: " << std::endl;
+	std::cout << tree->str() << std::endl; */
 
 	Instructions instrs;
 	ConstantCache ccache;
@@ -852,8 +865,8 @@ void ISeq::_optimize()
 	_instrs = instrs;
 	_consts = ccache;
 
-	// TODO: prune duplicate constants
-	/* std::cout << "Optimized ISeq:" << std::endl;
+	/* TODO: prune duplicate constants
+	std::cout << "Optimized ISeq:" << std::endl;
 	std::cout << summary() << std::endl;
 
 	std::cout << "\nconsts: " << _consts.size() << std::endl;
@@ -876,71 +889,71 @@ ISeq::_reindex_map ISeq::_generate_reindex_map() const
 /////////////////////
 
 // Forward declarations
-_node *_diff_tree(const _node *, int);
+Node _diff_tree(const Node &, int);
 
 // Differentiation kernels
-_node *_diffk_get(const _function::Ptr &fptr, const _node *tree, int vindex)
+Node _diffk_get(const _function::Ptr &fptr, const Node &tree, int vindex)
 {
 	// Get the index
 	int index = reinterpret_cast <const Get *> (fptr.get())->index;
 
 	// Check if the index is the same as the variable
 	if (index == vindex)
-		return new _node(new_ftn_ <_repl_const> (1, vindex));
+		return _node::make(new_ftn_ <_repl_const> (1, vindex));
 
 	// Add the node
-	return new _node(new_ftn_ <_repl_const> (0, vindex));
+	return _node::make(new_ftn_ <_repl_const> (0, vindex));
 }
 
-_node *_diffk_add_sub(const _function::Ptr &fptr, const _node *tree, int vindex)
+Node _diffk_add_sub(const _function::Ptr &fptr, const Node &tree, int vindex)
 {
 	_function::Ptr f = new_ftn_ <_function> (1, fptr->spop);
-	_node *d1 = _diff_tree(tree->children[0], vindex);
-	_node *d2 = _diff_tree(tree->children[1], vindex);
-	return new _node(f, {d1, d2});
+	Node d1 = _diff_tree(tree->children[0], vindex);
+	Node d2 = _diff_tree(tree->children[1], vindex);
+	return _node::make(f, {d1, d2});
 }
 
-_node *_diffk_mul(const _function::Ptr &fptr, const _node *tree, int vindex)
+Node _diffk_mul(const _function::Ptr &fptr, const Node &tree, int vindex)
 {
 	_function::Ptr f1 = new_ftn_ <_function> (1, _function::op_add);
 	_function::Ptr f2 = new_ftn_ <_function> (1, _function::op_mul);
 
-	_node *c1 = tree->children[0];
-	_node *c2 = tree->children[1];
+	Node c1 = tree->children[0];
+	Node c2 = tree->children[1];
 
-	_node *d1 = _diff_tree(c1, vindex);
-	_node *d2 = _diff_tree(c2, vindex);
+	Node d1 = _diff_tree(c1, vindex);
+	Node d2 = _diff_tree(c2, vindex);
 
-	_node *c3 = new _node(f2, {c1, d2});
-	_node *c4 = new _node(f2, {c2, d1});
+	Node c3 = _node::make(f2, {c1, d2});
+	Node c4 = _node::make(f2, {c2, d1});
 
-	return new _node(f1, {c4, c3});
+	return _node::make(f1, {c4, c3});
 }
 
-_node *_diffk_div(const _function::Ptr &fptr, const _node *tree, int vindex)
+Node _diffk_div(const _function::Ptr &fptr, const Node &tree, int vindex)
 {
 	_function::Ptr f1 = new_ftn_ <_function> (1, _function::op_sub);
 	_function::Ptr f2 = new_ftn_ <_function> (1, _function::op_mul);
 	_function::Ptr f3 = new_ftn_ <_function> (1, _function::op_div);
 
-	_node *c1 = tree->children[0];
-	_node *c2 = tree->children[1];
+	Node c1 = tree->children[0];
+	Node c2 = tree->children[1];
 
-	_node *d1 = _diff_tree(c1, vindex);
-	_node *d2 = _diff_tree(c2, vindex);
+	Node d1 = _diff_tree(c1, vindex);
+	Node d2 = _diff_tree(c2, vindex);
 
-	_node *c3 = new _node(f2, {c2, d1});
-	_node *c4 = new _node(f2, {c1, d2});
+	Node c3 = _node::make(f2, {c2, d1});
+	Node c4 = _node::make(f2, {c1, d2});
 
-	_node *c5 = new _node(f1, {c3, c4});
-	_node *c6 = new _node(f2, {c2, c2});
+	Node c5 = _node::make(f1, {c3, c4});
+	Node c6 = _node::make(f2, {c2, c2});
 
-	return new _node(f3, {c5, c6});
+	return _node::make(f3, {c5, c6});
 }
 
 // Construct tree for special instructions
-_node *_diff_ispec(const _function::Ptr &ftn,
-		const _node *tree, int vindex)
+Node _diff_ispec(const _function::Ptr &ftn,
+		const Node &tree, int vindex)
 {
 	// TODO: operation factories (which return shared_ptr)
 
@@ -951,7 +964,7 @@ _node *_diff_ispec(const _function::Ptr &ftn,
 	case _function::op_get:
 		return _diffk_get(ftn, tree, vindex);
 	case _function::op_const:
-		return new _node(new_ftn_ <_repl_const> (0, vindex));
+		return _node::make(new_ftn_ <_repl_const> (0, vindex));
 	case _function::op_add:
 	case _function::op_sub:
 		return _diffk_add_sub(ftn, tree, vindex);
@@ -968,8 +981,8 @@ _node *_diff_ispec(const _function::Ptr &ftn,
 }
 
 // Substitute a differentiated template
-_node *_diff_iseq(const _node *orig,
-		const std::vector <_node *> &ins,
+Node _diff_iseq(const Node &orig,
+		const std::vector <Node> &ins,
 		const std::vector <Constant> &consts,
 		int vindex)
 {
@@ -980,7 +993,7 @@ _node *_diff_iseq(const _node *orig,
 	int index = -1;
 
 	// Any new children
-	std::vector <_node *> children;
+	std::vector <Node> children;
 
 	// Switch special instructions
 	switch (ftn->spop) {
@@ -991,31 +1004,31 @@ _node *_diff_iseq(const _node *orig,
 	case _function::op_const:
 		// Replace with _repl_const
 		index = reinterpret_cast <const Const *> (ftn.get())->index;
-		return new _node(new_ftn_ <_repl_const> (consts[index], -1));
+		return _node::make(new_ftn_ <_repl_const> (consts[index], -1));
 	case _function::op_differential:
 		// Get the index
 		index = reinterpret_cast <const _iop *> (ftn.get())->index;
 		return _diff_tree(ins[index], vindex);
 	default:
 		// Reiterate children
-		for (const _node *child : orig->children)
+		for (const Node &child : orig->children)
 			children.push_back(_diff_iseq(child, ins, consts, vindex));
 
 		// Create new node
-		return new _node(ftn, children);
+		return _node::make(ftn, children);
 	}
 
 	return nullptr;
 }
 
 // Construct a new, differentiated tree
-_node *_diff_tree(const _node *tree, int vindex)
+Node _diff_tree(const Node &tree, int vindex)
 {
 	// Get the function
 	const _function::Ptr &ftn = tree->fptr;
 
 	// Quit early if is a special instruction
-	_node *diff_tree;
+	Node diff_tree;
 	if ((diff_tree = _diff_ispec(ftn, tree, vindex)))
 		return diff_tree;
 
@@ -1029,11 +1042,11 @@ _node *_diff_tree(const _node *tree, int vindex)
 		ISeq *diseq = reinterpret_cast <ISeq *> (d.get());
 
 		ISeq::_cache_map cache;
-		_node *dtree = diseq->_tree(cache);
+		Node dtree = diseq->_tree(cache);
 
 		// std::cout << "PARTIALLY DIFFED TREE:\n" << dtree->str() << std::endl;
 
-		_node *replaced = _diff_iseq(
+		Node replaced = _diff_iseq(
 			dtree,
 			tree->children,
 			diseq->_consts,
@@ -1053,12 +1066,12 @@ _function::Ptr ISeq::diff(const int vindex) const
 {
 	// Get the tree
 	_cache_map cache;
-	_node *tree = _tree(cache);
+	Node tree = _tree(cache);
 
 	// std::cout << "PRE TREE:\n" << tree->str() << std::endl;
 
 	// Differentiate the tree
-	_node *diff_tree = _diff_tree(tree, vindex);
+	Node diff_tree = _diff_tree(tree, vindex);
 
 	// std::cout << "DIFF TREE:\n" << diff_tree->str() << std::endl;
 

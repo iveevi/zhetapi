@@ -14,8 +14,9 @@ int main()
 		Variable x;
 		Variable y;
 	
-		auto loss = square(length(x - y))/Constant {10};
+		// auto loss = square(length(x - y))/Constant {10};
 		auto dloss = 2 * (x - y)/Constant {10};
+		std::cout << "dloss(10, 1) = " << dloss(10, 1) << std::endl;
 	
 		/* auto model = ml::dense(100, 30)(x);
 		model = ml::sigmoid(model);

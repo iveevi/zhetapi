@@ -15,20 +15,26 @@ namespace zhetapi {
 
 namespace autograd {
 
+struct _node;
+
 // Cache structure for automatic differentiation
 using Cache = std::unordered_map <_function *, _function::Input>;
+using Node = std::shared_ptr <_node>;
 
 // Tree structure
 struct _node {
 	_function::Ptr fptr;
 
 	// TODO: should be a vector of plain nodes
-	std::vector <_node *> children;
+	std::vector <Node> children;
 
 	// Constructors
 	_node(const _function::Ptr &);
-	_node(const _function::Ptr &, const std::vector <_node *> &);
+	_node(const _function::Ptr &, const std::vector <Node> &);
 
+	static Node make(const _function::Ptr &);
+	static Node make(const _function::Ptr &, const std::vector <Node> &);
+	
 	// Printing the tree
 	std::string str(int = 0) const;
 };
@@ -47,11 +53,11 @@ private:
 	// Information about cache usage, for optimization
 	struct _cache_info {
 		int refs = 0;
-		_node *value;
+		Node value;
 
 		// Constructor
 		_cache_info();
-		_cache_info(int, _node *);
+		_cache_info(int, const Node &);
 	};
 
 	using _cache_map = std::unordered_map <int, _cache_info>;
@@ -95,10 +101,10 @@ private:
 	_function::Ptr _compose(const Compositions &) const override;
 
 	// Tree building and rebuilding
-	_node *_tree(_cache_map &) const;
-	void _tree_walk(const Ptr &, std::stack <_node *> &,
+	Node _tree(_cache_map &) const;
+	void _tree_walk(const Ptr &, std::stack <Node> &,
 		_cache_map &) const;
-	void _rebuild(const _node *, Instructions &,
+	void _rebuild(const Node &, Instructions &,
 		ConstantCache &, _cache_map &,
 		const ConstantCache &) const;
 
@@ -108,7 +114,7 @@ private:
 
 	// TODO: remove const
 	// Differentiation functions
-	friend _node *_diff_tree(const _node *, int);
+	friend Node _diff_tree(const Node &, int);
 
 	_function::Ptr diff(const int) const override;
 protected:
