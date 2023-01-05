@@ -128,12 +128,6 @@ public:
 		return 0;
 	}
 
-	// Copy pointer
-	virtual Ptr copy() const {
-		// TODO: make this obsolete
-		return Ptr(new _function(inputs, spop));
-	}
-
 	// Pseudo-virtual methods for function properties
 	using Property = std::variant <bool, int, float>;
 	using Arguments = std::vector <Property>;
@@ -183,11 +177,6 @@ struct Get : public _function {
 		return g;
 	}
 
-	// Copy pointer
-	Ptr copy() const override {
-		return new_ftn_ <Get> (index);
-	}
-
 	// Overload summary to include index
 	std::string summary() const override {
 		return "GET (" + std::to_string(index) + ")";
@@ -230,10 +219,6 @@ struct _store_cache : public _function {
 
 	_store_cache(int i) : _function(1, op_store_cache), index(i) {}
 
-	Ptr copy() const override {
-		return new_ftn_ <_store_cache> (index);
-	}
-
 	// Overload summary to include index
 	std::string summary() const override {
 		return "STORE-CACHE (" + std::to_string(index) + ")";
@@ -246,10 +231,6 @@ struct _get_cache : public _function {
 
 	_get_cache(int i) : _function(1, op_get_cache), index(i) {}
 
-	Ptr copy() const override {
-		return new_ftn_ <_get_cache> (index);
-	}
-
 	// Overload summary to include index
 	std::string summary() const override {
 		return "GET-CACHE (" + std::to_string(index) + ")";
@@ -261,11 +242,6 @@ struct _iop : public _function {
 	int index;
 
 	_iop(int i, int nins, int spop) : _function(nins, spop), index(i) {}
-
-	// Overload summary to include index
-	Ptr copy() const override {
-		return new_ftn_ <_iop> (index, inputs, spop);
-	}
 
 	// Overload summary to include index
 	std::string summary() const override {
@@ -297,10 +273,6 @@ public:
 
 	_variable() : _function(0, op_var), id(gid()) {}
 	_variable(int x) : _function(0, op_var), id(x) {}
-
-	Ptr copy() const override {
-		return Ptr(new _variable(id, value));
-	}
 
 	std::shared_ptr <_variable> clone() const {
 		return std::shared_ptr <_variable> (new _variable(id, value));

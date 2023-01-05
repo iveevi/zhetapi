@@ -159,9 +159,6 @@ public:
 	int parameters() const override;
 	int tunable_parameters() const override;
 
-	// Copy generator
-	_function::Ptr copy() const override;
-
 	// Dump instructions for debugging
 	std::string summary() const override;
 };

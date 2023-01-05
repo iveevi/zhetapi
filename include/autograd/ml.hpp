@@ -2,6 +2,7 @@
 #define ZHETAPI_AUTOGRAD_ML_H_
 
 // Standard headers
+#include <iomanip>
 #include <random>
 
 // Library headers
@@ -31,9 +32,9 @@ class _kdense : public _function {
 
 	// Private constructor
 	_kdense(size_t isize, size_t osize, Matrix <float> w, Matrix <float> b,
-			const std::string &init)
+			const std::string &init, float dropout)
 			: _function(1), _isize(isize), _osize(osize),
-			_w(w), _b(b), _init(init) {}
+			_w(w), _b(b), _init(init), m_dropout(dropout) {}
 
 	// Static random number generator
 	static utility::Interval <1>		_rng;
@@ -71,11 +72,6 @@ public:
 
 		_w = Matrix <float> (_osize, _isize, lambda);
 		_b = Matrix <float> (_osize, 1, lambda);
-	}
-
-	// Copy overload
-	_function::Ptr copy() const override {
-		return Ptr(new _kdense(_isize, _osize, _w, _b, _init));
 	}
 
 	// Forward pass
@@ -146,9 +142,12 @@ public:
 
 	// Summary of the function
 	std::string summary() const override {
-		return "KDENSE (" + std::to_string(_isize)
-			+ " x " + std::to_string(_osize)
-			+ ", " + _init + ")";
+		std::ostringstream oss;
+		oss << "KDENSE(" << _isize << " x " << _osize;
+		if (m_dropout > 0)
+			oss << ", dropout = " << std::setprecision(2) << m_dropout;
+		oss << ", " << _init << ")";
+		return oss.str();
 	}
 };
 

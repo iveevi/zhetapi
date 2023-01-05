@@ -12,18 +12,13 @@ int main()
 {
 	{
 		Variable x;
-		Variable y;
-	
-		// auto loss = square(length(x - y))/Constant {10};
-		auto dloss = 2 * (x - y)/Constant {10};
-		std::cout << "dloss(10, 1) = " << dloss(10, 1) << std::endl;
-	
-		/* auto model = ml::dense(100, 30)(x);
-		model = ml::sigmoid(model);
-		model = ml::dense(30, 10)(model);
-		model = ml::softmax(model); */
 
-		detail::MemoryTracker::report();
+		auto model = ml::dense(10, 10);
+		auto y = model(x);
+		model.fn("dropout", 0.5f);
+
+		std::cout << model.summary() << std::endl;
+		std::cout << y.summary() << std::endl;
 	}
 
 	detail::MemoryTracker::report();

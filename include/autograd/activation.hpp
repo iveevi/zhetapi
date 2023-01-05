@@ -38,10 +38,6 @@ public:
 		std::string summary() const override {
 			return "RELU";
 		}
-
-		Ptr copy() const override {
-			return Ptr(new_ftn_ <kernel> ());
-		}
 	};
 
 	_relu() : ISeq(new_ftn_ <kernel> (), 1) {}
@@ -80,10 +76,6 @@ public:
 
 		std::string summary() const override {
 			return "LEAKY RELU";
-		}
-
-		Ptr copy() const override {
-			return Ptr(new_ftn_ <kernel> (_alpha));
 		}
 	};
 
@@ -126,10 +118,6 @@ public:
 		std::string summary() const override {
 			return "SIGMOID";
 		}
-
-		Ptr copy() const override {
-			return Ptr(new_ftn_ <kernel> ());
-		}
 	};
 
 	_sigmoid() : ISeq(new_ftn_ <kernel> (), 1) {}
@@ -167,10 +155,6 @@ public:
 
 		std::string summary() const override {
 			return "TANH";
-		}
-
-		Ptr copy() const override {
-			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 
@@ -223,10 +207,6 @@ public:
 
 		std::string summary() const override {
 			return "SOFTMAX";
-		}
-
-		Ptr copy() const override {
-			return Ptr(new_ftn_ <kernel> ());
 		}
 	};
 

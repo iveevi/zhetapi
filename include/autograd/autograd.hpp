@@ -75,6 +75,24 @@ class Function {
 	static void _prm_process(std::vector <_variable *> &, const Variable &, Args ...);
 
 	static void _prm_process(std::vector <_variable *> &) {}
+	
+	// Invoking methods
+	_function::Property fn(const std::string &name, const _function::Arguments &args) {
+		const auto &[f, mt] = fptr->method_table();
+
+		auto it = mt.find(name);
+		if (it == mt.end())
+			throw std::runtime_error("_function: method " + name + " not found");
+
+		return it->second(f, args);
+	}
+
+	// Check argument validity with variant
+	template <class T, class U> struct is_one_of;
+
+	template <class T, class... Ts> 
+	struct is_one_of <T, std::variant<Ts...>>
+		: std::bool_constant <(std::is_same_v <T, Ts> || ...)> { };
 protected:
 	// Function pointer
 	_function::Ptr fptr;
@@ -127,18 +145,13 @@ public:
 	}
 	
 	// Invoking pseudo-virtual methods
-	_function::Property fn(const std::string &name, const _function::Arguments &args) {
-		const auto &[f, mt] = fptr->method_table();
-
-		auto it = mt.find(name);
-		if (it == mt.end())
-			throw std::runtime_error("_function: method " + name + " not found");
-
-		return it->second(f, args);
-	}
-
 	template <class ... Args>
 	_function::Property fn(const std::string &name, Args ... args) {
+		static_assert(
+			(is_one_of <Args, _function::Property> ::value && ...),
+			"Arguments must be compatible with _function::Property"
+		);
+
 		return fn(name, _function::Arguments {args...});
 	}
 
@@ -269,10 +282,6 @@ Function operator/(const Constant &, const Function &);
 										\
 			std::string summary() const override {			\
 				return str;					\
-			}							\
-										\
-			Ptr copy() const override {				\
-				return new_ftn_ <kernel> ();			\
 			}							\
 		}; 								\
 										\

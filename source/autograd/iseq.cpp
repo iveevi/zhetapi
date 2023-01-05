@@ -135,12 +135,6 @@ int ISeq::tunable_parameters() const
 	return n;
 }
 
-// Make copy
-_function::Ptr ISeq::copy() const
-{
-	return Ptr(new ISeq(_instrs, _consts, inputs, _generate_reindex_map()));
-}
-
 // Dump instructions for debugging
 std::string ISeq::summary() const
 {
@@ -300,7 +294,7 @@ void ISeq::append_iseq(const ISeq *const iseq)
 {
 	for (const Ptr &fptr : iseq->_instrs) {
 		// TODO: avoid copies
-		Ptr nptr = fptr->copy();
+		Ptr nptr = fptr;
 		if (nptr->spop == op_get) {
 			// TODO: clean up
 			int i = reinterpret_cast <Get *> (nptr.get())->index;
@@ -556,7 +550,7 @@ void _compose_iseq(ISeq::Instructions &instrs, const ISeq *iseq,
 		instrs.push_back(new_ftn_ <Const> (dst_consts.size()));
 		dst_consts.push_back(src_consts[index]);
 	} else {
-		instrs.push_back(ftn->copy());
+		instrs.push_back(ftn);
 	}
 }
 
@@ -615,7 +609,7 @@ _function::Ptr ISeq::_compose(const Compositions &cs) const
 			break;
 		default:
 			// Add the instruction
-			instrs.push_back(ftn->copy());
+			instrs.push_back(ftn);
 			break;
 		}
 
@@ -635,7 +629,7 @@ _function::Ptr ISeq::_compose(const Compositions &cs) const
 			break;
 		default:
 			// Add the instruction
-			instrs.push_back(ftn->copy());
+			instrs.push_back(ftn);
 			break;
 		}
 	}
