@@ -841,36 +841,6 @@ Matrix <T> operator-(const Matrix <T> &a, const Matrix <T> &b)
 	return c;
 }
 
-/*
-template <class T>
-Matrix <T> operator*(const Matrix <T> &A, const Matrix <T> &B)
-{
-	if (A.get_cols() != B.get_rows())
-		throw typename Matrix <T> ::dimension_mismatch();
-
-	size_t rs = A.get_rows();
-	size_t cs = B.get_cols();
-
-	size_t kmax = B.get_rows();
-
-	inline_init_mat(C, rs, cs);
-
-	for (size_t i = 0; i < rs; i++) {
-		const T *Ar = A[i];
-		T *Cr = C[i];
-
-		for (size_t k = 0; k < kmax; k++) {
-			const T *Br = B[k];
-
-			T a = Ar[k];
-			for (size_t j = 0; j < cs; j++)
-				Cr[j] += a * Br[j];
-		}
-	}
-
-	return C;
-} */
-
 template <class T, class U>
 Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 {
@@ -887,9 +857,9 @@ Matrix <T> operator*(const Matrix <T> &A, const Matrix <U> &B)
 
 	size_t kmax = B.get_rows();
 
-	// nline_init_mat(C, rs, cs);
 	Matrix <T> C(rs, cs);
 
+	// TODO: Use a parallel for
 	for (size_t i = 0; i < rs; i++) {
 		const T *Ar = A[i];
 		T *Cr = C[i];

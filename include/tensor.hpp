@@ -39,6 +39,7 @@ class Interval;
 }
 
 // Shape information for tensors
+// TODO: place into dedicated header
 struct _shape_info {
 	using shape_type = std::vector <std::size_t>;
 	using slice_type = Range <int>;
@@ -48,9 +49,7 @@ struct _shape_info {
 	size_t		elements = 0;
 	size_t		dimensions = 0;
 
-	// The dimension sizes,
-	// partial sizes,
-	// slices
+	// The dimension sizes, partial sizes, slices
 	size_t		*array = nullptr;
 	size_t		*partials = nullptr;
 	slice_type	*slices = nullptr;
@@ -358,18 +357,24 @@ public:
 
 	// Initializer list constructor
 	Tensor(const std::initializer_list <T> &);
+	Tensor(const std::initializer_list <Tensor <T>> &);
 
 	template <class A>
 	Tensor &operator=(const Tensor <A> &);
 
-	// Explicit copy
+	// Explicit copy operations
 	Tensor copy() const;
+	void copy(const Tensor &); // Copy at most the number of elements
 
 	// Getters and setters
 	size_t size() const;		// Get the # of elements
 	size_t dimensions() const;
 	size_t dimension(size_t) const;
 	shape_type shape() const;	// Get shape of tensor
+	
+	// Access raw array
+	T *data();
+	const T *data() const;
 
 	// Reshape tensor
 	void reshape(const shape_type &);
@@ -417,16 +422,6 @@ public:
 
 	Tensor <T> &operator*=(const Tensor &);
 	Tensor <T> &operator/=(const Tensor &);
-
-	// Configuring operative variants
-	enum Variant {
-		eCPU,
-		eCUDA
-	};
-
-	static void set_variant(Variant variant) {
-		s_variant = variant;
-	}
 
 	// Arithmetic
 	template <class U>
@@ -492,6 +487,16 @@ public:
 				: std::runtime_error("Index " +
 				std::to_string(i) + " is out of range") {}
 	};
+
+	// Configuring operative variants
+	enum Variant {
+		eCPU,
+		eCUDA
+	};
+
+	static void set_variant(Variant variant) {
+		s_variant = variant;
+	}
 private:
 	// Static and member-wise variants
 	static Variant s_variant;
@@ -591,6 +596,7 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 		_array[i] = f(i);
 }
 
+// Initializer list constructors
 template <class T>
 Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
 		: _shape({arr.size()})
@@ -600,6 +606,38 @@ Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
 		_array[i++] = *it;
+}
+
+template <class T>
+Tensor <T> ::Tensor(const std::initializer_list <Tensor <T>> &tensors)
+{
+	// Make sure all tensors have the same shape
+	_shape_info shape = tensors.begin()->_shape;
+	for (auto it = tensors.begin(); it != tensors.end(); it++) {
+		if (it->_shape != shape)
+			throw shape_mismatch(__PRETTY_FUNCTION__);
+	}
+
+	// Create a new dimension
+	shape_type dims = shape.to_shape_type();
+	dims.insert(dims.begin(), tensors.size());
+
+	_shape = shape_type(dims);
+	_array = detail::make_shared_array <T> (_shape.elements);
+
+	// Copy the data
+	// TODO: detail::copy based on the variant
+	size_t i = 0;
+	for (auto it = tensors.begin(); it != tensors.end(); it++) {
+		// std::copy will be faster
+		std::copy(
+			it->_array.get(),
+			it->_array.get() + shape.elements,
+			_array.get() + i
+		);
+
+		i += shape.elements;
+	}
 }
 
 ///////////////////////
@@ -613,9 +651,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	if (this != &other) {
 		_shape = other._shape;
 
-		// TODO: copy over if same size
 		_array = detail::make_shared_array <T> (_shape.elements);
-		// _array = other._array;
 		for (size_t i = 0; i < _shape.elements; i++)
 			_array[i] = static_cast <T> (other._array[i]);
 	}
@@ -623,7 +659,7 @@ Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
 	return *this;
 }
 
-// Explicit copy method
+// Explicit copy methods
 template <class T>
 Tensor <T> Tensor <T> ::copy() const
 {
@@ -633,6 +669,16 @@ Tensor <T> Tensor <T> ::copy() const
 		[&](size_t i) -> T {
 			return get(i);
 		}
+	);
+}
+
+template <class T>
+void Tensor <T> ::copy(const Tensor &tensor)
+{
+	std::copy(
+		tensor._array.get(),
+		tensor._array.get() + _shape.elements,
+		_array.get()
 	);
 }
 
@@ -668,6 +714,19 @@ template <class T>
 typename Tensor <T> ::shape_type Tensor <T> ::shape() const
 {
 	return _shape.to_shape_type();
+}
+
+// Raw pointer to the data
+template <class T>
+T *Tensor <T> ::data()
+{
+	return _array.get();
+}
+
+template <class T>
+const T *Tensor <T> ::data() const
+{
+	return _array.get();
 }
 
 // Reshape
@@ -807,6 +866,7 @@ Tensor <T> Tensor <T> ::flat() const
 template <class T>
 Tensor <T> &Tensor <T> ::operator+=(const T &x)
 {
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] += x;
 	return *this;
@@ -815,6 +875,7 @@ Tensor <T> &Tensor <T> ::operator+=(const T &x)
 template <class T>
 Tensor <T> &Tensor <T> ::operator-=(const T &x)
 {
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] -= x;
 	return *this;
@@ -826,6 +887,7 @@ Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
 	if (_shape != ts._shape)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] += ts._array[i];
 
@@ -838,6 +900,7 @@ Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
 	if (shape() != ts.shape())
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] -= ts._array[i];
 
@@ -847,6 +910,7 @@ Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
 template <class T>
 Tensor <T> &Tensor <T> ::operator*=(const T &x)
 {
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] *= x;
 	return *this;
@@ -855,6 +919,7 @@ Tensor <T> &Tensor <T> ::operator*=(const T &x)
 template <class T>
 Tensor <T> &Tensor <T> ::operator/=(const T &x)
 {
+#pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] /= x;
 	return *this;
@@ -865,6 +930,8 @@ Tensor <T> &Tensor <T> ::operator*=(const Tensor <T> &other)
 {
 	// Either scalar multiplication or element-wise multiplication
 	if (shape() == other.shape()) {
+		// Element-wise multiplication
+#pragma omp parallel for
 		for (size_t i = 0; i < size(); i++)
 			_array[i] *= other._array[i];
 	} else if (is_scalar()) {
@@ -883,6 +950,8 @@ Tensor <T> &Tensor <T> ::operator/=(const Tensor <T> &other)
 {
 	// Either scalar division or element-wise division
 	if (shape() == other.shape()) {
+		// Element-wise division
+#pragma omp parallel for
 		for (size_t i = 0; i < size(); i++)
 			_array[i] /= other._array[i];
 	} else if (is_scalar()) {

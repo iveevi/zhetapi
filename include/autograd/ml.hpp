@@ -10,6 +10,7 @@
 #include "../vector.hpp"
 #include "../std/interval.hpp"
 #include "autograd.hpp"
+#include "cpu_kernels.hpp"
 
 namespace zhetapi {
 
@@ -30,17 +31,19 @@ class _kdense : public _function {
 	// Bias
 	Matrix <float>			_b;
 
-	// Private constructor
-	_kdense(size_t isize, size_t osize, Matrix <float> w, Matrix <float> b,
-			const std::string &init, float dropout)
-			: _function(1), _isize(isize), _osize(osize),
-			_w(w), _b(b), _init(init), m_dropout(dropout) {}
+	// Cached resources
+	Matrix <float>			m_output;
+	Matrix <float>			m_igrad;
+	Matrix <float>			m_wgrad;
+	Matrix <float>			m_bgrad;
 
 	// Static random number generator
 	static utility::Interval <1>		_rng;
 public:
 	_kdense(size_t isize, size_t osize, const std::string &initializer = "xavier")
-			: _function(1), _isize(isize), _osize(osize)
+			: _function(1), _isize(isize), _osize(osize),
+			m_output(osize, 1), m_igrad(isize, 1),
+			m_wgrad(osize, isize), m_bgrad(osize, 1)
 	{
 		// Lower case initializer
 		for (auto &c : initializer)
@@ -69,6 +72,10 @@ public:
 
 		if (normal)
 			lambda = [&](size_t i) { return dist(gen); };
+		else if (_init == "debug")
+			lambda = [&](size_t i) { return 1.0f; };
+		else
+			lambda = [&](size_t i) { return 0.0f; };
 
 		_w = Matrix <float> (_osize, _isize, lambda);
 		_b = Matrix <float> (_osize, 1, lambda);
@@ -76,15 +83,24 @@ public:
 
 	// Forward pass
 	Constant compute(const Input &ins) override {
+		// TODO: check if batching...
 		// Convert first argument into a matrix
-		Matrix <float> x(ins[0], _isize, 1);
-		return _w * x + _b;
+		/* Matrix <float> x(ins[0], _isize, 1);
+		m_output = _w * x + _b; */
+		detail::autograd::fma_matrix_vector(
+			m_output.data(), _w.data(),
+			_b.data(), ins[0].data(),
+			_osize, _isize
+		);
+
+		return m_output;
 	}
 
 	// Machine learning functions
 	virtual Gradient gradient(const Input &ins, const Input &igrads) override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
+		
 		Matrix <float> I(ins[0], _isize, 1);
 		Matrix <float> dO(igrads[0], _osize, 1);
 		Matrix <float> wgrad = dO * I.transpose();
@@ -95,6 +111,36 @@ public:
 			.igrads = {igrad},
 			.grads = {wgrad, bgrad}
 		};
+
+		/* detail::autograd::mul_vector_vector_transpose(
+			m_wgrad.data(), igrads[0].data(), ins[0].data(),
+			_osize, _isize
+		);
+
+		std::cout << "wgrad" << std::endl;
+		std::cout << "\tkernel: " << m_wgrad << std::endl;
+		std::cout << "\tregular: " << dO * I.transpose() << std::endl;
+
+		// TODO: Copy and computation in parallel?
+		detail::autograd::mul_matrix_transpose_vector(
+			m_igrad.data(), _w.data(), igrads[0].data(),
+			_isize, _osize
+		);
+
+		std::cout << "igrad" << std::endl;
+		std::cout << "\tkernel: " << m_igrad << std::endl;
+		std::cout << "\tregular: " << _w.transpose() * dO << std::endl;
+
+		m_bgrad.copy(igrads[0]);
+
+		std::cout << "bgrad" << std::endl;
+		std::cout << "\tkernel: " << m_bgrad << std::endl;
+		std::cout << "\tregular: " << dO << std::endl;
+
+		return Gradient {
+			.igrads = {m_igrad},
+			.grads = {m_wgrad, m_bgrad}
+		}; */
 	}
 
 	// Apply gradient
@@ -105,10 +151,6 @@ public:
 
 		Matrix <float> wgrad(grads.back(), _osize, _isize);
 		grads.pop_back();
-
-		/* std::cout << "\nKDENSE GRADIENT:\n";
-		std::cout << "\tW = " << wgrad << "\n";
-		std::cout << "\tB = " << bgrad << "\n"; */
 
 		_w += wgrad;
 		_b += bgrad;

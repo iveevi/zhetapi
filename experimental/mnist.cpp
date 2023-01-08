@@ -44,11 +44,19 @@ bool file_exists(const std::string &path)
 	return (stat(path.c_str(), &buffer) == 0);
 }
 
+#ifdef _OPENMP
+#define OPENMP_ENABLED 1
+#else
+#define OPENMP_ENABLED 0
+#endif
+
 int main()
 {
 	const size_t TRAIN_IMAGES = 60000;
 	const size_t VALIDATION_IMAGES = 100;
 	const size_t DIMENSIONS = 784;
+
+	std::cout << "Backend: CPU, OpenMP: " << OPENMP_ENABLED << std::endl;
 
 	// TODO: try to use a single tensor for all data, then splice it
 	const Constant::shape_type IMAGE_SHAPE = {DIMENSIONS};

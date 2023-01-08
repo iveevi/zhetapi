@@ -1,6 +1,10 @@
 project(mnist)
 project(experimental)
+
+# TODO: run a script to check if cuda is available
 project(experimental_cuda CXX CUDA)
+
+project(benchmark)
 
 # CXX options
 set(CMAKE_CXX_STANDARD 17)
@@ -18,16 +22,22 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# PNG library
+# Required packages
 find_package(PNG REQUIRED)
+find_package(benchmark REQUIRED)
+find_package(OpenMP REQUIRED)
 
 # Include directories
-include_directories(. vendor vendor/indicators/include)
+include_directories(
+	.
+	vendor
+	vendor/indicators/include
+	vendor/benchmark/include
+)
 
 # Zhetapi library sources
 # TODO: turn into a library
 set(Zhetapi_SOURCES
-	source/autograd/activation.cpp
 	source/autograd/autograd.cpp
 	source/autograd/iseq.cpp
 	source/autograd/ml.cpp
@@ -44,7 +54,11 @@ set(Zhetapi_SOURCES
 add_executable(mnist experimental/mnist.cpp ${Zhetapi_SOURCES})
 add_executable(experimental experimental/experimental.cpp ${Zhetapi_SOURCES})
 add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
+add_executable(benchmark experimental/benchmark.cpp ${Zhetapi_SOURCES})
 
-target_link_libraries(mnist PNG::PNG)
-target_link_libraries(experimental PNG::PNG)
-target_link_libraries(experimental_cuda PNG::PNG cuda cudart nvrtc)
+set(ESSENTIAL_LIBS PNG::PNG OpenMP::OpenMP_CXX)
+
+target_link_libraries(mnist ${ESSENTIAL_LIBS})
+target_link_libraries(experimental ${ESSENTIAL_LIBS})
+target_link_libraries(experimental_cuda ${ESSENTIAL_LIBS} cuda cudart nvrtc)
+target_link_libraries(benchmark benchmark::benchmark ${ESSENTIAL_LIBS})
