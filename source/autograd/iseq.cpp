@@ -208,6 +208,14 @@ ISeq::ISeq(const std::vector <_function::Ptr> &instrs,
 		_instrs(instrs),
 		_consts(consts)
 {
+	// Make sure no duplicates in the instructions
+	std::set <const _function *> ftns;
+	for (const _function::Ptr &ftn : _instrs) {
+		if (ftns.count(ftn.get()) > 0)
+			throw std::runtime_error("ISeq: duplicate instructions");
+		ftns.insert(ftn.get());
+	}
+
 	// Fill the _vars with variables
 	_vars.resize(nins);
 
@@ -222,6 +230,14 @@ ISeq::ISeq(const std::vector <_function::Ptr> &instrs,
 		_instrs(instrs),
 		_consts(consts)
 {
+	// Make sure no duplicates in the instructions
+	std::set <const _function *> ftns;
+	for (const _function::Ptr &ftn : _instrs) {
+		if (ftns.count(ftn.get()) > 0)
+			throw std::runtime_error("ISeq: duplicate instructions");
+		ftns.insert(ftn.get());
+	}
+
 	// Fill the _vars with variables
 	_vars.resize(nins);
 
@@ -268,6 +284,12 @@ void ISeq::_append_function(const _function::Ptr &fptr)
 		append_iseq((ISeq *) fptr.get());
 		break;
 	default:
+		// Ensure that duplicate functions are not being added
+		for (const Ptr &ftn : _instrs) {
+			if (ftn.get() == fptr.get())
+				throw std::runtime_error("Duplicate function in ISeq");
+		}
+
 		// Just add the function to the instructions
 		_instrs.push_back(fptr);
 		break;

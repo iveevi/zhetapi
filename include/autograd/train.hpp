@@ -50,6 +50,7 @@ struct _reporter {
 		size_t		batch;
 		size_t		total_epochs;
 		float		avg_error;
+		float		time;
 		_function::Ptr	&model;
 	};
 
@@ -88,8 +89,9 @@ public:
 		: X {X_}, Y {Y_}, validator {validator_} {}
 
 	void report(const Info &info) const override {
-		float accuracy = zhetapi::autograd::ml::accuracy(info.model, X, Y, validator);
+		float accuracy = ml::accuracy(info.model, X, Y, validator);
 		std::cout << "Accuracy: " << accuracy
+			<< ", Time: " << std::setprecision(2) << info.time << "s"
 			<< ", Average error = " << info.avg_error << std::endl;
 
 		// TODO: make this optional
@@ -113,9 +115,15 @@ struct TrainingSuite {
 inline void fit(_function::Ptr &f, const Data &X, const std::vector <Constant> &Y,
 		_optimizer &optimizer, const TrainingSuite &suite)
 {
+	// Setup timer
+	std::chrono::steady_clock::time_point start;
+
 	// TODO: assert that X.size() == Y.size()
 	for (size_t i = 0; i < suite.iterations; i++) {
+		start = std::chrono::steady_clock::now();
+
 		// TODO: implement verbose
+		// TODO: batching
 		GradientQueue gq;
 		int elements = 0;
 
@@ -142,7 +150,12 @@ inline void fit(_function::Ptr &f, const Data &X, const std::vector <Constant> &
 			}
 		}
 
-		suite.reporter->report({i, 0, suite.iterations, serror/X.size(), f});
+		// Report progress
+		float time = std::chrono::duration_cast <std::chrono::milliseconds> (
+			std::chrono::steady_clock::now() - start
+		).count() / 1000.0f;
+
+		suite.reporter->report({i, 0, suite.iterations, serror/X.size(), time, f});
 	}
 }
 

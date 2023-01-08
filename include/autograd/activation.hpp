@@ -43,7 +43,10 @@ public:
 	_relu() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
-extern Function relu;
+inline Function relu(const Function &function)
+{
+	return (new_ <_relu> ())(function);
+}
 
 // Leaky RELU activation function
 class _leaky_relu : public ISeq {
@@ -123,7 +126,10 @@ public:
 	_sigmoid() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
-extern Function sigmoid;
+inline Function sigmoid(const Function &function)
+{
+	return (new_ <_sigmoid> ())(function);
+}
 
 // Tanh activation function
 class _tanh : public ISeq {
@@ -161,7 +167,10 @@ public:
 	_tanh() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
-extern Function tanh;
+inline Function tanh(const Function &function)
+{
+	return (new_ <_tanh> ())(function);
+}
 
 // Softmax activation function
 class _softmax : public ISeq {
@@ -213,7 +222,10 @@ public:
 	_softmax() : ISeq(new_ftn_ <kernel> (), 1) {}
 };
 
-extern Function softmax;
+inline Function softmax(const Function &function)
+{
+	return (new_ <_softmax> ())(function);
+}
 
 }
 
