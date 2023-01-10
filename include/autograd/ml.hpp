@@ -33,17 +33,12 @@ class _kdense : public _function {
 
 	// Cached resources
 	Matrix <float>			m_output;
-	Matrix <float>			m_igrad;
-	Matrix <float>			m_wgrad;
-	Matrix <float>			m_bgrad;
 
 	// Static random number generator
 	static utility::Interval <1>		_rng;
 public:
 	_kdense(size_t isize, size_t osize, const std::string &initializer = "xavier")
-			: _function(1), _isize(isize), _osize(osize),
-			m_output(osize, 1), m_igrad(isize, 1),
-			m_wgrad(osize, isize), m_bgrad(osize, 1)
+			: _function(1), _isize(isize), _osize(osize), m_output(osize, 1)
 	{
 		// Lower case initializer
 		for (auto &c : initializer)
@@ -85,8 +80,6 @@ public:
 	Constant compute(const Input &ins) override {
 		// TODO: check if batching...
 		// Convert first argument into a matrix
-		/* Matrix <float> x(ins[0], _isize, 1);
-		m_output = _w * x + _b; */
 		detail::autograd::fma_matrix_vector(
 			m_output.data(), _w.data(),
 			_b.data(), ins[0].data(),
@@ -100,47 +93,29 @@ public:
 	virtual Gradient gradient(const Input &ins, const Input &igrads) override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
-		
-		Matrix <float> I(ins[0], _isize, 1);
-		Matrix <float> dO(igrads[0], _osize, 1);
-		Matrix <float> wgrad = dO * I.transpose();
-		Matrix <float> bgrad = dO;
-		Matrix <float> igrad = _w.transpose() * dO;
+		Matrix <float>			igrad(_isize, 1);
+		Matrix <float>			wgrad(_osize, _isize);
+		Matrix <float>			bgrad(_osize, 1);
 
+		detail::autograd::mul_vector_vector_transpose(
+			wgrad.data(), igrads[0].data(), ins[0].data(),
+			_osize, _isize
+		);
+
+		// TODO: Copy and computation in parallel?
+		detail::autograd::mul_matrix_transpose_vector(
+			igrad.data(), _w.data(), igrads[0].data(),
+			_isize, _osize
+		);
+
+		bgrad.copy(igrads[0]);
+
+		// TODO: avoid the need to copy... reduce required allocations
+		// Debug copy issues when using persistent gradient storage...
 		return Gradient {
 			.igrads = {igrad},
 			.grads = {wgrad, bgrad}
 		};
-
-		/* detail::autograd::mul_vector_vector_transpose(
-			m_wgrad.data(), igrads[0].data(), ins[0].data(),
-			_osize, _isize
-		);
-
-		std::cout << "wgrad" << std::endl;
-		std::cout << "\tkernel: " << m_wgrad << std::endl;
-		std::cout << "\tregular: " << dO * I.transpose() << std::endl;
-
-		// TODO: Copy and computation in parallel?
-		detail::autograd::mul_matrix_transpose_vector(
-			m_igrad.data(), _w.data(), igrads[0].data(),
-			_isize, _osize
-		);
-
-		std::cout << "igrad" << std::endl;
-		std::cout << "\tkernel: " << m_igrad << std::endl;
-		std::cout << "\tregular: " << _w.transpose() * dO << std::endl;
-
-		m_bgrad.copy(igrads[0]);
-
-		std::cout << "bgrad" << std::endl;
-		std::cout << "\tkernel: " << m_bgrad << std::endl;
-		std::cout << "\tregular: " << dO << std::endl;
-
-		return Gradient {
-			.igrads = {m_igrad},
-			.grads = {m_wgrad, m_bgrad}
-		}; */
 	}
 
 	// Apply gradient
@@ -185,7 +160,7 @@ public:
 	// Summary of the function
 	std::string summary() const override {
 		std::ostringstream oss;
-		oss << "KDENSE(" << _isize << " x " << _osize;
+		oss << "DENSE(" << _isize << " x " << _osize;
 		if (m_dropout > 0)
 			oss << ", dropout = " << std::setprecision(2) << m_dropout;
 		oss << ", " << _init << ")";
