@@ -41,7 +41,7 @@ class Interval;
 // Shape information for tensors
 // TODO: place into dedicated header
 struct _shape_info {
-	using shape_type = std::vector <std::size_t>;
+	using shape_type = std::vector <size_t>;
 	using slice_type = Range <int>;
 
 	// Data
@@ -72,14 +72,13 @@ struct _shape_info {
 			elements *= shape[i];
 		}
 
-		// TODO: this check is redundant...
-		// at least make elements an integer
+		/* TODO: this check is redundant...
 		if (elements < 0) {
 			throw std::invalid_argument(
 				"Tensor::_shape_info:"
 				" shape is invalid"
 			);
-		}
+		} */
 	}
 
 	// Copy constructor
@@ -335,12 +334,12 @@ protected:
 	// TODO: should be private, matrix and vector should not be able to access
 	std::shared_ptr <T []>	_array;
 	_shape_info		_shape;
+
+	// Private constructor
+	Tensor(const std::shared_ptr <T []> &, const _shape_info &, Variant);
 public:
 	// Essential constructors
 	Tensor();
-
-	template <class A>
-	Tensor(const Tensor <A> &);
 
 	// Single element
 	Tensor(const T &);
@@ -358,9 +357,6 @@ public:
 	// Initializer list constructor
 	Tensor(const std::initializer_list <T> &);
 	Tensor(const std::initializer_list <Tensor <T>> &);
-
-	template <class A>
-	Tensor &operator=(const Tensor <A> &);
 
 	// Explicit copy operations
 	Tensor copy() const;
@@ -422,6 +418,16 @@ public:
 
 	Tensor <T> &operator*=(const Tensor &);
 	Tensor <T> &operator/=(const Tensor &);
+
+	// Static generators	
+	static Tensor <T> zeros(const shape_type &);
+	static Tensor <T> ones(const shape_type &);
+
+	/* template <class ... Args>
+	static Tensor <T> zeros(Args...);
+
+	template <class ... Args>
+	static Tensor <T> ones(Args...); */
 
 	// Arithmetic
 	template <class U>
@@ -489,11 +495,6 @@ public:
 	};
 
 	// Configuring operative variants
-	enum Variant {
-		eCPU,
-		eCUDA
-	};
-
 	static void set_variant(Variant variant) {
 		s_variant = variant;
 	}
@@ -503,6 +504,10 @@ private:
 	Variant m_variant;
 };
 
+// Variant starts as CPU by default
+template <class T>
+Variant Tensor <T> ::s_variant = eCPU;
+
 /////////////////////////
 // Tensor constructors //
 /////////////////////////
@@ -511,76 +516,61 @@ private:
  * @brief Default constructor.
  */
 template <class T>
-Tensor <T> ::Tensor() {}
-
-/**
- * @brief Heterogenous (with respect to the component type) copy constructor.
- *
- * @param other the reference vector (to be copied from).
- */
-template <class T>
-template <class A>
-Tensor <T> ::Tensor(const Tensor <A> &other)
-		: _shape(other._shape)
-{
-	_array = detail::make_shared_array <T> (_shape.elements);
-	for (size_t i = 0; i < _shape.elements; i++)
-		_array[i] = static_cast <T> (other._array[i]);
-}
+Tensor <T> ::Tensor() : m_variant(s_variant) {}
 
 // Single element
 // TODO: should delegate to another constructor
 template <class T>
 Tensor <T> ::Tensor(const T &value)
-		: _shape({1})
+		: _shape({1}), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (1);
+	_array = detail::make_shared_array <T> (1, m_variant);
 	_array[0] = value;
 }
 
 template <class T>
 Tensor <T> ::Tensor(size_t rows, size_t cols)
-		: _shape({rows, cols})
+		: _shape({rows, cols}), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim)
-		: _shape(dim)
+		: _shape(dim), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const T &def)
-		: _shape(dim)
+		: _shape(dim), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = def;
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::vector <T> &arr)
-		: _shape(dim)
+		: _shape(dim), m_variant(s_variant)
 {
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = arr[i];
 }
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::initializer_list <T> &arr)
-		: _shape(dim)
+		: _shape(dim), m_variant(s_variant)
 {
 	if (arr.size() != _shape.elements)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
@@ -589,9 +579,9 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::initializer_list <T> &arr)
 
 template <class T>
 Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
-		: _shape(dim)
+		: _shape(dim), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 	for (size_t i = 0; i < _shape.elements; i++)
 		_array[i] = f(i);
 }
@@ -599,9 +589,9 @@ Tensor <T> ::Tensor(const shape_type &dim, const std::function <T (size_t)> &f)
 // Initializer list constructors
 template <class T>
 Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
-		: _shape({arr.size()})
+		: _shape({arr.size()}), m_variant(s_variant)
 {
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 
 	size_t i = 0;
 	for (auto it = arr.begin(); it != arr.end(); it++)
@@ -610,6 +600,7 @@ Tensor <T> ::Tensor(const std::initializer_list <T> &arr)
 
 template <class T>
 Tensor <T> ::Tensor(const std::initializer_list <Tensor <T>> &tensors)
+		: m_variant(s_variant)
 {
 	// Make sure all tensors have the same shape
 	_shape_info shape = tensors.begin()->_shape;
@@ -623,7 +614,7 @@ Tensor <T> ::Tensor(const std::initializer_list <Tensor <T>> &tensors)
 	dims.insert(dims.begin(), tensors.size());
 
 	_shape = shape_type(dims);
-	_array = detail::make_shared_array <T> (_shape.elements);
+	_array = detail::make_shared_array <T> (_shape.elements, m_variant);
 
 	// Copy the data
 	// TODO: detail::copy based on the variant
@@ -640,41 +631,39 @@ Tensor <T> ::Tensor(const std::initializer_list <Tensor <T>> &tensors)
 	}
 }
 
+// Private constructor
+template <class T>
+Tensor <T> ::Tensor(const std::shared_ptr <T []> &array,
+		const _shape_info &shape, Variant variant)
+		: _shape(shape), _array(array), m_variant(variant) {}
+
 ///////////////////////
 // Essential methods //
 ///////////////////////
-
-template <class T>
-template <class A>
-Tensor <T> &Tensor <T> ::operator=(const Tensor <A> &other)
-{
-	if (this != &other) {
-		_shape = other._shape;
-
-		_array = detail::make_shared_array <T> (_shape.elements);
-		for (size_t i = 0; i < _shape.elements; i++)
-			_array[i] = static_cast <T> (other._array[i]);
-	}
-
-	return *this;
-}
 
 // Explicit copy methods
 template <class T>
 Tensor <T> Tensor <T> ::copy() const
 {
-	// TODO: manual copy helper method...
+	/* TODO: manual copy helper method...
 	return Tensor(
 		shape(),
 		[&](size_t i) -> T {
 			return get(i);
 		}
-	);
+	); */
+
+	auto shape = _shape;
+	auto array = detail::make_shared_array <T> (shape.elements, m_variant);
+	detail::copy(array, _array, shape.elements, m_variant);
+
+	return Tensor(array, shape, m_variant);
 }
 
 template <class T>
 void Tensor <T> ::copy(const Tensor &tensor)
 {
+	// TODO: check fo rvariants...
 	std::copy(
 		tensor._array.get(),
 		tensor._array.get() + _shape.elements,
@@ -859,6 +848,22 @@ Tensor <T> Tensor <T> ::flat() const
 	return ret;
 }
 
+///////////////////////
+// Static generators //
+///////////////////////
+
+template <class T>
+Tensor <T> Tensor <T> ::zeros(const shape_type &dim)
+{
+	return Tensor(dim, T(0));
+}
+
+template <class T>
+Tensor <T> Tensor <T> ::ones(const shape_type &dim)
+{
+	return Tensor(dim, T(1));
+}
+
 //////////////////////////
 // Arithmetic modifiers //
 //////////////////////////
@@ -887,6 +892,7 @@ Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
 	if (_shape != ts._shape)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
+// TODO: avoid nested parallelization...
 #pragma omp parallel for
 	for (size_t i = 0; i < size(); i++)
 		_array[i] += ts._array[i];

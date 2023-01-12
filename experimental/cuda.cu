@@ -1,64 +1,41 @@
 #include <iostream>
 
-#include <jitify/jitify.hpp>
+#include "include/tensor.hpp"
 
-const std::string source = R"(
-__global__
-void kernel_add(float *dst, float *x, int N)
-{
-	int idx = blockIdx.x * blockDim.x + threadIdx.x;
-	int stride = blockDim.x * gridDim.x;
+using namespace zhetapi;
 
-	for (int i = 0; i < N; i += stride)
-		dst[idx] += x[idx];
-}
-)";
+struct CuTensor {
+	size_t dimensions;
+	size_t *shape;
+	float *array; // Borrows data from Tensor
+};
+
+struct CuMatrix {
+	size_t rows;
+	size_t columns;
+	float *array; // Borrows data from Tensor
+};
 
 int main()
 {
-	std::cout << "CUDA JIT Testing..." << std::endl;
+	{
+		Tensor <float> a = Tensor <float> ::ones({2, 2});
+		Tensor <float> b = Tensor <float> ::zeros({2, 2});
 
-	jitify::JitCache kernel_cache;
-	jitify::Program program = kernel_cache.program(source);
+		std::cout << a << std::endl;
+		std::cout << b << std::endl;
 
-	std::cout << "Compiling kernel..." << std::endl;
+		Tensor <float> ::set_variant(eCUDA);
 
-	int N = 1024;
+		Tensor <float> c = a + b;
 
-	float *dst = new float[N];
-	float *x = new float[N];
+		std::cout << c << std::endl;
 
-	for (int i = 0; i < N; i++) {
-		dst[i] = i * i - 1;
-		x[i] = 1.0f;
+		// jitify and fill memory as such...
+		// Tensor <float> d = Tensor <float> ::ones({2, 2});
+		
+		detail::MemoryTracker::report();
 	}
 
-	float *d_dst, *d_x;
-
-	cudaMalloc(&d_dst, N * sizeof(float));
-	cudaMalloc(&d_x, N * sizeof(float));
-
-	cudaMemcpy(d_dst, dst, N * sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_x, x, N * sizeof(float), cudaMemcpyHostToDevice);
-
-	delete[] dst;
-	delete[] x;
-
-	std::shared_ptr <float []> s_dst(d_dst, cudaFree);
-	std::shared_ptr <float []> s_x(d_x, cudaFree);
-
-	jitify::KernelInstantiation kernel = program.kernel("kernel_add").instantiate();
-
-	std::cout << "Launching kernel..." << std::endl;
-
-	kernel.configure(dim3(32), dim3(32)).launch(d_dst, d_x, N);
-
-	float *h_dst = new float[N];
-
-	cudaMemcpy(h_dst, d_dst, N * sizeof(float), cudaMemcpyDeviceToHost);
-
-	std::cout << "Results:" << std::endl;
-	for (int i = 0; i < N; i++)
-		std::cout << h_dst[i] << " ";
-	std::cout << std::endl;
+	detail::MemoryTracker::report();
 }
