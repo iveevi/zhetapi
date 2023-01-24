@@ -1200,32 +1200,23 @@ T dot(const Tensor <T> &a, const Tensor <T> &b)
 template <class T>
 std::string Tensor <T> ::print() const
 {
-	// If the tensor is empty, return "[]"
-	if (size() == 0)
-		return "[]";
+	// Print shape, then address and variant
+	std::string out = "(";
 
-	// String to return
-	std::string out = "[";
-
-	// If only one dimension
-	if (dimensions() == 1) {
-		for (int i = 0; i < size(); i++) {
-			out += std::to_string(get(i));
-			if (i < size() - 1)
-				out += ", ";
-		}
-
-		return out + "]";
-	}
-
-	// Otherwise recurse through each slice
-	for (int i = 0; i < dimension(0); i++) {
-		out += this->operator[](i).print();
-		if (i < dimension(0) - 1)
+	shape_type shape_list = _shape.to_shape_type();
+	for (int i = 0; i < shape_list.size(); i++) {
+		out += std::to_string(shape_list[i]);
+		if (i < shape_list.size() - 1)
 			out += ", ";
+		else
+			out += ")";
 	}
 
-	return out + "]";
+	// TODO: verbose mode
+	// std::string variant_str = (m_variant == eCPU) ? "CPU" : "CUDA";
+	// out += ") " + std::to_string((long long) this) + " " + variant_str;
+
+	return out;
 }
 
 template <class T>

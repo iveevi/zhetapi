@@ -94,7 +94,8 @@ class MemoryTracker {
 			m_cuda_inuse -= m_cuda_map[ptr];
 			m_cuda_map.erase(ptr);
 
-			delete[] ptr;
+			cudaFree(ptr);
+
 #endif
 		}
 	}
