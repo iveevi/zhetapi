@@ -470,7 +470,8 @@ public:
 	friend U dot(const Tensor <U> &, const Tensor <U> &);
 
 	// Printing functions
-	std::string print() const;
+	std::string str() const;
+	std::string verbose() const;
 
 	template <class U>
 	friend std::ostream &operator<<(std::ostream &, const Tensor <U> &);
@@ -645,30 +646,59 @@ Tensor <T> ::Tensor(const std::shared_ptr <T []> &array,
 template <class T>
 Tensor <T> Tensor <T> ::copy() const
 {
-	/* TODO: manual copy helper method...
-	return Tensor(
-		shape(),
-		[&](size_t i) -> T {
-			return get(i);
-		}
-	); */
-
 	auto shape = _shape;
 	auto array = detail::make_shared_array <T> (shape.elements, m_variant);
 	detail::copy(array, _array, shape.elements, m_variant);
-
 	return Tensor(array, shape, m_variant);
 }
 
 template <class T>
 void Tensor <T> ::copy(const Tensor &tensor)
 {
-	// TODO: check fo rvariants...
+	// TODO: warning log if fewer elements in the tensor
+	// TODO: use copy helper...
+#ifdef __CUDACC__
+	if (m_variant == eCUDA) {
+		if (tensor.m_variant == eCUDA) {
+			cudaMemcpy(
+				_array.get(), tensor._array.get(),
+				_shape.elements * sizeof(T),
+				cudaMemcpyDeviceToDevice
+			);
+		} else {
+			cudaMemcpy(
+				_array.get(), tensor._array.get(),
+				_shape.elements * sizeof(T),
+				cudaMemcpyHostToDevice
+			);
+		}
+	} else {
+		if (tensor.m_variant == eCUDA) {
+			cudaMemcpy(
+				_array.get(), tensor._array.get(),
+				_shape.elements * sizeof(T),
+				cudaMemcpyDeviceToHost
+			);
+		} else {
+			std::copy(
+				tensor._array.get(),
+				tensor._array.get() + _shape.elements,
+				_array.get()
+			);
+		}
+	}
+#else
+	if (tensor.m_variant != m_variant)
+		throw std::runtime_error("Cannot copy between different variants");
+	else if (tensor.m_variant == Variant::eCUDA)
+		throw std::runtime_error("CUDA variant not enabled");
+
 	std::copy(
 		tensor._array.get(),
 		tensor._array.get() + _shape.elements,
 		_array.get()
 	);
+#endif
 }
 
 /////////////////////////
@@ -1198,7 +1228,7 @@ T dot(const Tensor <T> &a, const Tensor <T> &b)
 
 // Printing method
 template <class T>
-std::string Tensor <T> ::print() const
+std::string Tensor <T> ::str() const
 {
 	// Print shape, then address and variant
 	std::string out = "(";
@@ -1222,7 +1252,69 @@ std::string Tensor <T> ::print() const
 template <class T>
 std::ostream &operator<<(std::ostream &os, const Tensor <T> &ts)
 {
-	return (os << ts.print());
+	return (os << ts.str());
+}
+
+// Verbose printing method (all elements)
+template <class T>
+std::string verbose_str(T *data, const _shape_info &shape)
+{
+	// If the tensor is empty, return "[]"
+	size_t size = shape.elements;
+	if (size == 0)
+		return "[]";
+
+	// String to return
+	std::string out = "[";
+
+	// If only one dimension
+	if (shape.dimensions == 1) {
+		for (int i = 0; i < size; i++) {
+			int index = shape.translate(i);
+			out += std::to_string(data[index]);
+			if (i < size - 1)
+				out += ", ";
+		}
+
+		return out + "]";
+	}
+
+	// Otherwise recurse through each slice
+	size_t stride = size/shape[0];
+	_shape_info sub = shape.index(0);
+
+	for (int i = 0; i < shape.dimensions; i++) {
+		out += verbose_str(data + i * stride, sub);
+		if (i < shape[0] - 1)
+			out += ", ";
+	}
+
+	return out + "]";
+}
+
+template <class T>
+std::string Tensor <T> ::verbose() const
+{
+	if (m_variant == eCPU) {
+		return verbose_str(_array.get(), _shape);
+	} else {
+		if constexpr (!ZHETAPI_CUDA)
+			throw std::runtime_error("Tensor::verbose(): CUDA variant is not available");
+
+#ifdef __CUDACC__
+		// Copy to CPU
+		std::vector <T> data(_shape.elements);
+
+		// TODO: use helper...
+		cudaMemcpy(
+			data.data(), _array.get(),
+			_shape.elements * sizeof(T),
+			cudaMemcpyDeviceToHost
+		);
+
+		return verbose_str(data.data(), _shape);
+#endif
+	}
 }
 
 /////////////////////

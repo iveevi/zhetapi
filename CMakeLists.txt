@@ -36,7 +36,6 @@ include_directories(
 )
 
 # Zhetapi library sources
-# TODO: turn into a library
 set(Zhetapi_SOURCES
 	source/autograd/autograd.cpp
 	source/autograd/iseq.cpp
@@ -51,10 +50,17 @@ set(Zhetapi_SOURCES
 	source/timer.cpp
 )
 
-add_executable(mnist experimental/mnist.cpp ${Zhetapi_SOURCES})
-add_executable(experimental experimental/experimental.cpp ${Zhetapi_SOURCES})
+# Common object library
+add_library(Zhetapi_COMMON OBJECT ${Zhetapi_SOURCES})
+
+# Project executables
+add_executable(mnist experimental/mnist.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
+add_executable(experimental experimental/experimental.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
+
+# TODO: cant make a shared library for CUDA dependent items...
 add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
-add_executable(benchmark experimental/benchmark.cpp ${Zhetapi_SOURCES})
+
+add_executable(benchmark experimental/benchmark.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 
 set(ESSENTIAL_LIBS PNG::PNG OpenMP::OpenMP_CXX)
 
