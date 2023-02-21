@@ -74,7 +74,7 @@ template <class T>
 void parallel_fma(T *out, const T *matrix, const T *bias, const T *input, size_t rows, size_t cols)
 {
 #pragma omp parallel for
-	for (size_t i = 0; i < rows; i++) {
+	for (long int i = 0; i < rows; i++) {
 		T sum = 0;
 
 		const T *c = &matrix[i * cols];

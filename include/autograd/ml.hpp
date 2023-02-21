@@ -112,10 +112,10 @@ public:
 
 		// TODO: avoid the need to copy... reduce required allocations
 		// Debug copy issues when using persistent gradient storage...
-		return Gradient {
-			.igrads = {igrad},
-			.grads = {wgrad, bgrad}
-		};
+		Gradient gradient;
+		gradient.igrads = igrads,
+		gradient.grads = { wgrad, bgrad };
+		return gradient;
 	}
 
 	// Apply gradient

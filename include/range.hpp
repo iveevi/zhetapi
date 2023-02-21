@@ -127,7 +127,7 @@ struct Range {
 
 	// Compute range at a given number of steps
 	T compute(size_t nsteps) const {
-		return start + step * nsteps;
+		return start + static_cast <T> (step) * nsteps;
 	}
 
 	T operator()(size_t nsteps) const {

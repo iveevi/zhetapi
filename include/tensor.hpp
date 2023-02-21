@@ -1,5 +1,9 @@
-#ifndef TENSOR_H_
-#define TENSOR_H_
+#ifndef ZHETAPI_TENSOR_H_
+#define ZHETAPI_TENSOR_H_
+
+#if !defined(__PRETTY_FUNCTION__) && !defined(__GNUC__)
+#define __PRETTY_FUNCTION__ __FUNCSIG__
+#endif
 
 // Standard headers
 #include <cassert>
@@ -65,7 +69,7 @@ struct _shape_info {
 		partials = new size_t[dimensions];
 		slices = new slice_type[dimensions];
 
-		for (int i = dimensions - 1; i >= 0; i--) {
+		for (int i = static_cast <int> (dimensions) - 1; i >= 0; i--) {
 			array[i] = shape[i];
 			slices[i] = all;
 			partials[i] = elements;
@@ -924,7 +928,7 @@ Tensor <T> &Tensor <T> ::operator+=(const Tensor <T> &ts)
 
 // TODO: avoid nested parallelization...
 #pragma omp parallel for
-	for (size_t i = 0; i < size(); i++)
+	for (long int i = 0; i < size(); i++)
 		_array[i] += ts._array[i];
 
 	return *this;
@@ -937,7 +941,7 @@ Tensor <T> &Tensor <T> ::operator-=(const Tensor <T> &ts)
 		throw shape_mismatch(__PRETTY_FUNCTION__);
 
 #pragma omp parallel for
-	for (size_t i = 0; i < size(); i++)
+	for (long int i = 0; i < size(); i++)
 		_array[i] -= ts._array[i];
 
 	return *this;
@@ -947,7 +951,7 @@ template <class T>
 Tensor <T> &Tensor <T> ::operator*=(const T &x)
 {
 #pragma omp parallel for
-	for (size_t i = 0; i < size(); i++)
+	for (long int i = 0; i < size(); i++)
 		_array[i] *= x;
 	return *this;
 }
@@ -956,7 +960,7 @@ template <class T>
 Tensor <T> &Tensor <T> ::operator/=(const T &x)
 {
 #pragma omp parallel for
-	for (size_t i = 0; i < size(); i++)
+	for (long int i = 0; i < size(); i++)
 		_array[i] /= x;
 	return *this;
 }
@@ -968,7 +972,7 @@ Tensor <T> &Tensor <T> ::operator*=(const Tensor <T> &other)
 	if (shape() == other.shape()) {
 		// Element-wise multiplication
 #pragma omp parallel for
-		for (size_t i = 0; i < size(); i++)
+		for (long int i = 0; i < size(); i++)
 			_array[i] *= other._array[i];
 	} else if (is_scalar()) {
 		*this = other * get(0);
@@ -988,7 +992,7 @@ Tensor <T> &Tensor <T> ::operator/=(const Tensor <T> &other)
 	if (shape() == other.shape()) {
 		// Element-wise division
 #pragma omp parallel for
-		for (size_t i = 0; i < size(); i++)
+		for (long int i = 0; i < size(); i++)
 			_array[i] /= other._array[i];
 	} else if (is_scalar()) {
 		*this = other / get(0);

@@ -1,10 +1,7 @@
-project(mnist)
-project(experimental)
+cmake_minimum_required(VERSION 3.12)
 
-# TODO: run a script to check if cuda is available
-project(experimental_cuda CXX CUDA)
-
-project(benchmark)
+# All projects
+project(zhetapi CXX CUDA) # TODO: cuda is only an optional dependency...
 
 # CXX options
 set(CMAKE_CXX_STANDARD 17)
@@ -27,12 +24,15 @@ find_package(PNG REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(OpenMP REQUIRED)
 
+# add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/libpng)
+
 # Include directories
 include_directories(
 	.
 	vendor
 	vendor/indicators/include
 	vendor/benchmark/include
+	${PNG_INCLUDE_DIRS}
 )
 
 # Zhetapi library sources
