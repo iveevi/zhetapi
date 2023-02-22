@@ -15,6 +15,7 @@
 // Library headers
 #include "tensor.hpp"
 #include "cuda/essentials.cuh"
+#include "field.hpp"
 
 // Redeclare minor as a matrix operation
 #ifdef minor
@@ -34,7 +35,7 @@ class Vector;
  * @tparam T the type of each component.
  */
 template <class T>
-class Matrix : public Tensor <T> {
+class Matrix : public Tensor <T>, Field <T, Matrix <T>> {
 public:
 	// Public aliases
 	using index_type = std::pair <size_t, size_t>;
@@ -631,10 +632,9 @@ Matrix <T> ::Matrix(const Matrix <A> &other)
 // TODO: Do all initialization inline or use Tensor copy constructor
 template <class T>
 Matrix <T> ::Matrix(const Vector <T> &other)
-		: Tensor <T> (other.get_rows(), 1)
+		: Tensor <T> (other)
 {
-	for (size_t i = 0; i < get_rows(); i++)
-		this->_array[i] = other._array[i];
+	this->reshape({other.size(), 1});
 }
 
 template <class T>
@@ -748,6 +748,7 @@ inline size_t Matrix <T> ::get_cols() const
 template <class T>
 Matrix <T> Matrix <T> ::transpose() const
 {
+	// TODO: surely something more efficient
 	return Matrix(get_cols(), get_rows(),
 		[&](size_t i, size_t j) {
 			return this->_array[j * get_cols() + i];

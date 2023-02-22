@@ -20,32 +20,32 @@ namespace ml {
 
 class _kdense : public _function {
 	// Input and output shape
-	size_t				_isize;
-	size_t				_osize;
-	std::string			_init;
+	size_t				m_isize;
+	size_t				m_osize;
+	std::string			m_init;
 	float				m_dropout;
 
 	// Weight matrix
-	Matrix <float>			_w;
+	Matrix <float>			m_weights;
 
 	// Bias
-	Matrix <float>			_b;
+	Vector <float>			m_biases;
 
 	// Cached resources
-	Matrix <float>			m_output;
+	Vector <float>			m_output;
 
 	// Static random number generator
-	static utility::Interval <1>		_rng;
+	static utility::Interval <1>	rng;
 public:
 	_kdense(size_t isize, size_t osize, const std::string &initializer = "xavier")
-			: _function(1), _isize(isize), _osize(osize), m_output(osize, 1)
+			: _function(1), m_isize(isize), m_osize(osize), m_output(osize)
 	{
 		// Lower case initializer
 		for (auto &c : initializer)
-			_init += std::tolower(c);
+			m_init += std::tolower(c);
 
 		// Initializer
-		std::function <float (size_t)> lambda = [](size_t) { return _rng(); };
+		std::function <float (size_t)> lambda = [](size_t) { return rng(); };
 
 		std::random_device rd;
 		std::mt19937 gen(rd());
@@ -53,13 +53,13 @@ public:
 		std::normal_distribution <float> dist;
 
 		int normal = 0;
-		if (_init == "lecun") {
+		if (m_init == "lecun") {
 			dist = std::normal_distribution <float> (0, 1.0 / std::sqrt(isize));
 			normal++;
-		} else if (_init == "he") {
+		} else if (m_init == "he") {
 			dist = std::normal_distribution <float> (0, 2.0/std::sqrt(isize));
 			normal++;
-		} else if (_init == "xavier") {
+		} else if (m_init == "xavier") {
 			float avg = (isize + osize) / 2.0f;
 			dist = std::normal_distribution <float> (0, 1.0/std::sqrt(avg));
 			normal++;
@@ -67,23 +67,24 @@ public:
 
 		if (normal)
 			lambda = [&](size_t i) { return dist(gen); };
-		else if (_init == "debug")
+		else if (m_init == "debug")
 			lambda = [&](size_t i) { return 1.0f; };
 		else
 			lambda = [&](size_t i) { return 0.0f; };
 
-		_w = Matrix <float> (_osize, _isize, lambda);
-		_b = Matrix <float> (_osize, 1, lambda);
+		m_weights = Matrix <float> (m_osize, m_isize, lambda);
+		m_biases = Vector <float> (m_osize, lambda);
 	}
 
 	// Forward pass
 	Constant compute(const Input &ins) override {
+		// NOTE: Single input only
 		// TODO: check if batching...
 		// Convert first argument into a matrix
 		detail::autograd::fma_matrix_vector(
-			m_output.data(), _w.data(),
-			_b.data(), ins[0].data(),
-			_osize, _isize
+			m_output.data(), m_weights.data(),
+			m_biases.data(), ins[0].data(),
+			m_osize, m_isize
 		);
 
 		return m_output;
@@ -93,19 +94,19 @@ public:
 	virtual Gradient gradient(const Input &ins, const Input &igrads) override {
 		// igrad is the gradient of the output of the
 		// function wrt to the desired function
-		Matrix <float>			igrad(_isize, 1);
-		Matrix <float>			wgrad(_osize, _isize);
-		Matrix <float>			bgrad(_osize, 1);
+		Vector <float>			igrad(m_isize);
+		Matrix <float>			wgrad(m_osize, m_isize);
+		Vector <float>			bgrad(m_osize);
 
 		detail::autograd::mul_vector_vector_transpose(
 			wgrad.data(), igrads[0].data(), ins[0].data(),
-			_osize, _isize
+			m_osize, m_isize
 		);
 
 		// TODO: Copy and computation in parallel?
 		detail::autograd::mul_matrix_transpose_vector(
-			igrad.data(), _w.data(), igrads[0].data(),
-			_isize, _osize
+			igrad.data(), m_weights.data(), igrads[0].data(),
+			m_isize, m_osize
 		);
 
 		bgrad.copy(igrads[0]);
@@ -113,7 +114,7 @@ public:
 		// TODO: avoid the need to copy... reduce required allocations
 		// Debug copy issues when using persistent gradient storage...
 		Gradient gradient;
-		gradient.igrads = igrads,
+		gradient.igrads = { igrad };
 		gradient.grads = { wgrad, bgrad };
 		return gradient;
 	}
@@ -121,14 +122,14 @@ public:
 	// Apply gradient
 	virtual void update_parameters(GradientQueue &grads) override {
 		// Convert first argument into a matrix
-		Matrix <float> bgrad(grads.back(), _osize, 1);
+		Vector <float> bgrad(grads.back());
 		grads.pop_back();
 
-		Matrix <float> wgrad(grads.back(), _osize, _isize);
+		Matrix <float> wgrad(grads.back(), m_osize, m_isize);
 		grads.pop_back();
 
-		_w += wgrad;
-		_b += bgrad;
+		m_weights += wgrad;
+		m_biases += bgrad;
 	}
 
 	// Info about parameters
@@ -137,7 +138,7 @@ public:
 	}
 
 	virtual int tunable_parameters() const override {
-		return _w.size() + _b.size();
+		return m_weights.size() + m_biases.size();
 	}
 
 	// Method table
@@ -160,10 +161,10 @@ public:
 	// Summary of the function
 	std::string summary() const override {
 		std::ostringstream oss;
-		oss << "DENSE(" << _isize << " x " << _osize;
+		oss << "DENSE(" << m_isize << " x " << m_osize;
 		if (m_dropout > 0)
 			oss << ", dropout = " << std::setprecision(2) << m_dropout;
-		oss << ", " << _init << ")";
+		oss << ", " << m_init << ")";
 		return oss.str();
 	}
 };

@@ -10,7 +10,7 @@ namespace ml {
 // Static variables //
 //////////////////////
 
-utility::Interval <1> _kdense::_rng;
+utility::Interval <1> _kdense::rng;
 
 }
 

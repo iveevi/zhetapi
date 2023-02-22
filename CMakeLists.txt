@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 3.12)
 project(zhetapi CXX CUDA) # TODO: cuda is only an optional dependency...
 
 # CXX options
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 
 # Compiler (clang default)
 if (NOT CMAKE_CXX_COMPILER)
@@ -23,8 +23,6 @@ endif()
 find_package(PNG REQUIRED)
 find_package(benchmark REQUIRED)
 find_package(OpenMP REQUIRED)
-
-# add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/libpng)
 
 # Include directories
 include_directories(

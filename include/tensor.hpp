@@ -21,18 +21,9 @@
 #include "allocator.hpp"
 #include "range.hpp"
 #include "std/interval.hpp"
+#include "field.hpp"
 
 namespace zhetapi {
-
-// Forward declarations
-template <class T>
-class Tensor;
-
-template <class T>
-class Matrix;
-
-template <class T>
-class Vector;
 
 namespace utility {
 
@@ -328,7 +319,7 @@ struct _shape_info {
 
 // Tensor class
 template <class T>
-class Tensor {
+class Tensor : public Field <T, Tensor <T>> {
 public:
 	// Public type aliases
 	using shape_type = std::vector <std::size_t>;
@@ -371,7 +362,7 @@ public:
 	size_t dimensions() const;
 	size_t dimension(size_t) const;
 	shape_type shape() const;	// Get shape of tensor
-	
+
 	// Access raw array
 	T *data();
 	const T *data() const;
@@ -397,6 +388,7 @@ public:
 	// TODO: iterators
 
 	// Actions
+	// TODO: put method somewher else...
 	void nullify(long double, const utility::Interval <1> &);
 
 	// Apply a function to each element of the tensor
@@ -423,7 +415,7 @@ public:
 	Tensor <T> &operator*=(const Tensor &);
 	Tensor <T> &operator/=(const Tensor &);
 
-	// Static generators	
+	// Static generators
 	static Tensor <T> zeros(const shape_type &);
 	static Tensor <T> ones(const shape_type &);
 
@@ -1287,7 +1279,7 @@ std::string verbose_str(T *data, const _shape_info &shape)
 	size_t stride = size/shape[0];
 	_shape_info sub = shape.index(0);
 
-	for (int i = 0; i < shape.dimensions; i++) {
+	for (int i = 0; i < shape[0]; i++) {
 		out += verbose_str(data + i * stride, sub);
 		if (i < shape[0] - 1)
 			out += ", ";

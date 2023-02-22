@@ -13,6 +13,7 @@
 #include <functional>
 
 #include "matrix.hpp"
+#include "field.hpp"
 
 namespace zhetapi {
 
@@ -24,15 +25,14 @@ namespace zhetapi {
  * @tparam T the type of each component.
  */
 template <class T>
-class Vector : public Matrix <T> {
+class Vector : public Tensor <T>, Field <T, Vector <T>> {
 public:
 	Vector();
 	Vector(const Vector &);
-	Vector(const Matrix <T> &);
+	Vector(const Tensor <T> &);
 
 	Vector(size_t);
 	Vector(size_t, T);
-	// Vector(size_t, T *, bool = true);
 
 	// Lambda constructors
 	Vector(size_t, std::function <T (size_t)>);
@@ -49,24 +49,17 @@ public:
 	Vector &operator=(const Vector &);
 	Vector &operator=(const Matrix <T> &);
 
-	// Getters
-	inline size_t get_cols() const;
+	/* Indexing
+	inline T &get(size_t);
+	inline const T &get(size_t) const; */
 
-	// Indexing
-	__cuda_dual__ inline T &get(size_t);
-	__cuda_dual__ inline const T &get(size_t) const;
+	inline T &operator[](size_t);
+	inline const T &operator[](size_t) const;
 
-	__cuda_dual__ inline T &operator[](size_t);
-	__cuda_dual__ inline const T &operator[](size_t) const;
-
-	// Properties
-	T &x();
-	T &y();
-	T &z();
-
-	const T &x() const;
-	const T &y() const;
-	const T &z() const;
+	// Transpose
+	Matrix <T> transpose() const {
+		return Matrix <T> (*this).transpose();
+	}
 
 	// Direction of the vector (radians)
 	T arg() const;
@@ -103,15 +96,6 @@ public:
 	void operator+=(const Vector &);
 	void operator-=(const Vector &);
 
-// CUDA operations
-#ifdef __CUDACC__
-
-	void cuda_read(Vector <T> *);
-	Vector <T> *cuda_half_copy(NVArena *) const;
-	Vector <T> *cuda_full_copy(NVArena *);
-
-#endif
-
 	// Static methods
 	static Vector one(size_t);
 	static Vector rarg(double, double);
@@ -147,130 +131,35 @@ public:
 	class index_out_of_bounds {};
 };
 
-/**
- * @brief Default vector constructor.
- */
 template <class T>
-Vector <T> ::Vector() : Matrix <T> () {}
+Vector <T> ::Vector() : Tensor <T> () {}
 
-/**
- * @brief Size constructor. Components are initialized to 0 or the default value
- * of T.
- *
- * @param len size of the vector.
- */
+template <class T>
+Vector <T> ::Vector(const Vector <T> &other)
+		: Tensor <T> (other) {}
+
+template <class T>
+Vector <T> ::Vector(const Tensor <T> &other)
+		: Tensor <T> (other)
+{
+	this->reshape({other.size()});
+}
+
 template <class T>
 Vector <T> ::Vector(size_t len)
-		: Matrix <T> (len, 1) {}
-
-/**
- * @brief Size constructor. Each component is initialized to def.
- *
- * @param rs the number of rows (size) of the vector.
- * @param def the value each component is initialized to.
- */
-template <class T>
-Vector <T> ::Vector(size_t rs, T def)
-		: Matrix <T> (rs, 1, def) {}
-
-#ifdef __AVR
-
-/**
- * @brief Size constructor. Each component is evaluated from a function which
- * depends on the index.
- *
- * @param rs the number of rows (size) of the vector.
- * @param gen a pointer to the function that generates the coefficients.
- */
-template <class T>
-Vector <T> ::Vector(size_t rs, T (*gen)(size_t))
-		: Matrix <T> (rs, 1, gen) {}
-
-/**
- * @brief Size constructor. Each component is evaluated from a function which
- * depends on the index.
- *
- * @param rs the number of rows (size) of the vector.
- * @param gen a pointer to the function that generates pointers to the
- * coefficients.
- */
-template <class T>
-Vector <T> ::Vector(size_t rs, T *(*gen)(size_t))
-		: Matrix <T> (rs, 1, gen) {}
-
-#endif
-
-/*
-template <class T>
-Vector <T> ::Vector(size_t rs, T *ref, bool slice)
-		: Matrix <T> (rs, 1, ref, slice) {} */
-
-/**
- * @brief Copy constructor.
- *
- * @param other the reference vector (to be copied from).
- */
-template <class T>
-Vector <T> ::Vector(const Vector &other)
-		: Matrix <T> (other.size(), 1, T())
-{
-	for (size_t i = 0; i < this->size(); i++)
-		this->_array[i] = other._array[i];
-}
+		: Tensor <T> (typename Tensor <T> ::shape_type {len}) {}
 
 template <class T>
-Vector <T> ::Vector(const Matrix <T> &other)
-		: Matrix <T> (other.get_rows(), 1, T())
-{
-	for (size_t i = 0; i < this->size(); i++)
-		this->_array[i] = other[0][i];
-}
+Vector <T> ::Vector(size_t len, T def)
+		: Tensor <T> (typename Tensor <T> ::shape_type {len}, def) {}
 
 // Assignment operators
 template <class T>
 Vector <T> &Vector <T> ::operator=(const Vector <T> &other)
 {
-	if (this != &other) {
-		/* this->_clear();
-
-		this->_array = new T[other._size];
-
-		this->size() = other._size;
-		for (size_t i = 0; i < this->size(); i++)
-			this->_array[i] = other._array[i];
-
-		this->_dims = 1;
-		this->_dim = new size_t[1];
-
-		this->_dim[0] = this->size(); */
+	if (this != &other)
 		Tensor <T> ::operator=(other);
-	}
-
 	return *this;
-}
-
-template <class T>
-Vector <T> &Vector <T> ::operator=(const Matrix <T> &other)
-{
-	if (this != &other) {
-		*this = Vector(other.get_rows(), T());
-
-		for (size_t i = 0; i < this->size(); i++)
-			this->_array[i] = other[0][i];
-	}
-
-	return *this;
-}
-
-/**
- * Safety getter function.
- *
- * TODO: eliminate this somehow
- */
-template <class T>
-inline size_t Vector <T> ::get_cols() const
-{
-	return 1;
 }
 
 /**
@@ -281,7 +170,6 @@ inline size_t Vector <T> ::get_cols() const
  * @return the \f$i\f$th component of the vector.
  */
 template <class T>
-__cuda_dual__
 inline T &Vector <T> ::operator[](size_t i)
 {
 	return this->_array[i];
@@ -295,159 +183,9 @@ inline T &Vector <T> ::operator[](size_t i)
  * @return the \f$i\f$th component of the vector.
  */
 template <class T>
-__cuda_dual__
 inline const T &Vector <T> ::operator[](size_t i) const
 {
 	return this->_array[i];
-}
-
-/**
- * @brief Indexing function.
- *
- * @param i the specified index.
- *
- * @return the \f$i\f$th component of the vector.
- */
-template <class T>
-__cuda_dual__
-inline T &Vector <T> ::get(size_t i)
-{
-	return this->_array[i];
-}
-
-/**
- * @brief Indexing function.
- *
- * @param i the specified index.
- *
- * @return the \f$i\f$th component of the vector.
- */
-template <class T>
-__cuda_dual__
-inline const T &Vector <T> ::get(size_t i) const
-{
-	return this->_array[i];
-}
-
-/**
- * @return the first component of the vector (index 0).
- */
-template <class T>
-T &Vector <T> ::x()
-{
-	if (this->size() < 1)
-		throw index_out_of_bounds();
-
-	return this->_array[0];
-}
-
-/**
- * @return the second component of the vector (index 1).
- */
-template <class T>
-T &Vector <T> ::y()
-{
-	if (this->size() < 2)
-		throw index_out_of_bounds();
-
-	return this->_array[1];
-}
-
-/**
- * @return the third component of the vector (index 2).
- */
-template <class T>
-T &Vector <T> ::z()
-{
-	if (this->size() < 3)
-		throw index_out_of_bounds();
-
-	return this->_array[2];
-}
-
-/**
- * @return the first component of the vector (index 0).
- */
-template <class T>
-const T &Vector <T> ::x() const
-{
-	if (this->size() < 1)
-		throw index_out_of_bounds();
-
-	return this->_array[0];
-}
-
-/**
- * @return the second component of the vector (index 1).
- */
-template <class T>
-const T &Vector <T> ::y() const
-{
-	if (this->size() < 2)
-		throw index_out_of_bounds();
-
-	return this->_array[1];
-}
-
-/**
- * @return the third component of the vector (index 2).
- */
-template <class T>
-const T &Vector <T> ::z() const
-{
-	if (this->size() < 3)
-		throw index_out_of_bounds();
-
-	return this->_array[2];
-}
-
-/**
- * @brief Returns the argument of the vector. Assumes that the vector has at
- * least two components.
- *
- * @return the argument of the vector in radians (the angle at which the vector
- * is pointing to).
- */
-template <class T>
-T Vector <T> ::arg() const
-{
-	return atan2(y(), x());
-}
-
-/**
- * @brief The minimum component of the vector.
- *
- * @return the smallest component, \f$\min v_i.\f$
- */
-template <class T>
-T Vector <T> ::min() const
-{
-	T mn = this->_array[0];
-
-	for (size_t j = 1; j < this->size(); j++) {
-		if (mn > this->_array[j])
-			mn = this->_array[j];
-	}
-
-	return mn;
-}
-
-/**
- * @brief The maximum component of the vector.
- *
- * @return the largest component, \f$\max v_i.\f$
- */
-template <class T>
-T Vector <T> ::max() const
-{
-	T mx = this->_array[0];
-
-	for (size_t j = 1; j < this->size(); j++) {
-		if (mx < this->_array[j])
-			mx = this->_array[j];
-	}
-
-	return mx;
 }
 
 /**
@@ -608,6 +346,7 @@ Vector <T> operator/(const T &b, const Vector <T> &a)
 }
 
 // Static methods
+// TODO: remove some...
 template <class T>
 Vector <T> Vector <T> ::one(size_t size)
 {
@@ -750,7 +489,7 @@ Vector <T> Tensor <T> ::cast_to_vector() const
  */
 template <class T>
 Vector <T> ::Vector(const std::vector <T> &ref)
-		: Matrix <T> (ref) {}
+		: Tensor <T> ({ref.size()}, ref) {}
 
 /**
  * @brief Constructs a vector out of a list of components.
@@ -770,7 +509,7 @@ Vector <T> ::Vector(const std::initializer_list <T> &ref)
  */
 template <class T>
 Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
-	        : Matrix <T> (rs, 1, gen) {}
+	        : Tensor <T> ({rs}, gen) {}
 
 /**
  * @brief Size constructor. Each component is evaluated from a function which
@@ -782,7 +521,7 @@ Vector <T> ::Vector(size_t rs, std::function <T (size_t)> gen)
  */
 template <class T>
 Vector <T> ::Vector(size_t rs, std::function <T *(size_t)> gen)
-	        : Matrix <T> (rs, 1, gen) {}
+	        : Matrix <T> ({rs}, gen) {}
 
 /**
  * @brief Heterogenous copy constructor.
@@ -847,7 +586,7 @@ Vector <T> Vector <T> ::normalized() const
 {
 	std::vector <T> out;
 
-	T dt = this->norm();
+	T dt = this->length();
 
 	for (size_t i = 0; i < this->size(); i++)
 		out.push_back((*this)[i]/dt);

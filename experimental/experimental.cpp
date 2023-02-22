@@ -1,5 +1,6 @@
-#include "../include/autograd/ml.hpp"
-#include "../include/autograd/activation.hpp"
+#include "include/autograd/ml.hpp"
+#include "include/autograd/activation.hpp"
+#include "include/autograd/gradient_queue.hpp"
 
 using namespace zhetapi;
 using namespace zhetapi::autograd;
@@ -8,28 +9,20 @@ int main()
 {
 	{
 		Variable x;
+		auto model = ml::dense(3, 3);
 
-		auto model = ml::dense(4, 3, "debug")(x);
-		model = ml::sigmoid(model);
-		model = ml::dense(3, 2, "debug")(model);
-		model = ml::sigmoid(model);
-		
-		std::cout << "Summary:" << std::endl;
-		std::cout << model.summary() << std::endl;
+		Constant input {
+			Constant::shape_type {3, 3, 3},
+			1.0f
+		};
 
-		Constant in {1.0f, 2.0f, 3.0f, 4.0f};
+		std::cout << "input = " << input.verbose() << "\n";
+		std::cout << "model(input): = " << model(input).verbose() << "\n";
 
-		std::cout << "model: " << model(in) << std::endl;
+		Constant igrad { Constant::shape_type {3, 3, 3}, 1.0f };
+		Gradient grads = model.gradient({input}, {igrad});
 
-		Gradient grad = model.gradient({in}, {{1, 1}});
-
-		std::cout << "gradients:\n";
-		for (auto &g : grad.grads)
-			std::cout << "\t" << g << std::endl;
-
-		std::cout << "igrads:\n";
-		for (auto &g : grad.igrads)
-			std::cout << "\t" << g << std::endl;
+		std::cout << "grads = " << grads.igrads[0].verbose() << "\n";
 	}
 
 	detail::MemoryTracker::report();
