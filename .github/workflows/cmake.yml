@@ -25,11 +25,12 @@ jobs:
 
     - name: Compile Google benchmarks
       run: |
-        cd ${{github.workspace}}
+        cd ${{github.workspace}}/vendor/benchmark
         cmake -E make_directory "build"
         cmake -E chdir "build" cmake -DBENCHMARK_DOWNLOAD_DEPENDENCIES=on -DCMAKE_BUILD_TYPE=Release ../
         cmake --build "build" --config Release
         sudo cmake --build "build" --config Release --target install
+        cd ${{github.workspace}}
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build -DZHETAPI_ENABLE_CUDA=OFF
