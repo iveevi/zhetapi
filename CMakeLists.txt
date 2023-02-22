@@ -1,14 +1,21 @@
 cmake_minimum_required(VERSION 3.12)
 
 # All projects
-project(zhetapi CXX CUDA) # TODO: cuda is only an optional dependency...
+project(zhetapi CXX)
+
+# Check existence of CUDA
+option(ZHETAPI_ENABLE_CUDA "Enable CUDA for Zhetapi" ON)
+
+if (ZHETAPI_ENABLE_CUDA)
+	enable_language(CUDA)
+endif()
 
 # CXX options
 set(CMAKE_CXX_STANDARD 20)
 
 # Compiler (clang default)
 if (NOT CMAKE_CXX_COMPILER)
-    set(CMAKE_CXX_COMPILER clang++)
+	set(CMAKE_CXX_COMPILER clang++)
 endif()
 
 # Color output
@@ -16,7 +23,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fdiagnostics-color=always")
 
 # Build type (Release default)
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+	set(CMAKE_BUILD_TYPE Release)
 endif()
 
 # Required packages
@@ -55,8 +62,9 @@ add_library(Zhetapi_COMMON OBJECT ${Zhetapi_SOURCES})
 add_executable(mnist experimental/mnist.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 add_executable(experimental experimental/experimental.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 
-# TODO: cant make a shared library for CUDA dependent items...
-add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
+if (ZHETAPI_ENABLE_CUDA)
+	add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
+endif()
 
 add_executable(benchmark experimental/benchmark.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 
@@ -64,5 +72,5 @@ set(ESSENTIAL_LIBS PNG::PNG OpenMP::OpenMP_CXX)
 
 target_link_libraries(mnist ${ESSENTIAL_LIBS})
 target_link_libraries(experimental ${ESSENTIAL_LIBS})
-target_link_libraries(experimental_cuda ${ESSENTIAL_LIBS} cuda cudart nvrtc)
+# target_link_libraries(experimental_cuda ${ESSENTIAL_LIBS} cuda cudart nvrtc)
 target_link_libraries(benchmark benchmark::benchmark ${ESSENTIAL_LIBS})
