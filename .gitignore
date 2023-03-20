@@ -17,6 +17,7 @@
 .ninja_log
 .smake
 .vscode
+/.vs
 /Makefile
 CMakeCache.txt
 CMakeFiles
@@ -43,8 +44,8 @@ gen
 htests
 portability
 samples/rl/res
+tasks.json
 tmp
+vendor/benchmark
 zhetapi
 zhetapi-header
-tasks.json
-/.vs

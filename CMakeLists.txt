@@ -63,7 +63,7 @@ add_executable(mnist experimental/mnist.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 add_executable(experimental experimental/experimental.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
 
 if (ZHETAPI_ENABLE_CUDA)
-	add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
+        # add_executable(experimental_cuda experimental/cuda.cu ${Zhetapi_SOURCES})
 endif()
 
 add_executable(benchmark experimental/benchmark.cpp $<TARGET_OBJECTS:Zhetapi_COMMON>)
@@ -74,3 +74,7 @@ target_link_libraries(mnist ${ESSENTIAL_LIBS})
 target_link_libraries(experimental ${ESSENTIAL_LIBS})
 # target_link_libraries(experimental_cuda ${ESSENTIAL_LIBS} cuda cudart nvrtc)
 target_link_libraries(benchmark benchmark::benchmark ${ESSENTIAL_LIBS})
+
+if (ZHETAPI_ENABLE_CUDA)
+        target_link_libraries(experimental ${ESSENTIAL_LIBS})
+endif()
